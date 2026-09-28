@@ -6745,3 +6745,84 @@ input.form-input {
 .page#page-students .stu-meta-line .class-tag {
   flex: 0 0 auto !important;
 }
+
+
+/* SCMS v12.31 — student card geometry fix
+   Keep the right-side attendance + ID actions inside the card. */
+#page-students #studentList .stu-card {
+  width: auto !important;
+  max-width: calc(100% - 20px) !important;
+  box-sizing: border-box !important;
+  overflow: hidden !important;
+}
+#page-students #studentList .stu-card .card-row {
+  width: 100% !important;
+  box-sizing: border-box !important;
+  display: flex !important;
+  align-items: center !important;
+  min-width: 0 !important;
+}
+#page-students #studentList .stu-card .card-info {
+  flex: 1 1 auto !important;
+  width: auto !important;
+  min-width: 0 !important;
+  overflow: hidden !important;
+}
+#page-students #studentList .stu-card .card-actions {
+  flex: 0 0 auto !important;
+  width: auto !important;
+  min-width: max-content !important;
+  display: flex !important;
+  align-items: center !important;
+  gap: 5px !important;
+  margin-left: 6px !important;
+}
+#page-students #studentList .stu-card .att-pill {
+  flex: 0 0 25px !important;
+  width: 25px !important;
+  height: 25px !important;
+}
+#page-students #studentList .stu-card .icon-btn-mini {
+  flex: 0 0 30px !important;
+  width: 30px !important;
+  height: 30px !important;
+  min-width: 30px !important;
+  min-height: 30px !important;
+  padding: 0 !important;
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+}
+#page-students #studentList .stu-name-line {
+  width: 100% !important;
+  box-sizing: border-box !important;
+}
+#page-students #studentList .stu-name-primary {
+  overflow: hidden !important;
+  text-overflow: ellipsis !important;
+  white-space: nowrap !important;
+}
+#page-students #studentList .name-local {
+  flex: 0 1 auto !important;
+  max-width: 48% !important;
+  overflow: hidden !important;
+  text-overflow: ellipsis !important;
+  white-space: nowrap !important;
+}
+@media (max-width: 430px) {
+  #page-students #studentList .stu-card {
+    max-width: calc(100% - 16px) !important;
+    margin-left: 8px !important;
+    margin-right: 8px !important;
+  }
+  #page-students #studentList .stu-card .card-actions {
+    gap: 3px !important;
+    margin-left: 4px !important;
+  }
+  #page-students #studentList .stu-card .icon-btn-mini {
+    width: 28px !important;
+    min-width: 28px !important;
+    height: 28px !important;
+    min-height: 28px !important;
+  }
+}
