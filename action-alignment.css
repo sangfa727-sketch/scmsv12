@@ -106,7 +106,7 @@
   flex: 0 0 auto !important;
   width: auto !important;
   max-width: 52% !important;
-  min-width: max-content !important;
+  min-width: 0 !important;
   margin-left: auto !important;
   flex-wrap: nowrap !important;
   gap: 6px !important;
@@ -133,6 +133,14 @@
 .list-card .card-actions > .adm-move-menu {
   flex: 0 1 auto !important;
   min-width: 0 !important;
+  max-width: 100% !important;
+  overflow: hidden !important;
+  text-overflow: ellipsis !important;
+}
+.list-card .card-actions .adm-move-menu summary {
+  max-width: 100% !important;
+  overflow: hidden !important;
+  text-overflow: ellipsis !important;
 }
 .list-card .card-name {
   min-width: 0 !important;
