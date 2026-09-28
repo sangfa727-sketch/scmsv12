@@ -387,23 +387,39 @@ window.signOut = function () {
 // ─── PAGE NAVIGATION ────────────────────────────────────────────────────────
 
 window.goToPage = function(pageId) {
+  if (!pageId) return;
+  const currentPage = window.APP.currentPage;
+
+  // Ignore accidental double taps on the already-visible page.
+  if (currentPage === pageId) {
+    if (typeof _updateFabForPage === 'function') _updateFabForPage(pageId);
+    if (typeof closeSidebar === 'function') closeSidebar();
+    return;
+  }
+
   // Stop chat polling if leaving chat
-  if (window.APP.currentPage === 'chat' && pageId !== 'chat' && typeof stopChatPolling === 'function') {
+  if (currentPage === 'chat' && pageId !== 'chat' && typeof stopChatPolling === 'function') {
     stopChatPolling();
   }
+
+  // Close the native sidebar immediately after selection so navigation feels
+  // like one continuous interaction instead of two competing animations.
+  if (typeof closeSidebar === 'function') closeSidebar();
 
   const tabs  = document.querySelectorAll('.tab-btn');
   const pages = document.querySelectorAll('.page');
 
   tabs.forEach(t => t.classList.toggle('active', t.dataset.page === pageId));
-  pages.forEach(p => p.classList.toggle('active', p.id === `page-${pageId}`));
 
-  window.APP.currentPage = pageId;
+  // Let the browser paint the active-state change before running the page
+  // render hook. This removes the small "stuck" feeling on slower devices.
+  window.requestAnimationFrame(() => {
+    pages.forEach(p => p.classList.toggle('active', p.id === `page-${pageId}`));
+    window.APP.currentPage = pageId;
 
-  // Update FAB visibility & action for this page
-  if (typeof _updateFabForPage === 'function') _updateFabForPage(pageId);
+    if (typeof _updateFabForPage === 'function') _updateFabForPage(pageId);
 
-  // Lazy renders / per-page hooks
+    // Lazy renders / per-page hooks
   if (pageId === 'chat') {
     if (typeof renderChat === 'function') renderChat();
     if (typeof startChatPolling === 'function') startChatPolling();
@@ -424,9 +440,10 @@ window.goToPage = function(pageId) {
   // Scroll content to top
   document.getElementById('pages')?.scrollTo({ top: 0, behavior: 'smooth' });
 
-  if (window.APP.tg?.HapticFeedback) {
-    window.APP.tg.HapticFeedback.selectionChanged();
-  }
+    if (window.APP.tg?.HapticFeedback) {
+      window.APP.tg.HapticFeedback.selectionChanged();
+    }
+  });
 };
 
 // ─── LANGUAGE SWITCH → re-render JS-generated text ──────────────────────────
