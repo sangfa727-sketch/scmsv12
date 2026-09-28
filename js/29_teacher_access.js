@@ -127,7 +127,7 @@ async function _renderTeacherAccess() {
           '<div class="teacher-access-perm-copy"><strong>' + esc(_taText(p.permission_key)) + '</strong><small>' + esc(_taDescription(p.permission_key, p.description || '')) +
           '</small></div>' + _taScopeControls(p,catalog) +
           '<select class="teacher-access-perm-state" aria-label="' + _taUi('permissions') + '"><option value="default"' + (state === 'default' ? ' selected' : '') +
-          '>မူလ' + (roleDefault ? ' (' + _taUi('allowed') + ')' : ' (' + _taUi('denied') + ')') + '</option><option value="allow"' + (state === 'allow' ? ' selected' : '') +
+          '>' + _taUi('default') + (roleDefault ? ' (' + _taUi('allowed') + ')' : ' (' + _taUi('denied') + ')') + '</option><option value="allow"' + (state === 'allow' ? ' selected' : '') +
           '>' + _taUi('allowed') + '</option><option value="deny"' + (state === 'deny' ? ' selected' : '') + '>' + _taUi('denied') + '</option></select></div>';
       });
       html += '</div>';
@@ -160,7 +160,7 @@ async function _renderTeacherAccess() {
 window.openTeacherAccess = async function(teacherId, teacherName) {
   openModal('<div class="modal-sheet teacher-access-sheet" onclick="event.stopPropagation()">' +
     '<div class="modal-handle"></div><h3 class="modal-title">' + _taUi('manageTitle') + '</h3>' +
-    '<p class="modal-subtitle">' + esc(teacherName) + ' ' + _taUi('subtitle')</p>' +
+    '<p class="modal-subtitle">' + esc(teacherName) + ' ' + _taUi('subtitle') + '</p>' +
     '<div id="teacherAccessRoot" data-teacher-id="' + esc(teacherId) + '"><div class="text-center text-muted">' + _taUi('loading') + '</div></div>' +
     '<button class="btn-secondary mt16" onclick="closeModal()">' + _taUi('closeButton') + '</button></div>');
   await _renderTeacherAccess();
