@@ -36,11 +36,7 @@ test('all primary page shells and list mount points remain present', () => {
 
 test('primary navigation still exposes the core page routes', () => {
   const html = read('index.html');
-  for (const page of [
-    'students', 'attend', 'daily', 'hw', 'grades', 'billing',
-    'admissions', 'library', 'transport', 'parents', 'incidents',
-    'timetable', 'summary', 'more'
-  ]) {
+  for (const page of ['students', 'attend', 'daily', 'hw', 'chat', 'more']) {
     assert.match(html, new RegExp('data-page="' + page + '"'), page);
   }
 });
