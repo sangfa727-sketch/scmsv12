@@ -180,7 +180,8 @@ window.openModulesMenu = function () {
           <span>${esc(m.label)}</span>
         </div>`).join('')}
       </div>
-      <button class="btn-primary" style="margin-top:14px" id="btnSaveModules" onclick="saveSidebarModules()">${t('modules.save')}</button>
+      <div class="modal-footer">
+<button class="btn-primary" style="margin-top:14px" id="btnSaveModules" onclick="saveSidebarModules()">${t('modules.save')}</button>
     </div>`);
 };
 
@@ -238,7 +239,8 @@ window.confirmSignOut = function () {
       <p class="modal-subtitle">${t('signout.body')}</p>
 
       <button class="btn-danger solid mt16" onclick="_doSignOutConfirmed()">${t('sb.signout')}</button>
-      <button class="btn-secondary mt8" onclick="_closeSignOutConfirm()">${t('common.cancel')}</button>
+<button class="btn-secondary mt8" onclick="_closeSignOutConfirm()">${t('common.cancel')}</button>
+</div>
     </div>`;
   wrap.onclick = _closeSignOutConfirm;
   document.body.appendChild(wrap);
