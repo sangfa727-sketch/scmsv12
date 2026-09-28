@@ -5,7 +5,7 @@ Object.assign(API, {
   async saveDailyReport(data) {
       const date = data.date || new Date().toISOString().slice(0, 10);
       if (window.APP.platform === 'web') return _webRpc('rpc_save_daily_report', {
-        p_session_token: getWebSession()?.session_token,
+        p_session_token: _webSessionToken(),
         p_student_id: data.student_id, p_name_en: data.name_en, p_class: data.class,
         p_date: date, p_meal: data.meal, p_nap_min: data.nap_min ?? null,
         p_mood: data.mood, p_behaviour_note: data.behaviour_note || null,
@@ -25,7 +25,7 @@ Object.assign(API, {
   async getDailyReports(daysBack = 7) {
       if (window.APP.platform === 'web') {
         const res = await _webRpc('rpc_get_daily_reports', {
-          p_session_token: getWebSession()?.session_token, p_days_back: daysBack,
+          p_session_token: _webSessionToken(), p_days_back: daysBack,
         });
         return res.rows;
       }
@@ -39,7 +39,7 @@ Object.assign(API, {
   async saveHomework(data) {
       const date = data.date || new Date().toISOString().slice(0, 10);
       if (window.APP.platform === 'web') return _webRpc('rpc_save_homework', {
-        p_session_token: getWebSession()?.session_token,
+        p_session_token: _webSessionToken(),
         p_class: data.class, p_subject: data.subject, p_type: data.type,
         p_description: data.description, p_lb_page: data.lb_page || null,
         p_wb_page: data.wb_page || null, p_due_date: data.due_date || null,
@@ -55,7 +55,7 @@ Object.assign(API, {
   
   async updateHomework(id, patch) {
       if (window.APP.platform === 'web') return _webRpc('rpc_update_homework', {
-        p_session_token: getWebSession()?.session_token,
+        p_session_token: _webSessionToken(),
         p_id: id, p_subject: patch.subject, p_class: patch.class, p_type: patch.type,
         p_description: patch.description, p_lb_page: patch.lb_page || null,
         p_wb_page: patch.wb_page || null, p_due_date: patch.due_date || null,
@@ -65,7 +65,7 @@ Object.assign(API, {
   
   async deleteHomework(id) {
       if (window.APP.platform === 'web') return _webRpc('rpc_delete_homework', {
-        p_session_token: getWebSession()?.session_token,
+        p_session_token: _webSessionToken(),
         p_id: id,
       });
       return twaPost('delete_homework', { id });
@@ -74,7 +74,7 @@ Object.assign(API, {
   async getHomework(daysBack = 30) {
       if (window.APP.platform === 'web') {
         const res = await _webRpc('rpc_get_homework', {
-          p_session_token: getWebSession()?.session_token, p_days_back: daysBack,
+          p_session_token: _webSessionToken(), p_days_back: daysBack,
         });
         return res.rows;
       }
@@ -87,7 +87,7 @@ Object.assign(API, {
   
   async saveIncident(data) {
       if (window.APP.platform === 'web') return _webRpc('rpc_save_incident', {
-        p_session_token: getWebSession()?.session_token,
+        p_session_token: _webSessionToken(),
         p_student_id: data.student_id, p_name_en: data.name_en, p_class: data.class,
         p_type: data.type, p_severity: data.severity, p_description: data.description,
         p_action_taken: data.action_taken, p_parent_notified: !!data.parent_notified,
@@ -103,7 +103,7 @@ Object.assign(API, {
   
   async updateIncident(id, patch) {
       if (window.APP.platform === 'web') return _webRpc('rpc_update_incident', {
-        p_session_token: getWebSession()?.session_token,
+        p_session_token: _webSessionToken(),
         p_id: id, p_type: patch.type, p_severity: patch.severity,
         p_description: patch.description, p_action_taken: patch.action_taken,
         p_parent_notified: !!patch.parent_notified,
@@ -113,7 +113,7 @@ Object.assign(API, {
   
   async deleteIncident(id) {
       if (window.APP.platform === 'web') return _webRpc('rpc_delete_incident', {
-        p_session_token: getWebSession()?.session_token, p_id: id,
+        p_session_token: _webSessionToken(), p_id: id,
       });
       return twaPost('delete_incident', { id });
     },
@@ -121,7 +121,7 @@ Object.assign(API, {
   async getIncidents(daysBack = 30) {
       if (window.APP.platform === 'web') {
         const res = await _webRpc('rpc_get_incidents', {
-          p_session_token: getWebSession()?.session_token, p_days_back: daysBack,
+          p_session_token: _webSessionToken(), p_days_back: daysBack,
         });
         return res.rows;
       }
@@ -138,7 +138,7 @@ Object.assign(API, {
   async getLeaveRequests(status = null) {
       if (window.APP.platform === 'web') {
         const res = await _webRpc('rpc_get_leave_requests', {
-          p_session_token: getWebSession()?.session_token, p_status: status,
+          p_session_token: _webSessionToken(), p_status: status,
         });
         return res.rows;
       }
@@ -147,7 +147,7 @@ Object.assign(API, {
   
   async decideLeaveRequest(id, decision, teacherNote = null) {
       if (window.APP.platform === 'web') return _webRpc('rpc_decide_leave_request', {
-        p_session_token: getWebSession()?.session_token, p_id: id,
+        p_session_token: _webSessionToken(), p_id: id,
         p_decision: decision, p_teacher_note: teacherNote,
       });
       return twaPost('decide_leave_request', { id, decision, teacher_note: teacherNote });
@@ -157,7 +157,7 @@ Object.assign(API, {
   
   async saveTimetable(data) {
       if (window.APP.platform === 'web') return _webRpc('rpc_save_timetable', {
-        p_session_token: getWebSession()?.session_token,
+        p_session_token: _webSessionToken(),
         p_day: data.day, p_period: data.period, p_start_time: data.start_time,
         p_class: data.class, p_subject: data.subject, p_room: data.room,
       });
@@ -169,7 +169,7 @@ Object.assign(API, {
   
   async updateTimetable(id, patch) {
       if (window.APP.platform === 'web') return _webRpc('rpc_update_timetable', {
-        p_session_token: getWebSession()?.session_token,
+        p_session_token: _webSessionToken(),
         p_id: id, p_day: patch.day, p_period: patch.period, p_start_time: patch.start_time,
         p_class: patch.class, p_subject: patch.subject, p_room: patch.room,
       });
@@ -178,14 +178,14 @@ Object.assign(API, {
   
   async deleteTimetable(id) {
       if (window.APP.platform === 'web') return _webRpc('rpc_delete_timetable', {
-        p_session_token: getWebSession()?.session_token, p_id: id,
+        p_session_token: _webSessionToken(), p_id: id,
       });
       return twaPost('delete_timetable', { id });
     },
   
   async getTimetable() {
       if (window.APP.platform === 'web') {
-        const res = await _webRpc('rpc_get_timetable', { p_session_token: getWebSession()?.session_token });
+        const res = await _webRpc('rpc_get_timetable', { p_session_token: _webSessionToken() });
         return res.rows;
       }
       return sbQuery('timetable',
@@ -198,7 +198,7 @@ Object.assign(API, {
       const ym = yearMonth || new Date().toISOString().slice(0, 7);
       if (window.APP.platform === 'web') {
         const res = await _webRpc('rpc_get_monthly_summary', {
-          p_session_token: getWebSession()?.session_token, p_year_month: ym,
+          p_session_token: _webSessionToken(), p_year_month: ym,
         });
         return res.rows;
       }
@@ -209,25 +209,25 @@ Object.assign(API, {
     // ─── SCHOOL CONFIG ───────────────────────────────────────────────────────
   
   async getSubjects() {
-      const res = await _webRpc('rpc_get_subjects', { p_session_token: getWebSession()?.session_token });
+      const res = await _webRpc('rpc_get_subjects', { p_session_token: _webSessionToken() });
       return res.rows;
     },
   
   async addSubject(name, code, color) {
       return _webRpc('rpc_add_subject', {
-        p_session_token: getWebSession()?.session_token,
+        p_session_token: _webSessionToken(),
         p_subject_name: name, p_subject_code: code || null, p_subject_color: color || null,
       });
     },
   
   async getTerms() {
-      const res = await _webRpc('rpc_get_terms', { p_session_token: getWebSession()?.session_token });
+      const res = await _webRpc('rpc_get_terms', { p_session_token: _webSessionToken() });
       return res.rows;
     },
   
   async addTerm(data) {
       return _webRpc('rpc_add_term', {
-        p_session_token:  getWebSession()?.session_token,
+        p_session_token:  _webSessionToken(),
         p_academic_year:  data.academic_year || null,
         p_term_name:      data.term_name,
         p_term_order:     data.term_order || null,
@@ -239,7 +239,7 @@ Object.assign(API, {
   
   async getAssessments(filters = {}) {
       const res = await _webRpc('rpc_get_assessments', {
-        p_session_token: getWebSession()?.session_token,
+        p_session_token: _webSessionToken(),
         p_class:      filters.class || null,
         p_subject_id: filters.subject_id || null,
         p_term_id:    filters.term_id || null,
@@ -249,7 +249,7 @@ Object.assign(API, {
   
   async createAssessment(data) {
       return _webRpc('rpc_create_assessment', {
-        p_session_token: getWebSession()?.session_token,
+        p_session_token: _webSessionToken(),
         p_term_id:    data.term_id || null,
         p_subject_id: data.subject_id || null,
         p_class:      data.class,
@@ -263,14 +263,14 @@ Object.assign(API, {
   
   async deleteAssessment(id) {
       return _webRpc('rpc_delete_assessment', {
-        p_session_token: getWebSession()?.session_token,
+        p_session_token: _webSessionToken(),
         p_id: id,
       });
     },
   
   async getGrades(assessmentId) {
       const res = await _webRpc('rpc_get_grades', {
-        p_session_token: getWebSession()?.session_token,
+        p_session_token: _webSessionToken(),
         p_assessment_id: assessmentId,
       });
       return res.rows;
@@ -278,7 +278,7 @@ Object.assign(API, {
   
   async saveGrades(assessmentId, records) {
       return _webRpc('rpc_save_grades', {
-        p_session_token: getWebSession()?.session_token,
+        p_session_token: _webSessionToken(),
         p_assessment_id: assessmentId,
         p_records:       records,
       });
@@ -286,7 +286,7 @@ Object.assign(API, {
   
   async getReportCard(termId, cls) {
       return _webRpc('rpc_get_report_card', {
-        p_session_token: getWebSession()?.session_token,
+        p_session_token: _webSessionToken(),
         p_term_id: termId,
         p_class: cls,
       });
