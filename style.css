@@ -6749,3 +6749,48 @@ input.form-input {
 .modal-footer-destructive .modal-footer-main {
   margin-left: auto;
 }
+
+
+/* SCMS v12.21 — action groups: preserve layout semantics */
+.student-action-grid {
+  display: grid !important;
+  grid-template-columns: repeat(3, max-content);
+  justify-content: end !important;
+  align-items: stretch;
+  gap: 7px !important;
+  width: 100%;
+}
+.student-action-grid > button {
+  width: auto !important;
+  min-width: 0 !important;
+  flex: none !important;
+  margin: 0 !important;
+}
+.parent-form-footer {
+  justify-content: flex-end !important;
+}
+.id-card-actions {
+  justify-content: flex-end !important;
+}
+.attendance-save-actions {
+  display: flex;
+  justify-content: flex-end !important;
+  align-items: center;
+  width: 100%;
+  margin-top: 12px;
+}
+.attendance-save-actions > .btn-primary {
+  width: fit-content !important;
+  flex: 0 0 auto !important;
+  margin-top: 0 !important;
+}
+@media (max-width: 640px) {
+  .student-action-grid {
+    grid-template-columns: repeat(2, max-content);
+  }
+}
+@media (max-width: 380px) {
+  .student-action-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
