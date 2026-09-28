@@ -193,8 +193,10 @@ window.openNewInvoiceModal = function() {
       <label class="field-label">${t('bill.notes')}</label>
       <input class="form-input" id="niNotes" placeholder="${esc(t('bill.optional'))}">
 
-      <button class="btn-primary mt16" id="niSaveBtn" onclick="_saveNewInvoice()">${t('bill.createInvoice')}</button>
-      <button class="btn-secondary" onclick="closeModal()">${t('common.cancel')}</button>
+      <div class="modal-footer">
+<button class="btn-primary mt16" id="niSaveBtn" onclick="_saveNewInvoice()">${t('bill.createInvoice')}</button>
+<button class="btn-secondary" onclick="closeModal()">${t('common.cancel')}</button>
+</div>
     </div>
   `);
   _renderInvoiceItemsList();
@@ -370,7 +372,8 @@ async function _loadInvoiceDetail(id) {
       <p class="billing-notes">${t('bill.pendingNote')}</p>
     `) : ''}
 
-    ${balance > 0 ? `<button class="btn-primary mt16" onclick="_openRecordPayment(${inv.id}, ${balance})">${t('bill.recordPayment')}</button>` : ''}
+    ${balance > 0 ? `<div class="modal-footer">
+<button class="btn-primary mt16" onclick="_openRecordPayment(${inv.id}, ${balance})">${t('bill.recordPayment')}</button>` : ''}
     <button class="btn-secondary" onclick="_confirmDeleteInvoice(${inv.id})">${t('bill.deleteInvoice')}</button>
   `;
 }
@@ -411,7 +414,8 @@ window._openRecordPayment = function(invoiceId, balance) {
       <label class="field-label">${t('bill.notes')}</label>
       <input class="form-input" id="rpNotes" placeholder="${esc(t('bill.optional'))}">
       <button class="btn-primary mt16" id="rpSaveBtn" onclick="_saveRecordPayment(${invoiceId})">${t('bill.savePayment')}</button>
-      <button class="btn-secondary" onclick="closeModal()">${t('common.cancel')}</button>
+<button class="btn-secondary" onclick="closeModal()">${t('common.cancel')}</button>
+</div>
     </div>
   `);
 };
@@ -527,8 +531,10 @@ window._openAddFeeItem = function() {
       </div>
       <label class="field-label">${t('bill.defaultAmount')}</label>
       <input class="form-input" id="fiAmount" type="number" min="0" value="0">
-      <button class="btn-primary mt16" id="fiSaveBtn" onclick="_saveNewFeeItem()">${t('common.add')}</button>
-      <button class="btn-secondary" onclick="closeModal()">${t('common.cancel')}</button>
+      <div class="modal-footer">
+<button class="btn-primary mt16" id="fiSaveBtn" onclick="_saveNewFeeItem()">${t('common.add')}</button>
+<button class="btn-secondary" onclick="closeModal()">${t('common.cancel')}</button>
+</div>
     </div>
   `);
 };
