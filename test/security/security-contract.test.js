@@ -170,3 +170,18 @@ test('billing tables enforce non-negative and positive amount invariants', () =>
   assert.match(migration, /invoices_paid_amount_nonnegative/);
   assert.match(migration, /payments_amount_positive/);
 });
+
+test('web sessions are bound to the teacher current role and tenant', () => {
+  const migration = read('supabase/migrations/20260929063000_web_session_role_binding_hardening.sql');
+  assert.match(migration, /session_role is distinct from v_sess\.teacher_role/i);
+  assert.match(migration, /session_school_id is distinct from v_sess\.teacher_school_id/i);
+  assert.match(migration, /expires_at = now\(\)/i);
+  assert.match(migration, /t\.role as teacher_role/i);
+});
+
+test('password changes require an active role- and tenant-bound session', () => {
+  const migration = read('supabase/migrations/20260929063000_web_session_role_binding_hardening.sql');
+  assert.match(migration, /v_sess\.status <> 'active'/i);
+  assert.match(migration, /v_sess\.session_role is distinct from v_sess\.teacher_role/i);
+  assert.match(migration, /v_sess\.school_id is distinct from v_sess\.teacher_school_id/i);
+});
