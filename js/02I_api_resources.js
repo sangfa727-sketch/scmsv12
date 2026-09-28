@@ -32,7 +32,7 @@ Object.assign(API, {
   
   async setSchoolBranding(patch) {
       return _webRpc('rpc_set_school_branding', {
-        p_session_token: getWebSession()?.session_token,
+        p_session_token: _webSessionToken(),
         p_patch: patch,
       });
     },
@@ -41,7 +41,7 @@ Object.assign(API, {
   
   async setTeacherPhoto(photoUrl) {
       return _webRpc('rpc_set_teacher_photo', {
-        p_session_token: getWebSession()?.session_token,
+        p_session_token: _webSessionToken(),
         p_photo_url: photoUrl,
       });
     },
@@ -53,13 +53,13 @@ Object.assign(API, {
     // ─── DAILY REPORTS ───────────────────────────────────────────────────────
   
   async getBooks() {
-      const res = await _webRpc('rpc_get_books', { p_session_token: getWebSession()?.session_token });
+      const res = await _webRpc('rpc_get_books', { p_session_token: _webSessionToken() });
       return res.rows;
     },
   
   async addBook(data) {
       return _webRpc('rpc_add_book', {
-        p_session_token: getWebSession()?.session_token,
+        p_session_token: _webSessionToken(),
         p_title: data.title, p_author: data.author || null, p_isbn: data.isbn || null,
         p_category: data.category || null, p_total_copies: data.total_copies ?? 1,
         p_notes: data.notes || null,
@@ -68,34 +68,34 @@ Object.assign(API, {
   
   async updateBook(id, data) {
       return _webRpc('rpc_update_book', {
-        p_session_token: getWebSession()?.session_token,
+        p_session_token: _webSessionToken(),
         p_id: id, p_title: data.title || null, p_author: data.author ?? null, p_isbn: data.isbn ?? null,
         p_category: data.category ?? null, p_total_copies: data.total_copies ?? null, p_notes: data.notes ?? null,
       });
     },
   
   async deleteBook(id) {
-      return _webRpc('rpc_delete_book', { p_session_token: getWebSession()?.session_token, p_id: id });
+      return _webRpc('rpc_delete_book', { p_session_token: _webSessionToken(), p_id: id });
     },
   
   async getBookCheckouts(bookId) {
-      const res = await _webRpc('rpc_get_book_checkouts', { p_session_token: getWebSession()?.session_token, p_book_id: bookId });
+      const res = await _webRpc('rpc_get_book_checkouts', { p_session_token: _webSessionToken(), p_book_id: bookId });
       return res.rows;
     },
   
   async checkoutBook(bookId, studentId, dueDate, notes) {
       return _webRpc('rpc_checkout_book', {
-        p_session_token: getWebSession()?.session_token,
+        p_session_token: _webSessionToken(),
         p_book_id: bookId, p_student_id: studentId, p_due_date: dueDate || null, p_notes: notes || null,
       });
     },
   
   async returnBook(checkoutId) {
-      return _webRpc('rpc_return_book', { p_session_token: getWebSession()?.session_token, p_checkout_id: checkoutId });
+      return _webRpc('rpc_return_book', { p_session_token: _webSessionToken(), p_checkout_id: checkoutId });
     },
   
   async getStudentCheckouts(studentId) {
-      const res = await _webRpc('rpc_get_student_checkouts', { p_session_token: getWebSession()?.session_token, p_student_id: studentId });
+      const res = await _webRpc('rpc_get_student_checkouts', { p_session_token: _webSessionToken(), p_student_id: studentId });
       return res.rows;
     },
   
