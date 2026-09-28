@@ -6,7 +6,7 @@ on:
   pull_request:
   workflow_dispatch: {}
   schedule:
-    - cron: '0 20 * * *' # ~3:30am Yangon time, nightly
+    - cron: '30 20 * * *' # 3:00am Yangon time (UTC+6:30), nightly
 
 jobs:
   pgtap:
