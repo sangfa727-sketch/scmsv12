@@ -133,7 +133,7 @@ function _renderTeacherList(teachers) {
 ============================================================================ */
 window.openInviteCodeModal = function() {
   openModal(`
-    <div class="modal-sheet" onclick="event.stopPropagation()" style="max-width:380px">
+    <div class="modal-sheet settings-form-sheet" onclick="event.stopPropagation()" style="max-width:380px">
       <div class="modal-handle"></div>
       <h3 class="modal-title">${t('inv.title')}</h3>
       <p class="modal-subtitle">${t('inv.subtitle')}</p>
@@ -202,7 +202,7 @@ async function _loadPastInvites() {
 
 window.openCreateTeacherModal = function() {
   openModal(`
-    <div class="modal-sheet" onclick="event.stopPropagation()" style="max-width:380px">
+    <div class="modal-sheet settings-form-sheet" onclick="event.stopPropagation()" style="max-width:380px">
       <div class="modal-handle"></div>
       <h3 class="modal-title">${t('ct.title')}</h3>
       <p class="modal-subtitle">${t('ct.subtitle')}</p>
