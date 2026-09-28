@@ -68,7 +68,7 @@ jobs:
           SCMS_TEST_QR_TOKEN: ${{ secrets.SCMS_TEST_QR_TOKEN }}
           SCMS_REQUIRE_STAGING: '1'
         run: npx playwright test
-      - uses: actions/upload-artifact@v4
+      - uses: actions/upload-artifact@v7
         if: failure() && steps.staging_gate.outputs.enabled == 'true'
         with:
           name: playwright-report
