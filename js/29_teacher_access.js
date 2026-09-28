@@ -11,6 +11,39 @@ async function _teacherAccessRpc(action, teacherId, extra) {
   }, extra || {}));
 }
 
+function _taText(key) {
+  const map = {
+    'dashboard.view':'Dashboard ကြည့်ရှုရန်',
+    'students.view':'ကျောင်းသားများ ကြည့်ရှုရန်',
+    'students.edit':'ကျောင်းသားအချက်အလက် ပြင်ဆင်ရန်',
+    'leave.view':'ခွင့်တောင်းစာ ကြည့်ရှုရန်',
+    'leave.approve':'ခွင့်တောင်းစာ အတည်ပြု/ပယ်ချရန်',
+    'attendance.view':'တက်ရောက်မှု ကြည့်ရှုရန်',
+    'attendance.edit':'တက်ရောက်မှု ပြင်ဆင်ရန်',
+    'homework.view':'အိမ်စာ ကြည့်ရှုရန်',
+    'homework.create':'အိမ်စာ ထည့်သွင်းရန်',
+    'homework.edit':'အိမ်စာ ပြင်ဆင်ရန်',
+    'homework.delete':'အိမ်စာ ဖျက်ရန်',
+    'assessment.view':'အကဲဖြတ်ချက် ကြည့်ရှုရန်',
+    'assessment.create':'အကဲဖြတ်ချက် ထည့်သွင်းရန်',
+    'assessment.edit':'အကဲဖြတ်ချက် ပြင်ဆင်ရန်',
+    'assessment.delete':'အကဲဖြတ်ချက် ဖျက်ရန်',
+    'billing.view':'ငွေစာရင်း ကြည့်ရှုရန်',
+    'billing.write':'ငွေစာရင်း ပြင်ဆင်ရန်',
+    'teachers.view':'ဆရာ/ဆရာမများ ကြည့်ရှုရန်',
+    'teachers.manage':'ဆရာ/ဆရာမများ စီမံရန်',
+    'permissions.manage':'လုပ်ပိုင်ခွင့်များ စီမံရန်'
+  };
+  return map[key] || key;
+}
+function _taCategory(key) {
+  const map = { dashboard:'ပင်မစာမျက်နှာ', students:'ကျောင်းသားများ', leave:'ခွင့်တောင်းစာ', attendance:'တက်ရောက်မှု', homework:'အိမ်စာ', assessment:'အကဲဖြတ်ချက်', billing:'ငွေစာရင်း', teachers:'ဆရာ/ဆရာမများ', permissions:'လုပ်ပိုင်ခွင့်များ' };
+  return map[key] || key;
+}
+function _taDescription(key, fallback) {
+  return _taText(key);
+}
+
 function _taOpt(value, label, selected) {
   return '<option value="' + esc(value) + '"' + (String(value) === String(selected) ? ' selected' : '') + '>' + esc(label) + '</option>';
 }
@@ -93,16 +126,16 @@ async function _renderTeacherAccess() {
       '<p class="form-help">Default follows the teacher role. Scoped permissions need a class/subject context.</p><div class="teacher-access-permissions">';
 
     Object.keys(groups).forEach(function(category) {
-      html += '<div class="teacher-access-perm-group"><div class="teacher-access-perm-category">' + esc(category) + '</div>';
+      html += '<div class="teacher-access-perm-group"><div class="teacher-access-perm-category">' + esc(_taCategory(category)) + '</div>';
       groups[category].forEach(function(p) {
         const roleDefault = (roleDefaults.find(function(x){ return x.role === teacher.role && x.permission_key === p.permission_key; }) || {}).allowed;
         const override = p.scope_type === 'global' ? _taOverride(overrides,p.permission_key,p.scope_type,null,null) : null;
         const state = override ? (override.allowed ? 'allow' : 'deny') : 'default';
         html += '<div class="teacher-access-perm-row" data-permission="' + esc(p.permission_key) + '" data-scope="' + esc(p.scope_type) + '">' +
-          '<div class="teacher-access-perm-copy"><strong>' + esc(p.permission_key) + '</strong><small>' + esc(p.description || '') +
+          '<div class="teacher-access-perm-copy"><strong>' + esc(_taText(p.permission_key)) + '</strong><small>' + esc(_taDescription(p.permission_key, p.description || '')) +
           '</small></div>' + _taScopeControls(p,catalog) +
           '<select class="teacher-access-perm-state" aria-label="Permission state"><option value="default"' + (state === 'default' ? ' selected' : '') +
-          '>Default' + (roleDefault ? ' (Allow)' : ' (Deny)') + '</option><option value="allow"' + (state === 'allow' ? ' selected' : '') +
+          '>Default' + (roleDefault ? ' (ခွင့်ပြု)' : ' (ပိတ်ပင်)') + '</option><option value="allow"' + (state === 'allow' ? ' selected' : '') +
           '>Allow</option><option value="deny"' + (state === 'deny' ? ' selected' : '') + '>Deny</option></select></div>';
       });
       html += '</div>';
