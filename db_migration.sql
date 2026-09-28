@@ -283,3 +283,29 @@ REVOKE ALL ON FUNCTION public.rpc_app_session_poll(text) FROM PUBLIC;
 GRANT EXECUTE ON FUNCTION public.rpc_app_session_poll(text) TO anon, authenticated;
 
 DROP POLICY IF EXISTS app_sessions_select ON public.app_sessions;
+-- ============================================================================
+-- v12 SECURITY — Chat control boundary
+-- ============================================================================
+-- v12 frontend chat uses session-bound RPCs, not direct table access.
+DROP POLICY IF EXISTS chat_read ON public.chat_messages;
+DROP POLICY IF EXISTS chat_insert ON public.chat_messages;
+
+REVOKE ALL ON FUNCTION public.rpc_chat_send(text,text,text,text,text) FROM PUBLIC;
+REVOKE ALL ON FUNCTION public.rpc_chat_send(text,text,text,text,text) FROM anon, authenticated;
+GRANT EXECUTE ON FUNCTION public.rpc_chat_send(text,text,text,text,text) TO service_role;
+
+CREATE OR REPLACE FUNCTION public.rpc_chat_send(
+  p_school_id text,
+  p_channel text,
+  p_teacher_id text,
+  p_teacher_name text,
+  p_text text
+) RETURNS public.chat_messages
+LANGUAGE sql
+SECURITY DEFINER
+SET search_path = public
+AS $$
+  INSERT INTO public.chat_messages (school_id, channel, teacher_id, teacher_name, text)
+  VALUES (p_school_id, COALESCE(p_channel,'staff'), p_teacher_id, p_teacher_name, p_text)
+  RETURNING *;
+$$;
