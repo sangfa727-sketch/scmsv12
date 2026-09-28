@@ -4,6 +4,15 @@ test.describe('SCMS application shell', () => {
   test('loads the core application shell', async ({ page }) => {
     await page.goto('/', { waitUntil: 'domcontentloaded' });
 
+    if (process.env.SCMS_REQUIRE_STAGING === '1') {
+      const environment = await page.evaluate(() => ({
+        mode: window.SCMS_ENV?.mode,
+        isStaging: window.SCMS_ENV?.isStaging,
+      }));
+      expect(environment.mode).toBe('staging');
+      expect(environment.isStaging).toBe(true);
+    }
+
     await expect(page).toHaveTitle(/SCMS/i);
     await expect(page.locator('#app')).toBeVisible();
     await expect(page.locator('#pages')).toBeAttached();
