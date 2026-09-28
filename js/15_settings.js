@@ -90,9 +90,9 @@ window.openTeacherManager = async function() {
       <h3 class="modal-title">${t('tm.title')}</h3>
       <p class="modal-subtitle">${t('tm.subtitle')}</p>
 
-      <div class="modal-footer">
+      <div class="modal-footer teacher-manager-actions">
 <button class="btn-primary" onclick="openCreateTeacherModal()">${t('tm.addNew')}</button>
-<button class="btn-secondary mt8" onclick="openInviteCodeModal()">${t('tm.inviteGoogle')}</button>
+<button class="btn-secondary" onclick="openInviteCodeModal()">${t('tm.inviteGoogle')}</button>
 </div>
 
       <div id="teacherList" class="teacher-list mt16">
@@ -122,19 +122,19 @@ function _renderTeacherList(teachers) {
     el.innerHTML = `<div class="text-muted text-center">${t('tm.none')}</div>`;
     return;
   }
-  el.innerHTML = teachers.map(t => {
-    const lastLogin = t.last_web_login_at
-      ? new Date(t.last_web_login_at).toLocaleDateString(I18N.dateLocale())
+  el.innerHTML = teachers.map(teacher => {
+    const lastLogin = teacher.last_web_login_at
+      ? new Date(teacher.last_web_login_at).toLocaleDateString(I18N.dateLocale())
       : t('tm.never');
-    const roleBadge = (t.role === 'admin' || t.role === 'super_admin') ? ' 👑' : '';
-    const statusDot = t.status === 'active' ? '🟢' : '⚪';
+    const roleBadge = (teacher.role === 'admin' || teacher.role === 'super_admin') ? ' 👑' : '';
+    const statusDot = teacher.status === 'active' ? '🟢' : '⚪';
     return `
-      <div class="teacher-row" data-tid="${esc(t.teacher_id)}">
+      <div class="teacher-row" data-tid="${esc(teacher.teacher_id)}">
         <div class="teacher-row-info">
-          <div class="teacher-row-name">${statusDot} ${esc(t.teacher_name)}${roleBadge}</div>
-          <div class="teacher-row-sub">${esc(t.teacher_id)} · ${esc(t.role ? tv('roleName', t.role) : t('inv.roleTeacher'))} · ${t('tm.lastLogin', { date: lastLogin })}</div>
+          <div class="teacher-row-name">${statusDot} ${esc(teacher.teacher_name)}${roleBadge}</div>
+          <div class="teacher-row-sub">${esc(t.teacher_id)} · ${esc(teacher.role ? tv('roleName', teacher.role) : t('inv.roleTeacher'))} · ${t('tm.lastLogin', { date: lastLogin })}</div>
         </div>
-        <button class="icon-btn-mini" onclick="resetTeacherPassword('${esc(t.teacher_id)}', '${esc(t.teacher_name)}')" title="${esc(t('tm.resetPassword'))}">🔑</button>
+        <button class="icon-btn-mini" onclick="resetTeacherPassword('${esc(teacher.teacher_id)}', '${esc(teacher.teacher_name)}')" title="${esc(t('tm.resetPassword'))}">🔑</button>
       </div>`;
   }).join('');
 }
