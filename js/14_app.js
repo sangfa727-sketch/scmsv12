@@ -97,7 +97,9 @@ async function initApp() {
         try {
           webSession = await verifyWebSession();
         } catch (e) {
-          console.warn('[boot] web session verify failed:', e);
+          console.error('[boot] web session verify failed:', e);
+          showError(t('err.connFailed'), (e?.message || 'Unable to verify the saved session.') + '\n\nPlease tap Retry and try again.');
+          return;
         }
         if (webSession && webSession.session_token) {
           // Use the teacher_id directly — no Telegram needed
