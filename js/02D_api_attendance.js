@@ -4,7 +4,7 @@ var API = window.API || {};
 Object.assign(API, {
   async saveAttendance(cls, date, records) {
       if (window.APP.platform === 'web') return _webRpc('rpc_save_attendance', {
-        p_session_token: getWebSession()?.session_token,
+        p_session_token: _webSessionToken(),
         p_class: cls, p_date: date, p_records: records,
       });
       return twaPost('save_attendance', { class: cls, date, records });
@@ -13,7 +13,7 @@ Object.assign(API, {
   async getAttendance(daysBack = 30) {
       if (window.APP.platform === 'web') {
         const res = await _webRpc('rpc_get_attendance', {
-          p_session_token: getWebSession()?.session_token, p_days_back: daysBack,
+          p_session_token: _webSessionToken(), p_days_back: daysBack,
         });
         return res.rows;
       }
