@@ -649,3 +649,46 @@ ALTER FUNCTION public.rpc_save_attendance(text,text,date,text,jsonb)
   SET search_path = public, extensions;
 ALTER FUNCTION public.rpc_save_attendance(text,text,text,text,jsonb)
   SET search_path = public, extensions;
+
+
+-- SCMS v12 — Attendance audit read path (admin-only, school-scoped, sanitized projection)
+CREATE OR REPLACE FUNCTION public.rpc_get_attendance_audit(
+  p_session_token text,
+  p_class text DEFAULT NULL,
+  p_from_date date DEFAULT NULL,
+  p_to_date date DEFAULT NULL,
+  p_limit integer DEFAULT 50
+) RETURNS jsonb
+LANGUAGE plpgsql SECURITY DEFINER
+SET search_path = public, extensions
+AS $function$
+DECLARE
+  v_sess record; v_limit integer; v_rows jsonb;
+BEGIN
+  SELECT s.teacher_id, s.school_id, s.role INTO v_sess
+    FROM public.app_web_sessions s
+    JOIN public.teachers t ON t.teacher_id=s.teacher_id
+   WHERE s.session_token=p_session_token AND s.expires_at>now() AND t.status='active' LIMIT 1;
+  IF v_sess IS NULL THEN RETURN jsonb_build_object('ok',false,'error','invalid_session'); END IF;
+  IF COALESCE(v_sess.role,'') NOT IN ('admin','super_admin') THEN RETURN jsonb_build_object('ok',false,'error','admin_only'); END IF;
+  IF p_from_date IS NOT NULL AND p_to_date IS NOT NULL AND p_from_date>p_to_date THEN RETURN jsonb_build_object('ok',false,'error','invalid_date_range'); END IF;
+  v_limit:=LEAST(GREATEST(COALESCE(p_limit,50),1),100);
+  SELECT COALESCE(jsonb_agg(jsonb_build_object(
+    'id',x.id,'ts',x.ts,'actor',x.actor,'action',x.action,
+    'class',x.payload->>'class','date',x.payload->>'date',
+    'records_count',COALESCE((x.payload->>'records_count')::integer,0)
+  ) ORDER BY x.ts DESC),'[]'::jsonb) INTO v_rows
+  FROM (
+    SELECT id,ts,actor,action,payload FROM public.audit_log
+    WHERE school_id=v_sess.school_id AND source='web' AND action='attendance.save'
+      AND (p_class IS NULL OR payload->>'class'=trim(p_class))
+      AND (p_from_date IS NULL OR (payload->>'date')::date>=p_from_date)
+      AND (p_to_date IS NULL OR (payload->>'date')::date<=p_to_date)
+    ORDER BY ts DESC LIMIT v_limit
+  ) x;
+  RETURN jsonb_build_object('ok',true,'rows',v_rows,'count',jsonb_array_length(v_rows));
+END;
+$function$;
+
+REVOKE ALL ON FUNCTION public.rpc_get_attendance_audit(text,text,date,date,integer) FROM PUBLIC;
+GRANT EXECUTE ON FUNCTION public.rpc_get_attendance_audit(text,text,date,date,integer) TO anon,authenticated;
