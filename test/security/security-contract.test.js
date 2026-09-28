@@ -88,3 +88,12 @@ test('feature modules do not bypass the shared web RPC transport', () => {
     assert.equal(source.includes('/rest/v1/rpc/'), false, name + ' must use the shared API/auth boundary');
   }
 });
+
+
+test('admin teacher mutations stay behind the shared session-aware RPC boundary', () => {
+  const source = read('js/15_settings.js');
+  assert.ok(source.includes("_webRpc('rpc_admin_create_teacher'"));
+  assert.ok(source.includes("_webRpc('rpc_admin_reset_teacher_password'"));
+  assert.equal(source.includes('rest/v1/rpc/rpc_admin_create_teacher'), false);
+  assert.equal(source.includes('rest/v1/rpc/rpc_admin_reset_teacher_password'), false);
+});
