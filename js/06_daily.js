@@ -126,7 +126,7 @@ window.openDailyModal = function(studentId, studentName) {
   const moodEmoji = { Happy:'😊', OK:'😐', Tired:'😴', Sad:'😢', Energetic:'⚡' };
 
   const html = `
-    <div class="modal-sheet" onclick="event.stopPropagation()">
+    <div class="modal-sheet daily-form-sheet" onclick="event.stopPropagation()">
       <div class="modal-handle"></div>
       <h3 class="modal-title">${esc(t('daily.modalTitle', { name: studentName }))}</h3>
 
