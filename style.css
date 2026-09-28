@@ -6221,66 +6221,6 @@ input.form-input {
   min-width: 0 !important;
 }
 
-/* 4) Dashboard: actual responsive card grid, not a vertical feed. */
-#page-dashboard #dashboardContent {
-  display: block;
-}
-#page-dashboard #dashboardScopeChips {
-  margin-bottom: 2px;
-}
-#page-dashboard .stats-grid {
-  grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
-  gap: 8px !important;
-  padding: 0 12px 10px !important;
-}
-#page-dashboard .dashboard-actions {
-  padding: 0 12px 10px !important;
-}
-#page-dashboard .dashboard-actions > button {
-  flex: 0 1 auto !important;
-}
-#page-dashboard .dashboard-banner {
-  margin-left: 12px !important;
-  margin-right: 12px !important;
-}
-
-/* On phones keep cards readable and full-width within the small rail. */
-@media (max-width: 699px) {
-  #page-dashboard .stats-grid {
-    grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
-  }
-  #page-dashboard .dashboard-actions > button {
-    flex: 1 1 auto !important;
-  }
-}
-
-/* SCMS v12.12 — compact controls + consistent page rail */
-.page-header,.search-bar,.chips-row,.date-strip,.timetable-day-tabs,.profile-card{
-  width:min(100%,1200px)!important;margin-left:auto!important;margin-right:auto!important;
-}
-.page-header{padding-left:16px!important;padding-right:16px!important}
-.search-bar{width:min(calc(100% - 32px),1168px)!important}
-.chips-row,.date-strip,.timetable-day-tabs{padding-left:16px!important;padding-right:16px!important}
-.page-toolbar .btn-primary,.page-toolbar .btn-secondary,.attend-toolbar .btn-primary,.attend-toolbar .btn-secondary,
-.billing-filter-row .btn-primary,.billing-filter-row .btn-secondary,.grades-filter-row .btn-primary,.grades-filter-row .btn-secondary,
-.form-actions .btn-primary,.form-actions .btn-secondary{width:fit-content!important;flex:0 1 auto!important}
-.form-actions{display:flex!important;flex-wrap:wrap!important;align-items:center!important;gap:7px!important}
-.form-actions>button{width:fit-content!important;min-width:0!important;flex:0 1 auto!important}
-@media(min-width:900px){
- #page-dashboard .dashboard-list-grid,#page-students #studentList,#page-daily #dailyList,#page-hw #hwList,
- #page-parents #commsList,#page-incidents #incidentList,#page-library #libraryList,#page-transport #transportList,
- #page-admissions #admissionsList{width:100%}
- #page-billing .list-card,#page-grades .list-card,#page-summary .list-card{margin-left:0!important;margin-right:0!important}
-}
-@media(max-width:899px){
- .page-header{padding-top:14px!important;padding-bottom:11px!important}
- .page-title{font-size:24px!important}
- .list-card{padding:11px 12px!important;margin-left:12px!important;margin-right:12px!important}
- .stats-grid{padding-left:12px!important;padding-right:12px!important}
- .page-toolbar,.attend-toolbar,.form-actions{padding-left:12px!important;padding-right:12px!important}
-}
-
-
 /* SCMS v12.16 — Settings modal action system
    Semantic action rows: description on the left, action on the right.
    Keep Settings-specific rules isolated from global button styles. */
