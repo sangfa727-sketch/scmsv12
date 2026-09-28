@@ -1,6 +1,6 @@
 /** SCMS v12 — 02K_api_health.js */
 'use strict';
-const API = window.API || {};
+var API = window.API || {};
 Object.assign(API, {
   async getHealthProfile(studentId) {
       return _webRpc('rpc_get_health_profile', {
