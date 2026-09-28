@@ -669,6 +669,17 @@ window.openModal = function(html, onClose) {
   window._modalStack.push({ layer, onClose });
 };
 
+window._modalEscapeHandler = window._modalEscapeHandler || function(e) {
+  if (e.key !== 'Escape') return;
+  if (document.getElementById('_passwordPromptModal')) return window._closePasswordPrompt();
+  if (document.getElementById('_genericConfirmModal')) return window._closeGenericConfirm();
+  if (window._modalStack?.length) window.closeModal();
+};
+if (!window._modalEscapeInstalled) {
+  document.addEventListener('keydown', window._modalEscapeHandler);
+  window._modalEscapeInstalled = true;
+}
+
 window.closeModal = function(onCloseOverride) {
   const overlay = document.getElementById('modalOverlay');
   const top = window._modalStack.pop();
