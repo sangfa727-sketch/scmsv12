@@ -1000,6 +1000,26 @@ a { color: inherit; }
   background: var(--text);
   color: var(--bg);
 }
+#commTargetPills .pill {
+  flex: 1 1 0;
+  min-height: 42px;
+  transition: background .18s ease, color .18s ease, border-color .18s ease, transform .16s ease, box-shadow .18s ease;
+}
+#commTargetPills .pill:active { transform: scale(.98); }
+.comm-target-panel {
+  overflow: hidden;
+  max-height: 320px;
+  opacity: 1;
+  transform: translateY(0);
+  transition: max-height .24s ease, opacity .18s ease, transform .24s ease;
+}
+.comm-target-panel:not(.is-active) {
+  max-height: 0;
+  opacity: 0;
+  transform: translateY(-6px);
+  pointer-events: none;
+}
+.comm-target-panel.is-active { pointer-events: auto; }
 
 /* ── Toggle ────────────────────────────────────────────────────── */
 .toggle-row {
@@ -3855,10 +3875,25 @@ button, .tab-btn, .att-code-pill, .pill, .chip {
 .idc-logo  { width: 9cqw; height: 9cqw; object-fit: contain; flex: 0 0 auto; }
 .idc-school {
   font-family: 'Fraunces', serif; font-weight: 700;
-  font-size: 4.6cqw; line-height: 1.1; letter-spacing: .01em;
+  font-size: 4.1cqw; line-height: 1.05; letter-spacing: .005em;
   text-transform: uppercase; color: #0F1B33;
-  display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden;
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+  min-width: 0;
 }
+.idc-academic {
+  display: flex; align-items: baseline; justify-content: center;
+  gap: 2.2cqw; min-width: 0; margin-top: 1.1cqw;
+}
+.idc-academic .idc-class {
+  font-size: 4.2cqw; line-height: 1.1; font-weight: 800;
+  color: #0F1B33; overflow-wrap: anywhere;
+}
+.idc-academic .idc-grade {
+  font-size: 3cqw; line-height: 1.1; font-weight: 600;
+  color: #6B7280; overflow-wrap: anywhere;
+}
+.id-card:not(.id-card-vertical) .idc-brand { min-width: 0; }
+.id-card:not(.id-card-vertical) .idc-brand .idc-logo { width: 7.5cqw; height: 7.5cqw; }
 .idc-photo {
   flex: 0 0 auto; border-radius: 50%; overflow: hidden;
   display: flex; align-items: center; justify-content: center;
@@ -3914,7 +3949,10 @@ button, .tab-btn, .att-code-pill, .pill, .chip {
 }
 .id-card-vertical .idc-brand { align-self: stretch; }
 .id-card-vertical .idc-logo  { width: 11cqw; height: 11cqw; }
-.id-card-vertical .idc-school { font-size: 6cqw; }
+ .id-card-vertical .idc-school { font-size: 5.4cqw; }
+.id-card-vertical .idc-academic { margin-top: 1.5cqw; }
+.id-card-vertical .idc-academic .idc-class { font-size: 5cqw; }
+.id-card-vertical .idc-academic .idc-grade { font-size: 3.4cqw; }
 .id-card-vertical .idc-photo { width: 44cqw; height: 44cqw; font-size: 17cqw; }
 .id-card-vertical .idc-who   { text-align: center; }
 .id-card-vertical .idc-name  { font-size: 8.4cqw; line-height: 1.1; }
