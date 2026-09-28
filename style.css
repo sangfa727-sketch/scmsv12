@@ -6840,7 +6840,7 @@ input.form-input {
   justify-content: center !important;
   padding: 18px !important;
   box-sizing: border-box !important;
-  z-index: 500 !important;
+  z-index: 11000 !important;
 }
 .generic-confirm-overlay .generic-confirm-sheet {
   width: min(92vw, 380px) !important;
