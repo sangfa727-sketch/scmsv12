@@ -577,3 +577,70 @@ $function$;
 
 REVOKE ALL ON FUNCTION public.rpc_update_student_parent(text,text,text,text,text,text) FROM PUBLIC;
 GRANT EXECUTE ON FUNCTION public.rpc_update_student_parent(text,text,text,text,text,text) TO anon,authenticated;
+
+-- SCMS v12 — Attendance security hardening
+-- Canonical web attendance path: session token -> school scope -> active roster validation -> write -> audit.
+-- Remove the legacy 4-argument admission conversion overload so natural calls cannot be ambiguous.
+DROP FUNCTION IF EXISTS public.rpc_convert_admission_to_student(text, bigint, text, text);
+ALTER FUNCTION public.rpc_convert_admission_to_student(text, bigint, text, text, text)
+  SET search_path = public, extensions;
+
+CREATE OR REPLACE FUNCTION public.rpc_save_attendance(
+  p_session_token text, p_class text, p_date date, p_records jsonb
+) RETURNS jsonb
+LANGUAGE plpgsql SECURITY DEFINER
+SET search_path = public, extensions
+AS $function$
+DECLARE
+  v_sess record; v_count integer := 0; v_total integer := 0; v_distinct integer := 0;
+  v_record jsonb; v_status text; v_note text;
+BEGIN
+  SELECT s.teacher_id, s.school_id, s.role INTO v_sess
+    FROM public.app_web_sessions s JOIN public.teachers t ON t.teacher_id=s.teacher_id
+   WHERE s.session_token=p_session_token AND s.expires_at>now() AND t.status='active' LIMIT 1;
+  IF v_sess IS NULL THEN RETURN jsonb_build_object('ok',false,'error','invalid_session'); END IF;
+  IF p_class IS NULL OR trim(p_class)='' THEN RETURN jsonb_build_object('ok',false,'error','class_required'); END IF;
+  IF p_date IS NULL THEN RETURN jsonb_build_object('ok',false,'error','date_required'); END IF;
+  IF p_records IS NULL OR jsonb_typeof(p_records)<>'array' THEN RETURN jsonb_build_object('ok',false,'error','records_must_be_array'); END IF;
+  v_total:=jsonb_array_length(p_records);
+  IF v_total=0 THEN RETURN jsonb_build_object('ok',false,'error','no_records'); END IF;
+  SELECT count(*),count(DISTINCT r->>'student_id') INTO v_count,v_distinct FROM jsonb_array_elements(p_records) r;
+  IF v_count<>v_distinct THEN RETURN jsonb_build_object('ok',false,'error','duplicate_student_records'); END IF;
+
+  FOR v_record IN SELECT * FROM jsonb_array_elements(p_records) LOOP
+    IF jsonb_typeof(v_record)<>'object' OR NULLIF(trim(v_record->>'student_id'),'') IS NULL THEN
+      RETURN jsonb_build_object('ok',false,'error','invalid_student_record');
+    END IF;
+    v_status:=upper(COALESCE(NULLIF(trim(v_record->>'status'),''),'P'));
+    IF v_status NOT IN ('P','A','L','T','S','E','H') THEN
+      RETURN jsonb_build_object('ok',false,'error','invalid_attendance_status','student_id',v_record->>'student_id');
+    END IF;
+    v_note:=NULLIF(trim(v_record->>'note'),'');
+    IF v_note IS NOT NULL AND char_length(v_note)>200 THEN
+      RETURN jsonb_build_object('ok',false,'error','attendance_note_too_long','student_id',v_record->>'student_id');
+    END IF;
+    IF NOT EXISTS (
+      SELECT 1 FROM public.students st
+       WHERE st.student_id=v_record->>'student_id' AND st.school_id=v_sess.school_id
+         AND st.class=trim(p_class) AND st.status='Active'
+    ) THEN
+      RETURN jsonb_build_object('ok',false,'error','student_not_in_class','student_id',v_record->>'student_id');
+    END IF;
+  END LOOP;
+
+  DELETE FROM public.attendance WHERE school_id=v_sess.school_id AND class=trim(p_class) AND date=p_date;
+  INSERT INTO public.attendance(date,day_of_week,student_id,name_en,class,status,note,teacher_id,school_id,"timestamp")
+  SELECT p_date,to_char(p_date,'Dy'),r->>'student_id',
+    (SELECT st.name_en FROM public.students st WHERE st.student_id=r->>'student_id' AND st.school_id=v_sess.school_id),
+    trim(p_class),upper(COALESCE(NULLIF(trim(r->>'status'),''),'P')),NULLIF(trim(r->>'note'),''),
+    v_sess.teacher_id,v_sess.school_id,now()
+  FROM jsonb_array_elements(p_records) r;
+
+  INSERT INTO public.audit_log(source,actor,action,school_id,payload)
+  VALUES('web',v_sess.teacher_id,'attendance.save',v_sess.school_id,
+    jsonb_build_object('class',trim(p_class),'date',p_date,'records_count',v_total,'records',p_records));
+  RETURN jsonb_build_object('ok',true,'count',v_total,'class',trim(p_class),'date',p_date);
+END;
+$function$;
+REVOKE ALL ON FUNCTION public.rpc_save_attendance(text,text,date,jsonb) FROM PUBLIC;
+GRANT EXECUTE ON FUNCTION public.rpc_save_attendance(text,text,date,jsonb) TO anon,authenticated;
