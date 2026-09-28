@@ -255,8 +255,10 @@ window.openNewAssessmentModal = function() {
         </div>
       </div>
 
-      <button class="btn-primary mt16" id="gaSaveBtn" onclick="saveNewAssessment()">${t('grades.create')}</button>
-      <button class="btn-secondary" onclick="closeModal()">${t('common.cancel')}</button>
+      <div class="modal-footer">
+<button class="btn-primary mt16" id="gaSaveBtn" onclick="saveNewAssessment()">${t('grades.create')}</button>
+<button class="btn-secondary" onclick="closeModal()">${t('common.cancel')}</button>
+</div>
     </div>
   `);
 };
@@ -341,8 +343,10 @@ window.openGradeEntry = async function(assessmentId) {
         }).join('')}
       </div>
 
-      <button class="btn-primary mt16" id="gradeSaveBtn" onclick="saveGradeEntry(${assessmentId})">${t('grades.saveScores')}</button>
-      <button class="btn-secondary" onclick="closeModal()">${t('common.cancel')}</button>
+      <div class="modal-footer">
+<button class="btn-primary mt16" id="gradeSaveBtn" onclick="saveGradeEntry(${assessmentId})">${t('grades.saveScores')}</button>
+<button class="btn-secondary" onclick="closeModal()">${t('common.cancel')}</button>
+</div>
     </div>
   `);
 };
@@ -399,8 +403,10 @@ window.openAddTermPrompt = function() {
           <input class="form-input" id="newTermEnd" type="date">
         </div>
       </div>
-      <button class="btn-primary mt16" id="addTermBtn" onclick="_confirmAddTerm()">${t('common.add')}</button>
-      <button class="btn-secondary mt8" onclick="closeModal()">${t('common.cancel')}</button>
+      <div class="modal-footer">
+<button class="btn-primary mt16" id="addTermBtn" onclick="_confirmAddTerm()">${t('common.add')}</button>
+<button class="btn-secondary mt8" onclick="closeModal()">${t('common.cancel')}</button>
+</div>
     </div>
   `);
 };
