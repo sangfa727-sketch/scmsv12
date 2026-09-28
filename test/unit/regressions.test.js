@@ -145,7 +145,7 @@ test('entry-form shells keep the compact width and control baseline', () => {
   ];
 
   for (const shell of compactShells) {
-    assert.match(css, new RegExp('\\\\.' + shell + '[\\s\\S]{0,260}max-width: (?:440|520|560)px !important'));
+    assert.match(css, new RegExp('\\.' + shell + '[\\s\\S]{0,260}max-width: (?:440|520|560)px !important'));
   }
 
   assert.match(css, /SCMS v12\\.2 — Premium compact data-entry forms/);
