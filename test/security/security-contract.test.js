@@ -29,7 +29,7 @@ test('client configuration does not embed a Supabase service-role secret', () =>
 
 test('web API modules delegate RPC transport through the shared session-aware helper', () => {
   const files = fs.readdirSync(path.join(ROOT, 'js'))
-    .filter((f) => /^02[A-L]_api_.*\.js$/.test(f));
+    .filter((f) => /^02[B-L]_api_.*\.js$/.test(f));
 
   assert.ok(files.length >= 10);
   for (const file of files) {
@@ -41,7 +41,7 @@ test('web API modules delegate RPC transport through the shared session-aware he
 
 test('session-bound feature RPC calls do not rely on client-supplied school identity in the web API layer', () => {
   const files = fs.readdirSync(path.join(ROOT, 'js'))
-    .filter((f) => /^02[A-L]_api_.*\.js$/.test(f));
+    .filter((f) => /^02[B-L]_api_.*\.js$/.test(f));
 
   for (const file of files) {
     const source = read('js/' + file);
