@@ -3827,114 +3827,122 @@ button, .tab-btn, .att-code-pill, .pill, .chip {
   height: 18px;
 }
 
-/* ── Student ID Card (Parent Portal QR) — v2 premium redesign ────────────── */
-/* CR80 standard card ratio (3.375in x 2.125in / 85.6mm x 54mm — same as a
-   real plastic ID/ATM card). On-screen preview is scaled up for legibility;
-   print CSS renders both the single card and the bulk sheet at true
-   physical size, so nothing needs sizing in an external editor. */
+/* ── Student ID Card (Parent Portal QR) — v3 modern & minimal ─────────────── */
+/* CR80 card (85.6 x 54 mm). Everything inside the card is sized in cqw (a
+   percentage of the card's own width), so the on-screen preview, the single
+   print and the A4 sheet are the same design at different scales — nothing
+   to resize by hand. The card is always white with one ink colour, whatever
+   the app theme (it is a printed object, not UI). Needs container-query
+   units (Chrome/Edge/Safari 16+/Firefox 110+). */
 .id-card {
-  position: relative;
-  overflow: hidden;
-  display: flex;
-  flex-direction: column;
-  border: 0.5px solid var(--border);
-  border-radius: 16px;
-  background: var(--surface);
-  box-shadow: var(--shadow);
+  container-type: inline-size;
+  width: 100%; max-width: 380px; margin: 0 auto;
   aspect-ratio: 3.375 / 2.125;
-  max-width: 380px;
-  margin: 0 auto;
 }
-.id-card::after {
-  content: '';
-  position: absolute;
-  right: -30px; bottom: -30px;
-  width: 140px; height: 140px;
-  border: 10px solid var(--id-accent, var(--accent));
-  border-radius: 50%;
-  opacity: 0.05;
-  pointer-events: none;
-}
-.id-card-accent {
-  height: 7%;
-  min-height: 6px;
-  background: var(--id-accent, var(--accent));
-  flex: 0 0 auto;
-}
-.id-card-body {
-  flex: 1;
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  padding: 8% 8% 6%;
-  min-height: 0;
-}
-.id-card-photo {
-  flex: 0 0 auto;
-  width: 26%;
-  aspect-ratio: 1;
-  border-radius: 50%;
-  border: 2px solid var(--surface);
-  outline: 1.5px solid var(--id-accent, var(--accent));
-  display: flex; align-items: center; justify-content: center;
-  color: #fff; font-size: 22px; font-weight: 700;
+.id-card.id-card-vertical { max-width: 240px; aspect-ratio: 2.125 / 3.375; }
+
+.idc-face {
+  box-sizing: border-box;
+  width: 100%; height: 100%;
+  background: #fff; color: #0F1B33;
+  border: 0.3cqw solid #E5E7EB;
+  border-radius: 3.7cqw;
+  box-shadow: 0 1px 2px rgba(15,27,51,.06), 0 8px 24px rgba(15,27,51,.08);
   overflow: hidden;
+  -webkit-print-color-adjust: exact; print-color-adjust: exact;
 }
-.id-card-photo img { width: 100%; height: 100%; object-fit: cover; }
-.id-card-info { flex: 1; min-width: 0; }
-.id-card-school {
-  font-size: 9px; font-weight: 700; text-transform: uppercase;
-  letter-spacing: 0.08em; color: var(--muted);
-  white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+.idc-brand { display: flex; align-items: center; gap: 2.5cqw; min-width: 0; }
+.idc-logo  { width: 9cqw; height: 9cqw; object-fit: contain; flex: 0 0 auto; }
+.idc-school {
+  font-family: 'Fraunces', serif; font-weight: 700;
+  font-size: 4.6cqw; line-height: 1.1; letter-spacing: .01em;
+  text-transform: uppercase; color: #0F1B33;
+  display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden;
 }
-.id-card-name {
-  font-family: 'Fraunces', serif;
-  font-size: 17px; font-weight: 700; line-height: 1.15;
-  margin-top: 3px;
-  white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+.idc-photo {
+  flex: 0 0 auto; border-radius: 50%; overflow: hidden;
+  display: flex; align-items: center; justify-content: center;
+  background: #EEF1F6; color: #0F1B33;
+  font-family: 'Fraunces', serif; font-weight: 700;
+  box-shadow: 0 0 0 1cqw #fff, 0 0 0 1.4cqw rgba(15,27,51,.14);
 }
-.id-card-sub { font-size: 11.5px; color: var(--text2); margin-top: 2px; }
-.id-card-id { font-size: 9.5px; color: var(--muted); font-family: 'JetBrains Mono', monospace; margin-top: 3px; }
-.id-card-qr {
-  flex: 0 0 auto;
-  padding: 3px;
-  background: #fff;
-  border-radius: 6px;
-  border: 0.5px solid var(--border);
-  line-height: 0;
+.idc-photo img { width: 100%; height: 100%; object-fit: cover; display: block; }
+.idc-name {
+  font-family: 'Fraunces', serif; font-weight: 700; color: #0F1B33;
+  overflow-wrap: anywhere;
+  display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; overflow: hidden;
 }
+.idc-label {
+  font-size: 2.4cqw; font-weight: 600; letter-spacing: .14em;
+  text-transform: uppercase; color: #6B7280;
+}
+.idc-value { font-weight: 700; color: #0F1B33; overflow-wrap: anywhere; }
+.idc-sid   { font-variant-numeric: tabular-nums; letter-spacing: .01em; }
+.idc-qr {
+  flex: 0 0 auto; box-sizing: border-box; line-height: 0;
+  background: #fff; padding: 1.2cqw;
+  border: 0.3cqw solid #E5E7EB; border-radius: 1.6cqw;
+}
+.idc-qr img, .idc-qr canvas { width: 100% !important; height: 100% !important; }
+
+/* Horizontal */
+.id-card:not(.id-card-vertical) .idc-face {
+  display: grid; grid-template-columns: 34cqw 1fr; column-gap: 5cqw; padding: 5cqw;
+}
+.id-card:not(.id-card-vertical) .idc-left {
+  display: flex; flex-direction: column; align-items: center; justify-content: center;
+  gap: 4cqw; padding-right: 4cqw; box-sizing: border-box; min-width: 0;
+  border-right: 0.3cqw solid #E5E7EB;
+}
+.id-card:not(.id-card-vertical) .idc-photo { width: 24cqw; height: 24cqw; font-size: 9.6cqw; }
+.id-card:not(.id-card-vertical) .idc-name  { font-size: 5cqw; line-height: 1.12; text-align: center; }
+.id-card:not(.id-card-vertical) .idc-right {
+  display: flex; flex-direction: column; justify-content: space-between; min-width: 0;
+}
+.id-card:not(.id-card-vertical) .idc-value { font-size: 3.4cqw; margin-top: .6cqw; }
+.id-card:not(.id-card-vertical) .idc-field .idc-sid { font-size: 2.9cqw; letter-spacing: 0; white-space: nowrap; }
+.id-card:not(.id-card-vertical) .idc-bottom {
+  display: flex; align-items: flex-end; justify-content: space-between; gap: 3cqw;
+}
+.id-card:not(.id-card-vertical) .idc-bottom .idc-value { font-size: 4cqw; }
+.id-card:not(.id-card-vertical) .idc-qr { width: 21cqw; height: 21cqw; }
+
+/* Vertical */
+.id-card-vertical .idc-face {
+  display: flex; flex-direction: column; align-items: center;
+  justify-content: space-between; padding: 7cqw;
+}
+.id-card-vertical .idc-brand { align-self: stretch; }
+.id-card-vertical .idc-logo  { width: 11cqw; height: 11cqw; }
+.id-card-vertical .idc-school { font-size: 6cqw; }
+.id-card-vertical .idc-photo { width: 44cqw; height: 44cqw; font-size: 17cqw; }
+.id-card-vertical .idc-who   { text-align: center; }
+.id-card-vertical .idc-name  { font-size: 8.4cqw; line-height: 1.1; }
+.id-card-vertical .idc-class { font-size: 5cqw; color: #6B7280; margin-top: 1.5cqw; }
+.id-card-vertical .idc-sid   {
+  font-size: 3.8cqw; color: #6B7280; margin-top: 1.8cqw;
+  text-transform: uppercase; letter-spacing: .04em; font-variant-numeric: tabular-nums;
+}
+.id-card-vertical .idc-qr { width: 36cqw; height: 36cqw; }
+
+/* Modal: link row + orientation control (outside the printed area) */
 .id-card-link-row { display: flex; gap: 6px; align-items: center; margin: 8px 0 0; }
 .id-card-link-row input { flex: 1; font-size: 11px; padding: 8px 10px; }
 .id-card-link-row button { flex: 0 0 auto; white-space: nowrap; }
+.id-card-preview-wrap { max-width: 380px; margin: 0 auto; }
+.id-card-orient-row { display: flex; justify-content: flex-end; margin-bottom: 10px; }
 
-/* Vertical (portrait) orientation — same CR80 card, dimensions swapped */
-.id-card.id-card-vertical { aspect-ratio: 2.125 / 3.375; max-width: 240px; }
-.id-card.id-card-vertical .id-card-body {
-  flex-direction: column;
-  text-align: center;
-  padding: 6% 8% 8%;
+.id-orient-seg {
+  display: inline-flex; gap: 2px; padding: 2px; flex: 0 0 auto;
+  border-radius: 999px; background: var(--bg2); border: 0.5px solid var(--border);
 }
-.id-card.id-card-vertical .id-card-photo { width: 40%; margin-bottom: 4%; }
-.id-card.id-card-vertical .id-card-info { width: 100%; }
-.id-card.id-card-vertical .id-card-name,
-.id-card.id-card-vertical .id-card-sub,
-.id-card.id-card-vertical .id-card-id { white-space: normal; text-overflow: clip; }
-.id-card.id-card-vertical .id-card-qr { margin-top: 8%; }
-
-/* Orientation toggle — sits OUTSIDE #idCardPrintArea (a sibling), so it
-   never appears on the printed card. */
-.id-card-preview-wrap { position: relative; max-width: 380px; margin: 0 auto; }
-.id-card-orient-btn {
-  position: absolute; top: -10px; right: -10px; z-index: 2;
-  width: 34px; height: 34px;
-  border-radius: 50%;
-  background: var(--surface);
-  border: 0.5px solid var(--border);
-  box-shadow: var(--shadow);
+.id-orient-opt {
+  width: 28px; height: 28px; border-radius: 50%; border: none; background: transparent;
   display: flex; align-items: center; justify-content: center;
-  cursor: pointer;
+  color: var(--muted); cursor: pointer;
 }
-.id-card-orient-btn svg { width: 16px; height: 16px; stroke: var(--text); }
+.id-orient-opt svg { width: 15px; height: 15px; }
+.id-orient-opt.on { background: var(--surface); color: var(--text); box-shadow: var(--shadow); }
 
 /* ── Bulk ID card sheet (A4, multiple cards per page) ─────────────────────── */
 #bulkIdPrintArea { display: none; }
@@ -3942,7 +3950,7 @@ button, .tab-btn, .att-code-pill, .pill, .chip {
   display: grid;
   grid-template-columns: repeat(2, 85.6mm);
   grid-template-rows: repeat(5, 54mm);
-  gap: 4mm 6mm;
+  gap: 2.5mm 6mm;   /* 5 rows x 54mm + 4 gaps = 280mm fits A4 (297mm) with 6mm margins */
   justify-content: center;
 }
 .id-sheet-page + .id-sheet-page { page-break-before: always; break-before: page; }
@@ -3951,14 +3959,11 @@ button, .tab-btn, .att-code-pill, .pill, .chip {
   grid-template-rows: repeat(3, 85.6mm);
 }
 .id-sheet-page .id-card {
-  max-width: none;
-  aspect-ratio: auto;
-  border-radius: 3mm;
-  box-shadow: none;
-  outline: 0.2mm dashed var(--border2, #ccc);
-  outline-offset: 1mm;
+  width: 100%; height: 100%; max-width: none; aspect-ratio: auto; margin: 0;
+  outline: 0.2mm dashed #C7CCD6; outline-offset: 0.6mm;   /* cut guide */
   break-inside: avoid;
 }
+.id-sheet-page .idc-face { box-shadow: none; }
 
 /* ── Select-for-print toolbar (Students page) ─────────────────────────────── */
 .id-select-toolbar {
@@ -3967,15 +3972,6 @@ button, .tab-btn, .att-code-pill, .pill, .chip {
   flex-wrap: wrap;
 }
 .id-select-toolbar .id-select-count { font-size: 12.5px; color: var(--text2); font-weight: 600; margin-right: auto; }
-.id-orient-mini-btn {
-  width: 30px; height: 30px; flex: 0 0 auto;
-  border-radius: 50%;
-  background: var(--bg2);
-  border: 0.5px solid var(--border);
-  display: flex; align-items: center; justify-content: center;
-  cursor: pointer;
-}
-.id-orient-mini-btn svg { width: 14px; height: 14px; stroke: var(--text); }
 .id-select-checkbox {
   position: absolute; top: 10px; left: 10px; z-index: 2;
   width: 22px; height: 22px;
@@ -3988,21 +3984,20 @@ button, .tab-btn, .att-code-pill, .pill, .chip {
   body.printing-id-single #idCardPrintArea,
   body.printing-id-single #idCardPrintArea * { visibility: visible; }
   body.printing-id-single #idCardPrintArea {
-    position: fixed; top: 0; left: 0;
-    width: 100%; height: 100%;
+    position: fixed; top: 0; left: 0; width: 100%; height: 100%;
   }
   body.printing-id-single #idCardPrintArea .id-card {
-    width: 100%; height: 100%;
-    max-width: none; aspect-ratio: auto;
-    border-radius: 0; border: none; box-shadow: none; padding: 0; margin: 0;
+    width: 100%; height: 100%; max-width: none; aspect-ratio: auto; margin: 0;
+  }
+  body.printing-id-single #idCardPrintArea .idc-face {
+    border: none; border-radius: 0; box-shadow: none;
   }
 
   body.printing-id-bulk * { visibility: hidden; }
   body.printing-id-bulk #bulkIdPrintArea,
   body.printing-id-bulk #bulkIdPrintArea * { visibility: visible; }
   body.printing-id-bulk #bulkIdPrintArea {
-    display: block;
-    position: absolute; top: 0; left: 0;
+    display: block; position: absolute; top: 0; left: 0;
   }
 }
 
