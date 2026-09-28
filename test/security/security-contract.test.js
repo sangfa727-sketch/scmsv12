@@ -150,3 +150,23 @@ test('billing admin session helper is not directly executable by client roles', 
   const migration = read('supabase/migrations/20260929060010_billing_admin_session_execute_hardening.sql');
   assert.match(migration, /revoke execute on function public\._billing_admin_session\(text\) from public, anon, authenticated/i);
 });
+
+test('billing financial integrity contracts reject unsafe money operations', () => {
+  const migration = read('supabase/migrations/20260929062000_billing_financial_integrity_hardening.sql');
+  assert.match(migration, /p_default_amount[\\s\\S]*< 0[\\s\\S]*invalid_amount/i);
+  assert.match(migration, /p_amount[\\s\\S]*<= 0[\\s\\S]*invalid_amount/i);
+  assert.match(migration, /for update/i);
+  assert.match(migration, /payment_exceeds_balance/i);
+  assert.match(migration, /invoice_has_payments/i);
+  assert.match(migration, /billing\\.invoice\\.create/i);
+  assert.match(migration, /billing\\.payment\\.create/i);
+});
+
+test('billing tables enforce non-negative and positive amount invariants', () => {
+  const migration = read('supabase/migrations/20260929062010_billing_amount_constraints.sql');
+  assert.match(migration, /fee_items_default_amount_nonnegative/);
+  assert.match(migration, /invoice_items_amount_nonnegative/);
+  assert.match(migration, /invoices_total_amount_positive/);
+  assert.match(migration, /invoices_paid_amount_nonnegative/);
+  assert.match(migration, /payments_amount_positive/);
+});
