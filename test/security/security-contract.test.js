@@ -213,3 +213,24 @@ test('web session RPC client execution is explicitly restored after hardening', 
   assert.match(migration, /grant execute on function public\.rpc_web_session_verify\(text\) to anon, authenticated/i);
   assert.match(migration, /grant execute on function public\.rpc_change_password\(text,text,text\) to anon, authenticated/i);
 });
+
+
+test('school config writes bind to current role, tenant, and allowlisted keys', () => {
+  const migration = read('supabase/migrations/20260929065000_school_config_current_role_binding_hardening.sql');
+  for (const fn of ['rpc_set_school_branding','rpc_update_school_config_web']) {
+    const start = migration.indexOf('create or replace function public.' + fn);
+    assert.ok(start >= 0, fn + ' must be covered by school config hardening');
+    const end = migration.indexOf('create or replace function public.', start + 1);
+    const body = migration.slice(start, end === -1 ? migration.length : end);
+    assert.match(body, /join public\.teachers t on t\.teacher_id=s\.teacher_id/i);
+    assert.match(body, /t\.status='active'/i);
+    assert.match(body, /s\.school_id=t\.school_id/i);
+    assert.match(body, /s\.role=t\.role/i);
+    assert.match(body, /v_clean/i);
+  }
+  const branding = migration.slice(migration.indexOf('create or replace function public.rpc_set_school_branding'));
+  assert.doesNotMatch(branding, /p_patch\s+directly/i);
+  assert.match(migration, /p_patch \? 'classes'/i);
+  assert.match(migration, /p_patch \? 'grades'/i);
+  assert.match(migration, /p_patch \? 'subjects'/i);
+});
