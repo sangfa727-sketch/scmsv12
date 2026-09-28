@@ -60,3 +60,42 @@ test('local development bypasses the authenticated landing/backend flow', () => 
   );
   assert.match(source, /bootstrapData = _demoBootstrap\(\)/);
 });
+
+
+test('settings CSS stays behind Settings-specific selectors', () => {
+  const css = read('style.css');
+  const blocks = css.match(/[^{}]+\{[^{}]*\}/g) || [];
+  const settingsBlocks = blocks.filter(block => /settings/i.test(block.split('{')[0]));
+  assert.ok(settingsBlocks.length > 0, 'Settings CSS contract should remain detectable');
+  for (const block of settingsBlocks) {
+    const selector = block.split('{')[0];
+    assert.match(
+      selector,
+      /\.settings[-_a-z0-9]*/i,
+      'Settings selector must remain scoped: ' + selector.trim()
+    );
+  }
+});
+
+test('Settings module does not directly mutate global page containers or global styles', () => {
+  const source = read('js/15_settings.js');
+  assert.doesNotMatch(source, /document\.getElementById\(['"](?:pages|app|tabBar|studentList|dashboard|moreMenu)['"]/);
+  assert.doesNotMatch(source, /document\.documentElement\.style|document\.body\.style/);
+  assert.doesNotMatch(source, /document\.querySelectorAll\(['"](?:\.list-card|\.card|button|\.page)/);
+  assert.match(source, /openModal\(/);
+  assert.match(source, /_webRpc\(/);
+});
+
+test('Settings writes use modal-local DOM targets instead of shared page state', () => {
+  const source = read('js/15_settings.js');
+  const forbiddenGlobalWrites = [
+    /window\.APP\.students\s*=/,
+    /window\.APP\.attendance\s*=/,
+    /window\.APP\.homework\s*=/,
+    /window\.APP\.currentPage\s*=/,
+    /window\.APPStore\.set\(['"]ui\./,
+  ];
+  for (const pattern of forbiddenGlobalWrites) {
+    assert.doesNotMatch(source, pattern);
+  }
+});
