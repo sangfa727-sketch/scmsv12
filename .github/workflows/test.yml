@@ -18,6 +18,8 @@ jobs:
         with:
           node-version: 20
       - run: npm install --no-audit --no-fund
+      - name: Run dependency security audit
+        run: npm audit --audit-level=high
       - name: Run frontend syntax and regression tests
         run: npm test
 
@@ -49,6 +51,9 @@ jobs:
           node-version: 20
       - run: npm install --no-audit --no-fund
         if: steps.staging_gate.outputs.enabled == 'true'
+      - name: Run dependency security audit
+        if: steps.staging_gate.outputs.enabled == 'true'
+        run: npm audit --audit-level=high
       - name: Run frontend syntax and regression tests
         if: steps.staging_gate.outputs.enabled == 'true'
         run: npm test
