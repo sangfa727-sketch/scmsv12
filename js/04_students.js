@@ -363,7 +363,9 @@ window.openStudentDetail = function(studentId) {
         ${s.status === "Active" ? `<button class="btn-secondary" data-id="${esc(s.student_id)}" onclick="showStudentTransport(this.dataset.id)">🚌 ${t("stuTr.title")}</button>` : ""}
         ${s.status === "Inactive" && window.APP.is_admin ? `<button class="btn-primary" data-id="${esc(s.student_id)}" onclick="reactivateStudent(this.dataset.id)">↻ Reactivate</button>` : ""}
       </div>
-      <button class="btn-secondary" onclick="closeModal()">${t('common.close')}</button>
+      <div class="modal-footer student-detail-footer">
+        <button class="btn-secondary" type="button" onclick="closeModal()">${t('common.close')}</button>
+      </div>
     </div>`;
 
   openModal(html);
@@ -856,14 +858,18 @@ function _openStudentForm({ mode, student }) {
            </div>`
       }
 
-      <button class="btn-primary mt16" id="saveStudentBtn" onclick="saveStudentForm('${isEdit ? 'edit' : 'add'}','${isEdit ? esc(s.student_id) : ''}')">
-        ${t(isEdit ? 'students.form.saveEdit' : 'students.form.register')}
-      </button>
-      ${isEdit && window.APP.is_admin ? `
-        <button class="btn-danger" onclick="confirmDeleteStudent('${esc(s.student_id)}')">
-          ${t('students.form.removeBtn')}
-        </button>` : ''}
-      <button class="btn-secondary" onclick="closeModal()">${t('common.cancel')}</button>
+      <div class="modal-footer student-form-footer">
+        ${isEdit && window.APP.is_admin ? `
+          <button class="btn-danger student-destructive-action" onclick="confirmDeleteStudent('${esc(s.student_id)}')">
+            ${t('students.form.removeBtn')}
+          </button>` : ''}
+        <div class="modal-footer-main">
+          <button class="btn-secondary" type="button" onclick="closeModal()">${t('common.cancel')}</button>
+          <button class="btn-primary" type="button" id="saveStudentBtn" onclick="saveStudentForm('${isEdit ? 'edit' : 'add'}','${isEdit ? esc(s.student_id) : ''}')">
+            ${t(isEdit ? 'students.form.saveEdit' : 'students.form.register')}
+          </button>
+        </div>
+      </div>
     </div>`;
 
   openModal(html);
