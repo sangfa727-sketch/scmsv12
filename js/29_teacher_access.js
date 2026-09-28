@@ -95,13 +95,13 @@ async function _renderTeacherAccess() {
     const roleDefaults = catalog.role_permissions || [];
 
     let html = '<div class="teacher-access-head"><strong>' + esc(teacher.teacher_name || '') +
-      '</strong><span>' + esc(teacher.teacher_id || teacherId) + ' · ' + esc(teacher.role || '') + '</span></div>';
+      '</strong><span>' + esc(teacher.teacher_id || teacherId) + ' · ' + esc(teacher.role === 'admin' ? 'Admin' : (teacher.role === 'super_admin' ? 'Super Admin' : 'ဆရာ/ဆရာမ')) + '</span></div>';
 
     html += '<section class="teacher-access-section">' +
       '<div class="teacher-access-section-head"><strong>👥 အတန်းများ</strong><span>' + classAssignments.length + '</span></div>' +
       '<div class="teacher-access-add-row"><select id="taClass" class="form-input"><option value="">အတန်းရွေးပါ</option>' +
       (catalog.classes || []).map(function(x){ return _taOpt(x,x,''); }).join('') +
-      '</select><button class="btn-primary teacher-access-small" onclick="teacherAccessAddClass()">Add</button></div>' +
+      '</select><button class="btn-primary teacher-access-small" onclick="teacherAccessAddClass()">ထည့်မည်</button></div>' +
       '<div class="teacher-access-chips">' +
       (classAssignments.length ? classAssignments.map(function(a){
         return '<span class="teacher-access-chip">' + esc(a.class_name) + ' · ' + esc(_taAssignmentTypeLabel(a.assignment_type)) +
@@ -115,7 +115,7 @@ async function _renderTeacherAccess() {
       (catalog.classes || []).map(function(x){ return _taOpt(x,x,''); }).join('') +
       '</select><select id="taSubject" class="form-input"><option value="">ဘာသာရပ်ရွေးပါ</option>' +
       (catalog.subjects || []).map(function(x){ return _taOpt(x.id, x.subject_name + (x.subject_code ? ' · ' + x.subject_code : ''), ''); }).join('') +
-      '</select><button class="btn-primary teacher-access-small" onclick="teacherAccessAddSubject()">Add</button></div>' +
+      '</select><button class="btn-primary teacher-access-small" onclick="teacherAccessAddSubject()">ထည့်မည်</button></div>' +
       '<div class="teacher-access-list">' +
       (subjectAssignments.length ? subjectAssignments.map(function(a){
         const s = (catalog.subjects || []).find(function(x){ return String(x.id) === String(a.subject_id); });
@@ -139,8 +139,8 @@ async function _renderTeacherAccess() {
           '<div class="teacher-access-perm-copy"><strong>' + esc(_taText(p.permission_key)) + '</strong><small>' + esc(_taDescription(p.permission_key, p.description || '')) +
           '</small></div>' + _taScopeControls(p,catalog) +
           '<select class="teacher-access-perm-state" aria-label="လုပ်ပိုင်ခွင့် အခြေအနေ"><option value="default"' + (state === 'default' ? ' selected' : '') +
-          '>Default' + (roleDefault ? ' (ခွင့်ပြု)' : ' (ပိတ်ပင်)') + '</option><option value="allow"' + (state === 'allow' ? ' selected' : '') +
-          '>Allow</option><option value="deny"' + (state === 'deny' ? ' selected' : '') + '>Deny</option></select></div>';
+          '>မူလ' + (roleDefault ? ' (ခွင့်ပြု)' : ' (ပိတ်ပင်)') + '</option><option value="allow"' + (state === 'allow' ? ' selected' : '') +
+          '>ခွင့်ပြု</option><option value="deny"' + (state === 'deny' ? ' selected' : '') + '>ပိတ်ပင်</option></select></div>';
       });
       html += '</div>';
     });
