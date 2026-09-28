@@ -65,16 +65,13 @@ window.openNewRouteModal = function() {
     <div class="modal-sheet" onclick="event.stopPropagation()" style="max-height:85vh;overflow-y:auto">
       <div class="modal-handle"></div>
       <h3 class="modal-title">${t('tr.newTitle')}</h3>
-      <label class="field-label">${t('tr.routeName')}</label>
-      <input class="form-input" id="nrName" placeholder="${esc(t('tr.routeNamePh'))}">
-      <label class="field-label">${t('tr.driverName')}</label>
-      <input class="form-input" id="nrDriverName" placeholder="${esc(t('health.medicationsOpt'))}">
-      <label class="field-label">${t('tr.driverPhone')}</label>
-      <input class="form-input" id="nrDriverPhone" placeholder="${esc(t('health.medicationsOpt'))}" type="tel">
-      <label class="field-label">${t('tr.vehicle')}</label>
-      <input class="form-input" id="nrVehicle" placeholder="${esc(t('tr.vehiclePh'))}">
-      <label class="field-label">${t('health.notes')}</label>
-      <input class="form-input" id="nrNotes" placeholder="${esc(t('health.medicationsOpt'))}">
+      <div class="compact-form-grid">
+        <div><label class="field-label">${t('tr.routeName')}</label><input class="form-input" id="nrName" placeholder="${esc(t('tr.routeNamePh'))}"></div>
+        <div><label class="field-label">${t('tr.driverName')}</label><input class="form-input" id="nrDriverName" placeholder="${esc(t('health.medicationsOpt'))}"></div>
+        <div><label class="field-label">${t('tr.driverPhone')}</label><input class="form-input" id="nrDriverPhone" placeholder="${esc(t('health.medicationsOpt'))}" type="tel"></div>
+        <div><label class="field-label">${t('tr.vehicle')}</label><input class="form-input" id="nrVehicle" placeholder="${esc(t('tr.vehiclePh'))}"></div>
+        <div class="full-span"><label class="field-label">${t('health.notes')}</label><input class="form-input" id="nrNotes" placeholder="${esc(t('health.medicationsOpt'))}"></div>
+      </div>
       <button class="btn-primary mt16" id="nrSaveBtn" onclick="_saveNewRoute()">${t('tr.add')}</button>
       <button class="btn-secondary" onclick="closeModal()">${t('common.cancel')}</button>
     </div>
