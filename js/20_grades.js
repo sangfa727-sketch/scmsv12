@@ -244,6 +244,17 @@ window.openNewAssessmentModal = function() {
       <label class="field-label">${t('grades.date')}</label>
       <input class="form-input" id="gaDate" type="date" value="${new Date().toISOString().slice(0, 10)}">
 
+      <div class="form-row">
+        <div class="form-col">
+          <label class="field-label">Start time</label>
+          <input class="form-input" id="gaStartTime" type="time">
+        </div>
+        <div class="form-col">
+          <label class="field-label">End time</label>
+          <input class="form-input" id="gaEndTime" type="time">
+        </div>
+      </div>
+
       <button class="btn-primary mt16" id="gaSaveBtn" onclick="saveNewAssessment()">${t('grades.create')}</button>
       <button class="btn-secondary" onclick="closeModal()">${t('common.cancel')}</button>
     </div>
