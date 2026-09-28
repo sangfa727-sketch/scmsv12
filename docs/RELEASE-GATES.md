@@ -71,3 +71,8 @@ in staging and exercise the same authorization path used by production.
 - Environment isolation protects production from test writes.
 
 All four are needed for a production SaaS system.
+
+
+## Security finding recorded — legacy chat RPC
+
+The legacy `rpc_chat_send(p_school_id, p_channel, p_teacher_id, p_teacher_name, p_text)` SECURITY DEFINER RPC accepted tenant and actor identity from the caller. It was not used by the current frontend feature API surface, while the session-bound `rpc_send_chat_message(p_session_token, ...)` exists for authenticated web access. Execute permission for the legacy RPC was therefore removed from `anon` and `authenticated`; backend/service-role callers remain unaffected. If a legacy integration needs it later, migrate that caller to the session-bound contract instead of restoring public execute permission.
