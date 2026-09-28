@@ -5628,3 +5628,74 @@ input.form-input {
 .modal-overlay.active {
   opacity: 1;
 }
+
+/* SCMS v12.5 — Sidebar cover / school identity separation */
+.sidebar-header .sidebar-cover {
+  height: 142px !important;
+  min-height: 142px !important;
+  position: relative !important;
+  display: block !important;
+  background-size: 100% 92px !important;
+  background-repeat: no-repeat !important;
+  background-position: top center !important;
+  background-color: var(--surface) !important;
+}
+.sidebar-header .sidebar-cover::after,
+.sidebar-header .sidebar-cover.has-cover::after {
+  height: 92px !important;
+  bottom: auto !important;
+  background: linear-gradient(to top, rgba(0,0,0,.56), rgba(0,0,0,.06)) !important;
+}
+.sidebar-header .sidebar-cover .sidebar-school-row-top {
+  position: absolute !important;
+  left: 14px !important;
+  right: 14px !important;
+  bottom: 8px !important;
+  width: auto !important;
+  margin: 0 !important;
+  padding: 0 !important;
+  align-items: center !important;
+  gap: 9px !important;
+  color: var(--text) !important;
+  z-index: 4 !important;
+}
+.sidebar-header .sidebar-cover .sidebar-school-logo,
+.sidebar-header .sidebar-cover .sidebar-school-mark {
+  width: 42px !important;
+  height: 42px !important;
+  flex: 0 0 42px !important;
+  border-radius: 11px !important;
+  border: 2px solid var(--surface) !important;
+  box-shadow: 0 2px 8px rgba(0,0,0,.16) !important;
+}
+.sidebar-header .sidebar-cover .sidebar-school-name {
+  color: var(--text) !important;
+  text-shadow: none !important;
+  font-size: 14px !important;
+  font-weight: 700 !important;
+  line-height: 1.25 !important;
+  max-width: calc(100% - 54px) !important;
+}
+.settings-modal-sheet {
+  width: min(92vw, 430px) !important;
+  max-width: 430px !important;
+}
+.settings-modal-sheet > .btn-primary,
+.settings-modal-sheet > .btn-secondary {
+  width: auto !important;
+  min-width: 0 !important;
+  max-width: 100% !important;
+  display: block !important;
+  margin-left: auto !important;
+  margin-right: auto !important;
+  padding: 9px 13px !important;
+}
+.settings-modal-sheet > .btn-primary { margin-top: 12px !important; }
+.settings-modal-sheet > .btn-secondary { margin-top: 8px !important; }
+.settings-modal-sheet > .settings-close {
+  min-width: 96px !important;
+  margin: 14px auto 0 !important;
+}
+@media (max-width: 600px) {
+  .settings-modal-sheet { width: min(94vw, 430px) !important; max-width: 94vw !important; }
+}
