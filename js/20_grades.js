@@ -136,7 +136,7 @@ async function _loadAndRenderAssessments() {
       <div class="card-row">
         <div class="card-info">
           <div class="card-name">${esc(a.title)} <span class="type-tag">${esc(tv('assessType', a.type))}</span></div>
-          <div class="card-sub">${esc(t('grades.metaLine', { date: fmtDate(a.date), max: a.max_score, w: a.weight }))}</div>
+          <div class="card-sub">${esc(t('grades.metaLine', { date: fmtDate(a.date), max: a.max_score, w: a.weight }))}${a.start_time ? ' · ' + esc(String(a.start_time).slice(0,5)) + (a.end_time ? '–' + esc(String(a.end_time).slice(0,5)) : '') : ''}</div>
         </div>
         <div class="card-actions">
           <button class="icon-btn-mini danger" onclick="event.stopPropagation();confirmDeleteAssessment(${a.id})" title="${esc(t('btn.delete'))}">🗑</button>
