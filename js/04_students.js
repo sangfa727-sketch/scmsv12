@@ -746,7 +746,7 @@ function _openStudentForm({ mode, student }) {
       <button class="btn-primary mt16" id="saveStudentBtn" onclick="saveStudentForm('${isEdit ? 'edit' : 'add'}','${isEdit ? esc(s.student_id) : ''}')">
         ${t(isEdit ? 'students.form.saveEdit' : 'students.form.register')}
       </button>
-      ${isEdit ? `
+      ${isEdit && window.APP.is_admin ? `
         <button class="btn-danger" onclick="confirmDeleteStudent('${esc(s.student_id)}')">
           ${t('students.form.removeBtn')}
         </button>` : ''}
