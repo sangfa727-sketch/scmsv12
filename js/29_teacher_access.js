@@ -172,7 +172,7 @@ async function _renderTeacherAccess() {
 window.openTeacherAccess = async function(teacherId, teacherName) {
   openModal('<div class="modal-sheet teacher-access-sheet" onclick="event.stopPropagation()">' +
     '<div class="modal-handle"></div><h3 class="modal-title">🔐 လုပ်ပိုင်ခွင့် စီမံရန်</h3>' +
-    '<p class="modal-subtitle">' + esc(teacherName) + ' အတွက် အတန်း၊ ဘာသာရပ်နှင့် လုပ်ပိုင်ခွင့် သတ်မှတ်ချက်များ '</p>' +
+    '<p class="modal-subtitle">' + esc(teacherName) + ' အတွက် အတန်း၊ ဘာသာရပ်နှင့် လုပ်ပိုင်ခွင့် သတ်မှတ်ချက်များ</p>' +
     '<div id="teacherAccessRoot" data-teacher-id="' + esc(teacherId) + '"><div class="text-center text-muted">တင်နေသည်…</div></div>' +
     '<button class="btn-secondary mt16" onclick="closeModal()">ပိတ်မည်</button></div>');
   await _renderTeacherAccess();
