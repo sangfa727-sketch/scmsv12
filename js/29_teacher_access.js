@@ -3,10 +3,9 @@
 function _taLang() { return window.I18N?.current === 'my' ? 'my' : 'en'; }
 function _taUi(key) {
   const en = {loading:'Loading…',manageTitle:'Manage Access',subtitle:'Set class, subject, and permission access for',classes:'Classes',subjects:'Subjects',permissions:'Permission Settings',permissionModes:'Default / Allow / Deny',selectClass:'Select class',selectSubject:'Select subject',add:'Add',closeButton:'Close',noClasses:'No class assignments yet.',noSubjects:'No subject assignments yet.',default:'Default',allowed:'Allow',denied:'Deny',defaultAllowed:'Allowed',defaultDenied:'Denied',permissionHelp:'Default permission follows the teacher role. For class/subject-specific access, select the relevant class and subject.',classRequired:'Please select a class first.',classSubjectRequired:'Please select a class and subject first.',saved:'Permission saved.',saveFailed:'Could not save permission.',classAddFailed:'Could not add class.',classRemoveFailed:'Could not remove class.',subjectAddFailed:'Could not add subject.',subjectRemoveFailed:'Could not remove subject.',loadFailed:'Could not load permission information.'};
-  const my = {loading:'' + _taUi('loading') + '',manageTitle:'' + _taUi('manageTitle') + '',subtitle:'' + _taUi('subtitle')',classes:'' + _taUi('classes') + '',subjects:'' + _taUi('subjects') + '',permissions:'' + _taUi('permissions') + '',permissionModes:'' + _taUi('permissionModes') + '',selectClass:'' + _taUi('selectClass') + '',selectSubject:'' + _taUi('selectSubject') + '',add:'' + _taUi('add') + '',closeButton:'' + _taUi('closeButton') + '',noClasses:'' + _taUi('noClasses') + '',noSubjects:'' + _taUi('noSubjects') + '',default:'မူလ',allowed:'' + _taUi('allowed') + '',denied:'' + _taUi('denied') + '',defaultAllowed:'' + _taUi('allowed') + '',defaultDenied:'' + _taUi('denied') + '',permissionHelp:'မူလ' + _taUi('allowed') + 'ချက်သည် ' + (_taLang() === 'my' ? 'ဆရာ/ဆရာမ' : 'Teacher') + '၏ role အတိုင်းဖြစ်သည်။ အတန်း/ဘာသာရပ်အလိုက် ' + _taUi('allowed') + 'ချက်အတွက် သက်ဆိုင်ရာအတန်းနှင့် ဘာသာရပ်ကို ရွေးပါ။',classRequired:'' + _taUi('classRequired') + '',classSubjectRequired:'' + _taUi('classSubjectRequired') + '',saved:'' + _taUi('saved') + '',saveFailed:'' + _taUi('saveFailed') + '',classAddFailed:'' + _taUi('classAddFailed') + '',classRemoveFailed:'' + _taUi('classRemoveFailed') + '',subjectAddFailed:'' + _taUi('subjectAddFailed') + '',subjectRemoveFailed:'' + _taUi('subjectRemoveFailed') + '',loadFailed:'လုပ်ပိုင်ခွင့် အချက်အလက် တင်မရပါ။'};
+  const my = {loading:'တင်နေသည်…',manageTitle:'လုပ်ပိုင်ခွင့် စီမံရန်',subtitle:'အတွက် အတန်း၊ ဘာသာရပ်နှင့် လုပ်ပိုင်ခွင့် သတ်မှတ်ချက်များ',classes:'👥 အတန်းများ',subjects:'📚 ဘာသာရပ်များ',permissions:'🔐 လုပ်ပိုင်ခွင့် သတ်မှတ်ချက်များ',permissionModes:'မူလ / ခွင့်ပြု / ပိတ်ပင်',selectClass:'အတန်းရွေးပါ',selectSubject:'ဘာသာရပ်ရွေးပါ',add:'ထည့်မည်',closeButton:'ပိတ်မည်',noClasses:'အတန်းတာဝန်ပေးထားခြင်း မရှိသေးပါ။',noSubjects:'ဘာသာရပ်တာဝန်ပေးထားခြင်း မရှိသေးပါ။',default:'မူလ',allowed:'ခွင့်ပြု',denied:'ပိတ်ပင်',defaultAllowed:'ခွင့်ပြု',defaultDenied:'ပိတ်ပင်',permissionHelp:'မူလခွင့်ပြုချက်သည် ဆရာ/ဆရာမ၏ role အတိုင်းဖြစ်သည်။ အတန်း/ဘာသာရပ်အလိုက် ခွင့်ပြုချက်အတွက် သက်ဆိုင်ရာအတန်းနှင့် ဘာသာရပ်ကို ရွေးပါ။',classRequired:'အတန်းကို အရင်ရွေးပါ။',classSubjectRequired:'အတန်းနှင့် ဘာသာရပ်ကို အရင်ရွေးပါ။',saved:'လုပ်ပိုင်ခွင့် သိမ်းပြီးပါပြီ။',saveFailed:'လုပ်ပိုင်ခွင့် သိမ်း၍ မရပါ။',classAddFailed:'အတန်းထည့်၍ မရပါ။',classRemoveFailed:'အတန်းဖယ်၍ မရပါ။',subjectAddFailed:'ဘာသာရပ်ထည့်၍ မရပါ။',subjectRemoveFailed:'ဘာသာရပ်ဖယ်၍ မရပါ။',loadFailed:'လုပ်ပိုင်ခွင့် အချက်အလက် တင်မရပါ။'};
   return (_taLang() === 'my' ? my : en)[key] || key;
 }
-
 
 async function _teacherAccessRpc(action, teacherId, extra) {
   const sess = getWebSession();
@@ -116,7 +115,7 @@ async function _renderTeacherAccess() {
     const groups = {};
     (catalog.permissions || []).forEach(function(p){ (groups[p.category] ||= []).push(p); });
     html += '<section class="teacher-access-section"><div class="teacher-access-section-head"><strong>' + _taUi('permissions') + '</strong><span>' + _taUi('permissionModes') + '</span></div>' +
-      '<p class="form-help">မူလ' + _taUi('allowed') + 'ချက်သည် ဆရာ/ဆရာမ၏ role အတိုင်းဖြစ်သည်။ အတန်း/ဘာသာရပ်အလိုက် ' + _taUi('allowed') + 'ချက်အတွက် သက်ဆိုင်ရာအတန်းနှင့် ဘာသာရပ်ကို ရွေးပါ။</p><div class="teacher-access-permissions">';
+      '<p class="form-help">' + _taUi('permissionHelp') + '</p><div class="teacher-access-permissions">';
 
     Object.keys(groups).forEach(function(category) {
       html += '<div class="teacher-access-perm-group"><div class="teacher-access-perm-category">' + esc(_taCategory(category)) + '</div>';
@@ -154,16 +153,16 @@ async function _renderTeacherAccess() {
       });
     });
   } catch (e) {
-    root.innerHTML = '<div class="form-error">' + _taUi('loadFailed') + ' '' + esc(e?.message || String(e)) + '</div>';
+    root.innerHTML = '<div class="form-error">' + _taUi('loadFailed') + ' ' + esc(e?.message || String(e)) + '</div>';
   }
 }
 
 window.openTeacherAccess = async function(teacherId, teacherName) {
   openModal('<div class="modal-sheet teacher-access-sheet" onclick="event.stopPropagation()">' +
-    '<div class="modal-handle"></div><h3 class="modal-title">🔐 လုပ်ပိုင်ခွင့် စီမံရန်</h3>' +
-    '<p class="modal-subtitle">' + esc(teacherName) + ' အတွက် အတန်း၊ ဘာသာရပ်နှင့် လုပ်ပိုင်ခွင့် သတ်မှတ်ချက်များ</p>' +
+    '<div class="modal-handle"></div><h3 class="modal-title">' + _taUi('manageTitle') + '</h3>' +
+    '<p class="modal-subtitle">' + esc(teacherName) + ' ' + _taUi('subtitle')</p>' +
     '<div id="teacherAccessRoot" data-teacher-id="' + esc(teacherId) + '"><div class="text-center text-muted">' + _taUi('loading') + '</div></div>' +
-    '<button class="btn-secondary mt16" onclick="closeModal()">ပိတ်မည်</button></div>');
+    '<button class="btn-secondary mt16" onclick="closeModal()">' + _taUi('closeButton') + '</button></div>');
   await _renderTeacherAccess();
 };
 
@@ -205,7 +204,7 @@ window.teacherAccessSavePermission = async function(select) {
   const subjectRaw = row.querySelector('.teacher-access-subject')?.value || null;
   const subject = subjectRaw ? Number(subjectRaw) : null;
   if ((scope === 'class' || scope === 'class_subject') && !cls) { showToast('' + _taUi('classRequired') + ''); select.value='default'; return; }
-  if ((scope === 'subject' || scope === 'class_subject') && !subject) { showToast('ဘာသာရပ်ကို အရင်ရွေးပါ။'); select.value='default'; return; }
+  if ((scope === 'subject' || scope === 'class_subject') && !subject) { showToast(_taUi('classSubjectRequired')); select.value='default'; return; }
   try {
     if (select.value === 'default') {
       await _teacherAccessRpc('permission_remove', root.dataset.teacherId, {p_permission_key:key,p_scope_type:scope,p_class_name:cls,p_subject_id:subject});
