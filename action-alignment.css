@@ -84,3 +84,40 @@
     margin-right: 12px !important;
   }
 }
+
+/* Card-level actions: content stays left, commands sit on the right edge. */
+.card-actions {
+  display: flex !important;
+  align-items: center !important;
+  justify-content: flex-end !important;
+  flex-wrap: wrap !important;
+  gap: 7px !important;
+  width: 100% !important;
+}
+.card-actions > button {
+  flex: 0 0 auto !important;
+  width: fit-content !important;
+  min-width: 0 !important;
+}
+
+/* Page-level action rows follow the same edge alignment. */
+.page-actions {
+  display: flex !important;
+  align-items: center !important;
+  justify-content: flex-end !important;
+  flex-wrap: wrap !important;
+  gap: 8px !important;
+  width: 100% !important;
+}
+.page-actions > button {
+  flex: 0 0 auto !important;
+  width: fit-content !important;
+  min-width: 0 !important;
+}
+
+/* Keep compact inline action clusters right-aligned when they are
+   intentionally attached to a card/list item. */
+.list-header .card-actions,
+.section-head .card-actions {
+  margin-left: auto !important;
+}
