@@ -29,40 +29,43 @@ window.openSettings = function() {
       <div class="info-row"><span>${t('settings.login')}</span><span>${esc(_loginMethodLabel(isWeb))}</span></div>
       <div class="info-row"><span>${t('settings.telegram')}</span><span>${window.APP.telegram_id ? t('settings.connected') : t('settings.notConnected')}</span></div>
 
-      ${isAdmin ? `
-        <button class="btn-primary mt16" onclick="closeModal(); openTeacherManager()">
-          ${t('settings.manageTeachers')}
-        </button>
-      ` : ''}
+      <div class="settings-actions">
+        ${isAdmin ? `
+          <button class="btn-primary" onclick="closeModal(); openTeacherManager()">
+            ${t('settings.manageTeachers')}
+          </button>
+        ` : ''}
 
-      ${isWeb && !window.APP.telegram_id ? `
-        <button class="btn-secondary mt8" onclick="closeModal(); openTelegramConnectModal()">
-          ${t('settings.connectTelegram')}
-        </button>
-      ` : ''}
-      ${isWeb && window.APP.telegram_id ? `
-        <button class="btn-secondary mt8" onclick="disconnectTelegram()">
-          ${t('settings.disconnectTelegram')}
-        </button>
-      ` : ''}
+        ${isWeb && !window.APP.telegram_id ? `
+          <button class="btn-secondary" onclick="closeModal(); openTelegramConnectModal()">
+            ${t('settings.connectTelegram')}
+          </button>
+        ` : ''}
+        ${isWeb && window.APP.telegram_id ? `
+          <button class="btn-secondary" onclick="disconnectTelegram()">
+            ${t('settings.disconnectTelegram')}
+          </button>
+        ` : ''}
 
-      ${isWeb && window.APP.webSession?.auth_mode !== 'google' ? `
-        <button class="btn-secondary mt8" onclick="closeModal(); openChangePasswordModal()">
-          ${t('settings.changePassword')}
-        </button>
-      ` : ''}
-      ${isWeb ? `
-        <button class="btn-secondary mt8" onclick="webLogout()">
-          ${t('sb.signout')}
-        </button>
-      ` : ''}
+        ${isWeb && window.APP.webSession?.auth_mode !== 'google' ? `
+          <button class="btn-secondary" onclick="closeModal(); openChangePasswordModal()">
+            ${t('settings.changePassword')}
+          </button>
+        ` : ''}
+        ${isWeb ? `
+          <button class="btn-secondary" onclick="webLogout()">
+            ${t('sb.signout')}
+          </button>
+        ` : ''}
+      </div>
 
-      </div>\n\n      <p class="settings-footer-note">
+      <p class="settings-footer-note">
         ${t('settings.footerNote')}
       </p>
 
       <button class="btn-secondary settings-close" onclick="closeModal()">${t('common.close')}</button>
     </div>`;
+
 
   openModal(html);
 };
