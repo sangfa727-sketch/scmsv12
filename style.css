@@ -5900,3 +5900,21 @@ input.form-input {
     font-size: 12px !important;
   }
 }
+
+
+/* SCMS v12.9 — smooth modal closing without layout shift */
+.modal-layer.is-closing {
+  pointer-events: none !important;
+  animation: modalLayerOut .17s ease both !important;
+}
+.modal-layer.is-closing .modal-sheet {
+  animation: modalSheetOut .17s cubic-bezier(.4,0,.8,.2) both !important;
+}
+@keyframes modalLayerOut {
+  from { opacity: 1; }
+  to { opacity: 0; }
+}
+@keyframes modalSheetOut {
+  from { opacity: 1; transform: translateY(0) scale(1); }
+  to { opacity: 0; transform: translateY(7px) scale(.992); }
+}
