@@ -51,19 +51,42 @@ function _ensureGisInitialized() {
  * renderLanding() has put #googleSignInBtn into the DOM.
  */
 window.renderGoogleSignInButton = function (containerId) {
-  if (!_ensureGisInitialized()) return;
-  const el = document.getElementById(containerId || 'googleSignInBtn');
-  if (!el) return;
-  try {
-    window.google.accounts.id.renderButton(el, {
-      type: 'standard',
-      theme: 'outline',
-      size: 'large',
-      text: 'continue_with',
-      shape: 'pill',
-      width: 280,
-    });
-  } catch (e) { /* GIS not ready yet — ignore, button area stays empty */ }
+  const id = containerId || 'googleSignInBtn';
+
+  const draw = function () {
+    const el = document.getElementById(id);
+    if (!el) return true;
+    if (el.childElementCount > 0) return true;
+    if (!_ensureGisInitialized()) return false;
+    try {
+      window.google.accounts.id.renderButton(el, {
+        type: 'standard',
+        theme: 'outline',
+        size: 'large',
+        text: 'continue_with',
+        shape: 'pill',
+        width: 280,
+      });
+      return true;
+    } catch (e) {
+      return false;
+    }
+  };
+
+  if (draw()) return;
+
+  // GIS is loaded with async/defer. Retry on its script load event and for a
+  // short bounded period so the Google button cannot silently remain blank.
+  const gisScript = Array.from(document.scripts).find(function (s) {
+    return s.src && s.src.indexOf('accounts.google.com/gsi/client') !== -1;
+  });
+  if (gisScript) gisScript.addEventListener('load', draw, { once: true });
+
+  let tries = 0;
+  const timer = setInterval(function () {
+    tries++;
+    if (draw() || tries >= 50) clearInterval(timer);
+  }, 300);
 };
 
 async function _onGoogleCredential(response) {
