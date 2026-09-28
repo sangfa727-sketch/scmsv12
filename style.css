@@ -5980,3 +5980,109 @@ input.form-input {
 .att-history-report{margin-top:10px;padding:10px;border:1px solid var(--line);border-radius:10px;background:var(--soft)}
 .att-history-report-title{font-size:12px;font-weight:700;margin-bottom:7px}.att-report-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:5px}.att-report-grid span{font-size:11px;color:var(--muted)}.att-report-grid b{color:var(--text);margin-left:3px}
 @media(max-width:430px){.att-history-item{grid-template-columns:1fr auto}.att-history-counts{grid-column:1}.att-history-edit{grid-column:2;grid-row:1/3}.att-history-toolbar{align-items:stretch}.att-report-grid{grid-template-columns:repeat(2,1fr)}}
+
+/* SCMS v12.9 — stable sidebar header composition
+   Cover is a true top banner; school identity is a separate row below it.
+   This prevents the logo/name from being hidden or centered over the cover. */
+.sidebar-header .sidebar-cover {
+  height: 92px !important;
+  min-height: 92px !important;
+  background-size: cover !important;
+  background-position: center !important;
+  overflow: hidden !important;
+}
+.sidebar-header .sidebar-cover::after,
+.sidebar-header .sidebar-cover.has-cover::after {
+  inset: 0 !important;
+  height: 100% !important;
+  background: linear-gradient(to bottom, rgba(0,0,0,.08), rgba(0,0,0,.34)) !important;
+}
+.sidebar-header .sidebar-cover .sidebar-school-row-top {
+  position: static !important;
+  display: flex !important;
+  width: auto !important;
+  height: auto !important;
+  min-height: 58px !important;
+  margin: 0 !important;
+  padding: 9px 14px !important;
+  align-items: center !important;
+  justify-content: flex-start !important;
+  flex-direction: row !important;
+  flex-wrap: nowrap !important;
+  gap: 9px !important;
+  border: 0 !important;
+  color: var(--text) !important;
+  background: var(--surface) !important;
+  z-index: 2 !important;
+}
+.sidebar-header .sidebar-logo-wrap {
+  width: 40px !important;
+  height: 40px !important;
+  flex: 0 0 40px !important;
+  margin: 0 !important;
+}
+.sidebar-header .sidebar-cover .sidebar-school-logo,
+.sidebar-header .sidebar-cover .sidebar-school-mark {
+  width: 40px !important;
+  height: 40px !important;
+  flex: 0 0 40px !important;
+  border-radius: 10px !important;
+  border: 2px solid var(--border) !important;
+  box-shadow: 0 2px 7px rgba(0,0,0,.14) !important;
+}
+.sidebar-header .sidebar-cover .sidebar-logo-edit {
+  right: -5px !important;
+  bottom: -5px !important;
+  width: 20px !important;
+  height: 20px !important;
+  min-width: 20px !important;
+  min-height: 20px !important;
+}
+.sidebar-header .sidebar-cover .sidebar-school-name {
+  flex: 1 1 auto !important;
+  min-width: 0 !important;
+  max-width: none !important;
+  color: var(--text) !important;
+  text-shadow: none !important;
+  font-size: 14px !important;
+  font-weight: 700 !important;
+  line-height: 1.25 !important;
+  text-align: left !important;
+  -webkit-line-clamp: 2 !important;
+}
+
+/* Settings: compact controls with no giant full-width bars. */
+.settings-modal-sheet {
+  width: min(92vw, 420px) !important;
+  max-width: 420px !important;
+}
+.settings-modal-sheet > .btn-primary,
+.settings-modal-sheet > .btn-secondary,
+.settings-modal-sheet > .settings-close {
+  width: fit-content !important;
+  max-width: 100% !important;
+  min-width: 0 !important;
+  display: block !important;
+  margin-left: auto !important;
+  margin-right: auto !important;
+  padding: 8px 12px !important;
+  line-height: 1.25 !important;
+}
+.settings-modal-sheet > .btn-primary { margin-top: 12px !important; }
+.settings-modal-sheet > .btn-secondary { margin-top: 7px !important; }
+.settings-modal-sheet > .settings-close {
+  margin-top: 12px !important;
+  min-width: 88px !important;
+}
+@media (max-width: 600px) {
+  .settings-modal-sheet {
+    width: min(94vw, 420px) !important;
+    max-width: 94vw !important;
+  }
+  .settings-modal-sheet > .btn-primary,
+  .settings-modal-sheet > .btn-secondary,
+  .settings-modal-sheet > .settings-close {
+    font-size: 13px !important;
+    padding: 8px 11px !important;
+  }
+}
