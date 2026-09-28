@@ -331,32 +331,42 @@ window.doCreateTeacher = async function() {
   }
 };
 
-window.resetTeacherPassword = async function(teacherId, teacherName) {
-  const newPw = prompt(t('rp.prompt', { name: teacherName, id: teacherId }));
-  if (!newPw) return;
-  if (newPw.length < 6) {
-    showToast(t('ct.pwTooShort'));
-    return;
-  }
-
-  const sess = getWebSession();
-  if (!sess || !sess.session_token) {
-    showToast(t('rp.sessionExpired'));
-    return;
-  }
-
-  try {
-    const result = await _webRpc('rpc_admin_reset_teacher_password', {
-      p_session_token: sess.session_token,
-      p_teacher_id:    teacherId,
-      p_new_password:  newPw,
-    });
-    if (!result || !result.ok) {
-      showToast(t('rp.failed', { err: result?.error || t('common.unknown') }));
-      return;
-    }
-    showToast(t('rp.done', { name: teacherName, pw: newPw }));
-  } catch (e) {
+window.resetTeacherPassword = function(teacherId, teacherName) {
+  if (typeof window.showPasswordPrompt !== 'function') {
     showToast(t('ct.connErr'));
+    return;
   }
+
+  window.showPasswordPrompt(
+    t('tm.resetPassword'),
+    t('rp.prompt', { name: teacherName, id: teacherId }),
+    async (newPw) => {
+      if (!newPw) return;
+      if (newPw.length < 6) {
+        showToast(t('ct.pwTooShort'));
+        return;
+      }
+
+      const sess = getWebSession();
+      if (!sess || !sess.session_token) {
+        showToast(t('rp.sessionExpired'));
+        return;
+      }
+
+      try {
+        const result = await _webRpc('rpc_admin_reset_teacher_password', {
+          p_session_token: sess.session_token,
+          p_teacher_id:    teacherId,
+          p_new_password:  newPw,
+        });
+        if (!result || !result.ok) {
+          showToast(t('rp.failed', { err: result?.error || t('common.unknown') }));
+          return;
+        }
+        showToast(t('rp.done', { name: teacherName, pw: newPw }));
+      } catch (e) {
+        showToast(t('ct.connErr'));
+      }
+    }
+  );
 };
