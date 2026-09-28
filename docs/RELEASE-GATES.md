@@ -31,6 +31,20 @@ Before database/RPC changes:
 - verify admin vs teacher permissions;
 - verify session expiry/revocation behavior.
 
+### Current free-tier environment status
+
+The repository now protects local development from production writes by
+disabling the backend on localhost. A real authenticated staging environment
+has not been provisioned because the current project is intentionally avoiding
+the recurring cost of a hosted Supabase branch/project.
+
+Therefore:
+- local UI/feature work may use demo data safely;
+- production must not be used as a test database;
+- Gate 4 cannot be claimed complete until an isolated staging backend and
+  staging-only credentials exist;
+- the GitHub E2E job is guarded so it runs only when staging secrets are present.
+
 ### Gate 4 — Authenticated E2E
 
 Run Playwright against staging:
