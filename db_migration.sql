@@ -532,3 +532,48 @@ REVOKE ALL ON FUNCTION public.rpc_update_student(text,text,text,text,text,text,t
 GRANT EXECUTE ON FUNCTION public.rpc_update_student(text,text,text,text,text,text,text,date,text,text,text,text) TO anon,authenticated;
 REVOKE ALL ON FUNCTION public.rpc_get_student_history(text,text,integer) FROM PUBLIC;
 GRANT EXECUTE ON FUNCTION public.rpc_get_student_history(text,text,integer) TO anon,authenticated;
+
+
+-- SCMS v12 — Parent / Guardian management
+CREATE OR REPLACE FUNCTION public.rpc_update_student_parent(
+  p_session_token text,
+  p_student_id text,
+  p_parent_name text DEFAULT NULL,
+  p_parent_phone text DEFAULT NULL,
+  p_parent_phone2 text DEFAULT NULL,
+  p_parent_email text DEFAULT NULL
+) RETURNS jsonb
+LANGUAGE plpgsql SECURITY DEFINER SET search_path = public, extensions
+AS $function$
+DECLARE v_sess record; v_row record;
+BEGIN
+  SELECT s.teacher_id,s.school_id,s.role INTO v_sess
+  FROM public.app_web_sessions s JOIN public.teachers t ON t.teacher_id=s.teacher_id
+  WHERE s.session_token=p_session_token AND s.expires_at>now() AND t.status='active' LIMIT 1;
+  IF v_sess IS NULL THEN RETURN jsonb_build_object('ok',false,'error','invalid_session'); END IF;
+  IF p_student_id IS NULL OR trim(p_student_id)='' THEN RETURN jsonb_build_object('ok',false,'error','student_id_required'); END IF;
+
+  UPDATE public.students SET
+    parent_name=nullif(trim(coalesce(p_parent_name,'')),''),
+    parent_phone=nullif(trim(coalesce(p_parent_phone,'')),''),
+    parent_phone2=nullif(trim(coalesce(p_parent_phone2,'')),''),
+    parent_email=nullif(lower(trim(coalesce(p_parent_email,''))),''),
+    updated_at=now()
+  WHERE student_id=p_student_id AND school_id=v_sess.school_id
+  RETURNING * INTO v_row;
+
+  IF v_row IS NULL THEN RETURN jsonb_build_object('ok',false,'error','not_found'); END IF;
+
+  INSERT INTO public.audit_log(source,actor,action,school_id,payload)
+  VALUES('web',v_sess.teacher_id,'student.parent.update',v_sess.school_id,
+    jsonb_build_object('student_id',v_row.student_id,'parent_name',v_row.parent_name,
+      'parent_phone',v_row.parent_phone,'parent_phone2',v_row.parent_phone2,'parent_email',v_row.parent_email));
+
+  RETURN jsonb_build_object('ok',true,'student_id',v_row.student_id,'parent_name',v_row.parent_name,
+    'parent_phone',v_row.parent_phone,'parent_phone2',v_row.parent_phone2,
+    'parent_email',v_row.parent_email,'parent_tg_id',v_row.parent_tg_id);
+END;
+$function$;
+
+REVOKE ALL ON FUNCTION public.rpc_update_student_parent(text,text,text,text,text,text) FROM PUBLIC;
+GRANT EXECUTE ON FUNCTION public.rpc_update_student_parent(text,text,text,text,text,text) TO anon,authenticated;
