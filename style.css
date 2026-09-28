@@ -6710,3 +6710,38 @@ input.form-input {
     flex-basis: 30px !important;
   }
 }
+
+
+/* SCMS v12.30 — student roster name line
+   Keep English + Myanmar student names on one compact line. */
+.page#page-students .stu-name-line {
+  display: flex !important;
+  align-items: center !important;
+  gap: 6px !important;
+  min-width: 0 !important;
+  white-space: nowrap !important;
+  overflow: hidden !important;
+}
+.page#page-students .stu-name-primary,
+.page#page-students .stu-name-line .name-local {
+  min-width: 0 !important;
+  overflow: hidden !important;
+  text-overflow: ellipsis !important;
+  white-space: nowrap !important;
+}
+.page#page-students .stu-name-primary {
+  flex: 0 1 auto !important;
+}
+.page#page-students .stu-name-line .name-local {
+  flex: 0 1 auto !important;
+  color: var(--text2) !important;
+  font-weight: 500 !important;
+}
+.page#page-students .stu-meta-line {
+  flex-wrap: nowrap !important;
+  white-space: nowrap !important;
+  overflow: hidden !important;
+}
+.page#page-students .stu-meta-line .class-tag {
+  flex: 0 0 auto !important;
+}
