@@ -766,11 +766,16 @@ function _openStudentForm({ mode, student }) {
               onclick="_removeStuPhoto()" style="${s.photo_url ? '' : 'display:none'}">
         ${t('students.form.removePhoto')}
       </button>
-      <label class="field-label">${t('students.form.localName')}</label>
-      <input class="form-input" id="newStuLocal" placeholder="${esc(t('students.form.localNamePh'))}" value="${esc(s.name_local || '')}">
-
-      <label class="field-label">${t('students.form.englishName')}</label>
-      <input class="form-input" id="newStuEn" placeholder="${esc(t('students.form.englishNamePh'))}" value="${esc(s.name_en || '')}">
+      <div class="form-row student-name-row">
+        <div class="form-col">
+          <label class="field-label">${t('students.form.localName')}</label>
+          <input class="form-input" id="newStuLocal" placeholder="${esc(t('students.form.localNamePh'))}" value="${esc(s.name_local || '')}">
+        </div>
+        <div class="form-col">
+          <label class="field-label">${t('students.form.englishName')}</label>
+          <input class="form-input" id="newStuEn" placeholder="${esc(t('students.form.englishNamePh'))}" value="${esc(s.name_en || '')}">
+        </div>
+      </div>
 
       <div class="form-row">
         <div class="form-col">
@@ -793,15 +798,20 @@ function _openStudentForm({ mode, student }) {
         </div>
       </div>
 
-      <label class="field-label">${t('students.form.gender')}</label>
-      <div class="pill-group" id="genderPills">
-        <button class="pill ${s.gender === 'M' ? 'active' : ''}" type="button" data-value="M" onclick="togglePill(this,'genderPills')">${t('students.form.genderM')}</button>
-        <button class="pill ${s.gender === 'F' ? 'active' : ''}" type="button" data-value="F" onclick="togglePill(this,'genderPills')">${t('students.form.genderF')}</button>
-        <button class="pill ${s.gender === 'Other' ? 'active' : ''}" type="button" data-value="Other" onclick="togglePill(this,'genderPills')">${t('students.form.genderOther')}</button>
+      <div class="form-row student-demographics-row">
+        <div class="form-col">
+          <label class="field-label">${t('students.form.gender')}</label>
+          <div class="pill-group" id="genderPills">
+            <button class="pill ${s.gender === 'M' ? 'active' : ''}" type="button" data-value="M" onclick="togglePill(this,'genderPills')">${t('students.form.genderM')}</button>
+            <button class="pill ${s.gender === 'F' ? 'active' : ''}" type="button" data-value="F" onclick="togglePill(this,'genderPills')">${t('students.form.genderF')}</button>
+            <button class="pill ${s.gender === 'Other' ? 'active' : ''}" type="button" data-value="Other" onclick="togglePill(this,'genderPills')">${t('students.form.genderOther')}</button>
+          </div>
+        </div>
+        <div class="form-col">
+          <label class="field-label">${t('students.form.birthday')} <span class="optional">${t('students.form.birthdayHint')}</span></label>
+          <input class="form-input" id="newStuDob" type="date" value="${esc(s.date_of_birth || '')}" max="${new Date().toISOString().slice(0,10)}">
+        </div>
       </div>
-
-      <label class="field-label">${t('students.form.birthday')} <span class="optional">${t('students.form.birthdayHint')}</span></label>
-      <input class="form-input" id="newStuDob" type="date" value="${esc(s.date_of_birth || '')}" max="${new Date().toISOString().slice(0,10)}">
 
       <label class="field-label">${t('students.form.homeColor')} <span class="optional">${t('students.form.homeColorHint')}</span></label>
       <div class="color-grid" id="colorGrid">
@@ -819,11 +829,16 @@ function _openStudentForm({ mode, student }) {
 
       <div class="form-divider"><span>${t('students.form.parentSection')}</span></div>
 
-      <label class="field-label">${t('students.form.parentName')}</label>
-      <input class="form-input" id="newStuParent" placeholder="${esc(t('students.form.parentNamePh'))}" value="${esc(s.parent_name || '')}">
-
-      <label class="field-label">${t('students.form.parentPhone')}</label>
-      <input class="form-input" id="newStuPhone" type="tel" placeholder="${esc(t('students.form.parentPhonePh'))}" value="${esc(s.parent_phone || '')}">
+      <div class="form-row parent-contact-row">
+        <div class="form-col">
+          <label class="field-label">${t('students.form.parentName')}</label>
+          <input class="form-input" id="newStuParent" placeholder="${esc(t('students.form.parentNamePh'))}" value="${esc(s.parent_name || '')}">
+        </div>
+        <div class="form-col">
+          <label class="field-label">${t('students.form.parentPhone')}</label>
+          <input class="form-input" id="newStuPhone" type="tel" placeholder="${esc(t('students.form.parentPhonePh'))}" value="${esc(s.parent_phone || '')}">
+        </div>
+      </div>
 
       <label class="field-label">${t('students.form.parentEmail')} <span class="optional">${t('common.optional')}</span></label>
       <input class="form-input" id="newStuEmail" type="email" placeholder="${esc(t('students.form.parentEmailPh'))}" value="${esc(s.parent_email || '')}">
