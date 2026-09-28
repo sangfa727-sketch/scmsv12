@@ -17,7 +17,7 @@
 
 window.showHealthRecord = function(studentId) {
   openModal(`
-    <div class="modal-sheet" onclick="event.stopPropagation()" style="max-height:85vh;overflow-y:auto">
+    <div class="modal-sheet health-form-sheet" onclick="event.stopPropagation()" style="max-height:85vh;overflow-y:auto">
       <div class="modal-handle"></div>
       <h3 class="modal-title">🏥 ${t('students.btn.health')}</h3>
       <div id="healthRecordBody">${skeletonCards(2)}</div>
