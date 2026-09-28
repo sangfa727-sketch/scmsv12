@@ -5,7 +5,7 @@
 -- session validation, tenant/class roster validation, status validation,
 -- persistence, audit logging, and removal of the ambiguous admission RPC.
 begin;
-select plan(7);
+select plan(10);
 
 insert into schools (school_id, school_name, status)
 values ('att-sec-a', 'Attendance Security A', 'active'),
@@ -95,5 +95,11 @@ select is(
   'ambiguous 4-argument admission conversion overload is removed'
 );
 
+
+select is((select r->>'error' from rpc_get_attendance_audit('att-token-a', NULL, NULL, NULL, 50) r),'admin_only','teacher session cannot read attendance audit');
+update app_web_sessions set role='admin' where session_token='att-token-a';
+select is((select count(*)::int from jsonb_array_elements((select rpc_get_attendance_audit('att-token-a','Grade 1',current_date,current_date,50)->'rows'))),1,'admin attendance audit returns current school attendance save');
+insert into audit_log(source,actor,action,school_id,payload) values('web','ATT-T2','attendance.save','att-sec-b',jsonb_build_object('class','Grade 1','date',current_date,'records_count',1));
+select is((select count(*)::int from jsonb_array_elements((select rpc_get_attendance_audit('att-token-a',NULL,NULL,NULL,50)->'rows'))),1,'admin audit reader cannot see another school audit rows');
 select * from finish();
 rollback;
