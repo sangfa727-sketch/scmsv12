@@ -124,3 +124,29 @@ test('dependency security guardrails are configured', () => {
   const workflow = read('.github/workflows/test.yml');
   assert.match(workflow, /npm audit --audit-level=high/);
 });
+
+test('billing write RPCs are admin-only and keep tenant scope checks', () => {
+  const migration = read('supabase/migrations/20260929060000_billing_admin_only_write_authorization.sql');
+  assert.match(migration, /_billing_admin_session[\s\S]*t\.role in \('admin','super_admin'\)/i);
+  for (const fn of [
+    'rpc_add_fee_item',
+    'rpc_create_invoice',
+    'rpc_delete_fee_item',
+    'rpc_delete_invoice',
+    'rpc_delete_payment',
+    'rpc_link_admission_invoice',
+    'rpc_record_payment',
+    'rpc_update_fee_item',
+  ]) {
+    const start = migration.indexOf('create or replace function public.' + fn);
+    assert.ok(start >= 0, fn + ' must remain explicitly defined in the billing hardening migration');
+    const end = migration.indexOf('create or replace function public.', start + 1);
+    const body = migration.slice(start, end === -1 ? migration.length : end);
+    assert.match(body, /_billing_admin_session|t\.role in \('admin','super_admin'\)/i, fn + ' must require an admin session');
+  }
+});
+
+test('billing admin session helper is not directly executable by client roles', () => {
+  const migration = read('supabase/migrations/20260929060010_billing_admin_session_execute_hardening.sql');
+  assert.match(migration, /revoke execute on function public\._billing_admin_session\(text\) from public, anon, authenticated/i);
+});
