@@ -727,6 +727,81 @@ window._closeGenericConfirm = function () {
   setTimeout(() => wrap.remove(), 160);
 };
 
+// Password entry dialog — keeps credential prompts inside the SCMS UI.
+window.showPasswordPrompt = function (title, message, onSubmit) {
+  const wrap = document.createElement('div');
+  wrap.id = '_passwordPromptModal';
+  wrap.className = 'modal-overlay generic-confirm-overlay';
+  wrap.setAttribute('role', 'dialog');
+  wrap.setAttribute('aria-modal', 'true');
+  wrap.innerHTML = \`
+    <div class="modal-sheet generic-confirm-sheet password-prompt-sheet" onclick="event.stopPropagation()">
+      <div class="modal-handle"></div>
+      <h3 class="modal-title">\${esc(title)}</h3>
+      <p class="modal-subtitle password-prompt-message">\${esc(message)}</p>
+      <label class="field-label" for="_passwordPromptInput">Password အသစ်</label>
+      <div class="password-prompt-input-wrap">
+        <input class="form-input" id="_passwordPromptInput" type="password"
+               autocomplete="new-password" minlength="6"
+               placeholder="အနည်းဆုံး ၆ လုံး">
+        <button type="button" class="password-prompt-toggle" id="_passwordPromptToggle"
+                aria-label="Show password">👁️</button>
+      </div>
+      <div class="generic-confirm-actions">
+        <button class="btn-danger solid" id="_passwordPromptSubmit">Password ပြန်သတ်မှတ်မည်</button>
+        <button class="btn-secondary" id="_passwordPromptCancel">\${t('common.cancel')}</button>
+      </div>
+    </div>\`;
+  wrap.onclick = (e) => {
+    if (e.target === wrap) window._closePasswordPrompt();
+  };
+  document.body.appendChild(wrap);
+
+  const input = document.getElementById('_passwordPromptInput');
+  const submit = document.getElementById('_passwordPromptSubmit');
+  const cancel = document.getElementById('_passwordPromptCancel');
+  const toggle = document.getElementById('_passwordPromptToggle');
+
+  const submitValue = () => {
+    const value = input?.value?.trim() || '';
+    if (!value) {
+      input?.focus();
+      return;
+    }
+    window._closePasswordPrompt();
+    onSubmit(value);
+  };
+
+  cancel.onclick = window._closePasswordPrompt;
+  submit.onclick = submitValue;
+  input.addEventListener('keydown', (e) => {
+    if (e.key === 'Enter') {
+      e.preventDefault();
+      submitValue();
+    } else if (e.key === 'Escape') {
+      window._closePasswordPrompt();
+    }
+  });
+  toggle.onclick = () => {
+    const isPassword = input.type === 'password';
+    input.type = isPassword ? 'text' : 'password';
+    toggle.textContent = isPassword ? '🙈' : '👁️';
+    toggle.setAttribute('aria-label', isPassword ? 'Hide password' : 'Show password');
+  };
+
+  requestAnimationFrame(() => {
+    wrap.classList.add('active');
+    input?.focus();
+  });
+};
+
+window._closePasswordPrompt = function () {
+  const wrap = document.getElementById('_passwordPromptModal');
+  if (!wrap) return;
+  wrap.classList.remove('active');
+  setTimeout(() => wrap.remove(), 160);
+};
+
 // ─── SKELETON LOADING HELPER ─────────────────────────────────────────────────
 
 window.skeletonCards = function(count = 3) {
