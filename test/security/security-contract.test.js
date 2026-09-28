@@ -53,3 +53,26 @@ test('session-bound feature RPC calls do not rely on client-supplied school iden
     );
   }
 });
+
+
+test('legacy privileged RPCs are not callable from frontend feature code', () => {
+  const jsDir = path.join(ROOT, 'js');
+  const files = fs.readdirSync(jsDir).filter((name) => name.endsWith('.js'));
+  const forbidden = [
+    'rpc_approve_school',
+    'rpc_reject_school',
+    'rpc_update_school_config',
+    'rpc_seed_default_config',
+    'rpc_bootstrap',
+  ];
+  for (const name of files) {
+    const source = read(path.join('js', name));
+    for (const fn of forbidden) {
+      assert.doesNotMatch(
+        source,
+        new RegExp('(?:_webRpc|fetch)[\\s\\S]{0,500}' + fn.replace(/_/g, '\\_')),
+        name + ' must not call legacy privileged RPC ' + fn
+      );
+    }
+  }
+});
