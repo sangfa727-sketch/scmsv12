@@ -129,7 +129,7 @@ test('compact form modal baseline is not overridden by extra-small global CSS', 
   const css = read('style.css');
   assert.match(css, /SCMS v12\.2 — Premium compact data-entry forms/);
   assert.match(css, /@media \(max-width:380px\)/);
-  assert.match(css, /\.modal-sheet:has\(\.form-input, \.form-textarea, \.picker-trigger, input, select, textarea\)\{width:94vw!important;max-width:94vw!important\}/);
+  assert.match(css, /\.modal-sheet:has\(\.form-input, \.form-textarea, \.picker-trigger, input, select, textarea\) \{\n  width: min\(92vw, 500px\) !important;/);
   assert.doesNotMatch(css, /\.modal-sheet\{width:95vw!important;max-width:95vw!important\}/);
 });
 
@@ -145,7 +145,7 @@ test('entry-form shells keep the compact width and control baseline', () => {
   ];
 
   for (const shell of compactShells) {
-    assert.match(css, new RegExp('\\.' + shell + '[\\s\\S]{0,260}max-width: (?:440|520|560)px !important'));
+    assert.match(css, new RegExp('\\.' + shell + '[\\s\\S]{0,260}max-width: (?:440|500)px !important'));
   }
 
   assert.match(css, /SCMS v12\\.2 — Premium compact data-entry forms/);
