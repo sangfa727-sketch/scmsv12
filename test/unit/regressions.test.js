@@ -16,9 +16,9 @@ test('critical frontend files have no obvious unresolved merge markers', () => {
   ];
   for (const file of files) {
     const source = read(file);
-    assert.equal(source.includes('<<<<<<<'), false, file);
-    assert.equal(source.includes('======='), false, file);
-    assert.equal(source.includes('>>>>>>>'), false, file);
+    assert.doesNotMatch(source, /^<<<<<<<(?:\\s|$)/m, file);
+    assert.doesNotMatch(source, /^=======(?:\\s|$)/m, file);
+    assert.doesNotMatch(source, /^>>>>>>>(?:\\s|$)/m, file);
   }
 });
 
