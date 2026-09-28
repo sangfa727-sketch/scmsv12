@@ -142,3 +142,39 @@ test('feature modules render lists through their owned roots', () => {
     assert.match(source, /innerHTML/);
   }
 });
+
+
+test('feature modules cannot directly mutate unrelated page roots', () => {
+  const pageOwners = {
+    'js/05_attendance.js': 'page-attend',
+    'js/06_daily.js': 'page-daily',
+    'js/07_homework.js': 'page-hw',
+    'js/08_comms.js': 'page-parents',
+    'js/09_incidents.js': 'page-incidents',
+    'js/10_timetable.js': 'page-timetable',
+    'js/11_summary.js': 'page-summary',
+    'js/12_more.js': 'page-more',
+    'js/20_grades.js': 'page-grades',
+    'js/21_billing.js': 'page-billing',
+    'js/22_admissions.js': 'page-admissions',
+    'js/23_health.js': 'page-students',
+    'js/24_library.js': 'page-library',
+    'js/25_transport.js': 'page-transport',
+    'js/28_leave_requests.js': 'page-leave',
+  };
+  const pageIds = [
+    'page-dashboard','page-leave','page-students','page-attend','page-daily','page-hw',
+    'page-grades','page-billing','page-admissions','page-library','page-transport',
+    'page-parents','page-incidents','page-timetable','page-summary','page-more','page-chat'
+  ];
+  for (const [file, owner] of Object.entries(pageOwners)) {
+    const source = read(file);
+    for (const pageId of pageIds) {
+      if (pageId === owner) continue;
+      const directAccess = new RegExp(
+        '(?:getElementById\\([\\\'"]' + pageId + '[\\\'"]\\)|querySelector(?:All)?\\([\\\'"]#[^\\\'"]*' + pageId + '[^\\\'"]*[\\\'"]\\))'
+      );
+      assert.doesNotMatch(source, directAccess, file + ' must not directly access ' + pageId);
+    }
+  }
+});
