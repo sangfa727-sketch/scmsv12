@@ -6832,3 +6832,46 @@ input.form-input {
     min-height: 28px !important;
   }
 }
+
+/* SCMS v12 — teacher access manager */
+.teacher-row-actions { display:flex; align-items:center; gap:6px; flex:0 0 auto; }
+.teacher-access-sheet { width:min(94vw, 680px) !important; max-width:680px !important; max-height:min(86dvh, 780px) !important; overflow:hidden; }
+.teacher-access-sheet > #teacherAccessRoot { overflow-y:auto; max-height:calc(86dvh - 100px); padding-right:2px; }
+.teacher-access-head { display:flex; justify-content:space-between; gap:12px; padding:10px 12px; border:1px solid var(--border); border-radius:12px; background:var(--bg2); margin-bottom:10px; }
+.teacher-access-head strong { display:block; }
+.teacher-access-head span { display:block; color:var(--text2); font-size:11px; margin-top:3px; }
+.teacher-access-section { margin-top:12px; padding:12px; border:1px solid var(--border); border-radius:12px; background:var(--surface); }
+.teacher-access-section-head { display:flex; align-items:center; justify-content:space-between; gap:8px; margin-bottom:9px; font-size:12px; }
+.teacher-access-section-head span { color:var(--text2); font-size:10.5px; }
+.teacher-access-add-row { display:grid; grid-template-columns:minmax(0,1fr) auto; gap:7px; }
+.teacher-access-add-grid { display:grid; grid-template-columns:1fr 1fr auto; gap:7px; }
+.teacher-access-small { width:auto !important; min-width:58px !important; padding:8px 11px !important; }
+.teacher-access-chips { display:flex; flex-wrap:wrap; gap:6px; margin-top:9px; }
+.teacher-access-chip { display:inline-flex; align-items:center; gap:5px; max-width:100%; padding:5px 8px; border:1px solid var(--border); border-radius:999px; background:var(--bg2); font-size:11px; }
+.teacher-access-chip button { border:0; background:transparent; color:var(--text2); cursor:pointer; padding:0 2px; }
+.teacher-access-list { display:flex; flex-direction:column; gap:5px; margin-top:9px; }
+.teacher-access-item { display:flex; align-items:center; justify-content:space-between; gap:8px; padding:7px 9px; border-radius:9px; background:var(--bg2); font-size:11.5px; }
+.teacher-access-permissions { display:flex; flex-direction:column; gap:8px; }
+.teacher-access-perm-group { border:1px solid var(--border); border-radius:10px; overflow:hidden; }
+.teacher-access-perm-category { padding:7px 9px; background:var(--bg2); color:var(--text2); font-size:10px; text-transform:uppercase; letter-spacing:.06em; font-weight:700; }
+.teacher-access-perm-row { display:grid; grid-template-columns:minmax(150px,1fr) minmax(90px,auto) minmax(94px,auto); align-items:center; gap:7px; padding:8px 9px; border-top:1px solid var(--border); }
+.teacher-access-perm-copy { min-width:0; }
+.teacher-access-perm-copy strong { display:block; font-size:11px; overflow-wrap:anywhere; }
+.teacher-access-perm-copy small { display:block; color:var(--text2); font-size:9.5px; line-height:1.35; margin-top:2px; }
+.teacher-access-scope-controls { display:flex; gap:5px; min-width:0; }
+.teacher-access-scope-controls .form-input { min-width:0; font-size:10.5px; padding:6px 7px; }
+.teacher-access-perm-state { min-width:92px; font-size:10.5px; padding:6px 7px; }
+@media (max-width:600px) {
+  .teacher-access-add-grid { grid-template-columns:1fr 1fr; }
+  .teacher-access-add-grid .teacher-access-small { grid-column:1 / -1; }
+  .teacher-access-perm-row { grid-template-columns:1fr; }
+  .teacher-access-scope-controls { display:grid; grid-template-columns:1fr 1fr; }
+  .teacher-access-perm-state { width:100%; }
+}
+@media (max-width:430px) {
+  .teacher-access-sheet { width:94vw !important; }
+  .teacher-access-add-row { grid-template-columns:1fr; }
+  .teacher-access-add-grid { grid-template-columns:1fr; }
+  .teacher-access-add-grid .teacher-access-small { grid-column:auto; }
+  .teacher-access-scope-controls { grid-template-columns:1fr; }
+}
