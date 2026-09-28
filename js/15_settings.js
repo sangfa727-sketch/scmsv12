@@ -17,7 +17,7 @@ window.openSettings = function() {
   const isAdmin = !!(window.APP && window.APP.is_admin);
 
   const html = `
-    <div class="modal-sheet" onclick="event.stopPropagation()">
+    <div class="modal-sheet settings-modal-sheet" onclick="event.stopPropagation()">
       <div class="modal-handle"></div>
       <h3 class="modal-title">${t('settings.title')}</h3>
 
@@ -61,7 +61,7 @@ window.openSettings = function() {
         ${t('settings.footerNote')}
       </p>
 
-      <button class="btn-secondary mt16" onclick="closeModal()">${t('common.close')}</button>
+      <button class="btn-secondary settings-close" onclick="closeModal()">${t('common.close')}</button>
     </div>`;
 
   openModal(html);
