@@ -93,3 +93,28 @@ The legacy `rpc_chat_send(p_school_id, p_channel, p_teacher_id, p_teacher_name, 
 - Billing session/maintenance and mutation functions `_billing_session`, `_recalc_invoice`, `rpc_delete_invoice`, `rpc_record_payment`, and `rpc_delete_payment` now pin `search_path` to `public, pg_temp` to reduce SECURITY DEFINER search-path risk.
 - A negative-path database check with an invalid session returned `invalid_session`; no billing row was created.
 - The remaining Security Advisor search-path warnings are broader legacy/schema-wide findings and are not being mass-modified without function-by-function review.
+
+
+## Critical RPC search-path hardening recorded
+
+The next high-risk subset was reviewed by function definition instead of mass-changing the entire schema. Search paths are now pinned to `public, pg_temp` for the active web authentication/session boundary and selected feature RPCs:
+
+- `rpc_teacher_web_login`
+- `rpc_email_login`
+- `rpc_google_login`
+- `rpc_web_session_verify`
+- `rpc_web_bootstrap`
+- `rpc_web_logout`
+- `rpc_admin_create_teacher`
+- `rpc_admin_reset_teacher_password`
+- `rpc_admin_list_teachers`
+- `rpc_admin_list_invites`
+- `rpc_admin_create_invite`
+- `rpc_get_students`
+- `rpc_save_homework`
+- `rpc_save_grades`
+- `rpc_create_assessment`
+
+Post-change verification confirmed these signatures have the expected fixed search path. Security Advisor's mutable-search-path count decreased from 107 to 95. The remaining findings require individual dependency/authorization review and are intentionally not being changed blindly.
+
+The session-bound attendance implementation was also re-verified: it derives school/teacher from the active session and validates every submitted student against the session school and requested class before replacing attendance rows. The legacy direct-identity overloads remain a separate compatibility surface and must not be exposed to browser roles.
