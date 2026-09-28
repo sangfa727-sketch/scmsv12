@@ -76,3 +76,12 @@ All four are needed for a production SaaS system.
 ## Security finding recorded — legacy chat RPC
 
 The legacy `rpc_chat_send(p_school_id, p_channel, p_teacher_id, p_teacher_name, p_text)` SECURITY DEFINER RPC accepted tenant and actor identity from the caller. It was not used by the current frontend feature API surface, while the session-bound `rpc_send_chat_message(p_session_token, ...)` exists for authenticated web access. Execute permission for the legacy RPC was therefore removed from `anon` and `authenticated`; backend/service-role callers remain unaffected. If a legacy integration needs it later, migrate that caller to the session-bound contract instead of restoring public execute permission.
+
+
+## Latest backend authorization audit
+
+- Audited public `SECURITY DEFINER` functions that accept tenant/actor identifiers. The legacy direct-identity attendance overloads, school approval/config helpers, and `rpc_chat_send` are not granted to `anon`/ `authenticated`; `rpc_chat_send` was explicitly revoked from those roles during this hardening pass.
+- The active web feature mutation/read RPC surface uses `p_session_token` and is granted to `anon`/ `authenticated` as the browser contract. These functions must derive tenant and actor context from `app_web_sessions`, then enforce role/resource authorization inside the function.
+- `rpc_web_bootstrap` and `rpc_web_session_verify` require an unexpired session and an active teacher; both refresh the rolling 30-day session expiry. Logout deletes the exact session token.
+- Public authentication entry points such as teacher/password login, Google login, email signup/login, QR resolution, and parent login are intentionally callable before a session exists; they must create or validate identity and then return a server-issued session/token rather than accepting an arbitrary school identity as authorization.
+- Do not revoke or alter public auth functions solely because they are SECURITY DEFINER. Review their authentication purpose separately from tenant-bound feature RPCs.
