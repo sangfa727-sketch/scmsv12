@@ -371,6 +371,13 @@ function _idCardHtml(s, qrTargetId) {
   const vertical = _idCardOrientation === 'vertical';
   const logo   = window.APP.school_logo || (window.APP.config && window.APP.config.school_logo) || '';
   const school = esc(window.APP.school_name || '');
+  const className = (s.class || '').trim();
+  const gradeName = (s.grade || '').trim();
+  const academic = `
+    <div class="idc-academic" aria-label="Class and grade">
+      ${className ? `<span class="idc-class">${esc(className)}</span>` : ''}
+      ${gradeName ? `<span class="idc-grade">${esc(gradeName)}</span>` : ''}
+    </div>`;
   const brand  = `<div class="idc-brand">${logo ? `<img class="idc-logo" src="${esc(logo)}" alt="">` : ''}<div class="idc-school">${school}</div></div>`;
   const photo  = `<div class="idc-photo">${avatarContent(s)}</div>`;
   const qr     = `<div class="idc-qr" id="${qrTargetId}"></div>`;
@@ -381,18 +388,20 @@ function _idCardHtml(s, qrTargetId) {
         ${brand}
         ${photo}
         <div class="idc-who">
-          <div class="idc-name">${esc(s.name_en)}</div>
-          <div class="idc-class">${esc(s.class || '')}</div>
+          <div class="idc-name">${esc(s.name_en || s.name_local || s.student_id)}</div>
+          ${academic}
           <div class="idc-sid">${esc(s.student_id)}</div>
         </div>
         ${qr}
       </div></div>`;
   }
+
   return `
     <div class="id-card"><div class="idc-face">
       <div class="idc-left">
         ${photo}
-        <div class="idc-name">${esc(s.name_en)}</div>
+        <div class="idc-name">${esc(s.name_en || s.name_local || s.student_id)}</div>
+        ${academic}
       </div>
       <div class="idc-right">
         ${brand}
@@ -400,17 +409,10 @@ function _idCardHtml(s, qrTargetId) {
           <div class="idc-label">Student ID</div>
           <div class="idc-value idc-sid">${esc(s.student_id)}</div>
         </div>
-        <div class="idc-bottom">
-          <div class="idc-field">
-            <div class="idc-label">Class</div>
-            <div class="idc-value">${esc(s.class || '')}</div>
-          </div>
-          ${qr}
-        </div>
+        ${qr}
       </div>
     </div></div>`;
 }
-
 // Orientation is a session-wide choice (not per-student) — pick once via the
 // toggle button, it applies to the single-card preview/print AND to the
 // next bulk print, until changed again. Defaults to horizontal (the
