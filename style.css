@@ -6832,3 +6832,10 @@ input.form-input {
 @media (max-width: 640px) {
   #page-more .more-list { grid-template-columns: 1fr; }
 }
+
+
+/* SCMS v12.23 — dashboard leave request notification */
+#page-dashboard .dashboard-leave-card { cursor: pointer; }
+#page-dashboard .dashboard-leave-card.red { box-shadow: 0 0 0 1px rgba(220,38,38,.18); }
+#page-dashboard .dashboard-leave-banner { cursor: pointer; }
+#page-dashboard .dashboard-leave-banner:hover { filter: brightness(.99); }
