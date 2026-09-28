@@ -85,3 +85,11 @@ The legacy `rpc_chat_send(p_school_id, p_channel, p_teacher_id, p_teacher_name, 
 - `rpc_web_bootstrap` and `rpc_web_session_verify` require an unexpired session and an active teacher; both refresh the rolling 30-day session expiry. Logout deletes the exact session token.
 - Public authentication entry points such as teacher/password login, Google login, email signup/login, QR resolution, and parent login are intentionally callable before a session exists; they must create or validate identity and then return a server-issued session/token rather than accepting an arbitrary school identity as authorization.
 - Do not revoke or alter public auth functions solely because they are SECURITY DEFINER. Review their authentication purpose separately from tenant-bound feature RPCs.
+
+## Billing and view hardening recorded
+
+- `v_students_full` and `v_today_attendance` are now `security_invoker=true`, so the views no longer bypass the underlying table RLS policies.
+- Billing invoice creation now verifies that the target student belongs to the authenticated session school, an optional term belongs to that school, and every supplied `fee_item_id` belongs to that school before inserting invoice data.
+- Billing session/maintenance and mutation functions `_billing_session`, `_recalc_invoice`, `rpc_delete_invoice`, `rpc_record_payment`, and `rpc_delete_payment` now pin `search_path` to `public, pg_temp` to reduce SECURITY DEFINER search-path risk.
+- A negative-path database check with an invalid session returned `invalid_session`; no billing row was created.
+- The remaining Security Advisor search-path warnings are broader legacy/schema-wide findings and are not being mass-modified without function-by-function review.
