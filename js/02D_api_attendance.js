@@ -1,6 +1,6 @@
 /** SCMS v12 — 02D_api_attendance.js */
 'use strict';
-const API = window.API || {};
+var API = window.API || {};
 Object.assign(API, {
   async saveAttendance(cls, date, records) {
       if (window.APP.platform === 'web') return _webRpc('rpc_save_attendance', {
