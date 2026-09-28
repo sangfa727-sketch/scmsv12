@@ -84,7 +84,7 @@ async function doDeleteComm(id) {
 window.openParentPortalEventModal = function() {
   const classes = window.getClassList();
   openModal(`
-    <div class="modal-sheet" onclick="event.stopPropagation()">
+    <div class="modal-sheet comms-form-sheet" onclick="event.stopPropagation()">
       <div class="modal-handle"></div>
       <h3 class="modal-title">Parent Portal schedule</h3>
       <p class="modal-subtitle">Exam မဟုတ်တဲ့ school meeting, announcement, event တွေကို မိဘ Portal မှာ ပြပါမယ်။</p>
