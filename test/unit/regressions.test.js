@@ -99,3 +99,27 @@ test('dashboard baseline anchors remain present', () => {
   assert.match(html, /class="page-header dashboard-page-header"/);
   assert.match(source, /dashboardContent/);
 });
+
+
+test('student history feature stays wired', () => {
+  const source = read('js/04_students.js');
+  assert.match(source, /showStudentHistory/);
+  assert.match(source, /API\.getStudentHistory\(studentId, 50\)/);
+  assert.match(source, /studentHistoryBody/);
+});
+
+test('grade assessment time feature stays wired', () => {
+  const source = read('js/20_grades.js');
+  assert.match(source, /a\.start_time/);
+  assert.match(source, /a\.end_time/);
+  assert.match(source, /id="gaStartTime"/);
+  assert.match(source, /id="gaEndTime"/);
+  assert.match(source, /start_time:\s*document\.getElementById\('gaStartTime'\)\.value/);
+  assert.match(source, /end_time:\s*document\.getElementById\('gaEndTime'\)\.value/);
+});
+
+test('parent communication page keeps message workflow wired', () => {
+  const source = read('js/08_comms.js');
+  assert.match(source, /message_preview/);
+  assert.match(source, /label class="field-label">\$\{t\('comms\.message'\)\}/);
+});
