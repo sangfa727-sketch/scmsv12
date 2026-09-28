@@ -85,7 +85,7 @@ window.openSettings = function() {
 ============================================================================ */
 window.openTeacherManager = async function() {
   openModal(`
-    <div class="modal-sheet" onclick="event.stopPropagation()" style="max-width:480px">
+    <div class="modal-sheet teacher-manager-sheet" onclick="event.stopPropagation()">
       <div class="modal-handle"></div>
       <h3 class="modal-title">${t('tm.title')}</h3>
       <p class="modal-subtitle">${t('tm.subtitle')}</p>
