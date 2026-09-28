@@ -1,6 +1,6 @@
 /** SCMS v12 — 02L_api_chat.js */
 'use strict';
-const API = window.API || {};
+var API = window.API || {};
 Object.assign(API, {
   async getChatMessages(channel = 'staff', limit = 50) {
       try {
