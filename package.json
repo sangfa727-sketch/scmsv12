@@ -1,6 +1,6 @@
 {
   "name": "scms-frontend",
-  "version": "11.7.0",
+  "version": "12.0.0",
   "description": "SCMS — School Class Management System frontend. Runs as Telegram WebApp, native Android/iOS app (via Capacitor), or plain web.",
   "private": true,
   "scripts": {
