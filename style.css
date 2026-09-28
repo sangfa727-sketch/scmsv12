@@ -4393,3 +4393,380 @@ button, .tab-btn, .att-code-pill, .pill, .chip {
 .parent-contact-card .detail-section{
   margin-top:8px;
 }
+
+
+/* ================================================================
+   SCMS v12 — Smart Compact Responsive UI
+   ================================================================ */
+
+/* Global density: reduce visual bulk without making controls hard to tap. */
+html, body {
+  font-size: 14px;
+}
+.page-header {
+  padding: 14px 14px 10px;
+}
+.page-title {
+  font-size: clamp(23px, 5vw, 28px);
+}
+.page-subtitle {
+  font-size: 12px;
+  line-height: 1.45;
+}
+.stats-grid {
+  gap: 6px;
+  padding: 0 12px 10px;
+}
+.stat-card {
+  padding: 9px 8px;
+  border-radius: 10px;
+}
+.stat-num { font-size: 19px; }
+.stat-lbl { font-size: 10px; line-height: 1.25; }
+
+.search-bar {
+  height: 38px;
+  margin: 0 12px 8px;
+  padding: 0 10px;
+  border-radius: 10px;
+}
+.search-bar input { font-size: 13px; }
+
+.chips-row {
+  gap: 6px;
+  padding: 0 12px 8px;
+}
+.chip {
+  padding: 5px 10px;
+  font-size: 12px;
+}
+
+.list-card {
+  border-radius: 10px;
+  padding: 10px 11px;
+  margin: 0 12px 6px;
+  box-shadow: 0 1px 5px rgba(0,0,0,.035);
+}
+.card-row { gap: 9px; }
+.card-avatar {
+  width: 34px; height: 34px;
+  border-radius: 9px;
+  font-size: 14px;
+}
+.card-name {
+  font-size: 13px;
+  line-height: 1.35;
+}
+.card-sub, .card-note, .card-parent, .card-action {
+  font-size: 11px;
+}
+.card-note { margin-top: 5px; line-height: 1.4; }
+.card-parent { margin-top: 5px; padding-top: 5px; }
+
+.more-grid {
+  gap: 7px;
+  padding: 0 12px 12px;
+}
+.more-tile {
+  border-radius: 10px;
+  padding: 11px 10px;
+  gap: 6px;
+  font-size: 12px;
+}
+.more-icon { font-size: 18px; }
+.profile-card {
+  gap: 10px;
+  padding: 11px;
+  margin: 0 12px 12px;
+  border-radius: 10px;
+}
+.profile-avatar {
+  width: 44px; height: 44px;
+  border-radius: 12px;
+  font-size: 18px;
+}
+
+/* Buttons: compact but still touch-friendly; Myanmar labels stay inside. */
+.btn-primary,
+.btn-secondary,
+.btn-danger {
+  min-height: 38px;
+  padding: 7px 11px;
+  border-radius: 9px;
+  font-size: 13px;
+  line-height: 1.25;
+  white-space: normal;
+  overflow-wrap: anywhere;
+  word-break: normal;
+}
+.btn-secondary { margin-top: 7px; }
+.btn-pill-action {
+  min-height: 34px;
+  padding: 6px 10px;
+  font-size: 11.5px;
+  line-height: 1.25;
+  white-space: normal;
+  overflow-wrap: anywhere;
+  text-align: center;
+}
+.pill {
+  padding: 6px 10px;
+  font-size: 12px;
+}
+.link-actions { gap: 6px; }
+.link-btn, .link-btn-inline {
+  min-height: 36px;
+  padding: 7px 10px;
+  font-size: 12px;
+  line-height: 1.25;
+  white-space: normal;
+  overflow-wrap: anywhere;
+}
+.form-row {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 8px;
+}
+.form-col { min-width: 0; }
+
+/* Compact forms: less vertical air means fewer scrolls while entering data. */
+.field-label {
+  font-size: 10.5px;
+  margin-top: 10px;
+  margin-bottom: 4px;
+  line-height: 1.35;
+}
+.form-input {
+  height: 38px;
+  padding: 0 10px;
+  border-radius: 8px;
+  font-size: 13px;
+  min-width: 0;
+}
+.form-textarea {
+  min-height: 64px;
+  padding: 8px 10px;
+  border-radius: 8px;
+  font-size: 13px;
+  line-height: 1.45;
+}
+.form-divider {
+  margin: 11px 0 7px;
+}
+.info-tip {
+  gap: 7px;
+  padding: 8px 10px;
+  border-radius: 9px;
+  font-size: 11.5px;
+  line-height: 1.45;
+}
+.link-box {
+  padding: 10px;
+  margin-top: 8px;
+  border-radius: 9px;
+}
+.link-box-url {
+  font-size: 11px;
+  padding: 8px 9px;
+}
+.toggle-check {
+  width: 40px;
+  height: 24px;
+}
+.toggle-check::after {
+  width: 18px;
+  height: 18px;
+}
+.toggle-check:checked::after { transform: translateX(16px); }
+
+/* Modal/sheet: contained, compact, and internally scrollable instead of giant cards. */
+.modal-layer {
+  padding: 8px;
+}
+.modal-sheet {
+  width: min(100%, 520px);
+  max-height: calc(100dvh - 16px);
+  padding: 7px 14px 13px;
+  border-radius: 16px;
+}
+.modal-handle {
+  width: 34px;
+  height: 3px;
+  margin: 0 auto 10px;
+}
+.modal-title {
+  font-size: 19px;
+  line-height: 1.25;
+  margin-bottom: 10px;
+  padding-right: 34px;
+}
+.modal-title.mb0 { margin-bottom: 2px; }
+.modal-subtitle {
+  font-size: 11.5px;
+  line-height: 1.45;
+  margin-top: 2px;
+  margin-bottom: 9px;
+}
+.modal-close-x {
+  top: 9px;
+  right: 10px;
+  width: 28px;
+  height: 28px;
+  font-size: 13px;
+}
+.modal-sheet .detail-header {
+  gap: 9px;
+  margin-bottom: 10px;
+}
+.detail-avatar {
+  width: 46px; height: 46px;
+  border-radius: 12px;
+  font-size: 20px;
+}
+.detail-grid { margin-bottom: 10px; }
+.detail-row {
+  padding: 7px 0;
+  font-size: 12px;
+  gap: 10px;
+}
+.detail-val {
+  min-width: 0;
+  max-width: 62%;
+  text-align: right;
+  overflow-wrap: anywhere;
+}
+.detail-section {
+  font-size: 10px;
+  margin: 10px 0 6px;
+}
+.mini-card {
+  padding: 7px 9px;
+  font-size: 11.5px;
+  margin-bottom: 5px;
+}
+.logo-preview-block {
+  gap: 10px;
+  padding: 10px;
+  border-radius: 10px;
+  margin: 6px 0 9px;
+}
+.logo-preview-frame {
+  width: 64px; height: 64px;
+  border-radius: 10px;
+}
+.logo-preview-placeholder { font-size: 25px; }
+.logo-preview-name { font-size: 13px; }
+.logo-preview-hint { font-size: 11px; }
+
+/* Pickers and attendance should also feel dense. */
+.picker-sheet {
+  height: min(78dvh, 620px);
+  max-height: min(78dvh, 620px);
+}
+.picker-header {
+  padding: 10px 12px 6px;
+}
+.picker-title { font-size: 15px; }
+.picker-subtitle { font-size: 11px; }
+.picker-search { margin: 7px 0 6px; }
+.picker-search input {
+  padding: 9px 11px 9px 34px;
+  border-radius: 9px;
+  font-size: 13px;
+}
+.picker-list { padding: 6px 9px 10px; }
+.picker-row {
+  gap: 9px;
+  padding: 7px 6px;
+  border-radius: 9px;
+}
+.picker-avatar {
+  width: 34px; height: 34px;
+  font-size: 12px;
+}
+.picker-row-name { font-size: 13px; }
+.picker-row-sub { font-size: 11px; }
+
+.attend-row-v2 {
+  border-radius: 10px;
+  padding: 9px;
+  gap: 7px;
+}
+.att-code-v2 {
+  min-height: 44px;
+  padding: 6px 2px;
+  border-radius: 8px;
+}
+.att-code-v2 .att-letter { font-size: 14px; }
+.att-code-v2 .att-mini { font-size: 8px; }
+.attend-toolbar { gap: 6px; margin-bottom: 8px; }
+
+/* Never let Burmese labels create horizontal overflow. */
+button, .btn-primary, .btn-secondary, .btn-danger, .btn-pill-action,
+.pill, .chip, .tab-label, .sidebar-label, .more-tile,
+.link-btn, .link-btn-inline {
+  max-width: 100%;
+  overflow-wrap: anywhere;
+  word-break: normal;
+}
+.card-name, .page-title, .modal-title, .field-label,
+.school-name, .school-header-name, .sidebar-school-name {
+  overflow-wrap: anywhere;
+}
+
+/* Desktop: compact cards and centered forms instead of wide, stretched blocks. */
+@media (min-width: 900px) {
+  .page-header {
+    padding: 16px 14px 10px;
+  }
+  .stats-grid {
+    padding-left: 12px;
+    padding-right: 12px;
+  }
+  #studentList, #admissionsList, #billingInvoiceList, #dailyList {
+    gap: 8px;
+    padding: 0 12px 12px;
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  }
+  #studentList .list-card,
+  #admissionsList .list-card,
+  #billingInvoiceList .list-card,
+  #dailyList .list-card {
+    min-width: 0;
+  }
+  .modal-layer {
+    padding: 12px;
+  }
+  .modal-sheet {
+    width: min(92vw, 520px);
+    max-height: min(78dvh, 680px);
+    padding: 8px 16px 14px;
+    border-radius: 15px;
+  }
+}
+
+/* Small phones: keep forms readable rather than forcing two cramped columns. */
+@media (max-width: 359px) {
+  .form-row { grid-template-columns: 1fr; }
+  .stats-grid { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+  .stat-num { font-size: 17px; }
+  .stat-lbl { font-size: 9px; }
+  .modal-sheet { padding-left: 11px; padding-right: 11px; }
+}
+
+/* Myanmar typography: tighter line-height inside controls prevents button growth. */
+html[lang="my"] body {
+  line-height: 1.55;
+}
+html[lang="my"] .btn-primary,
+html[lang="my"] .btn-secondary,
+html[lang="my"] .btn-danger,
+html[lang="my"] .btn-pill-action,
+html[lang="my"] .pill,
+html[lang="my"] .chip,
+html[lang="my"] .tab-label {
+  line-height: 1.25;
+}
+html[lang="my"] .field-label {
+  letter-spacing: 0;
+}
