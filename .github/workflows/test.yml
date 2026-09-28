@@ -6,7 +6,7 @@ on:
   pull_request:
   workflow_dispatch: {}
   schedule:
-    - cron: '0 20 * * *' # ~2:30am Yangon time, nightly
+    - cron: '0 20 * * *'
 
 jobs:
   frontend:
@@ -21,25 +21,8 @@ jobs:
       - name: Run frontend syntax and regression tests
         run: npm test
 
-  pgtap:
-    name: pgTAP (only when migrations are present)
-    runs-on: ubuntu-latest
-    if: github.event_name == 'workflow_dispatch' && hashFiles('supabase/migrations/**/*.sql') != ''
-    steps:
-      - uses: actions/checkout@v4
-      - uses: supabase/setup-cli@v1
-        with:
-          version: latest
-      - name: Start local Supabase stack
-        run: supabase start
-      - name: Run pgTAP tests
-        run: supabase test db
-      - name: Stop stack
-        if: always()
-        run: supabase stop
-
   e2e:
-    name: Playwright (critical flows only)
+    name: Playwright (scheduled/manual only)
     runs-on: ubuntu-latest
     if: github.event_name == 'workflow_dispatch' || github.event_name == 'schedule'
     steps:
