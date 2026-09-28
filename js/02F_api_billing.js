@@ -1,6 +1,6 @@
 /** SCMS v12 — 02F_api_billing.js */
 'use strict';
-const API = window.API || {};
+var API = window.API || {};
 Object.assign(API, {
   async getFeeItems() {
       const res = await _webRpc('rpc_get_fee_items', { p_session_token: getWebSession()?.session_token });
