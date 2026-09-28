@@ -39,7 +39,7 @@ test('architecture documents protect environment and tenant boundaries', () => {
   assert.match(source, /staging\/preview/);
   assert.match(source, /Production uses the production Supabase/);
   assert.match(source, /school A cannot access school B/);
-  assert.match(source, /client-provided.*school_id.*teacher_id/);
+  assert.match(source, /client-provided[\s\S]*school_id[\s\S]*teacher_id/);
 });
 
 test('release gates require isolated backend testing before production', () => {
