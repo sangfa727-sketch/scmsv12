@@ -699,3 +699,7 @@ GRANT EXECUTE ON FUNCTION public.rpc_get_attendance_audit(text,text,date,date,in
 -- Key guarantees: fixed search_path, removed legacy 9-arg assessment overload,
 -- school-scoped term/subject/assessment/student validation, score bounds,
 -- audit events for assessment create/delete and grade saves.
+
+-- SCMS v12 — Academics runtime hardening final corrections
+-- The canonical assessment writer is the 11-argument overload; the legacy 9-argument overload is removed.
+-- Both assessment creation and grade save use non-conflicting session variable names.
