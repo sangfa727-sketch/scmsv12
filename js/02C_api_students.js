@@ -25,7 +25,7 @@ Object.assign(API, {
    *  Web sessions call rpc_register_student directly — no n8n dependency,
    *  and it de-dupes server-side (same school+class+english name) so manual
    *  entry and future AI/chat entry can never create two rows for one student.
-   *  Telegram/native platforms still go through the n8n TWA webhook. */,
+   *  Telegram/native platforms still go through the n8n TWA webhook. */
 
   async registerStudent(data) {
     if (window.APP.platform === 'web') {
@@ -71,7 +71,7 @@ Object.assign(API, {
   },
 
     /** Upload a student's photo to Supabase Storage and return its public URL.
-   *  Path: <school_id>/<student_id>-<uid>.<ext> — unique per upload, never overwrites. */,
+   *  Path: <school_id>/<student_id>-<uid>.<ext> — unique per upload, never overwrites. */
 
   async uploadStudentPhoto(studentId, file) {
     // Phone photos are often HEIC or > 3 MB, which the bucket rejects — always
@@ -95,7 +95,7 @@ Object.assign(API, {
       throw new Error(`Photo upload failed (${resp.status}): ${t.slice(0, 200)}`);
     }
     return `${SCMS_CONFIG.SUPABASE_URL}/storage/v1/object/public/student-photos/${path}?t=${Date.now()}`;
-  },,
+  },
 
   async setStudentPhoto(studentId, photoUrl) {
     return _webRpc('rpc_set_student_photo', {
@@ -107,7 +107,7 @@ Object.assign(API, {
   /** Edit / update an existing student.
    *  Backend has no `update_student` TWA route yet — we PATCH Supabase directly
    *  (allowed by RLS for authenticated reads). For best results, replicate
-   *  fields the bot's `/editstudent` wizard supports. */,
+   *  fields the bot's `/editstudent` wizard supports. */
 
   async updateStudent(studentId, patch) {
     if (window.APP.platform === 'web') return _webRpc('rpc_update_student', {
@@ -154,7 +154,7 @@ Object.assign(API, {
     return { ok: true, success: true, student: rows[0] || null };
   },
 
-  /** Soft-delete (status=Inactive) — admin only. */,
+  /** Soft-delete (status=Inactive) — admin only. */
 
   async deleteStudent(studentId) {
     if (window.APP.platform === 'web') return _webRpc('rpc_delete_student', {
@@ -186,7 +186,7 @@ Object.assign(API, {
 
   /** Poll Supabase to see if the bot has captured the parent's Telegram ID
    *  (via the `/start parent_<STU-id>` deep link → `Update Parent TG ID` node).
-   *  Returns { parent_tg_id, parent_name } once linked, else { parent_tg_id: null }. */,
+   *  Returns { parent_tg_id, parent_name } once linked, else { parent_tg_id: null }. */
 
   async checkParentLink(studentId) {
     const url = `${SCMS_CONFIG.SUPABASE_URL}/rest/v1/students`
@@ -216,21 +216,21 @@ Object.assign(API, {
   // teachers.photo_url), so bootstrap stays small.
 
   /** Upload an image Blob to school-assets, return its public URL.
-   *  kind: 'logo' | 'cover' | 'teacher'. Every upload gets a unique path — never overwrites. */,
+   *  kind: 'logo' | 'cover' | 'teacher'. Every upload gets a unique path — never overwrites. */
 
   async getStudentById(studentId) {
     return _webRpc('rpc_get_student_by_id', {
       p_session_token: getWebSession()?.session_token,
       p_student_id: studentId,
     });
-  },,
+  },
 
   async getOrCreateStudentQr(studentId) {
     return _webRpc('rpc_get_or_create_student_qr', {
       p_session_token: getWebSession()?.session_token,
       p_student_id: studentId,
     });
-  },,
+  },
 
   async regenerateStudentQr(studentId) {
     return _webRpc('rpc_regenerate_student_qr', {
