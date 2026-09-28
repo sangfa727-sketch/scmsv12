@@ -228,7 +228,7 @@ window.openAttendNote = function(studentId) {
   const codeLabel = currentCode ? attendCodeLabel(currentCode) : t('att.notMarkedYet');
 
   openModal(`
-    <div class="modal-sheet" onclick="event.stopPropagation()">
+    <div class="modal-sheet attendance-form-sheet" onclick="event.stopPropagation()">
       <div class="modal-handle"></div>
       <h3 class="modal-title">${esc(t('att.noteTitle', { name: student.name_en || student.name_local }))}</h3>
       <p class="modal-subtitle">${esc(t('att.currentStatus'))} <strong>${esc(codeLabel)}</strong> · ${esc(fmtDateLong(_attendDate))}</p>
