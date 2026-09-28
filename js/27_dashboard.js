@@ -185,7 +185,8 @@ function _paintDashboard(container) {
         </div>
       </div>`).join('')}` : ''}
   `;
-  _renderDashboardNotificationBell(leavePending, queuedComms.length);\n  _dashboardWrapCardGroups(container);
+  _renderDashboardNotificationBell(leavePending, queuedComms.length);
+  _dashboardWrapCardGroups(container);
 }
 
 // _classColor(cls) is reused as-is from js/04_students.js — same
