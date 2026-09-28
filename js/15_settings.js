@@ -90,8 +90,10 @@ window.openTeacherManager = async function() {
       <h3 class="modal-title">${t('tm.title')}</h3>
       <p class="modal-subtitle">${t('tm.subtitle')}</p>
 
-      <button class="btn-primary" onclick="openCreateTeacherModal()">${t('tm.addNew')}</button>
-      <button class="btn-secondary mt8" onclick="openInviteCodeModal()">${t('tm.inviteGoogle')}</button>
+      <div class="modal-footer">
+<button class="btn-primary" onclick="openCreateTeacherModal()">${t('tm.addNew')}</button>
+<button class="btn-secondary mt8" onclick="openInviteCodeModal()">${t('tm.inviteGoogle')}</button>
+</div>
 
       <div id="teacherList" class="teacher-list mt16">
         <div class="text-center text-muted">${t('tm.loading')}</div>
@@ -159,7 +161,8 @@ window.openInviteCodeModal = function() {
         <option value="admin">${t('inv.roleAdmin')}</option>
       </select>
 
-      <button class="btn-primary mt16" id="invGenBtn" onclick="doGenerateInvite()">${t('inv.generate')}</button>
+      <div class="modal-footer">
+<button class="btn-primary mt16" id="invGenBtn" onclick="doGenerateInvite()">${t('inv.generate')}</button>
 
       <div id="invCodeResult" style="display:none" class="mt16">
         <div class="info-row"><span>${t('inv.codeLabel')}</span><span id="invCodeValue" style="font-weight:700;letter-spacing:2px"></span></div>
@@ -241,7 +244,8 @@ window.openCreateTeacherModal = function() {
       <div id="newTError" class="form-error" style="display:none"></div>
 
       <button class="btn-primary mt16" id="newTBtn" onclick="doCreateTeacher()">${t('ct.create')}</button>
-      <button class="btn-secondary" onclick="closeModal()">${t('common.cancel')}</button>
+<button class="btn-secondary" onclick="closeModal()">${t('common.cancel')}</button>
+</div>
     </div>
   `);
 };
