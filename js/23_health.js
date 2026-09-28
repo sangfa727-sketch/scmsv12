@@ -120,8 +120,10 @@ window._showEditHealthProfile = function(studentId) {
     <label class="field-label">${t('health.notes')}</label>
     <input class="form-input" id="hpNotes" value="${esc(p.notes || '')}">
 
-    <button class="btn-primary mt16" id="hpSaveBtn" onclick="_saveHealthProfile('${esc(studentId)}')">${t('btn.save')}</button>
-    <button class="btn-secondary" onclick="_loadHealthRecord('${esc(studentId)}')">${t('common.cancel')}</button>
+    <div class="modal-footer">
+<button class="btn-primary mt16" id="hpSaveBtn" onclick="_saveHealthProfile('${esc(studentId)}')">${t('btn.save')}</button>
+<button class="btn-secondary" onclick="_loadHealthRecord('${esc(studentId)}')">${t('common.cancel')}</button>
+</div>
   `;
 };
 
@@ -161,8 +163,10 @@ window._showAddVaccination = function(studentId) {
     <input class="form-input" id="vxDate" type="date">
     <label class="field-label">${t('health.notes')}</label>
     <input class="form-input" id="vxNotes" placeholder="${esc(t('health.medicationsOpt'))}">
-    <button class="btn-primary mt16" id="vxSaveBtn" onclick="_saveVaccination('${esc(studentId)}')">${t('common.add')}</button>
-    <button class="btn-secondary" onclick="_loadHealthRecord('${esc(studentId)}')">${t('common.cancel')}</button>
+    <div class="modal-footer">
+<button class="btn-primary mt16" id="vxSaveBtn" onclick="_saveVaccination('${esc(studentId)}')">${t('common.add')}</button>
+<button class="btn-secondary" onclick="_loadHealthRecord('${esc(studentId)}')">${t('common.cancel')}</button>
+</div>
   `;
 };
 
@@ -213,8 +217,10 @@ window._showAddHealthVisit = function(studentId) {
     <input class="form-input" id="hvTreatment" placeholder="${esc(t('health.medicationsOpt'))}">
     <label class="field-label">${t('health.notes')}</label>
     <input class="form-input" id="hvNotes" placeholder="${esc(t('health.medicationsOpt'))}">
-    <button class="btn-primary mt16" id="hvSaveBtn" onclick="_saveHealthVisit('${esc(studentId)}')">${t('health.logVisit').replace('+ ', '')}</button>
-    <button class="btn-secondary" onclick="_loadHealthRecord('${esc(studentId)}')">${t('common.cancel')}</button>
+    <div class="modal-footer">
+<button class="btn-primary mt16" id="hvSaveBtn" onclick="_saveHealthVisit('${esc(studentId)}')">${t('health.logVisit').replace('+ ', '')}</button>
+<button class="btn-secondary" onclick="_loadHealthRecord('${esc(studentId)}')">${t('common.cancel')}</button>
+</div>
   `;
 };
 
