@@ -58,3 +58,44 @@ test('all JavaScript source files are present and non-empty', () => {
   assert.ok(jsFiles.length >= 25);
   for (const file of jsFiles) assert.ok(fs.statSync(path.join(dir, file)).size > 0, file);
 });
+
+test('protected page list layout stays on the compact baseline', () => {
+  const css = read('style.css');
+
+  // These page lists are intentionally single-column baseline surfaces.
+  // Do not reintroduce page-wide desktop grid overrides without an explicit
+  // product request for that page.
+  const protectedLists = [
+    '#page-students #studentList',
+    '#page-daily #dailyList',
+    '#page-hw #hwList',
+    '#page-parents #commsList',
+    '#page-incidents #incidentList',
+    '#page-library #libraryList',
+    '#page-transport #transportList',
+    '#page-admissions #admissionsList',
+    '#page-summary #summaryList'
+  ];
+
+  assert.doesNotMatch(css, /Desktop common list surfaces/i);
+  assert.doesNotMatch(css, /actual responsive card grid, not a vertical feed/i);
+  assert.doesNotMatch(css, /SCMS v12\.12 — compact controls \+ consistent page rail/i);
+
+  for (const selector of protectedLists) {
+    assert.doesNotMatch(
+      css,
+      new RegExp(selector.replace(/[.*+?^()|[\]\\]/g, '\\$&') + '[\\s\\S]{0,900}display\\s*:\\s*grid', 'i'),
+      selector
+    );
+  }
+});
+
+test('dashboard baseline anchors remain present', () => {
+  const html = read('index.html');
+  const source = read('js/27_dashboard.js');
+
+  assert.match(html, /id="dashboardContent"/);
+  assert.match(html, /id="dashboardNotificationWrap"/);
+  assert.match(html, /class="page-header dashboard-page-header"/);
+  assert.match(source, /dashboardContent/);
+});
