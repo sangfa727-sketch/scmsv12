@@ -282,23 +282,14 @@ window.doCreateTeacher = async function() {
   btn.textContent = t('ct.creating');
 
   try {
-    const resp = await fetch(`${SCMS_CONFIG.SUPABASE_URL}/rest/v1/rpc/rpc_admin_create_teacher`, {
-      method: 'POST',
-      headers: {
-        'apikey':        SCMS_CONFIG.SUPABASE_ANON,
-        'Authorization': `Bearer ${SCMS_CONFIG.SUPABASE_ANON}`,
-        'Content-Type':  'application/json',
-      },
-      body: JSON.stringify({
-        p_session_token:    sess.session_token,
-        p_teacher_id:       id,
-        p_teacher_name:     name,
-        p_initial_password: pw,
-        p_role:             role,
-        p_email:            email,
-      }),
+    const result = await _webRpc('rpc_admin_create_teacher', {
+      p_session_token:    sess.session_token,
+      p_teacher_id:       id,
+      p_teacher_name:     name,
+      p_initial_password: pw,
+      p_role:             role,
+      p_email:            email,
     });
-    const result = await resp.json();
     if (!result || !result.ok) {
       errEl.textContent = (result && result.message) || t('ct.createFailed');
       errEl.style.display = 'block';
@@ -333,20 +324,11 @@ window.resetTeacherPassword = async function(teacherId, teacherName) {
   }
 
   try {
-    const resp = await fetch(`${SCMS_CONFIG.SUPABASE_URL}/rest/v1/rpc/rpc_admin_reset_teacher_password`, {
-      method: 'POST',
-      headers: {
-        'apikey':        SCMS_CONFIG.SUPABASE_ANON,
-        'Authorization': `Bearer ${SCMS_CONFIG.SUPABASE_ANON}`,
-        'Content-Type':  'application/json',
-      },
-      body: JSON.stringify({
-        p_session_token: sess.session_token,
-        p_teacher_id:    teacherId,
-        p_new_password:  newPw,
-      }),
+    const result = await _webRpc('rpc_admin_reset_teacher_password', {
+      p_session_token: sess.session_token,
+      p_teacher_id:    teacherId,
+      p_new_password:  newPw,
     });
-    const result = await resp.json();
     if (!result || !result.ok) {
       showToast(t('rp.failed', { err: result?.error || t('common.unknown') }));
       return;
