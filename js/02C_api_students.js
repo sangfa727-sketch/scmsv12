@@ -222,6 +222,17 @@ Object.assign(API, {
   /** Upload an image Blob to school-assets, return its public URL.
    *  kind: 'logo' | 'cover' | 'teacher'. Every upload gets a unique path — never overwrites. */
 
+  async updateStudentParent(studentId, data) {
+    return _webRpc('rpc_update_student_parent', {
+      p_session_token: _webSessionToken(),
+      p_student_id: studentId,
+      p_parent_name: data.parent_name || null,
+      p_parent_phone: data.parent_phone || null,
+      p_parent_phone2: data.parent_phone2 || null,
+      p_parent_email: data.parent_email || null,
+    });
+  },
+
   async getStudentHistory(studentId, limit = 50) {
     return _webRpc('rpc_get_student_history', {
       p_session_token: _webSessionToken(),
