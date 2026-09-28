@@ -78,6 +78,16 @@ test('legacy privileged RPCs are not callable from frontend feature code', () =>
 });
 
 
+test('direct Supabase REST access in student API is isolated to the legacy non-web branch', () => {
+  const source = read('js/02C_api_students.js');
+  const directRest = source.match(/\\/rest\\/v1\\/students/g) || [];
+  assert.ok(directRest.length > 0, 'student API should retain its legacy TWA REST path until a dedicated RPC replaces it');
+  const webBranch = source.slice(0, source.indexOf('// Whitelist fields that exist in the DB schema'));
+  assert.equal(webBranch.includes('/rest/v1/students'), false, 'web student mutations must use the shared session-aware RPC boundary');
+  assert.match(source, /if \(window\\.APP\\.platform === 'web'\) return _webRpc\('rpc_update_student'/);
+  assert.match(source, /if \(window\\.APP\\.platform === 'web'\) return _webRpc\('rpc_deactivate_student'/);
+});
+
 test('feature modules do not bypass the shared web RPC transport', () => {
   const jsDir = path.join(ROOT, 'js');
   const files = fs.readdirSync(jsDir).filter((name) => name.endsWith('.js'));
