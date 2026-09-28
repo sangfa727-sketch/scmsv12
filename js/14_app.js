@@ -402,6 +402,7 @@ window.signOut = function () {
   // session, so web-session users could never actually sign out; the app
   // would just log them straight back in on reload.
   if (typeof clearWebSession === 'function') clearWebSession();
+  if (window.APPStore) window.APPStore.reset();
   window.location.reload();
 };
 
