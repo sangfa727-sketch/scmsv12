@@ -268,14 +268,14 @@ function _renderStudentList() {
         <div class="card-row">
           <div class="card-avatar" style="background:${homeHex}">${avatarContent(s)}</div>
           <div class="card-info">
-            <div class="card-name">
-              ${esc(s.name_en || s.name_local || s.student_id)}
-              ${bdaySoon ? `<span class="bday-pill" title="${esc(t(bdayDays === 1 ? 'students.bday.tooltipOne' : 'students.bday.tooltip', { n: bdayDays }))}">🎂 ${bdayDays === 0 ? t('students.bday.today') : t('students.bday.short', { n: bdayDays })}</span>` : ''}
-            </div>
-            <div class="card-sub">
-              <span class="class-tag">${esc(s.class || '—')}</span>
+            <div class="card-name stu-name-line">
+              <span class="stu-name-primary">${esc(s.name_en || s.name_local || s.student_id)}</span>
               ${s.name_local && s.name_local !== s.name_en
                 ? `<span class="name-local">${esc(s.name_local)}</span>` : ''}
+              ${bdaySoon ? `<span class="bday-pill" title="${esc(t(bdayDays === 1 ? 'students.bday.tooltipOne' : 'students.bday.tooltip', { n: bdayDays }))}">🎂 ${bdayDays === 0 ? t('students.bday.today') : t('students.bday.short', { n: bdayDays })}</span>` : ''}
+            </div>
+            <div class="card-sub stu-meta-line">
+              <span class="class-tag">${esc(s.class || '—')}</span>
               ${s.home_color ? `<span class="home-dot" style="background:${homeHex}" title="${esc(t('students.homeLabel'))} ${esc(homeColorName(s.home_color))}"></span>` : ''}
             </div>
           </div>
