@@ -753,7 +753,7 @@ function _openStudentForm({ mode, student }) {
     const homeHex = homeColorHex(s.home_color);
 
   const html = `
-    <div class="modal-sheet" onclick="event.stopPropagation()">
+    <div class="modal-sheet student-form-sheet" onclick="event.stopPropagation()">
       <div class="modal-handle"></div>
       <h3 class="modal-title">${t(isEdit ? 'students.form.editTitle' : 'students.form.addTitle')}</h3>
 
