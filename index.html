@@ -1,0 +1,446 @@
+<!DOCTYPE html>
+<html lang="en" data-platform="web">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+<meta name="theme-color" content="#0F0F0F">
+<meta name="version" content="11.0.0">
+<title>SCMS — School Class Management</title>
+
+<!-- Telegram Web App SDK (no-op in native/web) -->
+<script src="https://telegram.org/js/telegram-web-app.js"></script>
+<!-- Supabase JS Client -->
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="https://accounts.google.com/gsi/client" async defer></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+
+<!-- Fonts -->
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,500;9..144,600;9..144,700;9..144,900&family=Inter+Tight:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&family=Noto+Sans+Myanmar:wght@400;500;600;700&display=swap" rel="stylesheet">
+
+<!-- App stylesheet -->
+<link rel="stylesheet" href="style.css?v=20260927e">
+<link rel="stylesheet" href="dashboard.css?v=20260924n">
+</head>
+<body>
+<div id="app">
+
+  <!-- ===== OFFLINE BANNER ===== -->
+  <div class="offline-banner" id="offlineBanner" data-i18n="msg.offlineBanner">📡 Offline — Changes will sync when reconnected</div>
+
+  <!-- ===== BOOT SCREEN ===== -->
+  <div class="boot-screen" id="bootScreen">
+    <div class="boot-inner">
+      <div class="boot-logo">
+        <span class="boot-logo-mark">S</span>
+        <span class="boot-logo-text">CMS</span>
+      </div>
+      <div class="boot-spinner"><div class="spin-ring"></div></div>
+      <div class="boot-status" id="bootStatus">Connecting…</div>
+      <div class="boot-sub" id="bootSub">School Class Management System</div>
+    </div>
+  </div>
+
+  <!-- ===== ERROR SCREEN ===== -->
+  <div class="error-screen" id="errorScreen" style="display:none">
+    <div class="error-inner">
+      <div class="error-icon">⚠️</div>
+      <h2 class="error-title" id="errorTitle">Unable to connect</h2>
+      <p class="error-msg" id="errorMsg">Please open this app from Telegram.</p>
+      <button class="btn-primary" id="btnRetry" onclick="window.location.reload()" data-i18n="btn.retry">Retry</button>
+    </div>
+  </div>
+
+  <!-- ===== SIDEBAR (native only — hidden in TWA via CSS) ===== -->
+  <aside class="sidebar" id="sidebar" aria-hidden="true"></aside>
+  <div class="sidebar-backdrop" id="sidebarBackdrop"></div>
+
+  <!-- ===== HEADER ===== -->
+  <header class="app-header" id="appHeader">
+    <div class="header-row">
+      <!-- Burger menu — visible only in native app -->
+      <button class="icon-btn icon-btn-burger" id="btnBurger" aria-label="Open menu" title="Menu" data-i18n-aria="menu.open" data-i18n-title="menu.title">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <line x1="3" y1="6" x2="21" y2="6"/>
+          <line x1="3" y1="12" x2="21" y2="12"/>
+          <line x1="3" y1="18" x2="21" y2="18"/>
+        </svg>
+      </button>
+
+      <div class="school-info">
+        <div class="school-name" id="schoolName">SCMS</div>
+        <div class="school-meta">
+          <span id="userRole" class="role-badge">—</span>
+          <span class="dot">·</span>
+          <span id="userName">Loading…</span>
+          <span class="dot">·</span>
+          <span class="conn-dot" id="connDot" title="Connection status" data-i18n-title="status.connection"></span>
+        </div>
+      </div>
+            <div class="header-actions">
+        <!-- ⭐ LANGUAGE SWITCH — အသစ်ထည့် -->
+        <button class="lang-switch" id="langSwitch"
+        aria-label="Switch language"
+        data-i18n-aria="topbar.language"
+        title="Switch language / ဘာသာစကား ပြောင်းရန်" data-i18n-title="lang.switchTitle">
+  <span class="lang-label" id="langLabel">EN</span>
+</button>
+
+        <button class="icon-btn" id="btnRefresh" aria-label="Refresh" title="Refresh data" data-i18n-aria="btn.refresh" data-i18n-title="btn.refreshData">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M21 12a9 9 0 0 1-9 9 9.75 9.75 0 0 1-6.74-2.74L3 16"/>
+            <path d="M3 12a9 9 0 0 1 9-9 9.75 9.75 0 0 1 6.74 2.74L21 8"/>
+            <path d="M21 3v5h-5"/><path d="M3 21v-5h5"/>
+          </svg>
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <!-- ===== PAGES ===== -->
+  <main id="pages">
+  <!-- ⭐ DASHBOARD — အသစ်ထည့် (ဒီနေရာမှာ) -->
+    <section class="page active" id="page-dashboard">
+      <div class="page-header">
+        <div class="page-eyebrow" data-i18n="page.dashboard.eyebrow">Overview</div>
+        <h1 class="page-title" data-i18n-html="page.dashboard.title">Today's <em>dashboard</em></h1>
+      </div>
+      <div id="dashboardContent"></div>
+    </section>
+
+    <!-- ⭐ LEAVE REQUESTS — အသစ်ထည့် -->
+    <section class="page" id="page-leave">
+      <div class="page-header">
+        <div class="page-eyebrow" data-i18n="page.leave.eyebrow">Requests</div>
+        <h1 class="page-title" data-i18n="page.leave.title">Leave requests</h1>
+      </div>
+      <div id="leaveRequestsContent"></div>
+    </section>
+
+    <!-- STUDENTS -->
+    <section class="page" id="page-students">
+      <div class="page-header">
+        <div class="page-eyebrow" data-i18n="page.students.eyebrow">Roster</div>
+        <h1 class="page-title" data-i18n-html="page.students.title">My <em>students</em></h1>
+        <p class="page-subtitle" id="studentsSubtitle">Loading…</p>
+      </div>
+      <div class="stats-grid" id="studentStats"></div>
+      <div class="search-bar" id="studentSearch">
+        <span class="search-icon">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/>
+          </svg>
+        </span>
+        <input type="text" id="studentSearchInput" placeholder="Search by name, ID, or class…" data-i18n-placeholder="students.searchPh">
+        <button class="clear-btn" id="studentSearchClear">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round">
+            <path d="M18 6 6 18M6 6l12 12"/>
+          </svg>
+        </button>
+      </div>
+      <div class="chips-row" id="classChips"></div>
+      <div class="id-select-toolbar" id="idSelectToolbar"></div>
+      <div id="studentList"></div>
+    </section>
+
+          <!-- ATTENDANCE -->
+    <section class="page" id="page-attend">
+      <div class="page-header" id="attendPageHeader">
+        <div class="page-eyebrow" data-i18n="page.attend.eyebrow">Daily check-in</div>
+        <h1 class="page-title" data-i18n-html="page.attend.title"><em>Attendance</em></h1>
+        <p class="page-subtitle" id="attendSubtitle" data-i18n="page.attend.sub">Mark today's attendance for your class.</p>
+        <div class="chips-row" id="attendClassChips"></div>
+      </div>
+      <div class="attend-toprow">
+        <div class="attend-cal-col">
+          <div class="date-strip-head">
+            <button type="button" class="date-strip-nav" onclick="shiftDateStrip(-1)" aria-label="Previous week" data-i18n-aria="att.prevWeek">‹</button>
+            <button type="button" class="date-strip-label" id="dateStripLabel" onclick="resetDateStripToToday()" title="Jump to today" data-i18n-title="att.jumpToday"></button>
+            <button type="button" class="date-strip-nav" onclick="shiftDateStrip(1)" aria-label="Next week" data-i18n-aria="att.nextWeek">›</button>
+          </div>
+          <div class="date-strip" id="dateStrip"></div>
+        </div>
+        <div class="attend-stats-col">
+          <div class="stats-grid" id="attendStats"></div>
+          <div class="attend-toolbar">
+            <button class="btn-pill-action" onclick="markAllAttend('P')">
+              <span class="dot-mini" style="background:#10B981"></span> All Present
+            </button>
+            <button class="btn-pill-action" onclick="clearAllAttend()">
+              <span class="dot-mini" style="background:#8A8A82"></span> Clear marks
+            </button>
+            <button class="btn-pill-action ghost" onclick="showAttendLegend()" title="Code legend" data-i18n-title="att.legendBtn">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <circle cx="12" cy="12" r="10"/><path d="M12 17v.01"/><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/>
+              </svg>
+              Codes
+            </button>
+          </div>
+        </div>
+      </div>
+      <div class="attend-grid" id="attendList"></div>
+      <div style="height:12px;"></div>
+      <button class="btn-primary" id="btnSaveAttendance">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="margin-right:6px;vertical-align:-2px">
+          <path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/><polyline points="17 21 17 13 7 13 7 21"/><polyline points="7 3 7 8 15 8"/>
+        </svg>
+        Save Attendance
+      </button>
+    </section>
+
+    <!-- DAILY REPORTS -->
+    <section class="page" id="page-daily">
+      <div class="page-header">
+        <div class="page-eyebrow" data-i18n="page.daily.eyebrow">For parents</div>
+        <h1 class="page-title" data-i18n-html="page.daily.title">Daily <em>reports</em></h1>
+        <p class="page-subtitle" data-i18n="page.daily.sub">Quick snapshot for today, sent to parents.</p>
+      </div>
+      <div class="chips-row" id="dailyClassChips"></div>
+      <div id="dailyList"></div>
+    </section>
+
+    <!-- HOMEWORK -->
+    <section class="page" id="page-hw">
+      <div class="page-header">
+        <div class="page-eyebrow" data-i18n="page.hw.eyebrow">Assignments</div>
+        <h1 class="page-title" data-i18n-html="page.hw.title"><em>Homework</em></h1>
+        <p class="page-subtitle" data-i18n="page.hw.sub">Track & assign work for each class.</p>
+      </div>
+      <div class="chips-row" id="hwClassChips"></div>
+      <div id="hwList"></div>
+    </section>
+
+        <!-- GRADES -->
+    <section class="page" id="page-grades">
+      <div class="page-header">
+        <div class="page-eyebrow" data-i18n="page.grades.eyebrow">Assessment</div>
+        <h1 class="page-title" data-i18n-html="page.grades.title"><em>Grades</em></h1>
+        <p class="page-subtitle" data-i18n="page.grades.sub">Record and track student assessment scores.</p>
+      </div>
+      <div class="grades-filter-row">
+        <div id="gradesTermPicker"></div>
+        <div id="gradesSubjectPicker"></div>
+      </div>
+      <div class="chips-row" id="gradesClassPicker"></div>
+      <div id="gradesAssessmentList"></div>
+    </section>
+
+    <!-- BILLING -->
+    <section class="page" id="page-billing">
+      <div class="page-header">
+        <div class="page-eyebrow" data-i18n="page.billing.eyebrow">Fees</div>
+        <h1 class="page-title" data-i18n-html="page.billing.title"><em>Billing</em></h1>
+        <p class="page-subtitle" data-i18n="page.billing.sub">Invoices and payments per student.</p>
+      </div>
+      <div id="billingSummary"></div>
+      <div class="billing-filter-row">
+        <div id="billingTermPicker"></div>
+        <button class="btn-pill-action ghost" onclick="openFeeItemsManager()" data-i18n="billing.feeItems">Fee items</button>
+      </div>
+      <div class="chips-row" id="billingClassPicker"></div>
+      <div class="chips-row" id="billingStatusPicker"></div>
+      <div id="billingInvoiceList"></div>
+    </section>
+
+    <!-- ADMISSIONS -->
+    <section class="page" id="page-admissions">
+      <div class="page-header">
+        <div class="page-eyebrow" data-i18n="page.admissions.eyebrow">Enrollment</div>
+        <h1 class="page-title" data-i18n-html="page.admissions.title"><em>Admissions</em></h1>
+        <p class="page-subtitle" data-i18n="page.admissions.sub">Track applicants from inquiry through enrollment.</p>
+      </div>
+      <div id="admissionsSummary"></div>
+      <div class="chips-row" id="admissionsStatusPicker"></div>
+      <div class="chips-row" id="admissionsClassPicker"></div>
+      <div id="admissionsList"></div>
+    </section>
+
+    <!-- LIBRARY -->
+    <section class="page" id="page-library">
+      <div class="page-header">
+        <div class="page-eyebrow" data-i18n="page.library.eyebrow">Resources</div>
+        <h1 class="page-title" data-i18n-html="page.library.title"><em>Library</em></h1>
+        <p class="page-subtitle" data-i18n="page.library.sub">Book catalog and checkouts.</p>
+      </div>
+      <div id="librarySummary"></div>
+      <div id="libraryList"></div>
+    </section>
+
+    <!-- TRANSPORT -->
+    <section class="page" id="page-transport">
+      <div class="page-header">
+        <div class="page-eyebrow" data-i18n="page.transport.eyebrow">Resources</div>
+        <h1 class="page-title" data-i18n-html="page.transport.title"><em>Transport</em></h1>
+        <p class="page-subtitle" data-i18n="page.transport.sub">Bus routes and student pickup/drop-off.</p>
+      </div>
+      <div id="transportList"></div>
+    </section>
+
+    <!-- PARENT COMMS -->
+    <section class="page" id="page-parents">
+      <div class="page-header">
+        <div class="page-eyebrow" data-i18n="page.parents.eyebrow">Communication</div>
+        <h1 class="page-title" data-i18n-html="page.parents.title">Parent <em>messages</em></h1>
+        <p class="page-subtitle" data-i18n="page.parents.sub">Recent communication with families.</p>
+      </div>
+      <div class="chips-row" id="commsTypeChips"></div>
+      <div id="commsList"></div>
+    </section>
+
+    <!-- INCIDENTS -->
+    <section class="page" id="page-incidents">
+      <div class="page-header">
+        <div class="page-eyebrow" data-i18n="page.incidents.eyebrow">Records</div>
+        <h1 class="page-title" data-i18n-html="page.incidents.title"><em>Incidents</em></h1>
+        <p class="page-subtitle" data-i18n="page.incidents.sub">Behavior, achievement, and important notes.</p>
+      </div>
+      <div class="chips-row" id="incidentTypeChips"></div>
+      <div id="incidentList"></div>
+    </section>
+
+    <!-- TIMETABLE -->
+    <section class="page" id="page-timetable">
+      <div class="page-header">
+        <div class="page-eyebrow" data-i18n="page.timetable.eyebrow">Schedule</div>
+        <h1 class="page-title" data-i18n-html="page.timetable.title"><em>Timetable</em></h1>
+        <p class="page-subtitle" id="timetableSubtitle">Weekly class schedule.</p>
+      </div>
+      <div class="timetable-day-tabs" id="dayTabs"></div>
+      <div class="chips-row" id="ttClassChips"></div>
+      <div id="timetableList"></div>
+    </section>
+
+    <!-- MONTHLY SUMMARY -->
+    <section class="page" id="page-summary">
+      <div class="page-header">
+        <div class="page-eyebrow" data-i18n="page.summary.eyebrow">Analytics</div>
+        <h1 class="page-title" data-i18n-html="page.summary.title">Monthly <em>summary</em></h1>
+        <p class="page-subtitle" data-i18n="page.summary.sub">Performance overview for this month.</p>
+      </div>
+      <div class="chips-row" id="summaryClassChips"></div>
+      <div id="summaryList"></div>
+    </section>
+
+    <!-- MORE -->
+    <section class="page" id="page-more">
+      <div class="page-header">
+        <div class="page-eyebrow" data-i18n="page.more.eyebrow">Tools</div>
+        <h1 class="page-title" data-i18n-html="page.more.title">More <em>features</em></h1>
+      </div>
+      <div id="moreMenu"></div>
+    </section>
+
+    <!-- STAFF CHAT (native only — hidden in TWA) -->
+    <section class="page" id="page-chat">
+      <div id="chatRoot" class="chat-shell"></div>
+    </section>
+
+  </main>
+
+  <!-- ⭐ Bulk ID card print sheet — hidden except during printSelectedIdCards() -->
+  <div id="bulkIdPrintArea"></div>
+
+  <!-- ===== FLOATING ACTION BUTTON ===== -->
+  <button class="fab" id="fab" aria-label="Add new" data-i18n-aria="btn.addNew">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+      <path d="M12 5v14M5 12h14"/>
+    </svg>
+  </button>
+
+  <!-- ===== BOTTOM TAB BAR ===== -->
+  <nav class="tab-bar" id="tabBar">
+    <button class="tab-btn" data-page="students">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/>
+        <circle cx="9" cy="7" r="4"/>
+        <path d="M22 21v-2a4 4 0 0 0-3-3.87"/>
+        <path d="M16 3.13a4 4 0 0 1 0 7.75"/>
+      </svg>
+      <span class="tab-label" data-i18n="tab.students">Students</span>
+    </button>
+    <button class="tab-btn" data-page="attend">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M9 11l3 3L22 4"/>
+        <path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/>
+      </svg>
+      <span class="tab-label" data-i18n="tab.attend">Attend</span>
+    </button>
+    <button class="tab-btn" data-page="daily">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
+        <polyline points="14 2 14 8 20 8"/>
+        <line x1="16" y1="13" x2="8" y2="13"/>
+        <line x1="16" y1="17" x2="8" y2="17"/>
+      </svg>
+      <span class="tab-label" data-i18n="tab.daily">Daily</span>
+    </button>
+    <button class="tab-btn" data-page="hw">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/>
+        <path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/>
+      </svg>
+      <span class="tab-label" data-i18n="tab.hw">HW</span>
+    </button>
+    <!-- Chat tab — hidden in TWA via CSS -->
+    <button class="tab-btn tab-btn-chat" data-page="chat">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>
+      </svg>
+      <span class="tab-label" data-i18n="tab.chat">Chat</span>
+    </button>
+    <button class="tab-btn" data-page="more">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <circle cx="12" cy="12" r="1"/>
+        <circle cx="19" cy="12" r="1"/>
+        <circle cx="5" cy="12" r="1"/>
+      </svg>
+      <span class="tab-label" data-i18n="tab.more">More</span>
+    </button>
+  </nav>
+
+  <!-- ===== MODAL OVERLAY ===== -->
+  <div class="modal-overlay" id="modalOverlay"></div>
+
+  <!-- ===== TOAST ===== -->
+  <div class="toast" id="toast"></div>
+
+</div>
+
+<!-- ===== APPLICATION SCRIPTS ===== -->
+<!-- Order matters: config → api → utils → landing → picker → features → app -->
+<script src="js/00a_locales_en.js?v=20260927d"></script>
+<script src="js/00b_locales_my.js?v=20260927d"></script>
+<script src="js/00c_i18n.js?v=20260924n"></script>
+<script src="js/01_config.js?v=20260924n"></script>
+<script src="js/02_api.js?v=20260927d"></script>
+<script src="js/03_utils.js?v=20260924n"></script>
+<script src="js/00_landing.js?v=20260924n"></script>
+<script src="js/19_google_auth.js?v=20260924n"></script>
+<script src="js/03b_student_picker.js?v=20260924n"></script>
+<script src="js/04_students.js?v=20260924n"></script>
+<script src="js/05_attendance.js?v=20260924n"></script>
+<script src="js/06_daily.js?v=20260924n"></script>
+<script src="js/07_homework.js?v=20260924n"></script>
+<script src="js/08_comms.js?v=20260927d"></script>
+<script src="js/09_incidents.js?v=20260924n"></script>
+<script src="js/10_timetable.js?v=20260924n"></script>
+<script src="js/11_summary.js?v=20260924n"></script>
+<script src="js/12_more.js?v=20260924n"></script>
+<script src="js/13_register.js?v=20260924n"></script>
+<script src="js/15_settings.js?v=20260924n"></script>
+<script src="js/16_chat.js?v=20260924n"></script>
+<script src="js/17_sidebar.js?v=20260927d"></script>
+<script src="js/18_help.js?v=20260924n"></script>
+<script src="js/20_grades.js?v=20260924n"></script>
+<script src="js/21_billing.js?v=20260924n"></script>
+<script src="js/22_admissions.js?v=20260924n"></script>
+<script src="js/23_health.js?v=20260924n"></script>
+<script src="js/24_library.js?v=20260924n"></script>
+<script src="js/25_transport.js?v=20260924n"></script>
+<script src="js/26_branding.js?v=20260924n"></script>
+<script src="js/27_dashboard.js?v=20260927a"></script>   <!-- ⭐ အသစ်ထည့် -->
+<script src="js/28_leave_requests.js?v=20260927d"></script>   <!-- ⭐ အသစ်ထည့် -->
+<script src="js/14_app.js?v=20260924n"></script>
+</body>
+</html>

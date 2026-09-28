@@ -1,0 +1,29 @@
+{
+  "appId": "com.scms.app",
+  "appName": "SCMS",
+  "webDir": ".",
+  "server": {
+    "androidScheme": "https",
+    "iosScheme": "https",
+    "cleartext": false
+  },
+  "android": {
+    "allowMixedContent": false,
+    "backgroundColor": "#0F0F0E"
+  },
+  "ios": {
+    "contentInset": "always",
+    "backgroundColor": "#0F0F0E"
+  },
+  "plugins": {
+    "SplashScreen": {
+      "launchShowDuration": 600,
+      "backgroundColor": "#0F0F0E",
+      "showSpinner": false
+    },
+    "StatusBar": {
+      "style": "DARK",
+      "backgroundColor": "#0F0F0E"
+    }
+  }
+}
