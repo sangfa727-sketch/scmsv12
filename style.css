@@ -6739,3 +6739,13 @@ input.form-input {
   }
 }
 
+
+
+/* SCMS v12.20 — shared destructive modal footer */
+.modal-footer-destructive .student-destructive-action {
+  margin-right: auto !important;
+}
+
+.modal-footer-destructive .modal-footer-main {
+  margin-left: auto;
+}
