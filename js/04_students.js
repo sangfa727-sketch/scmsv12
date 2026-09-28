@@ -1066,6 +1066,17 @@ window.pickGradeValue = function(targetInputId) {
   });
 };
 
+function _applyClassGradePair(cls) {
+  if (!cls) return;
+  const map = window.APP.config?.class_grade_map;
+  const grade = map && typeof map === 'object' ? map[cls] : '';
+  if (!grade) return;
+
+  const input = document.getElementById('newStuGrade');
+  if (!input) return;
+  _setValueAndLabel('newStuGrade', grade);
+}
+ 
 function _setValueAndLabel(targetInputId, v) {
   const input = document.getElementById(targetInputId);
   const label = document.getElementById(targetInputId + '_label');
