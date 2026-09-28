@@ -173,6 +173,8 @@ function _renderStatusChips() {
 }
 window.filterStuStatus = function(status) {
   _stuStatus = status || 'Active';
+  _stuClass = 'All';
+  _renderClassChips();
   document.querySelectorAll('#studentStatusChips .chip').forEach(b => b.classList.toggle('active', b.dataset.status === _stuStatus));
   _renderStudentList();
 };
@@ -227,7 +229,7 @@ function _renderStudentList() {
   const el = document.getElementById('studentList');
   if (!el) return;
 
-  let list = window.APP.students.filter(s => s.status === 'Active');
+  let list = window.APP.students.filter(s => _stuStatus === 'All' || s.status === _stuStatus);
 
   if (_stuClass !== 'All') {
     list = list.filter(s => s.class === _stuClass);
