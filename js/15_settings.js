@@ -57,7 +57,7 @@ window.openSettings = function() {
         </button>
       ` : ''}
 
-      <p class="settings-footer-note">
+      </div>\n\n      <p class="settings-footer-note">
         ${t('settings.footerNote')}
       </p>
 
