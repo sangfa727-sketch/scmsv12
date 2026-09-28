@@ -26,6 +26,14 @@ test('state store provides reads, writes, subscriptions and reset', () => {
   assert.match(source, /Object\.freeze\(\{ read, get, patch, set, subscribe, reset \}\)/);
 });
 
+test('app bootstrap mirrors identity into the central store', () => {
+  const source = read('js/14_app.js');
+  assert.match(source, /APPStore\.patch\('session'/);
+  assert.match(source, /APPStore\.patch\('tenant'/);
+  assert.match(source, /APPStore\.set\('ui\.currentPage'/);
+  assert.match(source, /sessionToken: webSession\?\.session_token/);
+});
+
 test('architecture documents protect environment and tenant boundaries', () => {
   const source = read('docs/ARCHITECTURE.md');
   assert.match(source, /staging\/preview/);
