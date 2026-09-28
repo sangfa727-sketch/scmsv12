@@ -6550,3 +6550,32 @@ input.form-input {
   .teacher-manager-actions { justify-content: stretch !important; }
   .teacher-manager-actions > button { flex: 1 1 100% !important; }
 }
+
+/* SCMS v12.18 — final compact entry-sheet sizing */
+.modal-sheet:has(.form-input, .form-textarea, .picker-trigger, input, select, textarea) {
+  width: min(92vw, 460px) !important;
+  max-width: 460px !important;
+  max-height: min(70dvh, 600px) !important;
+}
+@media (min-width: 700px) {
+  .modal-sheet:has(.form-input, .form-textarea, .picker-trigger, input, select, textarea) {
+    width: min(84vw, 460px) !important;
+    max-width: 460px !important;
+  }
+}
+@media (max-width: 699px) {
+  .modal-sheet:has(.form-input, .form-textarea, .picker-trigger, input, select, textarea) {
+    width: 92vw !important;
+    max-width: 92vw !important;
+    max-height: 74dvh !important;
+  }
+}
+@media (max-width: 430px) {
+  .modal-sheet:has(.form-input, .form-textarea, .picker-trigger, input, select, textarea) {
+    width: 92vw !important;
+    max-width: 92vw !important;
+    max-height: 76dvh !important;
+  }
+}
+.student-form-sheet { width: min(92vw, 460px) !important; max-width: 460px !important; }
+.student-form-sheet .stu-photo-picker { transform: scale(.76) !important; margin: -4px auto -15px !important; }
