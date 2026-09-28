@@ -353,20 +353,51 @@ window.openStudentDetail = function(studentId) {
           <div class="mini-card incident-card">${esc(i.date)} · ${esc(i.type)} · ${esc(i.severity)}</div>`).join('')}
       ` : ''}
 
-      <button class="btn-primary mt16" onclick="openEditStudentModal('${esc(s.student_id)}')">
-        ${t('students.detail.editInfo')}
-      </button>
-      ${s.status === 'Inactive' && window.APP.is_admin ? `<button class="btn-primary" onclick="reactivateStudent('${esc(s.student_id)}')">↻ Reactivate student</button>` : ''}
-      ${s.status === 'Active' ? `<button class="btn-secondary" onclick="showStudentIdCard('${esc(s.student_id)}')">🪪 ${t('idCard.title')}</button>` : ''}
-      ${s.status === 'Active' ? `<button class="btn-secondary" onclick="showHealthRecord('${esc(s.student_id)}')">🏥 ${t('students.btn.health')}</button>` : ''}
-      ${s.status === 'Active' ? `<button class="btn-secondary" onclick="showStudentLibrary('${esc(s.student_id)}')">📚 ${t('stuLib.title')}</button>` : ''}
-      ${s.status === 'Active' ? `<button class="btn-secondary" onclick="showStudentTransport('${esc(s.student_id)}')">🚌 ${t('stuTr.title')}</button>` : ''}
+      <div class="student-action-grid mt16">
+        <button class="btn-primary" data-id="${esc(s.student_id)}" onclick="openEditStudentModal(this.dataset.id)">✏️ ${t("common.edit")}</button>
+        <button class="btn-secondary" data-id="${esc(s.student_id)}" onclick="showStudentHistory(this.dataset.id)">🕘 History</button>
+        ${s.status === "Active" ? `<button class="btn-secondary" data-id="${esc(s.student_id)}" onclick="showStudentIdCard(this.dataset.id)">🪪 ${t("idCard.title")}</button>` : ""}
+        ${s.status === "Active" ? `<button class="btn-secondary" data-id="${esc(s.student_id)}" onclick="showHealthRecord(this.dataset.id)">🏥 ${t("students.btn.health")}</button>` : ""}
+        ${s.status === "Active" ? `<button class="btn-secondary" data-id="${esc(s.student_id)}" onclick="showStudentLibrary(this.dataset.id)">📚 ${t("stuLib.title")}</button>` : ""}
+        ${s.status === "Active" ? `<button class="btn-secondary" data-id="${esc(s.student_id)}" onclick="showStudentTransport(this.dataset.id)">🚌 ${t("stuTr.title")}</button>` : ""}
+        ${s.status === "Inactive" && window.APP.is_admin ? `<button class="btn-primary" data-id="${esc(s.student_id)}" onclick="reactivateStudent(this.dataset.id)">↻ Reactivate</button>` : ""}
+      </div>
       <button class="btn-secondary" onclick="closeModal()">${t('common.close')}</button>
     </div>`;
 
   openModal(html);
 };
 
+window.showStudentHistory = async function(studentId) {
+  const s = window.APP.students.find(x => x.student_id === studentId);
+  if (!s) return;
+  openModal(
+    "<div class=\"modal-sheet\" onclick=\"event.stopPropagation()\">"
+    + "<div class=\"modal-handle\"></div>"
+    + "<h3 class=\"modal-title\">Student History</h3>"
+    + "<div id=\"studentHistoryBody\">" + skeletonCards(2) + "</div>"
+    + "<button class=\"btn-secondary mt16\" data-id=\"" + esc(studentId) + "\" onclick=\"openStudentDetail(this.dataset.id)\">Back</button>"
+    + "</div>"
+  );
+  const el = document.getElementById("studentHistoryBody");
+  try {
+    const res = await API.getStudentHistory(studentId, 50);
+    if (!res?.ok) throw new Error(res?.message || res?.error || "History unavailable");
+    const rows = Array.isArray(res.history) ? res.history : [];
+    if (!rows.length) { el.innerHTML = "<div class=\"empty-state\">No history recorded yet.</div>"; return; }
+    el.innerHTML = rows.map(r =>
+      "<div class=\"mini-card\">"
+      + "<div style=\"display:flex;justify-content:space-between;gap:10px;align-items:flex-start\">"
+      + "<strong>" + esc(r.action || "student.change") + "</strong>"
+      + "<span class=\"muted-note\">" + esc(typeof fmtDateTime === "function" ? fmtDateTime(r.ts) : (r.ts || "")) + "</span>"
+      + "</div>"
+      + "<div class=\"muted-note\" style=\"margin-top:4px\">By " + esc(r.actor || "system") + " · " + esc(r.source || "web") + "</div>"
+      + "</div>"
+    ).join("");
+  } catch (e) {
+    el.innerHTML = "<div class=\"empty-state\">" + esc(t("common.loadFailed", { err: e.message || t("common.error") })) + "</div>";
+  }
+};
 function _detailRow(label, value) {
   return `<div class="detail-row"><span class="detail-lbl">${esc(label)}</span><span class="detail-val">${value}</span></div>`;
 }
