@@ -14,7 +14,7 @@ Object.assign(API, {
 
   async getStudents() {
     if (window.APP.platform === 'web') {
-      const res = await _webRpc('rpc_get_students', { p_session_token: getWebSession()?.session_token });
+      const res = await _webRpc('rpc_get_students', { p_session_token: _webSessionToken() });
       return res.rows;
     }
     return sbQuery('students',
@@ -99,7 +99,7 @@ Object.assign(API, {
 
   async setStudentPhoto(studentId, photoUrl) {
     return _webRpc('rpc_set_student_photo', {
-      p_session_token: getWebSession()?.session_token,
+      p_session_token: _webSessionToken(),
       p_student_id: studentId,
       p_photo_url: photoUrl,
     });
@@ -111,7 +111,7 @@ Object.assign(API, {
 
   async updateStudent(studentId, patch) {
     if (window.APP.platform === 'web') return _webRpc('rpc_update_student', {
-      p_session_token: getWebSession()?.session_token,
+      p_session_token: _webSessionToken(),
       p_student_id: studentId,
       p_name_local: patch.name_local || null,
       p_name_en:    patch.name_en,
@@ -158,7 +158,7 @@ Object.assign(API, {
 
   async deleteStudent(studentId) {
     if (window.APP.platform === 'web') return _webRpc('rpc_delete_student', {
-      p_session_token: getWebSession()?.session_token,
+      p_session_token: _webSessionToken(),
       p_student_id: studentId,
     });
 
@@ -220,21 +220,21 @@ Object.assign(API, {
 
   async getStudentById(studentId) {
     return _webRpc('rpc_get_student_by_id', {
-      p_session_token: getWebSession()?.session_token,
+      p_session_token: _webSessionToken(),
       p_student_id: studentId,
     });
   },
 
   async getOrCreateStudentQr(studentId) {
     return _webRpc('rpc_get_or_create_student_qr', {
-      p_session_token: getWebSession()?.session_token,
+      p_session_token: _webSessionToken(),
       p_student_id: studentId,
     });
   },
 
   async regenerateStudentQr(studentId) {
     return _webRpc('rpc_regenerate_student_qr', {
-      p_session_token: getWebSession()?.session_token,
+      p_session_token: _webSessionToken(),
       p_student_id: studentId,
     });
   },
