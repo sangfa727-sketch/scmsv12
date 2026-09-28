@@ -308,33 +308,68 @@ window.openManageClassesModal = function () {
     return;
   }
 
+  const cfg = window.APP.config || {};
   const classes = window.getClassList();
-  const grades  = window.getGradeList();
+  const grades = window.getGradeList();
+  const classGradeMap = (cfg.class_grade_map && typeof cfg.class_grade_map === 'object')
+    ? { ...cfg.class_grade_map } : {};
 
-  const renderList = (items, listKey) => items.length
-    ? items.map(v => `
-        <div class="cg-row">
-          <span class="cg-name">${esc(v)}</span>
-          <button class="cg-remove" onclick="_cgRemove('${esc(listKey)}','${esc(v)}')" aria-label="${esc(t('picker.remove'))}">×</button>
-        </div>`).join('')
-    : `<div class="cg-empty">${t('cg.none')}</div>`;
+  // Preserve existing school data: infer missing pairs from enrolled students.
+  (window.APP.students || []).forEach(s => {
+    if (s.class && s.grade && !classGradeMap[s.class]) classGradeMap[s.class] = s.grade;
+  });
+
+  const renderRows = () => {
+    const current = window.getClassList();
+    const map = window.APP.config?.class_grade_map || {};
+    return current.length
+      ? current.map(cls => `
+          <div class="cg-row cg-pair-row">
+            <div class="cg-pair-main">
+              <span class="cg-name">${esc(cls)}</span>
+              <span class="cg-pair-arrow">→</span>
+              <span class="cg-pair-grade">${esc(map[cls] || '—')}</span>
+            </div>
+            <button class="cg-remove" onclick="_cgRemoveClass('${esc(cls)}')" aria-label="${esc(t('picker.remove'))}">×</button>
+          </div>`).join('')
+      : `<div class="cg-empty">${t('cg.none')}</div>`;
+  };
+
+  window.APP.config.class_grade_map = classGradeMap;
 
   openModal(`
     <div class="modal-sheet" onclick="event.stopPropagation()">
       <div class="modal-handle"></div>
       <h3 class="modal-title">${t('more.classes')}</h3>
-      <p class="modal-subtitle">${t('cg.hint')}</p>
+      <p class="modal-subtitle">Class နဲ့ Grade ကို တစ်ခါတည်း စီမံနိုင်ပါတယ်။</p>
+
+      <div class="cg-pair-card">
+        <div class="cg-pair-card-title">Class + Grade</div>
+        <div class="cg-add-pair-row">
+          <div class="cg-add-field">
+            <label class="field-label">${t('cg.classes')}</label>
+            <input type="text" class="form-input" id="cgClassInput" placeholder="${esc(t('cg.classPh'))}" maxlength="20" autocomplete="off">
+          </div>
+          <div class="cg-add-field">
+            <label class="field-label">${t('cg.grades')}</label>
+            <input type="text" class="form-input" id="cgGradeInput" list="cgGradeSuggestions" placeholder="${esc(t('cg.gradePh'))}" maxlength="20" autocomplete="off">
+            <datalist id="cgGradeSuggestions">
+              ${grades.map(g => `<option value="${esc(g)}"></option>`).join('')}
+            </datalist>
+          </div>
+          <button type="button" class="btn-primary cg-add-pair-btn" onclick="_cgAddPair()">
+            ${t('common.add')}
+          </button>
+        </div>
+        <div class="form-help cg-pair-help">ဥပမာ — Grade 5 + Class A၊ Grade 5 + Class B၊ မူကြို + K1</div>
+      </div>
 
       <div class="cg-section">
         <div class="cg-section-head">
-          <span class="cg-section-title">${t('cg.classes')}</span>
-          <span class="cg-section-count">${classes.length}</span>
+          <span class="cg-section-title">Class → Grade</span>
+          <span class="cg-section-count" id="cgPairCount">${classes.length}</span>
         </div>
-        <div class="cg-list" id="cgClassList">${renderList(classes, 'classes')}</div>
-        <div class="cg-add-row">
-          <input type="text" class="form-input" id="cgClassInput" placeholder="${esc(t('cg.classPh'))}" maxlength="20">
-          <button class="btn-primary" onclick="_cgAdd('classes','cgClassInput')">${t('common.add')}</button>
-        </div>
+        <div class="cg-list" id="cgPairList">${renderRows()}</div>
       </div>
 
       <div class="cg-section">
@@ -342,47 +377,71 @@ window.openManageClassesModal = function () {
           <span class="cg-section-title">${t('cg.grades')}</span>
           <span class="cg-section-count">${grades.length}</span>
         </div>
-        <div class="cg-list" id="cgGradeList">${renderList(grades, 'grades')}</div>
-        <div class="cg-add-row">
-          <input type="text" class="form-input" id="cgGradeInput" placeholder="${esc(t('cg.gradePh'))}" maxlength="20">
-          <button class="btn-primary" onclick="_cgAdd('grades','cgGradeInput')">${t('common.add')}</button>
+        <div class="cg-grade-chips">
+          ${grades.length ? grades.map(g => `<span class="cg-grade-chip">${esc(g)}</span>`).join('') : `<span class="cg-empty">${t('cg.none')}</span>`}
         </div>
       </div>
 
       <button class="btn-secondary mt16" onclick="closeModal()">${t('common.done')}</button>
-    </div>
-  `);
+    </div>`
+  );
+
+  window._cgRenderRows = renderRows;
 };
 
-window._cgAdd = async function (listKey, inputId) {
-  const input = document.getElementById(inputId);
-  const v = (input?.value || '').trim();
-  if (!v) { showToast(t('picker.typeName')); return; }
+window._cgAddPair = async function () {
+  const classInput = document.getElementById('cgClassInput');
+  const gradeInput = document.getElementById('cgGradeInput');
+  const cls = (classInput?.value || '').trim();
+  const grade = (gradeInput?.value || '').trim();
+  if (!cls || !grade) {
+    showToast('Class နဲ့ Grade နှစ်ခုလုံးထည့်ပါ');
+    return;
+  }
+
   const cfg = window.APP.config || {};
-  const cur = Array.isArray(cfg[listKey]) ? cfg[listKey].slice() : window[listKey === 'classes' ? 'getClassList' : 'getGradeList']();
-  if (cur.includes(v)) { showToast(t('cg.exists')); return; }
-  cur.push(v);
-  await _cgSave(listKey, cur);
-  // Re-open to refresh
-  closeModal();
-  setTimeout(openManageClassesModal, 200);
+  const classes = Array.isArray(cfg.classes) ? cfg.classes.slice() : window.getClassList();
+  const grades = Array.isArray(cfg.grades) ? cfg.grades.slice() : window.getGradeList();
+  const map = (cfg.class_grade_map && typeof cfg.class_grade_map === 'object') ? { ...cfg.class_grade_map } : {};
+
+  if (!classes.includes(cls)) classes.push(cls);
+  if (!grades.includes(grade)) grades.push(grade);
+  map[cls] = grade;
+
+  await _cgSavePaired({ classes, grades, class_grade_map: map });
+
+  const list = document.getElementById('cgPairList');
+  if (list && typeof window._cgRenderRows === 'function') list.innerHTML = window._cgRenderRows();
+  const count = document.getElementById('cgPairCount');
+  if (count) count.textContent = classes.length;
+  if (classInput) classInput.value = '';
+  if (gradeInput) gradeInput.value = '';
+  classInput?.focus();
 };
 
-window._cgRemove = async function (listKey, value) {
-  if (!confirm(t('cg.confirmRemove', { value, list: t('picker.list.' + listKey) }))) return;
+window._cgRemoveClass = async function (cls) {
+  if (!confirm(t('cg.confirmRemove', { value: cls, list: t('picker.list.classes') }))) return;
+
   const cfg = window.APP.config || {};
-  const cur = Array.isArray(cfg[listKey]) ? cfg[listKey] : window[listKey === 'classes' ? 'getClassList' : 'getGradeList']();
-  await _cgSave(listKey, cur.filter(x => x !== value));
-  closeModal();
-  setTimeout(openManageClassesModal, 200);
+  const classes = (Array.isArray(cfg.classes) ? cfg.classes : window.getClassList()).filter(x => x !== cls);
+  const grades = Array.isArray(cfg.grades) ? cfg.grades.slice() : window.getGradeList();
+  const map = (cfg.class_grade_map && typeof cfg.class_grade_map === 'object') ? { ...cfg.class_grade_map } : {};
+  delete map[cls];
+
+  await _cgSavePaired({ classes, grades, class_grade_map: map });
+
+  const list = document.getElementById('cgPairList');
+  if (list && typeof window._cgRenderRows === 'function') list.innerHTML = window._cgRenderRows();
+  const count = document.getElementById('cgPairCount');
+  if (count) count.textContent = classes.length;
 };
 
-async function _cgSave(listKey, updated) {
+async function _cgSavePaired(updated) {
   try {
-    const res = await API.updateSchoolConfig({ [listKey]: updated });
+    const res = await API.updateSchoolConfig(updated);
     if (res && (res.ok === true || res.success === true)) {
       window.APP.config = window.APP.config || {};
-      window.APP.config[listKey] = updated;
+      Object.assign(window.APP.config, updated);
       showToast(t('common.saved'));
     } else {
       showToast(t('common.saveFailedShort'));
