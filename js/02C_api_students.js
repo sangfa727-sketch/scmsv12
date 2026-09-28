@@ -222,6 +222,14 @@ Object.assign(API, {
   /** Upload an image Blob to school-assets, return its public URL.
    *  kind: 'logo' | 'cover' | 'teacher'. Every upload gets a unique path — never overwrites. */
 
+  async getStudentHistory(studentId, limit = 50) {
+    return _webRpc('rpc_get_student_history', {
+      p_session_token: _webSessionToken(),
+      p_student_id: studentId,
+      p_limit: limit,
+    });
+  },
+
   async getStudentById(studentId) {
     return _webRpc('rpc_get_student_by_id', {
       p_session_token: _webSessionToken(),
