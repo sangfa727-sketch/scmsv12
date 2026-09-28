@@ -132,8 +132,13 @@ window.openTeacherManager = async function() {
     _renderTeacherList(res.rows || []);
   } catch (e) {
     const msg = e?.message || String(e);
-    document.getElementById('teacherList').innerHTML =
-      `<div class="form-error">${esc(t('tm.loadFailed'))}<br><small>${esc(msg.slice(0, 180))}</small></div>`;
+    const listEl = document.getElementById('teacherList');
+    // The modal may have been closed while the request was in flight.
+    // Never let that race turn into a second UI exception.
+    if (listEl) {
+      listEl.innerHTML =
+        `<div class="form-error">${esc(t('tm.loadFailed'))}<br><small>${esc(msg.slice(0, 180))}</small></div>`;
+    }
   }
 };
 
