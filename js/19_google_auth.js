@@ -525,7 +525,7 @@ window.startTelegramConnect = async function () {
   if (btn) { btn.disabled = true; btn.textContent = t('boot.openingTg'); }
 
   try {
-    const result = await _webRpc('rpc_telegram_connect_start', { p_session_token: sess.session_token });    const result = await resp.json();
+    const result = await _webRpc('rpc_telegram_connect_start', { p_session_token: sess.session_token });
     if (!result || !result.ok) {
       if (statusEl) statusEl.textContent = result?.message || t('tg.connectFailed');
       if (btn) { btn.disabled = false; btn.textContent = t('tg.openTelegram'); }
@@ -562,7 +562,7 @@ function _startTelegramConnectPolling(sessionToken, connectToken) {
       return;
     }
     try {
-      const result = await _webRpc('rpc_telegram_connect_finish', { p_session_token: sessionToken, p_connect_token: connectToken });      const result = await resp.json();
+      const result = await _webRpc('rpc_telegram_connect_finish', { p_session_token: sessionToken, p_connect_token: connectToken });
       if (result && result.ok) {
         _stopTelegramConnectPolling();
         if (window.APP) window.APP.telegram_id = result.telegram_id;
@@ -615,7 +615,7 @@ window._doDisconnectTelegramConfirmed = async function () {
   if (!sess || !sess.session_token) return;
 
   try {
-    const result = await _webRpc('rpc_telegram_disconnect', { p_session_token: sess.session_token });    const result = await resp.json();
+    const result = await _webRpc('rpc_telegram_disconnect', { p_session_token: sess.session_token });
     if (result && result.ok) {
       if (window.APP) window.APP.telegram_id = null;
       showToast?.(t('tg.disconnected'));
