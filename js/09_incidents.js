@@ -130,8 +130,10 @@ function _renderIncidentForm() {
         <input type="checkbox" id="incNotify" class="toggle-check">
       </label>
 
-      <button class="btn-primary mt16" id="saveIncBtn" onclick="saveIncident()">${t('btn.save')}</button>
-      <button class="btn-secondary" onclick="closeModal()">${t('common.cancel')}</button>
+      <div class="modal-footer">
+<button class="btn-primary mt16" id="saveIncBtn" onclick="saveIncident()">${t('btn.save')}</button>
+<button class="btn-secondary" onclick="closeModal()">${t('common.cancel')}</button>
+</div>
     </div>`;
 
   openModal(html);
@@ -208,8 +210,10 @@ window.openEditIncident = function(id) {
         ${t('inc.parentNotified')}
       </label>
 
-      <button class="btn-primary mt16" id="saveEincBtn" onclick="saveEditIncident('${esc(id)}')">${t('common.saveChanges')}</button>
-      <button class="btn-secondary" onclick="closeModal()">${t('common.cancel')}</button>
+      <div class="modal-footer">
+<button class="btn-primary mt16" id="saveEincBtn" onclick="saveEditIncident('${esc(id)}')">${t('common.saveChanges')}</button>
+<button class="btn-secondary" onclick="closeModal()">${t('common.cancel')}</button>
+</div>
     </div>
   `);
 };
