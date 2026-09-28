@@ -328,15 +328,6 @@ function _startLoginPolling(token) {
       // Primary: look up the exact token the app generated.
       let session = await _checkSession(token);
 
-      // Fallback: if the deep-link dropped the start param (some Telegram
-      // clients / native handoffs do this), the bot may have created a row
-      // under a DIFFERENT token but with our flow still pending. In that case
-      // we detect the most-recent freshly-linked session and adopt it.
-      // This only triggers after a few seconds to avoid grabbing a stale row.
-      if ((!session || !session.telegram_id) && _loginPollCount >= 2) {
-        session = await _checkRecentLinkedSession();
-      }
-
       if (session && session.telegram_id) {
         // ✓ Authenticated
         _stopLoginPolling();
@@ -358,43 +349,24 @@ function _stopLoginPolling() {
 }
 
 async function _checkSession(token) {
-  const url = `${SCMS_CONFIG.SUPABASE_URL}/rest/v1/app_sessions`
-            + `?token=eq.${encodeURIComponent(token)}`
-            + `&select=token,telegram_id,teacher_id,school_id,status,teacher_name`;
-  const resp = await fetch(url, {
-    headers: {
-      'apikey':        SCMS_CONFIG.SUPABASE_ANON,
-      'Authorization': `Bearer ${SCMS_CONFIG.SUPABASE_ANON}`,
-    },
-  });
-  if (!resp.ok) return null;
-  const rows = await resp.json();
-  return rows[0] || null;
-}
-
-/**
- * Fallback: find a session row that was linked within the last 3 minutes.
- * Used when the deep-link's start param was dropped so the bot's row uses a
- * token we don't know. Since the bot only links a session when a real teacher
- * presses Start in THIS login window, adopting the freshest linked row is safe
- * for a single-user device. We pick the most recently linked row.
- */
-async function _checkRecentLinkedSession() {
-  const threeMinAgo = new Date(Date.now() - 3 * 60 * 1000).toISOString();
-  const url = `${SCMS_CONFIG.SUPABASE_URL}/rest/v1/app_sessions`
-            + `?status=eq.linked`
-            + `&linked_at=gte.${encodeURIComponent(threeMinAgo)}`
-            + `&order=linked_at.desc&limit=1`
-            + `&select=token,telegram_id,teacher_id,school_id,status,teacher_name,linked_at`;
-  const resp = await fetch(url, {
-    headers: {
-      'apikey':        SCMS_CONFIG.SUPABASE_ANON,
-      'Authorization': `Bearer ${SCMS_CONFIG.SUPABASE_ANON}`,
-    },
-  });
-  if (!resp.ok) return null;
-  const rows = await resp.json();
-  return rows[0] || null;
+  if (!token) return null;
+  try {
+    const url = SCMS_CONFIG.SUPABASE_URL + '/rest/v1/rpc/rpc_app_session_poll';
+    const resp = await fetch(url, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'apikey': SCMS_CONFIG.SUPABASE_ANON,
+        'Authorization': 'Bearer ' + SCMS_CONFIG.SUPABASE_ANON,
+      },
+      body: JSON.stringify({ p_token: token }),
+    });
+    if (!resp.ok) return null;
+    const result = await resp.json();
+    return result?.ok && result?.linked ? (result.session || null) : null;
+  } catch (_e) {
+    return null;
+  }
 }
 
 function _setPendingSub(text) {
