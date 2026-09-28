@@ -553,30 +553,30 @@ window.clearWebSession = function () {
 window.verifyWebSession = async function () {
   const sess = getWebSession();
   if (!sess || !sess.session_token) return null;
-
+  const controller = new AbortController();
+  const timer = setTimeout(() => controller.abort(), 10000);
   try {
     const resp = await fetch(`${SCMS_CONFIG.SUPABASE_URL}/rest/v1/rpc/rpc_web_session_verify`, {
       method: 'POST',
       headers: {
-        'apikey':        SCMS_CONFIG.SUPABASE_ANON,
+        'apikey': SCMS_CONFIG.SUPABASE_ANON,
         'Authorization': `Bearer ${SCMS_CONFIG.SUPABASE_ANON}`,
-        'Content-Type':  'application/json',
+        'Content-Type': 'application/json',
       },
       body: JSON.stringify({ p_session_token: sess.session_token }),
+      signal: controller.signal,
     });
-    const result = await resp.json();
+    const result = await resp.json().catch(() => null);
+    if (!resp.ok) throw new Error(`HTTP ${resp.status}`);
     if (!result || !result.ok) {
       clearWebSession();
       return null;
     }
-    // Refresh local cache with the verified data — write back to whichever
-    // storage it actually came from (localStorage = remembered, sessionStorage
-    // = "remember me" was unchecked).
     const updated = {
       ...sess,
-      teacher_name:         result.teacher_name,
-      role:                 result.role,
-      school_id:            result.school_id,
+      teacher_name: result.teacher_name,
+      role: result.role,
+      school_id: result.school_id,
       must_change_password: result.must_change_password,
     };
     try {
@@ -585,9 +585,14 @@ window.verifyWebSession = async function () {
     } catch (e) {}
     return updated;
   } catch (e) {
-    return null;
+    if (e?.name === 'AbortError') throw new Error('Session verification timed out. Please retry.');
+    throw e;
+  } finally {
+    clearTimeout(timer);
   }
 };
+
+window.webLogout = async function ()
 
 window.webLogout = async function () {
   const sess = getWebSession();
