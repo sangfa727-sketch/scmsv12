@@ -52,3 +52,19 @@ test('web login stores the server-issued session token and role metadata', () =>
   assert.match(block, /role: result.role/);
   assert.doesNotMatch(block, /password: result/);
 });
+
+
+test('session-bound backend contract is explicit for bootstrap and verification', () => {
+  const source = read('js/02A_api_core.js');
+  assert.match(source, /p_session_token/);
+  const app = read('js/14_app.js');
+  assert.match(app, /APPStore\.patch\('session'/);
+  assert.match(app, /sessionToken:/);
+});
+
+test('admin role compatibility is explicit at the UI/backend boundary', () => {
+  const settings = read('js/15_settings.js');
+  const app = read('js/14_app.js');
+  assert.match(settings, /window\.APP\.is_admin/);
+  assert.match(app, /window\.APP\.is_admin/);
+});
