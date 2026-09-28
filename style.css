@@ -5222,3 +5222,15 @@ html[lang="my"] .field-label {
     max-width: 94vw !important;
   }
 }
+
+
+.settings-form-sheet {
+  width: min(94vw, 440px) !important;
+  max-width: 440px !important;
+}
+.settings-form-sheet .form-input {
+  min-height: 40px;
+}
+@media (max-width: 600px) {
+  .settings-form-sheet { width: 94vw !important; max-width: 94vw !important; }
+}
