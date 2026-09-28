@@ -61,26 +61,32 @@ Object.assign(API, {
    *  in one call. Doesn't depend on n8n. */
 
   async bootstrapByTeacher(teacher_id, session_token) {
-    const resp = await fetch(`${SCMS_CONFIG.SUPABASE_URL}/rest/v1/rpc/rpc_web_bootstrap`, {
-      method:  'POST',
-      headers: {
-        'apikey':        SCMS_CONFIG.SUPABASE_ANON,
-        'Authorization': `Bearer ${SCMS_CONFIG.SUPABASE_ANON}`,
-        'Content-Type':  'application/json',
-      },
-      body: JSON.stringify({
-        p_session_token: session_token,
-      }),
-    });
-    if (!resp.ok) {
-      const txt = await resp.text().catch(() => '');
-      throw new Error(`HTTP ${resp.status} ${txt.slice(0, 200)}`);
+    const controller = new AbortController();
+    const timer = setTimeout(() => controller.abort(), 15000);
+    try {
+      const resp = await fetch(`${SCMS_CONFIG.SUPABASE_URL}/rest/v1/rpc/rpc_web_bootstrap`, {
+        method:  'POST',
+        headers: {
+          'apikey':        SCMS_CONFIG.SUPABASE_ANON,
+          'Authorization': `Bearer ${SCMS_CONFIG.SUPABASE_ANON}`,
+          'Content-Type':  'application/json',
+        },
+        body: JSON.stringify({ p_session_token: session_token }),
+        signal: controller.signal,
+      });
+      if (!resp.ok) {
+        const txt = await resp.text().catch(() => '');
+        throw new Error(`HTTP ${resp.status} ${txt.slice(0, 200)}`);
+      }
+      const result = await resp.json();
+      if (!result || !result.ok) throw new Error((result && result.message) || 'Web bootstrap failed');
+      return result;
+    } catch (e) {
+      if (e?.name === 'AbortError') throw new Error('Web bootstrap timed out. Please retry.');
+      throw e;
+    } finally {
+      clearTimeout(timer);
     }
-    const result = await resp.json();
-    if (!result || !result.ok) {
-      throw new Error((result && result.message) || 'Web bootstrap failed');
-    }
-    return result;
   },
 
   // ─── ATTENDANCE ──────────────────────────────────────────────────────────
