@@ -4,14 +4,14 @@ var API = window.API || {};
 Object.assign(API, {
   async getHealthProfile(studentId) {
       return _webRpc('rpc_get_health_profile', {
-        p_session_token: getWebSession()?.session_token,
+        p_session_token: _webSessionToken(),
         p_student_id: studentId,
       });
     },
   
   async upsertHealthProfile(studentId, data) {
       return _webRpc('rpc_upsert_health_profile', {
-        p_session_token: getWebSession()?.session_token,
+        p_session_token: _webSessionToken(),
         p_student_id: studentId,
         p_blood_type: data.blood_type || null,
         p_allergies: data.allergies || null,
@@ -27,7 +27,7 @@ Object.assign(API, {
   
   async addVaccination(studentId, data) {
       return _webRpc('rpc_add_vaccination', {
-        p_session_token: getWebSession()?.session_token,
+        p_session_token: _webSessionToken(),
         p_student_id: studentId,
         p_vaccine_name: data.vaccine_name,
         p_date_given: data.date_given || null,
@@ -36,12 +36,12 @@ Object.assign(API, {
     },
   
   async deleteVaccination(id) {
-      return _webRpc('rpc_delete_vaccination', { p_session_token: getWebSession()?.session_token, p_id: id });
+      return _webRpc('rpc_delete_vaccination', { p_session_token: _webSessionToken(), p_id: id });
     },
   
   async addHealthVisit(studentId, data) {
       return _webRpc('rpc_add_health_visit', {
-        p_session_token: getWebSession()?.session_token,
+        p_session_token: _webSessionToken(),
         p_student_id: studentId,
         p_date: data.date || null,
         p_reason: data.reason,
@@ -51,7 +51,7 @@ Object.assign(API, {
     },
   
   async deleteHealthVisit(id) {
-      return _webRpc('rpc_delete_health_visit', { p_session_token: getWebSession()?.session_token, p_id: id });
+      return _webRpc('rpc_delete_health_visit', { p_session_token: _webSessionToken(), p_id: id });
     },
   
     // ─── LIBRARY ────────────────────────────────────────────────────────────
