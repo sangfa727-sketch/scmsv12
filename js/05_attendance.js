@@ -59,6 +59,7 @@ function _renderDateStrip() {
 window.selectAttendDate = function(iso) {
   _attendDate  = iso;
   _attendMarks = {};
+  _attendNotes = {};
   _renderDateStrip();
   if (_attendClass) _renderAttendGrid(_attendClass);
 };
@@ -108,6 +109,7 @@ function _renderAttendClassChips() {
 window.selectAttendClass = function(cls) {
   _attendClass = cls;
   _attendMarks = {};
+  _attendNotes = {};
   _attendNotes = {};
   document.querySelectorAll('#attendClassChips .chip').forEach(b => {
     b.classList.toggle('active', b.dataset.class === cls);
