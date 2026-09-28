@@ -72,8 +72,10 @@ window.openNewRouteModal = function() {
         <div><label class="field-label">${t('tr.vehicle')}</label><input class="form-input" id="nrVehicle" placeholder="${esc(t('tr.vehiclePh'))}"></div>
         <div class="full-span"><label class="field-label">${t('health.notes')}</label><input class="form-input" id="nrNotes" placeholder="${esc(t('health.medicationsOpt'))}"></div>
       </div>
-      <button class="btn-primary mt16" id="nrSaveBtn" onclick="_saveNewRoute()">${t('tr.add')}</button>
-      <button class="btn-secondary" onclick="closeModal()">${t('common.cancel')}</button>
+      <div class="modal-footer">
+<button class="btn-primary mt16" id="nrSaveBtn" onclick="_saveNewRoute()">${t('tr.add')}</button>
+<button class="btn-secondary" onclick="closeModal()">${t('common.cancel')}</button>
+</div>
     </div>
   `);
 };
@@ -148,8 +150,10 @@ function _renderRouteDetailView(id, students) {
       </div>
     `).join('') : `<p class="muted-note">${t('tr.noStudents')}</p>`}
 
-    <button class="btn-primary mt16" onclick="_showAssignStudentView(${id})">${t('tr.assign')}</button>
-    <button class="btn-secondary" onclick="_showEditRouteView(${id})">${t('tr.editRoute')}</button>
+    <div class="modal-footer">
+<button class="btn-primary mt16" onclick="_showAssignStudentView(${id})">${t('tr.assign')}</button>
+<button class="btn-secondary" onclick="_showEditRouteView(${id})">${t('tr.editRoute')}</button>
+</div>
     <button class="btn-secondary" onclick="_confirmDeleteRoute(${id})">${t('tr.deleteRoute')}</button>
   `;
 }
@@ -172,8 +176,10 @@ window._showEditRouteView = function(id) {
     <input class="form-input" id="erVehicle" value="${esc(r.vehicle_info || '')}">
     <label class="field-label">${t('health.notes')}</label>
     <input class="form-input" id="erNotes" value="${esc(r.notes || '')}">
-    <button class="btn-primary mt16" id="erSaveBtn" onclick="_saveEditRoute(${id})">${t('common.saveChanges')}</button>
-    <button class="btn-secondary" onclick="_loadRouteDetail(${id})">${t('common.cancel')}</button>
+    <div class="modal-footer">
+<button class="btn-primary mt16" id="erSaveBtn" onclick="_saveEditRoute(${id})">${t('common.saveChanges')}</button>
+<button class="btn-secondary" onclick="_loadRouteDetail(${id})">${t('common.cancel')}</button>
+</div>
   `;
 };
 
@@ -217,8 +223,10 @@ window._showAssignStudentView = function(id) {
     <input class="form-input" id="asPickupTime" type="time">
     <label class="field-label">${t('tr.dropoffTime')}</label>
     <input class="form-input" id="asDropoffTime" type="time">
-    <button class="btn-primary mt16" id="asSaveBtn" onclick="_saveAssignStudent(${id})">${t('tr.assignBtn')}</button>
-    <button class="btn-secondary" onclick="_loadRouteDetail(${id})">${t('common.cancel')}</button>
+    <div class="modal-footer">
+<button class="btn-primary mt16" id="asSaveBtn" onclick="_saveAssignStudent(${id})">${t('tr.assignBtn')}</button>
+<button class="btn-secondary" onclick="_loadRouteDetail(${id})">${t('common.cancel')}</button>
+</div>
   `;
 };
 
