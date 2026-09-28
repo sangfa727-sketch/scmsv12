@@ -34,7 +34,7 @@ window.openSettings = function() {
           ${isAdmin ? `
             <div class="settings-action-row">
               <div class="settings-action-copy"><strong>${t('settings.manageTeachers')}</strong></div>
-              <button type="button" class="settings-action-button settings-action-primary" onclick="closeModal(); openTeacherManager()">${t('settings.manageTeachers')}</button>
+              <button type="button" class="settings-action-button settings-action-primary" onclick="closeModal(); setTimeout(() => openTeacherManager(), 190)>${t('settings.manageTeachers')}</button>
             </div>
           ` : ''}
 
@@ -203,22 +203,27 @@ window.doGenerateInvite = async function() {
   const name = document.getElementById('invTName')?.value.trim() || null;
   const role = document.getElementById('invTRole')?.value;
   const btn = document.getElementById('invGenBtn');
+  if (!btn || btn.disabled) return;
+
   btn.disabled = true;
   btn.textContent = t('inv.generating');
 
-  const result = await createTeacherInvite(role, name);
+  try {
+    const result = await createTeacherInvite(role, name);
+    if (!result || !result.ok) {
+      showToast(t('inv.failed', { err: result?.message || result?.error || t('common.unknown') }));
+      return;
+    }
 
-  btn.disabled = false;
-  btn.textContent = t('inv.generate');
-
-  if (!result || !result.ok) {
-    showToast(t('inv.failed', { err: result?.message || result?.error || t('common.unknown') }));
-    return;
+    document.getElementById('invCodeResult').style.display = 'block';
+    document.getElementById('invCodeValue').textContent = result.invite_code;
+    await _loadPastInvites();
+  } catch (e) {
+    showToast(t('inv.failed', { err: e?.message || t('common.unknown') }));
+  } finally {
+    btn.disabled = false;
+    btn.textContent = t('inv.generate');
   }
-
-  document.getElementById('invCodeResult').style.display = 'block';
-  document.getElementById('invCodeValue').textContent = result.invite_code;
-  _loadPastInvites();
 };
 
 async function _loadPastInvites() {
