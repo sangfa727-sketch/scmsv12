@@ -16,8 +16,7 @@
     "test": "npm run test:syntax && npm run test:static",
     "test:syntax": "node test/scripts/check-js-syntax.js",
     "test:static": "node --test test/unit/regressions.test.js",
-    "test:e2e": "playwright test",
-    "test:all": "npm test && npm run test:e2e"
+    "test:e2e": "playwright test"
   },
   "devDependencies": {
     "@capacitor/cli": "^6.0.0",
