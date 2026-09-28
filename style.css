@@ -5058,7 +5058,7 @@ html,body,#app,#pages{width:100%;max-width:100%;overflow-x:hidden!important}
 @media (max-width:380px){
 .page-header{padding-left:10px;padding-right:10px}.stats-grid{gap:6px;padding-left:10px;padding-right:10px}.list-card{margin-left:10px;margin-right:10px}
 /* Keep the compact form baseline; do not expand modal sheets to 95vw. */
-.modal-sheet:has(.form-input, .form-textarea, .picker-trigger, input, select, textarea){width:94vw!important;max-width:94vw!important}
+.modal-sheet:has(.form-input, .form-textarea, .picker-trigger, input, select, textarea){width:92vw!important;max-width:92vw!important}
 #pages .btn-primary,#pages .btn-secondary,#pages .btn-danger{font-size:12px}
 }
 
