@@ -100,8 +100,10 @@ window.openNewBookModal = function() {
         <div><label class="field-label">${t('lib.copies')}</label><input class="form-input" id="nbCopies" type="number" min="1" value="1"></div>
         <div><label class="field-label">${t('health.notes')}</label><input class="form-input" id="nbNotes" placeholder="${esc(t('health.medicationsOpt'))}"></div>
       </div>
-      <button class="btn-primary mt16" id="nbSaveBtn" onclick="_saveNewBook()">${t('lib.add')}</button>
-      <button class="btn-secondary" onclick="closeModal()">${t('common.cancel')}</button>
+      <div class="modal-footer">
+<button class="btn-primary mt16" id="nbSaveBtn" onclick="_saveNewBook()">${t('lib.add')}</button>
+<button class="btn-secondary" onclick="closeModal()">${t('common.cancel')}</button>
+</div>
     </div>
   `);
 };
@@ -173,7 +175,8 @@ function _renderBookDetailView(id, checkouts) {
     </div>
     ${b.notes ? `<p class="billing-notes">${esc(b.notes)}</p>` : ''}
 
-    ${b.available_copies > 0 ? `<button class="btn-primary mt16" onclick="_showCheckoutView(${id})">${t('lib.checkoutBtn')}</button>` : ''}
+    ${b.available_copies > 0 ? `<div class="modal-footer">
+<button class="btn-primary mt16" onclick="_showCheckoutView(${id})">${t('lib.checkoutBtn')}</button>` : ''}
 
     <div class="billing-section-title mt16">${t('lib.currentlyOut')}</div>
     ${active.length ? active.map(c => `
@@ -194,7 +197,8 @@ function _renderBookDetailView(id, checkouts) {
     ` : ''}
 
     <button class="btn-secondary mt16" onclick="_showEditBookView(${id})">${t('lib.editTitle')}</button>
-    <button class="btn-secondary" onclick="_confirmDeleteBook(${id})">${t('lib.delTitle').replace('🗑 ', '').replace('?','')}</button>
+<button class="btn-secondary" onclick="_confirmDeleteBook(${id})">${t('lib.delTitle').replace('🗑 ', '').replace('?','')}</button>
+</div>
   `;
 }
 
@@ -218,8 +222,10 @@ window._showEditBookView = function(id) {
     <input class="form-input" id="ebCopies" type="number" min="0" value="${esc(String(b.total_copies))}">
     <label class="field-label">${t('health.notes')}</label>
     <input class="form-input" id="ebNotes" value="${esc(b.notes || '')}">
-    <button class="btn-primary mt16" id="ebSaveBtn" onclick="_saveEditBook(${id})">${t('common.saveChanges')}</button>
-    <button class="btn-secondary" onclick="_loadBookDetail(${id})">${t('common.cancel')}</button>
+    <div class="modal-footer">
+<button class="btn-primary mt16" id="ebSaveBtn" onclick="_saveEditBook(${id})">${t('common.saveChanges')}</button>
+<button class="btn-secondary" onclick="_loadBookDetail(${id})">${t('common.cancel')}</button>
+</div>
   `;
 };
 
@@ -260,8 +266,10 @@ window._showCheckoutView = function(id) {
     <input type="hidden" id="coStudentId" value="">
     <label class="field-label">${t('bill.dueDate')}</label>
     <input class="form-input" id="coDueDate" type="date">
-    <button class="btn-primary mt16" id="coSaveBtn" onclick="_saveCheckout(${id})">${t('lib.checkoutBtn2')}</button>
-    <button class="btn-secondary" onclick="_loadBookDetail(${id})">${t('common.cancel')}</button>
+    <div class="modal-footer">
+<button class="btn-primary mt16" id="coSaveBtn" onclick="_saveCheckout(${id})">${t('lib.checkoutBtn2')}</button>
+<button class="btn-secondary" onclick="_loadBookDetail(${id})">${t('common.cancel')}</button>
+</div>
   `;
 };
 
