@@ -98,7 +98,7 @@ function _renderIncidentForm() {
   const severities = window.APP.config?.severities || ['Info','Low','Medium','High'];
 
   const html = `
-    <div class="modal-sheet" onclick="event.stopPropagation()">
+    <div class="modal-sheet incident-form-sheet" onclick="event.stopPropagation()">
       <div class="modal-handle"></div>
       <h3 class="modal-title">${t('inc.logTitle')}</h3>
 
