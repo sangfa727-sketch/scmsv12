@@ -99,6 +99,25 @@ workflow, or new feature is exercised.
 Client-side feature flags are UI controls, not authorization controls. Sensitive
 features must also be protected by backend authorization.
 
+## 4. Frontend feature isolation (implemented)
+
+Feature additions must be scoped to their owning page/module.
+
+- New page-specific CSS must use a page root (for example `#page-...`) or a
+  feature-specific class prefix. Avoid broad selectors such as `.card`,
+  `.button`, `.list-card`, or bare `button` when the change belongs to one
+  feature.
+- Settings-specific styling is currently guarded by automated tests so its
+  selectors remain Settings-scoped.
+- Settings code must not directly mutate unrelated page containers, global
+  styles, or shared feature collections. Shared application identity/state is
+  exposed through the central store and existing application boundary.
+- New feature UI should be rendered inside its page/modal root and should not
+  rely on global DOM queries for unrelated components.
+- Regression tests are part of the feature contract. A feature is not
+  considered isolated merely because it looks correct on the developer's
+  screen.
+
 ## 4. Tenant isolation
 
 Every authenticated request must derive school/tenant identity from the
