@@ -1,6 +1,6 @@
 /** SCMS v12 — 02H_api_communication.js */
 'use strict';
-const API = window.API || {};
+var API = window.API || {};
 Object.assign(API, {
   async sendParentComm(data) {
       if (window.APP.platform === 'web') return _webRpc('rpc_send_parent_comm', {
