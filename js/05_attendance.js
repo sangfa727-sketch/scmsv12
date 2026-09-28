@@ -147,11 +147,17 @@ function _renderAttendGrid(cls) {
     return;
   }
 
-  // Pre-fill marks from existing attendance data
+  // Pre-fill marks AND notes from persisted attendance data.
+  // Notes must be hydrated here; otherwise they disappear whenever the row
+  // is re-rendered, the date/class changes, or the app is reopened.
   const existing = window.APP.attendance.filter(
     a => a.class === cls && a.date === _attendDate
   );
-  existing.forEach(a => { _attendMarks[a.student_id] = a.status; });
+  existing.forEach(a => {
+    _attendMarks[a.student_id] = a.status;
+    if (a.note) _attendNotes[a.student_id] = a.note;
+    else delete _attendNotes[a.student_id];
+  });
 
   const codes = _getAttendanceCodes();
 
@@ -246,13 +252,61 @@ window.openAttendNote = function(studentId) {
   setTimeout(() => document.getElementById('attNoteInput')?.focus(), 100);
 };
 
-window.saveAttendNote = function(studentId) {
+window.saveAttendNote = async function(studentId) {
   const txt = document.getElementById('attNoteInput')?.value.trim() || '';
-  if (txt) _attendNotes[studentId] = txt;
-  else delete _attendNotes[studentId];
-  closeModal();
-  if (_attendClass) _renderAttendGrid(_attendClass);
-  showToast(t(txt ? 'att.noteSaved' : 'att.noteRemoved'));
+  const oldNote = _attendNotes[studentId] || '';
+  if (txt === oldNote) {
+    closeModal();
+    return;
+  }
+
+  if (!_attendClass) return;
+
+  const students = window.APP.students.filter(
+    s => s.class === _attendClass && s.status === 'Active'
+  );
+  const existing = window.APP.attendance.filter(
+    a => a.class === _attendClass && a.date === _attendDate
+  );
+  const byStudent = new Map(existing.map(a => [a.student_id, a]));
+
+  // Persist the note immediately using the same atomic attendance save route.
+  // Preserve every existing status/note so editing one note never overwrites
+  // another student's attendance.
+  const records = students.map(s => {
+    const row = byStudent.get(s.student_id);
+    const isEdited = s.student_id === studentId;
+    return {
+      student_id: s.student_id,
+      status: _attendMarks[s.student_id] || row?.status || 'P',
+      note: isEdited ? (txt || null) : (_attendNotes[s.student_id] || row?.note || null),
+    };
+  });
+
+  try {
+    await API.saveAttendance(_attendClass, _attendDate, records);
+
+    _attendNotes[studentId] = txt;
+    if (!txt) delete _attendNotes[studentId];
+
+    const kept = window.APP.attendance.filter(
+      a => !(a.class === _attendClass && a.date === _attendDate)
+    );
+    const savedRows = records.map(r => ({
+      ...r,
+      class: _attendClass,
+      date: _attendDate,
+      school_id: window.APP.school_id,
+      teacher_id: window.APP.teacher_id,
+    }));
+    window.APP.attendance = [...kept, ...savedRows];
+
+    closeModal();
+    _renderAttendGrid(_attendClass);
+    showToast(t(txt ? 'att.noteSaved' : 'att.noteRemoved'));
+  } catch (e) {
+    showToast(t('att.saveFailed', { err: e.message || t('common.networkError') }));
+  }
 };
 
 window.markAllAttend = function(code) {
