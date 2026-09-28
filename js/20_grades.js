@@ -215,7 +215,7 @@ window.openNewAssessmentModal = function() {
   if (!_gradesClass) { showToast(t('grades.pickClass')); return; }
 
   openModal(`
-    <div class="modal-sheet" onclick="event.stopPropagation()">
+    <div class="modal-sheet grades-form-sheet" onclick="event.stopPropagation()">
       <div class="modal-handle"></div>
       <h3 class="modal-title">${t('grades.newTitle')}</h3>
       <p class="modal-subtitle">${esc(_gradesClass)}</p>
