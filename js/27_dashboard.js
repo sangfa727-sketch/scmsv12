@@ -188,6 +188,7 @@ function _paintDashboard(container) {
         </div>
       </div>`).join('')}` : ''}
   `;
+  _dashboardWrapCardGroups(container);
 }
 
 // _classColor(cls) is reused as-is from js/04_students.js — same
@@ -207,4 +208,20 @@ function _isoDaysAgo(n) {
   const d = new Date();
   d.setDate(d.getDate() - n);
   return d.toISOString().slice(0, 10);
+}
+
+
+function _dashboardWrapCardGroups(container) {
+  const titles = Array.from(container.querySelectorAll('.more-section-title'));
+  for (const title of titles) {
+    const grid = document.createElement('div');
+    grid.className = 'dashboard-list-grid';
+    let node = title.nextElementSibling;
+    while (node && !node.classList.contains('more-section-title')) {
+      const next = node.nextElementSibling;
+      if (node.classList.contains('list-card')) grid.appendChild(node);
+      node = next;
+    }
+    if (grid.children.length) title.after(grid);
+  }
 }
