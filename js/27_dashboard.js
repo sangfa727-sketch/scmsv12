@@ -43,15 +43,16 @@ function renderDashboard() {
 }
 
 async function _loadDashboardData() {
-  const [timetable, attendance, homework, incidents, comms] = await Promise.all([
+  const [timetable, attendance, homework, incidents, comms, leaveRequests] = await Promise.all([
     API.getTimetable().catch(() => []),
     API.getAttendance(14).catch(() => []),
     API.getHomework(14).catch(() => []),
     API.getIncidents(14).catch(() => []),
     API.getParentComms(14).catch(() => []),
+    API.getLeaveRequests().catch(() => []),
   ]);
   _dashboardCache = { timetable: timetable || [], attendance: attendance || [],
-    homework: homework || [], incidents: incidents || [], comms: comms || [] };
+    homework: homework || [], incidents: incidents || [], comms: comms || [], leaveRequests: leaveRequests || [] };
 }
 
 function _dashboardScopedRows(rows) {
@@ -87,6 +88,8 @@ function _paintDashboard(container) {
 
   const recentIncidents = _dashboardScopedRows(d.incidents).slice(0, 6);
   const queuedComms     = d.comms.filter(c => c.status === 'Queued');
+  const leaveTotal       = d.leaveRequests.length;
+  const leavePending     = d.leaveRequests.filter(r => r.status === 'Pending').length;
 
   const absenceCounts = {};
   for (const a of d.attendance) {
@@ -127,7 +130,20 @@ function _paintDashboard(container) {
         <div class="stat-num">${queuedComms.length}</div>
         <div class="stat-lbl">${t('dash.messagesQueued')}</div>
       </div>
+      <div class="stat-card dashboard-leave-card${leavePending ? ' red' : ' muted'}" onclick="window.goToPage('leave')" role="button" tabindex="0">
+        <div class="stat-num">${leavePending}/${leaveTotal}</div>
+        <div class="stat-lbl">🔔 Leave requests</div>
+      </div>
     </div>
+
+    ${leavePending ? `
+    <div class="dashboard-banner dashboard-leave-banner" onclick="window.goToPage('leave')" role="button" tabindex="0">
+      <span class="dashboard-banner-icon">🔔</span>
+      <div>
+        <div class="dashboard-banner-title">${leavePending} Leave request${leavePending === 1 ? '' : 's'} pending</div>
+        <div class="dashboard-banner-text">New leave request${leavePending === 1 ? '' : 's'} need your review. Tap to open.</div>
+      </div>
+    </div>` : ''}
 
     ${queuedComms.length ? `
     <div class="dashboard-banner">
