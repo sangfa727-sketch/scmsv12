@@ -166,7 +166,7 @@ window.openNewInvoiceModal = function() {
   _newInvoiceStudent = null;
   _newInvoiceItems   = [];
   openModal(`
-    <div class="modal-sheet" onclick="event.stopPropagation()" style="max-height:85vh;overflow-y:auto">
+    <div class="modal-sheet billing-form-sheet" onclick="event.stopPropagation()" style="max-height:85vh;overflow-y:auto">
       <div class="modal-handle"></div>
       <h3 class="modal-title">${t('bill.newTitle')}</h3>
 
