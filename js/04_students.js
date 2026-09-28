@@ -390,8 +390,13 @@ window.showStudentParent = function(studentId) {
     '<input class="form-input" id="parentEditEmail" type="email" maxlength="160" value="' + esc(s.parent_email || "") + '">' +
     '<div class="detail-section">Telegram</div>' +
     (s.parent_tg_id ? '<div class="tg-linked-box">✓ Linked · <code>' + esc(s.parent_tg_id) + '</code></div>' : '<button type="button" class="link-btn" data-id="' + esc(s.student_id) + '" onclick="showParentLinkQR(this.dataset.id)">Send parent link</button>') +
-    '<button class="btn-primary mt16" id="saveParentBtn" data-id="' + esc(s.student_id) + '" onclick="saveStudentParent(this.dataset.id)">Save parent details</button>' +
-    '<button class="btn-secondary" onclick="closeModal()">Cancel</button>' +
+    '<div class="modal-footer parent-form-footer">' +
+
+    '<button class="btn-secondary" type="button" onclick="closeModal()">Cancel</button>' +
+
+    '<button class="btn-primary" type="button" id="saveParentBtn" data-id="' + esc(s.student_id) + '" onclick="saveStudentParent(this.dataset.id)">Save parent details</button>' +
+
+    '</div>' +
     '</div></div>'
   );
 };
