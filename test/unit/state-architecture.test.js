@@ -48,3 +48,19 @@ test('release gates require isolated backend testing before production', () => {
   assert.match(source, /Do not use customer credentials/);
   assert.match(source, /RLS\/tenant boundaries/);
 });
+
+
+test('navigation state mirrors the compatibility page value', () => {
+  const source = read('js/14_app.js');
+  assert.match(source, /window\.APP\.currentPage = pageId/);
+  assert.match(source, /APPStore\.set\('ui\.currentPage', pageId\)/);
+});
+
+test('logout resets the central state before reload', () => {
+  const source = read('js/14_app.js');
+  const idx = source.indexOf('window.signOut');
+  assert.ok(idx >= 0);
+  const block = source.slice(idx, idx + 900);
+  assert.match(block, /APPStore\.reset\(\)/);
+  assert.match(block, /window\.location\.reload/);
+});
