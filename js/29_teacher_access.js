@@ -150,6 +150,20 @@ async function _renderTeacherAccess() {
     root.querySelectorAll('.teacher-access-perm-state').forEach(function(select) {
       select.addEventListener('change', function(){ teacherAccessSavePermission(select); });
     });
+    root.querySelectorAll('.teacher-access-perm-row').forEach(function(row) {
+      const state = row.querySelector('.teacher-access-perm-state');
+      const refresh = function() {
+        const scope = row.dataset.scope;
+        const cls = row.querySelector('.teacher-access-class')?.value || null;
+        const raw = row.querySelector('.teacher-access-subject')?.value || null;
+        const subject = raw ? Number(raw) : null;
+        const override = _taOverride(overrides, row.dataset.permission, scope, cls, subject);
+        state.value = override ? (override.allowed ? 'allow' : 'deny') : 'default';
+      };
+      row.querySelectorAll('.teacher-access-class, .teacher-access-subject').forEach(function(sel) {
+        sel.addEventListener('change', refresh);
+      });
+    });
   } catch (e) {
     root.innerHTML = '<div class="form-error">လုပ်ပိုင်ခွင့် အချက်အလက် တင်မရပါ။ ' + esc(e?.message || String(e)) + '</div>';
   }
