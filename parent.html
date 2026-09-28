@@ -65,6 +65,12 @@
   .b-late, .b-partial   { background: rgba(217,119,6,0.14); color: var(--amber); }
   .b-unpaid              { background: rgba(8,145,178,0.14); color: var(--blue); }
   .b-exam-date           { background: rgba(8,145,178,0.14); color: var(--blue); }
+  .section-title { font-size: 15px; font-weight: 800; margin-bottom: 10px; }
+  .section-kicker { color: var(--muted); font-size: 11px; text-transform: uppercase; letter-spacing: .05em; margin-bottom: 3px; }
+  .message-card { border-left: 3px solid var(--blue); }
+  .event-card { border-left: 3px solid var(--amber); }
+  .schedule-time { font-weight: 700; white-space: nowrap; }
+  .schedule-day { font-size: 12px; color: var(--muted); }
   .exam-card-title { font-weight: 700; font-size: 13.5px; margin-bottom: 8px; }
   .b-leave-pending  { background: rgba(217,119,6,0.14); color: var(--amber); }
   .b-leave-approved { background: rgba(5,150,105,0.14); color: var(--green); }
@@ -223,7 +229,7 @@ async function showDashboard(sessionToken) {
   appEl.innerHTML = `<div class="card center"><div class="skeleton" style="width:60%;margin:0 auto"></div><div class="skeleton" style="width:80%"></div><div class="skeleton" style="width:80%"></div></div>`;
 
   const res = await rpc('rpc_parent_get_dashboard', { p_session_token: sessionToken });
-  const { student, attendance, grades, invoices, upcoming_exams, leave_requests } = res;
+  const { student, attendance, grades, invoices, upcoming_exams, parent_messages, timetable, events, leave_requests } = res;
 
   const presentCount = attendance.filter(a => a.status === 'Present').length;
   const absentCount  = attendance.filter(a => a.status === 'Absent').length;
@@ -236,15 +242,47 @@ async function showDashboard(sessionToken) {
       <div class="student-sub">${esc(student.class || '')} · ID ${esc(student.student_id)}</div>
     </div>
 
+    ${events && events.length ? `
+    <div class="card event-card">
+      <div class="section-kicker">School updates</div>
+      <div class="section-title">📅 Events & notices</div>
+      ${events.map(x => `
+        <div class="row"><span><strong>${esc(x.title)}</strong>
+          ${x.description ? `<span class="r-sub" style="display:block">${esc(x.description)}</span>` : ``}
+          <span class="schedule-day">${esc(new Date(x.starts_at).toLocaleString(undefined,{dateStyle:"medium",timeStyle:"short"}))}</span>
+        </span></div>`).join("")}
+    </div>` : ``}
+
+    ${parent_messages && parent_messages.length ? `
+    <div class="card message-card">
+      <div class="section-kicker">Communication</div>
+      <div class="section-title">💬 Messages from school</div>
+      ${parent_messages.map(x => `
+        <div class="row"><span><strong>${esc(x.type || "General")}</strong>
+          <span class="r-sub" style="display:block">${esc(x.message_preview || "")}</span>
+        </span><span class="badge b-exam-date">${esc(fmtDate(x.date))}</span></div>`).join("")}
+    </div>` : ``}
+
     ${upcoming_exams && upcoming_exams.length ? `
     <div class="card">
+      <div class="section-kicker">Academic</div>
       <div class="exam-card-title">📝 Upcoming Exams</div>
       ${upcoming_exams.map(x => `
-        <div class="row">
-          <span>${esc(x.subject)} <span class="r-sub">— ${esc(x.title)}</span></span>
-          <span class="badge b-exam-date">${esc(fmtDate(x.date))}</span>
-        </div>`).join('')}
-    </div>` : ''}
+        <div class="row"><span><strong>${esc(x.subject)}</strong>
+          <span class="r-sub" style="display:block">${esc(x.title)}</span></span>
+          <span><span class="badge b-exam-date">${esc(fmtDate(x.date))}</span>
+          ${x.start_time ? `<span class="schedule-time">${esc(String(x.start_time).slice(0,5))}${x.end_time ? " – " + esc(String(x.end_time).slice(0,5)) : ""}</span>` : ``}</span></div>`).join("")}
+    </div>` : ``}
+
+    ${timetable && timetable.length ? `
+    <div class="card">
+      <div class="section-kicker">Class schedule</div>
+      <div class="section-title">🗓 Weekly timetable</div>
+      ${timetable.map(x => `
+        <div class="row"><span><strong>${esc(x.day)}</strong>
+          <span class="r-sub" style="display:block">${esc(x.subject)}${x.room ? " · " + esc(x.room) : ""}</span></span>
+          <span class="schedule-time">${esc(String(x.start_time || "").slice(0,5))}${x.end_time ? " – " + esc(String(x.end_time).slice(0,5)) : ""}</span></div>`).join("")}
+    </div>` : ``}
 
     <div class="tabs">
       <div class="tab active" data-tab="attendance">Attendance</div>
