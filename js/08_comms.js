@@ -159,7 +159,7 @@ window.openParentCommModal = function() {
   const defaultType = types.includes(_commsType) ? _commsType : 'General';
 
   const html = `
-    <div class="modal-sheet" onclick="event.stopPropagation()">
+    <div class="modal-sheet comms-form-sheet" onclick="event.stopPropagation()">
       <div class="modal-handle"></div>
       <h3 class="modal-title">${t('comms.sendTitle')}</h3>
 
