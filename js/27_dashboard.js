@@ -229,29 +229,29 @@ function _renderDashboardNotificationBell(leavePending, queuedCount) {
   const el = document.getElementById('dashboardNotificationWrap');
   if (!el) return;
   const total = leavePending + queuedCount;
-  el.innerHTML = \`
+  el.innerHTML = `
     <button class="dashboard-notification-btn" type="button" aria-label="Notifications" title="Notifications"
       onclick="toggleDashboardNotifications(event)" aria-expanded="false">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
         <path d="M18 8a6 6 0 0 0-12 0c0 7-3 7-3 9h18c0-2-3-2-3-9"/>
         <path d="M13.73 21a2 2 0 0 1-3.46 0"/>
       </svg>
-      \${total > 0 ? \`<span class="dashboard-notification-badge">\${total > 99 ? '99+' : total}</span>\` : ''}
+      ${total > 0 ? `<span class="dashboard-notification-badge">${total > 99 ? '99+' : total}</span>` : ''}
     </button>
     <div class="dashboard-notification-menu" id="dashboardNotificationMenu" hidden>
-      <div class="dashboard-notification-head"><strong>Notifications</strong><span>\${total} new</span></div>
-      \${leavePending ? \`
+      <div class="dashboard-notification-head"><strong>Notifications</strong><span>${total} new</span></div>
+      ${leavePending ? `
         <button class="dashboard-notification-item" type="button" onclick="window.goToPage('leave'); closeDashboardNotifications()">
           <span class="dashboard-notification-item-icon">🔔</span>
-          <span><strong>\${leavePending} Leave request\${leavePending === 1 ? '' : 's'} pending</strong><small>New leave request\${leavePending === 1 ? '' : 's'} need your review.</small></span>
-        </button>\` : ''}
-      \${queuedCount ? \`
+          <span><strong>${leavePending} Leave request${leavePending === 1 ? '' : 's'} pending</strong><small>New leave request${leavePending === 1 ? '' : 's'} need your review.</small></span>
+        </button>` : ''}
+      ${queuedCount ? `
         <button class="dashboard-notification-item" type="button" onclick="window.goToPage('parents'); closeDashboardNotifications()">
           <span class="dashboard-notification-item-icon">⚠️</span>
-          <span><strong>\${queuedCount} message\${queuedCount === 1 ? '' : 's'} not delivered</strong><small>\${t('dash.bannerText')}</small></span>
-        </button>\` : ''}
-      \${total === 0 ? \`<div class="dashboard-notification-empty">No new notifications</div>\` : ''}
-    </div>\`;
+          <span><strong>${queuedCount} message${queuedCount === 1 ? '' : 's'} not delivered</strong><small>${t('dash.bannerText')}</small></span>
+        </button>` : ''}
+      ${total === 0 ? `<div class="dashboard-notification-empty">No new notifications</div>` : ''}
+    </div>`;
 }
 window.toggleDashboardNotifications = function(event) {
   event?.stopPropagation();
