@@ -346,8 +346,10 @@ window.openNewAdmissionModal = function() {
       <label class="field-label">${t('adm.notes')}</label>
       <input class="form-input" id="naNotes" placeholder="${esc(t('adm.optional'))}">
 
-      <button class="btn-primary mt16" id="naSaveBtn" onclick="_saveNewAdmission()">${t('adm.add')}</button>
-      <button class="btn-secondary" onclick="closeModal()">${t('common.cancel')}</button>
+      <div class="modal-footer">
+<button class="btn-primary mt16" id="naSaveBtn" onclick="_saveNewAdmission()">${t('adm.add')}</button>
+<button class="btn-secondary" onclick="closeModal()">${t('common.cancel')}</button>
+</div>
     </div>
   `);
 };
@@ -500,13 +502,15 @@ function _admDetailHtml(a, student, invoice) {
     ` : ''}
 
     ${a.status === 'Accepted' && !a.converted_student_id ? `
-      <button class="btn-primary mt16" onclick="_showConvertAdmissionView(${a.id}, '${esc((a.desired_class || '').replace(/'/g, "\\'"))}')">${t('adm.enrollBtn')}</button>
+      <div class="modal-footer">
+<button class="btn-primary mt16" onclick="_showConvertAdmissionView(${a.id}, '${esc((a.desired_class || '').replace(/'/g, "\\'"))}')">${t('adm.enrollBtn')}</button>
     ` : ''}
 
     ${student ? _admEnrollmentSectionHtml(a, student, invoice) : ''}
 
     <button class="btn-secondary mt16" onclick="_showEditAdmissionView(${a.id})">${t('adm.editDetails')}</button>
-    <button class="btn-secondary" onclick="_confirmDeleteAdmission(${a.id})">${t('adm.deleteApplicant')}</button>
+<button class="btn-secondary" onclick="_confirmDeleteAdmission(${a.id})">${t('adm.deleteApplicant')}</button>
+</div>
   `;
 }
 
@@ -562,8 +566,10 @@ function _showInterviewDateView(id) {
     <h3 class="modal-title">${t('adm.scheduleTitle')}</h3>
     <label class="field-label">${t('adm.interviewDate')}</label>
     <input class="form-input" id="admInterviewDate" type="date" value="${new Date().toISOString().slice(0, 10)}">
-    <button class="btn-primary mt16" onclick="_saveInterviewDate(${id})">${t('btn.save')}</button>
-    <button class="btn-secondary" onclick="_loadAdmissionDetail(${id})">${t('common.cancel')}</button>
+    <div class="modal-footer">
+<button class="btn-primary mt16" onclick="_saveInterviewDate(${id})">${t('btn.save')}</button>
+<button class="btn-secondary" onclick="_loadAdmissionDetail(${id})">${t('common.cancel')}</button>
+</div>
   `;
 }
 
@@ -628,8 +634,10 @@ window._showEditAdmissionView = async function(id) {
     <label class="field-label">${t('adm.notes')}</label>
     <input class="form-input" id="eaNotes" value="${esc(a.notes || '')}">
 
-    <button class="btn-primary mt16" id="eaSaveBtn" onclick="_saveEditAdmission(${id})">${t('common.saveChanges')}</button>
-    <button class="btn-secondary" onclick="_loadAdmissionDetail(${id})">${t('common.cancel')}</button>
+    <div class="modal-footer">
+<button class="btn-primary mt16" id="eaSaveBtn" onclick="_saveEditAdmission(${id})">${t('common.saveChanges')}</button>
+<button class="btn-secondary" onclick="_loadAdmissionDetail(${id})">${t('common.cancel')}</button>
+</div>
   `;
 };
 
@@ -690,8 +698,10 @@ window._showConvertAdmissionView = function(id, desiredClass) {
       <svg class="form-picker-caret" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="m6 9 6 6 6-6"/></svg>
     </button>
     <input type="hidden" id="convClass" value="${esc(desiredClass || '')}">
-    <button class="btn-primary mt16" id="convSaveBtn" onclick="_saveConvertAdmission(${id})">${t('adm.enroll')}</button>
-    <button class="btn-secondary" onclick="_loadAdmissionDetail(${id})">${t('common.cancel')}</button>
+    <div class="modal-footer">
+<button class="btn-primary mt16" id="convSaveBtn" onclick="_saveConvertAdmission(${id})">${t('adm.enroll')}</button>
+<button class="btn-secondary" onclick="_loadAdmissionDetail(${id})">${t('common.cancel')}</button>
+</div>
   `;
 };
 
@@ -737,8 +747,10 @@ window._showRegistrationInvoiceView = async function(id, studentId) {
     <div class="billing-total-row" id="riTotalRow">${t('bill.total', { n: 0 })}</div>
     <label class="field-label">${t('bill.dueDate')}</label>
     <input class="form-input" id="riDueDate" type="date">
-    <button class="btn-primary mt16" id="riSaveBtn" onclick="_saveRegistrationInvoice(${id}, '${esc(studentId)}')">${t('bill.createInvoice')}</button>
-    <button class="btn-secondary" onclick="_loadAdmissionDetail(${id})">${t('common.cancel')}</button>
+    <div class="modal-footer">
+<button class="btn-primary mt16" id="riSaveBtn" onclick="_saveRegistrationInvoice(${id}, '${esc(studentId)}')">${t('bill.createInvoice')}</button>
+<button class="btn-secondary" onclick="_loadAdmissionDetail(${id})">${t('common.cancel')}</button>
+</div>
   `;
   _renderAdmInvoiceItemsList();
 };
