@@ -7038,3 +7038,53 @@ input.form-input {
   .settings-form-sheet { width: 94vw !important; max-width: 94vw !important; }
   .teacher-row-actions .icon-btn-mini { width: 30px !important; min-width: 30px !important; height: 30px !important; }
 }
+
+
+/* SCMS v12.3 — Teacher Access sheet
+   Keep the sheet dimensions stable while async permission data loads.
+   This prevents the generic :has(.form-input) modal sizing rule from
+   briefly rendering a wide horizontal strip before the real card arrives. */
+.modal-sheet.teacher-access-sheet,
+.modal-sheet.teacher-access-sheet:has(.form-input, input, select, textarea) {
+  width: min(94vw, 720px) !important;
+  max-width: 720px !important;
+  max-height: min(82dvh, 760px) !important;
+  padding: 12px 16px 14px !important;
+  border-radius: 16px !important;
+  overflow-x: hidden !important;
+  overflow-y: auto !important;
+}
+.teacher-access-sheet #teacherAccessRoot {
+  min-width: 0;
+  width: 100%;
+}
+.teacher-access-sheet .teacher-access-section {
+  width: 100%;
+  min-width: 0;
+  box-sizing: border-box;
+}
+.teacher-access-sheet .teacher-access-add-row,
+.teacher-access-sheet .teacher-access-add-grid,
+.teacher-access-sheet .teacher-access-perm-row {
+  min-width: 0;
+}
+.teacher-access-sheet .teacher-access-perm-row {
+  overflow: hidden;
+}
+.teacher-access-sheet .teacher-access-perm-copy {
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
+@media (max-width: 420px) {
+  .modal-sheet.teacher-access-sheet,
+  .modal-sheet.teacher-access-sheet:has(.form-input, input, select, textarea) {
+    width: 94vw !important;
+    max-width: 94vw !important;
+    max-height: 82dvh !important;
+    padding-left: 11px !important;
+    padding-right: 11px !important;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .modal-sheet.teacher-access-sheet { animation: none !important; }
+}
