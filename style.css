@@ -6640,3 +6640,102 @@ input.form-input {
   }
 }
 
+/* ================================================================
+   SCMS v12.19 — modal footer hierarchy
+   LTR convention: destructive action separates left; Cancel/Primary
+   stay together on the right, with Primary as the final action.
+   ================================================================ */
+
+.modal-sheet > .btn-primary,
+.modal-sheet > .btn-secondary,
+.modal-sheet > .btn-danger {
+  align-self: flex-end !important;
+  width: fit-content !important;
+  min-width: 0 !important;
+}
+
+.modal-footer {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 8px;
+  width: 100%;
+  margin-top: 10px;
+  box-sizing: border-box;
+}
+
+.modal-footer > .btn-primary,
+.modal-footer > .btn-secondary,
+.modal-footer > .btn-danger {
+  width: fit-content !important;
+  min-width: 0 !important;
+  margin-top: 0 !important;
+  flex: 0 0 auto !important;
+}
+
+.student-form-footer {
+  justify-content: space-between;
+  align-items: center;
+  gap: 10px;
+}
+
+.student-form-footer .student-destructive-action {
+  margin-right: auto !important;
+  flex: 0 0 auto !important;
+}
+
+.modal-footer-main {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 8px;
+  margin-left: auto;
+}
+
+.modal-footer-main > button {
+  width: fit-content !important;
+  min-width: 0 !important;
+  flex: 0 0 auto !important;
+  margin-top: 0 !important;
+}
+
+.student-detail-footer {
+  justify-content: flex-end;
+}
+
+@media (max-width: 520px) {
+  .student-form-footer {
+    align-items: stretch;
+    flex-wrap: wrap;
+  }
+
+  .student-form-footer .student-destructive-action {
+    order: 1;
+    margin-right: auto !important;
+  }
+
+  .student-form-footer .modal-footer-main {
+    order: 2;
+    width: 100%;
+  }
+
+  .student-form-footer .modal-footer-main > button {
+    flex: 0 1 auto !important;
+  }
+
+  .student-detail-footer {
+    justify-content: flex-end;
+  }
+}
+
+@media (max-width: 360px) {
+  .student-form-footer .modal-footer-main {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .student-form-footer .modal-footer-main > button {
+    width: 100% !important;
+  }
+}
+
