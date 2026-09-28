@@ -1,6 +1,6 @@
 /** SCMS v12 — 02I_api_resources.js */
 'use strict';
-const API = window.API || {};
+var API = window.API || {};
 Object.assign(API, {
   async uploadSchoolAsset(kind, blob) {
       const ext = blob.type === 'image/png' ? 'png' : 'jpg';
