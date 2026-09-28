@@ -93,7 +93,7 @@ Object.assign(API, {
 
   async updateSchoolConfig(patch) {
     if (window.APP.platform === 'web') return _webRpc('rpc_update_school_config_web', {
-      p_session_token: getWebSession()?.session_token,
+      p_session_token: _webSessionToken(),
       p_patch: patch,
     });
     return twaPost('update_school_config', { patch });
@@ -103,7 +103,7 @@ Object.assign(API, {
 
   async setMyUiPrefs(patch) {
     return _webRpc('rpc_set_my_ui_prefs', {
-      p_session_token: getWebSession()?.session_token,
+      p_session_token: _webSessionToken(),
       p_patch: patch,
     });
   },
