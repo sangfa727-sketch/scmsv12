@@ -652,12 +652,17 @@ window.closeModal = function(onCloseOverride) {
     overlay.innerHTML = '';
     return;
   }
-  top.layer.remove();
-  if (!window._modalStack.length) {
-    overlay.classList.remove('active');
-  }
-  const cb = onCloseOverride || top.onClose;
-  if (typeof cb === 'function') cb();
+  if (top.closing) return;
+  top.closing = true;
+  top.layer.classList.add('is-closing');
+  const removeLayer = () => {
+    top.layer.remove();
+    if (!window._modalStack.length) overlay.classList.remove('active');
+    const cb = onCloseOverride || top.onClose;
+    if (typeof cb === 'function') cb();
+  };
+  if (window.matchMedia?.('(prefers-reduced-motion: reduce)').matches) removeLayer();
+  else setTimeout(removeLayer, 170);
 };
 // ─── GENERIC CONFIRM DIALOG (replaces native confirm()) ─────────────────────
 window.showConfirm = function (title, message, confirmLabel, onConfirm, opts = {}) {
