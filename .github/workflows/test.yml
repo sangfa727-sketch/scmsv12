@@ -24,7 +24,7 @@ jobs:
   e2e:
     name: Playwright (scheduled/manual only)
     runs-on: ubuntu-latest
-    if: github.event_name == 'workflow_dispatch' || github.event_name == 'schedule'
+    if: (github.event_name == 'workflow_dispatch' || github.event_name == 'schedule') && secrets.SCMS_STAGING_URL != '' && secrets.SCMS_TEST_TEACHER != '' && secrets.SCMS_TEST_PW != ''
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
@@ -40,6 +40,7 @@ jobs:
           SCMS_TEST_TEACHER: ${{ secrets.SCMS_TEST_TEACHER }}
           SCMS_TEST_PW: ${{ secrets.SCMS_TEST_PW }}
           SCMS_TEST_QR_TOKEN: ${{ secrets.SCMS_TEST_QR_TOKEN }}
+          SCMS_REQUIRE_STAGING: '1'
         run: npx playwright test
       - uses: actions/upload-artifact@v4
         if: failure()
