@@ -81,6 +81,73 @@ async function doDeleteComm(id) {
   }
 }
 
+window.openParentPortalEventModal = function() {
+  const classes = window.getClassList();
+  openModal(`
+    <div class="modal-sheet" onclick="event.stopPropagation()">
+      <div class="modal-handle"></div>
+      <h3 class="modal-title">Parent Portal schedule</h3>
+      <p class="modal-subtitle">Exam မဟုတ်တဲ့ school meeting, announcement, event တွေကို မိဘ Portal မှာ ပြပါမယ်။</p>
+
+      <label class="field-label">Event type</label>
+      <select class="form-input" id="ppeType">
+        <option value="meeting">Parent meeting</option>
+        <option value="announcement">Announcement</option>
+        <option value="event">School event</option>
+        <option value="holiday">Holiday</option>
+      </select>
+
+      <label class="field-label">Title</label>
+      <input class="form-input" id="ppeTitle" placeholder="ဥပမာ — မိဘဆရာတွေ့ဆုံပွဲ">
+
+      <label class="field-label">Class</label>
+      <select class="form-input" id="ppeClass">
+        <option value="">Whole school</option>
+        ${classes.map(cls => `<option value="${esc(cls)}">${esc(cls)}</option>`).join('')}
+      </select>
+
+      <label class="field-label">Start</label>
+      <input class="form-input" id="ppeStart" type="datetime-local">
+
+      <label class="field-label">End <span class="optional">optional</span></label>
+      <input class="form-input" id="ppeEnd" type="datetime-local">
+
+      <label class="field-label">Description</label>
+      <textarea class="form-textarea" id="ppeDesc" rows="3" placeholder="မိဘတွေ သိထားသင့်တဲ့ အချက်များ"></textarea>
+
+      <button class="btn-primary mt16" id="ppeSaveBtn" onclick="saveParentPortalEvent()">Publish to Parent Portal</button>
+      <button class="btn-secondary" onclick="closeModal()">Cancel</button>
+    </div>
+  `);
+};
+
+window.saveParentPortalEvent = async function() {
+  const btn = document.getElementById('ppeSaveBtn');
+  const title = document.getElementById('ppeTitle')?.value.trim();
+  const start = document.getElementById('ppeStart')?.value;
+  const end = document.getElementById('ppeEnd')?.value;
+  if (!title || !start) {
+    showToast('Title နဲ့ Start time ထည့်ပါ');
+    return;
+  }
+  btn.disabled = true;
+  try {
+    await API.createParentPortalEvent({
+      event_type: document.getElementById('ppeType')?.value,
+      title,
+      class: document.getElementById('ppeClass')?.value || null,
+      starts_at: new Date(start).toISOString(),
+      ends_at: end ? new Date(end).toISOString() : null,
+      description: document.getElementById('ppeDesc')?.value.trim() || null,
+    });
+    closeModal();
+    showToast('Parent Portal မှာ ထုတ်ပြန်ပြီးပါပြီ');
+  } catch (e) {
+    btn.disabled = false;
+    showToast((t('common.failed') || 'Failed') + ' ' + (e.message || ''));
+  }
+};
+
 window.openParentCommModal = function() {
   _commPickedStudent = null;
   const classes  = [...new Set(window.APP.students.map(s => s.class).filter(Boolean))].sort();
