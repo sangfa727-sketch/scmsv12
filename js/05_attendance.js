@@ -483,6 +483,38 @@ function _attendanceReportSummary(){
   return {...counts,marked,days:new Set(data.filter(a=>a?.date&&new Date(a.date+'T00:00:00')>=cutoff).map(a=>a.date)).size,presentPct:marked?Math.round(counts.P/marked*100):0};
 }
 
+
+window.openAttendanceAudit = async function() {
+  const school = window.APP.school_id;
+  if (!school) return showToast('School scope unavailable');
+  openModal(`
+    <div class="modal-sheet attendance-audit-sheet" onclick="event.stopPropagation()">
+      <div class="modal-handle"></div><h3 class="modal-title">Attendance audit</h3>
+      <p class="modal-subtitle">Recent attendance changes for this school.</p>
+      <div id="attAuditRows"><div class="loading-state">Loading…</div></div>
+      <button class="btn-secondary mt16" onclick="closeModal()">Close</button>
+    </div>`);
+  try {
+    const rows = await API.getAuditLog?.('attendance');
+    const list = Array.isArray(rows) ? rows : [];
+    const el = document.getElementById('attAuditRows');
+    if (!el) return;
+    if (!list.length) {
+      el.innerHTML='<div class="empty-state"><div class="empty-state-icon">🧾</div><div class="empty-state-text">No attendance audit records found.</div></div>';
+      return;
+    }
+    el.innerHTML=`<div class="att-audit-list">${list.slice(0,50).map(x=>{
+      const p=x.payload||{}, when=x.ts?new Date(x.ts).toLocaleString():'';
+      return `<div class="att-audit-item"><div><strong>${esc(x.action||'attendance')}</strong><span>${esc(when)}</span></div>
+        <div class="att-audit-meta">${esc(p.class||'')} · ${esc(p.date||'')} · ${esc(String(p.count??''))} records</div>
+        <small>${esc(x.actor||'')}</small></div>`;
+    }).join('')}</div>`;
+  } catch(e) {
+    const el=document.getElementById('attAuditRows');
+    if(el) el.innerHTML='<div class="empty-state"><div class="empty-state-icon">⚠️</div><div class="empty-state-text">Audit history could not be loaded.</div></div>';
+  }
+};
+
 // ─── Save attendance ──────────────────────────────────────────────────────
 
 document.addEventListener('DOMContentLoaded', () => {
