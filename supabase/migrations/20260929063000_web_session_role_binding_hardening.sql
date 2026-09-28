@@ -99,5 +99,5 @@ begin
 end;
 $function$;
 
-revoke execute on function public.rpc_web_session_verify(text) from public;
-revoke execute on function public.rpc_change_password(text,text,text) from public;
+revoke execute on function public.rpc_web_session_verify(text) from public, anon, authenticated;
+revoke execute on function public.rpc_change_password(text,text,text) from public, anon, authenticated;
