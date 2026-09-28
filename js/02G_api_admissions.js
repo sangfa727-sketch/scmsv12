@@ -1,6 +1,6 @@
 /** SCMS v12 — 02G_api_admissions.js */
 'use strict';
-const API = window.API || {};
+var API = window.API || {};
 Object.assign(API, {
   async getAdmissions(filters = {}) {
       const res = await _webRpc('rpc_get_admissions', {
