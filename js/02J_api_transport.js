@@ -1,6 +1,6 @@
 /** SCMS v12 — 02J_api_transport.js */
 'use strict';
-const API = window.API || {};
+var API = window.API || {};
 Object.assign(API, {
   async getRoutes() {
       const res = await _webRpc('rpc_get_routes', { p_session_token: getWebSession()?.session_token });
