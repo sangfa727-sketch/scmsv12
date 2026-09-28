@@ -260,6 +260,8 @@ Object.assign(API, {
         p_date:       data.date,
         p_start_time: data.start_time || null,
         p_end_time:   data.end_time || null,
+        p_start_time: data.start_time || null,
+        p_end_time:   data.end_time || null,
       });
     },
   
