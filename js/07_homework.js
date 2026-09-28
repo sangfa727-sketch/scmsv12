@@ -81,7 +81,7 @@ window.openHomeworkModal = async function() {
   const classes  = [...new Set(window.APP.students.map(s => s.class).filter(Boolean))].sort();
 
   const html = `
-    <div class="modal-sheet" onclick="event.stopPropagation()">
+    <div class="modal-sheet homework-form-sheet" onclick="event.stopPropagation()">
       <div class="modal-handle"></div>
       <h3 class="modal-title">${t('hw.addTitle')}</h3>
 
