@@ -94,7 +94,7 @@ function _openTimetableForm({ mode, entry }) {
                    : [...new Set(window.APP.students.map(s => s.class).filter(Boolean))].sort();
 
   openModal(`
-    <div class="modal-sheet" onclick="event.stopPropagation()">
+    <div class="modal-sheet timetable-form-sheet" onclick="event.stopPropagation()">
       <div class="modal-handle"></div>
       <h3 class="modal-title">${t(isEdit ? 'tt.editTitle' : 'tt.addTitle')}</h3>
 
