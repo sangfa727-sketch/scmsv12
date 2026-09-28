@@ -5234,3 +5234,36 @@ html[lang="my"] .field-label {
 @media (max-width: 600px) {
   .settings-form-sheet { width: 94vw !important; max-width: 94vw !important; }
 }
+
+/* SCMS v12.4 — FINAL RESPONSIVE PASS */
+#pages,#pages > *,#pages .page,#pages .page.active{min-width:0;max-width:100%}
+#pages img,#pages svg,#pages canvas,#pages video{max-width:100%}
+#pages .card-row,#pages .attend-row,#pages .att-row-head,#pages .section-head,#pages .page-actions,#pages .toolbar,#pages .toolbar-row,#pages .list-header,#pages .form-row,#pages .form-actions,#pages .chips-row,
+#pages .card-info,#pages .card-main,#pages .card-actions,#pages .att-row-name,#pages .field,#pages .form-field,#pages .form-group{min-width:0}
+#pages button,#pages .btn-primary,#pages .btn-secondary,#pages .btn-danger,#pages .btn-pill-action,#pages .pill,#pages .chip,#pages .tab-label,#pages .more-tile{max-width:100%;white-space:normal;overflow-wrap:anywhere;word-break:normal;text-align:center}
+#pages input,#pages textarea,#pages select{min-width:0;max-width:100%}
+@media (max-width:699px){
+html,body,#app,#pages{width:100%;max-width:100%;overflow-x:hidden!important}
+.page-header{min-width:0;padding-left:12px;padding-right:12px}
+.page-title,.page-subtitle,.page-eyebrow{max-width:100%;overflow-wrap:anywhere}
+.page-title{font-size:clamp(22px,7vw,28px)}
+.page-actions,.toolbar,.toolbar-row,.section-head,.list-header{width:100%;max-width:100%;flex-wrap:wrap}
+.page-actions>*,.toolbar>*,.toolbar-row>*,.section-head>*{min-width:0;max-width:100%}
+.form-row,.compact-form-grid{grid-template-columns:minmax(0,1fr)!important;min-width:0}
+.card-row{flex-wrap:nowrap;min-width:0}.card-info{min-width:0;overflow:hidden}
+.card-name,.card-sub,.card-note,.card-parent{max-width:100%;overflow-wrap:anywhere}
+#pages table{display:block;width:100%;max-width:100%;overflow-x:auto;-webkit-overflow-scrolling:touch}
+#pages thead,#pages tbody{width:max-content}
+#pages th,#pages td{white-space:normal;overflow-wrap:anywhere}
+#pages .id-tag,#pages .link-box-url,#pages .email,#pages .phone,#pages .url{overflow-wrap:anywhere;word-break:break-word}
+#pages .icon-btn,#pages .modal-close-x,#pages .att-note-btn,#pages .att-statbar-more{flex:0 0 auto;white-space:nowrap;overflow-wrap:normal}
+#pages .btn-primary,#pages .btn-secondary,#pages .btn-danger{min-width:0;min-height:38px;padding-left:10px;padding-right:10px}
+#pages .picker-trigger,#pages .form-picker-trigger,#pages .attend-class-select,#pages select{width:100%;min-width:0;max-width:100%}
+#pages .chips-row,#pages .date-strip,#pages .timetable-day-tabs{max-width:100%;overflow-x:auto;overflow-y:hidden;flex-wrap:nowrap}
+.modal-layer{width:100%;max-width:100%;overflow:hidden}.modal-sheet{min-width:0;max-width:94vw!important;overflow-x:hidden!important}
+.modal-sheet .modal-actions,.modal-sheet .form-actions,.modal-sheet .modal-actions>*,.modal-sheet .form-actions>*{min-width:0;max-width:100%}
+}
+@media (max-width:380px){
+.page-header{padding-left:10px;padding-right:10px}.stats-grid{gap:6px;padding-left:10px;padding-right:10px}.list-card{margin-left:10px;margin-right:10px}
+.modal-sheet{width:95vw!important;max-width:95vw!important}#pages .btn-primary,#pages .btn-secondary,#pages .btn-danger{font-size:12px}
+}
