@@ -6833,6 +6833,89 @@ input.form-input {
   }
 }
 
+
+/* SCMS v12.32 — centered confirm + credential dialogs */
+.modal-overlay.generic-confirm-overlay {
+  align-items: center !important;
+  justify-content: center !important;
+  padding: 18px !important;
+  box-sizing: border-box !important;
+  z-index: 500 !important;
+}
+.generic-confirm-overlay .generic-confirm-sheet {
+  width: min(92vw, 380px) !important;
+  max-width: 380px !important;
+  max-height: min(82dvh, 620px) !important;
+  margin: 0 !important;
+  border-radius: 18px !important;
+  padding: 14px 16px 16px !important;
+  box-shadow: 0 22px 70px rgba(0,0,0,.22) !important;
+  animation: confirmPopIn .18s cubic-bezier(.2,.8,.2,1) both !important;
+}
+.generic-confirm-overlay .modal-title {
+  margin-bottom: 8px !important;
+}
+.generic-confirm-overlay .modal-subtitle {
+  margin-bottom: 0 !important;
+  line-height: 1.55 !important;
+  white-space: pre-line !important;
+}
+.generic-confirm-actions {
+  display: flex !important;
+  gap: 8px !important;
+  margin-top: 14px !important;
+}
+.generic-confirm-actions > button {
+  flex: 1 1 0 !important;
+  min-width: 0 !important;
+  margin: 0 !important;
+}
+.password-prompt-sheet .password-prompt-message {
+  font-size: 12px !important;
+}
+.password-prompt-input-wrap {
+  position: relative;
+  margin-top: 6px;
+}
+.password-prompt-input-wrap .form-input {
+  width: 100% !important;
+  box-sizing: border-box !important;
+  padding-right: 42px !important;
+}
+.password-prompt-toggle {
+  position: absolute;
+  top: 50%;
+  right: 6px;
+  transform: translateY(-50%);
+  width: 32px;
+  height: 32px;
+  border: 0;
+  border-radius: 8px;
+  background: transparent;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+.password-prompt-toggle:hover {
+  background: var(--bg2);
+}
+@keyframes confirmPopIn {
+  from { opacity: 0; transform: translateY(6px) scale(.97); }
+  to { opacity: 1; transform: translateY(0) scale(1); }
+}
+@media (max-width: 520px) {
+  .modal-overlay.generic-confirm-overlay {
+    padding: 12px !important;
+  }
+  .generic-confirm-actions {
+    flex-direction: column-reverse !important;
+  }
+  .generic-confirm-actions > button {
+    width: 100% !important;
+  }
+}
+
 /* SCMS v12 — teacher access manager */
 .teacher-row-actions { display:flex; align-items:center; gap:6px; flex:0 0 auto; }
 .teacher-access-sheet { width:min(94vw, 680px) !important; max-width:680px !important; max-height:min(86dvh, 780px) !important; overflow:hidden; }
