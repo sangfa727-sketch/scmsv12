@@ -5267,3 +5267,296 @@ html,body,#app,#pages{width:100%;max-width:100%;overflow-x:hidden!important}
 .page-header{padding-left:10px;padding-right:10px}.stats-grid{gap:6px;padding-left:10px;padding-right:10px}.list-card{margin-left:10px;margin-right:10px}
 .modal-sheet{width:95vw!important;max-width:95vw!important}#pages .btn-primary,#pages .btn-secondary,#pages .btn-danger{font-size:12px}
 }
+
+
+/* ================================================================
+   SCMS v12 — interaction polish
+   Smooth page transitions, micro-interactions, comfortable data entry,
+   compact native sidebar, and reduced-motion safety.
+   ================================================================ */
+
+/* ── Global interaction baseline ───────────────────────────────── */
+html {
+  scroll-behavior: smooth;
+}
+button,
+a,
+select,
+input,
+textarea,
+[role="button"] {
+  -webkit-tap-highlight-color: transparent;
+  touch-action: manipulation;
+}
+button,
+.icon-btn,
+.tab-btn,
+.sidebar-item,
+.chip,
+.pill,
+.day-tab,
+.date-chip,
+.btn-icon-round,
+.fab,
+.modal-close-x {
+  transition:
+    background-color .16s ease,
+    border-color .16s ease,
+    color .16s ease,
+    opacity .16s ease,
+    transform .16s cubic-bezier(.2,.8,.2,1),
+    box-shadow .18s ease;
+}
+button:not(:disabled):active,
+.icon-btn:active,
+.sidebar-item:active,
+.chip:active,
+.pill:active,
+.day-tab:active,
+.date-chip:active,
+.btn-icon-round:active,
+.fab:active {
+  transform: translateY(1px) scale(.975);
+}
+button:focus-visible,
+input:focus-visible,
+textarea:focus-visible,
+select:focus-visible {
+  outline: 2px solid color-mix(in srgb, var(--blue) 58%, transparent);
+  outline-offset: 2px;
+}
+
+/* ── Page transitions ────────────────────────────────────────────
+   Pages remain display:none when inactive, but every newly active page
+   gets a short enter animation. This avoids a heavy SPA-style crossfade
+   while still making navigation feel deliberate and responsive. */
+.page.active {
+  animation: pageEnter .22s cubic-bezier(.22,.8,.2,1) both;
+  will-change: opacity, transform;
+}
+@keyframes pageEnter {
+  from { opacity: 0; transform: translate3d(0, 7px, 0); }
+  to   { opacity: 1; transform: translate3d(0, 0, 0); }
+}
+
+/* Cards enter as a very subtle stagger — capped so long lists stay fast. */
+.page.active .list-card,
+.page.active .stat-card,
+.page.active .mini-card,
+.page.active .attend-row,
+.page.active .tt-row {
+  animation: contentEnter .2s ease both;
+}
+.page.active .list-card:nth-child(1),
+.page.active .stat-card:nth-child(1),
+.page.active .attend-row:nth-child(1),
+.page.active .tt-row:nth-child(1) { animation-delay: .015s; }
+.page.active .list-card:nth-child(2),
+.page.active .stat-card:nth-child(2),
+.page.active .attend-row:nth-child(2),
+.page.active .tt-row:nth-child(2) { animation-delay: .03s; }
+.page.active .list-card:nth-child(3),
+.page.active .stat-card:nth-child(3),
+.page.active .attend-row:nth-child(3),
+.page.active .tt-row:nth-child(3) { animation-delay: .045s; }
+@keyframes contentEnter {
+  from { opacity: 0; transform: translateY(3px); }
+  to   { opacity: 1; transform: none; }
+}
+
+/* ── Cards: premium but restrained feedback ────────────────────── */
+.list-card,
+.stat-card,
+.mini-card {
+  transition:
+    transform .18s cubic-bezier(.2,.8,.2,1),
+    box-shadow .18s ease,
+    border-color .18s ease,
+    opacity .18s ease;
+}
+@media (hover:hover) {
+  .list-card:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 5px 18px rgba(0,0,0,.055);
+  }
+}
+.list-card:active {
+  transform: scale(.995);
+}
+
+/* ── Data-entry polish ─────────────────────────────────────────── */
+.form-input,
+.form-textarea,
+select.form-input,
+input.form-input {
+  transition:
+    border-color .16s ease,
+    background-color .16s ease,
+    box-shadow .18s ease,
+    transform .16s ease;
+}
+.form-input:focus,
+.form-textarea:focus {
+  border-color: color-mix(in srgb, var(--blue) 48%, var(--border2));
+  background: var(--surface);
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--blue) 9%, transparent);
+}
+.form-input:active,
+.form-textarea:active {
+  transform: translateY(.5px);
+}
+.btn-primary:not(:disabled):hover,
+.btn-secondary:not(:disabled):hover {
+  box-shadow: 0 4px 14px rgba(0,0,0,.08);
+}
+.btn-primary:not(:disabled):active {
+  box-shadow: none;
+}
+
+/* Keep touch targets comfortable even though the visual UI is compact. */
+.btn-primary,
+.btn-secondary,
+.btn-pill-action,
+.att-code,
+.icon-btn,
+.icon-btn-burger,
+.fab {
+  min-height: 40px;
+}
+
+/* ── Compact native sidebar ────────────────────────────────────── */
+.sidebar {
+  width: 264px;
+  transition:
+    transform .24s cubic-bezier(.22,.8,.2,1),
+    box-shadow .24s ease;
+}
+.sidebar-header {
+  padding: 12px 14px 10px;
+}
+.sidebar-cover {
+  min-height: 66px;
+}
+.sidebar-school-row-top {
+  margin-top: 0;
+  padding-top: 0;
+  border-top: 0;
+  gap: 9px;
+}
+.sidebar-logo-wrap {
+  width: 34px;
+  height: 34px;
+  flex: 0 0 34px;
+}
+.sidebar-school-logo,
+.sidebar-school-mark {
+  width: 34px;
+  height: 34px;
+  border-radius: 10px;
+}
+.sidebar-school-name {
+  font-size: 13px;
+  font-weight: 700;
+  line-height: 1.25;
+}
+.sidebar-nav {
+  padding: 7px 7px;
+  scrollbar-width: thin;
+}
+.sidebar-item {
+  min-height: 38px;
+  padding: 7px 9px;
+  gap: 9px;
+  border-radius: 9px;
+  font-size: 13.5px;
+  margin-bottom: 1px;
+}
+.sidebar-icon {
+  width: 20px;
+  height: 20px;
+  font-size: 15px;
+}
+.sidebar-icon svg {
+  width: 18px;
+  height: 18px;
+}
+.sidebar-item.active {
+  box-shadow: inset 2px 0 0 var(--blue);
+}
+.sidebar-badge {
+  padding: 3px 5px;
+}
+.sidebar-footer {
+  padding: 8px 10px 10px;
+}
+.sidebar-footer .sidebar-item {
+  min-height: 36px;
+}
+.sidebar-version {
+  margin-top: 4px;
+  font-size: 10px;
+}
+
+/* ── Header / bottom navigation micro-feedback ─────────────────── */
+.header-actions .icon-btn,
+.header-actions .lang-switch {
+  transition: transform .16s ease, background-color .16s ease, color .16s ease;
+}
+.header-actions .icon-btn:active,
+.header-actions .lang-switch:active {
+  transform: scale(.94);
+}
+.tab-btn {
+  transition:
+    color .16s ease,
+    background-color .16s ease,
+    transform .16s ease;
+}
+.tab-btn.active {
+  transform: translateY(-1px);
+}
+
+/* ── Modal / overlay motion ────────────────────────────────────── */
+.modal-overlay {
+  transition: opacity .2s ease, backdrop-filter .2s ease;
+}
+.modal-layer {
+  animation: modalLayerIn .2s cubic-bezier(.22,.8,.2,1) both;
+}
+.modal-layer .modal-sheet {
+  animation: modalSheetIn .22s cubic-bezier(.22,.8,.2,1) both;
+}
+@keyframes modalLayerIn {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}
+@keyframes modalSheetIn {
+  from { opacity: 0; transform: translateY(10px) scale(.992); }
+  to   { opacity: 1; transform: translateY(0) scale(1); }
+}
+
+/* ── Loading state: prevent layout jumps while content arrives ─── */
+.skeleton-card {
+  min-height: 92px;
+}
+[aria-busy="true"] {
+  cursor: progress;
+}
+.is-loading {
+  pointer-events: none;
+  user-select: none;
+  opacity: .72;
+}
+
+/* ── Respect users who prefer less motion ──────────────────────── */
+@media (prefers-reduced-motion: reduce) {
+  html { scroll-behavior: auto; }
+  *,
+  *::before,
+  *::after {
+    animation-duration: .01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: .01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
