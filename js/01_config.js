@@ -51,7 +51,7 @@ const SCMS_CONFIG = {
   // reads this into package.json, so when you bump this number, also update
   // "version" in package.json to match — package.json only feeds Capacitor/npm
   // tooling metadata, but keeping the two in sync avoids confusion later.
-  VERSION: '11.7.0',
+  VERSION: '12.0.0',
 };
 
 // ─── PLATFORM DETECTION ─────────────────────────────────────────────────────
