@@ -5089,3 +5089,87 @@ html[lang="my"] .field-label {
     max-width: 94vw !important;
   }
 }
+
+
+/* SCMS v12.3 — Attendance mobile polish */
+@media (max-width: 699px) {
+  #attendPageHeader {
+    grid-template-columns: 1fr;
+    row-gap: 8px;
+  }
+  #attendPageHeader .chips-row {
+    grid-column: 1;
+    grid-row: auto;
+    width: 100%;
+    margin: 0;
+  }
+  #attendPageHeader .attend-class-select-wrap,
+  #attendPageHeader .attend-class-select {
+    width: 100%;
+  }
+  #attendPageHeader .attend-class-select {
+    min-height: 40px;
+    padding: 8px 36px 8px 14px;
+    border-radius: 11px;
+  }
+
+  .attend-toprow {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+  }
+  .attend-cal-col,
+  .attend-stats-col {
+    width: 100%;
+    min-width: 0;
+  }
+
+  .attend-cal-col .date-strip-head {
+    padding: 0 0 6px;
+  }
+  .date-strip {
+    padding: 0 0 10px;
+    gap: 5px;
+  }
+  .date-chip {
+    min-width: 42px;
+    padding: 7px 8px;
+  }
+  .date-chip span { font-size: 15px; }
+
+  .att-statbar {
+    padding: 10px 8px;
+    border-radius: 12px;
+  }
+  .att-statbar-num { font-size: 19px; }
+  .att-statbar-lbl { font-size: 9.5px; }
+
+  .attend-row-clean {
+    padding: 10px;
+    border-radius: 12px;
+    margin-bottom: 8px;
+  }
+  .att-row-head {
+    gap: 8px;
+    margin-bottom: 8px;
+  }
+  .att-row-name {
+    font-size: 14px;
+  }
+  .att-codes-row {
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: 6px;
+  }
+  .att-code-pill {
+    width: 100%;
+    min-width: 0;
+    height: 36px;
+    padding: 0 4px;
+    font-size: 11px;
+  }
+}
+@media (max-width: 380px) {
+  .att-codes-row { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .att-code-pill { height: 34px; }
+}
