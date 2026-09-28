@@ -63,6 +63,31 @@ A Git branch is not a security boundary. Database/API isolation is required.
 Supabase documents separate development, staging/preview, and production
 environments, and preview branches provide isolated database environments.
 
+## 3. Frontend environment boundary (implemented)
+
+The static frontend now has an explicit deployment-environment boundary in
+`js/00_env.js` and `js/01_config.js`.
+
+- Local development hosts (`localhost`, `127.0.0.1`, `::1`) run with the
+  backend disabled and use the existing demo bootstrap path.
+- Hostnames containing `staging`, `preview`, `test`, or `dev` are treated
+  as non-production. They fail closed unless a dedicated
+  `window.__SCMS_STAGING_CONFIG__` is injected.
+- A staging configuration is rejected if it points to the known production
+  Supabase or n8n endpoints.
+- Unknown hosted environments remain production by default; environment
+  selection is not controlled by URL query parameters.
+- The environment selector is a deployment convenience, not an authorization
+  boundary. Database/API isolation remains mandatory.
+- No paid Supabase staging branch/project is provisioned yet. Until one exists,
+  authenticated staging E2E is intentionally not considered available.
+- GitHub E2E jobs require staging URL + test credentials before they can run;
+  they will not silently fall back to localhost or production.
+
+This gives the free/local workflow a fail-closed development boundary without
+pretending that local demo mode is a substitute for an isolated staging
+database.
+
 ## 3. Feature rollout
 
 design -> implementation branch -> static tests -> isolated DB/API test ->
