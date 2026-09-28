@@ -4352,3 +4352,15 @@ button, .tab-btn, .att-code-pill, .pill, .chip {
 /* Sidebar: profile row removed (name/role already in the top bar) → more room for the menu */
 .sidebar-signout { color: #EF4444; }
 .sidebar-signout .sidebar-label { color: #EF4444; }
+
+
+/* Student detail action menu — compact, consistent with SCMS modal controls */
+.student-action-grid{
+  display:grid;
+  grid-template-columns:repeat(2,minmax(0,1fr));
+  gap:8px;
+}
+.student-action-grid > button{min-width:0;}
+@media (min-width:520px){
+  .student-action-grid{grid-template-columns:repeat(3,minmax(0,1fr));}
+}
