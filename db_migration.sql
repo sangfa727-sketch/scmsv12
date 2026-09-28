@@ -311,6 +311,73 @@ AS $$
 $$;
 
 
+
+-- v12 Student management: admin-only soft deactivation
+-- The UI calls this instead of PATCHing students directly. The RPC derives
+-- school + teacher identity from the web session and records an audit event.
+CREATE OR REPLACE FUNCTION public.rpc_deactivate_student(
+  p_session_token text,
+  p_student_id text
+) RETURNS jsonb
+LANGUAGE plpgsql
+SECURITY DEFINER
+SET search_path = public
+AS $
+DECLARE
+  v_sess record;
+  v_row record;
+BEGIN
+  SELECT s.teacher_id, s.school_id, s.role
+    INTO v_sess
+    FROM public.app_web_sessions s
+    JOIN public.teachers t ON t.teacher_id = s.teacher_id
+   WHERE s.session_token = p_session_token
+     AND s.expires_at > now()
+     AND t.status = 'active'
+   LIMIT 1;
+
+  IF v_sess IS NULL THEN
+    RETURN jsonb_build_object('ok', false, 'error', 'invalid_session');
+  END IF;
+
+  IF COALESCE(v_sess.role, '') NOT IN ('admin', 'super_admin') THEN
+    RETURN jsonb_build_object('ok', false, 'error', 'forbidden',
+      'message', 'Only an administrator can deactivate a student.');
+  END IF;
+
+  IF p_student_id IS NULL OR trim(p_student_id) = '' THEN
+    RETURN jsonb_build_object('ok', false, 'error', 'student_id_required');
+  END IF;
+
+  UPDATE public.students
+     SET status = 'Inactive',
+         updated_at = now()
+   WHERE student_id = p_student_id
+     AND school_id = v_sess.school_id
+     AND status = 'Active'
+  RETURNING * INTO v_row;
+
+  IF v_row IS NULL THEN
+    RETURN jsonb_build_object('ok', false, 'error', 'not_found_or_not_active');
+  END IF;
+
+  INSERT INTO public.audit_log(source, actor, action, school_id, payload)
+  VALUES (
+    'web',
+    v_sess.teacher_id,
+    'student.deactivate',
+    v_sess.school_id,
+    jsonb_build_object('student_id', p_student_id)
+  );
+
+  RETURN jsonb_build_object('ok', true, 'student', to_jsonb(v_row));
+END;
+$;
+
+REVOKE ALL ON FUNCTION public.rpc_deactivate_student(text,text) FROM PUBLIC;
+GRANT EXECUTE ON FUNCTION public.rpc_deactivate_student(text,text) TO anon, authenticated;
+
+
 -- v12 Parent Portal communication + schedule expansion
 ALTER TABLE public.assessments
   ADD COLUMN IF NOT EXISTS start_time time without time zone,
