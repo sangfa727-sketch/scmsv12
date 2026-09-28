@@ -132,3 +132,17 @@ Reviewed session-bound resource mutations that accept a student or route identif
 - `rpc_assign_student_transport`
 
 These functions also pin their SECURITY DEFINER `search_path` to `public, pg_temp`. Invalid-session negative-path checks returned `invalid_session` for all six RPCs. Security Advisor mutable-search-path findings decreased from 95 to 89.
+
+
+## Auth/session RPC search-path hardening
+
+Reviewed the remaining auth/session-sensitive SECURITY DEFINER RPCs before changing them. The following were verified to derive identity from an active `app_web_sessions` record and now pin `search_path` to `public, pg_temp`:
+
+- `rpc_change_password`
+- `rpc_telegram_connect_start`
+- `rpc_telegram_connect_finish`
+- `rpc_telegram_disconnect`
+- `rpc_email_signup`
+- `rpc_get_my_data`
+
+Negative-path verification with an invalid session token returned `invalid_session` for password change, Telegram connect start/finish/disconnect, and data retrieval. `rpc_bootstrap` was reviewed separately because it is a legacy Telegram bootstrap path with different caller/identity semantics; it was not modified in this batch.
