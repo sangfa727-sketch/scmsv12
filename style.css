@@ -5560,3 +5560,71 @@ input.form-input {
     scroll-behavior: auto !important;
   }
 }
+
+
+/* ── Native sidebar final density pass ─────────────────────────── */
+.sidebar {
+  width: 264px;
+  transition: transform .24s cubic-bezier(.22,.8,.2,1), box-shadow .24s ease;
+}
+.sidebar-header {
+  padding: 14px 14px 12px;
+}
+.sidebar-profile { gap: 9px; }
+.sidebar-avatar {
+  width: 40px;
+  height: 40px;
+  font-size: 15px;
+}
+.sidebar-profile-name {
+  font-size: 14px;
+  line-height: 1.25;
+}
+.sidebar-profile-meta {
+  font-size: 11px;
+}
+.sidebar-nav {
+  padding: 7px 7px;
+  scrollbar-width: thin;
+}
+.sidebar-section-title {
+  padding: 9px 10px 5px;
+  font-size: 10px;
+}
+.sidebar-item {
+  min-height: 38px;
+  padding: 7px 9px;
+  gap: 9px;
+  border-radius: 9px;
+  font-size: 13.5px;
+  margin-bottom: 1px;
+  transition:
+    background-color .16s ease,
+    color .16s ease,
+    transform .16s cubic-bezier(.2,.8,.2,1),
+    box-shadow .16s ease;
+}
+.sidebar-item:hover { transform: translateX(1px); }
+.sidebar-item:active { transform: translateX(1px) scale(.985); }
+.sidebar-item.active {
+  background: var(--bg2);
+  box-shadow: inset 2px 0 0 var(--blue);
+}
+.sidebar-item.active .sidebar-icon { color: var(--blue); }
+.sidebar-icon {
+  width: 20px;
+  height: 20px;
+}
+.sidebar-icon svg { width: 18px; height: 18px; }
+.sidebar-footer { padding: 7px 8px 9px; }
+.sidebar-backdrop {
+  transition: opacity .18s ease;
+}
+
+/* Modal close is visually instant but animated; the sheet remains easy to read. */
+.modal-overlay {
+  transition: background-color .18s ease, opacity .18s ease;
+}
+.modal-overlay.active {
+  opacity: 1;
+}
