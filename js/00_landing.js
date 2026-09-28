@@ -592,8 +592,6 @@ window.verifyWebSession = async function () {
   }
 };
 
-window.webLogout = async function ()
-
 window.webLogout = async function () {
   const sess = getWebSession();
   if (sess && sess.session_token) {
