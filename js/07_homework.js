@@ -169,7 +169,7 @@ window.openEditHomework = async function(id) {
   const classes  = [...new Set(window.APP.students.map(s => s.class).filter(Boolean))].sort();
 
   openModal(`
-    <div class="modal-sheet" onclick="event.stopPropagation()">
+    <div class="modal-sheet homework-form-sheet" onclick="event.stopPropagation()">
       <div class="modal-handle"></div>
       <h3 class="modal-title">${t('hw.editTitle')}</h3>
 
