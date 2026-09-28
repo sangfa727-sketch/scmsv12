@@ -5164,9 +5164,29 @@ html[lang="my"] .field-label {
   .att-code-pill {
     width: 100%;
     min-width: 0;
-    height: 36px;
-    padding: 0 4px;
-    font-size: 11px;
+    height: 30px;
+    padding: 0 3px;
+    font-size: 10px;
+    border-radius: 8px;
+  }
+  .attend-row-clean {
+    padding: 9px 10px;
+    margin-bottom: 7px;
+  }
+  .att-row-head {
+    margin-bottom: 6px;
+  }
+  .att-avatar-sm {
+    width: 28px;
+    height: 28px;
+    font-size: 12px;
+  }
+  .att-row-name {
+    font-size: 13.5px;
+  }
+  .att-note-btn {
+    width: 28px;
+    height: 28px;
   }
 }
 @media (max-width: 380px) {
