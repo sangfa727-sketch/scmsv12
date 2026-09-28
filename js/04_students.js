@@ -14,12 +14,14 @@
 
 let _stuClass  = 'All';
 let _stuSearch = '';
+let _stuStatus = 'Active';
 let _parentLinkPollTimer = null;   // polls server after registering a student
 let _pendingPhotoFile    = null;   // File picked in the Add/Edit form, uploaded on save
 let _removePhotoRequested = false; // "Remove photo" tapped — clear on save
 
 function renderStudents() {
   _renderStudentStats();
+  _renderStatusChips();
   _renderClassChips();
   _renderIdSelectToolbar();
   _renderStudentList();
@@ -57,7 +59,7 @@ window.idSelectNone = function() {
 function _visibleStudentIds() {
   // Same filtering _renderStudentList uses, kept in sync deliberately —
   // "select all" means "all in the current class/search view", not everyone.
-  let list = window.APP.students.filter(s => s.status === 'Active');
+  let list = window.APP.students.filter(s => _stuStatus === 'All' || s.status === _stuStatus);
   if (_stuClass !== 'All') list = list.filter(s => s.class === _stuClass);
   if (_stuSearch) {
     list = list.filter(s =>
@@ -162,6 +164,19 @@ function _renderStudentStats() {
     { n: active, c: classes });
 }
 
+// ─── Status filter ─────────────────────────────────────────────────────────
+function _renderStatusChips() {
+  const el = document.getElementById('studentStatusChips');
+  if (!el) return;
+  const items = [['Active','Active'], ['Inactive','Inactive'], ['All','All']];
+  el.innerHTML = items.map(([value,label]) => '<button class="chip' + (value === _stuStatus ? ' active' : '') + '" data-status="' + esc(value) + '" onclick="filterStuStatus(\'' + esc(value) + '\')">' + esc(label) + '</button>').join('');
+}
+window.filterStuStatus = function(status) {
+  _stuStatus = status || 'Active';
+  document.querySelectorAll('#studentStatusChips .chip').forEach(b => b.classList.toggle('active', b.dataset.status === _stuStatus));
+  _renderStudentList();
+};
+
 // ─── Class filter chips ────────────────────────────────────────────────────
 
 function _renderClassChips() {
@@ -169,7 +184,7 @@ function _renderClassChips() {
   if (!el) return;
 
   const classes = ['All', ...[...new Set(
-    window.APP.students.filter(s => s.status === 'Active').map(s => s.class).filter(Boolean)
+    window.APP.students.filter(s => _stuStatus === 'All' || s.status === _stuStatus).map(s => s.class).filter(Boolean)
   )].sort()];
 
   el.innerHTML = classes.map(c =>
