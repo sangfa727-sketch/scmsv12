@@ -149,6 +149,6 @@ test('entry-form shells keep the compact width and control baseline', () => {
   }
 
   assert.match(css, /SCMS v12\\.2 — Premium compact data-entry forms/);
-  assert.match(css, /min-height: 38px !important; height: 38px !important/);
-  assert.match(css, /@media \\(max-width: 430px\\)[\\s\\S]{0,320}width: 94vw !important/);
+  assert.match(css, /min-height: 37px !important; height: 37px !important/);
+  assert.match(css, /@media \\(max-width: 430px\\)[\\s\\S]{0,320}width: 92vw !important/);
 });
