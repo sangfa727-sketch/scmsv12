@@ -502,16 +502,7 @@ window.startTelegramConnect = async function () {
   if (btn) { btn.disabled = true; btn.textContent = t('boot.openingTg'); }
 
   try {
-    const resp = await fetch(`${SCMS_CONFIG.SUPABASE_URL}/rest/v1/rpc/rpc_telegram_connect_start`, {
-      method: 'POST',
-      headers: {
-        'apikey': SCMS_CONFIG.SUPABASE_ANON,
-        'Authorization': `Bearer ${SCMS_CONFIG.SUPABASE_ANON}`,
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({ p_session_token: sess.session_token }),
-    });
-    const result = await resp.json();
+    const result = await _webRpc('rpc_telegram_connect_start', { p_session_token: sess.session_token });    const result = await resp.json();
     if (!result || !result.ok) {
       if (statusEl) statusEl.textContent = result?.message || t('tg.connectFailed');
       if (btn) { btn.disabled = false; btn.textContent = t('tg.openTelegram'); }
@@ -548,16 +539,7 @@ function _startTelegramConnectPolling(sessionToken, connectToken) {
       return;
     }
     try {
-      const resp = await fetch(`${SCMS_CONFIG.SUPABASE_URL}/rest/v1/rpc/rpc_telegram_connect_finish`, {
-        method: 'POST',
-        headers: {
-          'apikey': SCMS_CONFIG.SUPABASE_ANON,
-          'Authorization': `Bearer ${SCMS_CONFIG.SUPABASE_ANON}`,
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ p_session_token: sessionToken, p_connect_token: connectToken }),
-      });
-      const result = await resp.json();
+      const result = await _webRpc('rpc_telegram_connect_finish', { p_session_token: sessionToken, p_connect_token: connectToken });      const result = await resp.json();
       if (result && result.ok) {
         _stopTelegramConnectPolling();
         if (window.APP) window.APP.telegram_id = result.telegram_id;
@@ -610,16 +592,7 @@ window._doDisconnectTelegramConfirmed = async function () {
   if (!sess || !sess.session_token) return;
 
   try {
-    const resp = await fetch(`${SCMS_CONFIG.SUPABASE_URL}/rest/v1/rpc/rpc_telegram_disconnect`, {
-      method: 'POST',
-      headers: {
-        'apikey': SCMS_CONFIG.SUPABASE_ANON,
-        'Authorization': `Bearer ${SCMS_CONFIG.SUPABASE_ANON}`,
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({ p_session_token: sess.session_token }),
-    });
-    const result = await resp.json();
+    const result = await _webRpc('rpc_telegram_disconnect', { p_session_token: sess.session_token });    const result = await resp.json();
     if (result && result.ok) {
       if (window.APP) window.APP.telegram_id = null;
       showToast?.(t('tg.disconnected'));
@@ -637,20 +610,7 @@ window.createTeacherInvite = async function (role, teacherName) {
   if (!sess || !sess.session_token) return null;
 
   try {
-    const resp = await fetch(`${SCMS_CONFIG.SUPABASE_URL}/rest/v1/rpc/rpc_admin_create_invite`, {
-      method: 'POST',
-      headers: {
-        'apikey': SCMS_CONFIG.SUPABASE_ANON,
-        'Authorization': `Bearer ${SCMS_CONFIG.SUPABASE_ANON}`,
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({
-        p_session_token: sess.session_token,
-        p_role: role || 'teacher',
-        p_teacher_name: teacherName || null,
-      }),
-    });
-    return await resp.json();
+    return await _webRpc('rpc_admin_create_invite', { p_session_token: sess.session_token, p_role: role || 'teacher', p_teacher_name: teacherName || null });    return await resp.json();
   } catch (e) {
     return { ok: false, error: 'connection_error' };
   }
@@ -661,16 +621,7 @@ window.listTeacherInvites = async function () {
   if (!sess || !sess.session_token) return { ok: false, invites: [] };
 
   try {
-    const resp = await fetch(`${SCMS_CONFIG.SUPABASE_URL}/rest/v1/rpc/rpc_admin_list_invites`, {
-      method: 'POST',
-      headers: {
-        'apikey': SCMS_CONFIG.SUPABASE_ANON,
-        'Authorization': `Bearer ${SCMS_CONFIG.SUPABASE_ANON}`,
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({ p_session_token: sess.session_token }),
-    });
-    return await resp.json();
+    return await _webRpc('rpc_admin_list_invites', { p_session_token: sess.session_token });    return await resp.json();
   } catch (e) {
     return { ok: false, invites: [] };
   }
