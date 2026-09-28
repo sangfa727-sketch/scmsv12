@@ -92,18 +92,14 @@ window.openNewBookModal = function() {
     <div class="modal-sheet" onclick="event.stopPropagation()" style="max-height:85vh;overflow-y:auto">
       <div class="modal-handle"></div>
       <h3 class="modal-title">${t('lib.newTitle')}</h3>
-      <label class="field-label">${t('lib.title')}</label>
-      <input class="form-input" id="nbTitle" placeholder="${esc(t('lib.bookTitle'))}">
-      <label class="field-label">${t('lib.author')}</label>
-      <input class="form-input" id="nbAuthor" placeholder="${esc(t('health.medicationsOpt'))}">
-      <label class="field-label">${t('lib.category')}</label>
-      <input class="form-input" id="nbCategory" placeholder="${esc(t('lib.categoryPh'))}">
-      <label class="field-label">${t('lib.isbn')}</label>
-      <input class="form-input" id="nbIsbn" placeholder="${esc(t('health.medicationsOpt'))}">
-      <label class="field-label">${t('lib.copies')}</label>
-      <input class="form-input" id="nbCopies" type="number" min="1" value="1">
-      <label class="field-label">${t('health.notes')}</label>
-      <input class="form-input" id="nbNotes" placeholder="${esc(t('health.medicationsOpt'))}">
+      <div class="compact-form-grid">
+        <div><label class="field-label">${t('lib.title')}</label><input class="form-input" id="nbTitle" placeholder="${esc(t('lib.bookTitle'))}"></div>
+        <div><label class="field-label">${t('lib.author')}</label><input class="form-input" id="nbAuthor" placeholder="${esc(t('health.medicationsOpt'))}"></div>
+        <div><label class="field-label">${t('lib.category')}</label><input class="form-input" id="nbCategory" placeholder="${esc(t('lib.categoryPh'))}"></div>
+        <div><label class="field-label">${t('lib.isbn')}</label><input class="form-input" id="nbIsbn" placeholder="${esc(t('health.medicationsOpt'))}"></div>
+        <div><label class="field-label">${t('lib.copies')}</label><input class="form-input" id="nbCopies" type="number" min="1" value="1"></div>
+        <div><label class="field-label">${t('health.notes')}</label><input class="form-input" id="nbNotes" placeholder="${esc(t('health.medicationsOpt'))}"></div>
+      </div>
       <button class="btn-primary mt16" id="nbSaveBtn" onclick="_saveNewBook()">${t('lib.add')}</button>
       <button class="btn-secondary" onclick="closeModal()">${t('common.cancel')}</button>
     </div>
