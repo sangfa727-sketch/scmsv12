@@ -185,3 +185,31 @@ test('password changes require an active role- and tenant-bound session', () => 
   assert.match(migration, /v_sess\.session_role is distinct from v_sess\.teacher_role/i);
   assert.match(migration, /v_sess\.school_id is distinct from v_sess\.teacher_school_id/i);
 });
+
+
+test('admin RPCs bind authorization to the current teacher role and tenant', () => {
+  const migration = read('supabase/migrations/20260929064000_admin_rpc_current_role_binding_hardening.sql');
+  for (const fn of [
+    'rpc_admin_create_invite',
+    'rpc_admin_create_teacher',
+    'rpc_admin_list_invites',
+    'rpc_admin_list_teachers',
+    'rpc_admin_reset_teacher_password',
+  ]) {
+    const start = migration.indexOf('create or replace function public.' + fn);
+    assert.ok(start >= 0, fn + ' must be covered by admin role-binding hardening');
+    const end = migration.indexOf('create or replace function public.', start + 1);
+    const body = migration.slice(start, end === -1 ? migration.length : end);
+    assert.match(body, /join public\.teachers t on t\.teacher_id=s\.teacher_id/i);
+    assert.match(body, /t\.status='active'/i);
+    assert.match(body, /s\.school_id=t\.school_id/i);
+    assert.match(body, /s\.role=t\.role/i);
+  }
+  assert.match(migration, /p_role='admin'[\s\S]*v_admin\.teacher_role <> 'super_admin'/i);
+});
+
+test('web session RPC client execution is explicitly restored after hardening', () => {
+  const migration = read('supabase/migrations/20260929063010_web_session_rpc_client_execute_restore.sql');
+  assert.match(migration, /grant execute on function public\.rpc_web_session_verify\(text\) to anon, authenticated/i);
+  assert.match(migration, /grant execute on function public\.rpc_change_password\(text,text,text\) to anon, authenticated/i);
+});
