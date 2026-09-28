@@ -43,6 +43,10 @@ function _taCategory(key) {
 function _taDescription(key, fallback) {
   return _taText(key);
 }
+function _taAssignmentTypeLabel(type) {
+  const map = { class_teacher:'အတန်းပိုင်ဆရာ/ဆရာမ', assistant:'အကူဆရာ/ဆရာမ', subject_teacher:'ဘာသာရပ်ဆရာ/ဆရာမ', other:'အခြားတာဝန်' };
+  return map[type] || type;
+}
 
 function _taOpt(value, label, selected) {
   return '<option value="' + esc(value) + '"' + (String(value) === String(selected) ? ' selected' : '') + '>' + esc(label) + '</option>';
@@ -51,11 +55,11 @@ function _taOpt(value, label, selected) {
 function _taScopeControls(p, catalog) {
   let h = '';
   if (p.scope_type === 'class' || p.scope_type === 'class_subject') {
-    h += '<select class="form-input teacher-access-class" aria-label="Class"><option value="">Class</option>' +
+    h += '<select class="form-input teacher-access-class" aria-label="အတန်း"><option value="">အတန်းရွေးပါ</option>' +
       (catalog.classes || []).map(function(x){ return _taOpt(x,x,''); }).join('') + '</select>';
   }
   if (p.scope_type === 'subject' || p.scope_type === 'class_subject') {
-    h += '<select class="form-input teacher-access-subject" aria-label="Subject"><option value="">Subject</option>' +
+    h += '<select class="form-input teacher-access-subject" aria-label="ဘာသာရပ်"><option value="">ဘာသာရပ်ရွေးပါ</option>' +
       (catalog.subjects || []).map(function(x){ return _taOpt(x.id, x.subject_name + (x.subject_code ? ' · ' + x.subject_code : ''), ''); }).join('') + '</select>';
   }
   return h;
@@ -75,7 +79,7 @@ async function _renderTeacherAccess() {
   const root = document.getElementById('teacherAccessRoot');
   if (!root) return;
   const teacherId = root.dataset.teacherId;
-  root.innerHTML = '<div class="text-center text-muted">Loading…</div>';
+  root.innerHTML = '<div class="text-center text-muted">တင်နေသည်…</div>';
 
   try {
     const results = await Promise.all([
@@ -94,22 +98,22 @@ async function _renderTeacherAccess() {
       '</strong><span>' + esc(teacher.teacher_id || teacherId) + ' · ' + esc(teacher.role || '') + '</span></div>';
 
     html += '<section class="teacher-access-section">' +
-      '<div class="teacher-access-section-head"><strong>👥 Classes</strong><span>' + classAssignments.length + '</span></div>' +
-      '<div class="teacher-access-add-row"><select id="taClass" class="form-input"><option value="">Select class</option>' +
+      '<div class="teacher-access-section-head"><strong>👥 အတန်းများ</strong><span>' + classAssignments.length + '</span></div>' +
+      '<div class="teacher-access-add-row"><select id="taClass" class="form-input"><option value="">အတန်းရွေးပါ</option>' +
       (catalog.classes || []).map(function(x){ return _taOpt(x,x,''); }).join('') +
       '</select><button class="btn-primary teacher-access-small" onclick="teacherAccessAddClass()">Add</button></div>' +
       '<div class="teacher-access-chips">' +
       (classAssignments.length ? classAssignments.map(function(a){
-        return '<span class="teacher-access-chip">' + esc(a.class_name) + ' · ' + esc(a.assignment_type) +
+        return '<span class="teacher-access-chip">' + esc(a.class_name) + ' · ' + esc(_taAssignmentTypeLabel(a.assignment_type)) +
           '<button type="button" onclick="teacherAccessRemoveClass(' + JSON.stringify(a.class_name) + ',' + JSON.stringify(a.assignment_type) + ')">×</button></span>';
-      }).join('') : '<span class="text-muted">No class assignments yet.</span>') +
+      }).join('') : '<span class="text-muted">အတန်းတာဝန်ပေးထားခြင်း မရှိသေးပါ။</span>') +
       '</div></section>';
 
     html += '<section class="teacher-access-section">' +
-      '<div class="teacher-access-section-head"><strong>📚 Subjects</strong><span>' + subjectAssignments.length + '</span></div>' +
-      '<div class="teacher-access-add-grid"><select id="taSubjectClass" class="form-input"><option value="">Class</option>' +
+      '<div class="teacher-access-section-head"><strong>📚 ဘာသာရပ်များ</strong><span>' + subjectAssignments.length + '</span></div>' +
+      '<div class="teacher-access-add-grid"><select id="taSubjectClass" class="form-input"><option value="">အတန်းရွေးပါ</option>' +
       (catalog.classes || []).map(function(x){ return _taOpt(x,x,''); }).join('') +
-      '</select><select id="taSubject" class="form-input"><option value="">Subject</option>' +
+      '</select><select id="taSubject" class="form-input"><option value="">ဘာသာရပ်ရွေးပါ</option>' +
       (catalog.subjects || []).map(function(x){ return _taOpt(x.id, x.subject_name + (x.subject_code ? ' · ' + x.subject_code : ''), ''); }).join('') +
       '</select><button class="btn-primary teacher-access-small" onclick="teacherAccessAddSubject()">Add</button></div>' +
       '<div class="teacher-access-list">' +
@@ -117,13 +121,13 @@ async function _renderTeacherAccess() {
         const s = (catalog.subjects || []).find(function(x){ return String(x.id) === String(a.subject_id); });
         return '<div class="teacher-access-item"><span>' + esc(a.class_name) + ' · ' + esc(s ? s.subject_name : ('#' + a.subject_id)) +
           '</span><button type="button" class="icon-btn-mini" onclick="teacherAccessRemoveSubject(' + JSON.stringify(a.class_name) + ',' + Number(a.subject_id) + ')">×</button></div>';
-      }).join('') : '<span class="text-muted">No subject assignments yet.</span>') +
+      }).join('') : '<span class="text-muted">ဘာသာရပ်တာဝန်ပေးထားခြင်း မရှိသေးပါ။</span>') +
       '</div></section>';
 
     const groups = {};
     (catalog.permissions || []).forEach(function(p){ (groups[p.category] ||= []).push(p); });
-    html += '<section class="teacher-access-section"><div class="teacher-access-section-head"><strong>🔐 Permission overrides</strong><span>Default / Allow / Deny</span></div>' +
-      '<p class="form-help">Default follows the teacher role. Scoped permissions need a class/subject context.</p><div class="teacher-access-permissions">';
+    html += '<section class="teacher-access-section"><div class="teacher-access-section-head"><strong>🔐 လုပ်ပိုင်ခွင့် သတ်မှတ်ချက်များ</strong><span>မူလ / ခွင့်ပြု / ပိတ်ပင်</span></div>' +
+      '<p class="form-help">မူလခွင့်ပြုချက်သည် ဆရာ/ဆရာမ၏ role အတိုင်းဖြစ်သည်။ အတန်း/ဘာသာရပ်အလိုက် ခွင့်ပြုချက်အတွက် သက်ဆိုင်ရာအတန်းနှင့် ဘာသာရပ်ကို ရွေးပါ။</p><div class="teacher-access-permissions">';
 
     Object.keys(groups).forEach(function(category) {
       html += '<div class="teacher-access-perm-group"><div class="teacher-access-perm-category">' + esc(_taCategory(category)) + '</div>';
@@ -134,7 +138,7 @@ async function _renderTeacherAccess() {
         html += '<div class="teacher-access-perm-row" data-permission="' + esc(p.permission_key) + '" data-scope="' + esc(p.scope_type) + '">' +
           '<div class="teacher-access-perm-copy"><strong>' + esc(_taText(p.permission_key)) + '</strong><small>' + esc(_taDescription(p.permission_key, p.description || '')) +
           '</small></div>' + _taScopeControls(p,catalog) +
-          '<select class="teacher-access-perm-state" aria-label="Permission state"><option value="default"' + (state === 'default' ? ' selected' : '') +
+          '<select class="teacher-access-perm-state" aria-label="လုပ်ပိုင်ခွင့် အခြေအနေ"><option value="default"' + (state === 'default' ? ' selected' : '') +
           '>Default' + (roleDefault ? ' (ခွင့်ပြု)' : ' (ပိတ်ပင်)') + '</option><option value="allow"' + (state === 'allow' ? ' selected' : '') +
           '>Allow</option><option value="deny"' + (state === 'deny' ? ' selected' : '') + '>Deny</option></select></div>';
       });
@@ -147,46 +151,46 @@ async function _renderTeacherAccess() {
       select.addEventListener('change', function(){ teacherAccessSavePermission(select); });
     });
   } catch (e) {
-    root.innerHTML = '<div class="form-error">Failed to load access settings: ' + esc(e?.message || String(e)) + '</div>';
+    root.innerHTML = '<div class="form-error">လုပ်ပိုင်ခွင့် အချက်အလက် တင်မရပါ။ ' + esc(e?.message || String(e)) + '</div>';
   }
 }
 
 window.openTeacherAccess = async function(teacherId, teacherName) {
   openModal('<div class="modal-sheet teacher-access-sheet" onclick="event.stopPropagation()">' +
-    '<div class="modal-handle"></div><h3 class="modal-title">🔐 Manage access</h3>' +
-    '<p class="modal-subtitle">Classes, subjects and permission overrides for ' + esc(teacherName) + '</p>' +
-    '<div id="teacherAccessRoot" data-teacher-id="' + esc(teacherId) + '"><div class="text-center text-muted">Loading…</div></div>' +
-    '<button class="btn-secondary mt16" onclick="closeModal()">Close</button></div>');
+    '<div class="modal-handle"></div><h3 class="modal-title">🔐 လုပ်ပိုင်ခွင့် စီမံရန်</h3>' +
+    '<p class="modal-subtitle">' + esc(teacherName) + ' အတွက် အတန်း၊ ဘာသာရပ်နှင့် လုပ်ပိုင်ခွင့် သတ်မှတ်ချက်များ '</p>' +
+    '<div id="teacherAccessRoot" data-teacher-id="' + esc(teacherId) + '"><div class="text-center text-muted">တင်နေသည်…</div></div>' +
+    '<button class="btn-secondary mt16" onclick="closeModal()">ပိတ်မည်</button></div>');
   await _renderTeacherAccess();
 };
 
 window.teacherAccessAddClass = async function() {
   const root = document.getElementById('teacherAccessRoot');
   const value = document.getElementById('taClass')?.value;
-  if (!value) return showToast('Select a class first.');
+  if (!value) return showToast('အတန်းကို အရင်ရွေးပါ။');
   try { await _teacherAccessRpc('class_add', root.dataset.teacherId, {p_class_name:value,p_assignment_type:'class_teacher'}); await _renderTeacherAccess(); }
-  catch(e){ showToast(e?.message || 'Could not add class.'); }
+  catch(e){ showToast(e?.message || 'အတန်းထည့်၍ မရပါ။'); }
 };
 
 window.teacherAccessRemoveClass = async function(className, assignmentType) {
   const root = document.getElementById('teacherAccessRoot');
   try { await _teacherAccessRpc('class_remove', root.dataset.teacherId, {p_class_name:className,p_assignment_type:assignmentType}); await _renderTeacherAccess(); }
-  catch(e){ showToast(e?.message || 'Could not remove class.'); }
+  catch(e){ showToast(e?.message || 'အတန်းဖယ်၍ မရပါ။'); }
 };
 
 window.teacherAccessAddSubject = async function() {
   const root = document.getElementById('teacherAccessRoot');
   const cls = document.getElementById('taSubjectClass')?.value;
   const subject = Number(document.getElementById('taSubject')?.value);
-  if (!cls || !subject) return showToast('Select class and subject first.');
+  if (!cls || !subject) return showToast('အတန်းနှင့် ဘာသာရပ်ကို အရင်ရွေးပါ။');
   try { await _teacherAccessRpc('subject_add', root.dataset.teacherId, {p_class_name:cls,p_subject_id:subject}); await _renderTeacherAccess(); }
-  catch(e){ showToast(e?.message || 'Could not add subject.'); }
+  catch(e){ showToast(e?.message || 'ဘာသာရပ်ထည့်၍ မရပါ။'); }
 };
 
 window.teacherAccessRemoveSubject = async function(className, subjectId) {
   const root = document.getElementById('teacherAccessRoot');
   try { await _teacherAccessRpc('subject_remove', root.dataset.teacherId, {p_class_name:className,p_subject_id:Number(subjectId)}); await _renderTeacherAccess(); }
-  catch(e){ showToast(e?.message || 'Could not remove subject.'); }
+  catch(e){ showToast(e?.message || 'ဘာသာရပ်ဖယ်၍ မရပါ။'); }
 };
 
 window.teacherAccessSavePermission = async function(select) {
@@ -197,14 +201,14 @@ window.teacherAccessSavePermission = async function(select) {
   const cls = row.querySelector('.teacher-access-class')?.value || null;
   const subjectRaw = row.querySelector('.teacher-access-subject')?.value || null;
   const subject = subjectRaw ? Number(subjectRaw) : null;
-  if ((scope === 'class' || scope === 'class_subject') && !cls) { showToast('Select a class first.'); select.value='default'; return; }
-  if ((scope === 'subject' || scope === 'class_subject') && !subject) { showToast('Select a subject first.'); select.value='default'; return; }
+  if ((scope === 'class' || scope === 'class_subject') && !cls) { showToast('အတန်းကို အရင်ရွေးပါ။'); select.value='default'; return; }
+  if ((scope === 'subject' || scope === 'class_subject') && !subject) { showToast('ဘာသာရပ်ကို အရင်ရွေးပါ။'); select.value='default'; return; }
   try {
     if (select.value === 'default') {
       await _teacherAccessRpc('permission_remove', root.dataset.teacherId, {p_permission_key:key,p_scope_type:scope,p_class_name:cls,p_subject_id:subject});
     } else {
       await _teacherAccessRpc('permission_set', root.dataset.teacherId, {p_permission_key:key,p_allowed:select.value === 'allow',p_scope_type:scope,p_class_name:cls,p_subject_id:subject});
     }
-    showToast('Permission saved.');
-  } catch(e) { showToast(e?.message || 'Could not save permission.'); }
+    showToast('လုပ်ပိုင်ခွင့် သိမ်းပြီးပါပြီ။');
+  } catch(e) { showToast(e?.message || 'လုပ်ပိုင်ခွင့် သိမ်း၍ မရပါ။'); }
 };
