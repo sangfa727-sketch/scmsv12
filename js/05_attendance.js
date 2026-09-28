@@ -108,6 +108,7 @@ function _renderAttendClassChips() {
 window.selectAttendClass = function(cls) {
   _attendClass = cls;
   _attendMarks = {};
+  _attendNotes = {};
   document.querySelectorAll('#attendClassChips .chip').forEach(b => {
     b.classList.toggle('active', b.dataset.class === cls);
   });
