@@ -4364,3 +4364,13 @@ button, .tab-btn, .att-code-pill, .pill, .chip {
 @media (min-width:520px){
   .student-action-grid{grid-template-columns:repeat(3,minmax(0,1fr));}
 }
+
+
+.parent-contact-card{
+  display:flex;
+  flex-direction:column;
+  gap:8px;
+}
+.parent-contact-card .detail-section{
+  margin-top:8px;
+}
