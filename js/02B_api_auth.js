@@ -58,7 +58,7 @@ Object.assign(API, {
 
   /** v11.6 — bootstrap via web session (no Telegram, direct RPC).
    *  Verifies session token and returns full school+teacher bootstrap data
-   *  in one call. Doesn't depend on n8n. */,
+   *  in one call. Doesn't depend on n8n. */
 
   async bootstrapByTeacher(teacher_id, session_token) {
     const resp = await fetch(`${SCMS_CONFIG.SUPABASE_URL}/rest/v1/rpc/rpc_web_bootstrap`, {
