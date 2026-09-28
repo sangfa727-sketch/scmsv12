@@ -234,3 +234,52 @@ GRANT EXECUTE ON FUNCTION public.rpc_app_login_bind(text, text) TO service_role;
 -- ============================================================================
 -- DONE — app_sessions ready.
 -- ============================================================================
+
+-- ============================================================================
+-- v12 SECURITY — Exact-token Telegram app-session polling
+-- ============================================================================
+-- Do not expose app_sessions rows through PostgREST SELECT. The frontend polls
+-- only its own random token through this narrow RPC instead.
+CREATE OR REPLACE FUNCTION public.rpc_app_session_poll(p_token text)
+RETURNS jsonb
+LANGUAGE plpgsql
+SECURITY DEFINER
+SET search_path = public
+AS $$
+DECLARE
+  v_row RECORD;
+BEGIN
+  IF p_token IS NULL OR length(p_token) < 16 THEN
+    RETURN jsonb_build_object('ok', false, 'error', 'invalid_token');
+  END IF;
+
+  SELECT token, telegram_id, teacher_id, teacher_name, school_id, status
+    INTO v_row
+    FROM public.app_sessions
+   WHERE token = p_token
+     AND status = 'linked'
+   LIMIT 1;
+
+  IF v_row IS NULL THEN
+    RETURN jsonb_build_object('ok', true, 'linked', false);
+  END IF;
+
+  RETURN jsonb_build_object(
+    'ok', true,
+    'linked', true,
+    'session', jsonb_build_object(
+      'token', v_row.token,
+      'telegram_id', v_row.telegram_id,
+      'teacher_id', v_row.teacher_id,
+      'teacher_name', v_row.teacher_name,
+      'school_id', v_row.school_id,
+      'status', v_row.status
+    )
+  );
+END;
+$$;
+
+REVOKE ALL ON FUNCTION public.rpc_app_session_poll(text) FROM PUBLIC;
+GRANT EXECUTE ON FUNCTION public.rpc_app_session_poll(text) TO anon, authenticated;
+
+DROP POLICY IF EXISTS app_sessions_select ON public.app_sessions;
