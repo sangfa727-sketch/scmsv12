@@ -34,7 +34,7 @@ window.openSettings = function() {
           ${isAdmin ? `
             <div class="settings-action-row">
               <div class="settings-action-copy"><strong>${t('settings.manageTeachers')}</strong></div>
-              <button type="button" class="settings-action-button settings-action-primary" onclick="closeModal(); setTimeout(() => openTeacherManager(), 190)>${t('settings.manageTeachers')}</button>
+              <button type="button" class="settings-action-button settings-action-primary" onclick="closeModal(); setTimeout(() => openTeacherManager(), 190)">${t('settings.manageTeachers')}</button>
             </div>
           ` : ''}
 
