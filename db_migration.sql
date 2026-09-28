@@ -692,3 +692,10 @@ $function$;
 
 REVOKE ALL ON FUNCTION public.rpc_get_attendance_audit(text,text,date,date,integer) FROM PUBLIC;
 GRANT EXECUTE ON FUNCTION public.rpc_get_attendance_audit(text,text,date,date,integer) TO anon,authenticated;
+
+
+-- SCMS v12 — Academics / Grades security hardening (applied 2026-09-28)
+-- See canonical runtime migration: academics_security_hardening_v2.
+-- Key guarantees: fixed search_path, removed legacy 9-arg assessment overload,
+-- school-scoped term/subject/assessment/student validation, score bounds,
+-- audit events for assessment create/delete and grade saves.
