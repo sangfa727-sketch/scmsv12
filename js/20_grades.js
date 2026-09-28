@@ -131,8 +131,10 @@ async function _loadAndRenderAssessments() {
     return;
   }
 
-  el.innerHTML = toolbar + _gradesAssessments.map(a => `
-    <div class="list-card" onclick="openGradeEntry(${a.id})">
+  el.innerHTML = toolbar + `
+    <div class="grades-assessment-grid">
+      ${_gradesAssessments.map(a => `
+        <div class="list-card grades-assessment-card" onclick="openGradeEntry(${a.id})">
       <div class="card-row">
         <div class="card-info">
           <div class="card-name">${esc(a.title)} <span class="type-tag">${esc(tv('assessType', a.type))}</span></div>
@@ -142,8 +144,10 @@ async function _loadAndRenderAssessments() {
           <button class="icon-btn-mini danger" onclick="event.stopPropagation();confirmDeleteAssessment(${a.id})" title="${esc(t('btn.delete'))}">🗑</button>
         </div>
       </div>
+        </div>
+      `).join('')}
     </div>
-  `).join('');
+  `;
 }
 
 /* ─── Report card (term-end weighted average per subject + overall) ────── */
