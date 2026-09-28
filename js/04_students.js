@@ -356,6 +356,7 @@ window.openStudentDetail = function(studentId) {
       <div class="student-action-grid mt16">
         <button class="btn-primary" data-id="${esc(s.student_id)}" onclick="openEditStudentModal(this.dataset.id)">✏️ ${t("common.edit")}</button>
         <button class="btn-secondary" data-id="${esc(s.student_id)}" onclick="showStudentHistory(this.dataset.id)">🕘 History</button>
+        <button class="btn-secondary" data-id="${esc(s.student_id)}" onclick="showStudentParent(this.dataset.id)">👨‍👩‍👧 Parent</button>
         ${s.status === "Active" ? `<button class="btn-secondary" data-id="${esc(s.student_id)}" onclick="showStudentIdCard(this.dataset.id)">🪪 ${t("idCard.title")}</button>` : ""}
         ${s.status === "Active" ? `<button class="btn-secondary" data-id="${esc(s.student_id)}" onclick="showHealthRecord(this.dataset.id)">🏥 ${t("students.btn.health")}</button>` : ""}
         ${s.status === "Active" ? `<button class="btn-secondary" data-id="${esc(s.student_id)}" onclick="showStudentLibrary(this.dataset.id)">📚 ${t("stuLib.title")}</button>` : ""}
@@ -368,6 +369,53 @@ window.openStudentDetail = function(studentId) {
   openModal(html);
 };
 
+window.showStudentParent = function(studentId) {
+  const s = window.APP.students.find(x => x.student_id === studentId);
+  if (!s) return;
+  openModal(
+    '<div class="modal-sheet" onclick="event.stopPropagation()">' +
+    '<div class="modal-handle"></div>' +
+    '<h3 class="modal-title">Parent / Guardian</h3>' +
+    '<div class="parent-contact-card">' +
+    '<div class="detail-section">Primary contact</div>' +
+    '<label class="field-label">Parent / Guardian name</label>' +
+    '<input class="form-input" id="parentEditName" maxlength="120" value="' + esc(s.parent_name || "") + '">' +
+    '<label class="field-label">Phone</label>' +
+    '<input class="form-input" id="parentEditPhone" type="tel" inputmode="tel" maxlength="40" value="' + esc(s.parent_phone || "") + '">' +
+    '<label class="field-label">Phone 2</label>' +
+    '<input class="form-input" id="parentEditPhone2" type="tel" inputmode="tel" maxlength="40" value="' + esc(s.parent_phone2 || "") + '">' +
+    '<label class="field-label">Email</label>' +
+    '<input class="form-input" id="parentEditEmail" type="email" maxlength="160" value="' + esc(s.parent_email || "") + '">' +
+    '<div class="detail-section">Telegram</div>' +
+    (s.parent_tg_id ? '<div class="tg-linked-box">✓ Linked · <code>' + esc(s.parent_tg_id) + '</code></div>' : '<button type="button" class="link-btn" data-id="' + esc(s.student_id) + '" onclick="showParentLinkQR(this.dataset.id)">Send parent link</button>') +
+    '<button class="btn-primary mt16" id="saveParentBtn" data-id="' + esc(s.student_id) + '" onclick="saveStudentParent(this.dataset.id)">Save parent details</button>' +
+    '<button class="btn-secondary" onclick="closeModal()">Cancel</button>' +
+    '</div></div>'
+  );
+};
+
+window.saveStudentParent = async function(studentId) {
+  const name = (document.getElementById("parentEditName")?.value || "").trim();
+  const phone = (document.getElementById("parentEditPhone")?.value || "").trim();
+  const phone2 = (document.getElementById("parentEditPhone2")?.value || "").trim();
+  const email = (document.getElementById("parentEditEmail")?.value || "").trim().toLowerCase();
+  if (email && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) { showToast("Please enter a valid parent email."); return; }
+  if (phone && !/^[+0-9()\-\s]{6,40}$/.test(phone)) { showToast("Please check the primary phone number."); return; }
+  if (phone2 && !/^[+0-9()\-\s]{6,40}$/.test(phone2)) { showToast("Please check the second phone number."); return; }
+  const btn = document.getElementById("saveParentBtn");
+  if (btn) { btn.disabled = true; btn.textContent = "Saving…"; }
+  try {
+    const res = await API.updateStudentParent(studentId, { parent_name:name, parent_phone:phone, parent_phone2:phone2, parent_email:email });
+    if (!res?.ok) throw new Error(res?.message || res?.error || "Save failed");
+    const idx = window.APP.students.findIndex(x => x.student_id === studentId);
+    if (idx >= 0) Object.assign(window.APP.students[idx], res);
+    closeModal(); renderStudents(); openStudentDetail(studentId);
+    showToast("Parent details saved.");
+  } catch (e) {
+    if (btn) { btn.disabled = false; btn.textContent = "Save parent details"; }
+    showToast(t("common.failed") + " " + (e.message || t("common.error")));
+  }
+};
 window.showStudentHistory = async function(studentId) {
   const s = window.APP.students.find(x => x.student_id === studentId);
   if (!s) return;
