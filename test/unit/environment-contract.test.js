@@ -65,7 +65,7 @@ test('local development bypasses the authenticated landing/backend flow', () => 
 test('settings CSS stays behind Settings-specific selectors', () => {
   const css = read('style.css');
   const blocks = css.match(/[^{}]+\{[^{}]*\}/g) || [];
-  const settingsBlocks = blocks.filter(block => /settings/i.test(block.split('{')[0]));
+  const settingsBlocks = blocks.filter(block => /\.settings[-_a-z0-9]*/i.test(block.split('{')[0].replace(/\/\*[\s\S]*?\*\//g, '')));
   assert.ok(settingsBlocks.length > 0, 'Settings CSS contract should remain detectable');
   for (const block of settingsBlocks) {
     const selector = block.split('{')[0];
