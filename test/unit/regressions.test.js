@@ -123,3 +123,12 @@ test('parent communication page keeps message workflow wired', () => {
   assert.match(source, /message_preview/);
   assert.match(source, /label class="field-label">\$\{t\('comms\.message'\)\}/);
 });
+
+
+test('compact form modal baseline is not overridden by extra-small global CSS', () => {
+  const css = read('style.css');
+  assert.match(css, /SCMS v12\.2 — Premium compact data-entry forms/);
+  assert.match(css, /@media \(max-width:380px\)/);
+  assert.match(css, /\.modal-sheet:has\(\.form-input, \.form-textarea, \.picker-trigger, input, select, textarea\)\{width:94vw!important;max-width:94vw!important\}/);
+  assert.doesNotMatch(css, /\.modal-sheet\{width:95vw!important;max-width:95vw!important\}/);
+});
