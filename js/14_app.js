@@ -221,6 +221,23 @@ async function initApp() {
     window.APP.config         = bootstrapData.config || {};
     window.APP.currentTerm    = bootstrapData.currentTerm || null;
 
+    // Central state boundary: keep session/tenant identity in APPStore while
+    // preserving window.APP as the compatibility surface during migration.
+    if (window.APPStore) {
+      window.APPStore.patch('session', {
+        ready: true,
+        sessionToken: webSession?.session_token || window.APP.webSession?.session_token || null,
+        authMode: bootstrapData.auth_mode || (window.APP.platform === 'twa' ? 'twa' : null),
+      });
+      window.APPStore.patch('tenant', {
+        schoolId: window.APP.school_id,
+        teacherId: window.APP.teacher_id,
+        role: window.APP.teacher_role,
+        isAdmin: !!window.APP.is_admin,
+      });
+      window.APPStore.patch('ui', { currentPage: 'dashboard' });
+    }
+
     window.APP.students       = bootstrapData.students       || [];
     window.APP.attendance     = bootstrapData.attendance     || [];
     window.APP.dailyReports   = bootstrapData.dailyReports   || [];
@@ -279,6 +296,7 @@ async function initApp() {
     // Sidebar active-state is derived from APP.currentPage, so the initial
     // value must be dashboard before renderSidebar() runs.
     window.APP.currentPage = 'dashboard';
+    if (window.APPStore) window.APPStore.set('ui.currentPage', 'dashboard');
 
     // ── Step 8: Render modules ───────────────────────────────────────────
     setStatus(t('boot.building'), '');
