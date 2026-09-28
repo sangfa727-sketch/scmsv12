@@ -440,6 +440,7 @@ window.goToPage = function(pageId) {
   window.requestAnimationFrame(() => {
     pages.forEach(p => p.classList.toggle('active', p.id === `page-${pageId}`));
     window.APP.currentPage = pageId;
+  if (window.APPStore) window.APPStore.set('ui.currentPage', pageId);
 
     if (typeof _updateFabForPage === 'function') _updateFabForPage(pageId);
 
