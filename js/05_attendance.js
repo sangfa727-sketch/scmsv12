@@ -425,6 +425,64 @@ window.toggleAttendBreakdown = function(btn) {
   btn.classList.toggle('open', wasHidden);
 };
 
+
+// ─── History / correction / 30-day report ──────────────────────────────────
+window.openAttendanceHistory = function() {
+  const rows = _attendanceHistoryRows(), report = _attendanceReportSummary();
+  openModal(`
+    <div class="modal-sheet attendance-history-sheet" onclick="event.stopPropagation()">
+      <div class="modal-handle"></div><h3 class="modal-title">Attendance history</h3>
+      <p class="modal-subtitle">Recent records and 30-day summary.</p>
+      <div class="att-history-summary">
+        <div><strong>${report.days}</strong><span>Days</span></div>
+        <div><strong>${report.marked}</strong><span>Marked</span></div>
+        <div><strong>${report.presentPct}%</strong><span>Present</span></div>
+      </div>
+      <div class="att-history-toolbar">
+        <select class="form-input" id="attHistoryClass">
+          <option value="">All classes</option>
+          ${_attendanceClasses().map(c => `<option value="${esc(c)}">${esc(c)}</option>`).join('')}
+        </select>
+        <button class="btn-pill-action ghost" onclick="renderAttendanceHistoryRows()">Refresh</button>
+      </div>
+      <div id="attHistoryRows">${rows}</div>
+      <div class="att-history-report"><div class="att-history-report-title">30-day report</div>
+        <div class="att-report-grid">
+          <span>Present <b>${report.P}</b></span><span>Absent <b>${report.A}</b></span>
+          <span>Late <b>${report.L}</b></span><span>Sick <b>${report.S}</b></span>
+          <span>Excused <b>${report.E}</b></span><span>Half-day <b>${report.H}</b></span>
+        </div>
+      </div>
+      <button class="btn-secondary mt16" onclick="closeModal()">Close</button>
+    </div>`);
+};
+function _attendanceClasses(){return [...new Set((window.APP.students||[]).map(s=>s.class).filter(Boolean))].sort();}
+function _attendanceHistoryRows(){
+  const data=(window.APP.attendance||[]).filter(a=>a&&a.date&&a.class), cls=document.getElementById('attHistoryClass')?.value||'', grouped=new Map();
+  data.forEach(a=>{if(cls&&a.class!==cls)return;const k=a.date+'|'+a.class;if(!grouped.has(k))grouped.set(k,[]);grouped.get(k).push(a);});
+  const groups=[...grouped.entries()].sort((a,b)=>b[0].localeCompare(a[0])).slice(0,20);
+  if(!groups.length)return '<div class="empty-state"><div class="empty-state-icon">📋</div><div class="empty-state-text">No attendance history found.</div></div>';
+  return `<div class="att-history-list">${groups.map(([key,items])=>{
+    const [date,className]=key.split('|'), counts=items.reduce((m,x)=>(m[x.status]=(m[x.status]||0)+1,m),{});
+    return `<div class="att-history-item"><div class="att-history-main"><strong>${esc(className)}</strong><span>${esc(fmtDateLong(date))}</span></div>
+      <div class="att-history-counts"><span>P ${counts.P||0}</span><span>A ${counts.A||0}</span><span>L ${counts.L||0}</span><span>S ${counts.S||0}</span></div>
+      <button class="btn-secondary att-history-edit" onclick="correctAttendance('${esc(className)}','${esc(date)}')">Edit</button></div>`;
+  }).join('')}</div>`;
+}
+window.renderAttendanceHistoryRows=function(){const el=document.getElementById('attHistoryRows');if(el)el.innerHTML=_attendanceHistoryRows();};
+window.correctAttendance=function(cls,date){
+  closeModal();_attendClass=cls;_attendDate=date;_attendMarks={};_attendNotes={};_stripAnchor=new Date(date+'T00:00:00');
+  _renderDateStrip();_renderAttendClassChips();
+  setTimeout(()=>{document.getElementById('page-attend')?.scrollIntoView({behavior:'smooth',block:'start'});showToast('Correction mode: review and save the selected date.');},120);
+};
+function _attendanceReportSummary(){
+  const data=window.APP.attendance||[], cutoff=new Date();cutoff.setHours(0,0,0,0);cutoff.setDate(cutoff.getDate()-29);
+  const counts={P:0,A:0,L:0,T:0,S:0,E:0,H:0};
+  data.forEach(a=>{if(!a?.date||new Date(a.date+'T00:00:00')<cutoff)return;if(counts[a.status]!==undefined)counts[a.status]++;});
+  const marked=Object.values(counts).reduce((a,b)=>a+b,0);
+  return {...counts,marked,days:new Set(data.filter(a=>a?.date&&new Date(a.date+'T00:00:00')>=cutoff).map(a=>a.date)).size,presentPct:marked?Math.round(counts.P/marked*100):0};
+}
+
 // ─── Save attendance ──────────────────────────────────────────────────────
 
 document.addEventListener('DOMContentLoaded', () => {
