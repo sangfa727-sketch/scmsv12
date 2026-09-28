@@ -105,13 +105,35 @@ window.openTeacherManager = async function() {
 
   // Load teachers from the same school
   try {
-    const res = await _webRpc('rpc_admin_list_teachers', {
-      p_session_token: getWebSession()?.session_token,
-    });
+    let sess = getWebSession();
+    let res;
+    try {
+      res = await _webRpc('rpc_admin_list_teachers', {
+        p_session_token: sess?.session_token,
+      });
+    } catch (firstError) {
+      // A stale browser-cached session can survive a role/session refresh.
+      // Verify once and retry with the server-confirmed token before showing an error.
+      if (typeof verifyWebSession === 'function') {
+        const verified = await verifyWebSession();
+        if (verified?.session_token) {
+          window.APP.webSession = verified;
+          sess = verified;
+          res = await _webRpc('rpc_admin_list_teachers', {
+            p_session_token: sess.session_token,
+          });
+        } else {
+          throw firstError;
+        }
+      } else {
+        throw firstError;
+      }
+    }
     _renderTeacherList(res.rows || []);
   } catch (e) {
+    const msg = e?.message || String(e);
     document.getElementById('teacherList').innerHTML =
-      `<div class="form-error">${t('tm.loadFailed')}</div>`;
+      `<div class="form-error">${esc(t('tm.loadFailed'))}<br><small>${esc(msg.slice(0, 180))}</small></div>`;
   }
 };
 
