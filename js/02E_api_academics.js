@@ -258,6 +258,8 @@ Object.assign(API, {
         p_max_score:  data.max_score,
         p_weight:     data.weight,
         p_date:       data.date,
+        p_start_time: data.start_time || null,
+        p_end_time:   data.end_time || null,
       });
     },
   
