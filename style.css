@@ -6086,3 +6086,242 @@ input.form-input {
     padding: 8px 11px !important;
   }
 }
+
+
+/* ================================================================
+   SCMS v12 — layout containment / compact controls / cover identity
+   Final override: keep content readable, cards compact, buttons fit
+   their labels, and never hide a cover behind a solid identity row.
+   ================================================================ */
+
+/* 1) Sidebar cover: logo + school name sit ON the cover.
+      The identity strip is translucent so the cover remains visible. */
+.sidebar-header .sidebar-cover {
+  position: relative !important;
+  height: 112px !important;
+  min-height: 112px !important;
+  background-size: cover !important;
+  background-position: center !important;
+  overflow: hidden !important;
+}
+.sidebar-header .sidebar-cover .sidebar-school-row-top {
+  position: absolute !important;
+  left: 0 !important;
+  right: 0 !important;
+  bottom: 0 !important;
+  top: auto !important;
+  width: 100% !important;
+  min-height: 58px !important;
+  margin: 0 !important;
+  padding: 9px 14px !important;
+  display: flex !important;
+  flex-direction: row !important;
+  flex-wrap: nowrap !important;
+  align-items: center !important;
+  justify-content: flex-start !important;
+  gap: 9px !important;
+  border: 0 !important;
+  color: #fff !important;
+  background: linear-gradient(
+    to top,
+    rgba(0,0,0,.58),
+    rgba(0,0,0,.20) 72%,
+    transparent
+  ) !important;
+  z-index: 3 !important;
+  box-sizing: border-box !important;
+}
+.sidebar-header .sidebar-cover .sidebar-school-logo,
+.sidebar-header .sidebar-cover .sidebar-school-mark {
+  width: 42px !important;
+  height: 42px !important;
+  flex: 0 0 42px !important;
+  border-radius: 11px !important;
+  border: 2px solid rgba(255,255,255,.88) !important;
+  box-shadow: 0 2px 8px rgba(0,0,0,.28) !important;
+  background: rgba(255,255,255,.14) !important;
+}
+.sidebar-header .sidebar-cover .sidebar-school-mark {
+  color: #fff !important;
+  font-size: 20px !important;
+}
+.sidebar-header .sidebar-cover .sidebar-school-name {
+  flex: 1 1 auto !important;
+  min-width: 0 !important;
+  max-width: none !important;
+  color: #fff !important;
+  text-shadow: 0 1px 3px rgba(0,0,0,.55) !important;
+  font-size: 14px !important;
+  font-weight: 700 !important;
+  line-height: 1.25 !important;
+  text-align: left !important;
+  opacity: 1 !important;
+  overflow: hidden !important;
+  display: -webkit-box !important;
+  -webkit-box-orient: vertical !important;
+  -webkit-line-clamp: 2 !important;
+}
+.sidebar-header .sidebar-cover .sidebar-logo-edit {
+  right: -5px !important;
+  bottom: -5px !important;
+  border: 2px solid rgba(255,255,255,.92) !important;
+  box-shadow: 0 2px 7px rgba(0,0,0,.25) !important;
+}
+
+/* 2) One readable desktop content rail for every page. */
+@media (min-width: 900px) {
+  #pages {
+    width: 100%;
+  }
+  #pages > .page.active {
+    width: min(1200px, calc(100% - 32px)) !important;
+    max-width: 1200px !important;
+    margin-left: auto !important;
+    margin-right: auto !important;
+  }
+}
+
+/* 3) Buttons should size to their content by default.
+      Inputs/forms can still explicitly request full width. */
+.btn-primary,
+.btn-secondary {
+  width: fit-content !important;
+  max-width: 100% !important;
+  min-width: 0 !important;
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  white-space: normal !important;
+}
+.btn-primary { padding-left: 14px !important; padding-right: 14px !important; }
+.btn-secondary { padding-left: 13px !important; padding-right: 13px !important; }
+
+/* Common action/tool rows: compact, wrapping, never one giant bar. */
+.page-toolbar,
+.attend-toolbar,
+.billing-filter-row,
+.grades-filter-row,
+.dashboard-actions,
+.action-grid,
+.student-action-grid {
+  display: flex !important;
+  flex-wrap: wrap !important;
+  align-items: center !important;
+  gap: 7px !important;
+}
+.page-toolbar > button,
+.attend-toolbar > button,
+.billing-filter-row > button,
+.grades-filter-row > button,
+.dashboard-actions > button,
+.action-grid > button,
+.student-action-grid > button {
+  flex: 0 1 auto !important;
+  width: fit-content !important;
+  min-width: 0 !important;
+}
+
+/* 4) Dashboard: actual responsive card grid, not a vertical feed. */
+#page-dashboard #dashboardContent {
+  display: block;
+}
+#page-dashboard #dashboardScopeChips {
+  margin-bottom: 2px;
+}
+#page-dashboard .stats-grid {
+  grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+  gap: 8px !important;
+  padding: 0 12px 10px !important;
+}
+#page-dashboard .dashboard-actions {
+  padding: 0 12px 10px !important;
+}
+#page-dashboard .dashboard-actions > button {
+  flex: 0 1 auto !important;
+}
+#page-dashboard .dashboard-banner {
+  margin-left: 12px !important;
+  margin-right: 12px !important;
+}
+
+/* Dashboard list cards are arranged as a responsive grid. */
+#page-dashboard .list-card {
+  margin: 0 0 8px !important;
+}
+#page-dashboard .list-card + .list-card {
+  margin-top: 0 !important;
+}
+@media (min-width: 700px) {
+  #page-dashboard .stats-grid {
+    grid-template-columns: repeat(3, minmax(0, 1fr)) !important;
+  }
+  #page-dashboard #dashboardContent > .list-card,
+  #page-dashboard #dashboardContent > .dashboard-card-grid > .list-card {
+    width: auto;
+  }
+  #page-dashboard .dashboard-list-grid {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 8px;
+  }
+}
+@media (min-width: 1100px) {
+  #page-dashboard .dashboard-list-grid {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+}
+
+/* 5) Desktop common list surfaces: two columns where rows are cards.
+      Attendance/timetable rows are intentionally excluded. */
+@media (min-width: 900px) {
+  #page-students #studentList,
+  #page-daily #dailyList,
+  #page-hw #hwList,
+  #page-parents #commsList,
+  #page-incidents #incidentList,
+  #page-library #libraryList,
+  #page-transport #transportList,
+  #page-admissions #admissionsList,
+  #page-summary #summaryList {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 8px;
+    align-items: start;
+  }
+  #page-students #studentList > .list-card,
+  #page-daily #dailyList > .list-card,
+  #page-hw #hwList > .list-card,
+  #page-parents #commsList > .list-card,
+  #page-incidents #incidentList > .list-card,
+  #page-library #libraryList > .list-card,
+  #page-transport #transportList > .list-card,
+  #page-admissions #admissionsList > .list-card,
+  #page-summary #summaryList > .list-card {
+    margin-left: 0 !important;
+    margin-right: 0 !important;
+    margin-bottom: 0 !important;
+  }
+}
+@media (min-width: 1200px) {
+  #page-students #studentList,
+  #page-daily #dailyList,
+  #page-hw #hwList,
+  #page-parents #commsList,
+  #page-incidents #incidentList,
+  #page-library #libraryList,
+  #page-transport #transportList,
+  #page-admissions #admissionsList,
+  #page-summary #summaryList {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+}
+
+/* On phones keep cards readable and full-width within the small rail. */
+@media (max-width: 699px) {
+  #page-dashboard .stats-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+  }
+  #page-dashboard .dashboard-actions > button {
+    flex: 1 1 auto !important;
+  }
+}
