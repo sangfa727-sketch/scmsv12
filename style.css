@@ -7088,3 +7088,46 @@ input.form-input {
 @media (prefers-reduced-motion: reduce) {
   .modal-sheet.teacher-access-sheet { animation: none !important; }
 }
+
+
+/* SCMS v12.3.1 — Manage Access modal stability
+   The access sheet is a fixed modal surface from its first paint.
+   Do not let generic form/:has() rules resize it while async content loads. */
+.modal-layer > .modal-sheet.teacher-access-sheet,
+.modal-layer > .modal-sheet.teacher-access-sheet:has(.form-input, input, select, textarea) {
+  box-sizing: border-box !important;
+  width: min(94vw, 720px) !important;
+  max-width: min(94vw, 720px) !important;
+  min-width: min(94vw, 720px) !important;
+  max-height: min(82dvh, 760px) !important;
+  margin: 0 auto !important;
+  flex: 0 0 auto !important;
+  align-self: center !important;
+  contain: layout paint !important;
+  will-change: transform, opacity !important;
+  overflow-x: hidden !important;
+}
+.modal-layer > .modal-sheet.teacher-access-sheet > #teacherAccessRoot {
+  width: 100% !important;
+  min-width: 0 !important;
+  box-sizing: border-box !important;
+}
+@media (max-width: 420px) {
+  .modal-layer > .modal-sheet.teacher-access-sheet,
+  .modal-layer > .modal-sheet.teacher-access-sheet:has(.form-input, input, select, textarea) {
+    width: 94vw !important;
+    min-width: 94vw !important;
+    max-width: 94vw !important;
+    max-height: 82dvh !important;
+  }
+}
+.modal-layer > .modal-sheet.teacher-access-sheet .modal-close-x {
+  z-index: 5 !important;
+  top: 10px !important;
+  right: 10px !important;
+  width: 32px !important;
+  height: 32px !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+}
