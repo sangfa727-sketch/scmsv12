@@ -277,6 +277,8 @@ window.saveNewAssessment = async function() {
       max_score:  Number(document.getElementById('gaMax').value) || 100,
       weight:     Number(document.getElementById('gaWeight').value) || 0,
       date:       document.getElementById('gaDate').value || null,
+      start_time: document.getElementById('gaStartTime').value || null,
+      end_time:   document.getElementById('gaEndTime').value || null,
     });
     closeModal();
     showToast(t('grades.created'));
