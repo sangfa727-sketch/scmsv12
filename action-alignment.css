@@ -85,19 +85,83 @@
   }
 }
 
-/* Card-level actions: content stays left, commands sit on the right edge. */
-.card-actions {
+/* Card-level actions: reserve only the space the controls actually need.
+   The old width:100% rule could consume the whole card row and push
+   Burmese text / icons outside the card on narrow screens. */
+.list-card .card-row {
+  min-width: 0 !important;
+  width: 100% !important;
+  box-sizing: border-box !important;
+}
+.list-card .card-info {
+  flex: 1 1 auto !important;
+  min-width: 0 !important;
+  max-width: none !important;
+  overflow: hidden !important;
+}
+.list-card .card-actions {
   display: flex !important;
   align-items: center !important;
   justify-content: flex-end !important;
-  flex-wrap: wrap !important;
-  gap: 7px !important;
-  width: 100% !important;
-}
-.card-actions > button {
   flex: 0 0 auto !important;
-  width: fit-content !important;
+  width: auto !important;
+  max-width: 52% !important;
+  min-width: max-content !important;
+  margin-left: auto !important;
+  flex-wrap: nowrap !important;
+  gap: 6px !important;
+  box-sizing: border-box !important;
+}
+.list-card .card-actions > button,
+.list-card .card-actions > a,
+.list-card .card-actions > .icon-btn-mini,
+.list-card .card-actions > .btn-icon-round {
+  flex: 0 0 auto !important;
+  width: auto !important;
+  max-width: 100% !important;
   min-width: 0 !important;
+  white-space: nowrap !important;
+}
+.list-card .card-actions > .icon-btn-mini {
+  width: 30px !important;
+  min-width: 30px !important;
+  height: 30px !important;
+  padding: 0 !important;
+}
+.list-card .card-actions > .billing-status-badge,
+.list-card .card-actions > .adm-status-badge,
+.list-card .card-actions > .adm-move-menu {
+  flex: 0 1 auto !important;
+  min-width: 0 !important;
+}
+.list-card .card-name {
+  min-width: 0 !important;
+  max-width: 100% !important;
+  overflow: hidden !important;
+  text-overflow: ellipsis !important;
+}
+.list-card .card-sub {
+  min-width: 0 !important;
+}
+.list-card .card-note,
+.list-card .card-action,
+.list-card .card-parent {
+  min-width: 0 !important;
+  max-width: 100% !important;
+  overflow-wrap: break-word !important;
+  word-break: normal !important;
+}
+@media (max-width: 520px) {
+  .list-card .card-row { gap: 8px !important; }
+  .list-card .card-actions {
+    max-width: 48% !important;
+    gap: 4px !important;
+  }
+  .list-card .card-actions > .icon-btn-mini {
+    width: 28px !important;
+    min-width: 28px !important;
+    height: 28px !important;
+  }
 }
 
 /* Page-level action rows follow the same edge alignment. */
