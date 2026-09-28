@@ -19,40 +19,75 @@
 'use strict';
 
 // ─── HARDCODED BACKEND CONSTANTS ────────────────────────────────────────────
-const SCMS_CONFIG = {
-  // Supabase project (read queries — students, attendance, etc.)
+const _SCMS_PRODUCTION_CONFIG = {
   SUPABASE_URL:    'https://rszgbryucqwmrdbsgwbb.supabase.co',
   SUPABASE_ANON:   'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InJzemdicnl1Y3F3bXJkYnNnd2JiIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzA4MjkzNjcsImV4cCI6MjA4NjQwNTM2N30.uN2cpmL48H3ZEJlZADh6b06bwecANo1mzIwPSBZRI5g',
-
-  // n8n TWA webhook (all write operations)
   N8N_WEBHOOK:     'https://stailla.xyz/webhook/scms-twa',
-
-  // n8n Bootstrap webhook (initial session resolve)
   N8N_BOOTSTRAP:   'https://stailla.xyz/webhook/scms-bootstrap',
-
-  // Telegram bot username — used to build deep-links for parent TG ID capture
-  // e.g. https://t.me/<BOT_USERNAME>?start=parent_STU-XXXXXX
-  // Backend (n8n Merge Pre-State) parses regex: /^\/start\s+parent_(STU-[A-Z0-9]+)/i
-  // ⚠️ MUST be your real bot username WITHOUT the @ — login deep-links break if wrong.
   BOT_USERNAME:    'VavidaISBbot',
-
-  // ─── v11.7 — Google OAuth ─────────────────────────────────────────────────
-  // OAuth 2.0 Web Client ID from Google Cloud Console (APIs & Services →
-  // Credentials → OAuth 2.0 Client IDs → Web application). Must match the
-  // GOOGLE_CLIENT_ID env var set on the `google-login` Supabase Edge Function.
   GOOGLE_CLIENT_ID: '71086878167-t6q46hrv5j5n46h9nfmeuk8sdoftb5lt.apps.googleusercontent.com',
-
-  // Edge Function that verifies the Google ID token server-side and issues a
-  // session (same shape as rpc_teacher_web_login's response).
   GOOGLE_LOGIN_URL: 'https://rszgbryucqwmrdbsgwbb.supabase.co/functions/v1/google-login',
-
-  // App version — this is the single source of truth (shown in More → About,
-  // and used for the git tag / release notes). There's no build step that
-  // reads this into package.json, so when you bump this number, also update
-  // "version" in package.json to match — package.json only feeds Capacitor/npm
-  // tooling metadata, but keeping the two in sync avoids confusion later.
   VERSION: '12.0.0',
 };
+
+function _scmsEnvironmentConfig() {
+  const mode = window.SCMS_ENV?.mode || 'production';
+
+  // Local development is deliberately backend-disabled. This prevents a
+  // developer/test browser from accidentally exercising production data.
+  if (mode === 'development') {
+    return {
+      SUPABASE_URL: '',
+      SUPABASE_ANON: '',
+      N8N_WEBHOOK: '',
+      N8N_BOOTSTRAP: '',
+      BOT_USERNAME: '',
+      GOOGLE_CLIENT_ID: '',
+      GOOGLE_LOGIN_URL: '',
+      VERSION: _SCMS_PRODUCTION_CONFIG.VERSION,
+      ENVIRONMENT: mode,
+      BACKEND_ENABLED: false,
+    };
+  }
+
+  if (mode === 'staging') {
+    // A staging deployment must inject its own isolated backend config.
+    // Never fall back to production here.
+    const cfg = window.__SCMS_STAGING_CONFIG__;
+    if (!cfg || typeof cfg !== 'object') {
+      throw new Error('SCMS staging deployment is missing its isolated backend configuration.');
+    }
+
+    const required = ['SUPABASE_URL', 'SUPABASE_ANON', 'N8N_WEBHOOK', 'N8N_BOOTSTRAP'];
+    for (const key of required) {
+      if (!cfg[key] || typeof cfg[key] !== 'string') {
+        throw new Error('SCMS staging configuration is incomplete: ' + key);
+      }
+    }
+
+    if (cfg.SUPABASE_URL === _SCMS_PRODUCTION_CONFIG.SUPABASE_URL ||
+        cfg.N8N_WEBHOOK === _SCMS_PRODUCTION_CONFIG.N8N_WEBHOOK ||
+        cfg.N8N_BOOTSTRAP === _SCMS_PRODUCTION_CONFIG.N8N_BOOTSTRAP ||
+        cfg.GOOGLE_LOGIN_URL === _SCMS_PRODUCTION_CONFIG.GOOGLE_LOGIN_URL) {
+      throw new Error('SCMS staging configuration points to a production backend.');
+    }
+
+    return {
+      ...cfg,
+      VERSION: _SCMS_PRODUCTION_CONFIG.VERSION,
+      ENVIRONMENT: mode,
+      BACKEND_ENABLED: true,
+    };
+  }
+
+  return {
+    ..._SCMS_PRODUCTION_CONFIG,
+    ENVIRONMENT: mode,
+    BACKEND_ENABLED: true,
+  };
+}
+
+const SCMS_CONFIG = _scmsEnvironmentConfig();
 
 // ─── PLATFORM DETECTION ─────────────────────────────────────────────────────
 // Used everywhere we need to know "are we inside Telegram (hide chat/sidebar)
