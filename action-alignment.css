@@ -1,0 +1,86 @@
+/* SCMS v12.24 — final action alignment pass
+   Keep standalone modal/page actions compact and on the logical action edge.
+   Semantic footers remain the preferred grouped-action pattern. */
+
+/* Standalone modal actions: single Done / Close / Save / Cancel controls
+   sit on the right instead of inheriting the legacy left/start position. */
+.modal-sheet > .btn-primary,
+.modal-sheet > .btn-secondary,
+.modal-sheet > .btn-danger {
+  display: flex !important;
+  width: fit-content !important;
+  max-width: 100% !important;
+  min-width: 0 !important;
+  margin-left: auto !important;
+  margin-right: 0 !important;
+  flex: 0 0 auto !important;
+}
+
+/* If a modal has several direct action buttons without a footer wrapper,
+   keep each compact and consistently aligned to the right edge. */
+.modal-sheet > .btn-primary + .btn-secondary,
+.modal-sheet > .btn-secondary + .btn-primary,
+.modal-sheet > .btn-secondary + .btn-secondary,
+.modal-sheet > .btn-danger + .btn-secondary {
+  margin-left: auto !important;
+}
+
+/* Existing grouped modal action bars use the same LTR convention:
+   secondary/cancel first, primary/confirm last on the right. */
+.modal-actions {
+  display: flex !important;
+  align-items: center !important;
+  justify-content: flex-end !important;
+  flex-wrap: wrap !important;
+  gap: 8px !important;
+}
+.modal-actions > .btn-primary,
+.modal-actions > .btn-secondary,
+.modal-actions > .btn-danger {
+  width: fit-content !important;
+  min-width: 0 !important;
+  margin: 0 !important;
+  flex: 0 0 auto !important;
+}
+
+/* More/Admin page sign-out is a page-level destructive action, not a
+   full-width content bar. */
+#page-more #moreMenu > .btn-danger {
+  display: flex !important;
+  width: fit-content !important;
+  max-width: 100% !important;
+  margin-left: auto !important;
+  margin-right: 12px !important;
+  flex: 0 0 auto !important;
+}
+
+/* Settings modal: Close belongs to the action edge, not the center. */
+.settings-modal-sheet > .settings-close {
+  display: flex !important;
+  width: fit-content !important;
+  min-width: 88px !important;
+  margin-left: auto !important;
+  margin-right: 0 !important;
+}
+
+/* Admin/settings action rows: label stays left, command stays right. */
+.settings-modal-sheet .settings-action-row {
+  justify-content: space-between !important;
+}
+.settings-modal-sheet .settings-action-button {
+  margin-left: auto !important;
+  margin-right: 0 !important;
+}
+
+/* Small screens: preserve the right edge while allowing Burmese labels
+   to wrap safely. */
+@media (max-width: 430px) {
+  .modal-sheet > .btn-primary,
+  .modal-sheet > .btn-secondary,
+  .modal-sheet > .btn-danger {
+    max-width: 100% !important;
+  }
+  #page-more #moreMenu > .btn-danger {
+    margin-right: 12px !important;
+  }
+}
