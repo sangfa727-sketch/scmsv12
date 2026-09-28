@@ -160,11 +160,13 @@ window.openDailyModal = function(studentId, studentName) {
           data-value="No" onclick="togglePill(this,'toiletPills')">✗ ${t('enum.yesno.No')}</button>
       </div>
 
-      <button class="btn-primary mt16" id="saveDailyBtn"
+      <div class="modal-footer">
+<button class="btn-primary mt16" id="saveDailyBtn"
         onclick="saveDailyReport('${esc(studentId)}','${esc(studentName)}')">
         ${t('daily.save')}
       </button>
-      <button class="btn-secondary" onclick="closeModal()">${t('common.cancel')}</button>
+<button class="btn-secondary" onclick="closeModal()">${t('common.cancel')}</button>
+</div>
     </div>`;
 
   openModal(html);
