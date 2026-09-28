@@ -29,35 +29,44 @@ window.openSettings = function() {
       <div class="info-row"><span>${t('settings.login')}</span><span>${esc(_loginMethodLabel(isWeb))}</span></div>
       <div class="info-row"><span>${t('settings.telegram')}</span><span>${window.APP.telegram_id ? t('settings.connected') : t('settings.notConnected')}</span></div>
 
-      <div class="settings-actions">
-        ${isAdmin ? `
-          <button class="btn-primary" onclick="closeModal(); openTeacherManager()">
-            ${t('settings.manageTeachers')}
-          </button>
-        ` : ''}
+      <section class="settings-actions" aria-label="Settings actions">
+        <div class="settings-action-list">
+          ${isAdmin ? `
+            <div class="settings-action-row">
+              <div class="settings-action-copy"><strong>${t('settings.manageTeachers')}</strong></div>
+              <button type="button" class="settings-action-button settings-action-primary" onclick="closeModal(); openTeacherManager()">${t('settings.manageTeachers')}</button>
+            </div>
+          ` : ''}
 
-        ${isWeb && !window.APP.telegram_id ? `
-          <button class="btn-secondary" onclick="closeModal(); openTelegramConnectModal()">
-            ${t('settings.connectTelegram')}
-          </button>
-        ` : ''}
-        ${isWeb && window.APP.telegram_id ? `
-          <button class="btn-secondary" onclick="disconnectTelegram()">
-            ${t('settings.disconnectTelegram')}
-          </button>
-        ` : ''}
+          ${isWeb && !window.APP.telegram_id ? `
+            <div class="settings-action-row">
+              <div class="settings-action-copy"><strong>${t('settings.connectTelegram')}</strong></div>
+              <button type="button" class="settings-action-button" onclick="closeModal(); openTelegramConnectModal()">${t('settings.connectTelegram')}</button>
+            </div>
+          ` : ''}
 
-        ${isWeb && window.APP.webSession?.auth_mode !== 'google' ? `
-          <button class="btn-secondary" onclick="closeModal(); openChangePasswordModal()">
-            ${t('settings.changePassword')}
-          </button>
-        ` : ''}
-        ${isWeb ? `
-          <button class="btn-secondary" onclick="webLogout()">
-            ${t('sb.signout')}
-          </button>
-        ` : ''}
-      </div>
+          ${isWeb && window.APP.telegram_id ? `
+            <div class="settings-action-row">
+              <div class="settings-action-copy"><strong>${t('settings.disconnectTelegram')}</strong></div>
+              <button type="button" class="settings-action-button settings-action-danger" onclick="disconnectTelegram()">${t('settings.disconnectTelegram')}</button>
+            </div>
+          ` : ''}
+
+          ${isWeb && window.APP.webSession?.auth_mode !== 'google' ? `
+            <div class="settings-action-row">
+              <div class="settings-action-copy"><strong>${t('settings.changePassword')}</strong></div>
+              <button type="button" class="settings-action-button" onclick="closeModal(); openChangePasswordModal()">${t('settings.changePassword')}</button>
+            </div>
+          ` : ''}
+
+          ${isWeb ? `
+            <div class="settings-action-row">
+              <div class="settings-action-copy"><strong>${t('sb.signout')}</strong></div>
+              <button type="button" class="settings-action-button settings-action-danger" onclick="webLogout()">${t('sb.signout')}</button>
+            </div>
+          ` : ''}
+        </div>
+      </section>
 
       <p class="settings-footer-note">
         ${t('settings.footerNote')}
