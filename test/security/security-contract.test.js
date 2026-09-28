@@ -76,3 +76,15 @@ test('legacy privileged RPCs are not callable from frontend feature code', () =>
     }
   }
 });
+
+
+test('feature modules do not bypass the shared web RPC transport', () => {
+  const jsDir = path.join(ROOT, 'js');
+  const files = fs.readdirSync(jsDir).filter((name) => name.endsWith('.js'));
+  const allowed = new Set(['02A_api_core.js', '02B_api_auth.js', '19_google_auth.js']);
+  for (const name of files) {
+    if (allowed.has(name)) continue;
+    const source = read(path.join('js', name));
+    assert.equal(source.includes('/rest/v1/rpc/'), false, name + ' must use the shared API/auth boundary');
+  }
+});
