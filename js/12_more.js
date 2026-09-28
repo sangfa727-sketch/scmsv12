@@ -238,8 +238,12 @@ window.confirmSignOut = function () {
       <h3 class="modal-title">${t('signout.title')}</h3>
       <p class="modal-subtitle">${t('signout.body')}</p>
 
-      <button class="btn-danger solid mt16" onclick="_doSignOutConfirmed()">${t('sb.signout')}</button>
-<button class="btn-secondary mt8" onclick="_closeSignOutConfirm()">${t('common.cancel')}</button>
+      <div class="modal-footer modal-footer-destructive">
+<button class="btn-danger solid student-destructive-action" onclick="_doSignOutConfirmed()">${t('sb.signout')}</button>
+<div class="modal-footer-main">
+<button class="btn-secondary" type="button" onclick="_closeSignOutConfirm()">${t('common.cancel')}</button>
+</div>
+</div>
 </div>
     </div>`;
   wrap.onclick = _closeSignOutConfirm;
