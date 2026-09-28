@@ -107,3 +107,12 @@ If a gate is missing, the change remains non-production.
 This foundation does not rewrite all feature modules or alter the stable UI.
 The existing UI baseline is a compatibility constraint. Migrate one feature at a
 time and add a regression contract before changing its state ownership.
+
+
+## Security boundary rules
+
+- Frontend feature code must use session-token RPCs through the shared web API layer; it must not call legacy privileged RPCs that accept client-supplied school/teacher identity.
+- Production database authorization is enforced by RPC/session checks and RLS; UI role checks are convenience gates, not the security boundary.
+- Legacy privileged RPCs are treated as backend-only. They are not part of the browser API contract and must not be reintroduced into frontend modules.
+- Before changing database grants or removing legacy RPC overloads, verify all backend/n8n callers and stage the change against an isolated Supabase environment. Do not guess that an old RPC is unused.
+- Security-sensitive DB changes require verification after the change and must not be rolled directly into production as an experiment.
