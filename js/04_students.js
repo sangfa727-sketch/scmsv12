@@ -315,6 +315,7 @@ window.openStudentDetail = function(studentId) {
           <div class="detail-meta">
             <span class="class-tag">${esc(s.class || '—')}</span>
             <span class="id-tag">${esc(s.student_id)}</span>
+            <span class="status-tag">${esc(s.status || "—")}</span>
             ${s.home_color ? `<span class="home-tag" style="background:${homeHex}20;color:${homeHex}">● ${esc(homeColorName(s.home_color))}</span>` : ''}
           </div>
         </div>
@@ -353,6 +354,7 @@ window.openStudentDetail = function(studentId) {
       <button class="btn-primary mt16" onclick="openEditStudentModal('${esc(s.student_id)}')">
         ${t('students.detail.editInfo')}
       </button>
+      ${s.status === 'Inactive' && window.APP.is_admin ? `<button class="btn-primary" onclick="reactivateStudent('${esc(s.student_id)}')">↻ Reactivate student</button>` : ''}
       ${s.status === 'Active' ? `<button class="btn-secondary" onclick="showStudentIdCard('${esc(s.student_id)}')">🪪 ${t('idCard.title')}</button>` : ''}
       ${s.status === 'Active' ? `<button class="btn-secondary" onclick="showHealthRecord('${esc(s.student_id)}')">🏥 ${t('students.btn.health')}</button>` : ''}
       ${s.status === 'Active' ? `<button class="btn-secondary" onclick="showStudentLibrary('${esc(s.student_id)}')">📚 ${t('stuLib.title')}</button>` : ''}
@@ -907,6 +909,20 @@ window.saveStudentForm = async function(mode, studentId) {
     btn.disabled = false;
     btn.textContent = t(mode === 'edit' ? 'students.form.saveEdit' : 'students.form.register');
     showToast(t(mode === 'edit' ? 'students.toast.saveFailed' : 'students.toast.registerFailed', { err: e.message || t('common.networkError') }));
+  }
+};
+
+window.reactivateStudent = async function(studentId) {
+  try {
+    const result = await API.reactivateStudent(studentId);
+    if (!result?.ok) throw new Error(result?.message || result?.error || 'Reactivation failed');
+    const s = window.APP.students.find(x => x.student_id === studentId);
+    if (s) s.status = 'Active';
+    closeModal();
+    renderStudents();
+    showToast('Student reactivated');
+  } catch (e) {
+    showToast(t('common.failed') + ' ' + (e.message || t('common.networkError')));
   }
 };
 
