@@ -116,3 +116,8 @@ time and add a regression contract before changing its state ownership.
 - Legacy privileged RPCs are treated as backend-only. They are not part of the browser API contract and must not be reintroduced into frontend modules.
 - Before changing database grants or removing legacy RPC overloads, verify all backend/n8n callers and stage the change against an isolated Supabase environment. Do not guess that an old RPC is unused.
 - Security-sensitive DB changes require verification after the change and must not be rolled directly into production as an experiment.
+
+
+## Feature authorization migration rule
+
+Feature modules must not send `p_school_id` or `p_teacher_id` as authorization inputs to session-bound `_webRpc` calls. Tenant and actor identity belong to the server-side session context. UI checks such as `window.APP.is_admin` remain a usability/early-rejection layer; the RPC/database authorization remains authoritative.
