@@ -439,6 +439,7 @@ window.openAttendanceHistory = function() {
         <div><strong>${report.presentPct}%</strong><span>Present</span></div>
       </div>
       <div class="att-history-toolbar">
+        <button class="btn-pill-action ghost" onclick="openAttendanceAudit()">Audit</button>
         <select class="form-input" id="attHistoryClass">
           <option value="">All classes</option>
           ${_attendanceClasses().map(c => `<option value="${esc(c)}">${esc(c)}</option>`).join('')}
@@ -470,6 +471,50 @@ function _attendanceHistoryRows(){
   }).join('')}</div>`;
 }
 window.renderAttendanceHistoryRows=function(){const el=document.getElementById('attHistoryRows');if(el)el.innerHTML=_attendanceHistoryRows();};
+
+window.openAttendanceAudit = async function() {
+  if (window.APP.platform !== 'web') {
+    showToast('Audit viewer is available on web sessions only.');
+    return;
+  }
+  openModal(`
+    <div class="modal-sheet attendance-history-sheet" onclick="event.stopPropagation()">
+      <div class="modal-handle"></div>
+      <h3 class="modal-title">Attendance audit</h3>
+      <p class="modal-subtitle">Administrator-only attendance save history for this school.</p>
+      <div class="att-history-toolbar">
+        <select class="form-input" id="attAuditClass">
+          <option value="">All classes</option>
+          ${_attendanceClasses().map(c => `<option value="${esc(c)}">${esc(c)}</option>`).join('')}
+        </select>
+        <button class="btn-pill-action ghost" onclick="loadAttendanceAudit()">Load</button>
+      </div>
+      <div id="attAuditRows"><div class="empty-state"><div class="empty-state-icon">🛡️</div><div class="empty-state-text">Loading audit…</div></div></div>
+      <button class="btn-secondary mt16" onclick="closeModal()">Close</button>
+    </div>`);
+  await loadAttendanceAudit();
+};
+window.loadAttendanceAudit = async function() {
+  const el = document.getElementById('attAuditRows');
+  if (!el) return;
+  const className = document.getElementById('attAuditClass')?.value || null;
+  el.innerHTML = '<div class="empty-state"><div class="empty-state-icon">⏳</div><div class="empty-state-text">Loading audit…</div></div>';
+  try {
+    const rows = await API.getAttendanceAudit({ className, limit: 100 });
+    if (!rows.length) {
+      el.innerHTML = '<div class="empty-state"><div class="empty-state-icon">🛡️</div><div class="empty-state-text">No attendance audit records found.</div></div>';
+      return;
+    }
+    el.innerHTML = `<div class="att-history-list">${rows.map(r => `
+      <div class="att-history-item">
+        <div class="att-history-main"><strong>${esc(r.class || '—')}</strong><span>${esc(r.date || '—')} · ${esc(new Date(r.ts).toLocaleString())}</span></div>
+        <div class="att-history-counts"><span>${esc(r.records_count)} records</span><span>${esc(r.actor || '—')}</span></div>
+      </div>`).join('')}</div>`;
+  } catch (e) {
+    el.innerHTML = `<div class="empty-state"><div class="empty-state-icon">⚠️</div><div class="empty-state-text">${esc(e.message || 'Could not load audit history.')}</div></div>`;
+  }
+};
+
 window.correctAttendance=function(cls,date){
   closeModal();_attendClass=cls;_attendDate=date;_attendMarks={};_attendNotes={};_stripAnchor=new Date(date+'T00:00:00');
   _renderDateStrip();_renderAttendClassChips();
