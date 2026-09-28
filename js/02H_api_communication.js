@@ -4,7 +4,7 @@ var API = window.API || {};
 Object.assign(API, {
   async sendParentComm(data) {
       if (window.APP.platform === 'web') return _webRpc('rpc_send_parent_comm', {
-        p_session_token: getWebSession()?.session_token,
+        p_session_token: _webSessionToken(),
         p_student_id: data.student_id, p_name_en: data.name_en, p_class: data.class,
         p_type: data.type, p_message_preview: data.message_preview, p_date: data.date,
       });
@@ -21,7 +21,7 @@ Object.assign(API, {
   
   async deleteParentComm(id) {
       if (window.APP.platform === 'web') return _webRpc('rpc_delete_parent_comm', {
-        p_session_token: getWebSession()?.session_token, p_id: id,
+        p_session_token: _webSessionToken(), p_id: id,
       });
       return twaPost('delete_parent_comm', { id });
     },
@@ -29,7 +29,7 @@ Object.assign(API, {
   async getParentComms(daysBack = 30) {
       if (window.APP.platform === 'web') {
         const res = await _webRpc('rpc_get_parent_comms', {
-          p_session_token: getWebSession()?.session_token, p_days_back: daysBack,
+          p_session_token: _webSessionToken(), p_days_back: daysBack,
         });
         return res.rows;
       }
