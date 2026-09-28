@@ -79,10 +79,7 @@ function _renderIdSelectToolbar() {
   }
   el.innerHTML = `
     <span class="id-select-count">${t('idCard.nSelected', { n: _idSelected.size })}</span>
-    <button type="button" class="id-orient-mini-btn" onclick="_toggleIdCardOrientation()"
-      title="${esc(t(_idCardOrientation === 'horizontal' ? 'idCard.orientationToVertical' : 'idCard.orientationToHorizontal'))}">
-      ${_orientIconSvg(_idCardOrientation === 'horizontal' ? 'vertical' : 'horizontal')}
-    </button>
+    ${_orientSegHtml()}
     <button class="btn-pill-action ghost" onclick="idSelectAllVisible()">${t('idCard.selectAllVisible')}</button>
     ${_idSelected.size ? `<button class="btn-pill-action ghost" onclick="idSelectNone()">${t('idCard.selectNone')}</button>` : ''}
     <button class="btn-pill-action" ${_idSelected.size ? '' : 'disabled style="opacity:.4"'} onclick="printSelectedIdCards()">🖨️ ${t('idCard.printSelected')}</button>
@@ -125,11 +122,11 @@ window.printSelectedIdCards = async function() {
     const portalUrl = new URL('parent.html?t=' + encodeURIComponent(s.qr_token), location.href).href;
     const target = document.getElementById(`bulkQr_${pi}_${si}`);
     if (window.QRCode && target) {
-      new QRCode(target, { text: portalUrl, width: 70, height: 70, colorDark: '#1A1A18', colorLight: '#ffffff' });
+      new QRCode(target, { text: portalUrl, width: 256, height: 256, colorDark: '#1A1A18', colorLight: '#ffffff' });
     }
   }));
 
-  _printArea('printing-id-bulk', 'size: A4; margin: 10mm;', () => { area.innerHTML = ''; });
+  _printArea('printing-id-bulk', 'size: A4; margin: 6mm;', () => { area.innerHTML = ''; });
 };
 
 // ─── Stats ────────────────────────────────────────────────────────────────
@@ -364,23 +361,54 @@ function _detailRow(label, value) {
 // so the two never visually drift apart. `qrTargetId` is the id of an
 // (already-in-DOM) element the caller will instantiate a QRCode into right
 // after inserting this HTML — this function only lays out the empty slot.
+//
+// Design v3 — modern & minimal: white card, one ink colour, hairline
+// dividers, serif name/school (Fraunces), small-caps labels. No house/class
+// colours. Date of birth is deliberately NOT printed: a lost card would
+// otherwise carry personal data, and the QR already opens the parent portal
+// only after the parent signs in with the Gmail on file.
 function _idCardHtml(s, qrTargetId) {
-  const homeHex = s.home_color ? homeColorHex(s.home_color) : _classColor(s.class);
   const vertical = _idCardOrientation === 'vertical';
-  return `
-    <div class="id-card${vertical ? ' id-card-vertical' : ''}" style="--id-accent:${homeHex}">
-      <div class="id-card-accent"></div>
-      <div class="id-card-body">
-        <div class="id-card-photo" style="background:${homeHex}">${avatarContent(s)}</div>
-        <div class="id-card-info">
-          <div class="id-card-school">${esc(window.APP.school_name || '')}</div>
-          <div class="id-card-name">${esc(s.name_en)}</div>
-          <div class="id-card-sub">${esc(s.class || '')}</div>
-          <div class="id-card-id">${esc(s.student_id)}</div>
+  const logo   = window.APP.school_logo || (window.APP.config && window.APP.config.school_logo) || '';
+  const school = esc(window.APP.school_name || '');
+  const brand  = `<div class="idc-brand">${logo ? `<img class="idc-logo" src="${esc(logo)}" alt="">` : ''}<div class="idc-school">${school}</div></div>`;
+  const photo  = `<div class="idc-photo">${avatarContent(s)}</div>`;
+  const qr     = `<div class="idc-qr" id="${qrTargetId}"></div>`;
+
+  if (vertical) {
+    return `
+      <div class="id-card id-card-vertical"><div class="idc-face">
+        ${brand}
+        ${photo}
+        <div class="idc-who">
+          <div class="idc-name">${esc(s.name_en)}</div>
+          <div class="idc-class">${esc(s.class || '')}</div>
+          <div class="idc-sid">${esc(s.student_id)}</div>
         </div>
-        <div class="id-card-qr" id="${qrTargetId}"></div>
+        ${qr}
+      </div></div>`;
+  }
+  return `
+    <div class="id-card"><div class="idc-face">
+      <div class="idc-left">
+        ${photo}
+        <div class="idc-name">${esc(s.name_en)}</div>
       </div>
-    </div>`;
+      <div class="idc-right">
+        ${brand}
+        <div class="idc-field">
+          <div class="idc-label">Student ID</div>
+          <div class="idc-value idc-sid">${esc(s.student_id)}</div>
+        </div>
+        <div class="idc-bottom">
+          <div class="idc-field">
+            <div class="idc-label">Class</div>
+            <div class="idc-value">${esc(s.class || '')}</div>
+          </div>
+          ${qr}
+        </div>
+      </div>
+    </div></div>`;
 }
 
 // Orientation is a session-wide choice (not per-student) — pick once via the
@@ -390,17 +418,30 @@ function _idCardHtml(s, qrTargetId) {
 let _idCardOrientation   = 'horizontal'; // 'horizontal' | 'vertical'
 let _idCardCurrentStudent = null;        // so the toggle button can re-render the open modal
 
-function _orientIconSvg(targetOrientation) {
-  // Shows the icon for what you'll SWITCH TO, not the current state.
-  return targetOrientation === 'vertical'
-    ? `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="7" y="3" width="10" height="18" rx="2"/></svg>`
-    : `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="7" width="18" height="10" rx="2"/></svg>`;
+function _orientIconSvg(orientation) {
+  // The icon is the SHAPE of that orientation (tall = vertical, wide = horizontal).
+  return orientation === 'vertical'
+    ? `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="6.5" y="2.5" width="11" height="19" rx="2.5"/></svg>`
+    : `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2.5" y="6.5" width="19" height="11" rx="2.5"/></svg>`;
 }
 
-window._toggleIdCardOrientation = function() {
-  _idCardOrientation = _idCardOrientation === 'horizontal' ? 'vertical' : 'horizontal';
-  if (_idCardCurrentStudent) _renderIdCardBody(_idCardCurrentStudent);
-  _renderIdSelectToolbar(); // keep the toolbar's own orientation icon in sync
+// Two icon-only buttons, the active one highlighted — so it is always clear
+// which shape is selected and which one a tap will give you.
+function _orientSegHtml() {
+  const btn = (o) => {
+    const on = _idCardOrientation === o;
+    return `<button type="button" class="id-orient-opt${on ? ' on' : ''}" aria-pressed="${on}"
+      title="${esc(t(o === 'vertical' ? 'idCard.orientVertical' : 'idCard.orientHorizontal'))}"
+      onclick="_setIdCardOrientation('${o}')">${_orientIconSvg(o)}</button>`;
+  };
+  return `<div class="id-orient-seg" role="group">${btn('horizontal')}${btn('vertical')}</div>`;
+}
+
+window._setIdCardOrientation = function(o) {
+  if (o !== 'horizontal' && o !== 'vertical') return;
+  _idCardOrientation = o;
+  if (_idCardCurrentStudent && document.getElementById('idCardBody')) _renderIdCardBody(_idCardCurrentStudent);
+  _renderIdSelectToolbar();
 };
 
 // Prints exactly one DOM subtree at its true physical size, injecting the
@@ -457,18 +498,14 @@ function _renderIdCardBody(s) {
   // server-side, before it ever issues a session. Card lost/stolen? Use
   // "Issue a new code" below — the old QR stops working immediately.
   const portalUrl = new URL('parent.html?t=' + encodeURIComponent(s.qr_token), location.href).href;
-  const nextOrientation = _idCardOrientation === 'horizontal' ? 'vertical' : 'horizontal';
   const pageCss = _idCardOrientation === 'vertical'
     ? 'size: 2.125in 3.375in; margin: 0;'
     : 'size: 3.375in 2.125in; margin: 0;';
 
   el.innerHTML = `
     <div class="id-card-preview-wrap">
+      <div class="id-card-orient-row">${_orientSegHtml()}</div>
       <div id="idCardPrintArea">${_idCardHtml(s, 'idCardQr')}</div>
-      <button type="button" class="id-card-orient-btn" onclick="_toggleIdCardOrientation()"
-        title="${esc(t(nextOrientation === 'vertical' ? 'idCard.orientationToVertical' : 'idCard.orientationToHorizontal'))}">
-        ${_orientIconSvg(nextOrientation)}
-      </button>
     </div>
     <p class="muted" style="font-size:12px;text-align:center;margin:10px 0 0">${t('idCard.scanHint')}</p>
     <div class="id-card-link-row">
@@ -483,7 +520,7 @@ function _renderIdCardBody(s) {
 
   if (window.QRCode) {
     new QRCode(document.getElementById('idCardQr'), {
-      text: portalUrl, width: 92, height: 92,
+      text: portalUrl, width: 256, height: 256,
       colorDark: '#1A1A18', colorLight: '#ffffff',
     });
   } else {
