@@ -6351,3 +6351,55 @@ input.form-input {
  .stats-grid{padding-left:12px!important;padding-right:12px!important}
  .page-toolbar,.attend-toolbar,.form-actions{padding-left:12px!important;padding-right:12px!important}
 }
+
+
+/* SCMS v12.13 — settings controls final layout correction
+   Settings actions are content-sized controls, not page-width bars. */
+.settings-modal-sheet .settings-actions {
+  display: flex !important;
+  flex-direction: row !important;
+  flex-wrap: wrap !important;
+  align-items: center !important;
+  justify-content: center !important;
+  gap: 7px !important;
+  width: auto !important;
+  max-width: 100% !important;
+  margin: 12px auto 0 !important;
+  padding: 0 !important;
+}
+.settings-modal-sheet .settings-actions > button,
+.settings-modal-sheet .settings-actions > .btn-primary,
+.settings-modal-sheet .settings-actions > .btn-secondary {
+  box-sizing: border-box !important;
+  display: inline-flex !important;
+  flex: 0 0 auto !important;
+  width: auto !important;
+  min-width: max-content !important;
+  max-width: 100% !important;
+  height: auto !important;
+  min-height: 36px !important;
+  margin: 0 !important;
+  padding: 8px 12px !important;
+  align-items: center !important;
+  justify-content: center !important;
+  text-align: center !important;
+  white-space: nowrap !important;
+}
+.settings-modal-sheet .settings-close {
+  display: inline-flex !important;
+  width: auto !important;
+  min-width: 84px !important;
+  max-width: 100% !important;
+  margin: 12px auto 0 !important;
+}
+@media (max-width: 380px) {
+  .settings-modal-sheet .settings-actions { gap: 5px !important; }
+  .settings-modal-sheet .settings-actions > button,
+  .settings-modal-sheet .settings-actions > .btn-primary,
+  .settings-modal-sheet .settings-actions > .btn-secondary {
+    min-width: 0 !important;
+    padding: 7px 9px !important;
+    font-size: 12px !important;
+    white-space: normal !important;
+  }
+}
