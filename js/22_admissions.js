@@ -300,7 +300,7 @@ window.openNewAdmissionModal = function() {
   _admPendingPhotoFile = null;
   _admRemovePhotoRequested = false;
   openModal(`
-    <div class="modal-sheet" onclick="event.stopPropagation()" style="max-height:85vh;overflow-y:auto">
+    <div class="modal-sheet admission-form-sheet" onclick="event.stopPropagation()" style="max-height:85vh;overflow-y:auto">
       <div class="modal-handle"></div>
       <h3 class="modal-title">${t('adm.newTitle')}</h3>
 
