@@ -5699,3 +5699,79 @@ input.form-input {
 @media (max-width: 600px) {
   .settings-modal-sheet { width: min(94vw, 430px) !important; max-width: 94vw !important; }
 }
+
+/* SCMS v12.6 — requested sidebar identity composition:
+   cover = full background layer; logo + school name = foreground layer on cover. */
+.sidebar-header .sidebar-cover {
+  height: 118px !important;
+  min-height: 118px !important;
+  background-size: cover !important;
+  background-position: center !important;
+  position: relative !important;
+  overflow: hidden !important;
+}
+.sidebar-header .sidebar-cover::after,
+.sidebar-header .sidebar-cover.has-cover::after {
+  height: 100% !important;
+  inset: 0 !important;
+  background: linear-gradient(to right, rgba(0,0,0,.38), rgba(0,0,0,.12)) !important;
+}
+.sidebar-header .sidebar-cover .sidebar-school-row-top {
+  position: absolute !important;
+  inset: 0 !important;
+  width: auto !important;
+  margin: 0 !important;
+  padding: 14px 14px !important;
+  display: flex !important;
+  align-items: center !important;
+  gap: 10px !important;
+  color: #fff !important;
+  z-index: 5 !important;
+}
+.sidebar-header .sidebar-cover .sidebar-school-logo,
+.sidebar-header .sidebar-cover .sidebar-school-mark {
+  width: 48px !important;
+  height: 48px !important;
+  flex: 0 0 48px !important;
+  border-radius: 12px !important;
+  border: 2px solid rgba(255,255,255,.9) !important;
+  box-shadow: 0 3px 10px rgba(0,0,0,.28) !important;
+}
+.sidebar-header .sidebar-cover .sidebar-school-name {
+  flex: 1 !important;
+  min-width: 0 !important;
+  max-width: none !important;
+  color: #fff !important;
+  text-shadow: 0 1px 5px rgba(0,0,0,.65) !important;
+  font-size: 15px !important;
+  font-weight: 800 !important;
+  line-height: 1.25 !important;
+  white-space: normal !important;
+  display: -webkit-box !important;
+  -webkit-line-clamp: 2 !important;
+  -webkit-box-orient: vertical !important;
+  overflow: hidden !important;
+}
+
+/* Settings action group: dense, horizontal, never full-width. */
+.settings-modal-sheet {
+  width: min(92vw, 420px) !important;
+  max-width: 420px !important;
+  padding-bottom: 14px !important;
+}
+.settings-modal-sheet .settings-actions {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  align-items: center;
+  gap: 7px;
+  margin-top: 12px;
+}
+.settings-modal-sheet .settings-actions button {
+  width: auto !important;
+  min-width: 0 !important;
+  flex: 0 1 auto !important;
+  margin: 0 !important;
+  padding: 8px 11px !important;
+  line-height: 1.2 !important;
+}
