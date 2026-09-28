@@ -77,7 +77,7 @@ Object.assign(API, {
     window.APP.pendingLeaveCount = pendingLeave.status === 'fulfilled' ? (pendingLeave.value?.length || 0) : 0;
 
     return window.APP;
-  },,
+  },
 
   async updateSchoolConfig(patch) {
     if (window.APP.platform === 'web') return _webRpc('rpc_update_school_config_web', {
