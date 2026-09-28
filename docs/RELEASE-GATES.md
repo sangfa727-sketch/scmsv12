@@ -118,3 +118,17 @@ The next high-risk subset was reviewed by function definition instead of mass-ch
 Post-change verification confirmed these signatures have the expected fixed search path. Security Advisor's mutable-search-path count decreased from 107 to 95. The remaining findings require individual dependency/authorization review and are intentionally not being changed blindly.
 
 The session-bound attendance implementation was also re-verified: it derives school/teacher from the active session and validates every submitted student against the session school and requested class before replacing attendance rows. The legacy direct-identity overloads remain a separate compatibility surface and must not be exposed to browser roles.
+
+
+## Student resource tenant hardening
+
+Reviewed session-bound resource mutations that accept a student or route identifier. The following RPCs now validate the referenced student against the authenticated session school before writing, and transport assignment also validates the route against the same school:
+
+- `rpc_save_daily_report`
+- `rpc_save_incident`
+- `rpc_add_vaccination`
+- `rpc_add_health_visit`
+- `rpc_checkout_book`
+- `rpc_assign_student_transport`
+
+These functions also pin their SECURITY DEFINER `search_path` to `public, pg_temp`. Invalid-session negative-path checks returned `invalid_session` for all six RPCs. Security Advisor mutable-search-path findings decreased from 95 to 89.
