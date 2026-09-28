@@ -747,11 +747,11 @@ window.showPasswordPrompt = function (title, message, onSubmit) {
   wrap.className = 'modal-overlay generic-confirm-overlay';
   wrap.setAttribute('role', 'dialog');
   wrap.setAttribute('aria-modal', 'true');
-  wrap.innerHTML = \`
+  wrap.innerHTML = `
     <div class="modal-sheet generic-confirm-sheet password-prompt-sheet" onclick="event.stopPropagation()">
       <div class="modal-handle"></div>
-      <h3 class="modal-title">\${esc(title)}</h3>
-      <p class="modal-subtitle password-prompt-message">\${esc(message)}</p>
+      <h3 class="modal-title">${esc(title)}</h3>
+      <p class="modal-subtitle password-prompt-message">${esc(message)}</p>
       <label class="field-label" for="_passwordPromptInput">Password အသစ်</label>
       <div class="password-prompt-input-wrap">
         <input class="form-input" id="_passwordPromptInput" type="password"
@@ -762,9 +762,9 @@ window.showPasswordPrompt = function (title, message, onSubmit) {
       </div>
       <div class="generic-confirm-actions">
         <button class="btn-danger solid" id="_passwordPromptSubmit">Password ပြန်သတ်မှတ်မည်</button>
-        <button class="btn-secondary" id="_passwordPromptCancel">\${t('common.cancel')}</button>
+        <button class="btn-secondary" id="_passwordPromptCancel">${t('common.cancel')}</button>
       </div>
-    </div>\`;
+    </div>`;
   wrap.onclick = (e) => {
     if (e.target === wrap) window._closePasswordPrompt();
   };
