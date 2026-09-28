@@ -275,7 +275,12 @@ async function initApp() {
     document.getElementById('userRole').textContent   = window.APP.teacher_role || '—';
     document.getElementById('connDot').classList.add('online');
 
-    // ── Step 7: Render modules ───────────────────────────────────────────
+    // ── Step 7: Establish the landing page before rendering the sidebar.
+    // Sidebar active-state is derived from APP.currentPage, so the initial
+    // value must be dashboard before renderSidebar() runs.
+    window.APP.currentPage = 'dashboard';
+
+    // ── Step 8: Render modules ───────────────────────────────────────────
     setStatus(t('boot.building'), '');
 
     if (typeof renderDashboard  === 'function') renderDashboard();
@@ -316,7 +321,7 @@ async function initApp() {
       }
     });
 
-    // ── Step 8: Hide boot screen ─────────────────────────────────────────
+    // ── Step 9: Hide boot screen ─────────────────────────────────────────
     setTimeout(() => {
       if (bootScreen) {
         bootScreen.classList.add('fade-out');
