@@ -62,7 +62,7 @@ function _renderTransportList() {
 
 window.openNewRouteModal = function() {
   openModal(`
-    <div class="modal-sheet" onclick="event.stopPropagation()" style="max-height:85vh;overflow-y:auto">
+    <div class="modal-sheet transport-form-sheet" onclick="event.stopPropagation()" style="max-height:85vh;overflow-y:auto">
       <div class="modal-handle"></div>
       <h3 class="modal-title">${t('tr.newTitle')}</h3>
       <div class="compact-form-grid">
