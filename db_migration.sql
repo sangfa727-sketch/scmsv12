@@ -644,3 +644,8 @@ END;
 $function$;
 REVOKE ALL ON FUNCTION public.rpc_save_attendance(text,text,date,jsonb) FROM PUBLIC;
 GRANT EXECUTE ON FUNCTION public.rpc_save_attendance(text,text,date,jsonb) TO anon,authenticated;
+-- Harden legacy service-role attendance RPCs against mutable search_path.
+ALTER FUNCTION public.rpc_save_attendance(text,text,date,text,jsonb)
+  SET search_path = public, extensions;
+ALTER FUNCTION public.rpc_save_attendance(text,text,text,text,jsonb)
+  SET search_path = public, extensions;
