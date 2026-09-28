@@ -68,3 +68,22 @@ test('admin role compatibility is explicit at the UI/backend boundary', () => {
   assert.match(settings, /window\.APP\.is_admin/);
   assert.match(app, /window\.APP\.is_admin/);
 });
+
+
+test('feature mutations do not send client tenant identity through web RPC', () => {
+  const files = fs.readdirSync(path.join(ROOT, 'js')).filter((name) => name.endsWith('.js') && /^0[3-9]|^1[0-8]|^2[0-9]/.test(name));
+  const forbidden = /_webRpc\([^)]*[\\s\\S]{0,800}(?:p_school_id|p_teacher_id)\s*:/;
+  for (const name of files) {
+    const source = read(path.join('js', name));
+    assert.doesNotMatch(source, forbidden, name + ' must derive tenant/actor context server-side');
+  }
+});
+
+test('admin settings use the shared session-aware RPC path for teacher listing', () => {
+  const source = read('js/15_settings.js');
+  const idx = source.indexOf("rpc_admin_list_teachers");
+  assert.ok(idx >= 0);
+  const block = source.slice(idx - 120, idx + 500);
+  assert.match(block, /_webRpc\(/);
+  assert.match(block, /p_session_token/);
+});
