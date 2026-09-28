@@ -15,6 +15,25 @@ Object.assign(API, {
       });
     },
   
+  async createParentPortalEvent(data) {
+      return _webRpc('rpc_parent_portal_event_create', {
+        p_session_token: _webSessionToken(),
+        p_class: data.class || null,
+        p_student_id: data.student_id || null,
+        p_event_type: data.event_type || 'announcement',
+        p_title: data.title,
+        p_description: data.description || null,
+        p_starts_at: data.starts_at,
+        p_ends_at: data.ends_at || null,
+      });
+    },
+
+  async deleteParentPortalEvent(id) {
+      return _webRpc('rpc_parent_portal_event_delete', {
+        p_session_token: _webSessionToken(), p_id: id,
+      });
+    },
+
   async updateParentComm(id, patch) {
       return twaPost('update_parent_comm', { id, patch });
     },
