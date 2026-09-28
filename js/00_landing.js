@@ -686,20 +686,11 @@ window.doChangePassword = async function (firstTime) {
   btn.textContent = t('common.saving');
 
   try {
-    const resp = await fetch(`${SCMS_CONFIG.SUPABASE_URL}/rest/v1/rpc/rpc_change_password`, {
-      method: 'POST',
-      headers: {
-        'apikey':        SCMS_CONFIG.SUPABASE_ANON,
-        'Authorization': `Bearer ${SCMS_CONFIG.SUPABASE_ANON}`,
-        'Content-Type':  'application/json',
-      },
-      body: JSON.stringify({
-        p_session_token: sess.session_token,
-        p_old_password:  oldPw,
-        p_new_password:  newPw,
-      }),
+    const result = await _webRpc('rpc_change_password', {
+      p_session_token: sess.session_token,
+      p_old_password: oldPw,
+      p_new_password: newPw,
     });
-    const result = await resp.json();
 
     if (!result || !result.ok) {
       errEl.textContent = (result && result.message) || t('pw.failed');
