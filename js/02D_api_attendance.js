@@ -10,6 +10,18 @@ Object.assign(API, {
       return twaPost('save_attendance', { class: cls, date, records });
     },
   
+  async getAttendanceAudit({ className = null, fromDate = null, toDate = null, limit = 50 } = {}) {
+    if (window.APP.platform !== 'web') return [];
+    const res = await _webRpc('rpc_get_attendance_audit', {
+      p_session_token: _webSessionToken(),
+      p_class: className || null,
+      p_from_date: fromDate || null,
+      p_to_date: toDate || null,
+      p_limit: Math.min(Math.max(Number(limit) || 50, 1), 100),
+    });
+    return res.rows || [];
+  },
+
   async getAttendance(daysBack = 30) {
       if (window.APP.platform === 'web') {
         const res = await _webRpc('rpc_get_attendance', {
