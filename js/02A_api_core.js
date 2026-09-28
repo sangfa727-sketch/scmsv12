@@ -7,7 +7,19 @@
 'use strict';
 
 /** Direct PostgREST RPC helper used by web-session API modules. */
-async function _webRpc(fnName, params) {
+function _webSessionToken() {
+  const session = typeof getWebSession === 'function' ? getWebSession() : null;
+  const token = session?.session_token;
+  if (!token) {
+    const err = new Error('Your web session has expired. Please sign in again.');
+    err.code = 'AUTH_REQUIRED';
+    throw err;
+  }
+  return token;
+}
+
+async function _webRpc(fnName, params = {}) {
+  if (!params.p_session_token) params.p_session_token = _webSessionToken();
   const resp = await fetch(`${SCMS_CONFIG.SUPABASE_URL}/rest/v1/rpc/${fnName}`, {
     method: 'POST',
     headers: {
