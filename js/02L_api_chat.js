@@ -5,7 +5,7 @@ Object.assign(API, {
   async getChatMessages(channel = 'staff', limit = 50) {
       try {
         const res = await _webRpc('rpc_get_chat_messages', {
-          p_session_token: getWebSession()?.session_token,
+          p_session_token: _webSessionToken(),
           p_channel: channel, p_limit: Number(limit) || 50,
         });
         return Array.isArray(res.rows) ? res.rows : [];   // oldest first
@@ -18,7 +18,7 @@ Object.assign(API, {
   async sendChatMessage(channel, text) {
       // school/teacher identity comes from the session on the server
       return _webRpc('rpc_send_chat_message', {
-        p_session_token: getWebSession()?.session_token,
+        p_session_token: _webSessionToken(),
         p_channel: channel, p_text: text,
       });
     },
