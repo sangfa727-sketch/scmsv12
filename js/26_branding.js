@@ -100,7 +100,7 @@ window.openBrandingModal = function (kind) {
 
   const cur = _brandCurrent(kind);
   openModal(`
-    <div class="modal-sheet" onclick="event.stopPropagation()">
+    <div class="modal-sheet branding-form-sheet" onclick="event.stopPropagation()">
       <div class="modal-handle"></div>
       <h3 class="modal-title">${esc(K.title)}</h3>
       <p class="modal-subtitle">${esc(K.subtitle)}</p>
