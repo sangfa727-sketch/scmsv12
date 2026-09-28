@@ -201,3 +201,51 @@
     box-shadow: 0 1px 5px rgba(0,0,0,.035);
   }
 }
+
+
+/* SCMS v12 — FINAL compact/grid override (loaded after style.css) */
+#page-dashboard .dashboard-actions {
+  display: flex !important;
+  flex-wrap: wrap !important;
+  align-items: center !important;
+  gap: 7px !important;
+  padding: 0 12px 10px !important;
+}
+#page-dashboard .dashboard-actions button {
+  flex: 0 1 auto !important;
+  width: fit-content !important;
+  min-width: 0 !important;
+  max-width: 100% !important;
+  padding: 8px 11px !important;
+  white-space: nowrap !important;
+}
+#page-dashboard .stats-grid {
+  grid-template-columns: repeat(2, minmax(0,1fr)) !important;
+}
+#page-dashboard .dashboard-list-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0,1fr));
+  gap: 8px;
+  padding: 0 12px;
+}
+#page-dashboard .dashboard-list-grid .list-card {
+  margin: 0 !important;
+}
+@media (min-width: 900px) {
+  #page-dashboard .stats-grid {
+    grid-template-columns: repeat(3, minmax(0,1fr)) !important;
+  }
+  #page-dashboard .dashboard-list-grid {
+    grid-template-columns: repeat(2, minmax(0,1fr));
+  }
+}
+@media (min-width: 1200px) {
+  #page-dashboard .dashboard-list-grid {
+    grid-template-columns: repeat(3, minmax(0,1fr));
+  }
+}
+@media (max-width: 520px) {
+  #page-dashboard .dashboard-actions button {
+    white-space: normal !important;
+  }
+}
