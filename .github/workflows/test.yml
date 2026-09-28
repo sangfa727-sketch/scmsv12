@@ -1,0 +1,62 @@
+name: SCMS tests
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch: {}
+  schedule:
+    - cron: '0 20 * * *' # ~3:30am Yangon time, nightly
+
+jobs:
+  pgtap:
+    name: pgTAP (SQL / RPC / RLS)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: supabase/setup-cli@v1
+        with:
+          version: latest
+
+      # Spins up a local Postgres via Docker with your migrations
+      # already applied — this is why pgTAP never touches production.
+      - name: Start local Supabase stack
+        run: supabase start
+
+      - name: Run pgTAP tests
+        run: supabase test db
+
+      - name: Stop stack
+        if: always()
+        run: supabase stop
+
+  # Playwright needs a real running instance of the app to click
+  # through, so unlike pgTAP it can't spin itself up in CI from
+  # nothing. Point it at a staging deployment via repo secrets.
+  # Kept as workflow_dispatch (manual) + a nightly schedule rather
+  # than every push, since it's the layer most prone to flakiness —
+  # see README for why it's deliberately small.
+  e2e:
+    name: Playwright (critical flows only)
+    runs-on: ubuntu-latest
+    if: github.event_name == 'workflow_dispatch' || github.event_name == 'schedule'
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+      - run: npm ci
+      - run: npx playwright install --with-deps chromium
+      - name: Run e2e smoke tests against staging
+        env:
+          SCMS_URL: ${{ secrets.SCMS_STAGING_URL }}
+          SCMS_TEST_TEACHER: ${{ secrets.SCMS_TEST_TEACHER }}
+          SCMS_TEST_PW: ${{ secrets.SCMS_TEST_PW }}
+          SCMS_TEST_QR_TOKEN: ${{ secrets.SCMS_TEST_QR_TOKEN }}
+        run: npx playwright test
+      - uses: actions/upload-artifact@v4
+        if: failure()
+        with:
+          name: playwright-report
+          path: playwright-report/
