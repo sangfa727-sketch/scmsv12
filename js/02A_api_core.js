@@ -20,29 +20,44 @@ function _webSessionToken() {
 
 async function _webRpc(fnName, params = {}) {
   if (!params.p_session_token) params.p_session_token = _webSessionToken();
-  const resp = await fetch(`${SCMS_CONFIG.SUPABASE_URL}/rest/v1/rpc/${fnName}`, {
-    method: 'POST',
-    headers: {
-      apikey: SCMS_CONFIG.SUPABASE_ANON,
-      Authorization: `Bearer ${SCMS_CONFIG.SUPABASE_ANON}`,
-      'Content-Type': 'application/json',
-    },
-    body: JSON.stringify(params),
-  });
 
-  if (!resp.ok) {
-    const txt = await resp.text().catch(() => '');
-    throw new Error(`HTTP ${resp.status} ${txt.slice(0, 200)}`);
+  const controller = new AbortController();
+  const timer = setTimeout(() => controller.abort(), 15000);
+  try {
+    const resp = await fetch(`${SCMS_CONFIG.SUPABASE_URL}/rest/v1/rpc/${fnName}`, {
+      method: 'POST',
+      headers: {
+        apikey: SCMS_CONFIG.SUPABASE_ANON,
+        Authorization: `Bearer ${SCMS_CONFIG.SUPABASE_ANON}`,
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(params),
+      signal: controller.signal,
+    });
+
+    if (!resp.ok) {
+      const txt = await resp.text().catch(() => '');
+      throw new Error(`HTTP ${resp.status} ${txt.slice(0, 200)}`);
+    }
+
+    const result = await resp.json();
+    if (!result || !result.ok) {
+      const err = new Error(result?.message || result?.error || `${fnName} failed`);
+      Object.assign(err, result || {});
+      throw err;
+    }
+
+    return result;
+  } catch (e) {
+    if (e?.name === 'AbortError') {
+      const err = new Error(`${fnName} timed out. Please retry.`);
+      err.code = 'TIMEOUT';
+      throw err;
+    }
+    throw e;
+  } finally {
+    clearTimeout(timer);
   }
-
-  const result = await resp.json();
-  if (!result || !result.ok) {
-    const err = new Error(result?.message || result?.error || `${fnName} failed`);
-    Object.assign(err, result || {});
-    throw err;
-  }
-
-  return result;
 }
 
 /** Resize/compress a picked image to a small JPEG. */
