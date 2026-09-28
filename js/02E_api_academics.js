@@ -1,6 +1,6 @@
 /** SCMS v12 — 02E_api_academics.js */
 'use strict';
-const API = window.API || {};
+var API = window.API || {};
 Object.assign(API, {
   async saveDailyReport(data) {
       const date = data.date || new Date().toISOString().slice(0, 10);
