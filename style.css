@@ -5775,3 +5775,87 @@ input.form-input {
   padding: 8px 11px !important;
   line-height: 1.2 !important;
 }
+
+/* SCMS v12.7 — sidebar identity + active-state correction
+   Keep the cover as the background layer. The logo and school name stay
+   together on the same horizontal foreground row. */
+.sidebar-header .sidebar-cover .sidebar-school-row-top {
+  position: absolute !important;
+  inset: 0 !important;
+  display: flex !important;
+  flex-direction: row !important;
+  flex-wrap: nowrap !important;
+  align-items: center !important;
+  justify-content: flex-start !important;
+  gap: 10px !important;
+  padding: 14px !important;
+  margin: 0 !important;
+  border: 0 !important;
+  z-index: 5 !important;
+}
+.sidebar-header .sidebar-cover .sidebar-logo-wrap {
+  position: relative !important;
+  width: 48px !important;
+  height: 48px !important;
+  flex: 0 0 48px !important;
+  margin: 0 !important;
+}
+.sidebar-header .sidebar-cover .sidebar-school-logo,
+.sidebar-header .sidebar-cover .sidebar-school-mark {
+  position: relative !important;
+  display: block !important;
+  width: 48px !important;
+  height: 48px !important;
+  flex: 0 0 48px !important;
+}
+.sidebar-header .sidebar-cover .sidebar-logo-edit {
+  position: absolute !important;
+  right: -7px !important;
+  bottom: -7px !important;
+  top: auto !important;
+  left: auto !important;
+  width: 23px !important;
+  height: 23px !important;
+  min-width: 23px !important;
+  min-height: 23px !important;
+  padding: 0 !important;
+  margin: 0 !important;
+  display: grid !important;
+  place-items: center !important;
+  z-index: 8 !important;
+  border-radius: 50% !important;
+  font-size: 11px !important;
+  line-height: 1 !important;
+}
+.sidebar-header .sidebar-cover .sidebar-school-name {
+  position: static !important;
+  inset: auto !important;
+  transform: none !important;
+  float: none !important;
+  display: -webkit-box !important;
+  flex: 1 1 auto !important;
+  align-self: center !important;
+  min-width: 0 !important;
+  width: auto !important;
+  max-width: calc(100% - 58px) !important;
+  margin: 0 !important;
+  padding: 0 !important;
+  text-align: left !important;
+}
+
+/* Restore the clear, high-contrast sidebar selection state. */
+.sidebar-item.active,
+.sidebar-item.active:hover,
+.sidebar-item.active:focus-visible {
+  background: #1f1f1c !important;
+  color: #fff !important;
+  box-shadow: inset 3px 0 0 var(--blue), 0 1px 4px rgba(0,0,0,.08) !important;
+}
+.sidebar-item.active .sidebar-label,
+.sidebar-item.active .sidebar-icon,
+.sidebar-item.active .sidebar-badge {
+  color: #fff !important;
+}
+.sidebar-item.active .sidebar-icon {
+  opacity: 1 !important;
+}
