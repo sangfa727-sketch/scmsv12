@@ -4709,7 +4709,13 @@ button, .btn-primary, .btn-secondary, .btn-danger, .btn-pill-action,
   overflow-wrap: anywhere;
   word-break: normal;
 }
-.card-name, .page-title, .modal-title, .field-label,
+/* Card titles must break naturally, not between Myanmar glyphs.
+   Keep page/modal headings permissive for long translated labels. */
+.card-name {
+  overflow-wrap: normal;
+  word-break: normal;
+}
+.page-title, .modal-title, .field-label,
 .school-name, .school-header-name, .sidebar-school-name {
   overflow-wrap: anywhere;
 }
