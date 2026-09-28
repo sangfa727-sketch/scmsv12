@@ -99,3 +99,46 @@ test('Settings writes use modal-local DOM targets instead of shared page state',
     assert.doesNotMatch(source, pattern);
   }
 });
+
+
+test('feature modules do not directly reach unrelated feature DOM roots', () => {
+  const ownership = {
+    'js/04_students.js': ['studentList', 'studentStats', 'studentSearchInput', 'studentStatusChips', 'classChips', 'idCardBody', 'idCardQr'],
+    'js/12_more.js': ['moreMenu', 'cgClassInput', 'cgGradeInput', 'cgPairList', 'cgPairCount'],
+    'js/15_settings.js': ['teacherList', 'invTName', 'invTRole', 'invGenBtn', 'invCodeResult', 'invCodeValue', 'invPastList', 'newTId', 'newTName', 'newTEmail', 'newTRole', 'newTPw', 'newTError', 'newTBtn'],
+  };
+  const forbidden = {
+    'js/04_students.js': ['teacherList', 'invCodeResult', 'moreMenu', 'billingInvoiceList', 'admissionsList', 'dashboardContent'],
+    'js/12_more.js': ['studentList', 'billingInvoiceList', 'admissionsList', 'teacherList', 'invCodeResult', 'dashboardContent'],
+    'js/15_settings.js': ['studentList', 'billingInvoiceList', 'admissionsList', 'moreMenu', 'dashboardContent'],
+  };
+  for (const [file, allowedIds] of Object.entries(ownership)) {
+    const source = read(file);
+    for (const id of allowedIds) {
+      assert.ok(
+        source.includes("getElementById('" + id + "')") || source.includes('getElementById("' + id + '")'),
+        file + ' should own ' + id
+      );
+    }
+    for (const id of forbidden[file]) {
+      assert.equal(
+        source.includes("getElementById('" + id + "')") || source.includes('getElementById("' + id + '")'),
+        false,
+        file + ' must not directly own ' + id
+      );
+    }
+  }
+});
+
+test('feature modules render lists through their owned roots', () => {
+  const checks = [
+    ['js/04_students.js', 'studentList'],
+    ['js/12_more.js', 'moreMenu'],
+    ['js/15_settings.js', 'teacherList'],
+  ];
+  for (const [file, id] of checks) {
+    const source = read(file);
+    assert.ok(source.includes("getElementById('" + id + "')") || source.includes('getElementById("' + id + '")'), file + ' must use its page root');
+    assert.match(source, /innerHTML/);
+  }
+});
