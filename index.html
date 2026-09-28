@@ -462,5 +462,35 @@
 <script src="js/27_dashboard.js?v=20260928d"></script>   <!-- ⭐ အသစ်ထည့် -->
 <script src="js/28_leave_requests.js?v=20260927d"></script>   <!-- ⭐ အသစ်ထည့် -->
 <script src="js/14_app.js?v=20260929c"></script>
+<script>
+/* Boot rescue: never leave users on a permanent "Connecting…" screen if the
+   final app entry script was blocked by a stale cache or a browser parse/load
+   failure. The normal initApp() remains authoritative when it starts. */
+(function () {
+  const rescueTimer = setTimeout(function () {
+    const boot = document.getElementById('bootScreen');
+    const status = document.getElementById('bootStatus');
+    if (!boot || !status || boot.style.display === 'none') return;
+    if (status.textContent.trim() !== 'Connecting…') return;
+
+    if (typeof window.renderLanding === 'function') {
+      try {
+        window.renderLanding();
+        return;
+      } catch (e) {
+        console.error('[boot-rescue] renderLanding failed:', e);
+      }
+    }
+
+    status.textContent = 'Loading login…';
+    const sub = document.getElementById('bootSub');
+    if (sub) sub.textContent = 'Please wait a moment and try again.';
+  }, 3500);
+
+  window.addEventListener('beforeunload', function () {
+    clearTimeout(rescueTimer);
+  });
+})();
+</script>
 </body>
 </html>
