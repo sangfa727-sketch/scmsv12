@@ -8,7 +8,7 @@
 
 'use strict';
 
-const API = window.API || {};
+var API = window.API || {};
 
 Object.assign(API, {
 
