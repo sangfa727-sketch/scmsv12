@@ -47,6 +47,8 @@ jobs:
         with:
           node-version: 20
       - run: npm ci
+      - name: Run frontend syntax and regression tests
+        run: npm test
       - run: npx playwright install --with-deps chromium
       - name: Run e2e smoke tests against staging
         env:
