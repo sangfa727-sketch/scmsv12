@@ -118,8 +118,10 @@ window.openHomeworkModal = async function() {
       <label class="field-label">${t('hw.dueDate')} <span class="optional">${t('common.optional')}</span></label>
       <input class="form-input" id="hwDue" type="date">
 
-      <button class="btn-primary mt16" id="saveHwBtn" onclick="saveHomework()">${t('btn.save')}</button>
-      <button class="btn-secondary" onclick="closeModal()">${t('common.cancel')}</button>
+      <div class="modal-footer">
+<button class="btn-primary mt16" id="saveHwBtn" onclick="saveHomework()">${t('btn.save')}</button>
+<button class="btn-secondary" onclick="closeModal()">${t('common.cancel')}</button>
+</div>
     </div>`;
 
   openModal(html);
@@ -206,8 +208,10 @@ window.openEditHomework = async function(id) {
       <label class="field-label">${t('hw.dueDate')}</label>
       <input class="form-input" id="ehwDue" type="date" value="${esc(h.due_date || '')}">
 
-      <button class="btn-primary mt16" id="saveEhwBtn" onclick="saveEditHomework('${esc(id)}')">${t('common.saveChanges')}</button>
-      <button class="btn-secondary" onclick="closeModal()">${t('common.cancel')}</button>
+      <div class="modal-footer">
+<button class="btn-primary mt16" id="saveEhwBtn" onclick="saveEditHomework('${esc(id)}')">${t('common.saveChanges')}</button>
+<button class="btn-secondary" onclick="closeModal()">${t('common.cancel')}</button>
+</div>
     </div>
   `);
 };
