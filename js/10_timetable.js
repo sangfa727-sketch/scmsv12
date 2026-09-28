@@ -127,10 +127,12 @@ function _openTimetableForm({ mode, entry }) {
       <label class="field-label">${t('tt.roomOptional')}</label>
       <input class="form-input" id="ttRoom" value="${esc(e.room || '')}" placeholder="${esc(t('tt.roomPh'))}">
 
-      <button class="btn-primary mt16" id="saveTtBtn" onclick="saveTimetableEntry(${isEdit ? `'${esc(e.id)}'` : 'null'})">
+      <div class="modal-footer">
+<button class="btn-primary mt16" id="saveTtBtn" onclick="saveTimetableEntry(${isEdit ? `'${esc(e.id)}'` : 'null'})">
         ${t(isEdit ? 'common.saveChanges' : 'tt.addEntry')}
       </button>
-      <button class="btn-secondary" onclick="closeModal()">${t('common.cancel')}</button>
+<button class="btn-secondary" onclick="closeModal()">${t('common.cancel')}</button>
+</div>
     </div>
   `);
 }
