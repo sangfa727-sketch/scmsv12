@@ -28,5 +28,8 @@
     "@capacitor/ios": "^6.0.0",
     "@capacitor/splash-screen": "^6.0.0",
     "@capacitor/status-bar": "^6.0.0"
+  },
+  "overrides": {
+    "tar": "^7.5.22"
   }
 }
