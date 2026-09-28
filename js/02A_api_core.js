@@ -47,7 +47,7 @@ async function _prepStudentPhoto(file) {
   }
 }
 
-const API = window.API || {};
+var API = window.API || {};
 window.API = API;
 
 Object.assign(API, {
