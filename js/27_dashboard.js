@@ -134,26 +134,7 @@ function _paintDashboard(container) {
         <div class="stat-num">${leavePending}/${leaveTotal}</div>
         <div class="stat-lbl">🔔 Leave requests</div>
       </div>
-    </div>
-
-    ${leavePending ? `
-    <div class="dashboard-banner dashboard-leave-banner" onclick="window.goToPage('leave')" role="button" tabindex="0">
-      <span class="dashboard-banner-icon">🔔</span>
-      <div>
-        <div class="dashboard-banner-title">${leavePending} Leave request${leavePending === 1 ? '' : 's'} pending</div>
-        <div class="dashboard-banner-text">New leave request${leavePending === 1 ? '' : 's'} need your review. Tap to open.</div>
-      </div>
-    </div>` : ''}
-
-    ${queuedComms.length ? `
-    <div class="dashboard-banner">
-      <span class="dashboard-banner-icon">⚠️</span>
-      <div>
-        <div class="dashboard-banner-title">${t('dash.bannerTitle', { n: queuedComms.length })}</div>
-        <div class="dashboard-banner-text">${t('dash.bannerText')}</div>
-      </div>
-    </div>` : ''}
-
+    </div>\n
        ${todaysClasses.length ? `
     <div class="more-section-title">${t('dash.todaysSchedule')}</div>
     ${todaysClasses.map(x => `
@@ -204,7 +185,7 @@ function _paintDashboard(container) {
         </div>
       </div>`).join('')}` : ''}
   `;
-  _dashboardWrapCardGroups(container);
+  _renderDashboardNotificationBell(leavePending, queuedComms.length);\n  _dashboardWrapCardGroups(container);
 }
 
 // _classColor(cls) is reused as-is from js/04_students.js — same
@@ -241,3 +222,48 @@ function _dashboardWrapCardGroups(container) {
     if (grid.children.length) title.after(grid);
   }
 }
+
+
+function _renderDashboardNotificationBell(leavePending, queuedCount) {
+  const el = document.getElementById('dashboardNotificationWrap');
+  if (!el) return;
+  const total = leavePending + queuedCount;
+  el.innerHTML = \`
+    <button class="dashboard-notification-btn" type="button" aria-label="Notifications" title="Notifications"
+      onclick="toggleDashboardNotifications(event)" aria-expanded="false">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+        <path d="M18 8a6 6 0 0 0-12 0c0 7-3 7-3 9h18c0-2-3-2-3-9"/>
+        <path d="M13.73 21a2 2 0 0 1-3.46 0"/>
+      </svg>
+      \${total > 0 ? \`<span class="dashboard-notification-badge">\${total > 99 ? '99+' : total}</span>\` : ''}
+    </button>
+    <div class="dashboard-notification-menu" id="dashboardNotificationMenu" hidden>
+      <div class="dashboard-notification-head"><strong>Notifications</strong><span>\${total} new</span></div>
+      \${leavePending ? \`
+        <button class="dashboard-notification-item" type="button" onclick="window.goToPage('leave'); closeDashboardNotifications()">
+          <span class="dashboard-notification-item-icon">🔔</span>
+          <span><strong>\${leavePending} Leave request\${leavePending === 1 ? '' : 's'} pending</strong><small>New leave request\${leavePending === 1 ? '' : 's'} need your review.</small></span>
+        </button>\` : ''}
+      \${queuedCount ? \`
+        <button class="dashboard-notification-item" type="button" onclick="window.goToPage('parents'); closeDashboardNotifications()">
+          <span class="dashboard-notification-item-icon">⚠️</span>
+          <span><strong>\${queuedCount} message\${queuedCount === 1 ? '' : 's'} not delivered</strong><small>\${t('dash.bannerText')}</small></span>
+        </button>\` : ''}
+      \${total === 0 ? \`<div class="dashboard-notification-empty">No new notifications</div>\` : ''}
+    </div>\`;
+}
+window.toggleDashboardNotifications = function(event) {
+  event?.stopPropagation();
+  const menu = document.getElementById('dashboardNotificationMenu');
+  const btn = document.querySelector('.dashboard-notification-btn');
+  if (!menu) return;
+  const open = menu.hidden;
+  menu.hidden = !open;
+  btn?.setAttribute('aria-expanded', String(open));
+};
+window.closeDashboardNotifications = function() {
+  const menu = document.getElementById('dashboardNotificationMenu');
+  const btn = document.querySelector('.dashboard-notification-btn');
+  if (menu) menu.hidden = true;
+  btn?.setAttribute('aria-expanded', 'false');
+};
