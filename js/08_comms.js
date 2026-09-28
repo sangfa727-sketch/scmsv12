@@ -115,8 +115,10 @@ window.openParentPortalEventModal = function() {
       <label class="field-label">Description</label>
       <textarea class="form-textarea" id="ppeDesc" rows="3" placeholder="မိဘတွေ သိထားသင့်တဲ့ အချက်များ"></textarea>
 
-      <button class="btn-primary mt16" id="ppeSaveBtn" onclick="saveParentPortalEvent()">Publish to Parent Portal</button>
-      <button class="btn-secondary" onclick="closeModal()">Cancel</button>
+      <div class="modal-footer">
+<button class="btn-primary mt16" id="ppeSaveBtn" onclick="saveParentPortalEvent()">Publish to Parent Portal</button>
+<button class="btn-secondary" onclick="closeModal()">Cancel</button>
+</div>
     </div>
   `);
 };
@@ -192,8 +194,10 @@ window.openParentCommModal = function() {
       <label class="field-label">${t('comms.message')}</label>
       <textarea class="form-textarea" id="commMsg" rows="4" placeholder="${esc(t('comms.msgPh'))}"></textarea>
 
-      <button class="btn-primary mt16" id="sendCommBtn" onclick="sendParentComm()">${t('comms.send')}</button>
-      <button class="btn-secondary" onclick="closeModal()">${t('common.cancel')}</button>
+      <div class="modal-footer">
+<button class="btn-primary mt16" id="sendCommBtn" onclick="sendParentComm()">${t('comms.send')}</button>
+<button class="btn-secondary" onclick="closeModal()">${t('common.cancel')}</button>
+</div>
     </div>`;
 
   openModal(html);
