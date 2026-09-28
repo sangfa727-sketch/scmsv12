@@ -107,3 +107,20 @@ test('admin teacher mutations stay behind the shared session-aware RPC boundary'
   assert.equal(source.includes('rest/v1/rpc/rpc_admin_create_teacher'), false);
   assert.equal(source.includes('rest/v1/rpc/rpc_admin_reset_teacher_password'), false);
 });
+
+
+test('teacher invite redemption is serialized against concurrent use', () => {
+  const migration = read('supabase/migrations/20260929051500_email_signup_invite_race_hardening.sql');
+  assert.match(migration, /from public\.teacher_invites[\\s\\S]*limit 1 for update/i);
+  assert.match(migration, /security definer/i);
+});
+
+test('dependency security guardrails are configured', () => {
+  const pkg = JSON.parse(read('package.json'));
+  assert.equal(pkg.overrides?.tar, '^7.5.22');
+  const dependabot = read('.github/dependabot.yml');
+  assert.match(dependabot, /package-ecosystem: "npm"/);
+  assert.match(dependabot, /package-ecosystem: "github-actions"/);
+  const workflow = read('.github/workflows/test.yml');
+  assert.match(workflow, /npm audit --audit-level=high/);
+});
