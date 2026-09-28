@@ -12,7 +12,10 @@
     "cap:open:android": "cap open android",
     "cap:open:ios": "cap open ios",
     "build:android": "cap sync android && cap open android",
-    "build:ios": "cap sync ios && cap open ios"
+    "build:ios": "cap sync ios && cap open ios",
+    "test": "npm run test:syntax && npm run test:static",
+    "test:syntax": "node test/scripts/check-js-syntax.js",
+    "test:static": "node --test test/unit/regressions.test.js"
   },
   "devDependencies": {
     "@capacitor/cli": "^6.0.0"
