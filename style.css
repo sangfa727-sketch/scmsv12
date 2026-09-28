@@ -6584,3 +6584,59 @@ input.form-input {
     grid-template-columns: 1fr 1fr;
   }
 }
+
+/* ================================================================
+   SCMS v12.18 — universal action-button alignment
+   Primary / secondary actions belong to the trailing (right) edge.
+   Keep mixed toolbars intact; only action groups are right-aligned.
+   ================================================================ */
+
+.form-actions,
+.modal-actions,
+.page-actions,
+.card-actions {
+  justify-content: flex-end !important;
+}
+
+.form-actions > button,
+.modal-actions > button,
+.page-actions > button {
+  flex: 0 0 auto !important;
+  width: fit-content !important;
+  max-width: 100% !important;
+  margin-left: 0 !important;
+}
+
+/* Card action menus should always stay at the trailing edge of the card. */
+.card-actions {
+  margin-left: auto !important;
+}
+
+/* Modal form actions: compact right-aligned buttons, never stretched
+   across the whole modal just because of the legacy flex:1 rule. */
+.modal-actions .btn-primary,
+.modal-actions .btn-secondary,
+.modal-actions .btn-danger,
+.modal-sheet .form-actions > .btn-primary,
+.modal-sheet .form-actions > .btn-secondary,
+.modal-sheet .form-actions > .btn-danger {
+  flex: 0 0 auto !important;
+  width: fit-content !important;
+  min-width: 0 !important;
+  max-width: 100% !important;
+}
+
+/* Do not let the legacy secondary-button top margin create uneven action rows. */
+.form-actions > .btn-secondary,
+.modal-actions > .btn-secondary {
+  margin-top: 0 !important;
+}
+
+@media (max-width: 520px) {
+  .form-actions,
+  .modal-actions,
+  .page-actions {
+    gap: 6px !important;
+  }
+}
+
