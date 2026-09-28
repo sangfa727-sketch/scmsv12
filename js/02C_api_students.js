@@ -156,7 +156,7 @@ Object.assign(API, {
 
   /** Soft-delete (status=Inactive) — admin only. */
 
-  async deleteStudent(studentId) {
+  async reactivateStudent(studentId) {\n    return _webRpc('rpc_reactivate_student', { p_session_token: _webSessionToken(), p_student_id: studentId });\n  },\n\n  async deleteStudent(studentId) {
     if (window.APP.platform === 'web') return _webRpc('rpc_deactivate_student', {
       p_session_token: _webSessionToken(),
       p_student_id: studentId,
