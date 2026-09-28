@@ -6353,133 +6353,137 @@ input.form-input {
 }
 
 
-/* SCMS v12.13 — settings controls final layout correction
-   Settings actions are content-sized controls, not page-width bars. */
+/* SCMS v12.16 — Settings modal action system
+   Semantic action rows: description on the left, action on the right.
+   Keep Settings-specific rules isolated from global button styles. */
+
 .settings-modal-sheet .settings-actions {
-  display: flex !important;
-  flex-direction: row !important;
-  flex-wrap: wrap !important;
-  align-items: center !important;
-  justify-content: center !important;
-  gap: 7px !important;
-  width: auto !important;
-  max-width: 100% !important;
-  margin: 12px auto 0 !important;
-  padding: 0 !important;
-}
-.settings-modal-sheet .settings-actions > button,
-.settings-modal-sheet .settings-actions > .btn-primary,
-.settings-modal-sheet .settings-actions > .btn-secondary {
-  box-sizing: border-box !important;
-  display: inline-flex !important;
-  flex: 0 0 auto !important;
-  width: auto !important;
-  min-width: max-content !important;
-  max-width: 100% !important;
-  height: auto !important;
-  min-height: 36px !important;
-  margin: 0 !important;
-  padding: 8px 12px !important;
-  align-items: center !important;
-  justify-content: center !important;
-  text-align: center !important;
-  white-space: nowrap !important;
-}
-.settings-modal-sheet .settings-close {
-  display: inline-flex !important;
-  width: auto !important;
-  min-width: 84px !important;
-  max-width: 100% !important;
-  margin: 12px auto 0 !important;
-}
-@media (max-width: 380px) {
-  .settings-modal-sheet .settings-actions { gap: 5px !important; }
-  .settings-modal-sheet .settings-actions > button,
-  .settings-modal-sheet .settings-actions > .btn-primary,
-  .settings-modal-sheet .settings-actions > .btn-secondary {
-    min-width: 0 !important;
-    padding: 7px 9px !important;
-    font-size: 12px !important;
-    white-space: normal !important;
-  }
+  width: 100%;
+  margin: 16px 0 0;
+  padding: 0;
+  box-sizing: border-box;
 }
 
-
-/* SCMS v12.14 — shrink settings action container itself
-   A block flex container with width:auto still fills its parent. */
-.settings-modal-sheet .settings-actions {
-  display: inline-flex !important;
-  width: fit-content !important;
-  max-width: 100% !important;
-  flex-wrap: wrap !important;
-  align-items: center !important;
-  justify-content: center !important;
-  gap: 7px !important;
-  margin: 12px auto 0 !important;
-  vertical-align: top !important;
-}
-.settings-modal-sheet .settings-actions > button {
-  width: auto !important;
-  flex: 0 0 auto !important;
-  min-width: 0 !important;
-  max-width: 100% !important;
-  display: inline-flex !important;
-  margin: 0 !important;
+.settings-modal-sheet .settings-action-list {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  gap: 8px;
 }
 
+.settings-modal-sheet .settings-action-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  width: 100%;
+  min-height: 52px;
+  padding: 8px 10px 8px 12px;
+  box-sizing: border-box;
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  background: var(--surface);
+}
 
-/* SCMS v12.15 — production action alignment
-   Action controls follow the standard LTR form convention:
-   primary/confirm actions sit on the right; utility controls remain
-   compact and content-sized. Never stretch settings actions edge-to-edge. */
-.settings-modal-sheet .settings-actions {
-  display: flex !important;
-  width: 100% !important;
-  max-width: 100% !important;
-  flex-direction: row !important;
-  flex-wrap: wrap !important;
-  align-items: center !important;
-  justify-content: flex-end !important;
-  gap: 7px !important;
-  margin: 14px 0 0 !important;
-  padding: 0 !important;
-  box-sizing: border-box !important;
+.settings-modal-sheet .settings-action-copy {
+  min-width: 0;
+  flex: 1 1 auto;
+  color: var(--text);
+  font-size: 13px;
+  line-height: 1.35;
 }
-.settings-modal-sheet .settings-actions > button,
-.settings-modal-sheet .settings-actions > .btn-primary,
-.settings-modal-sheet .settings-actions > .btn-secondary {
-  width: fit-content !important;
-  max-width: 100% !important;
-  min-width: 0 !important;
-  flex: 0 1 auto !important;
-  display: inline-flex !important;
-  align-items: center !important;
-  justify-content: center !important;
-  margin: 0 !important;
-  min-height: 36px !important;
-  height: auto !important;
-  padding: 8px 12px !important;
-  text-align: center !important;
-  white-space: nowrap !important;
-  overflow-wrap: normal !important;
+
+.settings-modal-sheet .settings-action-copy strong {
+  display: block;
+  font-weight: 600;
+  overflow-wrap: anywhere;
 }
+
+.settings-modal-sheet .settings-action-button {
+  flex: 0 0 auto;
+  width: auto;
+  min-width: 0;
+  min-height: 34px;
+  height: auto;
+  margin: 0;
+  padding: 7px 11px;
+  border: 1px solid var(--border);
+  border-radius: 9px;
+  background: var(--bg2);
+  color: var(--text);
+  font: inherit;
+  font-size: 12px;
+  font-weight: 700;
+  line-height: 1.2;
+  text-align: center;
+  white-space: nowrap;
+  cursor: pointer;
+  transition: transform .14s ease, background-color .14s ease, border-color .14s ease, opacity .14s ease;
+}
+
+.settings-modal-sheet .settings-action-button:hover {
+  background: var(--surface2);
+}
+
+.settings-modal-sheet .settings-action-button:active {
+  transform: translateY(1px);
+}
+
+.settings-modal-sheet .settings-action-button.settings-action-primary {
+  background: var(--text);
+  border-color: var(--text);
+  color: var(--bg);
+}
+
+.settings-modal-sheet .settings-action-button.settings-action-danger {
+  color: var(--danger, #b42318);
+  border-color: color-mix(in srgb, currentColor 28%, var(--border));
+  background: var(--bg2);
+}
+
+.settings-modal-sheet .settings-footer-note {
+  margin: 12px 0 0;
+  font-size: 11px;
+  line-height: 1.45;
+  color: var(--text3);
+}
+
 .settings-modal-sheet > .settings-close {
-  display: inline-flex !important;
-  width: fit-content !important;
-  max-width: 100% !important;
-  min-width: 88px !important;
-  margin: 12px 0 0 auto !important;
-  min-height: 36px !important;
-  padding: 8px 12px !important;
-  align-items: center !important;
-  justify-content: center !important;
+  display: inline-flex;
+  width: auto;
+  min-width: 0;
+  min-height: 36px;
+  margin: 12px 0 0 auto;
+  padding: 8px 13px;
+  align-items: center;
+  justify-content: center;
 }
+
 @media (max-width: 520px) {
-  .settings-modal-sheet .settings-actions {
-    justify-content: flex-end !important;
+  .settings-modal-sheet .settings-action-row {
+    gap: 8px;
+    padding-left: 10px;
   }
-  .settings-modal-sheet .settings-actions > button {
-    white-space: normal !important;
-    text-align: right !important;
+
+  .settings-modal-sheet .settings-action-copy {
+    font-size: 12px;
+  }
+
+  .settings-modal-sheet .settings-action-button {
+    max-width: 48%;
+    white-space: normal;
+    overflow-wrap: anywhere;
+  }
+}
+
+@media (max-width: 360px) {
+  .settings-modal-sheet .settings-action-row {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+
+  .settings-modal-sheet .settings-action-button {
+    align-self: flex-end;
+    max-width: 100%;
   }
 }
