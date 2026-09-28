@@ -103,18 +103,18 @@ window.openParentCommModal = function() {
 
       <label class="field-label">${t('comms.sendTo')}</label>
       <div class="pill-group" id="commTargetPills">
-        <button type="button" class="pill active" data-value="class" onclick="togglePill(this,'commTargetPills');toggleCommTarget('class')">${t('comms.wholeClass')}</button>
-        <button type="button" class="pill" data-value="student" onclick="togglePill(this,'commTargetPills');toggleCommTarget('student')">${t('comms.individual')}</button>
+        <button type="button" class="pill active" data-value="class" onclick="selectCommTarget('class')">${t('comms.wholeClass')}</button>
+        <button type="button" class="pill" data-value="student" onclick="selectCommTarget('student')">${t('comms.individual')}</button>
       </div>
 
-      <div id="commClassTarget">
+      <div id="commClassTarget" class="comm-target-panel is-active" aria-hidden="false">
         <label class="field-label">${t('comms.class')}</label>
         <select class="form-input" id="commClass">
           ${classes.map(c => `<option>${esc(c)}</option>`).join('')}
         </select>
       </div>
 
-      <div id="commStudentTarget" style="display:none">
+      <div id="commStudentTarget" class="comm-target-panel" aria-hidden="true">
         <label class="field-label">${t('comms.student')}</label>
         <button type="button" class="picker-trigger" id="commStuTrigger" onclick="commPickStudent()">
           <span id="commStuTriggerText">${t('comms.chooseStudent')}</span>
@@ -132,37 +132,42 @@ window.openParentCommModal = function() {
   openModal(html);
 };
 
-window.toggleCommTarget = function(target) {
-  document.getElementById('commClassTarget').style.display   = target === 'class'   ? 'block' : 'none';
-  document.getElementById('commStudentTarget').style.display = target === 'student' ? 'block' : 'none';
+window.selectCommTarget = function(target) {
+  const isStudent = target === 'student';
+  document.querySelectorAll('#commTargetPills .pill').forEach(p => {
+    const active = p.dataset.value === target;
+    p.classList.toggle('active', active);
+    p.setAttribute('aria-pressed', active ? 'true' : 'false');
+  });
+
+  const classPanel = document.getElementById('commClassTarget');
+  const studentPanel = document.getElementById('commStudentTarget');
+  if (classPanel) {
+    classPanel.classList.toggle('is-active', !isStudent);
+    classPanel.setAttribute('aria-hidden', isStudent ? 'true' : 'false');
+  }
+  if (studentPanel) {
+    studentPanel.classList.toggle('is-active', isStudent);
+    studentPanel.setAttribute('aria-hidden', isStudent ? 'false' : 'true');
+  }
 };
 
-window.commPickStudent = function() {
-  // Close the comm modal temporarily, then open the picker
-  const overlay = document.getElementById('modalOverlay');
-  const savedHtml = overlay.innerHTML;
+window.toggleCommTarget = window.selectCommTarget;
 
+window.commPickStudent = function() {
+  // Keep the parent-message form underneath the picker. Do not serialize
+  // and reopen the form: doing that used to create duplicate modal layers,
+  // losing form state and requiring multiple Close taps.
   openStudentPicker({
-    title:   t('comms.pickerTitle'),
-    onPick:  (s) => {
+    title: t('comms.pickerTitle'),
+    onPick: (s) => {
       _commPickedStudent = s;
-      // Restore the comm modal
-      openModal(savedHtml);
-      setTimeout(() => {
-        // Re-select the Individual pill state
-        const indivPill = document.querySelectorAll('#commTargetPills .pill')[1];
-        if (indivPill) {
-          document.querySelectorAll('#commTargetPills .pill').forEach(p => p.classList.remove('active'));
-          indivPill.classList.add('active');
-          toggleCommTarget('student');
-        }
-        const trig = document.getElementById('commStuTriggerText');
-        if (trig) trig.textContent = `${s.name_en || s.name_local} (${s.class})`;
-      }, 50);
+      selectCommTarget('student');
+      const trig = document.getElementById('commStuTriggerText');
+      if (trig) trig.textContent = `${s.name_en || s.name_local} (${s.class || '—'})`;
     },
   });
 };
-
 window.sendParentComm = async function() {
   const btn = document.getElementById('sendCommBtn');
   const msg = document.getElementById('commMsg').value.trim();
