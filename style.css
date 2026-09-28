@@ -4770,3 +4770,192 @@ html[lang="my"] .tab-label {
 html[lang="my"] .field-label {
   letter-spacing: 0;
 }
+
+
+/* ================================================================
+   SCMS v12.1 — DATA ENTRY MODAL COMPACT MODE
+   Keep CRUD forms contained on both phone and desktop.
+   Inline max-height/max-width from older feature modules are
+   intentionally overridden here so every form follows one system.
+   ================================================================ */
+
+/* Forms are dialogs, not full-screen pages. */
+.modal-layer {
+  align-items: center !important;
+  justify-content: center;
+  padding: 8px !important;
+}
+
+.modal-sheet {
+  width: min(92vw, 440px) !important;
+  max-width: 440px !important;
+  max-height: min(72dvh, 560px) !important;
+  padding: 8px 13px 12px !important;
+  border-radius: 14px !important;
+  overflow-y: auto !important;
+  overflow-x: hidden;
+  overscroll-behavior: contain;
+}
+
+/* Older modules put 85vh / 640px directly in style="..." */
+.modal-sheet[style] {
+  max-height: min(72dvh, 560px) !important;
+  max-width: 440px !important;
+}
+
+.modal-handle {
+  width: 30px !important;
+  height: 3px !important;
+  margin: 0 auto 7px !important;
+}
+
+.modal-title {
+  font-size: 18px !important;
+  line-height: 1.25 !important;
+  margin-bottom: 9px !important;
+  letter-spacing: -0.2px;
+}
+.modal-title.mb0 { margin-bottom: 2px !important; }
+
+.modal-subtitle {
+  font-size: 11px !important;
+  line-height: 1.4 !important;
+  margin: 1px 0 7px !important;
+}
+
+/* Dense field rhythm — the main source of the excessive vertical scroll. */
+.modal-sheet .field-label {
+  margin-top: 7px !important;
+  margin-bottom: 3px !important;
+  font-size: 10px !important;
+  line-height: 1.25 !important;
+}
+.modal-sheet .field-label:first-child { margin-top: 0 !important; }
+
+.modal-sheet .form-input,
+.modal-sheet select.form-input,
+.modal-sheet button.form-input,
+.modal-sheet .form-picker-trigger {
+  height: 35px !important;
+  min-height: 35px !important;
+  padding: 0 9px !important;
+  border-radius: 8px !important;
+  font-size: 12.5px !important;
+  line-height: 1.25 !important;
+}
+
+.modal-sheet textarea.form-input,
+.modal-sheet .form-textarea {
+  min-height: 58px !important;
+  height: auto !important;
+  padding: 7px 9px !important;
+  line-height: 1.35 !important;
+}
+
+.modal-sheet .form-row {
+  gap: 6px !important;
+}
+.modal-sheet .form-divider {
+  margin: 8px 0 5px !important;
+}
+.modal-sheet .pill-group {
+  gap: 5px !important;
+  margin-bottom: 2px !important;
+}
+.modal-sheet .pill {
+  padding: 5px 9px !important;
+  font-size: 11.5px !important;
+  line-height: 1.25 !important;
+}
+.modal-sheet .mt16 {
+  margin-top: 8px !important;
+}
+.modal-sheet .btn-primary,
+.modal-sheet .btn-secondary,
+.modal-sheet .btn-danger {
+  min-height: 36px !important;
+  padding: 7px 10px !important;
+  border-radius: 8px !important;
+  font-size: 12.5px !important;
+  line-height: 1.25 !important;
+  margin-top: 6px !important;
+}
+
+/* Student form: make the visual header/photo compact. */
+.student-form-sheet .stu-photo-picker,
+.modal-sheet .stu-photo-picker {
+  transform: scale(.78);
+  transform-origin: center top;
+  margin: -4px auto -14px;
+}
+.modal-sheet .stu-photo-remove-link {
+  font-size: 10.5px;
+  margin-top: -7px;
+}
+.modal-sheet .color-grid {
+  grid-template-columns: repeat(10, 1fr) !important;
+  gap: 4px !important;
+  margin-top: 3px !important;
+}
+.modal-sheet .color-swatch {
+  border-radius: 7px !important;
+}
+
+/* Info/link boxes also consume too much vertical space in data-entry flows. */
+.modal-sheet .info-tip {
+  padding: 7px 9px !important;
+  margin-top: 6px !important;
+  font-size: 10.5px !important;
+  line-height: 1.4 !important;
+}
+.modal-sheet .link-box {
+  padding: 8px !important;
+  margin-top: 7px !important;
+}
+.modal-sheet .link-actions {
+  gap: 5px !important;
+  margin-top: 6px !important;
+}
+.modal-sheet .link-btn,
+.modal-sheet .link-btn-inline {
+  min-height: 34px !important;
+  padding: 6px 8px !important;
+  font-size: 11.5px !important;
+}
+
+/* Keep long Myanmar labels inside controls rather than making the card wider. */
+.modal-sheet button,
+.modal-sheet .form-picker-value,
+.modal-sheet label,
+.modal-sheet span {
+  max-width: 100%;
+  overflow-wrap: anywhere;
+  word-break: normal;
+}
+
+/* On very small phones, use nearly the full width but still leave a visible
+   page margin so it reads as a dialog instead of a second full-screen page. */
+@media (max-width: 420px) {
+  .modal-layer { padding: 7px !important; }
+  .modal-sheet {
+    width: min(94vw, 420px) !important;
+    max-height: 74dvh !important;
+    padding-left: 11px !important;
+    padding-right: 11px !important;
+  }
+}
+
+/* Desktop: smaller floating dialog, never a giant centered panel. */
+@media (min-width: 900px) {
+  .modal-layer { padding: 12px !important; }
+  .modal-sheet {
+    width: min(88vw, 460px) !important;
+    max-width: 460px !important;
+    max-height: min(70dvh, 600px) !important;
+  }
+}
+
+/* Respect reduced-motion preferences. */
+@media (prefers-reduced-motion: reduce) {
+  .modal-sheet { animation: none !important; }
+}
