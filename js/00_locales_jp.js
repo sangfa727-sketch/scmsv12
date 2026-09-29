@@ -79,5 +79,8 @@
     'help.about.introTitle':'SCMSについて','help.about.introBody':'SCMS v11 — Telegramを中心とした学校管理。ミャンマーの学校向けに作られています。','help.about.version':'バージョン','help.about.platform':'プラットフォーム','help.about.school':'学校','help.about.needHelpTitle':'ヘルプが必要ですか？','help.about.needHelpBody':'問題が発生した場合は学校管理者またはサポート窓口に連絡してください。','help.about.replayTour':'🔄 ウェルカムツアーをもう一度見る','help.close':'閉じる',
     'tour.s1.title':'SCMSへようこそ 👋','tour.s1.text':'ここから学校全体を管理できます。5ステップで見ていきましょう。','tour.s2.title':'生徒','tour.s2.text':'生徒はこちらです。カードをタップして詳細を表示・編集できます。','tour.s3.title':'出欠','tour.s3.text':'今日の出席・欠席をP/A/L/T/S/E/Hコードでワンタップ記録できます。','tour.s4.title':'+ ボタン','tour.s4.text':'この＋ボタンは現在のページで「新規追加」を実行します。','tour.s5.title':'その他 — ヘルプはこちら','tour.s5.text':'その他タブには使い方、管理者ツール、設定があります。','tour.skip':'スキップ','tour.next':'次へ →','tour.done':'完了 ✓'
   });
+  Object.assign(overrides, {
+    'modules.saveFailed':'保存できませんでした: {err}','cg.confirmRemove':'{list} から「{value}」を削除しますか？','cg.couldNotSave':'保存できませんでした: {err}','boot.user':'ユーザー: {name}','common.deleteFailed':'削除に失敗しました: {err}','common.updateFailed':'更新に失敗しました: {err}','daily.noStudents':'{cls} に生徒はいません','daily.modalTitle':'日次レポート — {name}','daily.saved':'✓ {name} のレポートを保存しました','daily.pickerSub':'{date} のレポート','hw.lb':'LB p.{n}','hw.wb':'WB p.{n}','comms.classBroadcast':'一斉連絡 — {class}','tt.noClasses':'{day} のクラスはありません','tt.room':'教室 {n}','tt.periods':'{day} に {n} 時限','tt.period1':'{day} に {n} 時限','grades.metaLine':'{date} · 満点 {max} · 重み {w}%','grades.classMax':'{cls} · 満点 {max}','bill.cardSub':'{cls} · 期限 {due} · 合計 {total}'
+  });
   window.I18N_JP = Object.assign({}, base, overrides);
 })();
