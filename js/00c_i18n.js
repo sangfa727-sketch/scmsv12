@@ -57,7 +57,6 @@ const I18N = {
     // instead of a hardcoded my/en check — a newly-added language is picked up for free.
     const registered = LANGUAGES.map(l => l.code);
     const normalizedTg = String(tgLang || '').toLowerCase();
-    const tgCandidates = normalizedTg === 'ja' ? ['jp'] : [normalizedTg];
     const browserLang = registered.find(c =>
       (LANGUAGE_ALIASES[c] || [c]).some(alias =>
         browserTag === alias || browserTag.startsWith(alias + '-')
