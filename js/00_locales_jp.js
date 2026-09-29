@@ -3,7 +3,7 @@
 (function () {
   const base = window.I18N_EN || {};
   const overrides = {
-    'app.title':'SCMS — ระบบจัดการชั้นเรียนโรงเรียน',
+    'app.title':'SCMS — 学校クラス管理システム',
     'common.all':'すべて','common.edit':'編集','common.close':'閉じる','common.cancel':'キャンセル','common.add':'追加','common.saving':'保存中…','common.years':'年','common.failed':'失敗:','common.saveFailed':'保存できません — もう一度お試しください','common.removed':'削除しました',
     'nav.dashboard':'ダッシュボード','nav.students':'生徒','nav.attendance':'出欠','nav.homework':'宿題','nav.messages':'メッセージ','nav.incidents':'インシデント','nav.timetable':'時間割','nav.reports':'レポート','nav.settings':'設定',
     'topbar.search':'検索...','topbar.notifications':'通知','topbar.profile':'プロフィール','topbar.logout':'ログアウト','topbar.language':'言語',
