@@ -175,31 +175,35 @@ function _renderBookDetailView(id, checkouts) {
     </div>
     ${b.notes ? `<p class="billing-notes">${esc(b.notes)}</p>` : ''}
 
-    ${b.available_copies > 0 ? `<div class="modal-footer">
-<button class="btn-primary mt16" onclick="_showCheckoutView(${id})">${t('lib.checkoutBtn')}</button>` : ''}
+    <div class="library-book-actions">
+      ${b.available_copies > 0 ? `<button class="btn-primary library-checkout-action" type="button" onclick="_showCheckoutView(${id})">${t('lib.checkoutBtn')}</button>` : ''}
+    </div>
 
     <div class="billing-section-title mt16">${t('lib.currentlyOut')}</div>
     ${active.length ? active.map(c => `
-      <div class="row-with-delete">
-        <span>${esc(c.student_name)} <span class="muted-note">${esc(t('lib.since', { date: fmtDate(c.checked_out_date) }))}${c.due_date ? esc(t('lib.due', { date: fmtDate(c.due_date) })) : ''}</span></span>
-        <button class="btn-pill-action ghost" onclick="_returnBook(${c.id}, ${id})">${t('lib.return')}</button>
+      <div class="library-current-row">
+        <div class="library-current-info">
+          <strong>${esc(c.student_name)}</strong>
+          <span class="muted-note">${esc(t('lib.since', { date: fmtDate(c.checked_out_date) }))}${c.due_date ? esc(t('lib.due', { date: fmtDate(c.due_date) })) : ''}</span>
+        </div>
+        <button class="btn-pill-action ghost" type="button" onclick="_returnBook(${c.id}, ${id})">${t('lib.return')}</button>
       </div>
-    `).join('') : `<p class="muted-note">${t('lib.none2')}</p>`}
+    `).join('') : `<p class="muted-note library-empty-note">${t('lib.none2')}</p>`}
 
     ${past.length ? `
       <div class="billing-section-title mt16">${t('lib.history')}</div>
       ${past.map(c => `
-        <div class="row-with-delete">
+        <div class="library-history-row">
           <span>${esc(c.student_name)}</span>
           <span class="muted-note">${esc(fmtDate(c.checked_out_date))} → ${esc(fmtDate(c.returned_date))}</span>
         </div>
       `).join('')}
     ` : ''}
 
-    <button class="btn-secondary mt16" onclick="_showEditBookView(${id})">${t('lib.editTitle')}</button>
-<button class="btn-secondary" onclick="_confirmDeleteBook(${id})">${t('lib.delTitle').replace('🗑 ', '').replace('?','')}</button>
-</div>
-  `;
+    <div class="library-book-actions">
+      <button class="btn-secondary" type="button" onclick="_showEditBookView(${id})">${t('lib.editTitle')}</button>
+      <button class="btn-secondary library-danger-action" type="button" onclick="_confirmDeleteBook(${id})">${t('lib.delTitle').replace('🗑 ', '').replace('?','')}</button>
+    </div>  `;
 }
 
 window._showEditBookView = function(id) {
