@@ -50,6 +50,33 @@ function renderDashboard() {
   });
 }
 
+/**
+ * Refresh only the incident slice used by Dashboard after an incident mutation.
+ * The Dashboard intentionally caches its other widgets, so invalidating the whole
+ * dashboard here would cause unnecessary network calls and visible UI flashing.
+ * Incident edits/saves/deletes are authoritative in the API; re-fetch that slice
+ * so Recent Incidents always reflects the persisted type/severity immediately.
+ */
+window.refreshDashboardIncidents = async function() {
+  try {
+    const incidents = await API.getIncidents(14);
+    if (_dashboardCache) _dashboardCache.incidents = incidents || [];
+
+    const container = document.getElementById('dashboardContent');
+    const dashboardPage = document.getElementById('page-dashboard');
+    if (container && dashboardPage?.classList.contains('active') && _dashboardCache) {
+      _paintDashboard(container);
+    }
+    return incidents || [];
+  } catch (e) {
+    // The Incidents mutation already succeeded. Keep the existing dashboard
+    // cache if a follow-up repaint fetch fails; the next dashboard visit can
+    // refresh it normally.
+    console.warn('[dashboard] incident refresh failed:', e);
+    return null;
+  }
+}
+
 async function _loadDashboardData() {
   const [timetable, attendance, homework, incidents, comms, leaveRequests] = await Promise.all([
     API.getTimetable().catch(() => []),
