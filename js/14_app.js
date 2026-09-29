@@ -498,7 +498,7 @@ window.addEventListener('languageChanged', () => {
   // Lazily rendered pages (they fetch data when opened): only refresh the one on screen.
   const lazy = { more: 'renderMore', billing: 'renderBilling', admissions: 'renderAdmissions',
                  library: 'renderLibrary', transport: 'renderTransport', grades: 'renderGrades',
-                 chat: 'renderChat',dashboard: 'renderDashboard' };
+                 chat: 'renderChat', dashboard: 'renderDashboard', leave: 'renderLeaveRequests' };
   const fn = lazy[window.APP.currentPage];
   if (fn) safe(window[fn]);
 });
