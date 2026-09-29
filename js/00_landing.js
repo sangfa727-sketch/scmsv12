@@ -470,7 +470,7 @@ window.clearSavedSession = function () {
 /* ============================================================================
    WEB LOGIN (v11.6 — Phase 1)
    ============================================================================
-   Teacher ID + password login, separate from the Telegram path.
+   Login name + PIN login, separate from the Telegram path.
    Session token stored in localStorage, verified on each app boot.
 ============================================================================ */
 
@@ -486,11 +486,11 @@ window.openWebLoginModal = function () {
       <h3 class="modal-title">${t('login.title')}</h3>
       <p class="modal-subtitle">${t('login.sub')}</p>
 
-      <label class="field-label">${t('login.teacherId')}</label>
+      <label class="field-label">${t('login.loginName')}</label>
       <input class="form-input" id="webLoginId" type="text" autocomplete="username"
-             placeholder="${esc(t('login.teacherIdPh'))}" autocapitalize="off" autocorrect="off">
+             placeholder="${esc(t('login.loginNamePh'))}" autocapitalize="off" autocorrect="off">
 
-      <label class="field-label">${t('login.password')}</label>
+      <label class="field-label">${t('login.pin')}</label>
       <input class="form-input" id="webLoginPw" type="password" autocomplete="current-password"
              placeholder="••••••••" onkeydown="if(event.key==='Enter')doWebLogin()">
 
@@ -533,7 +533,7 @@ window.doWebLogin = async function () {
   btn.textContent = t('login.signingIn');
 
   try {
-    const resp = await fetch(`${SCMS_CONFIG.SUPABASE_URL}/rest/v1/rpc/rpc_teacher_web_login`, {
+    const resp = await fetch(`${SCMS_CONFIG.SUPABASE_URL}/rest/v1/rpc/rpc_teacher_login`, {
       method: 'POST',
       headers: {
         'apikey':        SCMS_CONFIG.SUPABASE_ANON,
@@ -541,8 +541,8 @@ window.doWebLogin = async function () {
         'Content-Type':  'application/json',
       },
       body: JSON.stringify({
-        p_teacher_id: id,
-        p_password:   pw,
+        p_login_name: id,
+        p_pin:        pw,
         p_device_ua:  navigator.userAgent.slice(0, 200),
       }),
     });
