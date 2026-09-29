@@ -98,42 +98,27 @@ async function _teacherAccessRpc(action, teacherId, extra) {
   }, extra || {}));
 }
 
-function _taText(key) {
-  const en = {'dashboard.view':'View Dashboard','students.view':'View Students','students.edit':'Edit Student Information','leave.view':'View Leave Requests','leave.approve':'Approve / Reject Leave Requests','attendance.view':'View Attendance','attendance.edit':'Edit Attendance','homework.view':'View Homework','homework.create':'Create Homework','homework.edit':'Edit Homework','homework.delete':'Delete Homework','assessment.view':'View Assessments','assessment.create':'Create Assessments','assessment.edit':'Edit Assessments','assessment.delete':'Delete Assessments','billing.view':'View Billing','billing.write':'Edit Billing','teachers.view':'View Teachers','teachers.manage':'Manage Teachers','permissions.manage':'Manage Permissions'};
-  const my = {'dashboard.view':'Dashboard ကြည့်ရှုရန်','students.view':'ကျောင်းသားများ ကြည့်ရှုရန်','students.edit':'ကျောင်းသားအချက်အလက် ပြင်ဆင်ရန်','leave.view':'ခွင့်တောင်းစာ ကြည့်ရှုရန်','leave.approve':'ခွင့်တောင်းစာ အတည်ပြု/ပယ်ချရန်','attendance.view':'တက်ရောက်မှု ကြည့်ရှုရန်','attendance.edit':'တက်ရောက်မှု ပြင်ဆင်ရန်','homework.view':'အိမ်စာ ကြည့်ရှုရန်','homework.create':'အိမ်စာ ထည့်သွင်းရန်','homework.edit':'အိမ်စာ ပြင်ဆင်ရန်','homework.delete':'အိမ်စာ ဖျက်ရန်','assessment.view':'အကဲဖြတ်ချက် ကြည့်ရှုရန်','assessment.create':'အကဲဖြတ်ချက် ထည့်သွင်းရန်','assessment.edit':'အကဲဖြတ်ချက် ပြင်ဆင်ရန်','assessment.delete':'အကဲဖြတ်ချက် ဖျက်ရန်','billing.view':'ငွေစာရင်း ကြည့်ရှုရန်','billing.write':'ငွေစာရင်း ပြင်ဆင်ရန်','teachers.view':'ဆရာ/ဆရာမများ ကြည့်ရှုရန်','teachers.manage':'ဆရာ/ဆရာမများ စီမံရန်','permissions.manage':'လုပ်ပိုင်ခွင့်များ စီမံရန်'};
-  return (_taLang() === 'my' ? my : en)[key] || key;
-}
-function _taCategory(key) {
-  const en = {dashboard:'Dashboard',students:'Students',leave:'Leave Requests',attendance:'Attendance',homework:'Homework',assessment:'Assessments',billing:'Billing',teachers:'Teachers',permissions:'Permissions'};
-  const my = {dashboard:'ပင်မစာမျက်နှာ',students:'ကျောင်းသားများ',leave:'ခွင့်တောင်းစာ',attendance:'တက်ရောက်မှု',homework:'အိမ်စာ',assessment:'အကဲဖြတ်ချက်',billing:'ငွေစာရင်း',teachers:'ဆရာ/ဆရာမများ',permissions:'လုပ်ပိုင်ခွင့်များ'};
-  return (_taLang() === 'my' ? my : en)[key] || key;
-}
-function _taDescription(key, fallback) {
-  return _taText(key);
-}
-function _taAssignmentTypeLabel(type) {
-  const en = {class_teacher:'Class Teacher',assistant:'Assistant Teacher',subject_teacher:'Subject Teacher',other:'Other'};
-  const my = {class_teacher:'အတန်းပိုင်ဆရာ/ဆရာမ',assistant:'အကူဆရာ/ဆရာမ',subject_teacher:'ဘာသာရပ်ဆရာ/ဆရာမ',other:'အခြားတာဝန်'};
-  return (_taLang() === 'my' ? my : en)[type] || type;
-}
+/* Full four-language helper dictionaries are defined above. */
 
 function _taOpt(value, label, selected) {
   return '<option value="' + esc(value) + '"' + (String(value) === String(selected) ? ' selected' : '') + '>' + esc(label) + '</option>';
 }
 
 function _taScopeControls(p, catalog) {
-  let h = '';
+  if (p.scope_type !== 'class' && p.scope_type !== 'subject' && p.scope_type !== 'class_subject') return '';
+  let h = '<div class="teacher-access-scope-controls">';
   if (p.scope_type === 'class' || p.scope_type === 'class_subject') {
-    h += '<select class="form-input teacher-access-class" aria-label="အတန်း"><option value="">' + _taUi('selectClass') + '</option>' +
-      (catalog.classes || []).map(function(x){ return _taOpt(x,x,''); }).join('') + '</select>';
+    h += '<select class="form-input teacher-access-class" aria-label="' + esc(_taUi('selectClass')) + '"><option value="">'
+      + _taUi('selectClass') + '</option>'
+      + (catalog.classes || []).map(function(x){ return _taOpt(x,x,''); }).join('') + '</select>';
   }
   if (p.scope_type === 'subject' || p.scope_type === 'class_subject') {
-    h += '<select class="form-input teacher-access-subject" aria-label="ဘာသာရပ်"><option value="">' + _taUi('selectSubject') + '</option>' +
-      (catalog.subjects || []).map(function(x){ return _taOpt(x.id, x.subject_name + (x.subject_code ? ' · ' + x.subject_code : ''), ''); }).join('') + '</select>';
+    h += '<select class="form-input teacher-access-subject" aria-label="' + esc(_taUi('selectSubject')) + '"><option value="">'
+      + _taUi('selectSubject') + '</option>'
+      + (catalog.subjects || []).map(function(x){ return _taOpt(x.id, x.subject_name + (x.subject_code ? ' · ' + x.subject_code : ''), ''); }).join('') + '</select>';
   }
-  return h;
+  return h + '</div>';
 }
-
 function _taOverride(overrides, key, scope, cls, subject) {
   return (overrides || []).find(function(x) {
     return x.permission_key === key && x.scope_type === scope &&
@@ -164,7 +149,7 @@ async function _renderTeacherAccess() {
     const roleDefaults = catalog.role_permissions || [];
 
     let html = '<div class="teacher-access-head"><strong>' + esc(teacher.teacher_name || '') +
-      '</strong><span>' + esc(teacher.teacher_id || teacherId) + ' · ' + esc(teacher.role === 'admin' ? 'Admin' : (teacher.role === 'super_admin' ? 'Super Admin' : 'ဆရာ/ဆရာမ')) + '</span></div>';
+      '</strong><span>' + esc(teacher.teacher_id || teacherId) + ' · ' + esc(teacher.role === 'admin' ? ({en:'Admin',my:'Admin',th:'ผู้ดูแล',jp:'管理者'}[_taLang()] || 'Admin') : (teacher.role === 'super_admin' ? ({en:'Super Admin',my:'Super Admin',th:'ผู้ดูแลระบบสูงสุด',jp:'スーパー管理者'}[_taLang()] || 'Super Admin') : ({en:'Teacher',my:'ဆရာ/ဆရာမ',th:'ครู',jp:'教師'}[_taLang()] || 'Teacher'))) + '</span></div>';
 
     html += '<section class="teacher-access-section">' +
       '<div class="teacher-access-section-head"><strong>' + _taUi('classes') + '</strong><span>' + classAssignments.length + '</span></div>' +
