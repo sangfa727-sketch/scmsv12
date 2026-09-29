@@ -1,5 +1,6 @@
 // English translations — လက်ရှိ စာသားအားလုံး ဒီမှာ စုစည်းပါ
 window.I18N_EN = {
+  'app.title': 'SCMS — School Class Management',
     // ── Common ──
   'common.all': 'All',
   'common.edit': 'Edit',
