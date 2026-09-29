@@ -377,7 +377,7 @@ window.showStudentParent = function(studentId) {
   openModal(
     '<div class="modal-sheet" onclick="event.stopPropagation()">' +
     '<div class="modal-handle"></div>' +
-    '<h3 class="modal-title">Parent / Guardian</h3>' +
+    '<h3 class="modal-title">${t("students.form.parentGuardian")}</h3>' +
     '<div class="parent-contact-card">' +
     '<div class="detail-section">Primary contact</div>' +
     '<label class="field-label">Parent / Guardian name</label>' +
@@ -406,20 +406,20 @@ window.saveStudentParent = async function(studentId) {
   const phone = (document.getElementById("parentEditPhone")?.value || "").trim();
   const phone2 = (document.getElementById("parentEditPhone2")?.value || "").trim();
   const email = (document.getElementById("parentEditEmail")?.value || "").trim().toLowerCase();
-  if (email && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) { showToast("Please enter a valid parent email."); return; }
-  if (phone && !/^[+0-9()\-\s]{6,40}$/.test(phone)) { showToast("Please check the primary phone number."); return; }
-  if (phone2 && !/^[+0-9()\-\s]{6,40}$/.test(phone2)) { showToast("Please check the second phone number."); return; }
+  if (email && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) { showToast(t("students.validation.parentEmail")); return; }
+  if (phone && !/^[+0-9()\-\s]{6,40}$/.test(phone)) { showToast(t("students.validation.phone1")); return; }
+  if (phone2 && !/^[+0-9()\-\s]{6,40}$/.test(phone2)) { showToast(t("students.validation.phone2")); return; }
   const btn = document.getElementById("saveParentBtn");
-  if (btn) { btn.disabled = true; btn.textContent = "Saving…"; }
+  if (btn) { btn.disabled = true; btn.textContent = t("students.form.savingParent"); }
   try {
     const res = await API.updateStudentParent(studentId, { parent_name:name, parent_phone:phone, parent_phone2:phone2, parent_email:email });
     if (!res?.ok) throw new Error(res?.message || res?.error || "Save failed");
     const idx = window.APP.students.findIndex(x => x.student_id === studentId);
     if (idx >= 0) Object.assign(window.APP.students[idx], res);
     closeModal(); renderStudents(); openStudentDetail(studentId);
-    showToast("Parent details saved.");
+    showToast(t("students.toast.parentSaved"));
   } catch (e) {
-    if (btn) { btn.disabled = false; btn.textContent = "Save parent details"; }
+    if (btn) { btn.disabled = false; btn.textContent = t("students.form.saveParentDetails"); }
     showToast(t("common.failed") + " " + (e.message || t("common.error")));
   }
 };
@@ -429,7 +429,7 @@ window.showStudentHistory = async function(studentId) {
   openModal(
     "<div class=\"modal-sheet\" onclick=\"event.stopPropagation()\">"
     + "<div class=\"modal-handle\"></div>"
-    + "<h3 class=\"modal-title\">Student History</h3>"
+    + "<h3 class=\"modal-title\">" + t("students.history.title") + "</h3>"
     + "<div id=\"studentHistoryBody\">" + skeletonCards(2) + "</div>"
     + "<button class=\"btn-secondary mt16\" data-id=\"" + esc(studentId) + "\" onclick=\"openStudentDetail(this.dataset.id)\">Back</button>"
     + "</div>"
@@ -1027,7 +1027,7 @@ window.reactivateStudent = async function(studentId) {
     if (s) s.status = 'Active';
     closeModal();
     renderStudents();
-    showToast('Student reactivated');
+    showToast(t("students.toast.reactivated"));
   } catch (e) {
     showToast(t('common.failed') + ' ' + (e.message || t('common.networkError')));
   }
