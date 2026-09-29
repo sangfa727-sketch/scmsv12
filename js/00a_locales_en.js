@@ -1373,4 +1373,5 @@ window.I18N_EN = {
   'comms.portalRequired': 'Please enter the title and start time.',
   'comms.portalPublished': 'Published to the Parent Portal.',
   'err.sessionVerify': 'Unable to verify the saved session.','err.retryHint':'Please tap Retry and try again.','err.serverUnreachable':'Could not reach the SCMS server.','err.technicalDetails':'Technical details (screenshot if asking for help):','err.likelyCause':'Likely cause: the n8n workflow is not Active, the URL is wrong, or CORS is blocking the request.',
+  'login.loading':'Loading login…','login.waitRetry':'Please wait a moment and try again.','cg.required':'Please enter both Class and Grade.',
 };
