@@ -13,7 +13,7 @@
     'landing.title':'学校クラス管理を','landing.titleEm':'シンプルに','landing.emailLink':'メールでログイン','landing.or':'または','landing.telegram':'Telegramでログイン','landing.teacherId':'教師IDでログイン','landing.registerSchool':'新しい学校を登録','landing.joinSchool':'既存の学校に参加',
     'login.title':'🔐 ログイン','login.teacherId':'教師ID','login.password':'パスワード','login.btn':'ログイン','login.signingIn':'ログイン中…','pw.old':'現在のパスワード','pw.new':'新しいパスワード（6文字以上）','pw.confirm':'新しいパスワードを再入力','pw.btnChange':'パスワードを変更',
     'page.dashboard.eyebrow':'概要','page.dashboard.title':'今日の<em>ダッシュボード</em>','page.students.title':'私の<em>生徒</em>','page.attend.title':'<em>出欠</em>','page.hw.title':'<em>宿題</em>','page.grades.title':'<em>成績</em>','page.billing.title':'<em>請求</em>','page.admissions.title':'<em>入学受付</em>','page.library.title':'<em>図書館</em>','page.transport.title':'<em>送迎</em>','page.incidents.title':'<em>インシデント</em>','page.timetable.title':'<em>時間割</em>','page.summary.title':'月間<em>サマリー</em>','page.more.title':'その他の<em>機能</em>',
-    'tab.students':'生徒','tab.attend':'出欠','tab.daily':'日次','tab.hw':'宿題','tab.chat':'チャット','tab.more':'その他'
+    'tab.students':'生徒','tab.attend':'出欠','tab.daily':'日次','tab.hw':'宿題','tab.chat':'チャット','tab.more':'その他',
     'att.clearMarks':'記録をクリア','att.history':'履歴','att.historyTitle':'履歴とレポート','att.codes':'コード'
   };
   window.I18N_JP = Object.assign({}, base, overrides);
