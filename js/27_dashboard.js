@@ -132,7 +132,7 @@ function _paintDashboard(container) {
       </div>
       <div class="stat-card dashboard-leave-card${leavePending ? ' red' : ' muted'}" onclick="window.goToPage('leave')" role="button" tabindex="0">
         <div class="stat-num">${leavePending}/${leaveTotal}</div>
-        <div class="stat-lbl">🔔 Leave requests</div>
+        <div class="stat-lbl">🔔 ${t('dash.leaveRequests')}</div>
       </div>
     </div>\n
        ${todaysClasses.length ? `
@@ -230,7 +230,7 @@ function _renderDashboardNotificationBell(leavePending, queuedCount) {
   if (!el) return;
   const total = leavePending + queuedCount;
   el.innerHTML = `
-    <button class="dashboard-notification-btn" type="button" aria-label="Notifications" title="Notifications"
+    <button class="dashboard-notification-btn" type="button" aria-label="${t('dash.notifications')}" title="${t('dash.notifications')}"
       onclick="toggleDashboardNotifications(event)" aria-expanded="false">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
         <path d="M18 8a6 6 0 0 0-12 0c0 7-3 7-3 9h18c0-2-3-2-3-9"/>
@@ -239,18 +239,18 @@ function _renderDashboardNotificationBell(leavePending, queuedCount) {
       ${total > 0 ? `<span class="dashboard-notification-badge">${total > 99 ? '99+' : total}</span>` : ''}
     </button>
     <div class="dashboard-notification-menu" id="dashboardNotificationMenu" hidden>
-      <div class="dashboard-notification-head"><strong>Notifications</strong><span>${total} new</span></div>
+      <div class="dashboard-notification-head"><strong>${t('dash.notifications')}</strong><span>${t('dash.newCount', { n: total })}</span></div>
       ${leavePending ? `
         <button class="dashboard-notification-item" type="button" onclick="window.goToPage('leave'); closeDashboardNotifications()">
           <span class="dashboard-notification-item-icon">🔔</span>
-          <span><strong>${leavePending} Leave request${leavePending === 1 ? '' : 's'} pending</strong><small>New leave request${leavePending === 1 ? '' : 's'} need your review.</small></span>
+          <span><strong>${t(leavePending === 1 ? 'dash.leavePendingOne' : 'dash.leavePendingMany', { n: leavePending })}</strong><small>${t('dash.leaveReview')}</small></span>
         </button>` : ''}
       ${queuedCount ? `
         <button class="dashboard-notification-item" type="button" onclick="window.goToPage('parents'); closeDashboardNotifications()">
           <span class="dashboard-notification-item-icon">⚠️</span>
-          <span><strong>${queuedCount} message${queuedCount === 1 ? '' : 's'} not delivered</strong><small>${t('dash.bannerText')}</small></span>
+          <span><strong>${t(queuedCount === 1 ? 'dash.messageNotDeliveredOne' : 'dash.messageNotDeliveredMany', { n: queuedCount })}</strong><small>${t('dash.bannerText')}</small></span>
         </button>` : ''}
-      ${total === 0 ? `<div class="dashboard-notification-empty">No new notifications</div>` : ''}
+      ${total === 0 ? `<div class="dashboard-notification-empty">${t('dash.noNewNotifications')}</div>` : ''}
     </div>`;
 }
 window.toggleDashboardNotifications = function(event) {
