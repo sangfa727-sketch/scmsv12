@@ -7573,3 +7573,38 @@ body > .modal-overlay.generic-confirm-overlay .generic-confirm-sheet {
     padding: 12px !important;
   }
 }
+
+/* SCMS v12.36 — Manage Teachers responsive actions
+   Keep row action icons at their intended size on narrow screens and keep the
+   manager's primary actions inside the modal instead of allowing 100%-width
+   button rules to overflow a shared action row. */
+.teacher-row-actions {
+  display: flex !important;
+  align-items: center !important;
+  justify-content: flex-end !important;
+  gap: 6px !important;
+  flex: 0 0 auto !important;
+  min-width: max-content !important;
+}
+.teacher-row-actions .icon-btn-mini {
+  flex: 0 0 30px !important;
+  width: 30px !important;
+  min-width: 30px !important;
+  max-width: 30px !important;
+}
+.teacher-manager-actions {
+  display: grid !important;
+  grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+  gap: 8px !important;
+  align-items: stretch !important;
+}
+.teacher-manager-actions > button {
+  width: 100% !important;
+  min-width: 0 !important;
+  margin-top: 0 !important;
+}
+@media (max-width: 420px) {
+  .teacher-manager-actions {
+    grid-template-columns: 1fr !important;
+  }
+}
