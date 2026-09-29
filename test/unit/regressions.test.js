@@ -16,8 +16,8 @@ test('teacher ID card foundation stays protected', () => {
   assert.doesNotMatch(settings, /<span>SCMS<\\\/span>/);
   assert.match(css, /\.teacher-id-card/);
   assert.match(css, /printing-teacher-card/);
-  assert.match(html, /qrcode@1\.5\.4/);
-  assert.match(html, /qrcodejs\\/1\.0\.0/);
+  assert.ok(html.includes('qrcode@1.5.4'));
+  assert.ok(html.includes('qrcodejs/1.0.0'));
   assert.match(html, /15_settings\.js\?v=20260930o/);
   assert.match(html, /style\.css\?v=20260930o/);
 });
