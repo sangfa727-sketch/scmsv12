@@ -123,12 +123,30 @@ const I18N = {
     }
     this.current = lang;
     localStorage.setItem(this.storageKey, lang);
-    this.apply();
 
-    // Custom event — တခြား module တွေ နားထောင်နိုင်ဖို့
-    window.dispatchEvent(new CustomEvent('languageChanged', {
-      detail: { lang }
-    }));
+    // Apply the complete language change as one visual transaction. Chromium's
+    // View Transitions API keeps the previous UI visible while the translated
+    // DOM settles, then crossfades into the new layout. This is especially
+    // important for Myanmar / Thai / Japanese where line lengths can change.
+    const updateUI = () => {
+      this.apply();
+      window._i18nRenderPromise = null;
+      window.dispatchEvent(new CustomEvent('languageChanged', {
+        detail: { lang }
+      }));
+      return window._i18nRenderPromise || Promise.resolve();
+    };
+
+    if (document.startViewTransition &&
+        !window.matchMedia?.('(prefers-reduced-motion: reduce)').matches) {
+      try {
+        document.startViewTransition(updateUI);
+        return;
+      } catch (e) {
+        console.warn('[i18n] view transition fallback:', e);
+      }
+    }
+    updateUI();
   },
 
   // ── HTML ထဲက [data-i18n] အားလုံးကို apply ──
