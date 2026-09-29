@@ -82,16 +82,21 @@
       </div>
             <div class="header-actions">
         <!-- ⭐ LANGUAGE SWITCH — အသစ်ထည့် -->
-        <select class="lang-switch" id="langSwitch"
-        aria-label="Language"
-        data-i18n-aria="topbar.language"
-        title="Select language"
-        data-i18n-title="lang.switchTitle">
-  <option value="en">EN — English</option>
-  <option value="my">မြန်မာ — မြန်မာ</option>
-  <option value="th">ไทย — ภาษาไทย</option>
-  <option value="jp">日本語 — 日本語</option>
-</select>
+        <div class="lang-picker" id="langPicker">
+  <button type="button" class="lang-switch" id="langSwitch"
+          aria-haspopup="listbox" aria-expanded="false"
+          aria-label="Language" data-i18n-aria="topbar.language"
+          title="Select language" data-i18n-title="lang.switchTitle">
+    <span id="langSwitchLabel">EN</span>
+    <svg class="lang-switch-chevron" viewBox="0 0 20 20" aria-hidden="true"><path d="M5.5 7.5 10 12l4.5-4.5"/></svg>
+  </button>
+  <div class="lang-menu" id="langMenu" role="listbox" aria-label="Languages">
+    <button type="button" class="lang-option" data-lang="en" role="option">EN</button>
+    <button type="button" class="lang-option" data-lang="my" role="option">မြန်မာ</button>
+    <button type="button" class="lang-option" data-lang="th" role="option">ไทย</button>
+    <button type="button" class="lang-option" data-lang="jp" role="option">日本語</button>
+  </div>
+</div>
 
         <button class="icon-btn" id="btnRefresh" aria-label="Refresh" title="Refresh data" data-i18n-aria="btn.refresh" data-i18n-title="btn.refreshData">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
