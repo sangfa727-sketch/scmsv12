@@ -82,12 +82,16 @@
       </div>
             <div class="header-actions">
         <!-- ⭐ LANGUAGE SWITCH — အသစ်ထည့် -->
-        <button class="lang-switch" id="langSwitch"
-        aria-label="Switch language"
+        <select class="lang-switch" id="langSwitch"
+        aria-label="Language"
         data-i18n-aria="topbar.language"
-        title="Switch language / ဘာသာစကား ပြောင်းရန်" data-i18n-title="lang.switchTitle">
-  <span class="lang-label" id="langLabel">EN</span>
-</button>
+        title="Select language"
+        data-i18n-title="lang.switchTitle">
+  <option value="en">EN — English</option>
+  <option value="my">မြန်မာ — မြန်မာ</option>
+  <option value="th">ไทย — ภาษาไทย</option>
+  <option value="jp">日本語 — 日本語</option>
+</select>
 
         <button class="icon-btn" id="btnRefresh" aria-label="Refresh" title="Refresh data" data-i18n-aria="btn.refresh" data-i18n-title="btn.refreshData">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
