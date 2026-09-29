@@ -11,6 +11,7 @@ test('teacher ID card foundation stays protected', () => {
   const css = read('style.css');
   const html = read('index.html');
   assert.match(settings, /rpc_admin_create_teacher_card/);
+  assert.match(settings, /openTeacherCardModal\(id, name, login\)/);
   assert.match(settings, /openTeacherCardModal/);
   assert.match(settings, /printTeacherCard/);
   assert.match(settings, /setTimeout\(\(\) => openTeacherCardModal\(id, name, login\), 220\)/);
