@@ -75,6 +75,9 @@ async function doDeleteComm(id) {
     await API.deleteParentComm(id);
     window.APP.parentComms = window.APP.parentComms.filter(x => String(x.id) !== String(id));
     _renderCommsList();
+    if (typeof window.refreshDashboardNotifications === 'function') {
+      void window.refreshDashboardNotifications();
+    }
     showToast(t('common.deleted'));
   } catch (e) {
     showToast(t('common.deleteFailed', { err: e.message || t('common.error') }));
@@ -265,6 +268,9 @@ window.sendParentComm = async function() {
       if (typeof _renderCommsList === 'function') _renderCommsList();
     }
     closeModal();
+    if (typeof window.refreshDashboardNotifications === 'function') {
+      void window.refreshDashboardNotifications();
+    }
     showToast(t('comms.sent'));
     if (window.APP.tg?.HapticFeedback) window.APP.tg.HapticFeedback.notificationOccurred('success');
   } catch (e) {
