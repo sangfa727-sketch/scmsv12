@@ -6526,6 +6526,17 @@ input.form-input {
 }
 .dashboard-notification-item strong { display: block; font-size: 12.5px; line-height: 1.35; }
 .dashboard-notification-item small { display: block; margin-top: 2px; color: var(--text2); font-size: 11px; line-height: 1.4; }
+.dashboard-notification-item > span:last-child {
+  min-width: 0;
+  flex: 1 1 auto;
+  overflow-wrap: anywhere;
+  word-break: break-word;
+}
+.dashboard-notification-head > span {
+  min-width: 0;
+  overflow-wrap: anywhere;
+  text-align: right;
+}
 .dashboard-notification-empty { padding: 18px 10px; color: var(--text2); text-align: center; font-size: 12px; }
 .teacher-manager-actions { display: flex !important; flex-wrap: wrap !important; align-items: center !important; justify-content: flex-end !important; gap: 8px !important; width: 100%; }
 .teacher-manager-actions > button { flex: 0 1 auto !important; width: auto !important; max-width: 100% !important; min-width: 0 !important; margin: 0 !important; }
