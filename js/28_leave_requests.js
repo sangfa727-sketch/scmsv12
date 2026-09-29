@@ -26,6 +26,10 @@ async function renderLeaveRequests() {
   container.innerHTML = `<div class="skeleton-loading">${t('leave.loading')}</div>`;
   try {
     _leaveRequestsAll = await API.getLeaveRequests();
+    const safeRows = Array.isArray(_leaveRequestsAll) ? _leaveRequestsAll : [];
+    _leaveRequestsAll = safeRows;
+    if (window.APP) window.APP.pendingLeaveCount = safeRows.filter(r => r?.status === 'Pending').length;
+    if (typeof renderSidebar === 'function') renderSidebar();
     _paintLeaveRequests(container);
   } catch (e) {
     container.innerHTML = emptyState('⚠️', t('common.failed'), e.message || t('common.error'));
@@ -98,13 +102,12 @@ async function _decide(id, decision) {
   try {
     const res = await API.decideLeaveRequest(id, decision);
     showToast(t('leave.decided', { status: t('leave.status.' + decision), n: res.days_marked ?? 0 }));
-    if (typeof window.APP.pendingLeaveCount === 'number') {
-      window.APP.pendingLeaveCount = Math.max(0, window.APP.pendingLeaveCount - 1);
-      if (typeof renderSidebar === 'function') renderSidebar();
-    }
-    renderLeaveRequests();
+    // The decision is authoritative on the server. Re-fetch the list below
+    // so the sidebar, Leave page, and Dashboard all converge on the same count
+    // instead of relying on an optimistic decrement.
+    await renderLeaveRequests();
     if (typeof window.refreshDashboardLeaveRequests === 'function') {
-      void window.refreshDashboardLeaveRequests();
+      await window.refreshDashboardLeaveRequests();
     }
   } catch (e) {
     showToast(t('leave.decideFailed') + ': ' + (e.message || t('common.error')));
