@@ -106,8 +106,8 @@ async function _decide(id, decision) {
     // so the sidebar, Leave page, and Dashboard all converge on the same count
     // instead of relying on an optimistic decrement.
     await renderLeaveRequests();
-    if (typeof window.refreshDashboardLeaveRequests === 'function') {
-      await window.refreshDashboardLeaveRequests();
+    if (typeof window.refreshDashboardNotifications === 'function') {
+      await window.refreshDashboardNotifications();
     }
   } catch (e) {
     showToast(t('leave.decideFailed') + ': ' + (e.message || t('common.error')));
