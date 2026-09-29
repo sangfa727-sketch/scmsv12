@@ -368,17 +368,18 @@ window.openTeacherCardModal = async function(teacherId, teacherName, teacherLogi
     const photo = typeof result.photo_url === 'string' ? result.photo_url.trim() : '';
 
     root.innerHTML = '<div class="teacher-id-card">' +
-      '<div class="teacher-id-card-head"><strong>' + esc(window.APP?.school_name || '') + '</strong></div>' +
+      '<div class="teacher-id-card-head"><strong>' + esc(window.APP?.school_name || '') + '</strong><span>Teacher ID Card</span></div>' +
       '<div class="teacher-id-card-body">' +
-        '<div class="teacher-id-card-avatar">' +
-          (photo ? '<img src="' + esc(photo) + '" alt="' + esc(resolvedName) + '" referrerpolicy="no-referrer" onerror="this.style.display=\'none\';this.parentElement.classList.add(\'is-fallback\')">' : '') +
+        '<div class="teacher-id-card-avatar' + (photo ? ' has-photo' : '') + '">' +
+          (photo ? '<img src="' + esc(photo) + '" alt="' + esc(resolvedName) + '" referrerpolicy="no-referrer" onload="this.parentElement.classList.add(\'has-photo\')" onerror="this.style.display=\'none\';this.parentElement.classList.remove(\'has-photo\');this.parentElement.classList.add(\'is-fallback\')">' : '') +
           '<span class="teacher-id-card-avatar-fallback">👤</span>' +
         '</div>' +
         '<div class="teacher-id-card-info">' +
-          '<div class="teacher-id-card-name">' + esc(resolvedName) + '</div>' +
+          '<div class="teacher-id-card-name-label">Name</div>' +
+          '<div class="teacher-id-card-name">' + esc(resolvedName || '—') + '</div>' +
           '<div class="teacher-id-card-line"><span>Teacher ID</span><strong>' + esc(result.teacher_id || teacherId) + '</strong></div>' +
           (hasDistinctLogin ? '<div class="teacher-id-card-line"><span>Login</span><strong>' + esc(resolvedLogin) + '</strong></div>' : '') +
-          '<div class="teacher-id-card-line"><span>Role</span><strong>' + esc(result.role || '') + '</strong></div>' +
+          '<div class="teacher-id-card-line"><span>Role</span><strong>' + esc(result.role || 'teacher') + '</strong></div>' +
         '</div>' +
         '<div class="teacher-id-card-qr" data-token="' + esc(result.token) + '" aria-label="Teacher login QR"></div>' +
       '</div>' +
