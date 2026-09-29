@@ -57,11 +57,18 @@ function renderDashboard() {
  * Incident edits/saves/deletes are authoritative in the API; re-fetch that slice
  * so Recent Incidents always reflects the persisted type/severity immediately.
  */
-window.refreshDashboardLeaveRequests = async function() {
+window.refreshDashboardNotifications = async function() {
   try {
-    const leaveRequests = await API.getLeaveRequests();
+    const [leaveRequests, comms] = await Promise.all([
+      API.getLeaveRequests().catch(() => []),
+      API.getParentComms(30).catch(() => []),
+    ]);
     const safeLeaveRequests = Array.isArray(leaveRequests) ? leaveRequests : [];
-    if (_dashboardCache) _dashboardCache.leaveRequests = safeLeaveRequests;
+    const safeComms = Array.isArray(comms) ? comms : [];
+    if (_dashboardCache) {
+      _dashboardCache.leaveRequests = safeLeaveRequests;
+      _dashboardCache.comms = safeComms;
+    }
     _syncDashboardLeaveCount(safeLeaveRequests);
 
     const container = document.getElementById('dashboardContent');
@@ -69,12 +76,14 @@ window.refreshDashboardLeaveRequests = async function() {
     if (container && dashboardPage?.classList.contains('active') && _dashboardCache) {
       _paintDashboard(container);
     }
-    return leaveRequests || [];
+    return { leaveRequests: safeLeaveRequests, comms: safeComms };
   } catch (e) {
-    console.warn('[dashboard] leave refresh failed:', e);
+    console.warn('[dashboard] notification refresh failed:', e);
     return null;
   }
-}
+};
+
+window.refreshDashboardLeaveRequests = window.refreshDashboardNotifications;
 
 window.refreshDashboardIncidents = async function() {
   try {
