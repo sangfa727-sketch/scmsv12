@@ -14,7 +14,7 @@ test('teacher ID card foundation stays protected', () => {
   assert.match(settings, /openTeacherCardModal\(id, name, login\)/);
   assert.match(settings, /openTeacherCardModal/);
   assert.match(settings, /printTeacherCard/);
-  assert.match(settings, /closeModal\(\(\) => openTeacherCardModal\(id, name, login\)\)/);
+  assert.match(settings, /setTimeout\(\(\) => openTeacherCardModal\(id, name, login\), 280\)/);
   assert.match(settings, /result\.login_name \|\| teacherLoginName/);\n  assert.match(settings, /Teacher ID/);\n  assert.match(settings, /teacher-id-card-avatar-fallback/);\n  assert.match(settings, /_renderTeacherCardQrLegacy/);\n  assert.doesNotMatch(settings, /<span>SCMS<\\\/span>/);\n  assert.doesNotMatch(settings, /result\.teacher_id\\) \\+ '<\\\/div>.*result\.login_name/);
   assert.match(css, /\.teacher-id-card/);
   assert.match(css, /printing-teacher-card/);
