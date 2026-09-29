@@ -49,7 +49,7 @@ test('notification CSS supports compact responsive UI', () => {
 
 test('dashboard script cache version is bumped after notification change', () => {
   const html = read('index.html');
-  assert.match(html, /27_dashboard\.js\?v=20260928d/);
+  assert.match(html, /27_dashboard\.js\?v=20260930f/);
 });
 
 test('all JavaScript source files are present and non-empty', () => {
