@@ -440,6 +440,7 @@ window.openTeacherCardModal = async function(teacherId, teacherName, teacherLogi
     const photoValue = teacherProfile?.photo_url || result.photo_url || '';
     const photo = typeof photoValue === 'string' ? photoValue.trim() : '';
     const role = teacherProfile?.role || result.role || 'teacher';
+    const schoolLogo = window.APP?.school_logo || (window.APP?.config && window.APP.config.school_logo) || '';
 
     root.innerHTML = '<div class="teacher-id-card teacher-id-card-vertical">' +
       '<div class="teacher-id-card-face">' +
