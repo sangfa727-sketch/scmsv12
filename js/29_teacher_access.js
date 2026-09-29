@@ -224,12 +224,27 @@ async function _renderTeacherAccess() {
 }
 
 window.openTeacherAccess = async function(teacherId, teacherName) {
-  openModal('<div class="modal-sheet teacher-access-sheet" onclick="event.stopPropagation()">' +
+  /*
+   * Do not paint the generic modal loading sheet.  The generic modal starts
+   * with its own full-width/bottom-sheet animation, so showing "Loading…"
+   * first makes Manage Access visibly flash as a horizontal card before the
+   * real content replaces it.  Keep the shell hidden while the data loads,
+   * then reveal the already-sized final sheet in one paint.
+   */
+  openModal('<div class="modal-sheet teacher-access-sheet teacher-access-preparing" onclick="event.stopPropagation()" style="visibility:hidden">' +
     '<div class="modal-handle"></div><h3 class="modal-title">' + _taUi('manageTitle') + '</h3>' +
     '<p class="modal-subtitle">' + esc(teacherName) + ' ' + _taUi('subtitle') + '</p>' +
-    '<div id="teacherAccessRoot" data-teacher-id="' + esc(teacherId) + '"><div class="text-center text-muted">' + _taUi('loading') + '</div></div>' +
+    '<div id="teacherAccessRoot" data-teacher-id="' + esc(teacherId) + '"></div>' +
     '<button class="btn-secondary mt16" onclick="closeModal()">' + _taUi('closeButton') + '</button></div>');
-  await _renderTeacherAccess();
+  try {
+    await _renderTeacherAccess();
+  } finally {
+    const sheet = document.querySelector('.teacher-access-sheet');
+    if (sheet) {
+      sheet.classList.remove('teacher-access-preparing');
+      sheet.style.visibility = 'visible';
+    }
+  }
 };
 
 window.teacherAccessAddClass = async function() {
