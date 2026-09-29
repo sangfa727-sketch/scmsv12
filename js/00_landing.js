@@ -212,10 +212,14 @@ window.renderLanding = function () {
         landingTrigger.blur();
       }
     });
-    document.addEventListener('click', () => {
-      landingPicker.classList.remove('is-open');
-      landingTrigger.setAttribute('aria-expanded', 'false');
-    });
+    if (typeof window._landingLangClose === 'function') {
+      document.removeEventListener('click', window._landingLangClose);
+    }
+    window._landingLangClose = () => {
+      document.getElementById('landingLangPicker')?.classList.remove('is-open');
+      document.getElementById('landingLangSwitch')?.setAttribute('aria-expanded', 'false');
+    };
+    document.addEventListener('click', window._landingLangClose);
   }
 
   // If we have a pending login token from before a reload (native handoff
