@@ -84,5 +84,31 @@
   });
   Object.assign(overrides, {'bill.total':'รวม: {n}','bill.feePaidPending':'ชำระค่าธรรมเนียมแล้ว ✓ — {name} ยังอยู่ในสถานะ <em>รอดำเนินการ</em> และไม่แสดงในรายชื่อนักเรียน','bill.amountBalance':'จำนวนเงิน (ยอดคงเหลือ: {n})','adm.appliedOn':'สมัครเมื่อ {date}','adm.movedTo':'✓ ย้ายไป {status} แล้ว','adm.selected':'เลือกแล้ว {n} รายการ','adm.bulkMoving':'กำลังย้าย {n} รายการไป {status}…','adm.bulkMoved':'✓ {ok} รายการย้ายไป {status} แล้ว','adm.enrolling':'กำลังลงทะเบียน {n}…','adm.skipped':' ({n} รายการข้าม — ไม่มีชั้นเรียน)','adm.enrolledPending':'✓ ลงทะเบียนแล้ว {ok} รายการ (รอดำเนินการ)','adm.savedPhotoFail':'บันทึกแล้ว แต่การอัปโหลดรูปภาพล้มเหลว: {err}'});
   Object.assign(overrides, {'adm.addedPhotoFail':'เพิ่มแล้ว แต่การอัปโหลดรูปภาพล้มเหลว: {err}','adm.officialStudent':'✓ นักเรียนอย่างเป็นทางการ — ID <strong>{id}</strong>, ชั้นเรียน {cls} แสดงในรายชื่อนักเรียน','adm.pendingCreated':'สร้างรายการนักเรียนแล้ว (ID <strong>{id}</strong>) แต่สถานะเป็น <em>รอดำเนินการ</em> — จะซ่อนจากรายชื่อนักเรียนจนกว่าจะชำระค่าลงทะเบียน','adm.regPaid':'ใบแจ้งหนี้ลงทะเบียน {no} — <strong>ชำระแล้ว ✓</strong> เปิดใบแจ้งหนี้ในหน้าการเรียกเก็บเงินแล้วแตะ <em>เปิดใช้งานนักเรียน</em>','adm.regUnpaid':'ใบแจ้งหนี้ลงทะเบียน {no} — {status}, ยอดคงเหลือ {bal} บันทึกการชำระเงินในหน้าการเรียกเก็บเงิน แล้วแตะ <em>เปิดใช้งานนักเรียน</em>'});
+
+    'students.validation.parentEmail':'โปรดกรอกอีเมลผู้ปกครองให้ถูกต้อง',
+    'students.validation.phone1':'โปรดตรวจสอบหมายเลขโทรศัพท์หลัก',
+    'students.validation.phone2':'โปรดตรวจสอบหมายเลขโทรศัพท์สำรอง',
+    'students.form.savingParent':'กำลังบันทึก…',
+    'students.toast.parentSaved':'บันทึกข้อมูลผู้ปกครองแล้ว',
+    'students.form.saveParentDetails':'บันทึกข้อมูลผู้ปกครอง',
+    'students.form.parentGuardian':'ผู้ปกครอง / ผู้ดูแล',
+    'students.history.title':'ประวัตินักเรียน',
+    'students.history.empty':'ยังไม่มีประวัติ',
+    'students.toast.reactivated':'เปิดใช้งานนักเรียนอีกครั้งแล้ว',
+    'att.historyRecent':'รายการล่าสุดและสรุป 30 วัน',
+    'att.report30':'รายงาน 30 วัน',
+    'att.auditWebOnly':'ดูประวัติการตรวจสอบได้เฉพาะเซสชันเว็บ',
+    'att.auditTitle':'ประวัติการตรวจสอบการเข้าเรียน',
+    'att.auditSubtitle':'ประวัติการบันทึกการเข้าเรียนสำหรับผู้ดูแลระบบของโรงเรียนนี้เท่านั้น',
+    'att.auditLoading':'กำลังโหลดประวัติการตรวจสอบ…',
+    'att.auditEmpty':'ไม่พบประวัติการตรวจสอบการเข้าเรียน',
+    'att.auditLoadFailed':'ไม่สามารถโหลดประวัติการตรวจสอบได้',
+    'att.correctionMode':'โหมดแก้ไข: ตรวจสอบและบันทึกวันที่ที่เลือก',
+    'comms.portalScheduleTitle':'กำหนดการ Parent Portal',
+    'comms.portalScheduleSub':'แสดงการประชุม ประกาศ และกิจกรรมของโรงเรียนใน Parent Portal',
+    'comms.portalTitlePh':'ตัวอย่าง — ประชุมผู้ปกครองและครู',
+    'comms.portalDescPh':'ข้อมูลที่ผู้ปกครองควรทราบ',
+    'comms.portalRequired':'กรุณากรอกชื่อเรื่องและเวลาเริ่มต้น',
+    'comms.portalPublished':'เผยแพร่ไปยัง Parent Portal แล้ว',
   window.I18N_TH = Object.assign({}, base, overrides);
 })();
