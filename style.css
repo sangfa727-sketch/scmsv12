@@ -5071,8 +5071,8 @@ html,body,#app,#pages{width:100%;max-width:100%;overflow-x:hidden!important}
 
 /* ================================================================
    SCMS v12 — interaction polish
-   Smooth page transitions, micro-interactions, comfortable data entry,
-   compact native sidebar, and reduced-motion safety.
+   Quiet, premium motion system: state changes fade/settle without
+   physically shifting content under the user's eyes.
    ================================================================ */
 
 /* ── Global interaction baseline ───────────────────────────────── */
@@ -5088,6 +5088,9 @@ textarea,
   -webkit-tap-highlight-color: transparent;
   touch-action: manipulation;
 }
+
+/* Interactive controls may animate color/elevation, but NEVER translate
+   the layout on press. This prevents the "shaking/jumping" feeling. */
 button,
 .icon-btn,
 .tab-btn,
@@ -5104,7 +5107,6 @@ button,
     border-color .16s ease,
     color .16s ease,
     opacity .16s ease,
-    transform .16s cubic-bezier(.2,.8,.2,1),
     box-shadow .18s ease;
 }
 button:not(:disabled):active,
@@ -5116,7 +5118,8 @@ button:not(:disabled):active,
 .date-chip:active,
 .btn-icon-round:active,
 .fab:active {
-  transform: translateY(1px) scale(.975);
+  transform: none !important;
+  opacity: .88;
 }
 button:focus-visible,
 input:focus-visible,
@@ -5127,61 +5130,37 @@ select:focus-visible {
 }
 
 /* ── Page transitions ────────────────────────────────────────────
-   Pages remain display:none when inactive, but every newly active page
-   gets a short enter animation. This avoids a heavy SPA-style crossfade
-   while still making navigation feel deliberate and responsive. */
+   Navigation uses opacity only. No page-level translate/scale means the
+   content never appears to jump when switching sections or languages. */
 .page.active {
-  animation: pageEnter .22s cubic-bezier(.22,.8,.2,1) both;
-  will-change: opacity, transform;
+  animation: pageFadeIn .18s ease both;
 }
-@keyframes pageEnter {
-  from { opacity: 0; transform: translate3d(0, 7px, 0); }
-  to   { opacity: 1; transform: translate3d(0, 0, 0); }
+@keyframes pageFadeIn {
+  from { opacity: 0; }
+  to   { opacity: 1; }
 }
 
-/* Cards enter as a very subtle stagger — capped so long lists stay fast. */
-.page.active .list-card,
-.page.active .stat-card,
-.page.active .mini-card,
-.page.active .attend-row,
-.page.active .tt-row {
-  animation: contentEnter .2s ease both;
-}
-.page.active .list-card:nth-child(1),
-.page.active .stat-card:nth-child(1),
-.page.active .attend-row:nth-child(1),
-.page.active .tt-row:nth-child(1) { animation-delay: .015s; }
-.page.active .list-card:nth-child(2),
-.page.active .stat-card:nth-child(2),
-.page.active .attend-row:nth-child(2),
-.page.active .tt-row:nth-child(2) { animation-delay: .03s; }
-.page.active .list-card:nth-child(3),
-.page.active .stat-card:nth-child(3),
-.page.active .attend-row:nth-child(3),
-.page.active .tt-row:nth-child(3) { animation-delay: .045s; }
-@keyframes contentEnter {
-  from { opacity: 0; transform: translateY(3px); }
-  to   { opacity: 1; transform: none; }
-}
+/* Do not stagger cards during ordinary navigation or data refresh.
+   Staggering nested cards is a common source of visual "shaking" when
+   innerHTML is replaced or a language change triggers a rerender. */
 
 /* ── Cards: premium but restrained feedback ────────────────────── */
 .list-card,
 .stat-card,
 .mini-card {
   transition:
-    transform .18s cubic-bezier(.2,.8,.2,1),
     box-shadow .18s ease,
     border-color .18s ease,
     opacity .18s ease;
 }
 @media (hover:hover) {
   .list-card:hover {
-    transform: translateY(-1px);
     box-shadow: 0 5px 18px rgba(0,0,0,.055);
   }
 }
 .list-card:active {
-  transform: scale(.995);
+  transform: none !important;
+  opacity: .92;
 }
 
 /* ── Data-entry polish ─────────────────────────────────────────── */
@@ -5192,8 +5171,7 @@ input.form-input {
   transition:
     border-color .16s ease,
     background-color .16s ease,
-    box-shadow .18s ease,
-    transform .16s ease;
+    box-shadow .18s ease;
 }
 .form-input:focus,
 .form-textarea:focus {
@@ -5203,14 +5181,7 @@ input.form-input {
 }
 .form-input:active,
 .form-textarea:active {
-  transform: translateY(.5px);
-}
-.btn-primary:not(:disabled):hover,
-.btn-secondary:not(:disabled):hover {
-  box-shadow: 0 4px 14px rgba(0,0,0,.08);
-}
-.btn-primary:not(:disabled):active {
-  box-shadow: none;
+  transform: none !important;
 }
 
 /* Keep touch targets comfortable even though the visual UI is compact. */
@@ -5224,6 +5195,16 @@ input.form-input {
   min-height: 40px;
 }
 
+/* ── Reduced-motion safety ────────────────────────────────────── */
+@media (prefers-reduced-motion: reduce) {
+  html { scroll-behavior: auto; }
+  *, *::before, *::after {
+    animation-duration: .001ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: .001ms !important;
+    scroll-behavior: auto !important;
+  }
+}
 /* ── Compact native sidebar ────────────────────────────────────── */
 .sidebar {
   width: 264px;
