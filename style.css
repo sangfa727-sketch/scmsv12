@@ -7808,7 +7808,7 @@ body > .modal-overlay.generic-confirm-overlay .generic-confirm-sheet {
 
 /* Teacher ID card — print-ready, responsive */
 .teacher-card-modal{width:min(92vw,460px)!important;max-width:460px!important}
-.teacher-id-card{container-type:inline-size;width:100%;max-width:240px;aspect-ratio:2.125 / 3.375;margin:0 auto;box-sizing:border-box}
+.teacher-id-card,.teacher-id-card-vertical{container-type:inline-size;width:100%;max-width:240px;aspect-ratio:2.125 / 3.375;margin:0 auto;box-sizing:border-box}
 .teacher-id-card-face{box-sizing:border-box;width:100%;height:100%;background:#fff;color:#0F1B33;border:0.3cqw solid #E5E7EB;border-radius:3.7cqw;box-shadow:0 1px 2px rgba(15,27,51,.06),0 8px 24px rgba(15,27,51,.08);overflow:hidden;padding:7cqw;display:flex;flex-direction:column;align-items:center;justify-content:space-between;-webkit-print-color-adjust:exact;print-color-adjust:exact}
 .teacher-id-card-brand{display:flex;align-items:center;gap:2.5cqw;align-self:stretch;min-width:0}
 .teacher-id-card-logo{width:11cqw;height:11cqw;object-fit:contain;flex:0 0 auto}
