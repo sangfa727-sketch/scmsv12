@@ -342,7 +342,7 @@ window.doCreateTeacher = async function() {
     showToast(t('ct.created'));
     // A newly-created teacher should receive their secure ID card immediately.
     // The card RPC generates a fresh token and revokes any previous active card.
-    setTimeout(() => openTeacherCardModal(id, name, login), 220);
+    closeModal(() => openTeacherCardModal(id, name, login));
   } catch (e) {
     errEl.textContent = t('ct.connErr');
     errEl.style.display = 'block';
