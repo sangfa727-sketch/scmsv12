@@ -7131,3 +7131,22 @@ input.form-input {
   align-items: center !important;
   justify-content: center !important;
 }
+
+/* ── Multilingual typography ───────────────────────────────
+   Keep the existing visual language, but provide native glyph
+   fallbacks for Thai and Japanese so translated UI never renders
+   with broken/missing characters. */
+html[lang="th"] body,
+html[lang="th"] input,
+html[lang="th"] button,
+html[lang="th"] select,
+html[lang="th"] textarea {
+  font-family: "Noto Sans Thai", "Inter Tight", system-ui, sans-serif;
+}
+html[lang="jp"] body,
+html[lang="jp"] input,
+html[lang="jp"] button,
+html[lang="jp"] select,
+html[lang="jp"] textarea {
+  font-family: "Noto Sans JP", "Inter Tight", system-ui, sans-serif;
+}
