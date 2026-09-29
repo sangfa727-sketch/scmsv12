@@ -90,10 +90,10 @@ window.openTeacherManager = async function() {
       <h3 class="modal-title">${t('tm.title')}</h3>
       <p class="modal-subtitle">${t('tm.subtitle')}</p>
 
-      <div class="modal-footer teacher-manager-actions">
-<button class="btn-primary" onclick="openCreateTeacherModal()">${t('tm.addNew')}</button>
-<button class="btn-secondary" onclick="openInviteCodeModal()">${t('tm.inviteGoogle')}</button>
-</div>
+      <div class="teacher-manager-actions">
+        <button type="button" class="btn-primary teacher-manager-action-btn" onclick="openCreateTeacherModal()">${t('tm.addNew')}</button>
+        <button type="button" class="btn-secondary teacher-manager-action-btn" onclick="openInviteCodeModal()">${t('tm.inviteGoogle')}</button>
+      </div>
 
       <div id="teacherList" class="teacher-list mt16">
         <div class="text-center text-muted">${t('tm.loading')}</div>
