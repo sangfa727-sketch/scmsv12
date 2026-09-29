@@ -51,11 +51,10 @@ function renderDashboard() {
 }
 
 /**
- * Refresh only the incident slice used by Dashboard after an incident mutation.
- * The Dashboard intentionally caches its other widgets, so invalidating the whole
- * dashboard here would cause unnecessary network calls and visible UI flashing.
- * Incident edits/saves/deletes are authoritative in the API; re-fetch that slice
- * so Recent Incidents always reflects the persisted type/severity immediately.
+ * Refresh the Dashboard notification slices after a leave/message mutation.
+ * The Dashboard intentionally caches its other widgets, so refreshing only
+ * leave requests and parent communications avoids unnecessary network calls
+ * and visible UI flashing while keeping the bell, cards, and sidebar badge current.
  */
 window.refreshDashboardNotifications = async function() {
   try {
