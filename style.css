@@ -7805,3 +7805,22 @@ body > .modal-overlay.generic-confirm-overlay .generic-confirm-sheet {
   .modal-sheet.teacher-manager-sheet,
   .modal-sheet.teacher-access-sheet { animation: none !important; }
 }
+
+/* Teacher ID card — print-ready, responsive */
+.teacher-card-modal{width:min(92vw,460px)!important;max-width:460px!important}
+.teacher-id-card{width:100%;max-width:420px;margin:0 auto;border:1px solid var(--border2);border-radius:18px;padding:16px;background:var(--surface);box-sizing:border-box;box-shadow:0 12px 28px rgba(0,0,0,.12)}
+.teacher-id-card-head,.teacher-id-card-foot{display:flex;justify-content:space-between;align-items:center;gap:10px;font-size:12px}
+.teacher-id-card-head{font-weight:700;padding-bottom:12px;border-bottom:1px solid var(--border2)}
+.teacher-id-card-body{display:grid;grid-template-columns:64px minmax(0,1fr) 132px;gap:12px;align-items:center;padding:16px 0}
+.teacher-id-card-avatar{width:64px;height:76px;border-radius:12px;background:var(--bg);display:grid;place-items:center;overflow:hidden;font-size:30px}
+.teacher-id-card-avatar img{width:100%;height:100%;object-fit:cover}
+.teacher-id-card-info{min-width:0}
+.teacher-id-card-name{font-size:18px;font-weight:800;overflow-wrap:anywhere;line-height:1.2}
+.teacher-id-card-line{font-size:12px;margin-top:5px;overflow-wrap:anywhere}
+.teacher-id-card-qr{width:132px;height:132px;display:grid;place-items:center;background:#fff;border-radius:8px;overflow:hidden}
+.teacher-id-card-qr canvas{display:block}
+.teacher-id-card-foot{padding-top:10px;border-top:1px solid var(--border2);color:var(--muted);font-size:11px}
+.teacher-card-actions{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:12px}
+.teacher-card-actions button{min-width:0;white-space:normal}
+@media(max-width:520px){.teacher-id-card-body{grid-template-columns:56px minmax(0,1fr);}.teacher-id-card-avatar{width:56px;height:68px}.teacher-id-card-qr{grid-column:1/-1;margin:0 auto}.teacher-card-actions{grid-template-columns:1fr}}
+@media print{body.printing-teacher-card>*:not(#bulkIdPrintArea){display:none!important}body.printing-teacher-card #bulkIdPrintArea{display:block!important}body.printing-teacher-card .teacher-id-card{width:85.6mm;height:54mm;margin:0;box-shadow:none;border:1px solid #222;page-break-inside:avoid}}
