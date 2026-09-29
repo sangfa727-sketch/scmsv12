@@ -340,8 +340,9 @@ window.doCreateTeacher = async function() {
     }
     closeModal();
     showToast(t('ct.created'));
-    // Reopen the manager to show the new teacher
-    setTimeout(() => openTeacherManager(), 200);
+    // A newly-created teacher should receive their secure ID card immediately.
+    // The card RPC generates a fresh token and revokes any previous active card.
+    setTimeout(() => openTeacherCardModal(id, name, login), 220);
   } catch (e) {
     errEl.textContent = t('ct.connErr');
     errEl.style.display = 'block';
@@ -350,7 +351,7 @@ window.doCreateTeacher = async function() {
   }
 };
 
-window.openTeacherCardModal = async function(teacherId, teacherName) {
+window.openTeacherCardModal = async function(teacherId, teacherName, teacherLoginName) {
   openModal('<div class="modal-sheet teacher-card-modal" onclick="event.stopPropagation()"><div class="modal-handle"></div><h3 class="modal-title">🪪 ' + esc(t('tm.idCard')) + '</h3><div id="teacherCardRoot" class="teacher-card-root"><div class="text-center text-muted">' + esc(t('tm.cardLoading')) + '</div></div><button class="btn-secondary mt16" onclick="closeModal()">' + esc(t('common.close')) + '</button></div>');
   try {
     const sess = getWebSession();
@@ -363,7 +364,7 @@ window.openTeacherCardModal = async function(teacherId, teacherName) {
     root.innerHTML = '<div class="teacher-id-card">' +
       '<div class="teacher-id-card-head"><strong>' + esc(window.APP?.school_name || '') + '</strong><span>SCMS</span></div>' +
       '<div class="teacher-id-card-body"><div class="teacher-id-card-avatar">' + (result.photo_url ? '<img src="' + esc(result.photo_url) + '" alt="">' : '👤') + '</div>' +
-      '<div class="teacher-id-card-info"><div class="teacher-id-card-name">' + esc(result.teacher_name) + '</div><div class="teacher-id-card-line">' + esc(result.teacher_id) + '</div><div class="teacher-id-card-line">' + esc(result.role) + '</div></div>' +
+      '<div class="teacher-id-card-info"><div class="teacher-id-card-name">' + esc(result.teacher_name) + '</div><div class="teacher-id-card-line">' + esc(result.teacher_id) + '</div><div class="teacher-id-card-line">' + esc(result.login_name || teacherLoginName || '') + '</div><div class="teacher-id-card-line">' + esc(result.role) + '</div></div>' +
       '<div class="teacher-id-card-qr" data-token="' + esc(result.token) + '"></div></div>' +
       '<div class="teacher-id-card-foot"><span>' + esc(t('tm.cardScan')) + '</span><span>' + esc(result.token_prefix) + '</span></div></div>' +
       '<div class="teacher-card-actions"><button class="btn-primary" type="button" onclick="printTeacherCard()">' + esc(t('tm.printCard')) + '</button><button class="btn-secondary" type="button" onclick="regenerateTeacherCard(&quot;' + esc(teacherId) + '&quot;,&quot;' + esc(teacherName) + '&quot;)">' + esc(t('tm.regenerateCard')) + '</button></div>';
