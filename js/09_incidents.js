@@ -168,6 +168,9 @@ window.saveIncident = async function() {
 
     closeModal();
     _renderIncidentList();
+    if (typeof window.refreshDashboardIncidents === 'function') {
+      void window.refreshDashboardIncidents();
+    }
     showToast(t('inc.logged'));
     if (window.APP.tg?.HapticFeedback) window.APP.tg.HapticFeedback.notificationOccurred('success');
   } catch (e) {
@@ -236,6 +239,9 @@ window.saveEditIncident = async function(id) {
     if (idx >= 0) window.APP.incidents[idx] = { ...window.APP.incidents[idx], ...patch };
     closeModal();
     _renderIncidentList();
+    if (typeof window.refreshDashboardIncidents === 'function') {
+      void window.refreshDashboardIncidents();
+    }
     showToast(t('inc.updated'));
   } catch (e) {
     btn.disabled = false; btn.removeAttribute('aria-busy'); btn.textContent = t('common.saveChanges');
@@ -257,6 +263,9 @@ async function doDeleteIncident(id) {
     await API.deleteIncident(id);
     window.APP.incidents = window.APP.incidents.filter(x => String(x.id) !== String(id));
     _renderIncidentList();
+    if (typeof window.refreshDashboardIncidents === 'function') {
+      void window.refreshDashboardIncidents();
+    }
     showToast(t('common.deleted'));
   } catch (e) {
     showToast(t('common.deleteFailed', { err: e.message || t('common.error') }));
