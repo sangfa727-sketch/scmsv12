@@ -183,3 +183,13 @@ test('entry-form shells keep the compact width and control baseline', () => {
   assert.match(css, /min-height: 37px !important; height: 37px !important/);
   assert.match(css, /@media \(max-width: 430px\)[\s\S]{0,320}width: 92vw !important/);
 });
+
+
+test('teacher modals keep stable dimensions and soft entrance transitions', () => {
+  const css = read('style.css');
+  assert.match(css, /\.modal-sheet\.teacher-manager-sheet[\s\S]*min-width: 0 !important/);
+  assert.match(css, /\.modal-sheet\.teacher-access-sheet[\s\S]*width: min\(94vw, 680px\) !important/);
+  assert.match(css, /@keyframes teacherModalEnter/);
+  assert.match(css, /\.modal-sheet\.teacher-manager-sheet,[\s\S]*\.modal-sheet\.teacher-access-sheet \{[\s\S]*animation-name: teacherModalEnter !important/);
+  assert.match(css, /@media \(max-width: 430px\)[\s\S]*\.modal-sheet\.teacher-access-sheet[\s\S]*min-width: 0 !important/);
+});
