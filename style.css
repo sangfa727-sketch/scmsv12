@@ -786,7 +786,7 @@ a { color: inherit; }
   display: flex; align-items: center; justify-content: center;
   transition: transform 0.15s, box-shadow 0.15s;
 }
-.fab:active { transform: scale(0.93); box-shadow: 0 2px 10px rgba(0,0,0,0.2); }
+.fab:active { transform: none !important; opacity: .9; box-shadow: 0 2px 10px rgba(0,0,0,0.2); }
 .fab svg { width: 22px; height: 22px; }
 
 /* ── Tab bar ───────────────────────────────────────────────────── */
@@ -1071,7 +1071,7 @@ a { color: inherit; }
   transition: opacity 0.15s, transform 0.1s;
   display: flex; align-items: center; justify-content: center;
 }
-.btn-primary:active  { opacity: 0.85; transform: scale(0.98); }
+.btn-primary:active  { opacity: 0.88; transform: none !important; }
 .btn-primary:disabled { opacity: 0.4; pointer-events: none; }
 
 .btn-secondary {
@@ -1241,7 +1241,7 @@ a { color: inherit; }
   border-color: var(--border2);
 }
 
-.lang-switch:active { transform: scale(0.95); }
+.lang-switch:active { transform: none !important; opacity: .9; }
 
 .lang-switch:focus-visible {
   outline: 2px solid var(--accent);
@@ -6075,7 +6075,8 @@ input.form-input {
 }
 
 .settings-modal-sheet .settings-action-button:active {
-  transform: translateY(1px);
+  transform: none !important;
+  opacity: .9;
 }
 
 .settings-modal-sheet .settings-action-button.settings-action-primary {
