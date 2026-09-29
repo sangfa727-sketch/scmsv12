@@ -7518,6 +7518,19 @@ select.form-input {
 .modal-sheet select:active {
   transform: translateY(1px);
 }
+
+/* Form controls must stay physically stable while focused/tapped.
+   The generic #pages selector used to win over the modal's no-jump rule,
+   making native selects appear to shift behind the field on touch. */
+#pages .modal-sheet select:active,
+#pages .modal-sheet select:focus,
+#pages .modal-sheet input:active,
+#pages .modal-sheet input:focus,
+#pages .modal-sheet textarea:active,
+#pages .modal-sheet textarea:focus {
+  transform: none !important;
+  translate: none !important;
+}
 #pages select:disabled,
 .modal-sheet select:disabled {
   opacity: .58;
