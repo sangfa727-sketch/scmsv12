@@ -18,13 +18,15 @@ test('teacher ID card foundation stays protected', () => {
   assert.match(settings, /result\.login_name \|\| teacherLoginName/);
   assert.match(settings, /Teacher ID/);
   assert.match(settings, /teacher-id-card-avatar-fallback/);
+  assert.match(settings, /teacher-id-card-name-label/);
+  assert.match(settings, /result\\.photo_url/);
   assert.match(settings, /_renderTeacherCardQrLegacy/);
   assert.doesNotMatch(settings, /<span>SCMS<\\\/span>/);
   assert.doesNotMatch(settings, /result\.teacher_id\\) \\+ '<\\\/div>.*result\.login_name/);
   assert.match(css, /\.teacher-id-card/);
   assert.match(css, /printing-teacher-card/);
   assert.match(html, /qrcode@1\.5\.4/);
-  assert.doesNotMatch(html, /qrcodejs\\/1\\.0\\.0/);
+  assert.match(html, /qrcodejs\\/1\\.0\\.0/);
   assert.match(html, /15_settings\.js\?v=20260930n/);
   assert.match(html, /style\.css\?v=20260930n/);
 });
