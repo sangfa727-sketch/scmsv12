@@ -163,7 +163,7 @@ function _renderTeacherList(teachers) {
       <div class="teacher-row" data-tid="${esc(teacher.teacher_id)}">
         <div class="teacher-row-info">
           <div class="teacher-row-name">${statusDot} ${esc(teacher.teacher_name)}${roleBadge}</div>
-          <div class="teacher-row-sub">${esc(teacher.teacher_id)} · ${esc(teacher.role ? tv('roleName', teacher.role) : t('inv.roleTeacher'))} · ${t('tm.lastLogin', { date: lastLogin })}</div>
+          <div class="teacher-row-sub">${esc(teacher.login_name || teacher.teacher_id)} · ${esc(teacher.teacher_id)} · ${esc(teacher.role ? tv('roleName', teacher.role) : t('inv.roleTeacher'))} · ${t('tm.lastLogin', { date: lastLogin })}</div>
         </div>
 <div class="teacher-row-actions"><button class="icon-btn-mini teacher-access-btn" onclick="closeModal(); setTimeout(() => openTeacherAccess('${esc(teacher.teacher_id)}', '${esc(teacher.teacher_name)}'), 190)" title="Manage access">🔐</button> <button class="icon-btn-mini" onclick="resetTeacherPassword('${esc(teacher.teacher_id)}', '${esc(teacher.teacher_name)}')" title="${esc(t('tm.resetPassword'))}">🔑</button></div>
       </div>`;
@@ -261,6 +261,9 @@ window.openCreateTeacherModal = function() {
       <label class="field-label">${t('ct.teacherId')}</label>
       <input class="form-input" id="newTId" placeholder="${esc(t('ct.teacherIdPh'))}" autocapitalize="off">
 
+      <label class="field-label">${t('ct.loginName')}</label>
+      <input class="form-input" id="newTLogin" placeholder="${esc(t('ct.loginNamePh'))}" autocapitalize="off" autocorrect="off">
+
       <label class="field-label">${t('ct.teacherName')}</label>
       <input class="form-input" id="newTName" placeholder="${esc(t('inv.namePh'))}">
 
@@ -288,6 +291,7 @@ window.openCreateTeacherModal = function() {
 
 window.doCreateTeacher = async function() {
   const id    = document.getElementById('newTId')?.value.trim();
+  const login = document.getElementById('newTLogin')?.value.trim();
   const name  = document.getElementById('newTName')?.value.trim();
   const email = document.getElementById('newTEmail')?.value.trim() || null;
   const role  = document.getElementById('newTRole')?.value;
@@ -296,7 +300,7 @@ window.doCreateTeacher = async function() {
   const btn   = document.getElementById('newTBtn');
   errEl.style.display = 'none';
 
-  if (!id || !name || !pw) {
+  if (!id || !login || !name || !pw) {
     errEl.textContent = t('ct.needFields');
     errEl.style.display = 'block';
     return;
@@ -318,11 +322,12 @@ window.doCreateTeacher = async function() {
   btn.textContent = t('ct.creating');
 
   try {
-    const result = await _webRpc('rpc_admin_create_teacher', {
+    const result = await _webRpc('rpc_admin_create_teacher_v2', {
       p_session_token:    sess.session_token,
       p_teacher_id:       id,
+      p_login_name:       login,
       p_teacher_name:     name,
-      p_initial_password: pw,
+      p_initial_pin:      pw,
       p_role:             role,
       p_email:            email,
     });
