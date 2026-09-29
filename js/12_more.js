@@ -401,7 +401,7 @@ window._cgAddPair = async function () {
   const cls = (classInput?.value || '').trim();
   const grade = (gradeInput?.value || '').trim();
   if (!cls || !grade) {
-    showToast('Class နဲ့ Grade နှစ်ခုလုံးထည့်ပါ');
+    showToast(t('cg.required'));
     return;
   }
 
