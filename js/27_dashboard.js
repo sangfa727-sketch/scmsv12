@@ -60,8 +60,9 @@ function renderDashboard() {
 window.refreshDashboardLeaveRequests = async function() {
   try {
     const leaveRequests = await API.getLeaveRequests();
-    if (_dashboardCache) _dashboardCache.leaveRequests = leaveRequests || [];
-    window.APP.pendingLeaveCount = (leaveRequests || []).filter(r => r.status === 'Pending').length;
+    const safeLeaveRequests = Array.isArray(leaveRequests) ? leaveRequests : [];
+    if (_dashboardCache) _dashboardCache.leaveRequests = safeLeaveRequests;
+    _syncDashboardLeaveCount(safeLeaveRequests);
 
     const container = document.getElementById('dashboardContent');
     const dashboardPage = document.getElementById('page-dashboard');
@@ -95,6 +96,17 @@ window.refreshDashboardIncidents = async function() {
   }
 }
 
+function _syncDashboardLeaveCount(rows, repaintSidebar = true) {
+  const list = Array.isArray(rows) ? rows : [];
+  const pending = list.filter(r => r?.status === 'Pending').length;
+  const changed = window.APP?.pendingLeaveCount !== pending;
+  if (window.APP) window.APP.pendingLeaveCount = pending;
+  if (repaintSidebar && changed && typeof renderSidebar === 'function') {
+    renderSidebar();
+  }
+  return pending;
+}
+
 async function _loadDashboardData() {
   const [timetable, attendance, homework, incidents, comms, leaveRequests] = await Promise.all([
     API.getTimetable().catch(() => []),
@@ -104,8 +116,10 @@ async function _loadDashboardData() {
     API.getParentComms(14).catch(() => []),
     API.getLeaveRequests().catch(() => []),
   ]);
+  const safeLeaveRequests = Array.isArray(leaveRequests) ? leaveRequests : [];
   _dashboardCache = { timetable: timetable || [], attendance: attendance || [],
-    homework: homework || [], incidents: incidents || [], comms: comms || [], leaveRequests: leaveRequests || [] };
+    homework: homework || [], incidents: incidents || [], comms: comms || [], leaveRequests: safeLeaveRequests };
+  _syncDashboardLeaveCount(safeLeaveRequests);
 }
 
 function _dashboardScopedRows(rows) {
