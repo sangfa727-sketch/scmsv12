@@ -14,11 +14,18 @@
 // the app's t('...') call sites, need to change — the language-switch
 // button, browser-language detection, and <html lang> all read this list.
 const LANGUAGES = [
-  { code: 'en', label: 'EN',     name: 'English',            dict: () => window.I18N_EN },
-  { code: 'my', label: 'မြန်မာ', name: 'Myanmar (Burmese)',  dict: () => window.I18N_MY },
-  { code: 'th', label: 'ไทย', name: 'ภาษาไทย',                  dict: () => window.I18N_TH },
-  { code: 'jp', label: '日本語', name: '日本語',                    dict: () => window.I18N_JP },
+  { code: 'en', label: 'EN', name: 'English', dict: () => window.I18N_EN },
+  { code: 'my', label: 'မြန်မာ', name: 'Myanmar (Burmese)', dict: () => window.I18N_MY },
+  { code: 'th', label: 'ไทย', name: 'ภาษาไทย', dict: () => window.I18N_TH },
+  { code: 'jp', label: '日本語', name: '日本語', dict: () => window.I18N_JP },
 ];
+
+const LANGUAGE_ALIASES = {
+  en: ['en'],
+  my: ['my'],
+  th: ['th'],
+  jp: ['ja', 'jp'],
+};
 
 const I18N = {
   current: 'en',           // default language
@@ -28,6 +35,18 @@ const I18N = {
 
   // ── Available locales — built from LANGUAGES, one entry per registered code ──
   locales: Object.fromEntries(LANGUAGES.map(l => [l.code, () => l.dict() || {}])),
+
+  validateLocales() {
+    const base = window.I18N_EN || {};
+    LANGUAGES.forEach(lang => {
+      if (lang.code === 'en') return;
+      const dict = lang.dict() || {};
+      const missing = Object.keys(base).filter(key => !(key in dict));
+      if (missing.length) {
+        console.warn('[i18n] Missing keys in ' + lang.code + ':', missing);
+      }
+    });
+  },
 
   // ── Init: localStorage + Telegram + browser lang ဖတ် ──
   init() {
@@ -39,12 +58,20 @@ const I18N = {
     const registered = LANGUAGES.map(l => l.code);
     const normalizedTg = String(tgLang || '').toLowerCase();
     const tgCandidates = normalizedTg === 'ja' ? ['jp'] : [normalizedTg];
-    const browserLang = registered.find(c => browserTag === c || browserTag.startsWith(c + '-'));
+    const browserLang = registered.find(c =>
+      (LANGUAGE_ALIASES[c] || [c]).some(alias =>
+        browserTag === alias || browserTag.startsWith(alias + '-')
+      )
+    );
+    const telegramLang = registered.find(c =>
+      (LANGUAGE_ALIASES[c] || [c]).includes(normalizedTg)
+    );
 
     this.current = (saved && registered.includes(saved) && saved)
-      || tgCandidates.find(c => registered.includes(c))
+      || telegramLang
       || browserLang
       || this.fallback;
+    this.validateLocales();
     this.apply();
   },
 
