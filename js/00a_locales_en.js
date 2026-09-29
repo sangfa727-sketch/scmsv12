@@ -207,6 +207,15 @@ window.I18N_EN = {
   'dash.presentToday': 'Present Today',
   'dash.absentToday': 'Absent Today',
   'dash.pendingHomework': 'Pending Homework',
+'dash.leaveRequests': 'Leave requests',
+'dash.notifications': 'Notifications',
+'dash.newCount': '{n} new',
+'dash.leavePendingOne': '{n} leave request pending',
+'dash.leavePendingMany': '{n} leave requests pending',
+'dash.leaveReview': 'New leave requests need your review.',
+'dash.messageNotDeliveredOne': '{n} message not delivered',
+'dash.messageNotDeliveredMany': '{n} messages not delivered',
+'dash.noNewNotifications': 'No new notifications',
 
   // ── Students ──
   'students.title': 'Students',
