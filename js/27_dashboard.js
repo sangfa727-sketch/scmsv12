@@ -57,6 +57,24 @@ function renderDashboard() {
  * Incident edits/saves/deletes are authoritative in the API; re-fetch that slice
  * so Recent Incidents always reflects the persisted type/severity immediately.
  */
+window.refreshDashboardLeaveRequests = async function() {
+  try {
+    const leaveRequests = await API.getLeaveRequests();
+    if (_dashboardCache) _dashboardCache.leaveRequests = leaveRequests || [];
+    window.APP.pendingLeaveCount = (leaveRequests || []).filter(r => r.status === 'Pending').length;
+
+    const container = document.getElementById('dashboardContent');
+    const dashboardPage = document.getElementById('page-dashboard');
+    if (container && dashboardPage?.classList.contains('active') && _dashboardCache) {
+      _paintDashboard(container);
+    }
+    return leaveRequests || [];
+  } catch (e) {
+    console.warn('[dashboard] leave refresh failed:', e);
+    return null;
+  }
+}
+
 window.refreshDashboardIncidents = async function() {
   try {
     const incidents = await API.getIncidents(14);
