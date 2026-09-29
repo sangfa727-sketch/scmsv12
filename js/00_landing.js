@@ -61,9 +61,27 @@ window.renderLanding = function () {
     <div class="landing-shell">
       <div class="landing-inner">
 
-        <div class="landing-logo">
-          <span class="landing-logo-mark">S</span>
-          <span class="landing-logo-text">CMS</span>
+        <div class="landing-logo-row">
+          <div class="landing-logo">
+            <span class="landing-logo-mark">S</span>
+            <span class="landing-logo-text">CMS</span>
+          </div>
+
+          <div class="landing-lang-picker" id="landingLangPicker">
+            <button type="button" class="landing-lang-switch" id="landingLangSwitch"
+                    aria-haspopup="listbox" aria-expanded="false"
+                    aria-label="Language">
+              <span id="landingLangLabel">${LANGUAGES.find(l => l.code === I18N.current)?.label || 'EN'}</span>
+              <svg viewBox="0 0 20 20" aria-hidden="true"><path d="M5.5 7.5 10 12l4.5-4.5"/></svg>
+            </button>
+            <div class="landing-lang-menu" id="landingLangMenu" role="listbox" aria-label="Languages">
+              ${LANGUAGES.map(l => `
+                <button type="button" class="landing-lang-option${l.code === I18N.current ? ' is-active' : ''}"
+                        data-landing-lang="${l.code}" role="option" aria-selected="${l.code === I18N.current}">
+                  <span>${esc(l.label)}</span><small>${esc(l.name)}</small>
+                </button>`).join('')}
+            </div>
+          </div>
         </div>
 
         <h1 class="landing-title">${t('landing.title')}<br><em>${t('landing.titleEm')}</em></h1>
@@ -159,6 +177,45 @@ window.renderLanding = function () {
       }
       window.renderGoogleSignInButton('googleSignInBtn');
     }, 300);
+  }
+
+  // Landing language picker — save the locale before authentication so
+  // the same language remains active after login / sign-up / bootstrap.
+  const landingPicker = document.getElementById('landingLangPicker');
+  const landingTrigger = document.getElementById('landingLangSwitch');
+  const landingMenu = document.getElementById('landingLangMenu');
+  if (landingPicker && landingTrigger && landingMenu) {
+    landingTrigger.addEventListener('click', (e) => {
+      e.stopPropagation();
+      const open = landingPicker.classList.toggle('is-open');
+      landingTrigger.setAttribute('aria-expanded', String(open));
+    });
+    landingMenu.querySelectorAll('[data-landing-lang]').forEach(option => {
+      option.addEventListener('click', (e) => {
+        e.stopPropagation();
+        const lang = option.getAttribute('data-landing-lang');
+        if (!LANGUAGES.some(l => l.code === lang) || lang === I18N.current) {
+          landingPicker.classList.remove('is-open');
+          landingTrigger.setAttribute('aria-expanded', 'false');
+          return;
+        }
+        I18N.setLang(lang);
+        // renderLanding builds the pre-auth UI from t(), so rebuild it
+        // immediately instead of leaving mixed-language content behind.
+        window.renderLanding();
+      });
+    });
+    landingTrigger.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape') {
+        landingPicker.classList.remove('is-open');
+        landingTrigger.setAttribute('aria-expanded', 'false');
+        landingTrigger.blur();
+      }
+    });
+    document.addEventListener('click', () => {
+      landingPicker.classList.remove('is-open');
+      landingTrigger.setAttribute('aria-expanded', 'false');
+    });
   }
 
   // If we have a pending login token from before a reload (native handoff
