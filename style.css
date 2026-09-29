@@ -7828,3 +7828,13 @@ body > .modal-overlay.generic-confirm-overlay .generic-confirm-sheet {
 .teacher-card-actions button{min-width:0;white-space:normal}
 @media(max-width:520px){.teacher-id-card-body{grid-template-columns:58px minmax(0,1fr);}.teacher-id-card-avatar{width:58px;height:70px}.teacher-id-card-qr{grid-column:1/-1;margin:0 auto}.teacher-card-actions{grid-template-columns:1fr}}
 @media print{body.printing-teacher-card>*:not(#bulkIdPrintArea){display:none!important}body.printing-teacher-card #bulkIdPrintArea{display:block!important}body.printing-teacher-card .teacher-id-card{width:85.6mm;height:54mm;margin:0;box-shadow:none;border:1px solid #222;page-break-inside:avoid}}
+
+
+/* Teacher Manager — clickable teacher cards + compact edit pencil */
+.teacher-row-card{position:relative;cursor:pointer;border:1px solid var(--border2);border-radius:14px;padding:10px 10px 10px 12px;margin-bottom:8px;background:var(--surface);transition:transform .16s ease,box-shadow .16s ease,border-color .16s ease}
+.teacher-row-card:hover{transform:translateY(-1px);box-shadow:0 6px 18px rgba(0,0,0,.08)}
+.teacher-row-card:active{transform:scale(.995)}
+.teacher-row-card .teacher-row-info{min-width:0;padding-right:4px}
+.teacher-row-card .teacher-row-actions{display:flex;align-items:flex-start;gap:4px;flex-wrap:wrap;justify-content:flex-end}
+.teacher-edit-btn{font-size:12px;line-height:1}
+.teacher-edit-sheet{max-height:min(82dvh,720px);overflow-y:auto}
