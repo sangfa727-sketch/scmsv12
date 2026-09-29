@@ -16,6 +16,8 @@
 const LANGUAGES = [
   { code: 'en', label: 'EN',     name: 'English',            dict: () => window.I18N_EN },
   { code: 'my', label: 'မြန်မာ', name: 'Myanmar (Burmese)',  dict: () => window.I18N_MY },
+  { code: 'th', label: 'ไทย', name: 'ภาษาไทย',                  dict: () => window.I18N_TH },
+  { code: 'jp', label: '日本語', name: '日本語',                    dict: () => window.I18N_JP },
 ];
 
 const I18N = {
@@ -35,10 +37,12 @@ const I18N = {
     // Match the browser's language against whichever languages are actually registered,
     // instead of a hardcoded my/en check — a newly-added language is picked up for free.
     const registered = LANGUAGES.map(l => l.code);
+    const normalizedTg = String(tgLang || '').toLowerCase();
+    const tgCandidates = normalizedTg === 'ja' ? ['jp'] : [normalizedTg];
     const browserLang = registered.find(c => browserTag === c || browserTag.startsWith(c + '-'));
 
     this.current = (saved && registered.includes(saved) && saved)
-      || (registered.includes(tgLang) && tgLang)
+      || tgCandidates.find(c => registered.includes(c))
       || browserLang
       || this.fallback;
     this.apply();
@@ -75,7 +79,9 @@ const I18N = {
 
   // BCP-47 tag for Intl / toLocaleDateString, following the UI language
   // Weekday / month names stay English in both languages (that is what Myanmar users read on calendars)
-  dateLocale() { return 'en-US'; },
+  dateLocale() {
+    return this.current === 'th' ? 'th-TH' : this.current === 'jp' ? 'ja-JP' : 'en-US';
+  },
 
   // ── ဘာသာစကား ပြောင်း ──
   setLang(lang) {
