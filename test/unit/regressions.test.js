@@ -1,3 +1,11 @@
+const test = require('node:test');
+const assert = require('node:assert/strict');
+const fs = require('node:fs');
+const path = require('node:path');
+
+const ROOT = path.resolve(__dirname, '..', '..');
+const read = (file) => fs.readFileSync(path.join(ROOT, file), 'utf8');
+
 test('teacher login identity foundation stays protected', () => {
   const landing = read('js/00_landing.js');
   const settings = read('js/15_settings.js');
@@ -16,14 +24,6 @@ test('teacher login identity foundation stays protected', () => {
   assert.match(html, /00_locales_thai\.js\?v=20260930e/);
   assert.match(html, /00_locales_jp\.js\?v=20260930e/);
 });
-
-const test = require('node:test');
-const assert = require('node:assert/strict');
-const fs = require('node:fs');
-const path = require('node:path');
-
-const ROOT = path.resolve(__dirname, '..', '..');
-const read = (file) => fs.readFileSync(path.join(ROOT, file), 'utf8');
 
 test('critical frontend files have no obvious unresolved merge markers', () => {
   const files = [
