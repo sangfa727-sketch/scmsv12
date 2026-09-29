@@ -11,6 +11,7 @@ test('critical frontend files have no obvious unresolved merge markers', () => {
     'js/15_settings.js',
     'js/27_dashboard.js',
     'js/28_leave_requests.js',
+    'js/08_comms.js',
     'js/02B_api_auth.js',
     'js/02H_api_communication.js'
   ];
@@ -50,6 +51,21 @@ test('notification CSS supports compact responsive UI', () => {
 test('dashboard script cache version is bumped after notification change', () => {
   const html = read('index.html');
   assert.match(html, /27_dashboard\.js\?v=20260930i/);
+});
+
+test('dashboard notification refresh stays wired across notification producers', () => {
+  const dashboard = read('js/27_dashboard.js');
+  const comms = read('js/08_comms.js');
+  const leave = read('js/28_leave_requests.js');
+
+  assert.match(dashboard, /refreshDashboardNotifications/);
+  assert.match(comms, /refreshDashboardNotifications/);
+  assert.match(leave, /refreshDashboardNotifications/);
+});
+
+test('parent communications script cache version is bumped after notification sync change', () => {
+  const html = read('index.html');
+  assert.match(html, /08_comms\.js\?v=20260930b/);
 });
 
 test('all JavaScript source files are present and non-empty', () => {
