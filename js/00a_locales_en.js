@@ -1330,4 +1330,9 @@ window.I18N_EN = {
   'tour.skip': 'Skip',
   'tour.next': 'Next →',
   'tour.done': 'Done ✓',
+  'att.clearMarks': 'Clear marks',
+  'att.history': 'History',
+  'att.historyTitle': 'History & reports',
+  'att.codes': 'Codes',
+
 };
