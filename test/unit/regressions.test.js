@@ -1,3 +1,22 @@
+test('teacher login identity foundation stays protected', () => {
+  const landing = read('js/00_landing.js');
+  const settings = read('js/15_settings.js');
+  const html = read('index.html');
+  assert.match(landing, /rpc_teacher_login/);
+  assert.match(landing, /p_login_name:\s*id/);
+  assert.match(landing, /p_pin:\s*pw/);
+  assert.match(settings, /rpc_admin_create_teacher_v2/);
+  assert.match(settings, /newTLogin/);
+  assert.match(settings, /p_login_name:\s*login/);
+  assert.match(settings, /p_initial_pin:\s*pw/);
+  assert.match(html, /00_landing\.js\?v=20260930b/);
+  assert.match(html, /15_settings\.js\?v=20260930i/);
+  assert.match(html, /00a_locales_en\.js\?v=20260930e/);
+  assert.match(html, /00b_locales_my\.js\?v=20260930e/);
+  assert.match(html, /00_locales_thai\.js\?v=20260930e/);
+  assert.match(html, /00_locales_jp\.js\?v=20260930e/);
+});
+
 const test = require('node:test');
 const assert = require('node:assert/strict');
 const fs = require('node:fs');
