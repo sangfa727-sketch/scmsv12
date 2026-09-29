@@ -35,7 +35,7 @@ test('teacher manager regression stays protected', () => {
 test('manage access replaces the teacher manager modal instead of stacking it', () => {
   const source = read('js/15_settings.js');
   assert.match(source, /onclick="closeModal\(\); setTimeout\(\(\) => openTeacherAccess\(/);
-  assert.match(source, /openTeacherAccess\([^)]*\), 190\)/);
+  assert.match(source, /setTimeout\(\(\) => openTeacherAccess\([\s\S]*?\), 190\)/);
 });
 
 test('manage teachers responsive styles stay consolidated', () => {
