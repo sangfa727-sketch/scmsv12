@@ -14,12 +14,12 @@ test('teacher ID card foundation stays protected', () => {
   assert.match(settings, /openTeacherCardModal\(id, name, login\)/);
   assert.match(settings, /openTeacherCardModal/);
   assert.match(settings, /printTeacherCard/);
-  assert.match(settings, /setTimeout\(\(\) => openTeacherCardModal\(id, name, login\), 220\)/);
+  assert.match(settings, /closeModal\(\(\) => openTeacherCardModal\(id, name, login\)\)/);
   assert.match(settings, /result\.login_name \|\| teacherLoginName/);
   assert.match(css, /\.teacher-id-card/);
   assert.match(css, /printing-teacher-card/);
   assert.match(html, /qrcode@1\.5\.4/);
-  assert.match(html, /15_settings\.js\?v=20260930k/);
+  assert.match(html, /15_settings\.js\?v=20260930l/);
   assert.match(html, /style\.css\?v=20260930l/);
 });
 test('teacher login identity foundation stays protected', () => {
@@ -34,7 +34,7 @@ test('teacher login identity foundation stays protected', () => {
   assert.match(settings, /p_login_name:\s*login/);
   assert.match(settings, /p_initial_pin:\s*pw/);
   assert.match(html, /00_landing\.js\?v=20260930b/);
-  assert.match(html, /15_settings\.js\?v=20260930k/);
+  assert.match(html, /15_settings\.js\?v=20260930l/);
   assert.match(html, /00a_locales_en\.js\?v=20260930f/);
   assert.match(html, /00b_locales_my\.js\?v=20260930f/);
   assert.match(html, /00_locales_thai\.js\?v=20260930h/);
