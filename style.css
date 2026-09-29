@@ -7405,3 +7405,36 @@ html[lang="jp"] .landing-lang-option {
     width: 148px;
   }
 }
+
+
+/* SCMS v12 — final no-jump interaction guard
+   Pressing an action must feel responsive without moving the control or
+   surrounding layout. Motion is reserved for intentional open/close states. */
+button:active,
+a:active,
+select:active,
+input:active,
+textarea:active,
+[role="button"]:active,
+.btn-primary:active,
+.btn-secondary:active,
+.btn-danger:active,
+.btn-pill-action:active,
+.icon-btn:active,
+.icon-btn-mini:active,
+.dashboard-notification-btn:active,
+.settings-action-button:active,
+.landing-btn-primary:active,
+.landing-btn-secondary:active,
+.lang-switch:active,
+.landing-lang-switch:active,
+.sidebar-item:active,
+.chip:active,
+.pill:active,
+.day-tab:active,
+.date-chip:active,
+.btn-icon-round:active,
+.fab:active,
+.list-card:active {
+  transform: none !important;
+}
