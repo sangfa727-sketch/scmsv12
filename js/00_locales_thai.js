@@ -3,6 +3,7 @@
 (function () {
   const base = window.I18N_EN || {};
   const overrides = {
+    'app.title':'SCMS — ระบบจัดการชั้นเรียนโรงเรียน',
     'common.all':'ทั้งหมด','common.edit':'แก้ไข','common.close':'ปิด','common.cancel':'ยกเลิก','common.add':'เพิ่ม','common.saving':'กำลังบันทึก…','common.years':'ปี','common.failed':'ล้มเหลว:','common.saveFailed':'บันทึกไม่ได้ — ลองอีกครั้ง','common.removed':'ลบแล้ว',
     'nav.dashboard':'แดชบอร์ด','nav.students':'นักเรียน','nav.attendance':'การเข้าเรียน','nav.homework':'การบ้าน','nav.messages':'ข้อความ','nav.incidents':'เหตุการณ์','nav.timetable':'ตารางเรียน','nav.reports':'รายงาน','nav.settings':'การตั้งค่า',
     'topbar.search':'ค้นหา...','topbar.notifications':'การแจ้งเตือน','topbar.profile':'โปรไฟล์','topbar.logout':'ออกจากระบบ','topbar.language':'ภาษา',
