@@ -29,12 +29,20 @@ let _dashboardCache      = null;
 
 function renderDashboard() {
   const container = document.getElementById('dashboardContent');
-  if (!container) return;
+  if (!container) return Promise.resolve();
+
+  // Language changes only need translated text. Once dashboard data is cached,
+  // repaint from memory instead of refetching and briefly showing an intermediate
+  // loading state — the latter was the source of the visible double-flash.
+  if (_dashboardLoadedOnce && _dashboardCache) {
+    _paintDashboard(container);
+    return Promise.resolve();
+  }
 
   if (!_dashboardLoadedOnce) {
     container.innerHTML = `<div class="skeleton-loading">${t('dash.loading')}</div>`;
   }
-  _loadDashboardData().then(() => {
+  return _loadDashboardData().then(() => {
     _dashboardLoadedOnce = true;
     _paintDashboard(container);
   }).catch(err => {
