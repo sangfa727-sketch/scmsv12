@@ -32,6 +32,15 @@ test('teacher manager regression stays protected', () => {
   assert.match(source, /teacher-manager-actions/);
 });
 
+test('manage teachers responsive styles stay consolidated', () => {
+  const css = read('style.css');
+  const matches = css.match(/\/\* Manage Teachers — canonical responsive layout\./g) || [];
+  assert.equal(matches.length, 1);
+  assert.match(css, /\.teacher-manager-actions\s*\{[\s\S]*grid-template-columns: repeat\(2, minmax\(0, 1fr\)\)/);
+  assert.match(css, /@media \(max-width: 430px\)[\s\S]*\.teacher-manager-actions[\s\S]*grid-template-columns: 1fr/);
+  assert.match(css, /\.teacher-row-actions \.icon-btn-mini[\s\S]*min-width: 30px/);
+});
+
 test('dashboard notification regression stays protected', () => {
   const source = read('js/27_dashboard.js');
   assert.match(source, /dashboardNotificationWrap/);
