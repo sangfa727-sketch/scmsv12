@@ -96,5 +96,6 @@
     'comms.portalTitlePh':'ตัวอย่าง — ประชุมผู้ปกครองและครู','comms.portalDescPh':'ข้อมูลที่ผู้ปกครองควรทราบ','comms.portalRequired':'กรุณากรอกชื่อเรื่องและเวลาเริ่มต้น','comms.portalPublished':'เผยแพร่ไปยัง Parent Portal แล้ว'
   });
   Object.assign(overrides, {'err.sessionVerify':'ไม่สามารถตรวจสอบเซสชันที่บันทึกไว้ได้','err.retryHint':'แตะ Retry แล้วลองอีกครั้ง','err.serverUnreachable':'ไม่สามารถเชื่อมต่อเซิร์ฟเวอร์ SCMS ได้','err.technicalDetails':'รายละเอียดทางเทคนิค (โปรดแนบภาพหน้าจอเมื่อขอความช่วยเหลือ):','err.likelyCause':'สาเหตุที่เป็นไปได้: workflow n8n ยังไม่ Active, URL ไม่ถูกต้อง หรือ CORS บล็อกคำขอ'});
+  Object.assign(overrides, {'login.loading':'กำลังโหลดการเข้าสู่ระบบ…','login.waitRetry':'โปรดรอสักครู่แล้วลองอีกครั้ง','cg.required':'โปรดกรอกทั้ง Class และ Grade'});
   window.I18N_TH = Object.assign({}, base, overrides);
 })();
