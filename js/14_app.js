@@ -685,7 +685,7 @@ window.openModal = function(html, onClose) {
   // Skip injection when a caller already supplied its own close control.
   const closeButton = `<button type="button" class="modal-close-x" onclick="event.stopPropagation();closeModal()" aria-label="${t('common.close')}">✕</button>`;
   layer.innerHTML = html.replace(
-    /(<div\\s+[^>]*class=["'][^"']*\\bmodal-sheet\\b[^"']*["'][^>]*>)/i,
+    /(<div\s+[^>]*class=["'][^"']*\bmodal-sheet\b[^"']*["'][^>]*>)/i,
     (match) => match.includes('modal-close-x') ? match : match + closeButton
   );
   layer.onclick = function(e) {
