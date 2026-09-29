@@ -6928,6 +6928,54 @@ input.form-input {
   }
 }
 
+/* Manage Teachers — compact multilingual/mobile-safe rows */
+.teacher-manager-sheet {
+  width: min(94vw, 620px) !important;
+  max-width: 620px !important;
+  max-height: min(88dvh, 760px);
+  overflow: hidden;
+}
+.teacher-manager-sheet .teacher-list {
+  min-width: 0;
+  max-height: min(42dvh, 320px);
+  overflow-y: auto;
+  overflow-x: hidden;
+}
+.teacher-row {
+  min-width: 0;
+}
+.teacher-row-info {
+  min-width: 0;
+}
+.teacher-row-name {
+  min-width: 0;
+}
+.teacher-row-sub {
+  min-width: 0;
+  overflow-wrap: anywhere;
+  line-height: 1.45;
+}
+.teacher-row-actions {
+  flex: 0 0 auto;
+}
+@media (max-width: 430px) {
+  .teacher-manager-sheet {
+    width: calc(100vw - 20px) !important;
+    max-width: none !important;
+  }
+  .teacher-row {
+    align-items: flex-start;
+    gap: 7px;
+    padding: 9px 10px;
+  }
+  .teacher-row-actions {
+    padding-top: 1px;
+  }
+  .teacher-row-actions .icon-btn-mini {
+    flex: 0 0 34px;
+  }
+}
+
 /* SCMS v12 — teacher access manager */
 .teacher-row-actions { display:flex; align-items:center; gap:6px; flex:0 0 auto; }
 .teacher-access-sheet { width:min(94vw, 680px) !important; max-width:680px !important; max-height:min(86dvh, 780px) !important; overflow:hidden; }
