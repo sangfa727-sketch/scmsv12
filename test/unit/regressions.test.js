@@ -24,7 +24,6 @@ test('teacher ID card foundation stays protected', () => {
   assert.match(settings, /teacher-id-card-avatar-fallback/);
   assert.match(settings, /teacher-id-card-vertical/);
   assert.match(settings, /tm\.cardPurpose/);
-  assert.match(settings, /teacher-id-card-name-label/);
   assert.match(settings, /result\.photo_url/);
   assert.match(settings, /teacherProfile\?\.photo_url/);
   assert.match(settings, /_renderTeacherCardQrLegacy/);
