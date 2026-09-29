@@ -437,27 +437,39 @@ window.openTeacherCardModal = async function(teacherId, teacherName, teacherLogi
     const loginUrl = location.origin + location.pathname + '?teacher_card=' + encodeURIComponent(result.token);
     const resolvedName = teacherProfile?.teacher_name || result.teacher_name || teacherName || '';
     const resolvedLogin = teacherProfile?.login_name || result.login_name || teacherLoginName || '';
-    const hasDistinctLogin = resolvedLogin && resolvedLogin !== result.teacher_id;
     const photoValue = teacherProfile?.photo_url || result.photo_url || '';
     const photo = typeof photoValue === 'string' ? photoValue.trim() : '';
+    const role = teacherProfile?.role || result.role || 'teacher';
 
-    root.innerHTML = '<div class="teacher-id-card">' +
-      '<div class="teacher-id-card-head"><strong>' + esc(window.APP?.school_name || '') + '</strong><span>Teacher ID Card</span></div>' +
-      '<div class="teacher-id-card-body">' +
+    root.innerHTML = '<div class="teacher-id-card teacher-id-card-vertical">' +
+      '<div class="teacher-id-card-face">' +
+        '<div class="teacher-id-card-brand">' +
+          (window.APP?.school_logo ? '<img src="' + esc(window.APP.school_logo) + '" alt="" class="teacher-id-card-logo">' : '') +
+          '<div class="teacher-id-card-school">' + esc(window.APP?.school_name || '') + '</div>' +
+        '</div>' +
+        '<div class="teacher-id-card-type">TEACHER ID CARD</div>' +
         '<div class="teacher-id-card-avatar' + (photo ? ' has-photo' : '') + '">' +
           (photo ? '<img src="' + esc(photo) + '" alt="' + esc(resolvedName) + '" referrerpolicy="no-referrer" onload="this.parentElement.classList.add(\'has-photo\')" onerror="this.style.display=\'none\';this.parentElement.classList.remove(\'has-photo\');this.parentElement.classList.add(\'is-fallback\')">' : '') +
           '<span class="teacher-id-card-avatar-fallback">👤</span>' +
         '</div>' +
-        '<div class="teacher-id-card-info">' +
-          '<div class="teacher-id-card-name-label">Name</div>' +
+        '<div class="teacher-id-card-who">' +
           '<div class="teacher-id-card-name">' + esc(resolvedName || '—') + '</div>' +
-          '<div class="teacher-id-card-line"><span>Teacher ID</span><strong>' + esc(result.teacher_id || teacherId) + '</strong></div>' +
-          (hasDistinctLogin ? '<div class="teacher-id-card-line"><span>Login</span><strong>' + esc(resolvedLogin) + '</strong></div>' : '') +
-          '<div class="teacher-id-card-line"><span>Role</span><strong>' + esc(teacherProfile?.role || result.role || 'teacher') + '</strong></div>' +
+          '<div class="teacher-id-card-role">' + esc(role) + '</div>' +
+        '</div>' +
+        '<div class="teacher-id-card-fields">' +
+          '<div><span>Teacher ID</span><strong>' + esc(result.teacher_id || teacherId) + '</strong></div>' +
+          '<div><span>Login Name</span><strong>' + esc(resolvedLogin || '—') + '</strong></div>' +
         '</div>' +
         '<div class="teacher-id-card-qr" data-token="' + esc(result.token) + '" aria-label="Teacher login QR"></div>' +
+        '<div class="teacher-id-card-instruction">' + esc(t('tm.cardScan')) + '</div>' +
+        '<div class="teacher-id-card-security">' + esc(t('tm.cardPurpose')) + '</div>' +
       '</div>' +
-      '<div class="teacher-id-card-foot"><span>' + esc(t('tm.cardScan')) + '</span><span>' + esc(result.token_prefix || '') + '</span></div>' +
+    '</div>' +
+    '<div class="teacher-id-card-help">' +
+      '<div class="teacher-id-card-help-title">ℹ️ ' + esc(t('tm.cardPurposeTitle')) + '</div>' +
+      '<div>' + esc(t('tm.cardPurpose')) + '</div>' +
+      '<ol><li>' + esc(t('tm.cardStep1')) + '</li><li>' + esc(t('tm.cardStep2')) + '</li><li>' + esc(t('tm.cardStep3')) + '</li></ol>' +
+      '<div class="teacher-id-card-help-note">' + esc(t('tm.cardSecurity')) + '</div>' +
     '</div>' +
     '<div class="teacher-card-actions"><button class="btn-primary" type="button" onclick="printTeacherCard()">' + esc(t('tm.printCard')) + '</button><button class="btn-secondary" type="button" onclick="regenerateTeacherCard(&quot;' + esc(teacherId) + '&quot;,&quot;' + esc(teacherName) + '&quot;)">' + esc(t('tm.regenerateCard')) + '</button></div>';
 
