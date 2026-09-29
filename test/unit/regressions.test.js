@@ -6,6 +6,19 @@ const path = require('node:path');
 const ROOT = path.resolve(__dirname, '..', '..');
 const read = (file) => fs.readFileSync(path.join(ROOT, file), 'utf8');
 
+test('teacher ID card foundation stays protected', () => {
+  const settings = read('js/15_settings.js');
+  const css = read('style.css');
+  const html = read('index.html');
+  assert.match(settings, /rpc_admin_create_teacher_card/);
+  assert.match(settings, /openTeacherCardModal/);
+  assert.match(settings, /printTeacherCard/);
+  assert.match(css, /\.teacher-id-card/);
+  assert.match(css, /printing-teacher-card/);
+  assert.match(html, /qrcode@1\.5\.4/);
+  assert.match(html, /15_settings\\.js\\?v=20260930j/);
+  assert.match(html, /style\\.css\\?v=20260930l/);
+});
 test('teacher login identity foundation stays protected', () => {
   const landing = read('js/00_landing.js');
   const settings = read('js/15_settings.js');
