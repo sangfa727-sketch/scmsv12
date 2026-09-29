@@ -206,6 +206,15 @@ window.I18N_MY = {
   'dash.presentToday': 'ဒီနေ့ တက်ရောက်သူ',
   'dash.absentToday': 'ဒီနေ့ ပျက်ကွက်သူ',
   'dash.pendingHomework': 'ကျန်ရှိနေသော အိမ်စာ',
+'dash.leaveRequests': 'ခွင့်တောင်းဆိုမှုများ',
+'dash.notifications': 'အသိပေးချက်များ',
+'dash.newCount': 'အသစ် {n} ခု',
+'dash.leavePendingOne': 'ခွင့်တောင်းဆိုမှု {n} ခု စောင့်ဆိုင်းနေသည်',
+'dash.leavePendingMany': 'ခွင့်တောင်းဆိုမှု {n} ခု စောင့်ဆိုင်းနေသည်',
+'dash.leaveReview': 'ခွင့်တောင်းဆိုမှုအသစ်များကို စစ်ဆေးရန် လိုအပ်ပါသည်။',
+'dash.messageNotDeliveredOne': 'မပို့ရသေးသော စာ {n} စောင်',
+'dash.messageNotDeliveredMany': 'မပို့ရသေးသော စာ {n} စောင်',
+'dash.noNewNotifications': 'အသိပေးချက်အသစ် မရှိပါ',
 
   // ── Students ──
   'students.title': 'ကျောင်းသားများ',
