@@ -165,7 +165,7 @@ function _renderTeacherList(teachers) {
           <div class="teacher-row-name">${statusDot} ${esc(teacher.teacher_name)}${roleBadge}</div>
           <div class="teacher-row-sub">${esc(teacher.login_name || teacher.teacher_id)} · ${esc(teacher.teacher_id)} · ${esc(teacher.role ? tv('roleName', teacher.role) : t('inv.roleTeacher'))} · ${t('tm.lastLogin', { date: lastLogin })}</div>
         </div>
-<div class="teacher-row-actions"><button class="icon-btn-mini teacher-access-btn" onclick="closeModal(); setTimeout(() => openTeacherAccess('${esc(teacher.teacher_id)}', '${esc(teacher.teacher_name)}'), 190)" title="Manage access">🔐</button> <button class="icon-btn-mini" onclick="resetTeacherPassword('${esc(teacher.teacher_id)}', '${esc(teacher.teacher_name)}')" title="${esc(t('tm.resetPassword'))}">🔑</button></div>
+<div class="teacher-row-actions"><button class="icon-btn-mini teacher-access-btn" onclick="closeModal(); setTimeout(() => openTeacherAccess('${esc(teacher.teacher_id)}', '${esc(teacher.teacher_name)}'), 190)" title="Manage access">🔐</button> <button class="icon-btn-mini" onclick="openTeacherCardModal('${esc(teacher.teacher_id)}', '${esc(teacher.teacher_name)}')" title="${esc(t('tm.idCard'))}">🪪</button> <button class="icon-btn-mini" onclick="resetTeacherPassword('${esc(teacher.teacher_id)}', '${esc(teacher.teacher_name)}')" title="${esc(t('tm.resetPassword'))}">🔑</button></div>
       </div>`;
   }).join('');
 }
@@ -348,6 +348,55 @@ window.doCreateTeacher = async function() {
     btn.disabled = false;
     btn.textContent = t('ct.create');
   }
+};
+
+window.openTeacherCardModal = async function(teacherId, teacherName) {
+  openModal('<div class="modal-sheet teacher-card-modal" onclick="event.stopPropagation()"><div class="modal-handle"></div><h3 class="modal-title">🪪 ' + esc(t('tm.idCard')) + '</h3><div id="teacherCardRoot" class="teacher-card-root"><div class="text-center text-muted">' + esc(t('tm.cardLoading')) + '</div></div><button class="btn-secondary mt16" onclick="closeModal()">' + esc(t('common.close')) + '</button></div>');
+  try {
+    const sess = getWebSession();
+    if (!sess?.session_token) throw new Error('session_expired');
+    const result = await _webRpc('rpc_admin_create_teacher_card', { p_session_token: sess.session_token, p_teacher_id: teacherId });
+    const root = document.getElementById('teacherCardRoot');
+    if (!root) return;
+    if (!result?.ok) throw new Error(result?.error || 'card_failed');
+    const loginUrl = location.origin + location.pathname + '?teacher_card=' + encodeURIComponent(result.token);
+    root.innerHTML = '<div class="teacher-id-card">' +
+      '<div class="teacher-id-card-head"><strong>' + esc(window.APP?.school_name || '') + '</strong><span>SCMS</span></div>' +
+      '<div class="teacher-id-card-body"><div class="teacher-id-card-avatar">' + (result.photo_url ? '<img src="' + esc(result.photo_url) + '" alt="">' : '👤') + '</div>' +
+      '<div class="teacher-id-card-info"><div class="teacher-id-card-name">' + esc(result.teacher_name) + '</div><div class="teacher-id-card-line">' + esc(result.teacher_id) + '</div><div class="teacher-id-card-line">' + esc(result.role) + '</div></div>' +
+      '<div class="teacher-id-card-qr" data-token="' + esc(result.token) + '"></div></div>' +
+      '<div class="teacher-id-card-foot"><span>' + esc(t('tm.cardScan')) + '</span><span>' + esc(result.token_prefix) + '</span></div></div>' +
+      '<div class="teacher-card-actions"><button class="btn-primary" type="button" onclick="printTeacherCard()">' + esc(t('tm.printCard')) + '</button><button class="btn-secondary" type="button" onclick="regenerateTeacherCard(&quot;' + esc(teacherId) + '&quot;,&quot;' + esc(teacherName) + '&quot;)">' + esc(t('tm.regenerateCard')) + '</button></div>';
+    _renderTeacherCardQr(root.querySelector('.teacher-id-card-qr'), loginUrl);
+  } catch (e) {
+    const root = document.getElementById('teacherCardRoot');
+    if (root) root.innerHTML = '<div class="form-error">' + esc(t('tm.cardFailed')) + '<br><small>' + esc(e?.message || String(e)) + '</small></div>';
+  }
+};
+
+function _renderTeacherCardQr(el, value) {
+  if (!el) return;
+  if (window.QRCode?.toCanvas) {
+    const canvas=document.createElement('canvas'); el.appendChild(canvas);
+    QRCode.toCanvas(canvas,value,{width:132,margin:1},()=>{});
+    return;
+  }
+  el.textContent='QR';
+}
+
+window.printTeacherCard = function() {
+  const card=document.querySelector('.teacher-id-card');
+  const area=document.getElementById('bulkIdPrintArea');
+  if (!card || !area) return;
+  area.innerHTML=card.outerHTML;
+  document.body.classList.add('printing-teacher-card');
+  window.print();
+  setTimeout(()=>{ document.body.classList.remove('printing-teacher-card'); area.innerHTML=''; },500);
+};
+
+window.regenerateTeacherCard = function(teacherId, teacherName) {
+  closeModal();
+  setTimeout(()=>openTeacherCardModal(teacherId,teacherName),190);
 };
 
 window.resetTeacherPassword = function(teacherId, teacherName) {
