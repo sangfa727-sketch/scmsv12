@@ -7468,3 +7468,108 @@ textarea:active,
     animation-duration: 1ms !important;
   }
 }
+
+
+/* SCMS v12.33 — unified premium data-entry selects
+ * Keep native select semantics/accessibility, but give every form dropdown
+ * the same clean field treatment across all pages and modal cards.
+ */
+#pages select,
+.modal-sheet select,
+.form-input[type="select"],
+select.form-input {
+  -webkit-appearance: none !important;
+  appearance: none !important;
+  box-sizing: border-box !important;
+  width: 100% !important;
+  min-height: 38px !important;
+  height: 38px !important;
+  padding: 0 36px 0 11px !important;
+  border: 1px solid var(--border2) !important;
+  border-radius: 10px !important;
+  background-color: var(--bg2) !important;
+  background-image:
+    linear-gradient(45deg, transparent 50%, var(--muted) 50%),
+    linear-gradient(135deg, var(--muted) 50%, transparent 50%) !important;
+  background-position:
+    calc(100% - 15px) 50%,
+    calc(100% - 10px) 50% !important;
+  background-size: 5px 5px, 5px 5px !important;
+  background-repeat: no-repeat !important;
+  color: var(--text) !important;
+  font: inherit !important;
+  line-height: 1.2 !important;
+  cursor: pointer !important;
+  outline: none !important;
+  box-shadow: 0 1px 2px rgba(0,0,0,.025) !important;
+  transition: border-color .16s ease, box-shadow .16s ease, background-color .16s ease, transform .12s ease !important;
+}
+#pages select:hover,
+.modal-sheet select:hover {
+  background-color: var(--bg3) !important;
+  border-color: var(--border2) !important;
+}
+#pages select:focus-visible,
+.modal-sheet select:focus-visible {
+  border-color: var(--accent) !important;
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--accent) 12%, transparent) !important;
+}
+#pages select:active,
+.modal-sheet select:active {
+  transform: translateY(1px);
+}
+#pages select:disabled,
+.modal-sheet select:disabled {
+  opacity: .58;
+  cursor: not-allowed !important;
+}
+#pages select option,
+.modal-sheet select option {
+  background: var(--surface);
+  color: var(--text);
+  font-family: inherit;
+}
+
+/* Compact modal forms keep the same premium proportions. */
+.modal-sheet select.form-input,
+.modal-sheet:has(select) select {
+  min-height: 37px !important;
+  height: 37px !important;
+  border-radius: 9px !important;
+  padding-left: 9px !important;
+  padding-right: 34px !important;
+}
+
+/* SCMS v12.33 — confirmation dialogs are mathematically centered.
+ * This is intentionally more specific than the generic modal rules so
+ * later responsive/modal overrides cannot push the dialog toward the bottom.
+ */
+body > .modal-overlay.generic-confirm-overlay {
+  position: fixed !important;
+  inset: 0 !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  padding: 18px !important;
+  box-sizing: border-box !important;
+  overflow: hidden !important;
+}
+body > .modal-overlay.generic-confirm-overlay .generic-confirm-sheet {
+  position: relative !important;
+  top: auto !important;
+  left: auto !important;
+  right: auto !important;
+  bottom: auto !important;
+  margin: 0 !important;
+  flex: 0 0 auto !important;
+  align-self: center !important;
+  width: min(92vw, 380px) !important;
+  max-width: 380px !important;
+  max-height: min(82dvh, 620px) !important;
+  transform-origin: center center !important;
+}
+@media (max-width: 520px) {
+  body > .modal-overlay.generic-confirm-overlay {
+    padding: 12px !important;
+  }
+}
