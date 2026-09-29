@@ -36,7 +36,7 @@ test('teacher login identity foundation stays protected', () => {
   assert.match(html, /15_settings\\.js\\?v=20260930k/);
   assert.match(html, /00a_locales_en\\.js\\?v=20260930f/);
   assert.match(html, /00b_locales_my\\.js\\?v=20260930f/);
-  assert.match(html, /00_locales_thai\\.js\\?v=20260930f/);
+  assert.match(html, /00_locales_thai\\.js\\?v=20260930g/);
   assert.match(html, /00_locales_jp\\.js\\?v=20260930h/);
 });
 
