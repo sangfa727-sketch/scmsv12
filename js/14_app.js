@@ -680,9 +680,13 @@ window.openModal = function(html, onClose) {
   // addition to any Cancel button the form itself has — on a full-screen
   // mobile sheet there's no visible backdrop to tap to dismiss, so this is
   // often the only easy way to back out without finishing the form.
+  // Inject the shared close control into any modal sheet, including sheets
+  // with additional classes (e.g. "modal-sheet incident-form-sheet").
+  // Skip injection when a caller already supplied its own close control.
+  const closeButton = `<button type="button" class="modal-close-x" onclick="event.stopPropagation();closeModal()" aria-label="${t('common.close')}">✕</button>`;
   layer.innerHTML = html.replace(
-    /(<div class="modal-sheet"[^>]*>)/,
-    `$1<button type="button" class="modal-close-x" onclick="event.stopPropagation();closeModal()" aria-label="${t('common.close')}">✕</button>`
+    /(<div\\s+[^>]*class=["'][^"']*\\bmodal-sheet\\b[^"']*["'][^>]*>)/i,
+    (match) => match.includes('modal-close-x') ? match : match + closeButton
   );
   layer.onclick = function(e) {
     if (e.target === layer) closeModal();
