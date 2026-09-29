@@ -1369,4 +1369,5 @@ window.I18N_MY = {
   'comms.portalRequired': 'Title နှင့် Start time ထည့်ပါ။',
   'comms.portalPublished': 'မိဘ Portal တွင် ထုတ်ပြန်ပြီးပါပြီ။',
   'err.sessionVerify': 'သိမ်းထားသော session ကို အတည်မပြုနိုင်ပါ။','err.retryHint':'Retry ကိုနှိပ်ပြီး ထပ်မံကြိုးစားပါ။','err.serverUnreachable':'SCMS server သို့ ချိတ်ဆက်၍ မရပါ။','err.technicalDetails':'နည်းပညာဆိုင်ရာအသေးစိတ် (အကူအညီတောင်းရာတွင် screenshot ပေးနိုင်ပါသည်):','err.likelyCause':'ဖြစ်နိုင်သောအကြောင်းရင်း — n8n workflow Active မဖြစ်ခြင်း၊ URL မှားခြင်း သို့မဟုတ် CORS က request ကို ပိတ်ထားခြင်း။',
+  'login.loading':'Login တင်နေသည်…','login.waitRetry':'ခဏစောင့်ပြီး ထပ်မံကြိုးစားပါ။','cg.required':'Class နဲ့ Grade နှစ်ခုလုံး ထည့်ပါ။',
 };
