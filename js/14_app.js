@@ -331,6 +331,10 @@ async function initApp() {
       showToast(t('toast.refreshing'));
       try {
         await API.refreshAll();
+        if (typeof renderSidebar === 'function') renderSidebar();
+        if (typeof window.refreshDashboardLeaveRequests === 'function') {
+          void window.refreshDashboardLeaveRequests();
+        }
         if (typeof renderStudents  === 'function') renderStudents();
         if (typeof renderAttendance === 'function') renderAttendance();
         if (typeof renderDaily     === 'function') renderDaily();
