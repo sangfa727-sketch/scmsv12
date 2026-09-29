@@ -106,10 +106,13 @@ window.openTeacherManager = async function() {
   // Load teachers from the same school
   try {
     let sess = getWebSession();
+    if (!sess?.session_token) {
+      throw new Error('Web session is missing or expired');
+    }
     let res;
     try {
       res = await _webRpc('rpc_admin_list_teachers', {
-        p_session_token: sess?.session_token,
+        p_session_token: sess.session_token,
       });
     } catch (firstError) {
       // A stale browser-cached session can survive a role/session refresh.
@@ -129,7 +132,8 @@ window.openTeacherManager = async function() {
         throw firstError;
       }
     }
-    _renderTeacherList(res.rows || []);
+    const rows = Array.isArray(res?.rows) ? res.rows : [];
+    _renderTeacherList(rows);
   } catch (e) {
     const msg = e?.message || String(e);
     const listEl = document.getElementById('teacherList');
