@@ -85,30 +85,15 @@
   Object.assign(overrides, {'bill.total':'รวม: {n}','bill.feePaidPending':'ชำระค่าธรรมเนียมแล้ว ✓ — {name} はまだ <em>保留中</em> で、生徒一覧には表示されません。','bill.amountBalance':'金額（残額: {n}）','adm.appliedOn':'{date} に応募','adm.movedTo':'✓ {status} に移動しました','adm.selected':'{n}件選択','adm.bulkMoving':'{n}件を{status}へ移動中…','adm.bulkMoved':'✓ {ok}件を{status}へ移動しました','adm.enrolling':'{n}件を登録中…','adm.skipped':'（{n}件スキップ — クラスなし）','adm.enrolledPending':'✓ {ok}件を登録しました（保留）','adm.savedPhotoFail':'保存しましたが、写真のアップロードに失敗しました: {err}'});
   Object.assign(overrides, {'adm.addedPhotoFail':'追加しましたが、写真のアップロードに失敗しました: {err}','adm.officialStudent':'✓ 正式な生徒 — ID <strong>{id}</strong>、クラス {cls}。生徒一覧に表示されます。','adm.pendingCreated':'生徒記録を作成しました（ID <strong>{id}</strong>）が、<em>保留中</em>です — 登録料の支払いまで生徒一覧には表示されません。','adm.regPaid':'登録請求書 {no} — <strong>支払済み ✓</strong>。請求ページで請求書を開き、<em>生徒を有効化</em>をタップしてください。','adm.regUnpaid':'登録請求書 {no} — {status}、残額 {bal}。請求ページで支払いを記録し、支払済みになったら<em>生徒を有効化</em>してください。'});
 
-    'students.validation.parentEmail':'保護者のメールアドレスを正しく入力してください',
-    'students.validation.phone1':'主な電話番号を確認してください',
-    'students.validation.phone2':'予備の電話番号を確認してください',
-    'students.form.savingParent':'保存中…',
-    'students.toast.parentSaved':'保護者情報を保存しました',
-    'students.form.saveParentDetails':'保護者情報を保存',
-    'students.form.parentGuardian':'保護者 / 連絡先',
-    'students.history.title':'生徒履歴',
-    'students.history.empty':'履歴はまだありません',
-    'students.toast.reactivated':'生徒を再有効化しました',
-    'att.historyRecent':'最近の記録と30日間の概要。',
-    'att.report30':'30日間レポート',
-    'att.auditWebOnly':'監査ビューアーはWebセッションでのみ利用できます。',
-    'att.auditTitle':'出欠監査',
-    'att.auditSubtitle':'この学校の出欠保存履歴は管理者のみ閲覧できます。',
-    'att.auditLoading':'監査履歴を読み込み中…',
-    'att.auditEmpty':'出欠監査の記録はありません。',
-    'att.auditLoadFailed':'監査履歴を読み込めませんでした。',
-    'att.correctionMode':'修正モード：選択した日付を確認して保存してください。',
-    'comms.portalScheduleTitle':'保護者ポータルの予定',
-    'comms.portalScheduleSub':'学校の面談、告知、イベントを保護者ポータルに表示します。',
-    'comms.portalTitlePh':'例 — 保護者・教師面談',
-    'comms.portalDescPh':'保護者に知らせる情報',
-    'comms.portalRequired':'タイトルと開始時刻を入力してください。',
-    'comms.portalPublished':'保護者ポータルに公開しました。',
+  Object.assign(overrides, {
+    'students.validation.parentEmail':'保護者のメールアドレスを正しく入力してください','students.validation.phone1':'主な電話番号を確認してください','students.validation.phone2':'予備の電話番号を確認してください',
+    'students.form.savingParent':'保存中…','students.toast.parentSaved':'保護者情報を保存しました','students.form.saveParentDetails':'保護者情報を保存','students.form.parentGuardian':'保護者 / 連絡先',
+    'students.history.title':'生徒履歴','students.history.empty':'履歴はまだありません','students.toast.reactivated':'生徒を再有効化しました',
+    'att.historyRecent':'最近の記録と30日間の概要。','att.report30':'30日間レポート','att.auditWebOnly':'監査ビューアーはWebセッションでのみ利用できます。',
+    'att.auditTitle':'出欠監査','att.auditSubtitle':'この学校の出欠保存履歴は管理者のみ閲覧できます。','att.auditLoading':'監査履歴を読み込み中…',
+    'att.auditEmpty':'出欠監査の記録はありません。','att.auditLoadFailed':'監査履歴を読み込めませんでした。','att.correctionMode':'修正モード：選択した日付を確認して保存してください。',
+    'comms.portalScheduleTitle':'保護者ポータルの予定','comms.portalScheduleSub':'学校の面談、告知、イベントを保護者ポータルに表示します。',
+    'comms.portalTitlePh':'例 — 保護者・教師面談','comms.portalDescPh':'保護者に知らせる情報','comms.portalRequired':'タイトルと開始時刻を入力してください。','comms.portalPublished':'保護者ポータルに公開しました。'
+  });
   window.I18N_JP = Object.assign({}, base, overrides);
 })();
