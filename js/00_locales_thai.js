@@ -13,6 +13,7 @@
     'login.title':'🔐 เข้าสู่ระบบ','login.teacherId':'รหัสครู','login.password':'รหัสผ่าน','login.btn':'เข้าสู่ระบบ','login.signingIn':'กำลังเข้าสู่ระบบ…','pw.old':'รหัสผ่านปัจจุบัน','pw.new':'รหัสผ่านใหม่ (อย่างน้อย 6 ตัวอักษร)','pw.confirm':'ยืนยันรหัสผ่านใหม่','pw.btnChange':'เปลี่ยนรหัสผ่าน',
     'page.dashboard.eyebrow':'ภาพรวม','page.dashboard.title':'<em>แดชบอร์ด</em> วันนี้','page.students.title':'<em>นักเรียน</em>ของฉัน','page.attend.title':'<em>การเข้าเรียน</em>','page.hw.title':'<em>การบ้าน</em>','page.grades.title':'<em>ผลการเรียน</em>','page.billing.title':'<em>การเรียกเก็บเงิน</em>','page.admissions.title':'<em>การรับสมัคร</em>','page.library.title':'<em>ห้องสมุด</em>','page.transport.title':'<em>การเดินทาง</em>','page.incidents.title':'<em>เหตุการณ์</em>','page.timetable.title':'<em>ตารางเรียน</em>','page.summary.title':'<em>สรุปรายเดือน</em>','page.more.title':'<em>ฟีเจอร์เพิ่มเติม</em>',
     'tab.students':'นักเรียน','tab.attend':'เข้าเรียน','tab.daily':'รายวัน','tab.hw':'การบ้าน','tab.chat':'แชต','tab.more':'เพิ่มเติม'
+    'att.clearMarks':'ล้างเครื่องหมาย','att.history':'ประวัติ','att.historyTitle':'ประวัติและรายงาน','att.codes':'รหัส'
   };
   window.I18N_TH = Object.assign({}, base, overrides);
 })();
