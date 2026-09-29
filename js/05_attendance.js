@@ -431,8 +431,8 @@ window.openAttendanceHistory = function() {
   const rows = _attendanceHistoryRows(), report = _attendanceReportSummary();
   openModal(`
     <div class="modal-sheet attendance-history-sheet" onclick="event.stopPropagation()">
-      <div class="modal-handle"></div><h3 class="modal-title">Attendance history</h3>
-      <p class="modal-subtitle">Recent records and 30-day summary.</p>
+      <div class="modal-handle"></div><h3 class="modal-title">${t("att.historyTitle")}</h3>
+      <p class="modal-subtitle">${t("att.historyRecent")}</p>
       <div class="att-history-summary">
         <div><strong>${report.days}</strong><span>Days</span></div>
         <div><strong>${report.marked}</strong><span>Marked</span></div>
@@ -447,7 +447,7 @@ window.openAttendanceHistory = function() {
         <button class="btn-pill-action ghost" onclick="renderAttendanceHistoryRows()">Refresh</button>
       </div>
       <div id="attHistoryRows">${rows}</div>
-      <div class="att-history-report"><div class="att-history-report-title">30-day report</div>
+      <div class="att-history-report"><div class="att-history-report-title">${t("att.report30")}</div>
         <div class="att-report-grid">
           <span>Present <b>${report.P}</b></span><span>Absent <b>${report.A}</b></span>
           <span>Late <b>${report.L}</b></span><span>Sick <b>${report.S}</b></span>
@@ -474,14 +474,14 @@ window.renderAttendanceHistoryRows=function(){const el=document.getElementById('
 
 window.openAttendanceAudit = async function() {
   if (window.APP.platform !== 'web') {
-    showToast('Audit viewer is available on web sessions only.');
+    showToast(t("att.auditWebOnly"));
     return;
   }
   openModal(`
     <div class="modal-sheet attendance-history-sheet" onclick="event.stopPropagation()">
       <div class="modal-handle"></div>
-      <h3 class="modal-title">Attendance audit</h3>
-      <p class="modal-subtitle">Administrator-only attendance save history for this school.</p>
+      <h3 class="modal-title">${t("att.auditTitle")}</h3>
+      <p class="modal-subtitle">${t("att.auditSubtitle")}</p>
       <div class="att-history-toolbar">
         <select class="form-input" id="attAuditClass">
           <option value="">All classes</option>
@@ -498,11 +498,11 @@ window.loadAttendanceAudit = async function() {
   const el = document.getElementById('attAuditRows');
   if (!el) return;
   const className = document.getElementById('attAuditClass')?.value || null;
-  el.innerHTML = '<div class="empty-state"><div class="empty-state-icon">⏳</div><div class="empty-state-text">Loading audit…</div></div>';
+  el.innerHTML = '<div class="empty-state"><div class="empty-state-icon">⏳</div><div class="empty-state-text">${t("att.auditLoading")}</div></div>';
   try {
     const rows = await API.getAttendanceAudit({ className, limit: 100 });
     if (!rows.length) {
-      el.innerHTML = '<div class="empty-state"><div class="empty-state-icon">🛡️</div><div class="empty-state-text">No attendance audit records found.</div></div>';
+      el.innerHTML = '<div class="empty-state"><div class="empty-state-icon">🛡️</div><div class="empty-state-text">${t("att.auditEmpty")}</div></div>';
       return;
     }
     el.innerHTML = `<div class="att-history-list">${rows.map(r => `
@@ -511,14 +511,14 @@ window.loadAttendanceAudit = async function() {
         <div class="att-history-counts"><span>${esc(r.records_count)} records</span><span>${esc(r.actor || '—')}</span></div>
       </div>`).join('')}</div>`;
   } catch (e) {
-    el.innerHTML = `<div class="empty-state"><div class="empty-state-icon">⚠️</div><div class="empty-state-text">${esc(e.message || 'Could not load audit history.')}</div></div>`;
+    el.innerHTML = `<div class="empty-state"><div class="empty-state-icon">⚠️</div><div class="empty-state-text">${esc(e.message || t('att.auditLoadFailed'))}</div></div>`;
   }
 };
 
 window.correctAttendance=function(cls,date){
   closeModal();_attendClass=cls;_attendDate=date;_attendMarks={};_attendNotes={};_stripAnchor=new Date(date+'T00:00:00');
   _renderDateStrip();_renderAttendClassChips();
-  setTimeout(()=>{document.getElementById('page-attend')?.scrollIntoView({behavior:'smooth',block:'start'});showToast('Correction mode: review and save the selected date.');},120);
+  setTimeout(()=>{document.getElementById('page-attend')?.scrollIntoView({behavior:'smooth',block:'start'});showToast(t('att.correctionMode'));},120);
 };
 function _attendanceReportSummary(){
   const data=window.APP.attendance||[], cutoff=new Date();cutoff.setHours(0,0,0,0);cutoff.setDate(cutoff.getDate()-29);
