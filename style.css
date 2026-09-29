@@ -7288,3 +7288,138 @@ html[lang="jp"] .lang-switch, html[lang="jp"] .lang-option { font-family: "Noto 
 
 /* SCMS v12 — stable data-entry controls */
 .page.active .modal-sheet .form-input,.page.active .modal-sheet .form-textarea,.page.active .modal-sheet select,.page.active .modal-sheet input,.page.active .modal-sheet textarea,.page.active .modal-sheet .picker-trigger{animation:none!important;transform:none!important;will-change:auto!important}.modal-sheet .form-input,.modal-sheet .form-textarea,.modal-sheet select,.modal-sheet input,.modal-sheet textarea,.modal-sheet .picker-trigger{backface-visibility:hidden;transform:none!important}.modal-sheet .form-input:focus,.modal-sheet .form-input:active,.modal-sheet .form-textarea:focus,.modal-sheet .form-textarea:active,.modal-sheet select:focus,.modal-sheet select:active,.modal-sheet input:focus,.modal-sheet input:active,.modal-sheet textarea:focus,.modal-sheet textarea:active,.modal-sheet .picker-trigger:focus,.modal-sheet .picker-trigger:active{transform:none!important}.modal-sheet .form-input,.modal-sheet .form-textarea,.modal-sheet select,.modal-sheet input,.modal-sheet textarea{transition:border-color .16s ease,background-color .16s ease,box-shadow .18s ease,color .16s ease!important}.modal-sheet{isolation:isolate}.library-book-actions{display:flex;align-items:stretch;gap:7px;flex-wrap:wrap;width:100%;margin-top:12px}.library-book-actions>button{flex:1 1 150px;min-width:0!important;min-height:38px!important;margin:0!important;white-space:normal;line-height:1.25;text-align:center}.library-book-actions>.library-danger-action{flex:0 1 auto}.library-checkout-action{flex:1 1 100%!important}.library-current-row{display:grid;grid-template-columns:minmax(0,1fr) auto;align-items:center;gap:9px;padding:9px 0;border-bottom:1px solid var(--border)}.library-current-row:last-child{border-bottom:0}.library-current-info{min-width:0;line-height:1.4}.library-current-info .muted-note{display:block;margin-top:2px;padding:0;line-height:1.35}.library-current-row .btn-pill-action{flex:0 0 auto;min-height:34px;padding:6px 11px;white-space:nowrap}.library-empty-note{margin:0;padding:8px 0 2px;line-height:1.45}.library-history-row{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:9px;align-items:center;padding:7px 0;border-bottom:1px solid var(--border)}.library-history-row:last-child{border-bottom:0}.library-history-row>span{min-width:0}@media(max-width:430px){.library-book-actions{gap:6px}.library-book-actions>button{flex-basis:100%}.library-current-row,.library-history-row{grid-template-columns:minmax(0,1fr);gap:6px}.library-current-row .btn-pill-action{width:100%}}
+
+/* SCMS v12.35 — pre-auth landing language switch
+   Language can be selected before Login / Sign Up and stays compact on
+   mobile and desktop. The control is independent from authenticated header UI. */
+.landing-logo-row {
+  width: 100%;
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 18px;
+}
+.landing-logo-row .landing-logo {
+  margin-bottom: 0;
+}
+.landing-lang-picker {
+  position: relative;
+  flex: 0 0 auto;
+  z-index: 20;
+}
+.landing-lang-switch {
+  min-width: 50px;
+  height: 34px;
+  padding: 0 8px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 5px;
+  border: 1px solid var(--border2);
+  border-radius: 9px;
+  background: var(--surface);
+  color: var(--text);
+  font: 700 11px/1 "Inter Tight", system-ui, sans-serif;
+  box-shadow: 0 2px 8px rgba(0,0,0,.06);
+  transition: background .15s ease, border-color .15s ease, box-shadow .15s ease;
+}
+.landing-lang-switch:hover {
+  border-color: var(--text2);
+  background: var(--bg2);
+}
+.landing-lang-switch:focus-visible {
+  outline: none;
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--blue) 20%, transparent);
+}
+.landing-lang-switch svg {
+  width: 11px;
+  height: 11px;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 1.8;
+  transition: transform .16s ease;
+}
+.landing-lang-picker.is-open .landing-lang-switch svg {
+  transform: rotate(180deg);
+}
+.landing-lang-menu {
+  position: absolute;
+  top: calc(100% + 7px);
+  right: 0;
+  width: 156px;
+  padding: 5px;
+  border: 1px solid var(--border2);
+  border-radius: 11px;
+  background: var(--surface);
+  box-shadow: 0 14px 34px rgba(0,0,0,.18);
+  opacity: 0;
+  visibility: hidden;
+  transform: translateY(-4px) scale(.98);
+  transform-origin: top right;
+  pointer-events: none;
+  transition: opacity .14s ease, transform .14s ease, visibility .14s ease;
+}
+.landing-lang-picker.is-open .landing-lang-menu {
+  opacity: 1;
+  visibility: visible;
+  transform: translateY(0) scale(1);
+  pointer-events: auto;
+}
+.landing-lang-option {
+  width: 100%;
+  min-height: 34px;
+  padding: 6px 9px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  border: 0;
+  border-radius: 7px;
+  background: transparent;
+  color: var(--text);
+  text-align: left;
+  font: 600 12px/1.2 "Inter Tight", system-ui, sans-serif;
+}
+.landing-lang-option span {
+  font-weight: 700;
+}
+.landing-lang-option small {
+  color: var(--muted);
+  font-size: 10px;
+  white-space: nowrap;
+}
+.landing-lang-option:hover,
+.landing-lang-option:focus-visible {
+  outline: none;
+  background: var(--bg2);
+}
+.landing-lang-option.is-active {
+  background: color-mix(in srgb, var(--blue) 12%, transparent);
+}
+html[lang="my"] .landing-lang-switch,
+html[lang="my"] .landing-lang-option {
+  font-family: "Noto Sans Myanmar", "Inter Tight", system-ui, sans-serif;
+}
+html[lang="th"] .landing-lang-switch,
+html[lang="th"] .landing-lang-option {
+  font-family: "Noto Sans Thai", "Inter Tight", system-ui, sans-serif;
+}
+html[lang="jp"] .landing-lang-switch,
+html[lang="jp"] .landing-lang-option {
+  font-family: "Noto Sans JP", "Inter Tight", system-ui, sans-serif;
+}
+@media (max-width: 430px) {
+  .landing-logo-row {
+    gap: 8px;
+    margin-bottom: 14px;
+  }
+  .landing-lang-switch {
+    height: 32px;
+    min-width: 46px;
+    padding: 0 7px;
+  }
+  .landing-lang-menu {
+    width: 148px;
+  }
+}
