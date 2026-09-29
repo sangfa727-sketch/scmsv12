@@ -33,11 +33,11 @@ test('teacher login identity foundation stays protected', () => {
   assert.match(settings, /p_login_name:\s*login/);
   assert.match(settings, /p_initial_pin:\s*pw/);
   assert.match(html, /00_landing\.js\?v=20260930b/);
-  assert.match(html, /15_settings\.js\?v=20260930i/);
-  assert.match(html, /00a_locales_en\.js\?v=20260930e/);
-  assert.match(html, /00b_locales_my\.js\?v=20260930e/);
-  assert.match(html, /00_locales_thai\.js\?v=20260930e/);
-  assert.match(html, /00_locales_jp\.js\?v=20260930e/);
+  assert.match(html, /15_settings\\.js\\?v=20260930k/);
+  assert.match(html, /00a_locales_en\\.js\\?v=20260930f/);
+  assert.match(html, /00b_locales_my\\.js\\?v=20260930f/);
+  assert.match(html, /00_locales_thai\\.js\\?v=20260930f/);
+  assert.match(html, /00_locales_jp\\.js\\?v=20260930g/);
 });
 
 test('critical frontend files have no obvious unresolved merge markers', () => {
