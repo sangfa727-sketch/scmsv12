@@ -1,5 +1,6 @@
 // မြန်မာ ဘာသာပြန်ချက်များ — key တွေ English နဲ့ ထပ်တူညီရမယ်
 window.I18N_MY = {
+  'app.title': 'SCMS — School Class Management',
     // ── Common ──
   'common.all': 'အားလုံး',
   'common.edit': 'ပြင်ရန်',
@@ -236,6 +237,10 @@ window.I18N_MY = {
   'att.markAll': 'အားလုံး တက်ရောက်ဟု မှတ်ရန်',
   'att.date': 'ရက်စွဲ',
   'att.saveAttendance': 'တက်ရောက်မှု သိမ်းရန်',
+  'att.clearMarks': 'မှတ်တမ်းများ ရှင်းရန်',
+  'att.history': 'မှတ်တမ်း',
+  'att.historyTitle': 'မှတ်တမ်းနှင့် အစီရင်ခံစာများ',
+  'att.codes': 'ကုဒ်များ',
 
   // ── Added: t() wiring for Students / Attendance / Landing (v11.8) ──
   'common.optional': '(မဖြည့်လည်းရ)',
