@@ -160,12 +160,17 @@ function _renderTeacherList(teachers) {
     const roleBadge = (teacher.role === 'admin' || teacher.role === 'super_admin') ? ' 👑' : '';
     const statusDot = teacher.status === 'active' ? '🟢' : '⚪';
     return `
-      <div class="teacher-row" data-tid="${esc(teacher.teacher_id)}">
+      <div class="teacher-row teacher-row-card" data-tid="${esc(teacher.teacher_id)}" onclick="openTeacherEditModal('${esc(teacher.teacher_id)}')">
         <div class="teacher-row-info">
           <div class="teacher-row-name">${statusDot} ${esc(teacher.teacher_name)}${roleBadge}</div>
           <div class="teacher-row-sub">${esc(teacher.login_name || teacher.teacher_id)} · ${esc(teacher.teacher_id)} · ${esc(teacher.role ? tv('roleName', teacher.role) : t('inv.roleTeacher'))} · ${t('tm.lastLogin', { date: lastLogin })}</div>
         </div>
-<div class="teacher-row-actions"><button class="icon-btn-mini teacher-access-btn" onclick="closeModal(); setTimeout(() => openTeacherAccess('${esc(teacher.teacher_id)}', '${esc(teacher.teacher_name)}'), 190)" title="Manage access">🔐</button> <button class="icon-btn-mini" onclick="openTeacherCardModal('${esc(teacher.teacher_id)}', '${esc(teacher.teacher_name)}')" title="${esc(t('tm.idCard'))}">🪪</button> <button class="icon-btn-mini" onclick="resetTeacherPassword('${esc(teacher.teacher_id)}', '${esc(teacher.teacher_name)}')" title="${esc(t('tm.resetPassword'))}">🔑</button></div>
+        <div class="teacher-row-actions">
+          <button class="icon-btn-mini teacher-edit-btn" onclick="event.stopPropagation(); openTeacherEditModal('${esc(teacher.teacher_id)}')" title="Edit teacher">✏️</button>
+          <button class="icon-btn-mini teacher-access-btn" onclick="event.stopPropagation(); closeModal(); setTimeout(() => openTeacherAccess('${esc(teacher.teacher_id)}', '${esc(teacher.teacher_name)}'), 190)" title="Manage access">🔐</button>
+          <button class="icon-btn-mini" onclick="event.stopPropagation(); openTeacherCardModal('${esc(teacher.teacher_id)}', '${esc(teacher.teacher_name)}', '${esc(teacher.login_name || '')}')" title="${esc(t('tm.idCard'))}">🪪</button>
+          <button class="icon-btn-mini" onclick="event.stopPropagation(); resetTeacherPassword('${esc(teacher.teacher_id)}', '${esc(teacher.teacher_name)}')" title="${esc(t('tm.resetPassword'))}">🔑</button>
+        </div>
       </div>`;
   }).join('');
 }
@@ -289,6 +294,69 @@ window.openCreateTeacherModal = function() {
   `);
 };
 
+window.openTeacherEditModal = async function(teacherId) {
+  const sess = getWebSession();
+  if (!sess?.session_token) { showToast(t('ct.sessionExpired')); return; }
+  let teachers = [];
+  try {
+    const res = await _webRpc('rpc_admin_list_teachers', { p_session_token: sess.session_token });
+    teachers = Array.isArray(res?.rows) ? res.rows : [];
+  } catch (_) {}
+  const teacher = teachers.find(row => row.teacher_id === teacherId);
+  if (!teacher) { showToast(t('tm.loadFailed')); return; }
+
+  openModal(`
+    <div class="modal-sheet settings-form-sheet teacher-edit-sheet" onclick="event.stopPropagation()">
+      <div class="modal-handle"></div>
+      <h3 class="modal-title">✏️ Edit Teacher</h3>
+      <p class="modal-subtitle">Update the teacher name and Login Name used by the ID card and teacher login.</p>
+      <label class="field-label">Teacher ID</label>
+      <input class="form-input" value="${esc(teacher.teacher_id)}" readonly>
+      <label class="field-label">User name / Login Name</label>
+      <input class="form-input" id="editTLogin" value="${esc(teacher.login_name || '')}" autocapitalize="off" autocorrect="off">
+      <label class="field-label">Teacher Name</label>
+      <input class="form-input" id="editTName" value="${esc(teacher.teacher_name || '')}">
+      <label class="field-label">Email</label>
+      <input class="form-input" id="editTEmail" type="email" value="${esc(teacher.email || teacher.teacher_email || '')}">
+      <label class="field-label">Role</label>
+      <select class="form-input" id="editTRole">
+        <option value="teacher" ${teacher.role === 'teacher' ? 'selected' : ''}>Teacher</option>
+        <option value="admin" ${teacher.role === 'admin' ? 'selected' : ''}>Admin</option>
+        <option value="super_admin" ${teacher.role === 'super_admin' ? 'selected' : ''}>Super Admin</option>
+      </select>
+      <div id="editTError" class="form-error" style="display:none"></div>
+      <button class="btn-primary mt16" id="editTBtn" onclick="saveTeacherEdit('${esc(teacher.teacher_id)}')">Save changes</button>
+      <button class="btn-secondary" onclick="closeModal()">Cancel</button>
+    </div>
+  `);
+};
+
+window.saveTeacherEdit = async function(teacherId) {
+  const btn = document.getElementById('editTBtn');
+  const err = document.getElementById('editTError');
+  const login = document.getElementById('editTLogin')?.value.trim() || '';
+  const name = document.getElementById('editTName')?.value.trim() || '';
+  const email = document.getElementById('editTEmail')?.value.trim() || null;
+  const role = document.getElementById('editTRole')?.value || 'teacher';
+  if (!login || !name) { err.textContent = 'User name and Teacher Name are required.'; err.style.display = 'block'; return; }
+  const sess = getWebSession();
+  if (!sess?.session_token) { err.textContent = t('ct.sessionExpired'); err.style.display = 'block'; return; }
+  btn.disabled = true; btn.textContent = 'Saving…';
+  try {
+    const result = await _webRpc('rpc_admin_update_teacher_profile', {
+      p_session_token: sess.session_token, p_teacher_id: teacherId,
+      p_teacher_name: name, p_login_name: login, p_email: email, p_role: role
+    });
+    if (!result?.ok) throw new Error(result?.error || 'save_failed');
+    closeModal(); showToast('Teacher updated');
+    setTimeout(() => openTeacherManager(), 190);
+  } catch (e) {
+    err.textContent = e?.message || String(e); err.style.display = 'block';
+  } finally {
+    btn.disabled = false; btn.textContent = 'Save changes';
+  }
+};
+
 window.doCreateTeacher = async function() {
   const id    = document.getElementById('newTId')?.value.trim();
   const login = document.getElementById('newTLogin')?.value.trim();
@@ -357,15 +425,20 @@ window.openTeacherCardModal = async function(teacherId, teacherName, teacherLogi
     const sess = getWebSession();
     if (!sess?.session_token) throw new Error('session_expired');
     const result = await _webRpc('rpc_admin_create_teacher_card', { p_session_token: sess.session_token, p_teacher_id: teacherId });
+    let teacherProfile = null;
+    try {
+      const listResult = await _webRpc('rpc_admin_list_teachers', { p_session_token: sess.session_token });
+      teacherProfile = (Array.isArray(listResult?.rows) ? listResult.rows : []).find(row => row.teacher_id === teacherId) || null;
+    } catch (_) {}
     const root = document.getElementById('teacherCardRoot');
     if (!root) return;
     if (!result?.ok) throw new Error(result?.error || 'card_failed');
 
     const loginUrl = location.origin + location.pathname + '?teacher_card=' + encodeURIComponent(result.token);
-    const resolvedName = result.teacher_name || teacherName || '';
-    const resolvedLogin = result.login_name || teacherLoginName || '';
+    const resolvedName = teacherProfile?.teacher_name || result.teacher_name || teacherName || '';
+    const resolvedLogin = teacherProfile?.login_name || result.login_name || teacherLoginName || '';
     const hasDistinctLogin = resolvedLogin && resolvedLogin !== result.teacher_id;
-    const photo = typeof result.photo_url === 'string' ? result.photo_url.trim() : '';
+    const photoValue = teacherProfile?.photo_url || result.photo_url || '';\n    const photo = typeof photoValue === 'string' ? photoValue.trim() : '';
 
     root.innerHTML = '<div class="teacher-id-card">' +
       '<div class="teacher-id-card-head"><strong>' + esc(window.APP?.school_name || '') + '</strong><span>Teacher ID Card</span></div>' +
@@ -379,7 +452,7 @@ window.openTeacherCardModal = async function(teacherId, teacherName, teacherLogi
           '<div class="teacher-id-card-name">' + esc(resolvedName || '—') + '</div>' +
           '<div class="teacher-id-card-line"><span>Teacher ID</span><strong>' + esc(result.teacher_id || teacherId) + '</strong></div>' +
           (hasDistinctLogin ? '<div class="teacher-id-card-line"><span>Login</span><strong>' + esc(resolvedLogin) + '</strong></div>' : '') +
-          '<div class="teacher-id-card-line"><span>Role</span><strong>' + esc(result.role || 'teacher') + '</strong></div>' +
+          '<div class="teacher-id-card-line"><span>Role</span><strong>' + esc(teacherProfile?.role || result.role || 'teacher') + '</strong></div>' +
         '</div>' +
         '<div class="teacher-id-card-qr" data-token="' + esc(result.token) + '" aria-label="Teacher login QR"></div>' +
       '</div>' +
