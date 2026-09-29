@@ -82,5 +82,6 @@
   Object.assign(overrides, {
     'modules.saveFailed':'保存できませんでした: {err}','cg.confirmRemove':'{list} から「{value}」を削除しますか？','cg.couldNotSave':'保存できませんでした: {err}','boot.user':'ユーザー: {name}','common.deleteFailed':'削除に失敗しました: {err}','common.updateFailed':'更新に失敗しました: {err}','daily.noStudents':'{cls} に生徒はいません','daily.modalTitle':'日次レポート — {name}','daily.saved':'✓ {name} のレポートを保存しました','daily.pickerSub':'{date} のレポート','hw.lb':'LB p.{n}','hw.wb':'WB p.{n}','comms.classBroadcast':'一斉連絡 — {class}','tt.noClasses':'{day} のクラスはありません','tt.room':'教室 {n}','tt.periods':'{day} に {n} 時限','tt.period1':'{day} に {n} 時限','grades.metaLine':'{date} · 満点 {max} · 重み {w}%','grades.classMax':'{cls} · 満点 {max}','bill.cardSub':'{cls} · 期限 {due} · 合計 {total}'
   });
+  Object.assign(overrides, {'bill.total':'รวม: {n}','bill.feePaidPending':'ชำระค่าธรรมเนียมแล้ว ✓ — {name} はまだ <em>保留中</em> で、生徒一覧には表示されません。','bill.amountBalance':'金額（残額: {n}）','adm.appliedOn':'{date} に応募','adm.movedTo':'✓ {status} に移動しました','adm.selected':'{n}件選択','adm.bulkMoving':'{n}件を{status}へ移動中…','adm.bulkMoved':'✓ {ok}件を{status}へ移動しました','adm.enrolling':'{n}件を登録中…','adm.skipped':'（{n}件スキップ — クラスなし）','adm.enrolledPending':'✓ {ok}件を登録しました（保留）','adm.savedPhotoFail':'保存しましたが、写真のアップロードに失敗しました: {err}'});
   window.I18N_JP = Object.assign({}, base, overrides);
 })();
