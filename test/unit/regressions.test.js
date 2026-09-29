@@ -18,8 +18,8 @@ test('teacher ID card foundation stays protected', () => {
   assert.match(css, /\.teacher-id-card/);
   assert.match(css, /printing-teacher-card/);
   assert.match(html, /qrcode@1\.5\.4/);
-  assert.match(html, /15_settings\\.js\\?v=20260930k/);
-  assert.match(html, /style\\.css\\?v=20260930l/);
+  assert.match(html, /15_settings\.js\?v=20260930k/);
+  assert.match(html, /style\.css\?v=20260930l/);
 });
 test('teacher login identity foundation stays protected', () => {
   const landing = read('js/00_landing.js');
@@ -33,11 +33,11 @@ test('teacher login identity foundation stays protected', () => {
   assert.match(settings, /p_login_name:\s*login/);
   assert.match(settings, /p_initial_pin:\s*pw/);
   assert.match(html, /00_landing\.js\?v=20260930b/);
-  assert.match(html, /15_settings\\.js\\?v=20260930k/);
-  assert.match(html, /00a_locales_en\\.js\\?v=20260930f/);
-  assert.match(html, /00b_locales_my\\.js\\?v=20260930f/);
-  assert.match(html, /00_locales_thai\\.js\\?v=20260930h/);
-  assert.match(html, /00_locales_jp\\.js\\?v=20260930h/);
+  assert.match(html, /15_settings\.js\?v=20260930k/);
+  assert.match(html, /00a_locales_en\.js\?v=20260930f/);
+  assert.match(html, /00b_locales_my\.js\?v=20260930f/);
+  assert.match(html, /00_locales_thai\.js\?v=20260930h/);
+  assert.match(html, /00_locales_jp\.js\?v=20260930h/);
 });
 
 test('critical frontend files have no obvious unresolved merge markers', () => {
