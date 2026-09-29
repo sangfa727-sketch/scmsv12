@@ -168,10 +168,21 @@ const I18N = {
     // 5b. Browser document title
     document.title = this.t('app.title');
 
-    // 6. Language dropdown — keep the selected option in sync after every apply.
-    const selector = document.getElementById('langSwitch');
-    if (selector) selector.value = this.current;
-    
+    // 6. Compact custom language picker.
+    const picker = document.getElementById('langPicker');
+    const trigger = document.getElementById('langSwitch');
+    const label = document.getElementById('langSwitchLabel');
+    const menu = document.getElementById('langMenu');
+    if (label) label.textContent = LANGUAGES.find(l => l.code === this.current)?.label || this.current.toUpperCase();
+    if (menu) {
+      menu.querySelectorAll('[data-lang]').forEach(option => {
+        const active = option.getAttribute('data-lang') === this.current;
+        option.setAttribute('aria-selected', String(active));
+        option.classList.toggle('is-active', active);
+      });
+    }
+    if (trigger) trigger.setAttribute('aria-expanded', 'false');
+    if (picker) picker.classList.remove('is-open');
   },
 };
 
@@ -191,15 +202,36 @@ window.tv = (group, value) => I18N.tv(group, value);
 
   // Language switch button ကို ချိတ်ဆက်
   function wireSwitch() {
-    const switchBtn = document.getElementById('langSwitch');
-    if (!switchBtn) {
-      console.warn('[i18n] #langSwitch button not found');
+    const picker = document.getElementById('langPicker');
+    const trigger = document.getElementById('langSwitch');
+    const menu = document.getElementById('langMenu');
+    if (!picker || !trigger || !menu) {
+      console.warn('[i18n] language picker not found');
       return;
     }
-    switchBtn.addEventListener('change', (e) => {
-      const lang = e.target.value;
-      if (LANGUAGES.some(l => l.code === lang)) {
-        I18N.setLang(lang);
+    trigger.addEventListener('click', (e) => {
+      e.stopPropagation();
+      const open = picker.classList.toggle('is-open');
+      trigger.setAttribute('aria-expanded', String(open));
+    });
+    menu.querySelectorAll('[data-lang]').forEach(option => {
+      option.addEventListener('click', (e) => {
+        e.stopPropagation();
+        const lang = option.getAttribute('data-lang');
+        if (LANGUAGES.some(l => l.code === lang)) I18N.setLang(lang);
+        picker.classList.remove('is-open');
+        trigger.setAttribute('aria-expanded', 'false');
+      });
+    });
+    document.addEventListener('click', () => {
+      picker.classList.remove('is-open');
+      trigger.setAttribute('aria-expanded', 'false');
+    });
+    trigger.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape') {
+        picker.classList.remove('is-open');
+        trigger.setAttribute('aria-expanded', 'false');
+        trigger.blur();
       }
     });
   }
