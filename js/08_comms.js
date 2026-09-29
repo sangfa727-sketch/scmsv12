@@ -86,8 +86,8 @@ window.openParentPortalEventModal = function() {
   openModal(`
     <div class="modal-sheet comms-form-sheet" onclick="event.stopPropagation()">
       <div class="modal-handle"></div>
-      <h3 class="modal-title">Parent Portal schedule</h3>
-      <p class="modal-subtitle">Exam မဟုတ်တဲ့ school meeting, announcement, event တွေကို မိဘ Portal မှာ ပြပါမယ်။</p>
+      <h3 class="modal-title">${t("comms.portalScheduleTitle")}</h3>
+      <p class="modal-subtitle">${t("comms.portalScheduleSub")}</p>
 
       <label class="field-label">Event type</label>
       <select class="form-input" id="ppeType">
@@ -98,7 +98,7 @@ window.openParentPortalEventModal = function() {
       </select>
 
       <label class="field-label">Title</label>
-      <input class="form-input" id="ppeTitle" placeholder="ဥပမာ — မိဘဆရာတွေ့ဆုံပွဲ">
+      <input class="form-input" id="ppeTitle" placeholder="${esc(t("comms.portalTitlePh"))}">
 
       <label class="field-label">Class</label>
       <select class="form-input" id="ppeClass">
@@ -113,7 +113,7 @@ window.openParentPortalEventModal = function() {
       <input class="form-input" id="ppeEnd" type="datetime-local">
 
       <label class="field-label">Description</label>
-      <textarea class="form-textarea" id="ppeDesc" rows="3" placeholder="မိဘတွေ သိထားသင့်တဲ့ အချက်များ"></textarea>
+      <textarea class="form-textarea" id="ppeDesc" rows="3" placeholder="${esc(t("comms.portalDescPh"))}"></textarea>
 
       <div class="modal-footer">
 <button class="btn-primary mt16" id="ppeSaveBtn" onclick="saveParentPortalEvent()">Publish to Parent Portal</button>
@@ -129,7 +129,7 @@ window.saveParentPortalEvent = async function() {
   const start = document.getElementById('ppeStart')?.value;
   const end = document.getElementById('ppeEnd')?.value;
   if (!title || !start) {
-    showToast('Title နဲ့ Start time ထည့်ပါ');
+    showToast(t("comms.portalRequired"));
     return;
   }
   btn.disabled = true;
@@ -143,10 +143,10 @@ window.saveParentPortalEvent = async function() {
       description: document.getElementById('ppeDesc')?.value.trim() || null,
     });
     closeModal();
-    showToast('Parent Portal မှာ ထုတ်ပြန်ပြီးပါပြီ');
+    showToast(t("comms.portalPublished"));
   } catch (e) {
     btn.disabled = false;
-    showToast((t('common.failed') || 'Failed') + ' ' + (e.message || ''));
+    showToast((t('common.failed') || t('common.error')) + ' ' + (e.message || ''));
   }
 };
 
