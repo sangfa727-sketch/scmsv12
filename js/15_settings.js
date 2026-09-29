@@ -342,7 +342,7 @@ window.doCreateTeacher = async function() {
     showToast(t('ct.created'));
     // A newly-created teacher should receive their secure ID card immediately.
     // The card RPC generates a fresh token and revokes any previous active card.
-    closeModal(() => openTeacherCardModal(id, name, login));
+    setTimeout(() => openTeacherCardModal(id, name, login), 280);
   } catch (e) {
     errEl.textContent = t('ct.connErr');
     errEl.style.display = 'block';
@@ -360,15 +360,34 @@ window.openTeacherCardModal = async function(teacherId, teacherName, teacherLogi
     const root = document.getElementById('teacherCardRoot');
     if (!root) return;
     if (!result?.ok) throw new Error(result?.error || 'card_failed');
+
     const loginUrl = location.origin + location.pathname + '?teacher_card=' + encodeURIComponent(result.token);
+    const resolvedName = result.teacher_name || teacherName || '';
+    const resolvedLogin = result.login_name || teacherLoginName || '';
+    const hasDistinctLogin = resolvedLogin && resolvedLogin !== result.teacher_id;
+    const photo = typeof result.photo_url === 'string' ? result.photo_url.trim() : '';
+
     root.innerHTML = '<div class="teacher-id-card">' +
-      '<div class="teacher-id-card-head"><strong>' + esc(window.APP?.school_name || '') + '</strong><span>SCMS</span></div>' +
-      '<div class="teacher-id-card-body"><div class="teacher-id-card-avatar">' + (result.photo_url ? '<img src="' + esc(result.photo_url) + '" alt="">' : '👤') + '</div>' +
-      '<div class="teacher-id-card-info"><div class="teacher-id-card-name">' + esc(result.teacher_name) + '</div><div class="teacher-id-card-line">' + esc(result.teacher_id) + '</div><div class="teacher-id-card-line">' + esc(result.login_name || teacherLoginName || '') + '</div><div class="teacher-id-card-line">' + esc(result.role) + '</div></div>' +
-      '<div class="teacher-id-card-qr" data-token="' + esc(result.token) + '"></div></div>' +
-      '<div class="teacher-id-card-foot"><span>' + esc(t('tm.cardScan')) + '</span><span>' + esc(result.token_prefix) + '</span></div></div>' +
-      '<div class="teacher-card-actions"><button class="btn-primary" type="button" onclick="printTeacherCard()">' + esc(t('tm.printCard')) + '</button><button class="btn-secondary" type="button" onclick="regenerateTeacherCard(&quot;' + esc(teacherId) + '&quot;,&quot;' + esc(teacherName) + '&quot;)">' + esc(t('tm.regenerateCard')) + '</button></div>';
-    _renderTeacherCardQr(root.querySelector('.teacher-id-card-qr'), loginUrl);
+      '<div class="teacher-id-card-head"><strong>' + esc(window.APP?.school_name || '') + '</strong></div>' +
+      '<div class="teacher-id-card-body">' +
+        '<div class="teacher-id-card-avatar">' +
+          (photo ? '<img src="' + esc(photo) + '" alt="' + esc(resolvedName) + '" referrerpolicy="no-referrer" onerror="this.style.display=\'none\';this.parentElement.classList.add(\'is-fallback\')">' : '') +
+          '<span class="teacher-id-card-avatar-fallback">👤</span>' +
+        '</div>' +
+        '<div class="teacher-id-card-info">' +
+          '<div class="teacher-id-card-name">' + esc(resolvedName) + '</div>' +
+          '<div class="teacher-id-card-line"><span>Teacher ID</span><strong>' + esc(result.teacher_id || teacherId) + '</strong></div>' +
+          (hasDistinctLogin ? '<div class="teacher-id-card-line"><span>Login</span><strong>' + esc(resolvedLogin) + '</strong></div>' : '') +
+          '<div class="teacher-id-card-line"><span>Role</span><strong>' + esc(result.role || '') + '</strong></div>' +
+        '</div>' +
+        '<div class="teacher-id-card-qr" data-token="' + esc(result.token) + '" aria-label="Teacher login QR"></div>' +
+      '</div>' +
+      '<div class="teacher-id-card-foot"><span>' + esc(t('tm.cardScan')) + '</span><span>' + esc(result.token_prefix || '') + '</span></div>' +
+    '</div>' +
+    '<div class="teacher-card-actions"><button class="btn-primary" type="button" onclick="printTeacherCard()">' + esc(t('tm.printCard')) + '</button><button class="btn-secondary" type="button" onclick="regenerateTeacherCard(&quot;' + esc(teacherId) + '&quot;,&quot;' + esc(teacherName) + '&quot;)">' + esc(t('tm.regenerateCard')) + '</button></div>';
+
+    const qrEl = root.querySelector('.teacher-id-card-qr');
+    _renderTeacherCardQr(qrEl, loginUrl);
   } catch (e) {
     const root = document.getElementById('teacherCardRoot');
     if (root) root.innerHTML = '<div class="form-error">' + esc(t('tm.cardFailed')) + '<br><small>' + esc(e?.message || String(e)) + '</small></div>';
@@ -376,13 +395,43 @@ window.openTeacherCardModal = async function(teacherId, teacherName, teacherLogi
 };
 
 function _renderTeacherCardQr(el, value) {
-  if (!el) return;
-  if (window.QRCode?.toCanvas) {
-    const canvas=document.createElement('canvas'); el.appendChild(canvas);
-    QRCode.toCanvas(canvas,value,{width:132,margin:1},()=>{});
+  if (!el || !value) return;
+  el.innerHTML = '';
+  const QR = window.QRCode;
+
+  if (QR && typeof QR.toCanvas === 'function') {
+    const canvas = document.createElement('canvas');
+    canvas.width = 148;
+    canvas.height = 148;
+    el.appendChild(canvas);
+    QR.toCanvas(canvas, value, { width: 148, margin: 1, errorCorrectionLevel: 'M' }, (err) => {
+      if (err) {
+        el.innerHTML = '';
+        _renderTeacherCardQrLegacy(el, value);
+      }
+    });
     return;
   }
-  el.textContent='QR';
+
+  _renderTeacherCardQrLegacy(el, value);
+}
+
+function _renderTeacherCardQrLegacy(el, value) {
+  const QR = window.QRCode;
+  if (typeof QR !== 'function') {
+    el.innerHTML = '<span class="teacher-id-card-qr-error">QR unavailable</span>';
+    return;
+  }
+  try {
+    new QR(el, {
+      text: value,
+      width: 148,
+      height: 148,
+      correctLevel: QR.CorrectLevel?.M || 0
+    });
+  } catch (_) {
+    el.innerHTML = '<span class="teacher-id-card-qr-error">QR unavailable</span>';
+  }
 }
 
 window.printTeacherCard = function() {
