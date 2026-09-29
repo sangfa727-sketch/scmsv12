@@ -145,7 +145,8 @@ window.saveIncident = async function() {
 
   if (!stu) { showToast(t('inc.pickFirst')); return; }
 
-  btn.disabled = true; btn.textContent = t('common.saving');
+  if (!btn) return;
+  btn.disabled = true; btn.setAttribute('aria-busy', 'true'); btn.textContent = t('common.saving');
 
   try {
     const data = {
@@ -170,7 +171,7 @@ window.saveIncident = async function() {
     showToast(t('inc.logged'));
     if (window.APP.tg?.HapticFeedback) window.APP.tg.HapticFeedback.notificationOccurred('success');
   } catch (e) {
-    btn.disabled = false; btn.textContent = t('btn.save');
+    btn.disabled = false; btn.removeAttribute('aria-busy'); btn.textContent = t('btn.save');
     showToast(t('att.saveFailed', { err: e.message || t('common.error') }));
   }
 };
@@ -220,7 +221,8 @@ window.openEditIncident = function(id) {
 
 window.saveEditIncident = async function(id) {
   const btn = document.getElementById('saveEincBtn');
-  btn.disabled = true; btn.textContent = t('common.saving');
+  if (!btn) return;
+  btn.disabled = true; btn.setAttribute('aria-busy', 'true'); btn.textContent = t('common.saving');
   try {
     const patch = {
       type:            document.getElementById('eincType').value,
@@ -236,7 +238,7 @@ window.saveEditIncident = async function(id) {
     _renderIncidentList();
     showToast(t('inc.updated'));
   } catch (e) {
-    btn.disabled = false; btn.textContent = t('common.saveChanges');
+    btn.disabled = false; btn.removeAttribute('aria-busy'); btn.textContent = t('common.saveChanges');
     showToast(t('common.updateFailed', { err: e.message || t('common.error') }));
   }
 };
