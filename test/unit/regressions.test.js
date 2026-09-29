@@ -13,6 +13,10 @@ test('teacher ID card foundation stays protected', () => {
   assert.match(settings, /rpc_admin_create_teacher_card/);
   assert.match(settings, /openTeacherCardModal\(id, name, login\)/);
   assert.match(settings, /openTeacherCardModal/);
+  assert.match(settings, /openTeacherEditModal/);
+  assert.match(settings, /saveTeacherEdit/);
+  assert.match(settings, /rpc_admin_update_teacher_profile/);
+  assert.match(settings, /teacher-edit-btn/);
   assert.match(settings, /printTeacherCard/);
   assert.match(settings, /setTimeout\(\(\) => openTeacherCardModal\(id, name, login\), 280\)/);
   assert.match(settings, /result\.login_name \|\| teacherLoginName/);
@@ -20,6 +24,7 @@ test('teacher ID card foundation stays protected', () => {
   assert.match(settings, /teacher-id-card-avatar-fallback/);
   assert.match(settings, /teacher-id-card-name-label/);
   assert.match(settings, /result\.photo_url/);
+  assert.match(settings, /teacherProfile\?\.photo_url/);
   assert.match(settings, /_renderTeacherCardQrLegacy/);
   assert.doesNotMatch(settings, /<span>SCMS<\\\/span>/);
   assert.match(css, /\.teacher-id-card/);
