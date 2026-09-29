@@ -168,9 +168,9 @@ const I18N = {
     // 5b. Browser document title
     document.title = this.t('app.title');
 
-    // 6. Language switch button ရဲ့ label/"no flag" ကို update
-    const label = document.getElementById('langLabel');
-    if (label) label.textContent = LANGUAGES.find(l => l.code === this.current)?.label || this.current.toUpperCase();
+    // 6. Language dropdown — keep the selected option in sync after every apply.
+    const selector = document.getElementById('langSwitch');
+    if (selector) selector.value = this.current;
     
   },
 };
@@ -196,13 +196,11 @@ window.tv = (group, value) => I18N.tv(group, value);
       console.warn('[i18n] #langSwitch button not found');
       return;
     }
-    switchBtn.addEventListener('click', (e) => {
-      e.preventDefault();
-      e.stopPropagation();
-      // Cycle to the next registered language (wraps around) — works for any number of languages.
-      const codes = LANGUAGES.map(l => l.code);
-      const next = codes[(codes.indexOf(I18N.current) + 1) % codes.length];
-      I18N.setLang(next);
+    switchBtn.addEventListener('change', (e) => {
+      const lang = e.target.value;
+      if (LANGUAGES.some(l => l.code === lang)) {
+        I18N.setLang(lang);
+      }
     });
   }
 
