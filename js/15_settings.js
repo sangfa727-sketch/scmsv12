@@ -522,13 +522,31 @@ function _renderTeacherCardQrLegacy(el, value) {
 }
 
 window.printTeacherCard = function() {
-  const card=document.querySelector('.teacher-id-card');
-  const area=document.getElementById('bulkIdPrintArea');
+  const card = document.querySelector('.teacher-id-card');
+  const area = document.getElementById('bulkIdPrintArea');
   if (!card || !area) return;
-  area.innerHTML=card.outerHTML;
+
+  area.innerHTML = card.outerHTML;
   document.body.classList.add('printing-teacher-card');
+
+  const pageStyle = document.createElement('style');
+  pageStyle.id = 'teacherCardPrintPageStyle';
+  pageStyle.textContent = '@page { size: 2.125in 3.375in; margin: 0; }';
+  document.head.appendChild(pageStyle);
+
+  let cleaned = false;
+  const cleanup = () => {
+    if (cleaned) return;
+    cleaned = true;
+    document.body.classList.remove('printing-teacher-card');
+    area.innerHTML = '';
+    pageStyle.remove();
+    window.removeEventListener('afterprint', cleanup);
+  };
+
+  window.addEventListener('afterprint', cleanup);
   window.print();
-  setTimeout(()=>{ document.body.classList.remove('printing-teacher-card'); area.innerHTML=''; },500);
+  setTimeout(cleanup, 1200);
 };
 
 window.regenerateTeacherCard = function(teacherId, teacherName) {
