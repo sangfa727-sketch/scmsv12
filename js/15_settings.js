@@ -438,7 +438,8 @@ window.openTeacherCardModal = async function(teacherId, teacherName, teacherLogi
     const resolvedName = teacherProfile?.teacher_name || result.teacher_name || teacherName || '';
     const resolvedLogin = teacherProfile?.login_name || result.login_name || teacherLoginName || '';
     const hasDistinctLogin = resolvedLogin && resolvedLogin !== result.teacher_id;
-    const photoValue = teacherProfile?.photo_url || result.photo_url || '';\n    const photo = typeof photoValue === 'string' ? photoValue.trim() : '';
+    const photoValue = teacherProfile?.photo_url || result.photo_url || '';
+    const photo = typeof photoValue === 'string' ? photoValue.trim() : '';
 
     root.innerHTML = '<div class="teacher-id-card">' +
       '<div class="teacher-id-card-head"><strong>' + esc(window.APP?.school_name || '') + '</strong><span>Teacher ID Card</span></div>' +
