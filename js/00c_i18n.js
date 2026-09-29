@@ -165,6 +165,9 @@ const I18N = {
     // 5. <html lang="..."> update
     document.documentElement.lang = this.current;
 
+    // 5b. Browser document title
+    document.title = this.t('app.title');
+
     // 6. Language switch button ရဲ့ label/"no flag" ကို update
     const label = document.getElementById('langLabel');
     if (label) label.textContent = LANGUAGES.find(l => l.code === this.current)?.label || this.current.toUpperCase();
