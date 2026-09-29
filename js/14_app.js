@@ -481,26 +481,47 @@ window.addEventListener('languageChanged', () => {
   const boot = document.getElementById('bootScreen');
   if (boot && boot.style.display !== 'none' && boot.querySelector('.landing-shell')) {
     if (typeof renderLanding === 'function') renderLanding();
+    window._i18nRenderPromise = Promise.resolve();
     return;
   }
-  if (!window.APP || !Array.isArray(window.APP.students)) return;   // app not loaded yet
-  const safe = (fn) => { try { if (typeof fn === 'function') fn(); } catch (e) { console.warn('[i18n] re-render failed', e); } };
+  if (!window.APP || !Array.isArray(window.APP.students)) {
+    window._i18nRenderPromise = Promise.resolve();
+    return;
+  }
 
-  safe(window.renderSidebar);
+  const safe = (fn) => {
+    try {
+      return typeof fn === 'function' ? fn() : null;
+    } catch (e) {
+      console.warn('[i18n] re-render failed', e);
+      return null;
+    }
+  };
 
-  // Pages that are built once at boot from local data: rebuild ALL of them, not just the
-  // visible one — otherwise switching language leaves stale text (the previous language)
-  // on every page you are not currently looking at.
+  // Keep the language change atomic from the user's point of view. Render
+  // synchronously where possible, and let the transition wait for any async
+  // renderer that genuinely needs data.
+  const jobs = [];
+  const sidebar = safe(window.renderSidebar);
+  if (sidebar?.then) jobs.push(sidebar);
+
   [ 'renderStudents', 'renderAttendance', 'renderDaily', 'renderHomework',
     'renderComms', 'renderIncidents', 'renderTimetable', 'renderSummary' ]
-    .forEach(name => safe(window[name]));
+    .forEach(name => {
+      const job = safe(window[name]);
+      if (job?.then) jobs.push(job);
+    });
 
-  // Lazily rendered pages (they fetch data when opened): only refresh the one on screen.
+  // Only the currently visible lazy page needs a language repaint.
   const lazy = { more: 'renderMore', billing: 'renderBilling', admissions: 'renderAdmissions',
                  library: 'renderLibrary', transport: 'renderTransport', grades: 'renderGrades',
                  chat: 'renderChat', dashboard: 'renderDashboard', leave: 'renderLeaveRequests' };
   const fn = lazy[window.APP.currentPage];
-  if (fn) safe(window[fn]);
+  if (fn) {
+    const job = safe(window[fn]);
+    if (job?.then) jobs.push(job);
+  }
+  window._i18nRenderPromise = Promise.all(jobs);
 });
 
 // ─── TAB BAR ────────────────────────────────────────────────────────────────
