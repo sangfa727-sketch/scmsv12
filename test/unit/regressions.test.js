@@ -185,6 +185,14 @@ test('entry-form shells keep the compact width and control baseline', () => {
 });
 
 
+test('manage access does not paint a loading card before final content', () => {
+  const source = read('js/29_teacher_access.js');
+  assert.match(source, /teacher-access-preparing/);
+  assert.match(source, /style="visibility:hidden"/);
+  assert.match(source, /await _renderTeacherAccess()/);
+  assert.match(source, /sheet\.style\.visibility = 'visible'/);
+});
+
 test('teacher modals keep stable dimensions and soft entrance transitions', () => {
   const css = read('style.css');
   assert.match(css, /\.modal-sheet\.teacher-manager-sheet[\s\S]*min-width: 0 !important/);
