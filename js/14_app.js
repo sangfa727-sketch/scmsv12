@@ -332,8 +332,8 @@ async function initApp() {
       try {
         await API.refreshAll();
         if (typeof renderSidebar === 'function') renderSidebar();
-        if (typeof window.refreshDashboardLeaveRequests === 'function') {
-          void window.refreshDashboardLeaveRequests();
+        if (typeof window.refreshDashboardNotifications === 'function') {
+          void window.refreshDashboardNotifications();
         }
         if (typeof renderStudents  === 'function') renderStudents();
         if (typeof renderAttendance === 'function') renderAttendance();
