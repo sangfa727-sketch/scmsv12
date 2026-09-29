@@ -15,10 +15,16 @@ test('teacher ID card foundation stays protected', () => {
   assert.match(settings, /openTeacherCardModal/);
   assert.match(settings, /printTeacherCard/);
   assert.match(settings, /setTimeout\(\(\) => openTeacherCardModal\(id, name, login\), 280\)/);
-  assert.match(settings, /result\.login_name \|\| teacherLoginName/);\n  assert.match(settings, /Teacher ID/);\n  assert.match(settings, /teacher-id-card-avatar-fallback/);\n  assert.match(settings, /_renderTeacherCardQrLegacy/);\n  assert.doesNotMatch(settings, /<span>SCMS<\\\/span>/);\n  assert.doesNotMatch(settings, /result\.teacher_id\\) \\+ '<\\\/div>.*result\.login_name/);
+  assert.match(settings, /result\.login_name \|\| teacherLoginName/);
+  assert.match(settings, /Teacher ID/);
+  assert.match(settings, /teacher-id-card-avatar-fallback/);
+  assert.match(settings, /_renderTeacherCardQrLegacy/);
+  assert.doesNotMatch(settings, /<span>SCMS<\\\/span>/);
+  assert.doesNotMatch(settings, /result\.teacher_id\\) \\+ '<\\\/div>.*result\.login_name/);
   assert.match(css, /\.teacher-id-card/);
   assert.match(css, /printing-teacher-card/);
-  assert.match(html, /qrcode@1\.5\.4/);\n  assert.doesNotMatch(html, /qrcodejs\\/1\\.0\\.0/);
+  assert.match(html, /qrcode@1\.5\.4/);
+  assert.doesNotMatch(html, /qrcodejs\\/1\\.0\\.0/);
   assert.match(html, /15_settings\.js\?v=20260930m/);
   assert.match(html, /style\.css\?v=20260930m/);
 });
@@ -195,7 +201,8 @@ test('compact form modal baseline is not overridden by extra-small global CSS', 
   const css = read('style.css');
   assert.match(css, /SCMS v12\.2 — Premium compact data-entry forms/);
   assert.match(css, /@media \(max-width:380px\)/);
-  assert.match(css, /\.modal-sheet:has\(\.form-input, \.form-textarea, \.picker-trigger, input, select, textarea\) \{\n  width: min\(92vw, 500px\) !important;/);
+  assert.match(css, /\.modal-sheet:has\(\.form-input, \.form-textarea, \.picker-trigger, input, select, textarea\) \{
+  width: min\(92vw, 500px\) !important;/);
   assert.doesNotMatch(css, /\.modal-sheet\{width:95vw!important;max-width:95vw!important\}/);
 });
 
