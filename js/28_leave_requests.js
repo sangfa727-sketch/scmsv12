@@ -103,6 +103,9 @@ async function _decide(id, decision) {
       if (typeof renderSidebar === 'function') renderSidebar();
     }
     renderLeaveRequests();
+    if (typeof window.refreshDashboardLeaveRequests === 'function') {
+      void window.refreshDashboardLeaveRequests();
+    }
   } catch (e) {
     showToast(t('leave.decideFailed') + ': ' + (e.message || t('common.error')));
   }
