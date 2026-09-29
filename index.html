@@ -18,7 +18,7 @@
 <!-- Fonts -->
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,500;9..144,600;9..144,700;9..144,900&family=Inter+Tight:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&family=Noto+Sans+Myanmar:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,500;9..144,600;9..144,700;9..144,900&family=Inter+Tight:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&family=Noto+Sans+Myanmar:wght@400;500;600;700&family=Noto+Sans+Thai:wght@400;500;600;700&family=Noto+Sans+JP:wght@400;500;600;700&display=swap" rel="stylesheet">
 
 <!-- App stylesheet -->
 <link rel="stylesheet" href="style.css?v=20260930b">
@@ -39,8 +39,8 @@
         <span class="boot-logo-text">CMS</span>
       </div>
       <div class="boot-spinner"><div class="spin-ring"></div></div>
-      <div class="boot-status" id="bootStatus">Connecting…</div>
-      <div class="boot-sub" id="bootSub">School Class Management System</div>
+      <div class="boot-status" id="bootStatus" data-i18n="boot.starting">Connecting…</div>
+      <div class="boot-sub" id="bootSub" data-i18n="boot.title">School Class Management System</div>
     </div>
   </div>
 
@@ -48,8 +48,8 @@
   <div class="error-screen" id="errorScreen" style="display:none">
     <div class="error-inner">
       <div class="error-icon">⚠️</div>
-      <h2 class="error-title" id="errorTitle">Unable to connect</h2>
-      <p class="error-msg" id="errorMsg">Please open this app from Telegram.</p>
+      <h2 class="error-title" id="errorTitle" data-i18n="err.connFailed">Unable to connect</h2>
+      <p class="error-msg" id="errorMsg" data-i18n="err.startup">Please open this app from Telegram.</p>
       <button class="btn-primary" id="btnRetry" onclick="window.location.reload()" data-i18n="btn.retry">Retry</button>
     </div>
   </div>
@@ -168,19 +168,13 @@
         <div class="attend-stats-col">
           <div class="stats-grid" id="attendStats"></div>
           <div class="attend-toolbar">
-            <button class="btn-pill-action" onclick="markAllAttend('P')">
-              <span class="dot-mini" style="background:#10B981"></span> All Present
-            </button>
-            <button class="btn-pill-action" onclick="clearAllAttend()">
-              <span class="dot-mini" style="background:#8A8A82"></span> Clear marks
-            </button>
-            <button class="btn-pill-action ghost" onclick="openAttendanceHistory()" title="History & reports">History</button>
+            <button class="btn-pill-action" onclick="markAllAttend('P')" data-i18n="att.markAll"><span class="dot-mini" style="background:#10B981"></span> All Present</button>
+            <button class="btn-pill-action" onclick="clearAllAttend()" data-i18n="att.clearMarks"><span class="dot-mini" style="background:#8A8A82"></span> Clear marks</button>
+            <button class="btn-pill-action ghost" onclick="openAttendanceHistory()" data-i18n="att.history" data-i18n-title="att.historyTitle" title="History & reports">History</button>
             <button class="btn-pill-action ghost" onclick="showAttendLegend()" title="Code legend" data-i18n-title="att.legendBtn">
               <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                 <circle cx="12" cy="12" r="10"/><path d="M12 17v.01"/><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/>
-              </svg>
-              Codes
-            </button>
+              </svg data-i18n="att.codes">Codes</button>
           </div>
         </div>
       </div>
@@ -418,7 +412,9 @@
 <!-- Order matters: config → api → utils → landing → picker → features → app -->
 <script src="js/00a_locales_en.js?v=20260928a"></script>
 <script src="js/00b_locales_my.js?v=20260928a"></script>
-<script src="js/00c_i18n.js?v=20260924n"></script>
+<script src="js/00_locales_thai.js?v=20260930a"></script>
+<script src="js/00_locales_jp.js?v=20260930a"></script>
+<script src="js/00c_i18n.js?v=20260930a"></script>
 <script src="js/01_config.js?v=20260929f"></script>
 <script src="js/01B_state.js?v=20260929b"></script>
 <script src="js/02A_api_core.js?v=20260929d"></script>
