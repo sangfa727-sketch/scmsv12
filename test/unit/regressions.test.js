@@ -13,10 +13,12 @@ test('teacher ID card foundation stays protected', () => {
   assert.match(settings, /rpc_admin_create_teacher_card/);
   assert.match(settings, /openTeacherCardModal/);
   assert.match(settings, /printTeacherCard/);
+  assert.match(settings, /setTimeout\(\(\) => openTeacherCardModal\(id, name, login\), 220\)/);
+  assert.match(settings, /result\.login_name \|\| teacherLoginName/);
   assert.match(css, /\.teacher-id-card/);
   assert.match(css, /printing-teacher-card/);
   assert.match(html, /qrcode@1\.5\.4/);
-  assert.match(html, /15_settings\\.js\\?v=20260930j/);
+  assert.match(html, /15_settings\\.js\\?v=20260930k/);
   assert.match(html, /style\\.css\\?v=20260930l/);
 });
 test('teacher login identity foundation stays protected', () => {
