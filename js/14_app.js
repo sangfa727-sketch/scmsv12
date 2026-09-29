@@ -98,7 +98,7 @@ async function initApp() {
           webSession = await verifyWebSession();
         } catch (e) {
           console.error('[boot] web session verify failed:', e);
-          showError(t('err.connFailed'), (e?.message || 'Unable to verify the saved session.') + '\n\nPlease tap Retry and try again.');
+          showError(t('err.connFailed'), (e?.message || t('err.sessionVerify')) + '\n\n' + t('err.retryHint'));
           return;
         }
         if (webSession && webSession.session_token) {
@@ -182,15 +182,15 @@ async function initApp() {
       window.APP.demo = true;
     } else if (!bootstrapData) {
       // Build a detailed, debuggable error message
-      const errParts = ['Could not reach the SCMS server.'];
+      const errParts = [t('err.serverUnreachable')];
       if (bootstrapError) {
         errParts.push('');
-        errParts.push('Technical details (screenshot if asking for help):');
+        errParts.push(t('err.technicalDetails'));
         errParts.push('• URL: ' + SCMS_CONFIG.N8N_BOOTSTRAP);
         errParts.push('• Error: ' + (bootstrapError.message || String(bootstrapError)));
         if (bootstrapError.message?.includes('Failed to fetch')) {
           errParts.push('');
-          errParts.push('Likely cause: the n8n workflow is not Active, the URL is wrong, or CORS is blocking the request.');
+          errParts.push(t('err.likelyCause'));
         }
       }
       showError(t('err.connFailed'), errParts.join('\n'));
