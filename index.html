@@ -487,9 +487,9 @@
       }
     }
 
-    status.textContent = 'Loading login…';
+    status.textContent = I18N.t('login.loading');
     const sub = document.getElementById('bootSub');
-    if (sub) sub.textContent = 'Please wait a moment and try again.';
+    if (sub) sub.textContent = I18N.t('login.waitRetry');
   }, 3500);
 
   window.addEventListener('beforeunload', function () {
