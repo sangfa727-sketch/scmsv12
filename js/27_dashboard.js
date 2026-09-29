@@ -187,7 +187,7 @@ function _paintDashboard(container) {
         <div class="card-row">
           <div class="card-avatar" style="background:${_classColor(i.class)}">${avatarContent({ name_en: i.name_en })}</div>
           <div class="card-info">
-            <div class="card-name">${esc(i.name_en)} — ${esc(i.type)}</div>
+            <div class="card-name">${esc(i.name_en)} — ${esc(tv('incType', i.type))}</div>
             <div class="card-sub">${esc(i.date)}</div>
           </div>
         </div>
