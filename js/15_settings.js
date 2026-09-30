@@ -308,25 +308,25 @@ window.openTeacherEditModal = async function(teacherId) {
   openModal(`
     <div class="modal-sheet settings-form-sheet teacher-edit-sheet" onclick="event.stopPropagation()">
       <div class="modal-handle"></div>
-      <h3 class="modal-title">✏️ Edit Teacher</h3>
-      <p class="modal-subtitle">Update the teacher name and Login Name used by the ID card and teacher login.</p>
-      <label class="field-label">Teacher ID</label>
+      <h3 class="modal-title">✏️ ${esc(t('tm.editTeacherLabel'))}</h3>
+      <p class="modal-subtitle">${esc(t('tm.editTeacherSubtitle'))}</p>
+      <label class="field-label">${esc(t('tm.teacherId'))}</label>
       <input class="form-input" value="${esc(teacher.teacher_id)}" readonly>
-      <label class="field-label">User name / Login Name</label>
+      <label class="field-label">${esc(t('tm.loginName'))}</label>
       <input class="form-input" id="editTLogin" value="${esc(teacher.login_name || '')}" autocapitalize="off" autocorrect="off">
-      <label class="field-label">Teacher Name</label>
+      <label class="field-label">${esc(t('tm.teacherName'))}</label>
       <input class="form-input" id="editTName" value="${esc(teacher.teacher_name || '')}">
-      <label class="field-label">Email</label>
+      <label class="field-label">${esc(t('tm.email'))}</label>
       <input class="form-input" id="editTEmail" type="email" value="${esc(teacher.email || teacher.teacher_email || '')}">
-      <label class="field-label">Role</label>
+      <label class="field-label">${esc(t('tm.role'))}</label>
       <select class="form-input" id="editTRole">
-        <option value="teacher" ${teacher.role === 'teacher' ? 'selected' : ''}>Teacher</option>
-        <option value="admin" ${teacher.role === 'admin' ? 'selected' : ''}>Admin</option>
-        <option value="super_admin" ${teacher.role === 'super_admin' ? 'selected' : ''}>Super Admin</option>
+        <option value="teacher" ${teacher.role === 'teacher' ? 'selected' : ''}>${esc(t('tm.roleTeacher'))}</option>
+        <option value="admin" ${teacher.role === 'admin' ? 'selected' : ''}>${esc(t('tm.roleAdmin'))}</option>
+        <option value="super_admin" ${teacher.role === 'super_admin' ? 'selected' : ''}>${esc(t('tm.roleSuperAdmin'))}</option>
       </select>
       <div id="editTError" class="form-error" style="display:none"></div>
       <button class="btn-primary mt16" id="editTBtn" onclick="saveTeacherEdit('${esc(teacher.teacher_id)}')">Save changes</button>
-      <button class="btn-secondary" onclick="closeModal()">Cancel</button>
+      <button class="btn-secondary" onclick="closeModal()">${esc(t('tm.cancel'))}</button>
     </div>
   `);
 };
@@ -341,7 +341,7 @@ window.saveTeacherEdit = async function(teacherId) {
   if (!login || !name) { err.textContent = t('tm.requiredEdit'); err.style.display = 'block'; return; }
   const sess = getWebSession();
   if (!sess?.session_token) { err.textContent = t('ct.sessionExpired'); err.style.display = 'block'; return; }
-  btn.disabled = true; btn.textContent = 'Saving…';
+  btn.disabled = true; btn.textContent = t('tm.saving');
   try {
     const result = await _webRpc('rpc_admin_update_teacher_profile', {
       p_session_token: sess.session_token, p_teacher_id: teacherId,
@@ -458,10 +458,10 @@ window.openTeacherCardModal = async function(teacherId, teacherName, teacherLogi
           '<div class="teacher-id-card-role">' + esc(role) + '</div>' +
         '</div>' +
         '<div class="teacher-id-card-fields">' +
-          '<div><span>Teacher ID</span><strong>' + esc(result.teacher_id || teacherId) + '</strong></div>' +
-          '<div><span>Login Name</span><strong>' + esc(resolvedLogin || '—') + '</strong></div>' +
+          '<div><span>${esc(t('tm.teacherIdCardLabel'))}</span><strong>' + esc(result.teacher_id || teacherId) + '</strong></div>' +
+          '<div><span>${esc(t('tm.loginNameLabel'))}</span><strong>' + esc(resolvedLogin || '—') + '</strong></div>' +
         '</div>' +
-        '<div class="teacher-id-card-qr" data-token="' + esc(result.token) + '" aria-label="Teacher login QR"></div>' +
+        '<div class="teacher-id-card-qr" data-token="' + esc(result.token) + '" aria-label="' + esc(t('tm.teacherLoginQr')) + '"></div>' +
         '<div class="teacher-id-card-instruction">' + esc(t('tm.cardScan')) + '</div>' +
         '<div class="teacher-id-card-security">' + esc(t('tm.cardPurpose')) + '</div>' +
       '</div>' +
@@ -507,7 +507,7 @@ function _renderTeacherCardQr(el, value) {
 function _renderTeacherCardQrLegacy(el, value) {
   const QR = window.QRCode;
   if (typeof QR !== 'function') {
-    el.innerHTML = '<span class="teacher-id-card-qr-error">QR unavailable</span>';
+    el.innerHTML = '<span class="teacher-id-card-qr-error">' + esc(t('tm.qrUnavailable')) + '</span>';
     return;
   }
   try {
@@ -518,7 +518,7 @@ function _renderTeacherCardQrLegacy(el, value) {
       correctLevel: QR.CorrectLevel?.M || 0
     });
   } catch (_) {
-    el.innerHTML = '<span class="teacher-id-card-qr-error">QR unavailable</span>';
+    el.innerHTML = '<span class="teacher-id-card-qr-error">' + esc(t('tm.qrUnavailable')) + '</span>';
   }
 }
 
