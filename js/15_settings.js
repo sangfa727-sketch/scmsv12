@@ -87,6 +87,18 @@ window.openSettings = function() {
 
 
   openModal(html);
+  refreshSettingsThemeControl();
+};
+
+window.refreshSettingsThemeControl = function() {
+  const current = window.SCMSTheme?.current?.() || 'light';
+  const label = document.getElementById('settingsThemeCurrent');
+  if (label) label.textContent = current === 'dark' ? t('settings.themeDark') : t('settings.themeLight');
+  document.querySelectorAll('.settings-theme-option').forEach(btn => {
+    const selected = btn.dataset.themeChoice === current;
+    btn.setAttribute('aria-checked', selected ? 'true' : 'false');
+    btn.setAttribute('aria-label', btn.textContent.trim());
+  });
 };
 
 
