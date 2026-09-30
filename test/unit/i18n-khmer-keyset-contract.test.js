@@ -13,7 +13,7 @@ const KM_META_FILE = path.join(JS_DIR, '00e_locales_km.meta.js');
 // The English dictionary is the single source/reference for Khmer coverage.
 // The current English source evaluates to 1339 top-level keys; several of the
 // final entries are intentionally declared multiple per line.
-const EN_BASELINE_KEYS = 1339;
+const EN_BASELINE_KEYS = 1346;
 
 function loadLocale(file, globalName) {
   const source = fs.readFileSync(file, 'utf8');
