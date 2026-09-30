@@ -439,7 +439,7 @@ window.showStudentHistory = async function(studentId) {
     const res = await API.getStudentHistory(studentId, 50);
     if (!res?.ok) throw new Error(res?.message || res?.error || "History unavailable");
     const rows = Array.isArray(res.history) ? res.history : [];
-    if (!rows.length) { el.innerHTML = "<div class=\"empty-state\">No history recorded yet.</div>"; return; }
+    if (!rows.length) { el.innerHTML = '<div class="empty-state">' + t('students.history.empty') + '</div>'; return; }
     el.innerHTML = rows.map(r =>
       "<div class=\"mini-card\">"
       + "<div style=\"display:flex;justify-content:space-between;gap:10px;align-items:flex-start\">"

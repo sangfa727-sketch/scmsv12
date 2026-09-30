@@ -177,7 +177,7 @@ async function _brandSave(kind, blob) {
     }
 
     _brandStatus(blob ? 'Saved ✓' : 'Removed ✓', true);
-    showToast(blob ? 'Saved' : 'Removed');
+    showToast(blob ? t('common.saved') : t('common.removed'));
     _brandRefreshViews();
     if (!blob) {
       const prev = document.getElementById('brandPreview');

@@ -554,18 +554,18 @@ function _initBackdrops() {
 // apply, don't get a FAB.
 
 const FAB_PAGES = {
-  // pageId : { icon, title, action }
-  students:  { title: 'Add student',        action: () => openAddStudentModal() },
-  daily:     { title: 'Write daily report', action: () => openDailyReportModal() },
-  hw:        { title: 'Add homework',       action: () => openHomeworkModal() },
-  incidents: { title: 'Log incident',       action: () => openIncidentModal() },
-  parents:   { title: 'Message parent',     action: () => openParentCommModal() },
-  grades:    { title: 'New assessment',     action: () => openNewAssessmentModal() },
-  billing:   { title: 'New invoice',        action: () => openNewInvoiceModal() },
-  admissions:{ title: 'Add applicant',      action: () => openNewAdmissionModal() },
-  library:   { title: 'Add book',           action: () => openNewBookModal() },
-  transport: { title: 'Add route',          action: () => openNewRouteModal() },
-  timetable: { title: 'Add timetable entry',action: () => openAddTimetable() },
+  // pageId : { titleKey, action }
+  students:  { titleKey: 'students.form.addTitle', action: () => openAddStudentModal() },
+  daily:     { titleKey: 'daily.save', action: () => openDailyReportModal() },
+  hw:        { titleKey: 'hw.addTitle', action: () => openHomeworkModal() },
+  incidents: { titleKey: 'inc.logTitle', action: () => openIncidentModal() },
+  parents:   { titleKey: 'comms.sendTitle', action: () => openParentCommModal() },
+  grades:    { titleKey: 'grades.newTitle', action: () => openNewAssessmentModal() },
+  billing:   { titleKey: 'bill.newTitle', action: () => openNewInvoiceModal() },
+  admissions:{ titleKey: 'adm.add', action: () => openNewAdmissionModal() },
+  library:   { titleKey: 'lib.add', action: () => openNewBookModal() },
+  transport: { titleKey: 'tr.add', action: () => openNewRouteModal() },
+  timetable: { titleKey: 'tt.addTitle', action: () => openAddTimetable() },
 };
 
 function _updateFabForPage(pageId) {
@@ -574,8 +574,8 @@ function _updateFabForPage(pageId) {
   const conf = FAB_PAGES[pageId];
   if (conf) {
     fab.style.display = 'flex';
-    fab.setAttribute('aria-label', conf.title);
-    fab.setAttribute('title', conf.title);
+    fab.setAttribute('aria-label', t(conf.titleKey));
+    fab.setAttribute('title', t(conf.titleKey));
     fab._action = conf.action;
   } else {
     fab.style.display = 'none';
@@ -828,7 +828,7 @@ window.showPasswordPrompt = function (title, message, onSubmit) {
     const isPassword = input.type === 'password';
     input.type = isPassword ? 'text' : 'password';
     toggle.textContent = isPassword ? '🙈' : '👁️';
-    toggle.setAttribute('aria-label', isPassword ? 'Hide password' : 'Show password');
+    toggle.setAttribute('aria-label', isPassword ? t('password.hide') : t('password.show'));
   };
 
   requestAnimationFrame(() => {

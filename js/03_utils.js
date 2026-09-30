@@ -253,7 +253,7 @@ window._confirmAddSubject = async function() {
     }
     window._pendingSubjectAddCallback = null;
   } catch (e) {
-    btn.disabled = false; btn.textContent = 'Add';
-    showToast(e.duplicate ? 'That subject already exists' : 'Failed: ' + (e.message || 'error'));
+    btn.disabled = false; btn.textContent = t('common.add');
+    showToast(e.duplicate ? t('subject.exists') : t('subject.addFailed') + ' ' + (e.message || t('common.error')));
   }
 };
