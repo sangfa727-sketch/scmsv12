@@ -6,6 +6,17 @@
 
 'use strict';
 
+function refreshMoreThemeControl() {
+  const current = window.SCMSTheme?.current?.() || 'light';
+  const label = document.getElementById('moreThemeCurrent');
+  if (label) label.textContent = current === 'dark' ? t('settings.themeDark') : t('settings.themeLight');
+  document.querySelectorAll('.more-theme-option').forEach(btn => {
+    const selected = btn.dataset.themeChoice === current;
+    btn.setAttribute('aria-checked', selected ? 'true' : 'false');
+  });
+}
+window.refreshMoreThemeControl = refreshMoreThemeControl;
+
 function renderMore() {
   const el = document.getElementById('moreMenu');
   if (!el) return;
@@ -105,6 +116,16 @@ function renderMore() {
     </div>` : ''}
 
     <div class="more-section-title">${t('more.display')}</div>
+    <div class="more-theme-card" role="group" aria-label="${t('settings.theme')}">
+      <div class="more-theme-copy">
+        <strong>${t('settings.theme')}</strong>
+        <span id="moreThemeCurrent"></span>
+      </div>
+      <div class="more-theme-toggle" role="radiogroup" aria-label="${t('settings.theme')}">
+        <button type="button" class="more-theme-option" data-theme-choice="light" role="radio" onclick="SCMSTheme.set('light'); refreshMoreThemeControl()">${t('settings.themeLight')}</button>
+        <button type="button" class="more-theme-option" data-theme-choice="dark" role="radio" onclick="SCMSTheme.set('dark'); refreshMoreThemeControl()">${t('settings.themeDark')}</button>
+      </div>
+    </div>
     <div class="more-info-card">
       <label class="pref-row">
         <span class="pref-text">
@@ -136,6 +157,7 @@ function renderMore() {
 
     <div style="height: 40px;"></div>
   `;
+  refreshMoreThemeControl();
 }
 
 /* All feature modules live under one "School Modules" tile (Browse section). */

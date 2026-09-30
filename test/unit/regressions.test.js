@@ -4,7 +4,7 @@ const fs = require('node:fs');
 const path = require('node:path');
 
 const ROOT = path.resolve(__dirname, '..', '..');
-const read = (file) => fs.readFileSync(path.join(ROOT, file), 'utf8');
+const read = (file) => fs.readFileSync(path.join(ROOT, file), 'utf8'); // theme-control regression contract
 
 test('teacher ID card foundation stays protected', () => {
   const settings = read('js/15_settings.js');
@@ -34,5 +34,5 @@ test('teacher ID card foundation stays protected', () => {
   assert.ok(html.includes('qrcode@1.5.4'));
   assert.ok(html.includes('qrcodejs/1.0.0'));
   assert.match(html, /15_settings\.js\?v=20261001a/);
-  assert.match(html, /style\.css\?v=20260930q/);
+  assert.match(html, /style\.css\?v=20261001b/);
 });
