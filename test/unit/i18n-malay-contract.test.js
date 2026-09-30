@@ -79,3 +79,29 @@ test('Malay locale source is valid UTF-8 JavaScript when present', (t) => {
   assert.match(source, /window\.I18N_MS\s*=\s*\{/);
   assert.match(source, /\};\s*$/);
 });
+
+const I18N_ENGINE_FILE = path.join(JS_DIR, '00c_i18n.js');
+const INDEX_FILE = path.join(ROOT, 'index.html');
+
+test('Malay locale is registered and loaded before the i18n engine', () => {
+  const engine = readLocale(I18N_ENGINE_FILE);
+  const index = readLocale(INDEX_FILE);
+
+  assert.match(
+    engine,
+    /\{\s*code:\s*'ms',\s*label:\s*'BM',\s*name:\s*'Bahasa Melayu',\s*dict:\s*\(\)\s*=>\s*window\.I18N_MS\s*\}/
+  );
+  assert.match(engine, /ms:\s*\['ms'\]/);
+  assert.match(engine, /ms:\s*'ms-MY'/);
+
+  const localeScript = index.indexOf('js/00d_locales_ms.js');
+  const engineScript = index.indexOf('js/00c_i18n.js');
+  assert.ok(localeScript >= 0, 'index.html must load the Malay locale script');
+  assert.ok(engineScript >= 0, 'index.html must load the i18n engine');
+  assert.ok(localeScript < engineScript, 'Malay locale must load before the i18n engine');
+
+  assert.match(
+    index,
+    /<button[^>]+class="lang-option"[^>]+data-lang="ms"[^>]*>BM<\\/button>/
+  );
+});
