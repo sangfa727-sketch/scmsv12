@@ -4,7 +4,7 @@ const fs = require('node:fs');
 const path = require('node:path');
 
 const ROOT = path.resolve(__dirname, '..', '..');
-const read = (file) => fs.readFileSync(path.join(ROOT, file), 'utf8');
+const read = (file) => fs.readFileSync(path.join(ROOT, file), 'utf8'); // theme-control regression contract
 
 test('teacher ID card foundation stays protected', () => {
   const settings = read('js/15_settings.js');
