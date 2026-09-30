@@ -10,10 +10,8 @@ const EN_FILE = path.join(JS_DIR, '00a_locales_en.js');
 const KM_FILE = path.join(JS_DIR, '00e_locales_km.js');
 const KM_META_FILE = path.join(JS_DIR, '00e_locales_km.meta.js');
 
-// The current English dictionary is the single source/reference for Khmer coverage.
-// The historical 1333-key target has drifted to 1339 in the repository; do not
-// delete or alter English keys just to preserve the old count.
-const EN_BASELINE_KEYS = 1339;
+// The English dictionary is the single source/reference for Khmer coverage.
+const EN_BASELINE_KEYS = 1333;
 
 function loadLocale(file, globalName) {
   const source = fs.readFileSync(file, 'utf8');
@@ -25,7 +23,7 @@ function loadLocale(file, globalName) {
   return dict;
 }
 
-test('English source locale remains the 1339-key baseline for Khmer', () => {
+test('English source locale remains the 1333-key baseline for Khmer', () => {
   const en = loadLocale(EN_FILE, 'I18N_EN');
   const keys = Object.keys(en);
 
@@ -59,7 +57,7 @@ test('Khmer locale must match the English key set exactly once it is introduced'
   const kmKeys = Object.keys(km);
 
   assert.equal(new Set(kmKeys).size, kmKeys.length, 'Khmer locale must not contain duplicate keys');
-  assert.deepEqual(kmKeys, enKeys, 'Khmer locale keys must exactly match the current English baseline');
+  assert.deepEqual(kmKeys, enKeys, 'Khmer locale keys must exactly match the 1333-key English baseline');
 
   for (const key of enKeys) {
     assert.equal(Object.prototype.hasOwnProperty.call(km, key), true, 'Khmer locale is missing value for ' + key);
