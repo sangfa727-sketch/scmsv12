@@ -26,6 +26,10 @@ test('teacher ID card foundation stays protected', () => {
   assert.match(settings, /teacher-id-card-avatar-fallback/);
   assert.match(settings, /teacher-id-card-vertical/);
   assert.match(settings, /tm\.cardPurpose/);
+  assert.match(settings, /teacherManagerCacheFresh/);
+  assert.match(settings, /_prefetchTeacherManagerList/);
+  assert.match(settings, /toggleTeacherCardHelp/);
+  assert.match(settings, /teacher-id-card-help-popover/);
   assert.match(settings, /result\.photo_url/);
   assert.match(settings, /teacherProfile\?\.photo_url/);
   assert.match(settings, /_renderTeacherCardQrLegacy/);
@@ -36,6 +40,6 @@ test('teacher ID card foundation stays protected', () => {
   assert.ok(html.includes('qrcode@1.5.4'));
   assert.ok(html.includes('qrcodejs/1.0.0'));
   assert.match(html, /29_teacher_access\.js\?v=20261001a/);
-  assert.match(html, /15_settings\.js\?v=20261001b/);
-  assert.match(html, /style\.css\?v=20261001c/);
+  assert.match(html, /15_settings\.js\?v=20261001c/);
+  assert.match(html, /style\.css\?v=20261001d/);
 });
