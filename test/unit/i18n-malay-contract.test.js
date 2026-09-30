@@ -1,6 +1,7 @@
 const test = require('node:test');
 const assert = require('node:assert/strict');
 const fs = require('node:fs');
+const vm = require('node:vm');
 const path = require('node:path');
 
 const ROOT = path.resolve(__dirname, '..', '..');
@@ -12,28 +13,14 @@ function readLocale(file) {
   return fs.readFileSync(file, 'utf8');
 }
 
-function extractKeys(source) {
-  const keys = [];
-  const seen = new Set();
-  const re = /['"]([^'"]+)['"]\s*:/g;
-  let match;
-  while ((match = re.exec(source))) {
-    const key = match[1];
-    assert.equal(seen.has(key), false, `duplicate locale key: ${key}`);
-    seen.add(key);
-    keys.push(key);
-  }
-  return keys;
-}
-
-function extractValues(source) {
-  const values = new Map();
-  const re = /^\s{2}['"]([^'"]+)['"]\s*:\s*(['"])(.*?)\2\s*,?\s*$/gm;
-  let match;
-  while ((match = re.exec(source))) {
-    values.set(match[1], match[3]);
-  }
-  return values;
+function loadLocale(file, globalName) {
+  const source = readLocale(file);
+  const sandbox = { window: {} };
+  vm.runInNewContext(source, sandbox, { filename: file });
+  const dict = sandbox.window[globalName];
+  assert.equal(typeof dict, 'object', `${globalName} must export an object`);
+  assert.equal(dict !== null, true, `${globalName} must not be null`);
+  return dict;
 }
 
 function tokens(value) {
@@ -52,15 +39,14 @@ test('Malay locale contract is enforced when the locale file is present', (t) =>
     return;
   }
 
-  const en = readLocale(EN_FILE);
-  const ms = readLocale(MS_FILE);
-  const enKeys = extractKeys(en);
-  const msKeys = extractKeys(ms);
+  const enValues = loadLocale(EN_FILE, 'I18N_EN');
+  const msValues = loadLocale(MS_FILE, 'I18N_MS');
+  const enKeys = Object.keys(enValues);
+  const msKeys = Object.keys(msValues);
 
+  assert.equal(new Set(enKeys).size, enKeys.length, 'English locale must not contain duplicate keys');
+  assert.equal(new Set(msKeys).size, msKeys.length, 'Malay locale must not contain duplicate keys');
   assert.deepEqual(msKeys, enKeys, 'Malay locale keys must exactly match English keys');
-
-  const enValues = extractValues(en);
-  const msValues = extractValues(ms);
 
   for (const key of enKeys) {
     assert.equal(msValues.has(key), true, `Malay locale is missing value for ${key}`);
