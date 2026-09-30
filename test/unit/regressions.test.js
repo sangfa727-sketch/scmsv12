@@ -101,3 +101,21 @@ test('dashboard notification bell keeps accessible disclosure semantics', () => 
     assert.match(locales, new RegExp('(?:[\\\'\"])' + key.replace('.', '\\.') + '(?:[\\\'\"])'));
   }
 });
+
+test('teacher access management keeps session-token RPC boundary', () => {
+  const source = read('js/29_teacher_access.js');
+  assert.ok(source.includes('getWebSession()'));
+  assert.ok(source.includes('session_token'));
+  assert.ok(source.includes('rpc_manage_teacher_access'));
+  assert.ok(source.includes('p_teacher_id: teacherId'));
+  assert.ok(source.includes("'permission_set'"));
+  assert.ok(source.includes("'permission_remove'"));
+});
+
+test('parent communication send flow prevents duplicate submissions and refreshes notifications', () => {
+  const comms = read('js/08_comms.js');
+  assert.ok(comms.includes("btn.disabled = true; btn.textContent = t('comms.sending')"));
+  assert.ok(comms.includes('await API.sendParentComm('));
+  assert.ok(comms.includes('void window.refreshDashboardNotifications()'));
+  assert.ok(comms.includes("btn.disabled = false; btn.textContent = t('comms.send')"));
+});
