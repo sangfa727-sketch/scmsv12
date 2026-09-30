@@ -474,7 +474,7 @@ function _detailRow(label, value) {
 // only after the parent signs in with the Gmail on file.
 function _idCardHtml(s, qrTargetId) {
   const vertical = _idCardOrientation === 'vertical';
-  const logo   = window.APP.school_logo || (window.APP.config && window.APP.config.school_logo) || '';
+  const logo   = window.APP?.school_logo || window.APP?.config?.school_logo || '';
   const school = esc(window.APP.school_name || '');
   const className = (s.class || '').trim();
   const gradeName = (s.grade || '').trim();
@@ -518,6 +518,38 @@ function _idCardHtml(s, qrTargetId) {
       </div>
     </div></div>`;
 }
+async function _renderStudentCardQr(el, value) {
+  if (!el) return false;
+  el.innerHTML = '';
+  const QR = window.QRCode;
+  try {
+    if (QR && typeof QR.toCanvas === 'function') {
+      const canvas = document.createElement('canvas');
+      el.appendChild(canvas);
+      await new Promise((resolve, reject) => {
+        QR.toCanvas(canvas, value, {
+          width: 256, margin: 1,
+          color: { dark: '#1A1A18', light: '#ffffff' },
+          errorCorrectionLevel: 'M'
+        }, err => err ? reject(err) : resolve());
+      });
+      return true;
+    }
+    if (typeof QR === 'function') {
+      new QR(el, {
+        text: value, width: 256, height: 256,
+        colorDark: '#1A1A18', colorLight: '#ffffff',
+        correctLevel: QR.CorrectLevel?.M || 0
+      });
+      return true;
+    }
+  } catch (e) {
+    console.warn('[Student ID Card] QR render failed:', e);
+  }
+  el.innerHTML = '<span style="font-size:10px;color:#777;text-align:center;padding:4px">QR unavailable</span>';
+  return false;
+}
+
 // Orientation is a session-wide choice (not per-student) — pick once via the
 // toggle button, it applies to the single-card preview/print AND to the
 // next bulk print, until changed again. Defaults to horizontal (the
@@ -586,6 +618,9 @@ async function _loadIdCard(studentId) {
   let res;
   try {
     res = await API.getOrCreateStudentQr(studentId);
+    if (!res?.student?.student_id || !res?.student?.qr_token) {
+      throw new Error(res?.message || res?.error || 'Student ID card data unavailable');
+    }
   } catch (e) {
     el.innerHTML = `<div class="empty-state">${esc(t('idCard.failed', { err: e.message || t('common.error') }))}</div>`;
     return;
@@ -625,14 +660,7 @@ function _renderIdCardBody(s) {
     <button class="btn-secondary" onclick="closeModal()">${t('common.close')}</button>
   `;
 
-  if (window.QRCode) {
-    new QRCode(document.getElementById('idCardQr'), {
-      text: portalUrl, width: 256, height: 256,
-      colorDark: '#1A1A18', colorLight: '#ffffff',
-    });
-  } else {
-    document.getElementById('idCardQr').innerHTML = `<a href="${esc(portalUrl)}" style="font-size:10px">${esc(portalUrl)}</a>`;
-  }
+  _renderStudentCardQr(document.getElementById('idCardQr'), portalUrl);
 }
 
 window._copyIdCardLink = function() {
