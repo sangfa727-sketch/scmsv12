@@ -105,3 +105,50 @@ test('Malay locale is registered and loaded before the i18n engine', () => {
     /<button[^>]+class="lang-option"[^>]+data-lang="ms"[^>]*>BM<\/button>/
   );
 });
+
+
+test('Malay runtime can be selected, translated, persisted, and localized', () => {
+  const sandbox = {
+    window: {
+      I18N_EN: loadLocale(EN_FILE, 'I18N_EN'),
+      I18N_MS: loadLocale(MS_FILE, 'I18N_MS'),
+      matchMedia: () => ({ matches: false }),
+      dispatchEvent: () => {},
+    },
+    localStorage: {
+      values: new Map(),
+      getItem(key) { return this.values.get(key) ?? null; },
+      setItem(key, value) { this.values.set(key, value); },
+    },
+    navigator: { language: 'en-US' },
+    document: {
+      readyState: 'complete',
+      documentElement: { lang: '' },
+      title: '',
+      querySelectorAll: () => [],
+      getElementById: () => null,
+    },
+    CustomEvent: function CustomEvent(type, init) {
+      this.type = type;
+      this.detail = init?.detail;
+    },
+  };
+
+  vm.runInNewContext(
+    readLocale(I18N_ENGINE_FILE),
+    sandbox,
+    { filename: I18N_ENGINE_FILE }
+  );
+
+  const i18n = sandbox.window.I18N;
+  assert.equal(i18n.current, 'en');
+  i18n.setLang('ms');
+
+  assert.equal(i18n.current, 'ms');
+  assert.equal(sandbox.localStorage.getItem('scms_lang'), 'ms');
+  assert.equal(sandbox.document.documentElement.lang, 'ms');
+  assert.equal(sandbox.document.title, sandbox.window.I18N_MS['app.title']);
+  assert.equal(i18n.dateLocale(), 'ms-MY');
+  assert.equal(i18n.t('common.saveFailed'), sandbox.window.I18N_MS['common.saveFailed']);
+  assert.equal(i18n.t('students.subtitle', { n: 7, c: 2 }), '7 murid aktif merentas 2 kelas');
+});
