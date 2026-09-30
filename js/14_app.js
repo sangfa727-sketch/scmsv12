@@ -828,7 +828,7 @@ window.showPasswordPrompt = function (title, message, onSubmit) {
     const isPassword = input.type === 'password';
     input.type = isPassword ? 'text' : 'password';
     toggle.textContent = isPassword ? '🙈' : '👁️';
-    toggle.setAttribute('aria-label', isPassword ? 'Hide password' : 'Show password');
+    toggle.setAttribute('aria-label', isPassword ? t('password.hide') : t('password.show'));
   };
 
   requestAnimationFrame(() => {
