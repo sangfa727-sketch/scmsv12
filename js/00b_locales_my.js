@@ -1385,4 +1385,7 @@ window.I18N_MY = {
   'teacher.editTitle': 'ဆရာ/ဆရာမ အချက်အလက် ပြင်ဆင်ရန်',
   'teacher.editSubtitle': 'ID ကတ်နှင့် ဆရာ/ဆရာမ Login အတွက် အသုံးပြုသော အမည်နှင့် Login Name ကို ပြင်ဆင်ပါ။',
   'teacher.superAdmin': 'Super Admin',
+  'settings.theme': 'Theme ပုံစံ',
+  'settings.themeLight': '☀️ Light',
+  'settings.themeDark': '🌙 Dark',
 };
