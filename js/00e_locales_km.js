@@ -1,5 +1,5 @@
-// Khmer locale — staged translation, Batch 1.
-// NOT loaded by index.html yet. Do not register until all 1333 keys are complete.
+// Khmer locale — staged translation, Batch 2.
+// NOT loaded by index.html yet. Do not register until all 1339 keys are complete.
 window.I18N_KM = {
   'app.title': 'SCMS — ប្រព័ន្ធគ្រប់គ្រងថ្នាក់រៀន',
   'common.all': 'ទាំងអស់',
@@ -37,5 +37,41 @@ window.I18N_KM = {
   'students.field.parentTg': 'Telegram របស់មាតាបិតា',
   'students.detail.recentReports': 'របាយការណ៍ថ្មីៗ',
   'students.detail.recentIncidents': 'ករណីថ្មីៗ',
-  'students.detail.editInfo': 'កែព័ត៌មានសិស្ស'
+  'students.detail.editInfo': 'កែព័ត៌មានសិស្ស',
+
+  // Students: form
+  'students.form.editTitle': 'កែប្រែសិស្ស',
+  'students.form.addTitle': 'បន្ថែមសិស្សថ្មី',
+  'students.form.removePhoto': 'លុបរូបថត',
+  'students.form.localName': 'ឈ្មោះក្នុងស្រុក (មីយ៉ាន់ម៉ា / ឈ្មោះដើម)',
+  'students.form.localNamePh': 'ឈ្មោះសិស្ស…',
+  'students.form.englishName': 'ឈ្មោះជាភាសាអង់គ្លេស *',
+  'students.form.englishNamePh': 'ឈ្មោះពេញជាភាសាអង់គ្លេស',
+  'students.form.class': 'ថ្នាក់ *',
+  'students.form.selectClass': 'ជ្រើសរើសថ្នាក់',
+  'students.form.grade': 'កម្រិតថ្នាក់',
+  'students.form.selectGrade': 'ជ្រើសរើសកម្រិតថ្នាក់',
+  'students.form.gender': 'ភេទ',
+  'students.form.genderM': 'ប្រុស',
+  'students.form.genderF': 'ស្រី',
+  'students.form.genderOther': 'ផ្សេងទៀត',
+  'students.form.birthday': 'ថ្ងៃកំណើត',
+  'students.form.birthdayHint': '(ប្រើសម្រាប់ការរំលឹក 🎂)',
+  'students.form.homeColor': 'ពណ៌ផ្ទះ',
+  'students.form.homeColorHint': '(ក្រុម / ផ្ទះ)',
+  'students.form.parentSection': 'មាតាបិតា / អាណាព្យាបាល',
+  'students.form.parentName': 'ឈ្មោះមាតាបិតា',
+  'students.form.parentNamePh': 'ឈ្មោះមាតាបិតា / អាណាព្យាបាល',
+  'students.form.parentPhone': 'លេខទូរស័ព្ទមាតាបិតា',
+  'students.form.parentPhonePh': '+95 9 xxx xxx xxx',
+  'students.form.parentEmail': 'អ៊ីមែលមាតាបិតា',
+  'students.form.parentEmailOptional': 'អ៊ីមែលមាតាបិតា (ជាជម្រើស)',
+  'students.form.parentEmailPh': 'parent@example.com',
+  'students.form.parentTg': 'Telegram របស់មាតាបិតា',
+  'students.form.saveEdit': 'រក្សាទុកការផ្លាស់ប្តូរ',
+  'students.form.register': 'ចុះឈ្មោះសិស្ស',
+  'students.form.removeBtn': 'លុបសិស្ស',
+  'students.form.savingEdit': 'កំពុងរក្សាទុក…',
+  'students.form.registering': 'កំពុងចុះឈ្មោះ…',
+  'students.form.parentTgInfo': 'លេខសម្គាល់ Telegram របស់មាតាបិតានឹងត្រូវបំពេញ <b>ដោយស្វ័យប្រវត្តិ</b> បន្ទាប់ពីអ្នកចុះឈ្មោះសិស្ស។ យើងនឹងបង្ហាញតំណសម្រាប់ចែករំលែកជាមួយមាតាបិតា — នៅពេលពួកគេចុចតំណនោះក្នុង Telegram លេខសម្គាល់របស់ពួកគេនឹងត្រូវបានរក្សាទុក។'
 };
