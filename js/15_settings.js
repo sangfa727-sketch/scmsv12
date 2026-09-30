@@ -519,7 +519,7 @@ function _renderTeacherCardQrLegacy(el, value) {
       correctLevel: QR.CorrectLevel?.M || 0
     });
   } catch (_) {
-    el.innerHTML = '<span class="teacher-id-card-qr-error">${t('teacher.qrUnavailable')}</span>';
+    el.innerHTML = '<span class="teacher-id-card-qr-error">' + t('teacher.qrUnavailable') + '</span>';
   }
 }
 
