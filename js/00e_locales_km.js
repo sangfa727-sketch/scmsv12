@@ -1,4 +1,4 @@
-// Khmer locale — staged translation, Batch 2.
+// Khmer locale — staged translation, Batches 1–3.
 // NOT loaded by index.html yet. Do not register until all 1339 keys are complete.
 window.I18N_KM = {
   'app.title': 'SCMS — ប្រព័ន្ធគ្រប់គ្រងថ្នាក់រៀន',
@@ -73,7 +73,7 @@ window.I18N_KM = {
   'students.form.removeBtn': 'លុបសិស្ស',
   'students.form.savingEdit': 'កំពុងរក្សាទុក…',
   'students.form.registering': 'កំពុងចុះឈ្មោះ…',
-  'students.form.parentTgInfo': 'លេខសម្គាល់ Telegram របស់មាតាបិតានឹងត្រូវបំពេញ <b>ដោយស្វ័យប្រវត្តិ</b> បន្ទាប់ពីអ្នកចុះឈ្មោះសិស្ស។ យើងនឹងបង្ហាញតំណសម្រាប់ចែករំលែកជាមួយមាតាបិតា — នៅពេលពួកគេចុចតំណនោះក្នុង Telegram លេខសម្គាល់របស់ពួកគេនឹងត្រូវបានរក្សាទុក។'
+  'students.form.parentTgInfo': 'លេខសម្គាល់ Telegram របស់មាតាបិតានឹងត្រូវបំពេញ <b>ដោយស្វ័យប្រវត្តិ</b> បន្ទាប់ពីអ្នកចុះឈ្មោះសិស្ស។ យើងនឹងបង្ហាញតំណសម្រាប់ចែករំលែកជាមួយមាតាបិតា — នៅពេលពួកគេចុចតំណនោះក្នុង Telegram លេខសម្គាល់របស់ពួកគេនឹងត្រូវបានរក្សាទុក។',
 
   // Students: toasts
   'students.toast.imageOnly': 'សូមជ្រើសរើសឯកសាររូបភាព',
