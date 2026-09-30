@@ -1410,4 +1410,11 @@ window.I18N_EN = {
   'branding.removeConfirmButton': "Remove",
   'branding.savedToast': "Saved",
   'branding.removedToast': "Removed",
+  'tm.requiredEdit': "User name and Teacher Name are required.",
+  'tm.updated': "Teacher updated",
+  'tm.saveChanges': "Save changes",
+  'branding.readImageFailed': "Could not read that image",
+  'branding.processImageFailed': "Could not process image",
+  'branding.failed': "Failed",
+  'branding.saveFailed': "Save failed",
 };

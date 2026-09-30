@@ -40,7 +40,7 @@ function _brandImageToBlob(file, { maxW, maxH, crop, keepAlpha }) {
   return new Promise((resolve, reject) => {
     const url = URL.createObjectURL(file);
     const img = new Image();
-    img.onerror = () => { URL.revokeObjectURL(url); reject(new Error('Could not read that image')); };
+    img.onerror = () => { URL.revokeObjectURL(url); reject(new Error(t('branding.readImageFailed'))); };
     img.onload = () => {
       URL.revokeObjectURL(url);
       let sx = 0, sy = 0, sw = img.width, sh = img.height, dw, dh;
@@ -63,7 +63,7 @@ function _brandImageToBlob(file, { maxW, maxH, crop, keepAlpha }) {
       ctx.imageSmoothingQuality = 'high';
       ctx.drawImage(img, sx, sy, sw, sh, 0, 0, dw, dh);
       c.toBlob(
-        b => b ? resolve(b) : reject(new Error('Could not process image')),
+        b => b ? resolve(b) : reject(new Error(t('branding.processImageFailed'))),
         asPng ? 'image/png' : 'image/jpeg',
         0.88
       );
@@ -153,7 +153,7 @@ async function _brandHandlePick(kind, file) {
     await _brandSave(kind, blob);
   } catch (err) {
     console.error('[branding] failed', err);
-    _brandStatus(err.message || 'Failed', false);
+    _brandStatus(err.message || t('branding.failed'), false);
     showToast(t('modules.saveFailed', { err: err.message || t('branding.tryAgain') }));
   }
 }
@@ -187,7 +187,7 @@ async function _brandSave(kind, blob) {
     }
   } catch (err) {
     console.error('[branding] save failed', err);
-    _brandStatus(err.message || 'Save failed', false);
+    _brandStatus(err.message || t('branding.saveFailed'), false);
     showToast(t('modules.saveFailed', { err: err.message || t('branding.tryAgain') }));
   }
 }

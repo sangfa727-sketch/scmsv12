@@ -1361,4 +1361,11 @@ window.I18N_ZH = {
   'branding.removeConfirmButton': "移除",
   'branding.savedToast': "已保存",
   'branding.removedToast': "已移除",
+  'tm.requiredEdit': "用户名和教师姓名均为必填项。",
+  'tm.updated': "教师信息已更新",
+  'tm.saveChanges': "保存更改",
+  'branding.readImageFailed': "无法读取该图片",
+  'branding.processImageFailed': "无法处理图片",
+  'branding.failed': "失败",
+  'branding.saveFailed': "保存失败",
 };

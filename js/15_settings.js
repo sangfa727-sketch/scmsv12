@@ -338,7 +338,7 @@ window.saveTeacherEdit = async function(teacherId) {
   const name = document.getElementById('editTName')?.value.trim() || '';
   const email = document.getElementById('editTEmail')?.value.trim() || null;
   const role = document.getElementById('editTRole')?.value || 'teacher';
-  if (!login || !name) { err.textContent = 'User name and Teacher Name are required.'; err.style.display = 'block'; return; }
+  if (!login || !name) { err.textContent = t('tm.requiredEdit'); err.style.display = 'block'; return; }
   const sess = getWebSession();
   if (!sess?.session_token) { err.textContent = t('ct.sessionExpired'); err.style.display = 'block'; return; }
   btn.disabled = true; btn.textContent = 'Saving…';
@@ -348,12 +348,12 @@ window.saveTeacherEdit = async function(teacherId) {
       p_teacher_name: name, p_login_name: login, p_email: email, p_role: role
     });
     if (!result?.ok) throw new Error(result?.error || 'save_failed');
-    closeModal(); showToast('Teacher updated');
+    closeModal(); showToast(t('tm.updated'));
     setTimeout(() => openTeacherManager(), 190);
   } catch (e) {
     err.textContent = e?.message || String(e); err.style.display = 'block';
   } finally {
-    btn.disabled = false; btn.textContent = 'Save changes';
+    btn.disabled = false; btn.textContent = t('tm.saveChanges');
   }
 };
 
