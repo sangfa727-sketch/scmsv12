@@ -2,7 +2,7 @@
 'use strict';
 function _taLang() {
   const lang = window.I18N?.current;
-  return ['en','my','th','jp'].includes(lang) ? lang : 'en';
+  return ['en','my','th','jp','zh'].includes(lang) ? lang : 'en';
 }
 
 const _TA_UI = {
@@ -42,6 +42,18 @@ const _TA_UI = {
     classRemoveFailed:'ไม่สามารถลบชั้นเรียนได้', subjectAddFailed:'ไม่สามารถเพิ่มวิชาได้',
     subjectRemoveFailed:'ไม่สามารถลบวิชาได้', loadFailed:'ไม่สามารถโหลดข้อมูลสิทธิ์ได้'
   },
+  zh: {
+    loading:'正在加载…', manageTitle:'管理权限', subtitle:'设置班级、科目及访问权限：',
+    classes:'👥 班级', subjects:'📚 科目', permissions:'🔐 权限设置', permissionModes:'默认 / 允许 / 拒绝',
+    selectClass:'选择班级', selectSubject:'选择科目', add:'添加', closeButton:'关闭',
+    noClasses:'尚未分配班级。', noSubjects:'尚未分配科目。',
+    default:'默认', allowed:'允许', denied:'拒绝', defaultAllowed:'允许', defaultDenied:'拒绝',
+    permissionHelp:'默认权限遵循教师角色。如需按班级或科目设置权限，请选择相应的班级和科目。',
+    classRequired:'请先选择班级。', classSubjectRequired:'请先选择班级和科目。',
+    saved:'权限已保存。', saveFailed:'无法保存权限。', classAddFailed:'无法添加班级。',
+    classRemoveFailed:'无法移除班级。', subjectAddFailed:'无法添加科目。',
+    subjectRemoveFailed:'无法移除科目。', loadFailed:'无法加载权限信息。'
+  },
   jp: {
     loading:'読み込み中…', manageTitle:'アクセス管理', subtitle:'クラス・科目・権限を設定：',
     classes:'👥 クラス', subjects:'📚 科目', permissions:'🔐 権限設定', permissionModes:'既定 / 許可 / 拒否',
@@ -64,6 +76,7 @@ function _taText(key) {
     en:{'dashboard.view':'View Dashboard','students.view':'View Students','students.edit':'Edit Student Information','leave.view':'View Leave Requests','leave.approve':'Approve / Reject Leave Requests','attendance.view':'View Attendance','attendance.edit':'Edit Attendance','homework.view':'View Homework','homework.create':'Create Homework','homework.edit':'Edit Homework','homework.delete':'Delete Homework','assessment.view':'View Assessments','assessment.create':'Create Assessments','assessment.edit':'Edit Assessments','assessment.delete':'Delete Assessments','billing.view':'View Billing','billing.write':'Edit Billing','teachers.view':'View Teachers','teachers.manage':'Manage Teachers','permissions.manage':'Manage Permissions'},
     my:{'dashboard.view':'Dashboard ကြည့်ရှုရန်','students.view':'ကျောင်းသားများ ကြည့်ရှုရန်','students.edit':'ကျောင်းသားအချက်အလက် ပြင်ဆင်ရန်','leave.view':'ခွင့်တောင်းစာ ကြည့်ရှုရန်','leave.approve':'ခွင့်တောင်းစာ အတည်ပြု/ပယ်ချရန်','attendance.view':'တက်ရောက်မှု ကြည့်ရှုရန်','attendance.edit':'တက်ရောက်မှု ပြင်ဆင်ရန်','homework.view':'အိမ်စာ ကြည့်ရှုရန်','homework.create':'အိမ်စာ ထည့်သွင်းရန်','homework.edit':'အိမ်စာ ပြင်ဆင်ရန်','homework.delete':'အိမ်စာ ဖျက်ရန်','assessment.view':'အကဲဖြတ်ချက် ကြည့်ရှုရန်','assessment.create':'အကဲဖြတ်ချက် ထည့်သွင်းရန်','assessment.edit':'အကဲဖြတ်ချက် ပြင်ဆင်ရန်','assessment.delete':'အကဲဖြတ်ချက် ဖျက်ရန်','billing.view':'ငွေစာရင်း ကြည့်ရှုရန်','billing.write':'ငွေစာရင်း ပြင်ဆင်ရန်','teachers.view':'ဆရာ/ဆရာမများ ကြည့်ရှုရန်','teachers.manage':'ဆရာ/ဆရာမများ စီမံရန်','permissions.manage':'လုပ်ပိုင်ခွင့်များ စီမံရန်'},
     th:{'dashboard.view':'ดูแดชบอร์ด','students.view':'ดูนักเรียน','students.edit':'แก้ไขข้อมูลนักเรียน','leave.view':'ดูคำขอลา','leave.approve':'อนุมัติ / ปฏิเสธคำขอลา','attendance.view':'ดูการเข้าเรียน','attendance.edit':'แก้ไขการเข้าเรียน','homework.view':'ดูการบ้าน','homework.create':'สร้างการบ้าน','homework.edit':'แก้ไขการบ้าน','homework.delete':'ลบการบ้าน','assessment.view':'ดูการประเมิน','assessment.create':'สร้างการประเมิน','assessment.edit':'แก้ไขการประเมิน','assessment.delete':'ลบการประเมิน','billing.view':'ดูการเรียกเก็บเงิน','billing.write':'แก้ไขการเรียกเก็บเงิน','teachers.view':'ดูครู','teachers.manage':'จัดการครู','permissions.manage':'จัดการสิทธิ์'},
+    zh:{'dashboard.view':'查看仪表板','students.view':'查看学生','students.edit':'编辑学生信息','leave.view':'查看请假申请','leave.approve':'批准 / 拒绝请假申请','attendance.view':'查看考勤','attendance.edit':'编辑考勤','homework.view':'查看作业','homework.create':'创建作业','homework.edit':'编辑作业','homework.delete':'删除作业','assessment.view':'查看评估','assessment.create':'创建评估','assessment.edit':'编辑评估','assessment.delete':'删除评估','billing.view':'查看账单','billing.write':'编辑账单','teachers.view':'查看教师','teachers.manage':'管理教师','permissions.manage':'管理权限'},
     jp:{'dashboard.view':'ダッシュボードを見る','students.view':'生徒を見る','students.edit':'生徒情報を編集','leave.view':'休暇申請を見る','leave.approve':'休暇申請を承認 / 却下','attendance.view':'出欠を見る','attendance.edit':'出欠を編集','homework.view':'宿題を見る','homework.create':'宿題を作成','homework.edit':'宿題を編集','homework.delete':'宿題を削除','assessment.view':'評価を見る','assessment.create':'評価を作成','assessment.edit':'評価を編集','assessment.delete':'評価を削除','billing.view':'請求を見る','billing.write':'請求を編集','teachers.view':'教師を見る','teachers.manage':'教師を管理','permissions.manage':'権限を管理'}
   };
   return (dict[_taLang()]?.[key] || dict.en[key] || key);
@@ -73,6 +86,7 @@ function _taCategory(key) {
     en:{dashboard:'Dashboard',students:'Students',leave:'Leave Requests',attendance:'Attendance',homework:'Homework',assessment:'Assessments',billing:'Billing',teachers:'Teachers',permissions:'Permissions'},
     my:{dashboard:'ပင်မစာမျက်နှာ',students:'ကျောင်းသားများ',leave:'ခွင့်တောင်းစာ',attendance:'တက်ရောက်မှု',homework:'အိမ်စာ',assessment:'အကဲဖြတ်ချက်',billing:'ငွေစာရင်း',teachers:'ဆရာ/ဆရာမများ',permissions:'လုပ်ပိုင်ခွင့်များ'},
     th:{dashboard:'แดชบอร์ด',students:'นักเรียน',leave:'คำขอลา',attendance:'การเข้าเรียน',homework:'การบ้าน',assessment:'การประเมิน',billing:'การเรียกเก็บเงิน',teachers:'ครู',permissions:'สิทธิ์'},
+    zh:{dashboard:'仪表板',students:'学生',leave:'请假申请',attendance:'考勤',homework:'作业',assessment:'评估',billing:'账单',teachers:'教师',permissions:'权限'},
     jp:{dashboard:'ダッシュボード',students:'生徒',leave:'休暇申請',attendance:'出欠',homework:'宿題',assessment:'評価',billing:'請求',teachers:'教師',permissions:'権限'}
   };
   return dict[_taLang()]?.[key] || dict.en[key] || key;
@@ -83,6 +97,7 @@ function _taAssignmentTypeLabel(type) {
     en:{class_teacher:'Class Teacher',assistant:'Assistant Teacher',subject_teacher:'Subject Teacher',other:'Other'},
     my:{class_teacher:'အတန်းပိုင်ဆရာ/ဆရာမ',assistant:'အကူဆရာ/ဆရာမ',subject_teacher:'ဘာသာရပ်ဆရာ/ဆရာမ',other:'အခြားတာဝန်'},
     th:{class_teacher:'ครูประจำชั้น',assistant:'ครูผู้ช่วย',subject_teacher:'ครูประจำวิชา',other:'อื่นๆ'},
+    zh:{class_teacher:'班主任',assistant:'助理教师',subject_teacher:'科任教师',other:'其他'},
     jp:{class_teacher:'担任',assistant:'補助教員',subject_teacher:'教科担当',other:'その他'}
   };
   return dict[_taLang()]?.[type] || dict.en[type] || type;
