@@ -691,4 +691,11 @@ window.I18N_KM = {
   'att.historyRecent':'កំណត់ត្រាថ្មីៗ និងសេចក្តីសង្ខេប 30 ថ្ងៃ។','att.report30':'របាយការណ៍ 30 ថ្ងៃ','att.auditWebOnly':'កម្មវិធីមើល Audit មានសម្រាប់ Web session ប៉ុណ្ណោះ។','att.auditTitle':'Audit វត្តមាន','att.auditSubtitle':'ប្រវត្តិការរក្សាទុកវត្តមានសម្រាប់ Administrator ប៉ុណ្ណោះ។','att.auditLoading':'កំពុងផ្ទុក Audit…','att.auditEmpty':'រកមិនឃើញកំណត់ត្រា Audit វត្តមានទេ។','att.auditLoadFailed':'មិនអាចផ្ទុកប្រវត្តិ Audit បានទេ។','att.correctionMode':'របៀបកែតម្រូវ៖ ពិនិត្យ និងរក្សាទុកកាលបរិច្ឆេទដែលបានជ្រើស។',
   'comms.portalScheduleTitle':'កាលវិភាគ Parent Portal','comms.portalScheduleSub':'បង្ហាញកិច្ចប្រជុំសាលា សេចក្តីជូនដំណឹង និងព្រឹត្តិការណ៍ក្នុង Parent Portal។','comms.portalTitlePh':'ឧទាហរណ៍ — កិច្ចប្រជុំមាតាបិតា និងគ្រូ','comms.portalDescPh':'ព័ត៌មានដែលមាតាបិតាគួរដឹង','comms.portalRequired':'សូមបញ្ចូលចំណងជើង និងពេលចាប់ផ្តើម។','comms.portalPublished':'បានបោះផ្សាយទៅ Parent Portal។',
   'err.sessionVerify':'មិនអាចផ្ទៀងផ្ទាត់ Session ដែលបានរក្សាទុកបានទេ។','err.retryHint':'សូមចុច Retry ហើយព្យាយាមម្តងទៀត។','err.serverUnreachable':'មិនអាចភ្ជាប់ទៅ SCMS server បានទេ។','err.technicalDetails':'ព័ត៌មានបច្ចេកទេស (ថត Screenshot ប្រសិនបើសុំជំនួយ):','err.likelyCause':'មូលហេតុអាចជា៖ n8n workflow មិនបាន Active, URL ខុស ឬ CORS កំពុងរារាំងសំណើ។','login.loading':'កំពុងផ្ទុក Login…','login.waitRetry':'សូមរង់ចាំបន្តិច ហើយព្យាយាមម្តងទៀត។','cg.required':'សូមបញ្ចូលទាំង Class និង Grade។',
+  'subject.exists': 'មុខវិជ្ជានេះមានរួចហើយ។',
+  'subject.addFailed': 'មិនអាចបន្ថែមមុខវិជ្ជាបានទេ។',
+  'picker.noMatch': 'រកមិនឃើញសិស្សដែលត្រូវនឹង "{query}" ទេ។',
+  'teacher.updateRequired': 'ត្រូវបំពេញ User name និង Teacher Name។',
+  'teacher.qrUnavailable': 'មិនអាចប្រើ QR បានទេ',
+  'password.hide': 'លាក់ពាក្យសម្ងាត់',
+  'password.show': 'បង្ហាញពាក្យសម្ងាត់',
 };
