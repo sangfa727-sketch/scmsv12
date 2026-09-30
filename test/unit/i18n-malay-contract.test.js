@@ -15,7 +15,7 @@ function readLocale(file) {
 function extractKeys(source) {
   const keys = [];
   const seen = new Set();
-  const re = /^\s{2}['"]([^'"]+)['"]\s*:/gm;
+  const re = /['"]([^'"]+)['"]\s*:/g;
   let match;
   while ((match = re.exec(source))) {
     const key = match[1];
