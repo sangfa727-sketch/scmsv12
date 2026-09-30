@@ -105,3 +105,6 @@
   Object.assign(overrides, {'login.loading':'กำลังโหลดการเข้าสู่ระบบ…','login.waitRetry':'โปรดรอสักครู่แล้วลองอีกครั้ง','cg.required':'โปรดกรอกทั้ง Class และ Grade'});
   window.I18N_TH = Object.assign({}, base, overrides);
 })();
+  'teacher.editTitle': 'แก้ไขครู',
+  'teacher.editSubtitle': 'แก้ไขชื่อครูและ Login Name ที่ใช้สำหรับบัตรประจำตัวและการเข้าสู่ระบบครู',
+  'teacher.superAdmin': 'ผู้ดูแลระบบสูงสุด',
