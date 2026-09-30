@@ -646,7 +646,7 @@ window.verifyWebSession = async function () {
     } catch (e) {}
     return updated;
   } catch (e) {
-    if (e?.name === 'AbortError') throw new Error('Session verification timed out. Please retry.');
+    if (e?.name === 'AbortError') throw new Error(t('err.sessionVerify') + ' ' + t('err.retryHint'));
     throw e;
   } finally {
     clearTimeout(timer);
