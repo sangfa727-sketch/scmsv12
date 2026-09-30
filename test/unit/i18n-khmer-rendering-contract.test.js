@@ -72,3 +72,14 @@ test('Khmer sample strings contain actual Khmer Unicode characters', () => {
     assert.match(sample, /[\u1780-\u17FF]/, 'sample must contain Khmer Unicode code points');
   }
 });
+
+test('Khmer locale is registered for production switching', () => {
+  const i18n = fs.readFileSync(path.join(ROOT, 'js', '00c_i18n.js'), 'utf8');
+  const source = index();
+
+  assert.match(i18n, /code:\s*'km'[^\n]*dict:\s*\(\)\s*=>\s*window\.I18N_KM/);
+  assert.match(i18n, /km:\s*\['km',\s*'km-kh'\]/);
+  assert.match(i18n, /km:\s*'km-KH'/);
+  assert.match(source, /data-lang="km"[^>]*>ខ្មែរ<\/button>/);
+  assert.match(source, /<script src="js\/00e_locales_km\.js\?v=/);
+});
