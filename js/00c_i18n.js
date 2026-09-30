@@ -18,6 +18,7 @@ const LANGUAGES = [
   { code: 'my', label: 'မြန်မာ', name: 'Myanmar (Burmese)', dict: () => window.I18N_MY },
   { code: 'th', label: 'ไทย', name: 'ภาษาไทย', dict: () => window.I18N_TH },
   { code: 'jp', label: '日本語', name: '日本語', dict: () => window.I18N_JP },
+  { code: 'ms', label: 'BM', name: 'Bahasa Melayu', dict: () => window.I18N_MS },
 ];
 
 const LANGUAGE_ALIASES = {
@@ -25,6 +26,7 @@ const LANGUAGE_ALIASES = {
   my: ['my'],
   th: ['th'],
   jp: ['ja', 'jp'],
+  ms: ['ms'],
 };
 
 const I18N = {
@@ -143,6 +145,7 @@ const I18N = {
       my: 'en-US',
       th: 'th-TH',
       jp: 'ja-JP',
+      ms: 'ms-MY',
     }[this.current] || 'en-US';
   },
 
