@@ -338,22 +338,22 @@ window.saveTeacherEdit = async function(teacherId) {
   const name = document.getElementById('editTName')?.value.trim() || '';
   const email = document.getElementById('editTEmail')?.value.trim() || null;
   const role = document.getElementById('editTRole')?.value || 'teacher';
-  if (!login || !name) { err.textContent = 'User name and Teacher Name are required.'; err.style.display = 'block'; return; }
+  if (!login || !name) { err.textContent = t('teacher.updateRequired'); err.style.display = 'block'; return; }
   const sess = getWebSession();
   if (!sess?.session_token) { err.textContent = t('ct.sessionExpired'); err.style.display = 'block'; return; }
-  btn.disabled = true; btn.textContent = 'Saving…';
+  btn.disabled = true; btn.textContent = t('common.saving');
   try {
     const result = await _webRpc('rpc_admin_update_teacher_profile', {
       p_session_token: sess.session_token, p_teacher_id: teacherId,
       p_teacher_name: name, p_login_name: login, p_email: email, p_role: role
     });
     if (!result?.ok) throw new Error(result?.error || 'save_failed');
-    closeModal(); showToast('Teacher updated');
+    closeModal(); showToast(t('toast.updated'));
     setTimeout(() => openTeacherManager(), 190);
   } catch (e) {
     err.textContent = e?.message || String(e); err.style.display = 'block';
   } finally {
-    btn.disabled = false; btn.textContent = 'Save changes';
+    btn.disabled = false; btn.textContent = t('common.saveChanges');
   }
 };
 
@@ -507,7 +507,7 @@ function _renderTeacherCardQr(el, value) {
 function _renderTeacherCardQrLegacy(el, value) {
   const QR = window.QRCode;
   if (typeof QR !== 'function') {
-    el.innerHTML = '<span class="teacher-id-card-qr-error">QR unavailable</span>';
+    el.innerHTML = '<span class="teacher-id-card-qr-error">${t('teacher.qrUnavailable')}</span>';
     return;
   }
   try {
@@ -518,7 +518,7 @@ function _renderTeacherCardQrLegacy(el, value) {
       correctLevel: QR.CorrectLevel?.M || 0
     });
   } catch (_) {
-    el.innerHTML = '<span class="teacher-id-card-qr-error">QR unavailable</span>';
+    el.innerHTML = '<span class="teacher-id-card-qr-error">${t('teacher.qrUnavailable')}</span>';
   }
 }
 
