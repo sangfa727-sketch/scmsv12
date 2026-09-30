@@ -105,3 +105,6 @@
   Object.assign(overrides, {'login.loading':'ログインを読み込み中…','login.waitRetry':'少し待ってから、もう一度お試しください。','cg.required':'Class と Grade の両方を入力してください。'});
   window.I18N_JP = Object.assign({}, base, overrides);
 })();
+  'teacher.editTitle': '教師を編集',
+  'teacher.editSubtitle': 'IDカードと教師ログインで使用する教師名とログイン名を更新します。',
+  'teacher.superAdmin': 'スーパー管理者',
