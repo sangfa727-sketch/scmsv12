@@ -1393,7 +1393,7 @@ window.I18N_ZH = {
   "password.show": "显示密码",
   "teacher.editTitle": "编辑教师",
   "teacher.editSubtitle": "更新用于教师证和教师登录的教师姓名及登录名。",
-  "teacher.superAdmin": "超级管理员"
+  "teacher.superAdmin": "超级管理员",
   "settings.theme": "主题",
   "settings.themeLight": "☀️ 浅色",
   "settings.themeDark": "🌙 深色",
