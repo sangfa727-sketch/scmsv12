@@ -55,6 +55,26 @@ test('sidebar keeps aria-hidden synchronized with its visual state', () => {
   assert.match(sidebar, /classList\.remove\('open'\)[\s\S]*setAttribute\('aria-hidden', 'true'\)/);
 });
 
+test('dashboard notification keys remain available across all shipped locales', () => {
+  const keys = [
+    'dash.notifications',
+    'dash.newCount',
+    'dash.leavePendingOne',
+    'dash.leavePendingMany',
+    'dash.leaveReview',
+    'dash.messageNotDeliveredOne',
+    'dash.messageNotDeliveredMany',
+    'dash.bannerText',
+    'dash.noNewNotifications',
+  ];
+  for (const file of ['js/00a_locales_en.js', 'js/00b_locales_my.js', 'js/00_locales_thai.js', 'js/00_locales_jp.js']) {
+    const source = read(file);
+    for (const key of keys) {
+      assert.ok(source.includes("'" + key + "'"), file + ': missing ' + key);
+    }
+  }
+});
+
 test('dashboard notification bell keeps accessible disclosure semantics', () => {
   const dashboard = read('js/27_dashboard.js');
   const locales = read('js/00a_locales_en.js');
