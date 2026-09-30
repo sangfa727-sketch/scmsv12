@@ -36,6 +36,10 @@ function renderDashboard() {
   // loading state — the latter was the source of the visible double-flash.
   if (_dashboardLoadedOnce && _dashboardCache) {
     _paintDashboard(container);
+    // Notification data is intentionally refreshed on every dashboard revisit.
+    // The rest of the dashboard remains cached, but leave/message counts can
+    // change while the user is on another page or in another session.
+    void window.refreshDashboardNotifications();
     return Promise.resolve();
   }
 
