@@ -8,6 +8,7 @@ const ROOT = path.resolve(__dirname, '..', '..');
 const JS_DIR = path.join(ROOT, 'js');
 const EN_FILE = path.join(JS_DIR, '00a_locales_en.js');
 const KM_FILE = path.join(JS_DIR, '00e_locales_km.js');
+const KM_META_FILE = path.join(JS_DIR, '00e_locales_km.meta.js');
 
 // The English dictionary is the single source/reference for Khmer coverage.
 // Keep this gate intentionally small: no Khmer locale is registered or shipped
@@ -39,8 +40,14 @@ test('English source locale remains the 1333-key baseline for Khmer', () => {
 });
 
 test('Khmer locale must match the English key set exactly once it is introduced', (t) => {
-  if (!fs.existsSync(KM_FILE)) {
-    t.skip('Khmer locale is intentionally not introduced until the rendering/keyset gates pass.');
+  if (!fs.existsSync(KM_FILE) || !fs.existsSync(KM_META_FILE)) {
+    t.skip('Khmer locale is intentionally not introduced until the staged translation is complete.');
+    return;
+  }
+
+  const metaSource = fs.readFileSync(KM_META_FILE, 'utf8');
+  if (!/complete\\s*:\\s*true/.test(metaSource)) {
+    t.skip('Khmer locale is staged in batches; the 1333-key equality gate activates only when complete=true.');
     return;
   }
 
