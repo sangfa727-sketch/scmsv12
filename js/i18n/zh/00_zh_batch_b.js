@@ -1,12 +1,7 @@
 // Simplified Chinese translation batch B — staging only; not registered in production runtime.
 window.I18N_ZH_BATCH_B = {
-  'daily.meal': '餐食',
   'daily.mood': '情绪',
   'daily.nap': '午睡',
-  'daily.behaviour': '行为',
-  'daily.mealPh': '例如 吃得很好、吃了一半…',
-  'daily.moodPh': '例如 开心、平静、疲倦…',
-  'daily.napPh': '例如 30 分钟…',
   'daily.behaviourPh': '例如 今天非常专注，帮助了同学…',
   'daily.toilet': '如厕正常吗？',
   'daily.save': '保存报告',
