@@ -8,18 +8,6 @@ function _taLang() {
 const _TA_UI = {
   en: {
     loading:'Loading…', manageTitle:'Manage Access', subtitle:'Set class, subject, and permission access for',
-  km: {
-    loading:'កំពុងផ្ទុក…', manageTitle:'គ្រប់គ្រងសិទ្ធិចូលប្រើ', subtitle:'កំណត់ថ្នាក់ មុខវិជ្ជា និងសិទ្ធិចូលប្រើសម្រាប់',
-    classes:'👥 ថ្នាក់', subjects:'📚 មុខវិជ្ជា', permissions:'🔐 ការកំណត់សិទ្ធិ', permissionModes:'លំនាំដើម / អនុញ្ញាត / បដិសេធ',
-    selectClass:'ជ្រើសរើសថ្នាក់', selectSubject:'ជ្រើសរើសមុខវិជ្ជា', add:'បន្ថែម', closeButton:'បិទ',
-    noClasses:'មិនទាន់មានថ្នាក់ដែលបានចាត់តាំងទេ។', noSubjects:'មិនទាន់មានមុខវិជ្ជាដែលបានចាត់តាំងទេ។',
-    default:'លំនាំដើម', allowed:'អនុញ្ញាត', denied:'បដិសេធ', defaultAllowed:'បានអនុញ្ញាត', defaultDenied:'បានបដិសេធ',
-    permissionHelp:'សិទ្ធិលំនាំដើមអនុវត្តតាមតួនាទីគ្រូ។ សម្រាប់សិទ្ធិតាមថ្នាក់ ឬមុខវិជ្ជា សូមជ្រើសរើសថ្នាក់ និងមុខវិជ្ជាដែលពាក់ព័ន្ធ។',
-    classRequired:'សូមជ្រើសរើសថ្នាក់ជាមុនសិន។', classSubjectRequired:'សូមជ្រើសរើសថ្នាក់ និងមុខវិជ្ជាជាមុនសិន។',
-    saved:'បានរក្សាទុកសិទ្ធិ។', saveFailed:'មិនអាចរក្សាទុកសិទ្ធិបានទេ។', classAddFailed:'មិនអាចបន្ថែមថ្នាក់បានទេ។',
-    classRemoveFailed:'មិនអាចដកថ្នាក់បានទេ។', subjectAddFailed:'មិនអាចបន្ថែមមុខវិជ្ជាបានទេ។',
-    subjectRemoveFailed:'មិនអាចដកមុខវិជ្ជាបានទេ។', loadFailed:'មិនអាចផ្ទុកព័ត៌មានសិទ្ធិបានទេ។'
-  },
     classes:'Classes', subjects:'Subjects', permissions:'Permission Settings', permissionModes:'Default / Allow / Deny',
     selectClass:'Select class', selectSubject:'Select subject', add:'Add', closeButton:'Close',
     noClasses:'No class assignments yet.', noSubjects:'No subject assignments yet.',
@@ -63,8 +51,19 @@ const _TA_UI = {
     permissionHelp:'既定の権限は教師のロールに従います。クラス・科目ごとの権限を設定する場合は対象を選択してください。',
     classRequired:'先にクラスを選択してください。', classSubjectRequired:'先にクラスと科目を選択してください。',
     saved:'権限を保存しました。', saveFailed:'権限を保存できませんでした。', classAddFailed:'クラスを追加できませんでした。',
-    classRemoveFailed:'クラスを削除できませんでした。', subjectAddFailed:'科目を追加できませんでした。',
-    subjectRemoveFailed:'科目を削除できませんでした。', loadFailed:'権限情報を読み込めませんでした。'
+    classRemoveFailed:'クラスを削除できませんでした。', subjectAddFailed:'科目を追加できませんでした。', loadFailed:'権限情報を読み込めませんでした。'
+  },
+  km: {
+    loading:'កំពុងផ្ទុក…', manageTitle:'គ្រប់គ្រងសិទ្ធិចូលប្រើ', subtitle:'កំណត់ថ្នាក់ មុខវិជ្ជា និងសិទ្ធិចូលប្រើសម្រាប់',
+    classes:'👥 ថ្នាក់', subjects:'📚 មុខវិជ្ជា', permissions:'🔐 ការកំណត់សិទ្ធិ', permissionModes:'លំនាំដើម / អនុញ្ញាត / បដិសេធ',
+    selectClass:'ជ្រើសរើសថ្នាក់', selectSubject:'ជ្រើសរើសមុខវិជ្ជា', add:'បន្ថែម', closeButton:'បិទ',
+    noClasses:'មិនទាន់មានថ្នាក់ដែលបានចាត់តាំងទេ។', noSubjects:'មិនទាន់មានមុខវិជ្ជាដែលបានចាត់តាំងទេ។',
+    default:'លំនាំដើម', allowed:'អនុញ្ញាត', denied:'បដិសេធ', defaultAllowed:'បានអនុញ្ញាត', defaultDenied:'បានបដិសេធ',
+    permissionHelp:'សិទ្ធិលំនាំដើមអនុវត្តតាមតួនាទីគ្រូ។ សម្រាប់សិទ្ធិតាមថ្នាក់ ឬមុខវិជ្ជា សូមជ្រើសរើសថ្នាក់ និងមុខវិជ្ជាដែលពាក់ព័ន្ធ។',
+    classRequired:'សូមជ្រើសរើសថ្នាក់ជាមុនសិន។', classSubjectRequired:'សូមជ្រើសរើសថ្នាក់ និងមុខវិជ្ជាជាមុនសិន។',
+    saved:'បានរក្សាទុកសិទ្ធិ។', saveFailed:'មិនអាចរក្សាទុកសិទ្ធិបានទេ។', classAddFailed:'មិនអាចបន្ថែមថ្នាក់បានទេ។',
+    classRemoveFailed:'មិនអាចដកថ្នាក់បានទេ។', subjectAddFailed:'មិនអាចបន្ថែមមុខវិជ្ជាបានទេ။',
+    subjectRemoveFailed:'មិនអាចដកមុខវិជ្ជាបានទេ។', loadFailed:'មិនអាចផ្ទុកព័ត៌មានសិទ្ធិបានទេ។'
   }
 };
 
