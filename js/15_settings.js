@@ -166,8 +166,8 @@ function _renderTeacherList(teachers) {
           <div class="teacher-row-sub">${esc(teacher.login_name || teacher.teacher_id)} · ${esc(teacher.teacher_id)} · ${esc(teacher.role ? tv('roleName', teacher.role) : t('inv.roleTeacher'))} · ${t('tm.lastLogin', { date: lastLogin })}</div>
         </div>
         <div class="teacher-row-actions">
-          <button class="icon-btn-mini teacher-edit-btn" onclick="event.stopPropagation(); openTeacherEditModal('${esc(teacher.teacher_id)}')" title="Edit teacher">✏️</button>
-          <button class="icon-btn-mini teacher-access-btn" onclick="event.stopPropagation(); closeModal(); setTimeout(() => openTeacherAccess('${esc(teacher.teacher_id)}', '${esc(teacher.teacher_name)}'), 190)" title="Manage access">🔐</button>
+          <button class="icon-btn-mini teacher-edit-btn" onclick="event.stopPropagation(); openTeacherEditModal('${esc(teacher.teacher_id)}')" title="${esc(t('common.edit'))}">✏️</button>
+          <button class="icon-btn-mini teacher-access-btn" onclick="event.stopPropagation(); closeModal(); setTimeout(() => openTeacherAccess('${esc(teacher.teacher_id)}', '${esc(teacher.teacher_name)}'), 190)" title="${esc(t('tm.title'))}">🔐</button>
           <button class="icon-btn-mini" onclick="event.stopPropagation(); openTeacherCardModal('${esc(teacher.teacher_id)}', '${esc(teacher.teacher_name)}', '${esc(teacher.login_name || '')}')" title="${esc(t('tm.idCard'))}">🪪</button>
           <button class="icon-btn-mini" onclick="event.stopPropagation(); resetTeacherPassword('${esc(teacher.teacher_id)}', '${esc(teacher.teacher_name)}')" title="${esc(t('tm.resetPassword'))}">🔑</button>
         </div>
@@ -461,7 +461,7 @@ window.openTeacherCardModal = async function(teacherId, teacherName, teacherLogi
           '<div><span>Teacher ID</span><strong>' + esc(result.teacher_id || teacherId) + '</strong></div>' +
           '<div><span>Login Name</span><strong>' + esc(resolvedLogin || '—') + '</strong></div>' +
         '</div>' +
-        '<div class="teacher-id-card-qr" data-token="' + esc(result.token) + '" aria-label="Teacher login QR"></div>' +
+        '<div class="teacher-id-card-qr" data-token="' + esc(result.token) + '" aria-label="${esc(t('tm.idCard'))}"></div>' +
         '<div class="teacher-id-card-instruction">' + esc(t('tm.cardScan')) + '</div>' +
         '<div class="teacher-id-card-security">' + esc(t('tm.cardPurpose')) + '</div>' +
       '</div>' +
