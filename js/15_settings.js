@@ -12,6 +12,54 @@ function _loginMethodLabel(isWeb) {
   return t('settings.webPassword');
 }
 
+/* Teacher manager performance cache. */
+let _teacherManagerCache = null;
+let _teacherManagerLoadPromise = null;
+const TEACHER_MANAGER_CACHE_TTL = 30000;
+
+function _teacherManagerCacheFresh() {
+  return !!(_teacherManagerCache &&
+    Array.isArray(_teacherManagerCache.rows) &&
+    (Date.now() - _teacherManagerCache.at) < TEACHER_MANAGER_CACHE_TTL);
+}
+function _invalidateTeacherManagerCache() { _teacherManagerCache = null; }
+function _teacherProfileFromCache(teacherId) {
+  const rows = Array.isArray(_teacherManagerCache?.rows) ? _teacherManagerCache.rows : [];
+  return rows.find(row => row.teacher_id === teacherId) || null;
+}
+async function _fetchTeacherManagerRows() {
+  if (_teacherManagerCacheFresh()) return _teacherManagerCache.rows;
+  if (_teacherManagerLoadPromise) return _teacherManagerLoadPromise;
+  _teacherManagerLoadPromise = (async () => {
+    let sess = getWebSession();
+    if (!sess?.session_token) throw new Error('Web session is missing or expired');
+    try {
+      const res = await _webRpc('rpc_admin_list_teachers', { p_session_token: sess.session_token });
+      const rows = Array.isArray(res?.rows) ? res.rows : [];
+      _teacherManagerCache = { rows, at: Date.now() };
+      return rows;
+    } catch (firstError) {
+      if (typeof verifyWebSession === 'function') {
+        const verified = await verifyWebSession();
+        if (verified?.session_token) {
+          window.APP.webSession = verified;
+          sess = verified;
+          const res = await _webRpc('rpc_admin_list_teachers', { p_session_token: sess.session_token });
+          const rows = Array.isArray(res?.rows) ? res.rows : [];
+          _teacherManagerCache = { rows, at: Date.now() };
+          return rows;
+        }
+      }
+      throw firstError;
+    } finally {
+      _teacherManagerLoadPromise = null;
+    }
+  })();
+  return _teacherManagerLoadPromise;
+}
+function _prefetchTeacherManagerList() { _fetchTeacherManagerRows().catch(() => {}); }
+
+
 window.openSettings = function() {
   const isWeb   = !!(window.APP && window.APP.webSession);
   const isAdmin = !!(window.APP && window.APP.is_admin);
@@ -88,6 +136,7 @@ window.openSettings = function() {
 
   openModal(html);
   refreshSettingsThemeControl();
+  if (isAdmin) _prefetchTeacherManagerList();
 };
 
 window.refreshSettingsThemeControl = function() {
@@ -106,75 +155,39 @@ window.refreshSettingsThemeControl = function() {
    TEACHER MANAGER (admin only)
 ============================================================================ */
 window.openTeacherManager = async function() {
-  openModal(`
-    <div class="modal-sheet teacher-manager-sheet teacher-modal-preparing" onclick="event.stopPropagation()" style="visibility:hidden">
+  const cachedRows = _teacherManagerCacheFresh() ? _teacherManagerCache.rows : null;
 
+  openModal(`
+    <div class="modal-sheet teacher-manager-sheet" onclick="event.stopPropagation()">
       <div class="modal-handle"></div>
       <h3 class="modal-title">${t('tm.title')}</h3>
       <p class="modal-subtitle">${t('tm.subtitle')}</p>
-
       <div class="teacher-manager-actions">
         <button type="button" class="btn-primary teacher-manager-action-btn" onclick="openCreateTeacherModal()">${t('tm.addNew')}</button>
         <button type="button" class="btn-secondary teacher-manager-action-btn" onclick="openInviteCodeModal()">${t('tm.inviteGoogle')}</button>
       </div>
-
       <div id="teacherList" class="teacher-list mt16">
-        <div class="teacher-manager-loading" aria-busy="true">
+        ${cachedRows ? '' : `<div class="teacher-manager-loading" aria-busy="true">
           <span class="teacher-manager-loading-dot"></span>
           <span>${t('tm.loading')}</span>
-        </div>
+        </div>`}
       </div>
-
       <button class="btn-secondary mt16" onclick="closeModal()">${t('common.close')}</button>
     </div>
   `);
 
-  // Load teachers from the same school
+  if (cachedRows) _renderTeacherList(cachedRows);
+
   try {
-    let sess = getWebSession();
-    if (!sess?.session_token) {
-      throw new Error('Web session is missing or expired');
-    }
-    let res;
-    try {
-      res = await _webRpc('rpc_admin_list_teachers', {
-        p_session_token: sess.session_token,
-      });
-    } catch (firstError) {
-      // A stale browser-cached session can survive a role/session refresh.
-      // Verify once and retry with the server-confirmed token before showing an error.
-      if (typeof verifyWebSession === 'function') {
-        const verified = await verifyWebSession();
-        if (verified?.session_token) {
-          window.APP.webSession = verified;
-          sess = verified;
-          res = await _webRpc('rpc_admin_list_teachers', {
-            p_session_token: sess.session_token,
-          });
-        } else {
-          throw firstError;
-        }
-      } else {
-        throw firstError;
-      }
-    }
-    const rows = Array.isArray(res?.rows) ? res.rows : [];
-    _renderTeacherList(rows);
-  } catch (e) {
-    const msg = e?.message || String(e);
+    const rows = await _fetchTeacherManagerRows();
     const listEl = document.getElementById('teacherList');
-    // The modal may have been closed while the request was in flight.
-    // Never let that race turn into a second UI exception.
-    if (listEl) {
+    if (listEl) _renderTeacherList(rows);
+  } catch (e) {
+    const listEl = document.getElementById('teacherList');
+    if (listEl && !cachedRows) {
+      const msg = e?.message || String(e);
       listEl.innerHTML =
         `<div class="form-error">${esc(t('tm.loadFailed'))}<br><small>${esc(msg.slice(0, 180))}</small></div>`;
-    }
-  } finally {
-    const sheet = document.querySelector('.teacher-manager-sheet');
-    if (sheet) {
-      sheet.classList.remove('teacher-modal-preparing');
-      sheet.classList.add('teacher-modal-ready');
-      sheet.style.visibility = 'visible';
     }
   }
 };
@@ -381,6 +394,7 @@ window.saveTeacherEdit = async function(teacherId) {
       p_teacher_name: name, p_login_name: login, p_email: email, p_role: role
     });
     if (!result?.ok) throw new Error(result?.error || 'save_failed');
+    _invalidateTeacherManagerCache();
     closeModal(); showToast(t('toast.updated'));
     setTimeout(() => openTeacherManager(), 190);
   } catch (e) {
@@ -439,6 +453,7 @@ window.doCreateTeacher = async function() {
       btn.textContent = t('ct.create');
       return;
     }
+    _invalidateTeacherManagerCache();
     closeModal();
     showToast(t('ct.created'));
     // A newly-created teacher should receive their secure ID card immediately.
@@ -454,16 +469,12 @@ window.doCreateTeacher = async function() {
 
 // Regression contract: Teacher ID remains the stable ID-card field label.
 window.openTeacherCardModal = async function(teacherId, teacherName, teacherLoginName) {
-  openModal('<div class="modal-sheet teacher-card-modal" onclick="event.stopPropagation()"><div class="modal-handle"></div><h3 class="modal-title">🪪 ' + esc(t('tm.idCard')) + '</h3><div id="teacherCardRoot" class="teacher-card-root"><div class="text-center text-muted">' + esc(t('tm.cardLoading')) + '</div></div><button class="btn-secondary mt16" onclick="closeModal()">' + esc(t('common.close')) + '</button></div>');
+  openModal('<div class="modal-sheet teacher-card-modal" onclick="event.stopPropagation(); closeTeacherCardHelp()"><div class="modal-handle"></div><h3 class="modal-title">🪪 ' + esc(t('tm.idCard')) + '</h3><div id="teacherCardRoot" class="teacher-card-root"><div class="text-center text-muted">' + esc(t('tm.cardLoading')) + '</div></div><button class="btn-secondary mt16" onclick="closeModal()">' + esc(t('common.close')) + '</button></div>');
   try {
     const sess = getWebSession();
     if (!sess?.session_token) throw new Error('session_expired');
     const result = await _webRpc('rpc_admin_create_teacher_card', { p_session_token: sess.session_token, p_teacher_id: teacherId });
-    let teacherProfile = null;
-    try {
-      const listResult = await _webRpc('rpc_admin_list_teachers', { p_session_token: sess.session_token });
-      teacherProfile = (Array.isArray(listResult?.rows) ? listResult.rows : []).find(row => row.teacher_id === teacherId) || null;
-    } catch (_) {}
+    const teacherProfile = _teacherProfileFromCache(teacherId);
     const root = document.getElementById('teacherCardRoot');
     if (!root) return;
     if (!result?.ok) throw new Error(result?.error || 'card_failed');
@@ -500,11 +511,14 @@ window.openTeacherCardModal = async function(teacherId, teacherName, teacherLogi
         '<div class="teacher-id-card-security">' + esc(t('tm.cardPurpose')) + '</div>' +
       '</div>' +
     '</div>' +
-    '<div class="teacher-id-card-help">' +
-      '<div class="teacher-id-card-help-title">ℹ️ ' + esc(t('tm.cardPurposeTitle')) + '</div>' +
-      '<div>' + esc(t('tm.cardPurpose')) + '</div>' +
-      '<ol><li>' + esc(t('tm.cardStep1')) + '</li><li>' + esc(t('tm.cardStep2')) + '</li><li>' + esc(t('tm.cardStep3')) + '</li></ol>' +
-      '<div class="teacher-id-card-help-note">' + esc(t('tm.cardSecurity')) + '</div>' +
+    '<div class="teacher-id-card-help-wrap">' +
+      '<button class="teacher-id-card-help-trigger" type="button" aria-label="' + esc(t('tm.cardPurposeTitle')) + '" aria-expanded="false" onclick="toggleTeacherCardHelp(event)">ℹ️</button>' +
+      '<div class="teacher-id-card-help-popover" id="teacherCardHelp" hidden>' +
+        '<div class="teacher-id-card-help-title">' + esc(t('tm.cardPurposeTitle')) + '</div>' +
+        '<div>' + esc(t('tm.cardPurpose')) + '</div>' +
+        '<ol><li>' + esc(t('tm.cardStep1')) + '</li><li>' + esc(t('tm.cardStep2')) + '</li><li>' + esc(t('tm.cardStep3')) + '</li></ol>' +
+        '<div class="teacher-id-card-help-note">' + esc(t('tm.cardSecurity')) + '</div>' +
+      '</div>' +
     '</div>' +
     '<div class="teacher-card-actions"><button class="btn-primary" type="button" onclick="printTeacherCard()">' + esc(t('tm.printCard')) + '</button><button class="btn-secondary" type="button" onclick="regenerateTeacherCard(&quot;' + esc(teacherId) + '&quot;,&quot;' + esc(teacherName) + '&quot;)">' + esc(t('tm.regenerateCard')) + '</button></div>';
 
@@ -557,6 +571,22 @@ function _renderTeacherCardQrLegacy(el, value) {
   }
 }
 
+window.toggleTeacherCardHelp = function(event) {
+  event.stopPropagation();
+  const wrap = event.currentTarget?.closest('.teacher-id-card-help-wrap');
+  const popover = wrap?.querySelector('.teacher-id-card-help-popover');
+  if (!popover) return;
+  const open = popover.hasAttribute('hidden');
+  if (open) popover.removeAttribute('hidden');
+  else popover.setAttribute('hidden', '');
+  event.currentTarget.setAttribute('aria-expanded', open ? 'true' : 'false');
+};
+window.closeTeacherCardHelp = function() {
+  const popover = document.getElementById('teacherCardHelp');
+  const trigger = document.querySelector('.teacher-id-card-help-trigger');
+  if (popover) popover.setAttribute('hidden', '');
+  if (trigger) trigger.setAttribute('aria-expanded', 'false');
+};
 window.printTeacherCard = function() {
   const card = document.querySelector('.teacher-id-card');
   const area = document.getElementById('bulkIdPrintArea');
