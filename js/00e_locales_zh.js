@@ -1,3 +1,5 @@
+// Simplified Chinese (zh-CN) production locale. Generated from audited staging batches A-H.
+// NOTE: temporary assembly excludes 5 staging-only daily.* aliases not present in EN.
 // Simplified Chinese production locale source (assembled from audited staging batches A-H).
 window.I18N_ZH = {
   "enum.meal.Full": "全部",
