@@ -164,7 +164,7 @@ async function _renderTeacherAccess() {
     const roleDefaults = catalog.role_permissions || [];
 
     let html = '<div class="teacher-access-head"><strong>' + esc(teacher.teacher_name || '') +
-      '</strong><span>' + esc(teacher.teacher_id || teacherId) + ' · ' + esc(teacher.role === 'admin' ? ({en:'Admin',my:'Admin',th:'ผู้ดูแล',jp:'管理者'}[_taLang()] || 'Admin') : (teacher.role === 'super_admin' ? ({en:'Super Admin',my:'Super Admin',th:'ผู้ดูแลระบบสูงสุด',jp:'スーパー管理者'}[_taLang()] || 'Super Admin') : ({en:'Teacher',my:'ဆရာ/ဆရာမ',th:'ครู',jp:'教師'}[_taLang()] || 'Teacher'))) + '</span></div>';
+      '</strong><span>' + esc(teacher.teacher_id || teacherId) + ' · ' + esc(teacher.role === 'admin' ? ({en:'Admin',my:'Admin',th:'ผู้ดูแล',jp:'管理者',zh:'管理员'}[_taLang()] || 'Admin') : (teacher.role === 'super_admin' ? ({en:'Super Admin',my:'Super Admin',th:'ผู้ดูแลระบบสูงสุด',jp:'スーパー管理者'}[_taLang()] || 'Super Admin') : ({en:'Teacher',my:'ဆရာ/ဆရာမ',th:'ครู',jp:'教師'}[_taLang()] || 'Teacher'))) + '</span></div>';
 
     html += '<section class="teacher-access-section">' +
       '<div class="teacher-access-section-head"><strong>' + _taUi('classes') + '</strong><span>' + classAssignments.length + '</span></div>' +
