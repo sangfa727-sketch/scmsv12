@@ -46,7 +46,7 @@ test('dashboard interactive cards remain keyboard accessible', () => {
 
 test('dashboard refreshes notification slices when revisiting cached data', () => {
   const dashboard = read('js/27_dashboard.js');
-  assert.match(dashboard, /if \(_dashboardLoadedOnce && _dashboardCache\) \{[\\s\\S]*_paintDashboard\(container\);[\\s\\S]*void window\.refreshDashboardNotifications\(\);/);
+  assert.match(dashboard, /if \(_dashboardLoadedOnce && _dashboardCache\) \{[\s\S]*_paintDashboard\(container\);[\s\S]*void window\.refreshDashboardNotifications\(\);/);
 });
 
 test('sidebar keeps aria-hidden synchronized with its visual state', () => {
