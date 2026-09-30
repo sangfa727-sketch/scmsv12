@@ -6,7 +6,8 @@ on:
   pull_request:
   workflow_dispatch: {}
   schedule:
-    - cron: '0 20 * * *'
+    # 03:00 Myanmar Standard Time (UTC+6:30) = 20:30 UTC previous day
+    - cron: '30 20 * * *'
 
 jobs:
   frontend:
