@@ -269,7 +269,7 @@ window.openTeacherAccess = async function(teacherId, teacherName) {
    * real content replaces it.  Keep the shell hidden while the data loads,
    * then reveal the already-sized final sheet in one paint.
    */
-  openModal('<div class="modal-sheet teacher-access-sheet teacher-access-preparing" onclick="event.stopPropagation()" style="visibility:hidden">' +
+  openModal('<div class="modal-sheet teacher-access-sheet teacher-modal-preparing" onclick="event.stopPropagation()" style="visibility:hidden">' +
     '<div class="modal-handle"></div><h3 class="modal-title">' + _taUi('manageTitle') + '</h3>' +
     '<p class="modal-subtitle">' + esc(teacherName) + ' ' + _taUi('subtitle') + '</p>' +
     '<div id="teacherAccessRoot" data-teacher-id="' + esc(teacherId) + '"></div>' +
@@ -279,7 +279,8 @@ window.openTeacherAccess = async function(teacherId, teacherName) {
   } finally {
     const sheet = document.querySelector('.teacher-access-sheet');
     if (sheet) {
-      sheet.classList.remove('teacher-access-preparing');
+      sheet.classList.remove('teacher-modal-preparing');
+      sheet.classList.add('teacher-modal-ready');
       sheet.style.visibility = 'visible';
     }
   }
