@@ -461,7 +461,7 @@ window.openTeacherCardModal = async function(teacherId, teacherName, teacherLogi
           '<div><span>Teacher ID</span><strong>' + esc(result.teacher_id || teacherId) + '</strong></div>' +
           '<div><span>Login Name</span><strong>' + esc(resolvedLogin || '—') + '</strong></div>' +
         '</div>' +
-        '<div class="teacher-id-card-qr" data-token="' + esc(result.token) + '" aria-label="${esc(t('tm.idCard'))}"></div>' +
+        '<div class="teacher-id-card-qr" data-token="' + esc(result.token) + '" aria-label="' + esc(t('tm.idCard')) + '"></div>' +
         '<div class="teacher-id-card-instruction">' + esc(t('tm.cardScan')) + '</div>' +
         '<div class="teacher-id-card-security">' + esc(t('tm.cardPurpose')) + '</div>' +
       '</div>' +
