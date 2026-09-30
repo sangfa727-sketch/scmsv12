@@ -1,4 +1,4 @@
-// Locale dictionary aligned to the current English key order. New keys without translations fall back to English.
+// Locale dictionary aligned to the current English key order. Khmer UI text is kept free of Burmese fallbacks. New keys without translations fall back to English.
 window.I18N_KM = {
   "app.title": "SCMS — ប្រព័ន្ធគ្រប់គ្រងថ្នាក់រៀន",
   "common.all": "ទាំងអស់",
