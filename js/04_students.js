@@ -120,13 +120,11 @@ window.printSelectedIdCards = async function() {
     </div>`).join('');
 
   // QRCode needs the target element already in the DOM — instantiate after innerHTML is set.
-  pages.forEach((page, pi) => page.forEach((s, si) => {
+  await Promise.all(pages.flatMap((page, pi) => page.map((s, si) => {
     const portalUrl = new URL('parent.html?t=' + encodeURIComponent(s.qr_token), location.href).href;
     const target = document.getElementById(`bulkQr_${pi}_${si}`);
-    if (window.QRCode && target) {
-      new QRCode(target, { text: portalUrl, width: 256, height: 256, colorDark: '#1A1A18', colorLight: '#ffffff' });
-    }
-  }));
+    return _renderStudentCardQr(target, portalUrl);
+  })));
 
   _printArea('printing-id-bulk', 'size: A4; margin: 6mm;', () => { area.innerHTML = ''; });
 };
