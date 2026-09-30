@@ -575,7 +575,7 @@ function _updateFabForPage(pageId) {
   if (conf) {
     fab.style.display = 'flex';
     fab.setAttribute('aria-label', t(conf.titleKey));
-    fab.setAttribute('title', conf.title);
+    fab.setAttribute('title', t(conf.titleKey));
     fab._action = conf.action;
   } else {
     fab.style.display = 'none';
