@@ -74,4 +74,49 @@ window.I18N_KM = {
   'students.form.savingEdit': 'កំពុងរក្សាទុក…',
   'students.form.registering': 'កំពុងចុះឈ្មោះ…',
   'students.form.parentTgInfo': 'លេខសម្គាល់ Telegram របស់មាតាបិតានឹងត្រូវបំពេញ <b>ដោយស្វ័យប្រវត្តិ</b> បន្ទាប់ពីអ្នកចុះឈ្មោះសិស្ស។ យើងនឹងបង្ហាញតំណសម្រាប់ចែករំលែកជាមួយមាតាបិតា — នៅពេលពួកគេចុចតំណនោះក្នុង Telegram លេខសម្គាល់របស់ពួកគេនឹងត្រូវបានរក្សាទុក។'
+
+  // Students: toasts
+  'students.toast.imageOnly': 'សូមជ្រើសរើសឯកសាររូបភាព',
+  'students.toast.imageTooBig': 'រូបថតធំពេក (អតិបរមា 20 MB)',
+  'students.toast.studentNotFound': 'រកមិនឃើញសិស្ស',
+  'students.toast.nameRequired': 'ត្រូវការឈ្មោះជាភាសាអង់គ្លេស',
+  'students.toast.classRequired': 'ត្រូវការថ្នាក់',
+  'students.toast.emailInvalid': 'អ៊ីមែលមាតាបិតាហាក់ដូចជាមិនត្រឹមត្រូវ',
+  'students.toast.phoneInvalid': 'លេខទូរស័ព្ទមាតាបិតាហាក់ដូចជាមិនត្រឹមត្រូវ',
+  'students.toast.updated': '✓ បានធ្វើបច្ចុប្បន្នភាព {name}',
+  'students.toast.registered': '✓ បានចុះឈ្មោះ {name}',
+  'students.toast.photoUploadFailedEdit': 'បានរក្សាទុក ប៉ុន្តែការបង្ហោះរូបថតបានបរាជ័យ៖ {err}',
+  'students.toast.photoRemoveFailed': 'បានរក្សាទុក ប៉ុន្តែការលុបរូបថតបានបរាជ័យ៖ {err}',
+  'students.toast.photoUploadFailedAdd': 'បានចុះឈ្មោះ ប៉ុន្តែការបង្ហោះរូបថតបានបរាជ័យ៖ {err}',
+  'students.toast.saveFailed': 'ការរក្សាទុកបានបរាជ័យ៖ {err}',
+  'students.toast.registerFailed': 'ការចុះឈ្មោះបានបរាជ័យ៖ {err}',
+
+  // Students: delete
+  'students.delete.title': 'លុប {name}?',
+  'students.delete.body': 'វានឹងកំណត់សិស្សជា <b>អសកម្ម</b>។ កំណត់ត្រារបស់ពួកគេ (វត្តមាន របាយការណ៍) នឹងនៅរក្សាទុក ប៉ុន្តែពួកគេនឹងមិនបង្ហាញក្នុងបញ្ជីប្រចាំថ្ងៃទេ។ អ្នកអាចស្នើឱ្យអ្នកគ្រប់គ្រងស្ដារវានៅពេលក្រោយ។',
+  'students.delete.confirm': 'បាទ/ចាស លុប',
+  'students.delete.done': '✓ បានលុបសិស្ស',
+
+  // Parent link modal
+  'parentLink.title': 'ភ្ជាប់ Telegram របស់មាតាបិតា',
+  'parentLink.body': 'ចែករំលែកតំណនេះជាមួយមាតាបិតារបស់ {name}។ នៅពេលមាតាបិតាចុចតំណនេះក្នុង Telegram បូតរបស់យើងនឹងទទួលបានលេខសម្គាល់របស់ពួកគេ ហើយភ្ជាប់វាទៅសិស្សនេះដោយស្វ័យប្រវត្តិ។',
+  'parentLink.copy': '📋 ចម្លងតំណ',
+  'parentLink.share': '📤 ចែករំលែកតាម Telegram',
+  'parentLink.waiting': 'កំពុងរង់ចាំមាតាបិតាចុចតំណ…',
+  'parentLink.linkedHtml': '✓ <b>បានភ្ជាប់!</b> លេខសម្គាល់មាតាបិតា៖ <code>{id}</code>',
+  'parentLink.done': 'រួចរាល់ — ខ្ញុំនឹងចែករំលែកពេលក្រោយ',
+  'parentLink.copied': '✓ បានចម្លងតំណ',
+  'parentLink.copyFail': 'ការចម្លងបានបរាជ័យ — ចុចសង្កត់យូរ ដើម្បីចម្លងដោយដៃ',
+  'parentLink.shareText': 'សួស្តី! សូមចុចតំណនេះក្នុង Telegram ដើម្បីទទួលបានព័ត៌មានថ្មីៗអំពី {name} ពីសាលា៖',
+
+  // Value picker
+  'picker.class.title': 'ជ្រើសរើសថ្នាក់',
+  'picker.class.addLabel': 'បន្ថែមថ្នាក់ថ្មី',
+  'picker.class.placeholder': '(ឧ. P4 Online)',
+  'picker.grade.title': 'ជ្រើសរើសកម្រិតថ្នាក់',
+  'picker.grade.addLabel': 'បន្ថែមកម្រិតថ្នាក់ថ្មី',
+  'picker.select': 'ជ្រើសរើស…',
+  'picker.empty': 'មិនទាន់មានជម្រើសទេ — បន្ថែមមួយខាងក្រោម',
+  'picker.typeName': 'សូមបញ្ចូលឈ្មោះជាមុនសិន',
+  'picker.deleteConfirm': 'លុប "{value}" ចេញពីបញ្ជី {list} មែនទេ?',
 };
