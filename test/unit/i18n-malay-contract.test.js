@@ -102,6 +102,6 @@ test('Malay locale is registered and loaded before the i18n engine', () => {
 
   assert.match(
     index,
-    /<button[^>]+class="lang-option"[^>]+data-lang="ms"[^>]*>BM<\\/button>/
+    /<button[^>]+class="lang-option"[^>]+data-lang="ms"[^>]*>BM<\/button>/
   );
 });
