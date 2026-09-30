@@ -33,11 +33,6 @@ test('English source locale remains the 1349-key baseline for Khmer', () => {
     keys.length,
     'English locale must not contain duplicate top-level keys'
   );
-  assert.equal(
-    keys.length,
-    keys.length,
-    'English locale key count must be internally consistent'
-  );
 });
 
 test('Khmer locale must match the English key set exactly once it is introduced', (t) => {
