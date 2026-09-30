@@ -308,25 +308,25 @@ window.openTeacherEditModal = async function(teacherId) {
   openModal(`
     <div class="modal-sheet settings-form-sheet teacher-edit-sheet" onclick="event.stopPropagation()">
       <div class="modal-handle"></div>
-      <h3 class="modal-title">✏️ Edit Teacher</h3>
-      <p class="modal-subtitle">Update the teacher name and Login Name used by the ID card and teacher login.</p>
-      <label class="field-label">Teacher ID</label>
+      <h3 class="modal-title">✏️ ${t('teacher.editTitle')}</h3>
+      <p class="modal-subtitle">${t('teacher.editSubtitle')}</p>
+      <label class="field-label">${t('ct.teacherId')}</label>
       <input class="form-input" value="${esc(teacher.teacher_id)}" readonly>
-      <label class="field-label">User name / Login Name</label>
+      <label class="field-label">${t('ct.loginName')}</label>
       <input class="form-input" id="editTLogin" value="${esc(teacher.login_name || '')}" autocapitalize="off" autocorrect="off">
-      <label class="field-label">Teacher Name</label>
+      <label class="field-label">${t('ct.teacherName')}</label>
       <input class="form-input" id="editTName" value="${esc(teacher.teacher_name || '')}">
-      <label class="field-label">Email</label>
+      <label class="field-label">${t('ct.email')}</label>
       <input class="form-input" id="editTEmail" type="email" value="${esc(teacher.email || teacher.teacher_email || '')}">
-      <label class="field-label">Role</label>
+      <label class="field-label">${t('inv.role')}</label>
       <select class="form-input" id="editTRole">
-        <option value="teacher" ${teacher.role === 'teacher' ? 'selected' : ''}>Teacher</option>
-        <option value="admin" ${teacher.role === 'admin' ? 'selected' : ''}>Admin</option>
-        <option value="super_admin" ${teacher.role === 'super_admin' ? 'selected' : ''}>Super Admin</option>
+        <option value="teacher" ${teacher.role === 'teacher' ? 'selected' : ''}>${t('inv.roleTeacher')}</option>
+        <option value="admin" ${teacher.role === 'admin' ? 'selected' : ''}>${t('inv.roleAdmin')}</option>
+        <option value="super_admin" ${teacher.role === 'super_admin' ? 'selected' : ''}>${t('teacher.superAdmin')}</option>
       </select>
       <div id="editTError" class="form-error" style="display:none"></div>
-      <button class="btn-primary mt16" id="editTBtn" onclick="saveTeacherEdit('${esc(teacher.teacher_id)}')">Save changes</button>
-      <button class="btn-secondary" onclick="closeModal()">Cancel</button>
+      <button class="btn-primary mt16" id="editTBtn" onclick="saveTeacherEdit('${esc(teacher.teacher_id)}')">${t('common.saveChanges')}</button>
+      <button class="btn-secondary" onclick="closeModal()">${t('common.cancel')}</button>
     </div>
   `);
 };
@@ -448,7 +448,7 @@ window.openTeacherCardModal = async function(teacherId, teacherName, teacherLogi
           (window.APP?.school_logo ? '<img src="' + esc(window.APP.school_logo) + '" alt="" class="teacher-id-card-logo">' : '') +
           '<div class="teacher-id-card-school">' + esc(window.APP?.school_name || '') + '</div>' +
         '</div>' +
-        '<div class="teacher-id-card-type">TEACHER ID CARD</div>' +
+        '<div class="teacher-id-card-type">' + esc(t('tm.idCard')) + '</div>' +
         '<div class="teacher-id-card-avatar' + (photo ? ' has-photo' : '') + '">' +
           (photo ? '<img src="' + esc(photo) + '" alt="' + esc(resolvedName) + '" referrerpolicy="no-referrer" onload="this.parentElement.classList.add(\'has-photo\')" onerror="this.style.display=\'none\';this.parentElement.classList.remove(\'has-photo\');this.parentElement.classList.add(\'is-fallback\')">' : '') +
           '<span class="teacher-id-card-avatar-fallback">👤</span>' +
@@ -458,8 +458,8 @@ window.openTeacherCardModal = async function(teacherId, teacherName, teacherLogi
           '<div class="teacher-id-card-role">' + esc(role) + '</div>' +
         '</div>' +
         '<div class="teacher-id-card-fields">' +
-          '<div><span>Teacher ID</span><strong>' + esc(result.teacher_id || teacherId) + '</strong></div>' +
-          '<div><span>Login Name</span><strong>' + esc(resolvedLogin || '—') + '</strong></div>' +
+          '<div><span>' + esc(t('ct.teacherId')) + '</span><strong>' + esc(result.teacher_id || teacherId) + '</strong></div>' +
+          '<div><span>' + esc(t('ct.loginName')) + '</span><strong>' + esc(resolvedLogin || '—') + '</strong></div>' +
         '</div>' +
         '<div class="teacher-id-card-qr" data-token="' + esc(result.token) + '" aria-label="' + esc(t('tm.idCard')) + '"></div>' +
         '<div class="teacher-id-card-instruction">' + esc(t('tm.cardScan')) + '</div>' +
