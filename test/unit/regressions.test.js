@@ -9,6 +9,7 @@ const read = (file) => fs.readFileSync(path.join(ROOT, file), 'utf8'); // theme-
 test('teacher ID card foundation stays protected', () => {
   const settings = read('js/15_settings.js');
   const css = read('style.css');
+  const access = read('js/29_teacher_access.js');
   const html = read('index.html');
   assert.match(settings, /rpc_admin_create_teacher_card/);
   assert.match(settings, /openTeacherCardModal\(id, name, login\)/);
@@ -19,13 +20,17 @@ test('teacher ID card foundation stays protected', () => {
   assert.match(settings, /teacher-edit-btn/);
   assert.match(settings, /printTeacherCard/);
   assert.match(settings, /setTimeout\(\(\) => openTeacherCardModal\(id, name, login\), 280\)/);
-  assert.match(settings, /teacher-modal-preparing/);
-  assert.match(settings, /teacher-modal-ready/);
+  assert.match(access, /teacher-modal-preparing/);
+  assert.match(access, /teacher-modal-ready/);
   assert.match(settings, /result\.login_name \|\| teacherLoginName/);
   assert.match(settings, /Teacher ID/);
   assert.match(settings, /teacher-id-card-avatar-fallback/);
   assert.match(settings, /teacher-id-card-vertical/);
   assert.match(settings, /tm\.cardPurpose/);
+  assert.match(settings, /teacherManagerCacheFresh/);
+  assert.match(settings, /_prefetchTeacherManagerList/);
+  assert.match(settings, /toggleTeacherCardHelp/);
+  assert.match(settings, /teacher-id-card-help-popover/);
   assert.match(settings, /result\.photo_url/);
   assert.match(settings, /teacherProfile\?\.photo_url/);
   assert.match(settings, /_renderTeacherCardQrLegacy/);
@@ -36,6 +41,6 @@ test('teacher ID card foundation stays protected', () => {
   assert.ok(html.includes('qrcode@1.5.4'));
   assert.ok(html.includes('qrcodejs/1.0.0'));
   assert.match(html, /29_teacher_access\.js\?v=20261001a/);
-  assert.match(html, /15_settings\.js\?v=20261001b/);
-  assert.match(html, /style\.css\?v=20261001c/);
+  assert.match(html, /15_settings\.js\?v=20261001c/);
+  assert.match(html, /style\.css\?v=20261001d/);
 });

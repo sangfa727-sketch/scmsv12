@@ -7898,10 +7898,17 @@ body > .modal-overlay.generic-confirm-overlay .generic-confirm-sheet {
 .teacher-id-card-qr-error{font-size:2.8cqw;color:#777;text-align:center;padding:4cqw}
 .teacher-id-card-instruction{text-align:center;font-size:3.2cqw;line-height:1.15;font-weight:800;color:#0F1B33;overflow-wrap:anywhere}
 .teacher-id-card-security{text-align:center;font-size:2.65cqw;line-height:1.15;color:#6B7280;overflow-wrap:anywhere}
-.teacher-id-card-help{max-width:380px;margin:12px auto 0;padding:12px 14px;border:1px solid var(--border2);border-radius:14px;background:var(--surface);font-size:12px;line-height:1.5;color:var(--text2)}
-.teacher-id-card-help-title{font-weight:800;color:var(--text);margin-bottom:4px}
-.teacher-id-card-help ol{margin:6px 0 6px 18px;padding:0}
+.teacher-id-card-help-wrap{position:relative;display:flex;justify-content:center;align-items:center;margin:8px auto 0;min-height:30px}
+.teacher-id-card-help-trigger{width:30px;height:30px;border:1px solid var(--border2);border-radius:999px;background:var(--surface);color:var(--text2);display:grid;place-items:center;padding:0;font:inherit;font-size:15px;line-height:1;cursor:pointer;box-shadow:0 4px 14px rgba(0,0,0,.06);transition:transform .16s ease,background .16s ease,color .16s ease}
+.teacher-id-card-help-trigger:hover{transform:translateY(-1px);background:var(--bg2);color:var(--text)}
+.teacher-id-card-help-trigger:focus-visible{outline:2px solid var(--blue);outline-offset:2px}
+.teacher-id-card-help-popover{position:absolute;z-index:8;left:50%;bottom:38px;width:min(84vw,340px);max-height:min(48dvh,360px);overflow:auto;transform:translateX(-50%);padding:13px 15px;border:1px solid var(--border2);border-radius:14px;background:var(--surface);box-shadow:0 14px 34px rgba(0,0,0,.16);font-size:12px;line-height:1.55;color:var(--text2);text-align:left;animation:teacherCardHelpIn .16s ease}
+.teacher-id-card-help-popover[hidden]{display:none}
+.teacher-id-card-help-title{font-weight:800;color:var(--text);margin-bottom:5px}
+.teacher-id-card-help-popover ol{margin:6px 0 7px 18px;padding:0}
 .teacher-id-card-help-note{font-size:11px;color:var(--muted)}
+@keyframes teacherCardHelpIn{from{opacity:0;transform:translate(-50%,4px) scale(.98)}to{opacity:1;transform:translate(-50%,0) scale(1)}}
+@media (prefers-reduced-motion:reduce){.teacher-id-card-help-trigger,.teacher-id-card-help-popover{transition:none;animation:none}}
 .teacher-card-actions{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:12px}
 .teacher-card-actions button{min-width:0;white-space:normal}
 @media print{body.printing-teacher-card>*:not(#bulkIdPrintArea){display:none!important}body.printing-teacher-card #bulkIdPrintArea{display:block!important}body.printing-teacher-card .teacher-id-card{width:54mm;height:85.6mm;max-width:none;margin:0;aspect-ratio:auto;box-shadow:none;border:0;page-break-inside:avoid}body.printing-teacher-card .teacher-id-card-face{box-shadow:none}}
