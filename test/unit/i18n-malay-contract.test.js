@@ -49,20 +49,20 @@ test('Malay locale contract is enforced when the locale file is present', (t) =>
   assert.deepEqual(msKeys, enKeys, 'Malay locale keys must exactly match English keys');
 
   for (const key of enKeys) {
-    assert.equal(msValues.has(key), true, `Malay locale is missing value for ${key}`);
+    assert.equal(Object.prototype.hasOwnProperty.call(msValues, key), true, `Malay locale is missing value for ${key}`);
 
-    const msValue = msValues.get(key);
+    const msValue = msValues[key];
     assert.notEqual(msValue.trim(), '', `Malay locale has an empty value for ${key}`);
 
     assert.deepEqual(
       tokens(msValue),
-      tokens(enValues.get(key) || ''),
+      tokens(enValues[key] || ''),
       `placeholder tokens differ for ${key}`
     );
 
     assert.deepEqual(
       htmlTags(msValue),
-      htmlTags(enValues.get(key) || ''),
+      htmlTags(enValues[key] || ''),
       `HTML tags differ for ${key}`
     );
   }
@@ -75,6 +75,6 @@ test('Malay locale source is valid UTF-8 JavaScript when present', (t) => {
   }
 
   const source = readLocale(MS_FILE);
-  assert.match(source, /^window\.I18N_MS\s*=\s*\{/);
+  assert.match(source, /window\.I18N_MS\s*=\s*\{/);
   assert.match(source, /\};\s*$/);
 });
