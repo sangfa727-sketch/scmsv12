@@ -19,6 +19,8 @@ test('teacher ID card foundation stays protected', () => {
   assert.match(settings, /teacher-edit-btn/);
   assert.match(settings, /printTeacherCard/);
   assert.match(settings, /setTimeout\(\(\) => openTeacherCardModal\(id, name, login\), 280\)/);
+  assert.match(settings, /teacher-modal-preparing/);
+  assert.match(settings, /teacher-modal-ready/);
   assert.match(settings, /result\.login_name \|\| teacherLoginName/);
   assert.match(settings, /Teacher ID/);
   assert.match(settings, /teacher-id-card-avatar-fallback/);
@@ -33,6 +35,7 @@ test('teacher ID card foundation stays protected', () => {
   assert.match(css, /printing-teacher-card/);
   assert.ok(html.includes('qrcode@1.5.4'));
   assert.ok(html.includes('qrcodejs/1.0.0'));
-  assert.match(html, /15_settings\.js\?v=20261001a/);
-  assert.match(html, /style\.css\?v=20261001b/);
+  assert.match(html, /29_teacher_access\.js\?v=20261001a/);
+  assert.match(html, /15_settings\.js\?v=20261001b/);
+  assert.match(html, /style\.css\?v=20261001c/);
 });
