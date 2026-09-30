@@ -70,11 +70,11 @@ window.renderLanding = function () {
           <div class="landing-lang-picker" id="landingLangPicker">
             <button type="button" class="landing-lang-switch" id="landingLangSwitch"
                     aria-haspopup="listbox" aria-expanded="false"
-                    aria-label="Language">
+                    aria-label="${esc(t('topbar.language'))}">
               <span id="landingLangLabel">${LANGUAGES.find(l => l.code === I18N.current)?.label || 'EN'}</span>
               <svg viewBox="0 0 20 20" aria-hidden="true"><path d="M5.5 7.5 10 12l4.5-4.5"/></svg>
             </button>
-            <div class="landing-lang-menu" id="landingLangMenu" role="listbox" aria-label="Languages">
+            <div class="landing-lang-menu" id="landingLangMenu" role="listbox" aria-label="${esc(t('lang.switchTitle'))}">
               ${LANGUAGES.map(l => `
                 <button type="button" class="landing-lang-option${l.code === I18N.current ? ' is-active' : ''}"
                         data-landing-lang="${l.code}" role="option" aria-selected="${l.code === I18N.current}">
