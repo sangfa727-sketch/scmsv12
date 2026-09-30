@@ -64,6 +64,25 @@ button, button * { min-width: 0; }
 input, textarea, select { font-family: inherit; }
 a { color: inherit; }
 
+/* ── Khmer script rendering ───────────────────────────────────── */
+html[lang="km"] body {
+  font-family: 'Noto Sans Khmer', 'Inter Tight', system-ui, -apple-system, sans-serif;
+  line-height: 1.65;
+}
+
+html[lang="km"] .page-title,
+html[lang="km"] .page-subtitle,
+html[lang="km"] button,
+html[lang="km"] input,
+html[lang="km"] textarea,
+html[lang="km"] select,
+html[lang="km"] option,
+html[lang="km"] .modal-sheet,
+html[lang="km"] .toast,
+html[lang="km"] .tab-label {
+  font-family: 'Noto Sans Khmer', 'Inter Tight', system-ui, -apple-system, sans-serif;
+}
+
 /* ── App shell ─────────────────────────────────────────────────── */
 #app {
   display: flex;
