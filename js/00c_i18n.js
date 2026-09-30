@@ -38,13 +38,45 @@ const I18N = {
 
   validateLocales() {
     const base = window.I18N_EN || {};
+    const baseKeys = Object.keys(base);
+    const tokenList = (value) => String(value ?? '').match(/\\{[^{}]+\\}/g) || [];
+    const htmlList = (value) => String(value ?? '').match(/<\\/?[a-z][^>]*>/gi) || [];
+
     LANGUAGES.forEach(lang => {
       if (lang.code === 'en') return;
       const dict = lang.dict() || {};
-      const missing = Object.keys(base).filter(key => !(key in dict));
+      const localeKeys = Object.keys(dict);
+      const missing = baseKeys.filter(key => !(key in dict));
+      const extra = localeKeys.filter(key => !(key in base));
+
       if (missing.length) {
         console.warn('[i18n] Missing keys in ' + lang.code + ':', missing);
       }
+      if (extra.length) {
+        console.warn('[i18n] Extra keys in ' + lang.code + ':', extra);
+      }
+
+      baseKeys.forEach(key => {
+        if (!(key in dict)) return;
+        const baseValue = String(base[key] ?? '');
+        const localeValue = String(dict[key] ?? '');
+
+        if (!localeValue.trim()) {
+          console.warn('[i18n] Empty value in ' + lang.code + ':', key);
+        }
+
+        const baseTokens = tokenList(baseValue).sort();
+        const localeTokens = tokenList(localeValue).sort();
+        if (baseTokens.join('\\u0000') !== localeTokens.join('\\u0000')) {
+          console.warn('[i18n] Placeholder mismatch in ' + lang.code + ':', key);
+        }
+
+        const baseHtml = htmlList(baseValue).map(x => x.replace(/\\s+/g, ' ').trim()).sort();
+        const localeHtml = htmlList(localeValue).map(x => x.replace(/\\s+/g, ' ').trim()).sort();
+        if (baseHtml.join('\\u0000') !== localeHtml.join('\\u0000')) {
+          console.warn('[i18n] HTML tag mismatch in ' + lang.code + ':', key);
+        }
+      });
     });
   },
 
