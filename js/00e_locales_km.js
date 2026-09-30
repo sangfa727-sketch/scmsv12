@@ -698,4 +698,7 @@ window.I18N_KM = {
   'teacher.qrUnavailable': 'មិនអាចប្រើ QR បានទេ',
   'password.hide': 'លាក់ពាក្យសម្ងាត់',
   'password.show': 'បង្ហាញពាក្យសម្ងាត់',
+  'teacher.editTitle': 'កែសម្រួលគ្រូ',
+  'teacher.editSubtitle': 'កែសម្រួលឈ្មោះគ្រូ និងឈ្មោះចូលដែលប្រើសម្រាប់កាតសម្គាល់ និងការចូលរបស់គ្រូ។',
+  'teacher.superAdmin': 'អ្នកគ្រប់គ្រងប្រព័ន្ធកម្រិតខ្ពស់',
 };
