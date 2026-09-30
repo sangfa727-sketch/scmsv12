@@ -458,8 +458,8 @@ window.openTeacherCardModal = async function(teacherId, teacherName, teacherLogi
           '<div class="teacher-id-card-role">' + esc(role) + '</div>' +
         '</div>' +
         '<div class="teacher-id-card-fields">' +
-          '<div><span>${esc(t('tm.teacherIdCardLabel'))}</span><strong>' + esc(result.teacher_id || teacherId) + '</strong></div>' +
-          '<div><span>${esc(t('tm.loginNameLabel'))}</span><strong>' + esc(resolvedLogin || '—') + '</strong></div>' +
+          '<div><span>' + esc(t('tm.teacherIdCardLabel')) + '</span><strong>' + esc(result.teacher_id || teacherId) + '</strong></div>' +
+          '<div><span>' + esc(t('tm.loginNameLabel')) + '</span><strong>' + esc(resolvedLogin || '—') + '</strong></div>' +
         '</div>' +
         '<div class="teacher-id-card-qr" data-token="' + esc(result.token) + '" aria-label="' + esc(t('tm.teacherLoginQr')) + '"></div>' +
         '<div class="teacher-id-card-instruction">' + esc(t('tm.cardScan')) + '</div>' +
