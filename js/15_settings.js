@@ -504,6 +504,7 @@ function _renderTeacherCardQr(el, value) {
   _renderTeacherCardQrLegacy(el, value);
 }
 
+// Khmer i18n-safe QR fallback; keep interpolation outside single-quoted literals.
 function _renderTeacherCardQrLegacy(el, value) {
   const QR = window.QRCode;
   if (typeof QR !== 'function') {
