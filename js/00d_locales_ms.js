@@ -1366,4 +1366,7 @@ window.I18N_MS = {
   'teacher.qrUnavailable': 'Kod QR tidak tersedia.',
   'password.hide': 'Sembunyikan kata laluan',
   'password.show': 'Tunjukkan kata laluan',
+  'teacher.editTitle': 'Edit Guru',
+  'teacher.editSubtitle': 'Kemas kini nama guru dan Nama Log Masuk yang digunakan untuk kad ID dan log masuk guru.',
+  'teacher.superAdmin': 'Super Admin',
 };
