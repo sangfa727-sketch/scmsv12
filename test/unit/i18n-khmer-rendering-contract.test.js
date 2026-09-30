@@ -39,9 +39,19 @@ test('Khmer locale receives an explicit script-aware font stack', () => {
     '.toast',
     '.tab-label',
   ]) {
+    const selectorPattern = selector.startsWith('.')
+      ? selector.replace('.', '\\.')
+      : selector;
+    const pattern = new RegExp(
+      'html\\[lang="km"\\][\\s\\S]*?' +
+      selectorPattern +
+      '[\\s\\S]*?font-family:\\s*' +
+      "'Noto Sans Khmer'"
+    );
+
     assert.match(
       source,
-      new RegExp('html\\[lang="km"\\][\\s\\S]*?' + selector.replace('.', '\\.') + '[\\s\\S]*?font-family:\\s*\\'Noto Sans Khmer\\''),
+      pattern,
       'Khmer UI selector must retain the Khmer-capable font: ' + selector
     );
   }
