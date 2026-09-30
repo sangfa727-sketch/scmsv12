@@ -7866,3 +7866,16 @@ body > .modal-overlay.generic-confirm-overlay .generic-confirm-sheet {
 .teacher-row-card .teacher-row-actions{display:flex;align-items:flex-start;gap:4px;flex-wrap:wrap;justify-content:flex-end}
 .teacher-edit-btn{font-size:12px;line-height:1}
 .teacher-edit-sheet{max-height:min(82dvh,720px);overflow-y:auto}
+
+
+/* Simplified Chinese rendering foundation — enabled when ZH is selected. */
+html[lang="zh"],
+html[lang="zh"] body,
+html[lang="zh"] input,
+html[lang="zh"] button,
+html[lang="zh"] select,
+html[lang="zh"] textarea {
+  font-family: "Noto Sans SC", "Inter Tight", system-ui, sans-serif;
+  font-synthesis: none;
+}
+

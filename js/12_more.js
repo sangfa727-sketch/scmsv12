@@ -347,7 +347,7 @@ window.openManageClassesModal = function () {
     <div class="modal-sheet" onclick="event.stopPropagation()">
       <div class="modal-handle"></div>
       <h3 class="modal-title">${t('more.classes')}</h3>
-      <p class="modal-subtitle">Class နဲ့ Grade ကို တစ်ခါတည်း စီမံနိုင်ပါတယ်။</p>
+      <p class="modal-subtitle">${t('cg.pairHint')}</p>
 
       <div class="cg-pair-card">
         <div class="cg-pair-card-title">Class + Grade</div>
@@ -367,12 +367,12 @@ window.openManageClassesModal = function () {
             ${t('common.add')}
           </button>
         </div>
-        <div class="form-help cg-pair-help">ဥပမာ — Grade 5 + Class A၊ Grade 5 + Class B၊ မူကြို + K1</div>
+        <div class="form-help cg-pair-help">${t('cg.pairExample')}</div>
       </div>
 
       <div class="cg-section">
         <div class="cg-section-head">
-          <span class="cg-section-title">Class → Grade</span>
+          <span class="cg-section-title">${t('cg.classGrade')}</span>
           <span class="cg-section-count" id="cgPairCount">${classes.length}</span>
         </div>
         <div class="cg-list" id="cgPairList">${renderRows()}</div>
