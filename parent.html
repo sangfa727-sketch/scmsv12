@@ -3,12 +3,14 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
-<title>Parent Portal</title>
+<title id="pageTitle">Parent Portal</title>
 <script src="https://accounts.google.com/gsi/client" async defer></script>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,700&family=Inter+Tight:wght@400;500;600;700&family=Noto+Sans+Myanmar:wght@400;500;600;700&display=swap" rel="stylesheet">
 <style>
+  html[lang="zh-CN"], html[lang="zh-CN"] body { font-family: 'Noto Sans SC', 'Inter Tight', 'Noto Sans Myanmar', sans-serif; }
+
   :root {
     --bg: #FAFAF7; --bg2: #F2F1ED; --bg3: #E8E7E1; --surface: #FFFFFF;
     --border: rgba(0,0,0,0.09); --border2: rgba(0,0,0,0.15);
@@ -91,19 +93,30 @@
 </head>
 <body>
 <div class="wrap">
-  <div class="brand">Parent Portal</div>
+  <div class="brand" id="portalBrand">Parent Portal</div>
   <div id="app"><div class="card center"><div class="skeleton" style="width:60%;margin:0 auto"></div><div class="skeleton" style="width:40%;margin:8px auto"></div></div></div>
 </div>
 
 <script>
+const PARENT_LANG = new URLSearchParams(location.search).get('lang') === 'zh' || (navigator.language || '').toLowerCase().startsWith('zh') ? 'zh' : 'en';
+const PT = {
+  en: { title:'Parent Portal',qr:'This page opens from the QR code on your child\'s Student ID Card.',ask:'Ask the school office if you don\'t have one yet.',invalid:"${pt('invalid')}",network:"${pt('network')}",contact:'${pt('contact')}',retry:'${pt('retry')}',technical:'${pt('technical')}',googleLoad:'${pt('googleLoad')}',signing:'${pt('signing')}',mismatch:"That Google account doesn't match the parent email the school has on file for {name}. Please sign in with the correct Gmail, or ask the school office to update it.",signinFailed:'${pt('signinFailed')}',view:'Sign in with the Google account you gave the school ({name}\'s parent email) to view attendance, grades and billing.',updates:'${pt('updates')}',events:'Events & notices',communication:'${pt('communication')}',messages:'Messages from school',academic:'${pt('academic')}',exams:'Upcoming Exams',schedule:'${pt('schedule')}',weekly:'Weekly timetable',attendance:'${pt('attendance')}',grades:'${pt('grades')}',billing:'${pt('billing')}',leave:'${pt('leave')}',present:'${pt('present')}',late:'${pt('late')}',absent:'${pt('absent')}',no${pt('attendance')}:'${pt('noAttendance')}',no${pt('grades')}:'${pt('noGrades')}',due:'Due',total:'${pt('total')}',paid:'${pt('paid')}',balance:'${pt('balance')}',noInvoices:'${pt('noInvoices')}',reason:'${pt('reason')}',placeholder:'${pt('placeholder')}',from:'${pt('from')}',to:'${pt('to')}',submit:'${pt('submit')}',no${pt('leave')}:'${pt('noLeave')}',signout:'${pt('signout')}',chooseDates:'${pt('chooseDates')}',dateOrder:'${pt('dateOrder')}',submitted:'${pt('submitted')}',submitFailed:'Could not submit ({err}). Please try again.',general:'General',invoice:'Invoice #' },
+  zh: { title:'家长门户',qr:'此页面需要通过孩子学生证上的二维码打开。',ask:'如果您还没有二维码，请联系学校办公室。',invalid:'此二维码无效，或学生尚未激活。',network:'无法连接服务器，请检查网络连接后重试。',contact:'如果问题仍然存在，请联系学校办公室。',retry:'重试',technical:'技术详情',googleLoad:'Google 登录加载失败。请检查网络连接并重新加载。',signing:'正在登录…',mismatch:'此 Google 账号与学校登记的 {name} 家长邮箱不匹配。请使用正确的 Gmail 登录，或联系学校办公室更新邮箱。',signinFailed:'登录失败，请重试。',view:'请使用您提供给学校的 Google 账号（{name} 的家长邮箱）登录，以查看考勤、成绩和账单。',updates:'学校动态',events:'活动与通知',communication:'沟通',messages:'学校消息',academic:'学业',exams:'即将进行的考试',schedule:'课程安排',weekly:'每周课表',attendance:'考勤',grades:'成绩',billing:'账单',leave:'请假',present:'出勤',late:'迟到',absent:'缺勤',no${pt('attendance')}:'暂无考勤记录。',no${pt('grades')}:'暂无成绩记录。',due:'到期日',total:'总计',paid:'已付款',balance:'待付余额',noInvoices:'暂无账单。',reason:'请假原因',placeholder:'例如：家庭旅行、就医……',from:'开始日期',to:'结束日期',submit:'提交申请',no${pt('leave')}:'暂无请假申请。',signout:'退出此设备',chooseDates:'请选择开始和结束日期。',dateOrder:'结束日期必须不早于开始日期。',submitted:'申请已提交。',submitFailed:'提交失败（{err}），请重试。',general:'一般',invoice:'账单编号 #' }
+};
+const pt = k => PT[PARENT_LANG][k] || PT.en[k] || k;
+const pte = (k, vars={}) => Object.keys(vars).reduce((s,x)=>s.replaceAll('{'+x+'}',String(vars[x])),pt(k));
+document.documentElement.lang = PARENT_LANG === 'zh' ? 'zh-CN' : 'en';
+</script>
+<script>
 'use strict';
+document.getElementById('pageTitle').textContent=pt('title'); document.getElementById('portalBrand').textContent=pt('title');
 const SUPABASE_URL   = 'https://rszgbryucqwmrdbsgwbb.supabase.co';
 const SUPABASE_ANON  = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InJzemdicnl1Y3F3bXJkYnNnd2JiIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzA4MjkzNjcsImV4cCI6MjA4NjQwNTM2N30.uN2cpmL48H3ZEJlZADh6b06bwecANo1mzIwPSBZRI5g';
 const GOOGLE_CLIENT_ID = '71086878167-t6q46hrv5j5n46h9nfmeuk8sdoftb5lt.apps.googleusercontent.com';
 const PARENT_LOGIN_URL = SUPABASE_URL + '/functions/v1/parent-google-login';
 
 const qs = new URLSearchParams(location.search);
-const qrToken = qs.get('t') || qs.get('token') || '';
+const qr${pt('to')}ken = qs.get('t') || qs.get('token') || '';
 const appEl = document.getElementById('app');
 
 function esc(s) {
@@ -137,19 +150,19 @@ async function rpc(fn, params) {
 }
 
 async function boot() {
-  if (!qrToken) {
+  if (!qr${pt('to')}ken) {
     appEl.innerHTML = `<div class="card center">
-      <p>This page opens from the QR code on your child's Student ID Card.</p>
-      <p class="muted">Ask the school office if you don't have one yet.</p>
+      <p>${pt('qr')}</p>
+      <p class="muted">${pt('ask')}</p>
     </div>`;
     return;
   }
 
   // Already signed in on this device for this exact QR/student?
-  const savedToken = localStorage.getItem(sessionKey(qrToken));
-  if (savedToken) {
-    try { await showDashboard(savedToken); return; }
-    catch (e) { localStorage.removeItem(sessionKey(qrToken)); }
+  const saved${pt('to')}ken = localStorage.getItem(sessionKey(qr${pt('to')}ken));
+  if (saved${pt('to')}ken) {
+    try { await showDashboard(saved${pt('to')}ken); return; }
+    catch (e) { localStorage.removeItem(sessionKey(qr${pt('to')}ken)); }
   }
 
   await showLogin();
@@ -159,7 +172,7 @@ async function showLogin() {
   appEl.innerHTML = `<div class="card center"><div class="skeleton" style="width:70%;margin:0 auto"></div></div>`;
   let student;
   try {
-    const res = await rpc('rpc_qr_resolve', { p_qr_token: qrToken });
+    const res = await rpc('rpc_qr_resolve', { p_qr_token: qr${pt('to')}ken });
     student = res.student;
   } catch (e) {
     // Distinguish "the server said this token is invalid/inactive" (data
@@ -170,12 +183,12 @@ async function showLogin() {
     const isServerRefusal = !!e.code;
     appEl.innerHTML = `<div class="card center">
       <p>${isServerRefusal
-        ? "This QR code isn't valid, or the student isn't active yet."
-        : "Couldn't reach the server. Check your connection and try again."}</p>
-      <p class="muted">Please contact the school office if this continues.</p>
-      <button class="btn-secondary" onclick="showLogin()">Try again</button>
+        ? "${pt('invalid')}"
+        : "${pt('network')}"}</p>
+      <p class="muted">${pt('contact')}</p>
+      <button class="btn-secondary" onclick="showLogin()">${pt('retry')}</button>
       <details style="margin-top:14px;text-align:left">
-        <summary class="muted" style="cursor:pointer;font-size:11px">Technical detail</summary>
+        <summary class="muted" style="cursor:pointer;font-size:11px">${pt('technical')}</summary>
         <p class="muted" style="font-size:11px;word-break:break-all">${esc(e.code || e.message || 'unknown error')}</p>
       </details>
     </div>`;
@@ -187,13 +200,13 @@ async function showLogin() {
       <div class="avatar">${avatar(student)}</div>
       <div class="student-name">${esc(student.name_en)}</div>
       <div class="student-sub">${esc(student.class || '')} · ${esc(student.school_name || '')}</div>
-      <p class="muted">Sign in with the Google account you gave the school (${esc(student.name_en)}'s parent email) to view attendance, grades and billing.</p>
+      <p class="muted">${esc(pte('view',{name:student.name_en}))}</p>
       <div id="gBtn"></div>
       <div id="loginError"></div>
     </div>`;
 
   if (!window.google?.accounts?.id) {
-    document.getElementById('loginError').innerHTML = `<div class="error-box">Google Sign-In failed to load. Check your connection and reload.</div>`;
+    document.getElementById('loginError').innerHTML = `<div class="error-box">${pt('googleLoad')}</div>`;
     return;
   }
 
@@ -201,12 +214,12 @@ async function showLogin() {
     client_id: GOOGLE_CLIENT_ID,
     callback: async (resp) => {
       const errEl = document.getElementById('loginError');
-      errEl.innerHTML = `<p class="muted" style="margin-top:10px">Signing in…</p>`;
+      errEl.innerHTML = `<p class="muted" style="margin-top:10px">${pt('signing')}</p>`;
       try {
         const apiResp = await fetch(PARENT_LOGIN_URL, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ id_token: resp.credential, qr_token: qrToken, device_ua: navigator.userAgent }),
+          body: JSON.stringify({ id_token: resp.credential, qr_token: qr${pt('to')}ken, device_ua: navigator.userAgent }),
         });
         const data = await apiResp.json();
         if (!data.ok) {
@@ -215,25 +228,25 @@ async function showLogin() {
             : `<div class="error-box">Sign-in failed (${esc(data.error || 'unknown error')}). Please try again.</div>`;
           return;
         }
-        localStorage.setItem(sessionKey(qrToken), data.session_token);
+        localStorage.setItem(sessionKey(qr${pt('to')}ken), data.session_token);
         await showDashboard(data.session_token);
       } catch (e) {
-        errEl.innerHTML = `<div class="error-box">Sign-in failed. Please try again.</div>`;
+        errEl.innerHTML = `<div class="error-box">${pt('signinFailed')}</div>`;
       }
     },
   });
   window.google.accounts.id.renderButton(document.getElementById('gBtn'), { theme: 'filled_black', size: 'large', shape: 'pill', width: 280 });
 }
 
-async function showDashboard(sessionToken) {
+async function showDashboard(session${pt('to')}ken) {
   appEl.innerHTML = `<div class="card center"><div class="skeleton" style="width:60%;margin:0 auto"></div><div class="skeleton" style="width:80%"></div><div class="skeleton" style="width:80%"></div></div>`;
 
-  const res = await rpc('rpc_parent_get_dashboard', { p_session_token: sessionToken });
+  const res = await rpc('rpc_parent_get_dashboard', { p_session_token: session${pt('to')}ken });
   const { student, attendance, grades, invoices, upcoming_exams, parent_messages, timetable, events, leave_requests } = res;
 
-  const presentCount = attendance.filter(a => a.status === 'Present').length;
-  const absentCount  = attendance.filter(a => a.status === 'Absent').length;
-  const lateCount    = attendance.filter(a => a.status === 'Late').length;
+  const presentCount = attendance.filter(a => a.status === '${pt('present')}').length;
+  const absentCount  = attendance.filter(a => a.status === '${pt('absent')}').length;
+  const lateCount    = attendance.filter(a => a.status === '${pt('late')}').length;
 
   appEl.innerHTML = `
     <div class="card center">
@@ -244,8 +257,8 @@ async function showDashboard(sessionToken) {
 
     ${events && events.length ? `
     <div class="card event-card">
-      <div class="section-kicker">School updates</div>
-      <div class="section-title">📅 Events & notices</div>
+      <div class="section-kicker">${pt('updates')}</div>
+      <div class="section-title">📅 ${pt('events')}</div>
       ${events.map(x => `
         <div class="row"><span><strong>${esc(x.title)}</strong>
           ${x.description ? `<span class="r-sub" style="display:block">${esc(x.description)}</span>` : ``}
@@ -255,18 +268,18 @@ async function showDashboard(sessionToken) {
 
     ${parent_messages && parent_messages.length ? `
     <div class="card message-card">
-      <div class="section-kicker">Communication</div>
-      <div class="section-title">💬 Messages from school</div>
+      <div class="section-kicker">${pt('communication')}</div>
+      <div class="section-title">💬 ${pt('messages')}</div>
       ${parent_messages.map(x => `
-        <div class="row"><span><strong>${esc(x.type || "General")}</strong>
+        <div class="row"><span><strong>${esc(x.type || pt('general'))}</strong>
           <span class="r-sub" style="display:block">${esc(x.message_preview || "")}</span>
         </span><span class="badge b-exam-date">${esc(fmtDate(x.date))}</span></div>`).join("")}
     </div>` : ``}
 
     ${upcoming_exams && upcoming_exams.length ? `
     <div class="card">
-      <div class="section-kicker">Academic</div>
-      <div class="exam-card-title">📝 Upcoming Exams</div>
+      <div class="section-kicker">${pt('academic')}</div>
+      <div class="exam-card-title">📝 ${pt('exams')}</div>
       ${upcoming_exams.map(x => `
         <div class="row"><span><strong>${esc(x.subject)}</strong>
           <span class="r-sub" style="display:block">${esc(x.title)}</span></span>
@@ -276,8 +289,8 @@ async function showDashboard(sessionToken) {
 
     ${timetable && timetable.length ? `
     <div class="card">
-      <div class="section-kicker">Class schedule</div>
-      <div class="section-title">🗓 Weekly timetable</div>
+      <div class="section-kicker">${pt('schedule')}</div>
+      <div class="section-title">🗓 ${pt('weekly')}</div>
       ${timetable.map(x => `
         <div class="row"><span><strong>${esc(x.day)}</strong>
           <span class="r-sub" style="display:block">${esc(x.subject)}${x.room ? " · " + esc(x.room) : ""}</span></span>
@@ -285,18 +298,18 @@ async function showDashboard(sessionToken) {
     </div>` : ``}
 
     <div class="tabs">
-      <div class="tab active" data-tab="attendance">Attendance</div>
-      <div class="tab" data-tab="grades">Grades</div>
-      <div class="tab" data-tab="billing">Billing</div>
-      <div class="tab" data-tab="leave">Leave</div>
+      <div class="tab active" data-tab="attendance">${pt('attendance')}</div>
+      <div class="tab" data-tab="grades">${pt('grades')}</div>
+      <div class="tab" data-tab="billing">${pt('billing')}</div>
+      <div class="tab" data-tab="leave">${pt('leave')}</div>
     </div>
 
     <div class="panel active" id="panel-attendance">
       <div class="card">
         <div class="stat-row">
-          <div class="stat"><b style="color:var(--green)">${presentCount}</b><span>Present</span></div>
-          <div class="stat"><b style="color:var(--amber)">${lateCount}</b><span>Late</span></div>
-          <div class="stat"><b style="color:var(--red)">${absentCount}</b><span>Absent</span></div>
+          <div class="stat"><b style="color:var(--green)">${presentCount}</b><span>${pt('present')}</span></div>
+          <div class="stat"><b style="color:var(--amber)">${lateCount}</b><span>${pt('late')}</span></div>
+          <div class="stat"><b style="color:var(--red)">${absentCount}</b><span>${pt('absent')}</span></div>
         </div>
       </div>
       <div class="card">
@@ -304,7 +317,7 @@ async function showDashboard(sessionToken) {
           <div class="row">
             <span>${esc(fmtDate(a.date))}</span>
             <span class="badge b-${esc((a.status || '').toLowerCase())}">${esc(a.status)}</span>
-          </div>`).join('') : `<div class="empty">No attendance records yet.</div>`}
+          </div>`).join('') : `<div class="empty">${pt('noAttendance')}</div>`}
       </div>
     </div>
 
@@ -314,7 +327,7 @@ async function showDashboard(sessionToken) {
           <div class="row">
             <span>${esc(g.subject)} <span class="r-sub">— ${esc(g.assessment)}</span></span>
             <span><b>${g.percentage != null ? esc(String(g.percentage)) + '%' : '—'}</b> ${g.letter_grade ? esc(g.letter_grade) : ''}</span>
-          </div>`).join('') : `<div class="empty">No grades recorded yet.</div>`}
+          </div>`).join('') : `<div class="empty">${pt('noGrades')}</div>`}
       </div>
     </div>
 
@@ -327,8 +340,8 @@ async function showDashboard(sessionToken) {
         return `
         <div class="card">
           <div class="row">
-            <span><strong>${esc(inv.invoice_number || ('Invoice #' + inv.id))}</strong>
-              <span class="r-sub">Due ${esc(fmtDate(inv.due_date))}</span></span>
+            <span><strong>${esc(inv.invoice_number || (pt('invoice') + inv.id))}</strong>
+              <span class="r-sub">${pt('due')} ${esc(fmtDate(inv.due_date))}</span></span>
             <span class="badge b-${esc((inv.status || '').toLowerCase())}">${esc(inv.status)}</span>
           </div>
           ${(inv.items || []).map(it => `
@@ -337,34 +350,34 @@ async function showDashboard(sessionToken) {
             <span>${esc(fmtAmt(it.amount))}</span>
           </div>`).join('')}
           <div class="row">
-            <span class="r-sub">Total</span><span><strong>${esc(fmtAmt(total))}</strong></span>
+            <span class="r-sub">${pt('total')}</span><span><strong>${esc(fmtAmt(total))}</strong></span>
           </div>
-          ${paid ? `<div class="row"><span class="r-sub">Paid</span><span>${esc(fmtAmt(paid))}</span></div>` : ''}
-          ${bal ? `<div class="row"><span class="r-sub">Balance due</span><span><strong>${esc(fmtAmt(bal))}</strong></span></div>` : ''}
+          ${paid ? `<div class="row"><span class="r-sub">${pt('paid')}</span><span>${esc(fmtAmt(paid))}</span></div>` : ''}
+          ${bal ? `<div class="row"><span class="r-sub">${pt('balance')}</span><span><strong>${esc(fmtAmt(bal))}</strong></span></div>` : ''}
           ${(inv.payments || []).map(p => `
           <div class="row">
-            <span class="r-sub">Paid ${esc(fmtDate(p.payment_date))}${p.method ? ' · ' + esc(p.method) : ''}</span>
+            <span class="r-sub">${pt('paid')} ${esc(fmtDate(p.payment_date))}${p.method ? ' · ' + esc(p.method) : ''}</span>
             <span class="r-sub">${esc(fmtAmt(p.amount))}</span>
           </div>`).join('')}
         </div>`;
-      }).join('') : `<div class="card"><div class="empty">No invoices yet.</div></div>`}
+      }).join('') : `<div class="card"><div class="empty">${pt('noInvoices')}</div></div>`}
     </div>
 
     <div class="panel" id="panel-leave">
       <div class="card">
-        <label class="form-label">Reason for leave</label>
-        <textarea class="form-textarea" id="leaveReason" placeholder="e.g. Family trip, medical appointment…"></textarea>
+        <label class="form-label">${pt('reason')}</label>
+        <textarea class="form-textarea" id="leaveReason" placeholder="${pt('placeholder')}"></textarea>
         <div class="leave-date-row">
           <div>
-            <label class="form-label">From</label>
+            <label class="form-label">${pt('from')}</label>
             <input type="date" class="form-input" id="leaveStart">
           </div>
           <div>
-            <label class="form-label">To</label>
+            <label class="form-label">${pt('to')}</label>
             <input type="date" class="form-input" id="leaveEnd">
           </div>
         </div>
-        <button class="btn btn-primary" id="leaveSubmitBtn" style="margin-top:14px">Submit Request</button>
+        <button class="btn btn-primary" id="leaveSubmitBtn" style="margin-top:14px">${pt('submit')}</button>
         <div id="leaveFormMsg" class="muted" style="margin-top:8px;text-align:center"></div>
       </div>
       <div class="card">
@@ -373,11 +386,11 @@ async function showDashboard(sessionToken) {
             <span>${esc(fmtDate(lr.start_date))}${lr.start_date !== lr.end_date ? ' → ' + esc(fmtDate(lr.end_date)) : ''}
               <span class="r-sub">${lr.reason ? '— ' + esc(lr.reason) : ''}</span></span>
             <span class="badge b-leave-${esc((lr.status || '').toLowerCase())}">${esc(lr.status)}</span>
-          </div>`).join('') : `<div class="empty">No leave requests yet.</div>`}
+          </div>`).join('') : `<div class="empty">${pt('noLeave')}</div>`}
       </div>
     </div>
 
-    <div class="signout"><a id="signOutLink">Sign out of this device</a></div>
+    <div class="signout"><a id="signOutLink">${pt('signout')}</a></div>
   `;
 
   document.querySelectorAll('.tab').forEach(tab => {
@@ -389,7 +402,7 @@ async function showDashboard(sessionToken) {
     };
   });
   document.getElementById('signOutLink').onclick = () => {
-    localStorage.removeItem(sessionKey(qrToken));
+    localStorage.removeItem(sessionKey(qr${pt('to')}ken));
     showLogin();
   };
 
@@ -398,21 +411,21 @@ async function showDashboard(sessionToken) {
     const end   = document.getElementById('leaveEnd').value;
     const reason = document.getElementById('leaveReason').value.trim();
     const msgEl = document.getElementById('leaveFormMsg');
-    if (!start || !end) { msgEl.textContent = 'Please choose both dates.'; return; }
-    if (end < start) { msgEl.textContent = 'End date must be on or after the start date.'; return; }
+    if (!start || !end) { msgEl.textContent = '${pt('chooseDates')}'; return; }
+    if (end < start) { msgEl.textContent = '${pt('dateOrder')}'; return; }
 
     const btn = document.getElementById('leaveSubmitBtn');
     btn.disabled = true;
     msgEl.textContent = '';
     try {
       await rpc('rpc_parent_submit_leave_request', {
-        p_session_token: sessionToken, p_start_date: start, p_end_date: end, p_reason: reason || null,
+        p_session_token: session${pt('to')}ken, p_start_date: start, p_end_date: end, p_reason: reason || null,
       });
-      await showDashboard(sessionToken); // simplest refresh: re-render from the server, same pattern used everywhere else here
+      await showDashboard(session${pt('to')}ken); // simplest refresh: re-render from the server, same pattern used everywhere else here
       document.querySelector('.tab[data-tab="leave"]').click();
-      document.getElementById('leaveFormMsg').textContent = 'Request submitted.';
+      document.getElementById('leaveFormMsg').textContent = '${pt('submitted')}';
     } catch (e) {
-      msgEl.textContent = 'Could not submit (' + (e.message || 'error') + '). Please try again.';
+      msgEl.textContent = 'pte('submitFailed',{err:e.message || 'error'})';
       btn.disabled = false;
     }
   };
