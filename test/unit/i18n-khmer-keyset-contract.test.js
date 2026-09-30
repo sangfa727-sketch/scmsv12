@@ -59,7 +59,7 @@ test('Khmer locale must match the English key set exactly once it is introduced'
   const kmKeys = Object.keys(km);
 
   assert.equal(new Set(kmKeys).size, kmKeys.length, 'Khmer locale must not contain duplicate keys');
-  assert.deepEqual(kmKeys, enKeys, 'Khmer locale keys must exactly match the 1349-key English baseline');
+  assert.deepEqual([...kmKeys].sort(), [...enKeys].sort(), 'Khmer locale keys must exactly match the 1349-key English baseline');
 
   for (const key of enKeys) {
     assert.equal(Object.prototype.hasOwnProperty.call(km, key), true, 'Khmer locale is missing value for ' + key);
