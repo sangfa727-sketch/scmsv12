@@ -918,7 +918,7 @@ window.I18N_MS = {
   'adm.enrollingBtn': 'Mendaftarkan…',
   'adm.recordCreated': '✓ Rekod murid dicipta — {id} (Menunggu)',
   'adm.regTitle': 'Invois pendaftaran',
-  'adm.needAmountItem': 'Tambah အနည်းဆုံး item baris dengan amaun',
+  'adm.needAmountItem': 'Tambah sekurang-kurangnya satu item baris dengan amaun',
   'adm.regCreated': '✓ Invois pendaftaran dicipta',
 
   'adm.delTitle': '🗑 Padam pemohon ini?',
