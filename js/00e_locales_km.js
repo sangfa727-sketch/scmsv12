@@ -1397,5 +1397,8 @@ window.I18N_KM = {
   "password.show": "បង្ហាញពាក្យសម្ងាត់",
   "teacher.editTitle": "កែសម្រួលគ្រូ",
   "teacher.editSubtitle": "កែសម្រួលឈ្មោះគ្រូ និងឈ្មោះចូលដែលប្រើសម្រាប់កាតសម្គាល់ និងការចូលរបស់គ្រូ។",
-  "teacher.superAdmin": "អ្នកគ្រប់គ្រងប្រព័ន្ធកម្រិតខ្ពស់"
+  "teacher.superAdmin": "អ្នកគ្រប់គ្រងប្រព័ន្ធកម្រិតខ្ពស់",
+  "settings.theme": "រូបរាង",
+  "settings.themeLight": "☀️ ភ្លឺ",
+  "settings.themeDark": "🌙 ងងឹត",
 };

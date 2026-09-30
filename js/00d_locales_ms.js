@@ -1397,5 +1397,8 @@ window.I18N_MS = {
   "password.show": "Tunjukkan kata laluan",
   "teacher.editTitle": "Edit Guru",
   "teacher.editSubtitle": "Kemas kini nama guru dan Nama Log Masuk yang digunakan untuk kad ID dan log masuk guru.",
-  "teacher.superAdmin": "Super Admin"
+  "teacher.superAdmin": "Super Admin",
+  "settings.theme": "Tema",
+  "settings.themeLight": "☀️ Cerah",
+  "settings.themeDark": "🌙 Gelap",
 };

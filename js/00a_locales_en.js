@@ -1443,4 +1443,7 @@ window.I18N_EN = {
   'teacher.editTitle': 'Edit Teacher',
   'teacher.editSubtitle': 'Update the teacher name and Login Name used by the ID card and teacher login.',
   'teacher.superAdmin': 'Super Admin',
+  'settings.theme': 'Theme',
+  'settings.themeLight': '☀️ Light',
+  'settings.themeDark': '🌙 Dark',
 };
