@@ -7769,6 +7769,52 @@ body > .modal-overlay.generic-confirm-overlay .generic-confirm-sheet {
 }
 
 
+/* SCMS v12.37 — stable teacher data reveal.
+   Keep the dialog invisible while async teacher data is being assembled, then
+   reveal the fully-sized sheet with one short opacity/settle transition.
+   This prevents the loading card and final card from painting at different
+   sizes during Manage Teachers / Manage Access navigation. */
+.modal-sheet.teacher-modal-preparing {
+  visibility: hidden !important;
+  opacity: 0 !important;
+  transform: translateY(8px) scale(.992) !important;
+  animation: none !important;
+}
+.modal-sheet.teacher-modal-ready {
+  visibility: visible !important;
+  opacity: 1 !important;
+  transform: translateY(0) scale(1) !important;
+  animation: none !important;
+  transition: opacity .18s ease, transform .18s cubic-bezier(.22,.8,.2,1) !important;
+}
+.teacher-manager-loading {
+  min-height: 88px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  color: var(--muted);
+  font-size: 12px;
+}
+.teacher-manager-loading-dot {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: var(--muted);
+  animation: teacherLoadingPulse 1s ease-in-out infinite;
+}
+@keyframes teacherLoadingPulse {
+  0%, 100% { opacity: .35; transform: scale(.82); }
+  50% { opacity: 1; transform: scale(1); }
+}
+@media (prefers-reduced-motion: reduce) {
+  .modal-sheet.teacher-modal-ready,
+  .teacher-manager-loading-dot {
+    transition: none !important;
+    animation: none !important;
+  }
+}
+
 /* SCMS v12.34 — stable teacher modal transitions.
    Keep Manage Teachers / Manage Access at their final dimensions from the
    first paint and use a short opacity/translate entrance instead of the
