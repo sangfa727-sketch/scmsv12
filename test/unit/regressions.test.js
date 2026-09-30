@@ -44,6 +44,11 @@ test('dashboard interactive cards remain keyboard accessible', () => {
   assert.match(dashboard, /_dashboardGoToAttendance\(this\.dataset\.class\)[\s\S]*onkeydown="if\(event\.key==='Enter'\|\|event\.key===' '\)/);
 });
 
+test('dashboard refreshes notification slices when revisiting cached data', () => {
+  const dashboard = read('js/27_dashboard.js');
+  assert.match(dashboard, /if \(_dashboardLoadedOnce && _dashboardCache\) \{[\\s\\S]*_paintDashboard\(container\);[\\s\\S]*void window\.refreshDashboardNotifications\(\);/);
+});
+
 test('sidebar keeps aria-hidden synchronized with its visual state', () => {
   const sidebar = read('js/17_sidebar.js');
   assert.match(sidebar, /classList\.add\('open'\)[\s\S]*setAttribute\('aria-hidden', 'false'\)/);
