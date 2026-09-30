@@ -36,3 +36,16 @@ test('teacher ID card foundation stays protected', () => {
   assert.match(html, /15_settings\.js\?v=20260930q/);
   assert.match(html, /style\.css\?v=20260930q/);
 });
+
+
+test('dashboard interactive cards remain keyboard accessible', () => {
+  const dashboard = read('js/27_dashboard.js');
+  assert.match(dashboard, /dashboard-leave-card[\s\S]*onkeydown="if\(event\.key==='Enter'\|\|event\.key===' '\)/);
+  assert.match(dashboard, /_dashboardGoToAttendance\(this\.dataset\.class\)[\s\S]*onkeydown="if\(event\.key==='Enter'\|\|event\.key===' '\)/);
+});
+
+test('sidebar keeps aria-hidden synchronized with its visual state', () => {
+  const sidebar = read('js/17_sidebar.js');
+  assert.match(sidebar, /classList\.add\('open'\)[\s\S]*setAttribute\('aria-hidden', 'false'\)/);
+  assert.match(sidebar, /classList\.remove\('open'\)[\s\S]*setAttribute\('aria-hidden', 'true'\)/);
+});
