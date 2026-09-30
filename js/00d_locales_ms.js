@@ -1359,4 +1359,11 @@ window.I18N_MS = {
   'login.loading': 'Memuatkan log masuk…',
   'login.waitRetry': 'Sila tunggu sebentar dan cuba lagi.',
   'cg.required': 'Sila masukkan Kelas dan Tahun.',
+  'subject.exists': 'Subjek ini sudah wujud.',
+  'subject.addFailed': 'Tidak dapat menambah subjek — sila cuba lagi.',
+  'picker.noMatch': 'Tiada murid sepadan dengan "{query}"',
+  'teacher.updateRequired': 'Nama pengguna dan Nama Guru diperlukan.',
+  'teacher.qrUnavailable': 'Kod QR tidak tersedia.',
+  'password.hide': 'Sembunyikan kata laluan',
+  'password.show': 'Tunjukkan kata laluan',
 };
