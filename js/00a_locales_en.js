@@ -1395,4 +1395,7 @@ window.I18N_EN = {
   'teacher.qrUnavailable': 'QR unavailable',
   'password.hide': 'Hide password',
   'password.show': 'Show password',
+  'teacher.editTitle': 'Edit Teacher',
+  'teacher.editSubtitle': 'Update the teacher name and Login Name used by the ID card and teacher login.',
+  'teacher.superAdmin': 'Super Admin',
 };
