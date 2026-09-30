@@ -507,7 +507,7 @@ function _renderTeacherCardQr(el, value) {
 function _renderTeacherCardQrLegacy(el, value) {
   const QR = window.QRCode;
   if (typeof QR !== 'function') {
-    el.innerHTML = '<span class="teacher-id-card-qr-error">${t('teacher.qrUnavailable')}</span>';
+    el.innerHTML = '<span class="teacher-id-card-qr-error">' + t('teacher.qrUnavailable') + '</span>';
     return;
   }
   try {
