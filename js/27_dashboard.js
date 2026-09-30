@@ -36,6 +36,10 @@ function renderDashboard() {
   // loading state — the latter was the source of the visible double-flash.
   if (_dashboardLoadedOnce && _dashboardCache) {
     _paintDashboard(container);
+    // Notification data is intentionally refreshed on every dashboard revisit.
+    // The rest of the dashboard remains cached, but leave/message counts can
+    // change while the user is on another page or in another session.
+    void window.refreshDashboardNotifications();
     return Promise.resolve();
   }
 
@@ -205,7 +209,7 @@ function _paintDashboard(container) {
         <div class="stat-num">${queuedComms.length}</div>
         <div class="stat-lbl">${t('dash.messagesQueued')}</div>
       </div>
-      <div class="stat-card dashboard-leave-card${leavePending ? ' red' : ' muted'}" onclick="window.goToPage('leave')" role="button" tabindex="0">
+      <div class="stat-card dashboard-leave-card${leavePending ? ' red' : ' muted'}" onclick="window.goToPage('leave')" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();window.goToPage('leave')}" role="button" tabindex="0">
         <div class="stat-num">${leavePending}/${leaveTotal}</div>
         <div class="stat-lbl">🔔 ${t('dash.leaveRequests')}</div>
       </div>
@@ -213,7 +217,7 @@ function _paintDashboard(container) {
        ${todaysClasses.length ? `
     <div class="more-section-title">${t('dash.todaysSchedule')}</div>
     ${todaysClasses.map(x => `
-      <div class="list-card" data-class="${esc(x.class)}" onclick="_dashboardGoToAttendance(this.dataset.class)">
+      <div class="list-card" data-class="${esc(x.class)}" onclick="_dashboardGoToAttendance(this.dataset.class)" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();_dashboardGoToAttendance(this.dataset.class)}" role="button" tabindex="0">
         <div class="card-row">
           <div class="card-avatar" style="background:${_classColor(x.class)}">${x.period ?? '·'}</div>
           <div class="card-info">

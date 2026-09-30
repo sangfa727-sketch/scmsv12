@@ -114,12 +114,14 @@ window.sidebarGo = function(pageId) {
 window.openSidebar = function() {
   if (isTWA()) return;   // never opens inside Telegram
   document.getElementById('sidebar').classList.add('open');
+  document.getElementById('sidebar').setAttribute('aria-hidden', 'false');
   document.getElementById('sidebarBackdrop').classList.add('open');
   window.APP.sidebarOpen = true;
 };
 
 window.closeSidebar = function() {
   document.getElementById('sidebar').classList.remove('open');
+  document.getElementById('sidebar').setAttribute('aria-hidden', 'true');
   document.getElementById('sidebarBackdrop').classList.remove('open');
   window.APP.sidebarOpen = false;
 };
