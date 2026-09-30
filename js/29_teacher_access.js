@@ -2,7 +2,7 @@
 'use strict';
 function _taLang() {
   const lang = window.I18N?.current;
-  return ['en','my','th','jp','zh'].includes(lang) ? lang : 'en';
+  return ['en','my','th','jp','zh','km'].includes(lang) ? lang : 'en';
 }
 
 const _TA_UI = {
@@ -42,6 +42,18 @@ const _TA_UI = {
     classRemoveFailed:'ไม่สามารถลบชั้นเรียนได้', subjectAddFailed:'ไม่สามารถเพิ่มวิชาได้',
     subjectRemoveFailed:'ไม่สามารถลบวิชาได้', loadFailed:'ไม่สามารถโหลดข้อมูลสิทธิ์ได้'
   },
+  km: {
+    loading:'កំពុងផ្ទុក…', manageTitle:'គ្រប់គ្រងសិទ្ធិចូលប្រើ', subtitle:'កំណត់ថ្នាក់ មុខវិជ្ជា និងសិទ្ធិចូលប្រើសម្រាប់',
+    classes:'👥 ថ្នាក់', subjects:'📚 មុខវិជ្ជា', permissions:'🔐 ការកំណត់សិទ្ធិ', permissionModes:'លំនាំដើម / អនុញ្ញាត / បដិសេធ',
+    selectClass:'ជ្រើសរើសថ្នាក់', selectSubject:'ជ្រើសរើសមុខវិជ្ជា', add:'បន្ថែម', closeButton:'បិទ',
+    noClasses:'មិនទាន់មានថ្នាក់ដែលបានចាត់តាំងទេ។', noSubjects:'មិនទាន់មានមុខវិជ្ជាដែលបានចាត់តាំងទេ។',
+    default:'លំនាំដើម', allowed:'អនុញ្ញាត', denied:'បដិសេធ', defaultAllowed:'បានអនុញ្ញាត', defaultDenied:'បានបដិសេធ',
+    permissionHelp:'សិទ្ធិលំនាំដើមអនុវត្តតាមតួនាទីគ្រូ។ សម្រាប់សិទ្ធិតាមថ្នាក់ ឬមុខវិជ្ជា សូមជ្រើសរើសថ្នាក់ និងមុខវិជ្ជាដែលពាក់ព័ន្ធ។',
+    classRequired:'សូមជ្រើសរើសថ្នាក់ជាមុនសិន។', classSubjectRequired:'សូមជ្រើសរើសថ្នាក់ និងមុខវិជ្ជាជាមុនសិន។',
+    saved:'បានរក្សាទុកសិទ្ធិ។', saveFailed:'មិនអាចរក្សាទុកសិទ្ធិបានទេ។', classAddFailed:'មិនអាចបន្ថែមថ្នាក់បានទេ។',
+    classRemoveFailed:'មិនអាចដកថ្នាក់បានទេ។', subjectAddFailed:'មិនអាចបន្ថែមមុខវិជ្ជាបានទេ។',
+    subjectRemoveFailed:'មិនអាចដកមុខវិជ្ជាបានទេ។', loadFailed:'មិនអាចផ្ទុកព័ត៌មានសិទ្ធិបានទេ។'
+  },
   zh: {
     loading:'正在加载…', manageTitle:'管理权限', subtitle:'设置班级、科目及访问权限：',
     classes:'👥 班级', subjects:'📚 科目', permissions:'🔐 权限设置', permissionModes:'默认 / 允许 / 拒绝',
@@ -76,6 +88,7 @@ function _taText(key) {
     en:{'dashboard.view':'View Dashboard','students.view':'View Students','students.edit':'Edit Student Information','leave.view':'View Leave Requests','leave.approve':'Approve / Reject Leave Requests','attendance.view':'View Attendance','attendance.edit':'Edit Attendance','homework.view':'View Homework','homework.create':'Create Homework','homework.edit':'Edit Homework','homework.delete':'Delete Homework','assessment.view':'View Assessments','assessment.create':'Create Assessments','assessment.edit':'Edit Assessments','assessment.delete':'Delete Assessments','billing.view':'View Billing','billing.write':'Edit Billing','teachers.view':'View Teachers','teachers.manage':'Manage Teachers','permissions.manage':'Manage Permissions'},
     my:{'dashboard.view':'Dashboard ကြည့်ရှုရန်','students.view':'ကျောင်းသားများ ကြည့်ရှုရန်','students.edit':'ကျောင်းသားအချက်အလက် ပြင်ဆင်ရန်','leave.view':'ခွင့်တောင်းစာ ကြည့်ရှုရန်','leave.approve':'ခွင့်တောင်းစာ အတည်ပြု/ပယ်ချရန်','attendance.view':'တက်ရောက်မှု ကြည့်ရှုရန်','attendance.edit':'တက်ရောက်မှု ပြင်ဆင်ရန်','homework.view':'အိမ်စာ ကြည့်ရှုရန်','homework.create':'အိမ်စာ ထည့်သွင်းရန်','homework.edit':'အိမ်စာ ပြင်ဆင်ရန်','homework.delete':'အိမ်စာ ဖျက်ရန်','assessment.view':'အကဲဖြတ်ချက် ကြည့်ရှုရန်','assessment.create':'အကဲဖြတ်ချက် ထည့်သွင်းရန်','assessment.edit':'အကဲဖြတ်ချက် ပြင်ဆင်ရန်','assessment.delete':'အကဲဖြတ်ချက် ဖျက်ရန်','billing.view':'ငွေစာရင်း ကြည့်ရှုရန်','billing.write':'ငွေစာရင်း ပြင်ဆင်ရန်','teachers.view':'ဆရာ/ဆရာမများ ကြည့်ရှုရန်','teachers.manage':'ဆရာ/ဆရာမများ စီမံရန်','permissions.manage':'လုပ်ပိုင်ခွင့်များ စီမံရန်'},
     th:{'dashboard.view':'ดูแดชบอร์ด','students.view':'ดูนักเรียน','students.edit':'แก้ไขข้อมูลนักเรียน','leave.view':'ดูคำขอลา','leave.approve':'อนุมัติ / ปฏิเสธคำขอลา','attendance.view':'ดูการเข้าเรียน','attendance.edit':'แก้ไขการเข้าเรียน','homework.view':'ดูการบ้าน','homework.create':'สร้างการบ้าน','homework.edit':'แก้ไขการบ้าน','homework.delete':'ลบการบ้าน','assessment.view':'ดูการประเมิน','assessment.create':'สร้างการประเมิน','assessment.edit':'แก้ไขการประเมิน','assessment.delete':'ลบการประเมิน','billing.view':'ดูการเรียกเก็บเงิน','billing.write':'แก้ไขการเรียกเก็บเงิน','teachers.view':'ดูครู','teachers.manage':'จัดการครู','permissions.manage':'จัดการสิทธิ์'},
+    km:{'dashboard.view':'ផ្ទាំងគ្រប់គ្រង','students.view':'មើលសិស្ស','students.edit':'កែសម្រួលព័ត៌មានសិស្ស','leave.view':'មើលសំណើសុំច្បាប់ឈប់','leave.approve':'អនុម័ត / បដិសេធសំណើសុំច្បាប់ឈប់','attendance.view':'មើលវត្តមាន','attendance.edit':'កែសម្រួលវត្តមាន','homework.view':'មើលកិច្ចការផ្ទះ','homework.create':'បង្កើតកិច្ចការផ្ទះ','homework.edit':'កែសម្រួលកិច្ចការផ្ទះ','homework.delete':'លុបកិច្ចការផ្ទះ','assessment.view':'មើលការវាយតម្លៃ','assessment.create':'បង្កើតការវាយតម្លៃ','assessment.edit':'កែសម្រួលការវាយតម្លៃ','assessment.delete':'លុបការវាយតម្លៃ','billing.view':'មើលវិក្កយបត្រ','billing.write':'កែសម្រួលវិក្កយបត្រ','teachers.view':'មើលគ្រូ','teachers.manage':'គ្រប់គ្រងគ្រូ','permissions.manage':'គ្រប់គ្រងសិទ្ធិ'},
     zh:{'dashboard.view':'查看仪表板','students.view':'查看学生','students.edit':'编辑学生信息','leave.view':'查看请假申请','leave.approve':'批准 / 拒绝请假申请','attendance.view':'查看考勤','attendance.edit':'编辑考勤','homework.view':'查看作业','homework.create':'创建作业','homework.edit':'编辑作业','homework.delete':'删除作业','assessment.view':'查看评估','assessment.create':'创建评估','assessment.edit':'编辑评估','assessment.delete':'删除评估','billing.view':'查看账单','billing.write':'编辑账单','teachers.view':'查看教师','teachers.manage':'管理教师','permissions.manage':'管理权限'},
     jp:{'dashboard.view':'ダッシュボードを見る','students.view':'生徒を見る','students.edit':'生徒情報を編集','leave.view':'休暇申請を見る','leave.approve':'休暇申請を承認 / 却下','attendance.view':'出欠を見る','attendance.edit':'出欠を編集','homework.view':'宿題を見る','homework.create':'宿題を作成','homework.edit':'宿題を編集','homework.delete':'宿題を削除','assessment.view':'評価を見る','assessment.create':'評価を作成','assessment.edit':'評価を編集','assessment.delete':'評価を削除','billing.view':'請求を見る','billing.write':'請求を編集','teachers.view':'教師を見る','teachers.manage':'教師を管理','permissions.manage':'権限を管理'}
   };
@@ -98,7 +111,8 @@ function _taAssignmentTypeLabel(type) {
     my:{class_teacher:'အတန်းပိုင်ဆရာ/ဆရာမ',assistant:'အကူဆရာ/ဆရာမ',subject_teacher:'ဘာသာရပ်ဆရာ/ဆရာမ',other:'အခြားတာဝန်'},
     th:{class_teacher:'ครูประจำชั้น',assistant:'ครูผู้ช่วย',subject_teacher:'ครูประจำวิชา',other:'อื่นๆ'},
     zh:{class_teacher:'班主任',assistant:'助理教师',subject_teacher:'科任教师',other:'其他'},
-    jp:{class_teacher:'担任',assistant:'補助教員',subject_teacher:'教科担当',other:'その他'}
+    jp:{class_teacher:'担任',assistant:'補助教員',subject_teacher:'教科担当',other:'その他'},
+    km:{class_teacher:'គ្រូប្រចាំថ្នាក់',assistant:'ជំនួយការគ្រូ',subject_teacher:'គ្រូប្រចាំមុខវិជ្ជា',other:'ផ្សេងទៀត'}
   };
   return dict[_taLang()]?.[type] || dict.en[type] || type;
 }
@@ -164,7 +178,7 @@ async function _renderTeacherAccess() {
     const roleDefaults = catalog.role_permissions || [];
 
     let html = '<div class="teacher-access-head"><strong>' + esc(teacher.teacher_name || '') +
-      '</strong><span>' + esc(teacher.teacher_id || teacherId) + ' · ' + esc(teacher.role === 'admin' ? ({en:'Admin',my:'Admin',th:'ผู้ดูแล',jp:'管理者',zh:'管理员'}[_taLang()] || 'Admin') : (teacher.role === 'super_admin' ? ({en:'Super Admin',my:'Super Admin',th:'ผู้ดูแลระบบสูงสุด',jp:'スーパー管理者'}[_taLang()] || 'Super Admin') : ({en:'Teacher',my:'ဆရာ/ဆရာမ',th:'ครู',jp:'教師'}[_taLang()] || 'Teacher'))) + '</span></div>';
+      '</strong><span>' + esc(teacher.teacher_id || teacherId) + ' · ' + esc(teacher.role === 'admin' ? ({en:'Admin',my:'Admin',th:'ผู้ดูแล',jp:'管理者',zh:'管理员',km:'អ្នកគ្រប់គ្រង'}[_taLang()] || 'Admin') : (teacher.role === 'super_admin' ? ({en:'Super Admin',my:'Super Admin',th:'ผู้ดูแลระบบสูงสุด',jp:'スーパー管理者',km:'អ្នកគ្រប់គ្រងប្រព័ន្ធកម្រិតខ្ពស់'}[_taLang()] || 'Super Admin') : ({en:'Teacher',my:'ဆရာ/ဆရာမ',th:'ครู',jp:'教師',km:'គ្រូ'}[_taLang()] || 'Teacher'))) + '</span></div>';
 
     html += '<section class="teacher-access-section">' +
       '<div class="teacher-access-section-head"><strong>' + _taUi('classes') + '</strong><span>' + classAssignments.length + '</span></div>' +
