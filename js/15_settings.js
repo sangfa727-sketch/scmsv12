@@ -107,7 +107,8 @@ window.refreshSettingsThemeControl = function() {
 ============================================================================ */
 window.openTeacherManager = async function() {
   openModal(`
-    <div class="modal-sheet teacher-manager-sheet" onclick="event.stopPropagation()">
+    <div class="modal-sheet teacher-manager-sheet teacher-modal-preparing" onclick="event.stopPropagation()" style="visibility:hidden">
+
       <div class="modal-handle"></div>
       <h3 class="modal-title">${t('tm.title')}</h3>
       <p class="modal-subtitle">${t('tm.subtitle')}</p>
@@ -118,7 +119,10 @@ window.openTeacherManager = async function() {
       </div>
 
       <div id="teacherList" class="teacher-list mt16">
-        <div class="text-center text-muted">${t('tm.loading')}</div>
+        <div class="teacher-manager-loading" aria-busy="true">
+          <span class="teacher-manager-loading-dot"></span>
+          <span>${t('tm.loading')}</span>
+        </div>
       </div>
 
       <button class="btn-secondary mt16" onclick="closeModal()">${t('common.close')}</button>
@@ -164,6 +168,13 @@ window.openTeacherManager = async function() {
     if (listEl) {
       listEl.innerHTML =
         `<div class="form-error">${esc(t('tm.loadFailed'))}<br><small>${esc(msg.slice(0, 180))}</small></div>`;
+    }
+  } finally {
+    const sheet = document.querySelector('.teacher-manager-sheet');
+    if (sheet) {
+      sheet.classList.remove('teacher-modal-preparing');
+      sheet.classList.add('teacher-modal-ready');
+      sheet.style.visibility = 'visible';
     }
   }
 };
