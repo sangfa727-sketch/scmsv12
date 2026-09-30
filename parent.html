@@ -112,7 +112,7 @@ const GOOGLE_CLIENT_ID = '71086878167-t6q46hrv5j5n46h9nfmeuk8sdoftb5lt.apps.goog
 const PARENT_LOGIN_URL = SUPABASE_URL + '/functions/v1/parent-google-login';
 
 const qs = new URLSearchParams(location.search);
-const qr${pt('to')}ken = qs.get('t') || qs.get('token') || '';
+const qrtoken = qs.get('t') || qs.get('token') || '';
 const appEl = document.getElementById('app');
 
 function esc(s) {
@@ -146,7 +146,7 @@ async function rpc(fn, params) {
 }
 
 async function boot() {
-  if (!qr${pt('to')}ken) {
+  if (!qrtoken) {
     appEl.innerHTML = `<div class="card center">
       <p>${pt('qr')}</p>
       <p class="muted">${pt('ask')}</p>
@@ -155,10 +155,10 @@ async function boot() {
   }
 
   // Already signed in on this device for this exact QR/student?
-  const saved${pt('to')}ken = localStorage.getItem(sessionKey(qr${pt('to')}ken));
-  if (saved${pt('to')}ken) {
-    try { await showDashboard(saved${pt('to')}ken); return; }
-    catch (e) { localStorage.removeItem(sessionKey(qr${pt('to')}ken)); }
+  const savedTokenken = localStorage.getItem(sessionKey(qrtoken));
+  if (savedtoken) {
+    try { await showDashboard(savedtoken); return; }
+    catch (e) { localStorage.removeItem(sessionKey(qrtoken)); }
   }
 
   await showLogin();
@@ -168,7 +168,7 @@ async function showLogin() {
   appEl.innerHTML = `<div class="card center"><div class="skeleton" style="width:70%;margin:0 auto"></div></div>`;
   let student;
   try {
-    const res = await rpc('rpc_qr_resolve', { p_qr_token: qr${pt('to')}ken });
+    const res = await rpc('rpc_qr_resolve', { p_qr_token: qrtoken });
     student = res.student;
   } catch (e) {
     // Distinguish "the server said this token is invalid/inactive" (data
@@ -215,7 +215,7 @@ async function showLogin() {
         const apiResp = await fetch(PARENT_LOGIN_URL, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ id_token: resp.credential, qr_token: qr${pt('to')}ken, device_ua: navigator.userAgent }),
+          body: JSON.stringify({ id_token: resp.credential, qr_token: qrtoken, device_ua: navigator.userAgent }),
         });
         const data = await apiResp.json();
         if (!data.ok) {
@@ -224,7 +224,7 @@ async function showLogin() {
             : `<div class="error-box">Sign-in failed (${esc(data.error || 'unknown error')}). Please try again.</div>`;
           return;
         }
-        localStorage.setItem(sessionKey(qr${pt('to')}ken), data.session_token);
+        localStorage.setItem(sessionKey(qrtoken), data.session_token);
         await showDashboard(data.session_token);
       } catch (e) {
         errEl.innerHTML = `<div class="error-box">${pt('signinFailed')}</div>`;
@@ -234,15 +234,15 @@ async function showLogin() {
   window.google.accounts.id.renderButton(document.getElementById('gBtn'), { theme: 'filled_black', size: 'large', shape: 'pill', width: 280 });
 }
 
-async function showDashboard(session${pt('to')}ken) {
+async function showDashboard(sessiontoken) {
   appEl.innerHTML = `<div class="card center"><div class="skeleton" style="width:60%;margin:0 auto"></div><div class="skeleton" style="width:80%"></div><div class="skeleton" style="width:80%"></div></div>`;
 
-  const res = await rpc('rpc_parent_get_dashboard', { p_session_token: session${pt('to')}ken });
+  const res = await rpc('rpc_parent_get_dashboard', { p_session_token: sessiontoken });
   const { student, attendance, grades, invoices, upcoming_exams, parent_messages, timetable, events, leave_requests } = res;
 
-  const presentCount = attendance.filter(a => a.status === '${pt('present')}').length;
-  const absentCount  = attendance.filter(a => a.status === '${pt('absent')}').length;
-  const lateCount    = attendance.filter(a => a.status === '${pt('late')}').length;
+  const presentCount = attendance.filter(a => a.status === 'Present').length;
+  const absentCount  = attendance.filter(a => a.status === 'Absent').length;
+  const lateCount    = attendance.filter(a => a.status === 'Late').length;
 
   appEl.innerHTML = `
     <div class="card center">
@@ -398,7 +398,7 @@ async function showDashboard(session${pt('to')}ken) {
     };
   });
   document.getElementById('signOutLink').onclick = () => {
-    localStorage.removeItem(sessionKey(qr${pt('to')}ken));
+    localStorage.removeItem(sessionKey(qrtoken));
     showLogin();
   };
 
@@ -407,19 +407,19 @@ async function showDashboard(session${pt('to')}ken) {
     const end   = document.getElementById('leaveEnd').value;
     const reason = document.getElementById('leaveReason').value.trim();
     const msgEl = document.getElementById('leaveFormMsg');
-    if (!start || !end) { msgEl.textContent = '${pt('chooseDates')}'; return; }
-    if (end < start) { msgEl.textContent = '${pt('dateOrder')}'; return; }
+    if (!start || !end) { msgEl.textContent = pt('chooseDates'); return; }
+    if (end < start) { msgEl.textContent = pt('dateOrder'); return; }
 
     const btn = document.getElementById('leaveSubmitBtn');
     btn.disabled = true;
     msgEl.textContent = '';
     try {
       await rpc('rpc_parent_submit_leave_request', {
-        p_session_token: session${pt('to')}ken, p_start_date: start, p_end_date: end, p_reason: reason || null,
+        p_session_token: sessiontoken, p_start_date: start, p_end_date: end, p_reason: reason || null,
       });
-      await showDashboard(session${pt('to')}ken); // simplest refresh: re-render from the server, same pattern used everywhere else here
+      await showDashboard(sessiontoken); // simplest refresh: re-render from the server, same pattern used everywhere else here
       document.querySelector('.tab[data-tab="leave"]').click();
-      document.getElementById('leaveFormMsg').textContent = '${pt('submitted')}';
+      document.getElementById('leaveFormMsg').textContent = pt('submitted');
     } catch (e) {
       msgEl.textContent = 'pte('submitFailed',{err:e.message || 'error'})';
       btn.disabled = false;
