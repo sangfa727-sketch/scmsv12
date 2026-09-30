@@ -19,6 +19,7 @@ const LANGUAGES = [
   { code: 'th', label: 'ไทย', name: 'ภาษาไทย', dict: () => window.I18N_TH },
   { code: 'jp', label: '日本語', name: '日本語', dict: () => window.I18N_JP },
   { code: 'ms', label: 'BM', name: 'Bahasa Melayu', dict: () => window.I18N_MS },
+  { code: 'km', label: 'ខ្មែរ', name: 'ភាសាខ្មែរ', dict: () => window.I18N_KM },
 ];
 
 const LANGUAGE_ALIASES = {
@@ -27,6 +28,7 @@ const LANGUAGE_ALIASES = {
   th: ['th'],
   jp: ['ja', 'jp'],
   ms: ['ms'],
+  km: ['km', 'km-kh'],
 };
 
 const I18N = {
@@ -145,6 +147,7 @@ const I18N = {
       th: 'th-TH',
       jp: 'ja-JP',
       ms: 'ms-MY',
+      km: 'km-KH',
     }[this.current] || 'en-US';
   },
 
