@@ -122,7 +122,7 @@ function _renderPickerList() {
   const classKeys = Object.keys(grouped).sort();
 
   if (!list.length) {
-    el.innerHTML = `<div class="picker-empty">No students match "${esc(_pickerState.search)}"</div>`;
+    el.innerHTML = `<div class="picker-empty">${t('picker.noMatch', { query: esc(_pickerState.search) })}</div>`;
     return;
   }
 
