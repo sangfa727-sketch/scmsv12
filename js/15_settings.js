@@ -29,7 +29,7 @@ window.openSettings = function() {
       <div class="info-row"><span>${t('settings.login')}</span><span>${esc(_loginMethodLabel(isWeb))}</span></div>
       <div class="info-row"><span>${t('settings.telegram')}</span><span>${window.APP.telegram_id ? t('settings.connected') : t('settings.notConnected')}</span></div>
 
-      <section class="settings-actions" aria-label="Settings actions">
+      <section class="settings-actions" aria-label="${t('settings.actionsLabel')}">
         <div class="settings-action-list">
           ${isAdmin ? `
             <div class="settings-action-row">
