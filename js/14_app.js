@@ -70,8 +70,8 @@ async function initApp() {
         window.APP.tgUser   = tg.initDataUnsafe?.user || null;
 
         // Apply Telegram theme colors
-        if (tg.colorScheme === 'dark') {
-          document.documentElement.setAttribute('data-theme', 'dark');
+        if (window.SCMSTheme?.syncExternal) {
+          window.SCMSTheme.syncExternal(tg.colorScheme);
         }
         if (tg.themeParams?.bg_color) {
           document.documentElement.style.setProperty('--tg-bg', tg.themeParams.bg_color);
