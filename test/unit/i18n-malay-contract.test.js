@@ -52,6 +52,7 @@ test('Malay locale contract is enforced when the locale file is present', (t) =>
     assert.equal(Object.prototype.hasOwnProperty.call(msValues, key), true, `Malay locale is missing value for ${key}`);
 
     const msValue = msValues[key];
+    assert.equal(typeof msValue, 'string', `Malay locale value must be a string for ${key}`);
     assert.notEqual(msValue.trim(), '', `Malay locale has an empty value for ${key}`);
 
     assert.deepEqual(
