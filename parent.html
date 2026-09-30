@@ -234,10 +234,10 @@ async function showLogin() {
   window.google.accounts.id.renderButton(document.getElementById('gBtn'), { theme: 'filled_black', size: 'large', shape: 'pill', width: 280 });
 }
 
-async function showDashboard(sessiontoken) {
+async function showDashboard(sessionToken) {
   appEl.innerHTML = `<div class="card center"><div class="skeleton" style="width:60%;margin:0 auto"></div><div class="skeleton" style="width:80%"></div><div class="skeleton" style="width:80%"></div></div>`;
 
-  const res = await rpc('rpc_parent_get_dashboard', { p_session_token: sessiontoken });
+  const res = await rpc('rpc_parent_get_dashboard', { p_session_token: sessionToken });
   const { student, attendance, grades, invoices, upcoming_exams, parent_messages, timetable, events, leave_requests } = res;
 
   const presentCount = attendance.filter(a => a.status === 'Present').length;
@@ -415,13 +415,13 @@ async function showDashboard(sessiontoken) {
     msgEl.textContent = '';
     try {
       await rpc('rpc_parent_submit_leave_request', {
-        p_session_token: sessiontoken, p_start_date: start, p_end_date: end, p_reason: reason || null,
+        p_session_token: sessionToken, p_start_date: start, p_end_date: end, p_reason: reason || null,
       });
-      await showDashboard(sessiontoken); // simplest refresh: re-render from the server, same pattern used everywhere else here
+      await showDashboard(sessionToken); // simplest refresh: re-render from the server, same pattern used everywhere else here
       document.querySelector('.tab[data-tab="leave"]').click();
       document.getElementById('leaveFormMsg').textContent = pt('submitted');
     } catch (e) {
-      msgEl.textContent = 'pte('submitFailed',{err:e.message || 'error'})';
+      msgEl.textContent = pte('submitFailed',{err:e.message || 'error'});
       btn.disabled = false;
     }
   };
