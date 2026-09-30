@@ -185,23 +185,23 @@ function _paintDashboard(container) {
     </div>
 
     <div class="stats-grid">
-      <div class="stat-card">
+      <div class="stat-card dashboard-link-card" onclick="window.goToPage('attend')" role="button" tabindex="0">
         <div class="stat-num">${classesToday.length}</div>
         <div class="stat-lbl">${t('dash.classesToday')}</div>
       </div>
-      <div class="stat-card${missingAttendance.length ? ' red' : ' green'}">
+      <div class="stat-card dashboard-link-card${missingAttendance.length ? ' red' : ' green'}" onclick="window.goToPage('attend')" role="button" tabindex="0">
         <div class="stat-num">${missingAttendance.length}</div>
         <div class="stat-lbl">${t('dash.notYetMarked')}</div>
       </div>
-      <div class="stat-card">
+      <div class="stat-card dashboard-link-card" onclick="window.goToPage('hw')" role="button" tabindex="0">
         <div class="stat-num">${recentHomework.length}</div>
         <div class="stat-lbl">${t('dash.homeworkLogged2d')}</div>
       </div>
-      <div class="stat-card${recentIncidents.length ? ' red' : ''}">
+      <div class="stat-card dashboard-link-card${recentIncidents.length ? ' red' : ''}" onclick="window.goToPage('incidents')" role="button" tabindex="0">
         <div class="stat-num">${recentIncidents.length}</div>
         <div class="stat-lbl">${t('dash.recentIncidents')}</div>
       </div>
-      <div class="stat-card${queuedComms.length ? ' red' : ''}">
+      <div class="stat-card dashboard-link-card${queuedComms.length ? ' red' : ''}" onclick="window.goToPage('parents')" role="button" tabindex="0">
         <div class="stat-num">${queuedComms.length}</div>
         <div class="stat-lbl">${t('dash.messagesQueued')}</div>
       </div>
@@ -250,7 +250,7 @@ function _paintDashboard(container) {
     ${recentIncidents.length ? `
     <div class="more-section-title">${t('dash.recentIncidentsTitle')}</div>
     ${recentIncidents.map(i => `
-      <div class="list-card">
+      <div class="list-card dashboard-link-card dashboard-incident-card" data-student-id="${esc(i.student_id || '')}" onclick="window._dashboardOpenIncidentStudent(this.dataset.studentId)" role="button" tabindex="0">
         <div class="card-row">
           <div class="card-avatar" style="background:${_classColor(i.class)}">${avatarContent({ name_en: i.name_en })}</div>
           <div class="card-info">
@@ -276,6 +276,11 @@ function _dashboardGoToAttendance(className) {
     if (sel) sel.value = className;
   }
 }
+
+window._dashboardOpenIncidentStudent = function(studentId) {
+  window.APP.dashboardIncidentStudentId = studentId || '';
+  window.goToPage('incidents');
+};
 
 function _isoDaysAgo(n) {
   const d = new Date();
