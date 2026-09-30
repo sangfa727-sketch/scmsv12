@@ -1338,7 +1338,7 @@ window.I18N_ZH = {
   "adm.needAmountItem": "至少添加一项包含金额的明细",
   "adm.regCreated": "✓ 注册费发票已创建",
   "adm.delTitle": "🗑 删除此申请人？",
-  "adm.delBody": "这会删除申请记录，不会影响已经转换成学生的记录。"
+  "adm.delBody": "这会删除申请记录，不会影响已经转换成学生的记录。",
   'settings.actionsLabel': "设置操作",
   'tm.editTeacher': "编辑教师",
   'tm.manageAccess': "管理权限",
