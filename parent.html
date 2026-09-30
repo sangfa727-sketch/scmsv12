@@ -104,7 +104,6 @@ const PT={en:{title:'Parent Portal',qr:"This page opens from the QR code on your
 const pt=k=>PT[PARENT_LANG][k]||PT.en[k]||k;const pte=(k,v={})=>Object.keys(v).reduce((x,n)=>x.replaceAll('{'+n+'}',String(v[n])),pt(k));document.documentElement.lang=PARENT_LANG==='zh'?'zh-CN':'en';</script>
 <script>
 'use strict';
-document.getElementById('pageTitle').textContent=pt('title');document.getElementById('portalBrand').textContent=pt('title');
 document.getElementById('pageTitle').textContent=pt('title'); document.getElementById('portalBrand').textContent=pt('title');
 const SUPABASE_URL   = 'https://rszgbryucqwmrdbsgwbb.supabase.co';
 const SUPABASE_ANON  = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InJzemdicnl1Y3F3bXJkYnNnd2JiIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzA4MjkzNjcsImV4cCI6MjA4NjQwNTM2N30.uN2cpmL48H3ZEJlZADh6b06bwecANo1mzIwPSBZRI5g';
@@ -157,7 +156,7 @@ async function boot() {
   // Already signed in on this device for this exact QR/student?
   const savedToken = localStorage.getItem(sessionKey(qrtoken));
   if (savedToken) {
-    try { await showDashboard(savedtoken); return; }
+    try { await showDashboard(savedToken); return; }
     catch (e) { localStorage.removeItem(sessionKey(qrtoken)); }
   }
 
