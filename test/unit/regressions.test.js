@@ -44,3 +44,20 @@ test('teacher ID card foundation stays protected', () => {
   assert.match(html, /15_settings\.js\?v=20261001c/);
   assert.match(html, /style\.css\?v=20261001d/);
 });
+
+
+test('dashboard summary cards and incident entry points stay protected', () => {
+  const dashboard = read('js/27_dashboard.js');
+  const css = read('dashboard.css');
+  const html = read('index.html');
+  assert.match(dashboard, /dashboard-link-card/);
+  assert.match(dashboard, /window\.goToPage\('attend'\)/);
+  assert.match(dashboard, /window\.goToPage\('hw'\)/);
+  assert.match(dashboard, /window\.goToPage\('incidents'\)/);
+  assert.match(dashboard, /window\.goToPage\('parents'\)/);
+  assert.match(dashboard, /_dashboardOpenIncidentStudent/);
+  assert.match(dashboard, /data-student-id=/);
+  assert.match(css, /#102A43/);
+  assert.match(css, /dashboard-link-card/);
+  assert.ok(html.includes('dashboard.css?v=20261001e'));
+});
