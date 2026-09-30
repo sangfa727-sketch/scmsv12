@@ -29,7 +29,7 @@ window.openSettings = function() {
       <div class="info-row"><span>${t('settings.login')}</span><span>${esc(_loginMethodLabel(isWeb))}</span></div>
       <div class="info-row"><span>${t('settings.telegram')}</span><span>${window.APP.telegram_id ? t('settings.connected') : t('settings.notConnected')}</span></div>
 
-      <section class="settings-actions" aria-label="Settings actions">
+      <section class="settings-actions" aria-label="${t('settings.actionsLabel')}">
         <div class="settings-action-list">
           ${isAdmin ? `
             <div class="settings-action-row">
@@ -166,8 +166,8 @@ function _renderTeacherList(teachers) {
           <div class="teacher-row-sub">${esc(teacher.login_name || teacher.teacher_id)} · ${esc(teacher.teacher_id)} · ${esc(teacher.role ? tv('roleName', teacher.role) : t('inv.roleTeacher'))} · ${t('tm.lastLogin', { date: lastLogin })}</div>
         </div>
         <div class="teacher-row-actions">
-          <button class="icon-btn-mini teacher-edit-btn" onclick="event.stopPropagation(); openTeacherEditModal('${esc(teacher.teacher_id)}')" title="Edit teacher">✏️</button>
-          <button class="icon-btn-mini teacher-access-btn" onclick="event.stopPropagation(); closeModal(); setTimeout(() => openTeacherAccess('${esc(teacher.teacher_id)}', '${esc(teacher.teacher_name)}'), 190)" title="Manage access">🔐</button>
+          <button class="icon-btn-mini teacher-edit-btn" onclick="event.stopPropagation(); openTeacherEditModal('${esc(teacher.teacher_id)}')" title="${esc(t('tm.editTeacher'))}">✏️</button>
+          <button class="icon-btn-mini teacher-access-btn" onclick="event.stopPropagation(); closeModal(); setTimeout(() => openTeacherAccess('${esc(teacher.teacher_id)}', '${esc(teacher.teacher_name)}'), 190)" title="${esc(t('tm.manageAccess'))}">🔐</button>
           <button class="icon-btn-mini" onclick="event.stopPropagation(); openTeacherCardModal('${esc(teacher.teacher_id)}', '${esc(teacher.teacher_name)}', '${esc(teacher.login_name || '')}')" title="${esc(t('tm.idCard'))}">🪪</button>
           <button class="icon-btn-mini" onclick="event.stopPropagation(); resetTeacherPassword('${esc(teacher.teacher_id)}', '${esc(teacher.teacher_name)}')" title="${esc(t('tm.resetPassword'))}">🔑</button>
         </div>

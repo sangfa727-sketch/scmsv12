@@ -14,22 +14,22 @@
 
 const _BRAND_KINDS = {
   logo: {
-    title: 'School logo',
-    subtitle: 'Shown in the sidebar, app header and More page.',
+    title: t('branding.logoTitle'),
+    subtitle: t('branding.logoSubtitle'),
     adminOnly: true, frame: 'square', maxW: 256, maxH: 256, crop: false, keepAlpha: true,
-    tip: 'Use a square image — PNG with a transparent background works best. It is auto-resized to 256×256.',
+    tip: t('branding.logoTip'),
   },
   cover: {
-    title: 'Cover photo',
-    subtitle: 'Banner behind the school logo at the top of the sidebar.',
+    title: t('branding.coverTitle'),
+    subtitle: t('branding.coverSubtitle'),
     adminOnly: true, frame: 'wide', maxW: 1200, maxH: 400, crop: true, keepAlpha: false,
-    tip: 'Use a wide image (about 3:1). It is auto-cropped from the centre to 1200×400.',
+    tip: t('branding.coverTip'),
   },
   photo: {
-    title: 'My profile photo',
-    subtitle: 'Shown in the sidebar and on your profile card.',
+    title: t('branding.photoTitle'),
+    subtitle: t('branding.photoSubtitle'),
     adminOnly: false, frame: 'round', maxW: 320, maxH: 320, crop: true, keepAlpha: false,
-    tip: 'A clear, front-facing photo works best. It is auto-cropped to a square.',
+    tip: t('branding.photoTip'),
   },
 };
 
@@ -129,7 +129,7 @@ window.openBrandingModal = function (kind) {
   picker.onchange = e => _brandHandlePick(kind, e.target.files && e.target.files[0]);
   const rm = document.getElementById('btnBrandRemove');
   if (rm) rm.onclick = () => showConfirm(
-    'Remove?', `Remove the ${K.title.toLowerCase()}?`, 'Remove',
+    t('branding.removeConfirmTitle'), t('branding.removeConfirmText'), t('branding.removeConfirmButton'),
     () => _brandSave(kind, null), { danger: true });
 };
 
@@ -146,7 +146,7 @@ async function _brandHandlePick(kind, file) {
   if (!/^image\/(png|jpe?g|webp)$/.test(file.type)) { showToast(t('branding.imageTypes')); return; }
   if (file.size > _BRAND_MAX_BYTES) { showToast(t('branding.imageTooBig')); return; }
   try {
-    _brandStatus('Processing…');
+    _brandStatus(t('branding.processing'));
     const blob = await _brandImageToBlob(file, _BRAND_KINDS[kind]);
     const prev = document.getElementById('brandPreview');
     if (prev) prev.innerHTML = `<img src="${URL.createObjectURL(blob)}" alt="">`;
@@ -161,7 +161,7 @@ async function _brandHandlePick(kind, file) {
 /** blob = Blob to upload, or null to remove. */
 async function _brandSave(kind, blob) {
   try {
-    _brandStatus(blob ? 'Uploading…' : 'Removing…');
+    _brandStatus(blob ? t('branding.uploading') : t('branding.removing'));
     const url = blob ? await API.uploadSchoolAsset(kind === 'photo' ? 'teacher' : kind, blob) : null;
 
     if (kind === 'photo') {
@@ -176,8 +176,8 @@ async function _brandSave(kind, blob) {
       if (window.APP.config) window.APP.config[key] = window.APP[key];
     }
 
-    _brandStatus(blob ? 'Saved ✓' : 'Removed ✓', true);
-    showToast(blob ? 'Saved' : 'Removed');
+    _brandStatus(blob ? t('branding.saved') : t('branding.removed'), true);
+    showToast(blob ? t('branding.savedToast') : t('branding.removedToast'));
     _brandRefreshViews();
     if (!blob) {
       const prev = document.getElementById('brandPreview');
