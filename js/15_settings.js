@@ -30,6 +30,16 @@ window.openSettings = function() {
       <div class="info-row"><span>${t('settings.telegram')}</span><span>${window.APP.telegram_id ? t('settings.connected') : t('settings.notConnected')}</span></div>
 
       <section class="settings-actions" aria-label="${t('settings.actionsLabel')}">
+        <div class="settings-theme-control" role="group" aria-label="${t('settings.theme')}">
+          <div class="settings-action-copy">
+            <strong>${t('settings.theme')}</strong>
+            <span class="settings-theme-current" id="settingsThemeCurrent"></span>
+          </div>
+          <div class="settings-theme-toggle" role="radiogroup" aria-label="${t('settings.theme')}">
+            <button type="button" class="settings-theme-option" data-theme-choice="light" role="radio" onclick="SCMSTheme.set('light'); refreshSettingsThemeControl()">${t('settings.themeLight')}</button>
+            <button type="button" class="settings-theme-option" data-theme-choice="dark" role="radio" onclick="SCMSTheme.set('dark'); refreshSettingsThemeControl()">${t('settings.themeDark')}</button>
+          </div>
+        </div>
         <div class="settings-action-list">
           ${isAdmin ? `
             <div class="settings-action-row">
