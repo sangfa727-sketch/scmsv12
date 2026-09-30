@@ -138,7 +138,6 @@ const I18N = {
   },
 
   // BCP-47 tag for Intl / toLocaleDateString, following the UI language
-  // Weekday / month names stay English in both languages (that is what Myanmar users read on calendars)
   dateLocale() {
     return {
       en: 'en-US',
