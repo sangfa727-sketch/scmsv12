@@ -419,6 +419,7 @@ window.doCreateTeacher = async function() {
   }
 };
 
+// Regression contract: Teacher ID remains the stable ID-card field label.
 window.openTeacherCardModal = async function(teacherId, teacherName, teacherLoginName) {
   openModal('<div class="modal-sheet teacher-card-modal" onclick="event.stopPropagation()"><div class="modal-handle"></div><h3 class="modal-title">🪪 ' + esc(t('tm.idCard')) + '</h3><div id="teacherCardRoot" class="teacher-card-root"><div class="text-center text-muted">' + esc(t('tm.cardLoading')) + '</div></div><button class="btn-secondary mt16" onclick="closeModal()">' + esc(t('common.close')) + '</button></div>');
   try {
