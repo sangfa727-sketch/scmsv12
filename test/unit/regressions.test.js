@@ -9,6 +9,7 @@ const read = (file) => fs.readFileSync(path.join(ROOT, file), 'utf8'); // theme-
 test('teacher ID card foundation stays protected', () => {
   const settings = read('js/15_settings.js');
   const css = read('style.css');
+  const access = read('js/29_teacher_access.js');
   const html = read('index.html');
   assert.match(settings, /rpc_admin_create_teacher_card/);
   assert.match(settings, /openTeacherCardModal\(id, name, login\)/);
@@ -19,8 +20,8 @@ test('teacher ID card foundation stays protected', () => {
   assert.match(settings, /teacher-edit-btn/);
   assert.match(settings, /printTeacherCard/);
   assert.match(settings, /setTimeout\(\(\) => openTeacherCardModal\(id, name, login\), 280\)/);
-  assert.match(settings, /teacher-modal-preparing/);
-  assert.match(settings, /teacher-modal-ready/);
+  assert.match(access, /teacher-modal-preparing/);
+  assert.match(access, /teacher-modal-ready/);
   assert.match(settings, /result\.login_name \|\| teacherLoginName/);
   assert.match(settings, /Teacher ID/);
   assert.match(settings, /teacher-id-card-avatar-fallback/);
