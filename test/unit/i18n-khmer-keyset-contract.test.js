@@ -10,9 +10,11 @@ const EN_FILE = path.join(JS_DIR, '00a_locales_en.js');
 const KM_FILE = path.join(JS_DIR, '00e_locales_km.js');
 const KM_META_FILE = path.join(JS_DIR, '00e_locales_km.meta.js');
 
-// The English dictionary is the single source/reference for Khmer coverage.
-// Keep this gate intentionally small: no Khmer locale is registered or shipped
-// until its full 1:1 key set is ready.
+// The current English dictionary is the single source/reference for Khmer coverage.
+// The historical 1333-key target has drifted to 1339 in the repository; do not
+// delete or alter English keys just to preserve the old count.
+const EN_BASELINE_KEYS = 1339;
+
 function loadLocale(file, globalName) {
   const source = fs.readFileSync(file, 'utf8');
   const sandbox = { window: {} };
@@ -23,7 +25,7 @@ function loadLocale(file, globalName) {
   return dict;
 }
 
-test('English source locale remains the 1333-key baseline for Khmer', () => {
+test('English source locale remains the 1339-key baseline for Khmer', () => {
   const en = loadLocale(EN_FILE, 'I18N_EN');
   const keys = Object.keys(en);
 
@@ -34,8 +36,8 @@ test('English source locale remains the 1333-key baseline for Khmer', () => {
   );
   assert.equal(
     keys.length,
-    1333,
-    'Khmer implementation baseline must remain exactly 1333 English keys'
+    EN_BASELINE_KEYS,
+    'Khmer implementation baseline must remain exactly the current English key count'
   );
 });
 
@@ -46,8 +48,8 @@ test('Khmer locale must match the English key set exactly once it is introduced'
   }
 
   const metaSource = fs.readFileSync(KM_META_FILE, 'utf8');
-  if (!/complete\\s*:\\s*true/.test(metaSource)) {
-    t.skip('Khmer locale is staged in batches; the 1333-key equality gate activates only when complete=true.');
+  if (!/complete\s*:\s*true/.test(metaSource)) {
+    t.skip('Khmer locale is staged in batches; the full key equality gate activates only when complete=true.');
     return;
   }
 
@@ -57,7 +59,7 @@ test('Khmer locale must match the English key set exactly once it is introduced'
   const kmKeys = Object.keys(km);
 
   assert.equal(new Set(kmKeys).size, kmKeys.length, 'Khmer locale must not contain duplicate keys');
-  assert.deepEqual(kmKeys, enKeys, 'Khmer locale keys must exactly match the 1333-key English baseline');
+  assert.deepEqual(kmKeys, enKeys, 'Khmer locale keys must exactly match the current English baseline');
 
   for (const key of enKeys) {
     assert.equal(Object.prototype.hasOwnProperty.call(km, key), true, 'Khmer locale is missing value for ' + key);
