@@ -7258,6 +7258,23 @@ html[lang="jp"] textarea {
   font-family: "Noto Sans JP", "Inter Tight", system-ui, sans-serif;
 }
 
+/* Simplified Chinese rendering foundation — enabled when ZH is selected. */
+html[lang="zh"],
+html[lang="zh"] body,
+html[lang="zh"] input,
+html[lang="zh"] button,
+html[lang="zh"] select,
+html[lang="zh"] textarea {
+  font-family: "Noto Sans SC", "Inter Tight", system-ui, sans-serif;
+  font-synthesis: none;
+}
+
+html[lang="zh"] .lang-switch,
+html[lang="zh"] .lang-option {
+  font-family: "Noto Sans SC", "Inter Tight", system-ui, sans-serif;
+}
+
+
 /* Language selector — native dropdown */
 .lang-switch {
   appearance: none;
