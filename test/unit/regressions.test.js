@@ -54,3 +54,27 @@ test('sidebar keeps aria-hidden synchronized with its visual state', () => {
   assert.match(sidebar, /classList\.add\('open'\)[\s\S]*setAttribute\('aria-hidden', 'false'\)/);
   assert.match(sidebar, /classList\.remove\('open'\)[\s\S]*setAttribute\('aria-hidden', 'true'\)/);
 });
+
+test('dashboard notification bell keeps accessible disclosure semantics', () => {
+  const dashboard = read('js/27_dashboard.js');
+  const locales = read('js/00a_locales_en.js');
+  assert.match(dashboard, /<button class=\"dashboard-notification-btn\" type=\"button\"[\s\S]*aria-label=\"${t\('dash\.notifications'\)}\"[\s\S]*aria-expanded=\"false\"[\s\S]*aria-controls=\"dashboardNotificationMenu\"/);
+  assert.match(dashboard, /<div class=\"dashboard-notification-menu\" id=\"dashboardNotificationMenu\" hidden>/);
+  assert.match(dashboard, /btn\?\.setAttribute\('aria-expanded', String\(open\)\)/);
+  assert.match(dashboard, /window\.closeDashboardNotifications = function\(\)[\s\S]*setAttribute\('aria-expanded', 'false'\)/);
+  assert.match(dashboard, /event\.key !== 'Escape'/);
+  assert.match(dashboard, /!wrap\?\.contains\(event\.target\)/);
+  for (const key of [
+    'dash.notifications',
+    'dash.newCount',
+    'dash.leavePendingOne',
+    'dash.leavePendingMany',
+    'dash.leaveReview',
+    'dash.messageNotDeliveredOne',
+    'dash.messageNotDeliveredMany',
+    'dash.bannerText',
+    'dash.noNewNotifications',
+  ]) {
+    assert.match(locales, new RegExp('(?:[\\\'\"])' + key.replace('.', '\\.') + '(?:[\\\'\"])'));
+  }
+});
