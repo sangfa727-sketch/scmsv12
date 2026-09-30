@@ -67,13 +67,13 @@ const I18N = {
 
         const baseTokens = tokenList(baseValue).sort();
         const localeTokens = tokenList(localeValue).sort();
-        if (baseTokens.join('\u0000') !== localeTokens.join('\\u0000')) {
+        if (baseTokens.join('\u0000') !== localeTokens.join('\u0000')) {
           console.warn('[i18n] Placeholder mismatch in ' + lang.code + ':', key);
         }
 
         const baseHtml = htmlList(baseValue).map(x => x.replace(/\s+/g, ' ').trim()).sort();
-        const localeHtml = htmlList(localeValue).map(x => x.replace(/\\s+/g, ' ').trim()).sort();
-        if (baseHtml.join('\\u0000') !== localeHtml.join('\\u0000')) {
+        const localeHtml = htmlList(localeValue).map(x => x.replace(/\s+/g, ' ').trim()).sort();
+        if (baseHtml.join('\u0000') !== localeHtml.join('\u0000')) {
           console.warn('[i18n] HTML tag mismatch in ' + lang.code + ':', key);
         }
       });
