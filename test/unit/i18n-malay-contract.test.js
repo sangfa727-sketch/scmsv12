@@ -152,3 +152,57 @@ test('Malay runtime can be selected, translated, persisted, and localized', () =
   assert.equal(i18n.t('common.saveFailed'), sandbox.window.I18N_MS['common.saveFailed']);
   assert.equal(i18n.t('students.subtitle', { n: 7, c: 2 }), '7 murid aktif merentas 2 kelas');
 });
+
+
+test('All registered locale dictionaries remain valid objects without duplicate top-level keys', () => {
+  const localeFiles = [
+    ['en', EN_FILE, 'I18N_EN'],
+    ['my', path.join(JS_DIR, '00b_locales_my.js'), 'I18N_MY'],
+    ['th', path.join(JS_DIR, '00_locales_thai.js'), 'I18N_TH'],
+    ['jp', path.join(JS_DIR, '00_locales_jp.js'), 'I18N_JP'],
+    ['ms', MS_FILE, 'I18N_MS'],
+  ];
+
+  for (const [code, file, globalName] of localeFiles) {
+    assert.equal(fs.existsSync(file), true, `registered locale file is missing for ${code}`);
+    const dict = loadLocale(file, globalName);
+    const keys = Object.keys(dict);
+    assert.equal(new Set(keys).size, keys.length, `locale ${code} must not contain duplicate keys`);
+    for (const [key, value] of Object.entries(dict)) {
+      assert.equal(typeof value, 'string', `locale ${code} value must be a string for ${key}`);
+    }
+  }
+});
+
+test('Malay browser-language detection selects ms for ms-MY', () => {
+  const sandbox = {
+    window: {
+      I18N_EN: loadLocale(EN_FILE, 'I18N_EN'),
+      I18N_MS: loadLocale(MS_FILE, 'I18N_MS'),
+      matchMedia: () => ({ matches: false }),
+      dispatchEvent: () => {},
+    },
+    localStorage: {
+      getItem() { return null; },
+      setItem() {},
+    },
+    navigator: { language: 'ms-MY' },
+    document: {
+      readyState: 'loading',
+      addEventListener() {},
+      documentElement: { lang: '' },
+      title: '',
+      querySelectorAll: () => [],
+      getElementById: () => null,
+    },
+    CustomEvent: function CustomEvent(type, init) {
+      this.type = type;
+      this.detail = init?.detail;
+    },
+  };
+
+  vm.runInNewContext(readLocale(I18N_ENGINE_FILE), sandbox, { filename: I18N_ENGINE_FILE });
+  assert.equal(sandbox.window.I18N.current, 'ms');
+  assert.equal(sandbox.document.documentElement.lang, 'ms');
+  assert.equal(sandbox.window.I18N.dateLocale(), 'ms-MY');
+});
