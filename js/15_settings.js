@@ -325,7 +325,7 @@ window.openTeacherEditModal = async function(teacherId) {
         <option value="super_admin" ${teacher.role === 'super_admin' ? 'selected' : ''}>${esc(t('tm.roleSuperAdmin'))}</option>
       </select>
       <div id="editTError" class="form-error" style="display:none"></div>
-      <button class="btn-primary mt16" id="editTBtn" onclick="saveTeacherEdit('${esc(teacher.teacher_id)}')">Save changes</button>
+      <button class="btn-primary mt16" id="editTBtn" onclick="saveTeacherEdit('${esc(teacher.teacher_id)}')" >${esc(t('tm.saveChanges'))}</button>
       <button class="btn-secondary" onclick="closeModal()">${esc(t('tm.cancel'))}</button>
     </div>
   `);
@@ -448,7 +448,7 @@ window.openTeacherCardModal = async function(teacherId, teacherName, teacherLogi
           (window.APP?.school_logo ? '<img src="' + esc(window.APP.school_logo) + '" alt="" class="teacher-id-card-logo">' : '') +
           '<div class="teacher-id-card-school">' + esc(window.APP?.school_name || '') + '</div>' +
         '</div>' +
-        '<div class="teacher-id-card-type">TEACHER ID CARD</div>' +
+        '<div class="teacher-id-card-type">' + esc(t('tm.teacherIdCardTitle')) + '</div>' +
         '<div class="teacher-id-card-avatar' + (photo ? ' has-photo' : '') + '">' +
           (photo ? '<img src="' + esc(photo) + '" alt="' + esc(resolvedName) + '" referrerpolicy="no-referrer" onload="this.parentElement.classList.add(\'has-photo\')" onerror="this.style.display=\'none\';this.parentElement.classList.remove(\'has-photo\');this.parentElement.classList.add(\'is-fallback\')">' : '') +
           '<span class="teacher-id-card-avatar-fallback">👤</span>' +
