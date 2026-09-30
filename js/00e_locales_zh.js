@@ -1338,7 +1338,7 @@ window.I18N_ZH = {
   "err.likelyCause": "可能原因：n8n 工作流未启用、URL 不正确，或 CORS 阻止了请求。",
   "login.loading": "正在加载登录页面…",
   "login.waitRetry": "请稍候片刻后再试。",
-  "cg.required": "请输入班级和年级。",
+  "cg.required": "请输入班级和年级。","cg.pairHint":"同时管理班级和年级。","cg.pairExample":"示例：五年级 + A 班、五年级 + B 班、幼儿园 + K1","cg.classGrade":"班级 → 年级","tm.teacherIdCardTitle":"教师证",
   "settings.actionsLabel": "设置操作",
   "tm.editTeacher": "编辑教师",
   "tm.manageAccess": "管理权限",
