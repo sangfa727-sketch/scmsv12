@@ -94,3 +94,19 @@ test('dashboard notifications and keyboard interaction stay protected', () => {
   assert.ok(html.includes('dashboard.css?v=20261001f'));
   assert.match(html, /27_dashboard\.js\?v=20261001f/);
 });
+
+
+test('dashboard scope controls stay localized and functional', () => {
+  const dashboard = read('js/27_dashboard.js');
+  const en = read('js/00a_locales_en.js');
+  const my = read('js/00b_locales_my.js');
+  assert.match(dashboard, /_dashboardMyClassSet/);
+  assert.match(dashboard, /scopedAttendance/);
+  assert.match(dashboard, /scopedHomework/);
+  assert.match(dashboard, /scopedIncidents/);
+  assert.match(dashboard, /aria-pressed/);
+  assert.match(dashboard, /dash\.wholeSchool/);
+  assert.match(dashboard, /dash\.myClassesOnly/);
+  assert.match(en, /'dash\.wholeSchool': 'Whole school'/);
+  assert.match(my, /'dash\.wholeSchool': 'ကျောင်းတစ်ကျောင်းလုံး'/);
+});
