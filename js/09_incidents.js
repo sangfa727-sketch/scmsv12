@@ -21,7 +21,7 @@ function _renderIncidentTypeChips() {
     ['Good Behaviour','Participation','Achievement','Concern','Health','Other'])];
 
   el.innerHTML = types.map(ty =>
-    `<button class="chip${ty === _incidentType ? ' active' : ''}" data-type="${esc(ty)}"
+    `<button type="button" class="chip${ty === _incidentType ? ' active' : ''}" aria-pressed="${ty === _incidentType ? 'true' : 'false'}" data-type="${esc(ty)}"
       onclick="filterIncidentType('${esc(ty)}')">${esc(tv('incType', ty))}</button>`
   ).join('');
 }
