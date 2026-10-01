@@ -54,7 +54,7 @@ function _renderIncidentList() {
     const icon  = typeIcon[i.type]     || '📋';
 
     return `
-      <div class="list-card" data-incident-id="${esc(i.id)}">
+      <div class="list-card" data-incident-id="${esc(i.id)}" data-student-id="${esc(i.student_id || '')}">
         <div class="card-row">
           <div class="incident-icon">${icon}</div>
           <div class="card-info">
