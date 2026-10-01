@@ -477,6 +477,58 @@ window.goToPage = function(pageId) {
   });
 };
 
+function _applyDashboardContext(pageId) {
+  const ctx = window.APP?.dashboardContext;
+  document.querySelectorAll('.dashboard-context-banner').forEach(el => el.remove());
+  document.querySelectorAll('.dashboard-context-highlight').forEach(el => el.classList.remove('dashboard-context-highlight'));
+  if (!ctx) return;
+
+  const allowed = {
+    attend: 'attendance',
+    students: 'student',
+    hw: 'homework',
+    incidents: 'incident'
+  };
+  if (allowed[pageId] !== ctx.type) return;
+
+  const page = document.getElementById('page-' + pageId);
+  const header = page?.querySelector('.page-header');
+  if (!page || !header) return;
+
+  const banner = document.createElement('div');
+  banner.className = 'dashboard-context-banner';
+  banner.innerHTML = '<span class="dashboard-context-dot" aria-hidden="true"></span>' +
+    '<span><strong>' + t('dash.fromDashboard') + '</strong><small>' + esc(ctx.label || ctx.className || '') + '</small></span>' +
+    '<button type="button" aria-label="' + esc(t('common.close')) + '" title="' + esc(t('common.close')) + '" onclick="clearDashboardContext()">×</button>';
+  header.appendChild(banner);
+
+  requestAnimationFrame(() => {
+    let target = null;
+    if (ctx.type === 'attendance' && ctx.className) {
+      target = page.querySelector('#attendClassChips [data-class="' + CSS.escape(ctx.className) + '"]');
+      if (target) target.click();
+    } else if (ctx.type === 'student' && ctx.studentId) {
+      target = page.querySelector('.stu-card[data-student-id="' + CSS.escape(ctx.studentId) + '"]');
+    } else if (ctx.type === 'homework') {
+      target = ctx.id ? page.querySelector('.list-card[data-hw-id="' + CSS.escape(ctx.id) + '"]') : null;
+      if (!target && ctx.className) target = [...page.querySelectorAll('#hwList .list-card')].find(el => el.dataset.class === ctx.className && (!ctx.date || el.dataset.date === ctx.date));
+    } else if (ctx.type === 'incident') {
+      target = ctx.incidentId ? page.querySelector('.list-card[data-incident-id="' + CSS.escape(ctx.incidentId) + '"]') : null;
+      if (!target && ctx.studentId) target = [...page.querySelectorAll('#incidentList .list-card')].find(el => el.dataset.studentId === ctx.studentId);
+    }
+    if (target) {
+      target.classList.add('dashboard-context-highlight');
+      target.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    }
+  });
+}
+
+window.clearDashboardContext = function() {
+  delete window.APP.dashboardContext;
+  document.querySelectorAll('.dashboard-context-banner').forEach(el => el.remove());
+  document.querySelectorAll('.dashboard-context-highlight').forEach(el => el.classList.remove('dashboard-context-highlight'));
+};
+
 // ─── LANGUAGE SWITCH → re-render JS-generated text ──────────────────────────
 // Static [data-i18n] nodes are handled by I18N.apply(); everything built in JS
 // with t() has to be rebuilt, so re-render the landing screen / sidebar / the
