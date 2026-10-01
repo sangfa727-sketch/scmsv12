@@ -306,6 +306,25 @@ test('theme controller keeps theme state isolated and extensible', () => {
   assert.match(css, /\[data-theme="dark"\]/);
 });
 
+test('theme controls stay wired to the shared theme controller', () => {
+  const more = read('js/12_more.js');
+  const settings = read('js/15_settings.js');
+  const theme = read('js/30_theme.js');
+
+  assert.match(more, /window\.SCMSTheme\?\.current\?\(\)/);
+  assert.match(more, /window\.SCMSTheme\.set\('light'\)/);
+  assert.match(more, /window\.SCMSTheme\.set\('dark'\)/);
+  assert.match(more, /window\.refreshMoreThemeControl/);
+
+  assert.match(settings, /SCMSTheme\.set\('light'\)/);
+  assert.match(settings, /SCMSTheme\.set\('dark'\)/);
+  assert.match(settings, /window\.refreshSettingsThemeControl/);
+  assert.match(settings, /settings-theme-option/);
+
+  assert.match(theme, /window\.dispatchEvent\(new CustomEvent\('themeChanged'/);
+  assert.match(theme, /localStorage\.setItem\(KEY, value\)/);
+});
+
 test('dashboard notification labels remain localized across supported locales', () => {
   const localeFiles = [
     'js/00a_locales_en.js', 'js/00b_locales_my.js', 'js/00_locales_jp.js',
