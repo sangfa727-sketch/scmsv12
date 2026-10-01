@@ -323,3 +323,28 @@ test('dashboard notification labels remain localized across supported locales', 
     }
   }
 });
+
+
+test('dashboard notification locale placeholders stay consistent', () => {
+  const localeFiles = [
+    'js/00a_locales_en.js', 'js/00b_locales_my.js', 'js/00_locales_jp.js',
+    'js/00_locales_thai.js', 'js/00d_locales_ms.js', 'js/00e_locales_km.js', 'js/00e_locales_zh.js'
+  ];
+  const keys = [
+    'dash.newCount', 'dash.leavePendingOne', 'dash.leavePendingMany',
+    'dash.messageNotDeliveredOne', 'dash.messageNotDeliveredMany'
+  ];
+  const placeholders = (value) => [...value.matchAll(/\\{([a-zA-Z0-9_]+)\\}/g)].map(m => m[1]).sort();
+  const valueFor = (source, key) => {
+    const escaped = key.replace('.', '\\\\.')
+    const match = source.match(new RegExp("['\\\\\"]" + escaped + "['\\\\\"]\\\\s*:\\\\s*([^,\\\\n]+)"));
+    assert.ok(match, 'missing notification locale value: ' + key);
+    return match[1];
+  };
+  const baseline = Object.fromEntries(keys.map(key => [key, placeholders(valueFor(read(localeFiles[0]), key))]));
+  for (const file of localeFiles.slice(1)) {
+    for (const key of keys) {
+      assert.deepEqual(placeholders(valueFor(read(file), key)), baseline[key], file + ' placeholder mismatch for ' + key);
+    }
+  }
+});
