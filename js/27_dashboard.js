@@ -46,7 +46,7 @@ function renderDashboard() {
     _dashboardLoadedOnce = true;
     _paintDashboard(container);
   }).catch(err => {
-    container.innerHTML = emptyState('⚠️', t('dash.loadError'), err.message || String(err));
+    container.innerHTML = emptyState('⚠️', t('dash.loadFailed'), err.message || String(err));
   });
 }
 
