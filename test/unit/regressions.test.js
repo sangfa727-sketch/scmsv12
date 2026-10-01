@@ -227,3 +227,30 @@ test('parent portal event form stays fully localized', () => {
   assert.doesNotMatch(comms, /School event/);
   assert.doesNotMatch(comms, /Publish to Parent Portal/);
 });
+
+
+test('notification state stays synchronized after parent communication and leave mutations', () => {
+  const dashboard = read('js/27_dashboard.js');
+  const comms = read('js/08_comms.js');
+  const leave = read('js/28_leave_requests.js');
+  assert.match(dashboard, /API\.getLeaveRequests\(\)\.catch\(\(\) => \[\]\)/);
+  assert.match(dashboard, /API\.getParentComms\(30\)\.catch\(\(\) => \[\]\)/);
+  assert.match(dashboard, /_syncDashboardLeaveCount\(safeLeaveRequests\)/);
+  assert.match(dashboard, /_renderDashboardNotificationBell\(leavePending, queuedComms\.length\)/);
+  assert.match(comms, /refreshDashboardNotifications/);
+  assert.match(comms, /API\.sendParentComm/);
+  assert.match(comms, /API\.deleteParentComm/);
+  assert.match(leave, /API\.decideLeaveRequest/);
+  assert.match(leave, /await window\.refreshDashboardNotifications\(\)/);
+});
+
+test('i18n registration and language switching stay complete', () => {
+  const i18n = read('js/00c_i18n.js');
+  for (const code of ['en', 'my', 'th', 'jp', 'ms', 'km', 'zh']) {
+    assert.match(i18n, new RegExp("code: ['\\\"]" + code + "['\\\"]"));
+  }
+  assert.match(i18n, /storageKey: 'scms_lang'/);
+  assert.match(i18n, /document\.documentElement\.lang = this\.current/);
+  assert.match(i18n, /window\.dispatchEvent\(new CustomEvent\('languageChanged'/);
+  assert.match(i18n, /LANGUAGE_ALIASES/);
+});
