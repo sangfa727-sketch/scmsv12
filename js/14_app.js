@@ -463,6 +463,23 @@ window.goToPage = function(pageId) {
   if (pageId === 'grades' && typeof renderGrades === 'function') renderGrades();
   if (pageId === 'dashboard' && typeof renderDashboard === 'function') renderDashboard();
   if (pageId === 'leave' && typeof renderLeaveRequests === 'function') renderLeaveRequests();
+
+  // Dashboard → detail handoff: show the selected item after the destination
+  // page has been activated/rendered. A couple of frame retries cover pages
+  // whose list renderer paints asynchronously after navigation.
+  if (typeof _applyDashboardContext === 'function') {
+    _applyDashboardContext(pageId);
+    let contextRetries = 0;
+    const retryDashboardContext = () => {
+      if (window.APP?.currentPage !== pageId || !window.APP?.dashboardContext) return;
+      const target = document.querySelector('.dashboard-context-highlight');
+      if (target || contextRetries >= 4) return;
+      contextRetries += 1;
+      window.requestAnimationFrame(retryDashboardContext);
+      _applyDashboardContext(pageId);
+    };
+    window.requestAnimationFrame(retryDashboardContext);
+  }
   
   // Update sidebar highlight
   document.querySelectorAll('.sidebar-item').forEach(b =>
