@@ -414,3 +414,22 @@ test('communication and leave filters preserve accessible selected state', () =>
   assert.match(leave, /id="leaveFilterChips" role="group"/);
   assert.match(leave, /data-filter="\$\{s\}" aria-pressed="\$\{_leaveRequestFilter === s \? 'true' : 'false'\}"/);
 });
+
+test('filter controls preserve native button semantics and selected state', () => {
+  const files = [
+    ['js/04_students.js', /<button type="button" class="chip' + (value === _stuStatus/, /aria-pressed="'/],
+    ['js/06_daily.js', /<button type="button" class="chip\$\{c === _dailyClass/, /aria-pressed="\$\{c === _dailyClass/],
+    ['js/07_homework.js', /<button type="button" class="chip\$\{c === _hwClass/, /aria-pressed="\$\{c === _hwClass/],
+    ['js/08_comms.js', /<button type="button" class="chip\$\{ty === _commsType/, /aria-pressed="\$\{ty === _commsType/],
+    ['js/09_incidents.js', /<button type="button" class="chip\$\{ty === _incidentType/, /aria-pressed="\$\{ty === _incidentType/],
+    ['js/11_summary.js', /<button type="button" class="chip\$\{c === _sumClass/, /aria-pressed="\$\{c === _sumClass/],
+    ['js/20_grades.js', /<button type="button" class="chip\$\{c === _gradesClass/, /aria-pressed="\$\{c === _gradesClass/],
+    ['js/21_billing.js', /<button type="button" class="chip\$\{c === _billingClass/, /<button type="button" class="chip\$\{s === _billingStatus/],
+    ['js/22_admissions.js', /<button type="button" class="chip\$\{c === _admClass/, /<button type="button" class="chip\$\{s === _admStatus/],
+  ];
+  for (const [path, first, second] of files) {
+    const source = read(path);
+    assert.match(source, first);
+    assert.match(source, second);
+  }
+});
