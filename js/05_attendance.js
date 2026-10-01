@@ -306,6 +306,7 @@ window.saveAttendNote = async function(studentId) {
 
     closeModal();
     _renderAttendGrid(_attendClass);
+    if (typeof window.refreshDashboardAttendance === 'function') void window.refreshDashboardAttendance();
     showToast(t(txt ? 'att.noteSaved' : 'att.noteRemoved'));
   } catch (e) {
     showToast(t('att.saveFailed', { err: e.message || t('common.networkError') }));
