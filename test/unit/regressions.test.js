@@ -296,7 +296,8 @@ test('theme controller keeps theme state isolated and extensible', () => {
   const css = read('style.css');
   assert.match(theme, /const KEY = 'scms_theme'/);
   assert.match(theme, /const THEMES = new Set\(\['light', 'dark'\]\)/);
-  assert.match(theme, /normalize\(theme\)/);
+  assert.match(theme, /function normalize\(value\)/);
+  assert.match(theme, /normalize\(scheme\)/);
   assert.match(theme, /document\.documentElement\.setAttribute\('data-theme', value\)/);
   assert.match(theme, /document\.documentElement\.style\.colorScheme = value/);
   assert.match(theme, /window\.dispatchEvent\(new CustomEvent\('themeChanged'/);
@@ -316,7 +317,7 @@ test('dashboard notification labels remain localized across supported locales', 
     'dash.leaveReview', 'dash.messageNotDeliveredOne', 'dash.messageNotDeliveredMany',
     'dash.bannerText', 'dash.noNewNotifications'
   ]) {
-    assert.ok(dashboard.includes(`t('${key}'`), 'dashboard missing notification key: ' + key);
+    assert.match(dashboard, new RegExp(key.replace('.', '\\\\.') + '\\s*[\\\'\\\"]'), 'dashboard missing notification key: ' + key);
     for (const file of localeFiles) {
       assert.match(read(file), new RegExp("['\\\"]" + key.replace('.', '\\\\.') + "['\\\"]\\s*:"), file + ' missing ' + key);
     }
