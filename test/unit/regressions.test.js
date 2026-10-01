@@ -189,7 +189,7 @@ test('all supported locales keep the English translation key contract', () => {
     const entries = new Map();
     const re = /'([^'\\]*(?:\\.[^'\\]*)*)'\\s*:\\s*'((?:\\.|[^'\\])*)'/g;
     let match;
-    while ((match = re.exec(source))) entries.set(match[1], match[2]);
+    while ((match = re.exec(source))) entries.set(match[2], match[4]);
     return entries;
   };
   const english = parseLocale(read(localeFiles[0]));
