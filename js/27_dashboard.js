@@ -260,7 +260,7 @@ function _paintDashboard(container) {
     ${recentHomework.length ? `
     <div class="more-section-title">${t('dash.homeworkLogged2d')}</div>
     ${recentHomework.slice(0, 8).map(h => `
-      <div class="list-card dashboard-link-card dashboard-homework-card" onclick="window.goToPage('hw')" role="button" tabindex="0">
+      <div class="list-card dashboard-link-card dashboard-homework-card" data-hw-id="${esc(h.id || '')}" data-class="${esc(h.class || '')}" data-date="${esc(h.date || '')}" onclick="_dashboardOpenHomework(this.dataset.hwId, this.dataset.class, this.dataset.date, this.querySelector('.card-name')?.textContent || '')" role="button" tabindex="0">
         <div class="card-row">
           <div class="card-avatar">📝</div>
           <div class="card-info">
@@ -281,7 +281,7 @@ function _paintDashboard(container) {
     ${attentionList.length ? `
     <div class="more-section-title">${t('dash.studentsAttention')}</div>
     ${attentionList.map(([studentId, v]) => `
-      <div class="list-card dashboard-link-card dashboard-attention-card" data-student-id="${esc(studentId)}" onclick="_dashboardOpenStudent(this.dataset.studentId)" role="button" tabindex="0">
+      <div class="list-card dashboard-link-card dashboard-attention-card" data-student-id="${esc(studentId)}" onclick="_dashboardOpenStudent(this.dataset.studentId, this.querySelector('.card-name')?.textContent || '')" role="button" tabindex="0">
         <div class="card-row">
           <div class="card-avatar">${avatarContent({ name_en: v.name })}</div>
           <div class="card-info">
@@ -294,7 +294,7 @@ function _paintDashboard(container) {
     ${recentIncidents.length ? `
     <div class="more-section-title">${t('dash.recentIncidentsTitle')}</div>
     ${recentIncidents.map(i => `
-      <div class="list-card dashboard-link-card dashboard-incident-card" data-student-id="${esc(i.student_id || '')}" onclick="window._dashboardOpenIncidentStudent(this.dataset.studentId)" role="button" tabindex="0">
+      <div class="list-card dashboard-link-card dashboard-incident-card" data-student-id="${esc(i.student_id || '')}" data-incident-id="${esc(i.id || '')}" onclick="window._dashboardOpenIncidentStudent(this.dataset.studentId, this.dataset.incidentId, this.querySelector('.card-name')?.textContent || '')" role="button" tabindex="0">
         <div class="card-row">
           <div class="card-avatar" style="background:${_classColor(i.class)}">${avatarContent({ name_en: i.name_en })}</div>
           <div class="card-info">
@@ -312,7 +312,12 @@ function _paintDashboard(container) {
 // global scope, no re-declaration here (they're identical logic;
 // duplicating it would just be two places to keep in sync).
 
+function _dashboardSetContext(ctx) {
+  window.APP.dashboardContext = { ...ctx, createdAt: Date.now() };
+}
+
 function _dashboardGoToAttendance(className) {
+  _dashboardSetContext({ type: 'attendance', className, label: className });
   window.goToPage('attend');
   if (className && typeof window.selectAttendClass === 'function') {
     window.selectAttendClass(className);
@@ -321,12 +326,19 @@ function _dashboardGoToAttendance(className) {
   }
 }
 
-window._dashboardOpenIncidentStudent = function(studentId) {
+window._dashboardOpenHomework = function(id, cls, date, label) {
+  _dashboardSetContext({ type: 'homework', id, className: cls || '', date: date || '', label: label || cls || '' });
+  window.goToPage('hw');
+};
+
+window._dashboardOpenIncidentStudent = function(studentId, incidentId, label) {
+  _dashboardSetContext({ type: 'incident', studentId: studentId || '', incidentId: incidentId || '', label: label || '' });
   window.APP.dashboardIncidentStudentId = studentId || '';
   window.goToPage('incidents');
 };
 
-window._dashboardOpenStudent = function(studentId) {
+window._dashboardOpenStudent = function(studentId, label) {
+  _dashboardSetContext({ type: 'student', studentId: studentId || '', label: label || '' });
   window.APP.dashboardStudentId = studentId || '';
   window.goToPage('students');
 };
