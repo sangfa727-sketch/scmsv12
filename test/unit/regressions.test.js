@@ -114,11 +114,11 @@ test('dashboard scope controls stay localized and functional', () => {
 
 test('teacher access localization covers all supported UI languages', () => {
   const access = read('js/29_teacher_access.js');
-  assert.match(access, /\['en','my','th','jp','zh','km','ms'\]/);
-  for (const token of ['ms: {', 'zh: {', "ms:{'dashboard.view'", "ms:{dashboard:", "ms:{class_teacher:"]) {
-    assert.match(access, new RegExp(token.replace(/[{}]/g, '\\test('password prompt remains fully localized', () => {')));
+  assert.ok(access.includes("['en','my','th','jp','zh','km','ms']"));
+  for (const token of ['ms: {', 'zh: {', "ms:{'dashboard.view'", 'ms:{dashboard:', 'ms:{class_teacher:']) {
+    assert.ok(access.includes(token), `missing teacher access locale map: ${token}`);
   }
-  assert.match(access, /ms:'Guru'/);
+  assert.ok(access.includes("ms:'Guru'"));
 });
 
 test('password prompt remains fully localized', () => {
