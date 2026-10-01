@@ -100,7 +100,21 @@
     'att.auditTitle':'出欠監査','att.auditSubtitle':'この学校の出欠保存履歴は管理者のみ閲覧できます。','att.auditLoading':'監査履歴を読み込み中…',
     'att.auditEmpty':'出欠監査の記録はありません。','att.auditLoadFailed':'監査履歴を読み込めませんでした。','att.correctionMode':'修正モード：選択した日付を確認して保存してください。',
     'comms.portalScheduleTitle':'保護者ポータルの予定','comms.portalScheduleSub':'学校の面談、告知、イベントを保護者ポータルに表示します。',
-    'comms.portalTitlePh':'例 — 保護者・教師面談','comms.portalDescPh':'保護者に知らせる情報','comms.portalRequired':'タイトルと開始時刻を入力してください。','comms.portalPublished':'保護者ポータルに公開しました。'
+    'comms.portalTitlePh':'例 — 保護者・教師面談','comms.portalDescPh':'保護者に知らせる情報',    'comms.portalEventType':'イベント種別',
+    'comms.portalEventMeeting':'保護者面談',
+    'comms.portalEventAnnouncement':'お知らせ',
+    'comms.portalEventSchool':'学校行事',
+    'comms.portalEventHoliday':'休校日',
+    'comms.portalTitle':'タイトル',
+    'comms.portalClass':'クラス',
+    'comms.portalWholeSchool':'全校',
+    'comms.portalStart':'開始',
+    'comms.portalEnd':'終了',
+    'comms.portalOptional':'任意',
+    'comms.portalDescription':'説明',
+    'comms.portalPublish':'保護者ポータルに公開',
+    'comms.portalCancel':'キャンセル',
+'comms.portalRequired':'タイトルと開始時刻を入力してください。','comms.portalPublished':'保護者ポータルに公開しました。'
   });
   Object.assign(overrides, {});
   Object.assign(overrides, {'err.sessionVerify':'保存されたセッションを確認できませんでした。','err.retryHint':'「再試行」をタップして、もう一度お試しください。','err.serverUnreachable':'SCMSサーバーに接続できませんでした。','err.technicalDetails':'技術的な詳細（サポートに問い合わせる際はスクリーンショットを添付してください）：','err.likelyCause':'考えられる原因：n8nワークフローがActiveではない、URLが正しくない、またはCORSがリクエストをブロックしています。'});
