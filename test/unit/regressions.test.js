@@ -234,7 +234,7 @@ test('notification state stays synchronized after parent communication and leave
   const comms = read('js/08_comms.js');
   const leave = read('js/28_leave_requests.js');
   assert.match(dashboard, /API\.getLeaveRequests\(\)\.catch\(\(\) => \[\]\)/);
-  assert.match(dashboard, /API\.getParentComms\(30\)\.catch\(\(\) => \[\]\)/);
+  assert.match(dashboard, /API\.getParentComms\(14\)\.catch\(\(\) => \[\]\)/);
   assert.match(dashboard, /_syncDashboardLeaveCount\(safeLeaveRequests\)/);
   assert.match(dashboard, /_renderDashboardNotificationBell\(leavePending, queuedComms\.length\)/);
   assert.match(comms, /refreshDashboardNotifications/);
