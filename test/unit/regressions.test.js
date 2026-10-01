@@ -466,3 +466,11 @@ test('sidebar navigation preserves active and native button accessibility state'
   assert.ok(sidebar.includes('<button type="button" class="sidebar-item" onclick="sidebarGo(\'more\')">'));
   assert.ok(sidebar.includes('<button type="button" class="sidebar-item sidebar-signout"'));
 });
+
+test('dashboard load failure stays on a localized error key', () => {
+  const dashboard = read('js/27_dashboard.js');
+  const en = read('js/00a_locales_en.js');
+  assert.match(dashboard, /emptyState\\('⚠️', t\\('dash\\.loadFailed'\\)/);
+  assert.match(en, /['\"]dash\\.loadFailed['\"]\\s*:/);
+  assert.doesNotMatch(dashboard, /t\\('dash\\.loadError'\\)/);
+});
