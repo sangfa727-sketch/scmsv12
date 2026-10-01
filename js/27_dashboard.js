@@ -60,7 +60,7 @@ window.refreshDashboardNotifications = async function() {
   try {
     const [leaveRequests, comms] = await Promise.all([
       API.getLeaveRequests().catch(() => []),
-      API.getParentComms(30).catch(() => []),
+      API.getParentComms(14).catch(() => []),
     ]);
     const safeLeaveRequests = Array.isArray(leaveRequests) ? leaveRequests : [];
     const safeComms = Array.isArray(comms) ? comms : [];
