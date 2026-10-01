@@ -185,18 +185,28 @@ test('all supported locales keep the English translation key contract', () => {
     'js/00e_locales_km.js',
     'js/00e_locales_zh.js',
   ];
-  const keySet = (source) => {
-    const keys = new Set();
-    const re = /(?:'([^']+)'|"([^"]+)")\\s*:/g;
+  const parseLocale = (source) => {
+    const entries = new Map();
+    const re = /'([^'\\]*(?:\\.[^'\\]*)*)'\\s*:\\s*'((?:\\.|[^'\\])*)'/g;
     let match;
-    while ((match = re.exec(source))) keys.add(match[1] || match[2]);
-    return keys;
+    while ((match = re.exec(source))) entries.set(match[1], match[2]);
+    return entries;
   };
-  const english = keySet(read(localeFiles[0]));
+  const english = parseLocale(read(localeFiles[0]));
+  assert.equal(english.size, 1408, 'English locale key count changed unexpectedly');
   for (const file of localeFiles.slice(1)) {
-    const locale = keySet(read(file));
-    for (const key of english) {
-      assert.ok(locale.has(key), `${file} is missing locale key: ${key}`);
+    const source = read(file);
+    const rawKeys = [...source.matchAll(/'([^'\\]*(?:\\.[^'\\]*)*)'\\s*:/g)].map(m => m[1]);
+    const uniqueKeys = new Set(rawKeys);
+    assert.equal(rawKeys.length, uniqueKeys.size, file + ' contains duplicate locale keys');
+    const locale = parseLocale(source);
+    assert.equal(locale.size, english.size, file + ' locale key count differs from English');
+    for (const key of english.keys()) {
+      assert.ok(locale.has(key), file + ' is missing locale key: ' + key);
+      const placeholders = (value) => [...value.matchAll(/\\{[a-zA-Z0-9_]+\\}/g)].map(m => m[0]).sort().join('|');
+      const htmlTags = (value) => [...value.matchAll(/<\\/?[a-zA-Z][^>]*>/g)].map(m => m[0]).sort().join('|');
+      assert.equal(placeholders(locale.get(key)), placeholders(english.get(key)), file + ' placeholder mismatch: ' + key);
+      assert.equal(htmlTags(locale.get(key)), htmlTags(english.get(key)), file + ' HTML tag mismatch: ' + key);
     }
   }
 });
