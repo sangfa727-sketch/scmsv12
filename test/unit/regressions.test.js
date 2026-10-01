@@ -100,7 +100,7 @@ test('dashboard notifications and keyboard interaction stay protected', () => {
   assert.match(css, /dashboard-notification-badge/);
   assert.match(css, /dashboard-notification-item:focus-visible/);
   assert.ok(html.includes('dashboard.css?v=20261001g'));
-  assert.match(html, /27_dashboard\.js\?v=20261001f/);
+  assert.match(html, /27_dashboard\.js\?v=20261001g/);
 });
 
 
