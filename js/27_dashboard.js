@@ -184,7 +184,7 @@ function _paintDashboard(container) {
   const leavePending     = d.leaveRequests.filter(r => r.status === 'Pending').length;
 
   const absenceCounts = {};
-  for (const a of scopedAttendance {
+  for (const a of scopedAttendance) {
     if (a.status !== 'P') {
       absenceCounts[a.student_id] = absenceCounts[a.student_id] || { name: a.name_en, count: 0 };
       absenceCounts[a.student_id].count++;
