@@ -409,7 +409,7 @@ window.saveStudentParent = async function(studentId) {
   if (btn) { btn.disabled = true; btn.textContent = t("students.form.savingParent"); }
   try {
     const res = await API.updateStudentParent(studentId, { parent_name:name, parent_phone:phone, parent_phone2:phone2, parent_email:email });
-    if (!res?.ok) throw new Error(res?.message || res?.error || "Save failed");
+    if (!res?.ok) throw new Error(res?.message || res?.error || t("common.saveFailed"));
     const idx = window.APP.students.findIndex(x => x.student_id === studentId);
     if (idx >= 0) Object.assign(window.APP.students[idx], res);
     closeModal(); renderStudents(); openStudentDetail(studentId);
