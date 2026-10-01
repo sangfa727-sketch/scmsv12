@@ -427,6 +427,20 @@ window.goToPage = function(pageId) {
     return;
   }
 
+  // A Dashboard handoff is valid only on its intended destination page.
+  // If the user navigates somewhere else first, discard the stale highlight
+  // so it cannot reappear when they later return.
+  const dashboardContextPages = {
+    attend: 'attendance',
+    students: 'student',
+    hw: 'homework',
+    incidents: 'incident'
+  };
+  if (window.APP?.dashboardContext &&
+      dashboardContextPages[pageId] !== window.APP.dashboardContext.type) {
+    window.clearDashboardContext?.();
+  }
+
   // Stop chat polling if leaving chat
   if (currentPage === 'chat' && pageId !== 'chat' && typeof stopChatPolling === 'function') {
     stopChatPolling();
@@ -545,8 +559,10 @@ if (!window._dashboardContextInteractionBound) {
   window._dashboardContextInteractionBound = true;
   const dismissDashboardContextOnInteraction = (event) => {
     if (!event.isTrusted || !window.APP?.dashboardContext) return;
-    const page = event.target?.closest?.('.page.active');
-    if (!page) return;
+    // The handoff is intentionally dismissed by the first real user
+    // interaction anywhere after the destination page is reached. Do not
+    // require the event target to be inside .page.active: sidebar/tab
+    // controls live outside the page container and must also dismiss it.
     window.clearDashboardContext();
   };
   document.addEventListener('pointerdown', dismissDashboardContextOnInteraction, true);
