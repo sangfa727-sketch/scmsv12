@@ -104,6 +104,24 @@ test('dashboard notifications and keyboard interaction stay protected', () => {
 });
 
 
+test('language changes repaint active dynamic UI', () => {
+  const app = read('js/14_app.js');
+  assert.match(app, /_i18nPageRefreshBound/);
+  assert.match(app, /addEventListener\('languageChanged'/);
+  for (const token of [
+    'dashboard: window.renderDashboard',
+    'students: window.renderStudents',
+    'attend: window.renderAttendance',
+    'parents: window.renderComms',
+    'incidents: window.renderIncidents',
+    'leave: window.renderLeaveRequests',
+    'more: window.renderMore'
+  ]) assert.ok(app.includes(token), 'missing language refresh renderer: ' + token);
+  assert.match(app, /window\.renderSidebar/);
+  assert.match(app, /window\._updateFabForPage/);
+});
+
+
 test('dashboard-to-detail context handoff remains wired', () => {
   const dashboard = read('js/27_dashboard.js');
   const app = read('js/14_app.js');
