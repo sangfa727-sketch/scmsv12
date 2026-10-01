@@ -162,7 +162,7 @@ window.I18N_MS = {
   "dash.myClassesOnly": "Kelas saya sahaja",
   "dash.wholeSchool": "Seluruh sekolah",
   "dash.dashboardScope": "Skop papan pemuka",
-  "dash.noAssignedClasses": "Tiada kelas ditugaskan kepada akaun guru anda."
+  "dash.noAssignedClasses": "Tiada kelas ditugaskan kepada akaun guru anda.",
   "dash.todaysSchedule": "Jadual Hari Ini",
   "dash.noClassesToday": "Tiada kelas dijadualkan hari ini.",
   "dash.quickActions": "Tindakan Pantas",
