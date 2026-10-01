@@ -85,4 +85,11 @@ test('dashboard notifications and keyboard interaction stay protected', () => {
   assert.match(dashboard, /role="button"/);
   assert.match(dashboard, /tabindex="0"/);
   assert.match(css, /dashboard-link-card:focus-visible/);
+  assert.match(css, /dashboard-notification-wrap/);
+  assert.match(css, /dashboard-notification-btn/);
+  assert.match(css, /dashboard-notification-menu/);
+  assert.match(css, /dashboard-notification-badge/);
+  assert.match(css, /dashboard-notification-item:focus-visible/);
+  assert.ok(html.includes('dashboard.css?v=20261001f'));
+  assert.match(html, /27_dashboard\.js\?v=20261001f/);
 });
