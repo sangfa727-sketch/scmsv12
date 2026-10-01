@@ -289,3 +289,36 @@ test('student detail actions and parent contact labels stay localized', () => {
   assert.doesNotMatch(students, />Send parent link<\/button>/);
   assert.doesNotMatch(students, />Save parent details<\/button>/);
 });
+
+
+test('theme controller keeps theme state isolated and extensible', () => {
+  const theme = read('js/30_theme.js');
+  const css = read('style.css');
+  assert.match(theme, /const KEY = 'scms_theme'/);
+  assert.match(theme, /const THEMES = new Set\(\['light', 'dark'\]\)/);
+  assert.match(theme, /normalize\(theme\)/);
+  assert.match(theme, /document\.documentElement\.setAttribute\('data-theme', value\)/);
+  assert.match(theme, /document\.documentElement\.style\.colorScheme = value/);
+  assert.match(theme, /window\.dispatchEvent\(new CustomEvent\('themeChanged'/);
+  assert.match(theme, /syncExternal\(scheme\)/);
+  assert.match(theme, /hasUserPreference/);
+  assert.match(css, /\[data-theme="dark"\]/);
+});
+
+test('dashboard notification labels remain localized across supported locales', () => {
+  const localeFiles = [
+    'js/00a_locales_en.js', 'js/00b_locales_my.js', 'js/00_locales_jp.js',
+    'js/00_locales_thai.js', 'js/00d_locales_ms.js', 'js/00e_locales_km.js', 'js/00e_locales_zh.js'
+  ];
+  const dashboard = read('js/27_dashboard.js');
+  for (const key of [
+    'dash.notifications', 'dash.newCount', 'dash.leavePendingOne', 'dash.leavePendingMany',
+    'dash.leaveReview', 'dash.messageNotDeliveredOne', 'dash.messageNotDeliveredMany',
+    'dash.bannerText', 'dash.noNewNotifications'
+  ]) {
+    assert.ok(dashboard.includes(`t('${key}'`), 'dashboard missing notification key: ' + key);
+    for (const file of localeFiles) {
+      assert.match(read(file), new RegExp("['\\\"]" + key.replace('.', '\\\\.') + "['\\\"]\\s*:"), file + ' missing ' + key);
+    }
+  }
+});
