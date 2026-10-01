@@ -84,21 +84,22 @@ function renderSidebar() {
       ${items.map(it => {
         const badgeCount = it.id === 'leave' ? (window.APP.pendingLeaveCount || 0) : 0;
         return `
-        <button class="sidebar-item ${window.APP.currentPage === it.id ? 'active' : ''}"
-          data-page="${esc(it.id)}" onclick="sidebarGo('${esc(it.id)}')">
+        <button type="button" class="sidebar-item ${window.APP.currentPage === it.id ? 'active' : ''}"
+          data-page="${esc(it.id)}" aria-current="${window.APP.currentPage === it.id ? 'page' : 'false'}"
+          onclick="sidebarGo('${esc(it.id)}')">
           <span class="sidebar-icon">${it.icon}</span>
           <span class="sidebar-label">${esc(t(it.key))}</span>
-          ${badgeCount ? `<span class="sidebar-badge">${badgeCount > 99 ? '99+' : badgeCount}</span>` : ''}
+          ${badgeCount ? `<span class="sidebar-badge" aria-label="${badgeCount}">${badgeCount > 99 ? '99+' : badgeCount}</span>` : ''}
         </button>`;
       }).join('')}
     </nav>
 
     <div class="sidebar-footer">
-      <button class="sidebar-item" onclick="sidebarGo('more')">
+      <button type="button" class="sidebar-item" onclick="sidebarGo('more')">
         <span class="sidebar-icon">⚙️</span>
         <span class="sidebar-label">${t('sb.settings')}</span>
       </button>
-      <button class="sidebar-item sidebar-signout" onclick="closeSidebar(); confirmSignOut()">
+      <button type="button" class="sidebar-item sidebar-signout" onclick="closeSidebar(); confirmSignOut()">
         <span class="sidebar-icon">🚪</span>
         <span class="sidebar-label">${t('sb.signout')}</span>
       </button>
