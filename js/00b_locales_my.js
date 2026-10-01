@@ -188,6 +188,9 @@ window.I18N_MY = {
   'dash.recentIncidents': 'မကြာသေးမီ အဖြစ်အပျက်များ',
   'dash.messagesQueued': 'မပို့ရသေးသော စာများ',
   'dash.myClassesOnly': 'ကျွန်ုပ်၏ အတန်းများသာ',
+  'dash.wholeSchool': 'ကျောင်းတစ်ကျောင်းလုံး',
+  'dash.dashboardScope': 'ဒက်ရှ်ဘုတ် ကြည့်ရှုမှု',
+  'dash.noAssignedClasses': 'သင့် Teacher Account တွင် သတ်မှတ်ထားသော အတန်း မရှိပါ။'
   'dash.todaysSchedule': 'ယနေ့ အချိန်ဇယား',
   'dash.noClassesToday': 'ယနေ့ အတန်း မရှိပါ။',
   'dash.quickActions': 'အမြန်လုပ်ဆောင်ချက်များ',
