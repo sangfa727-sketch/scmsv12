@@ -188,6 +188,9 @@ window.I18N_EN = {
   'dash.recentIncidents': 'Recent incidents',
   'dash.messagesQueued': 'Messages queued (not delivered)',
   'dash.myClassesOnly': 'My classes only',
+  'dash.wholeSchool': 'Whole school',
+  'dash.dashboardScope': 'Dashboard scope',
+  'dash.noAssignedClasses': 'No classes are assigned to your teacher account.'
   'dash.todaysSchedule': "Today's Schedule",
   'dash.noClassesToday': 'No classes scheduled today.',
   'dash.quickActions': 'Quick Actions',
