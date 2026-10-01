@@ -71,6 +71,19 @@ test('dashboard summary cards and incident entry points stay protected', () => {
 });
 
 
+test('dashboard quick action buttons keep native button semantics', () => {
+  const dashboard = read('js/27_dashboard.js');
+  for (const token of [
+    '<button type="button" onclick="window.goToPage(\'attend\')">',
+    '<button type="button" onclick="window.goToPage(\'hw\')">',
+    '<button type="button" onclick="window.goToPage(\'parents\')">',
+    '<button type="button" onclick="window.goToPage(\'incidents\')">',
+  ]) {
+    assert.ok(dashboard.includes(token), 'missing dashboard action button contract: ' + token);
+  }
+});
+
+
 test('dashboard notifications and keyboard interaction stay protected', () => {
   const dashboard = read('js/27_dashboard.js');
   const css = read('dashboard.css');
