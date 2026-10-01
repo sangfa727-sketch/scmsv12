@@ -56,11 +56,11 @@ function _renderBillingFilters() {
   if (!clsEl || !statusEl || !termEl) return;
 
   clsEl.innerHTML = classes.map(c =>
-    `<button class="chip${c === _billingClass ? ' active' : ''}" data-value="${esc(c)}" onclick="selectBillingClass('${esc(c)}')">${esc(c === 'All' ? t('common.all') : c)}</button>`
+    `<button type="button" class="chip${c === _billingClass ? ' active' : ''}" aria-pressed="${c === _billingClass ? 'true' : 'false'}" data-value="${esc(c)}" onclick="selectBillingClass('${esc(c)}')">${esc(c === 'All' ? t('common.all') : c)}</button>`
   ).join('');
 
   statusEl.innerHTML = BILLING_STATUSES.map(s =>
-    `<button class="chip${s === _billingStatus ? ' active' : ''}" data-value="${esc(s)}" onclick="selectBillingStatus('${esc(s)}')">${esc(tv('billStatus', s))}</button>`
+    `<button type="button" class="chip${s === _billingStatus ? ' active' : ''}" aria-pressed="${s === _billingStatus ? 'true' : 'false'}" data-value="${esc(s)}" onclick="selectBillingStatus('${esc(s)}')">${esc(tv('billStatus', s))}</button>`
   ).join('');
 
   termEl.innerHTML = _billingTerms.length
