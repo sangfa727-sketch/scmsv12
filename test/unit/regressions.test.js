@@ -347,3 +347,39 @@ test('dashboard notification locale placeholders stay consistent', () => {
     }
   }
 });
+
+
+test('notification data flow keeps API transport contracts aligned', () => {
+  const api = read('js/02E_api_academics.js');
+  const commsApi = read('js/02H_api_communication.js');
+  const dashboard = read('js/27_dashboard.js');
+  const comms = read('js/08_comms.js');
+  const leave = read('js/28_leave_requests.js');
+
+  assert.match(api, /async getLeaveRequests\(status = null\)/);
+  assert.match(api, /rpc_get_leave_requests/);
+  assert.match(api, /p_status: status/);
+  assert.match(api, /twaPost\('get_leave_requests', \{ status \}\)/);
+  assert.match(api, /async decideLeaveRequest\(id, decision, teacherNote = null\)/);
+  assert.match(api, /rpc_decide_leave_request/);
+  assert.match(api, /p_decision: decision/);
+  assert.match(api, /twaPost\('decide_leave_request'/);
+
+  assert.match(commsApi, /async sendParentComm\(data\)/);
+  assert.match(commsApi, /rpc_send_parent_comm/);
+  assert.match(commsApi, /twaPost\('send_parent_comm'/);
+  assert.match(commsApi, /async deleteParentComm\(id\)/);
+  assert.match(commsApi, /rpc_delete_parent_comm/);
+  assert.match(commsApi, /twaPost\('delete_parent_comm'/);
+  assert.match(commsApi, /async getParentComms\(daysBack = 30\)/);
+  assert.match(commsApi, /rpc_get_parent_comms/);
+  assert.match(commsApi, /twaPost\('get_parent_comms'/);
+
+  assert.match(dashboard, /API\.getLeaveRequests\(\)\.catch\(\(\) => \[\]\)/);
+  assert.match(dashboard, /API\.getParentComms\(14\)\.catch\(\(\) => \[\]\)/);
+  assert.match(comms, /await API\.sendParentComm/);
+  assert.match(comms, /API\.deleteParentComm/);
+  assert.match(leave, /await API\.decideLeaveRequest/);
+  assert.match(leave, /await renderLeaveRequests\(\)/);
+  assert.match(leave, /await window\.refreshDashboardNotifications\(\)/);
+});
