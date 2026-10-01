@@ -1449,4 +1449,7 @@ window.I18N_MY = {
   'teacher.qrUnavailable': 'QR Code မရနိုင်ပါ',
   'password.hide': 'Password ဖျောက်ရန်',
   'password.show': 'Password ပြရန်',
+  'password.newLabel': 'Password အသစ်',
+  'password.newPlaceholder': 'အနည်းဆုံး ၆ လုံး',
+  'password.reset': 'Password ပြန်သတ်မှတ်မည်',
 };
