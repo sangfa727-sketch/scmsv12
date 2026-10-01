@@ -336,8 +336,7 @@ test('dashboard notification locale placeholders stay consistent', () => {
   ];
   const placeholders = (value) => [...value.matchAll(/\\{([a-zA-Z0-9_]+)\\}/g)].map(m => m[1]).sort();
   const valueFor = (source, key) => {
-    const escaped = key.replace(/[.*+?^${}()|[\\]\\\\]/g, '\\\\$&');
-    const match = source.match(new RegExp("['\\\"]" + escaped + "['\\\"]\\\\s*:\\\\s*([^,\\\\n]+)"));
+    const match = source.match(new RegExp("['\\\"]" + key.replace(/[.*+?^${}()|[\\]\\\\]/g, '\\\\$&') + "['\\\"]\\s*:\\s*([^,\\n]+)"));
     assert.ok(match, 'missing notification locale value: ' + key);
     return match[1];
   };
