@@ -261,7 +261,7 @@ function _renderStudentList() {
     const bdaySoon = bdayDays !== null && bdayDays <= 7;
 
     return `
-      <div class="list-card stu-card${_idSelectMode ? ' id-select-mode' : ''}" onclick="${_idSelectMode ? `_idToggleOne('${esc(s.student_id)}')` : `openStudentDetail('${esc(s.student_id)}')`}">
+      <div class="list-card stu-card${_idSelectMode ? ' id-select-mode' : ''}" data-student-id="${esc(s.student_id)}" onclick="${_idSelectMode ? `_idToggleOne('${esc(s.student_id)}')` : `openStudentDetail('${esc(s.student_id)}')`}">
         ${_idSelectMode ? `<input type="checkbox" class="id-select-checkbox" ${_idSelected.has(s.student_id) ? 'checked' : ''} onclick="event.stopPropagation();_idToggleOne('${esc(s.student_id)}')">` : ''}
         <div class="card-row">
           <div class="card-avatar" style="background:${homeHex}">${avatarContent(s)}</div>
