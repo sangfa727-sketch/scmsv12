@@ -70,7 +70,7 @@ function _renderGradesFilters(classes) {
     </div>`;
 
   clsEl.innerHTML = classes.length
-    ? classes.map(c => `<button class="chip${c === _gradesClass ? ' active' : ''}" onclick="selectGradesClass('${esc(c)}')">${esc(c)}</button>`).join('')
+    ? classes.map(c => `<button type="button" class="chip${c === _gradesClass ? ' active' : ''}" aria-pressed="${c === _gradesClass ? 'true' : 'false'}" onclick="selectGradesClass('${esc(c)}')">${esc(c)}</button>`).join('')
     : `<span class="chip-empty">${t('daily.addStudentsFirst')}</span>`;
 }
 
