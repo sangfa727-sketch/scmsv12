@@ -100,7 +100,21 @@
     'att.auditTitle':'ประวัติการตรวจสอบการเข้าเรียน','att.auditSubtitle':'ประวัติการบันทึกการเข้าเรียนสำหรับผู้ดูแลระบบของโรงเรียนนี้เท่านั้น','att.auditLoading':'กำลังโหลดประวัติการตรวจสอบ…',
     'att.auditEmpty':'ไม่พบประวัติการตรวจสอบการเข้าเรียน','att.auditLoadFailed':'ไม่สามารถโหลดประวัติการตรวจสอบได้','att.correctionMode':'โหมดแก้ไข: ตรวจสอบและบันทึกวันที่ที่เลือก',
     'comms.portalScheduleTitle':'กำหนดการ Parent Portal','comms.portalScheduleSub':'แสดงการประชุม ประกาศ และกิจกรรมของโรงเรียนใน Parent Portal',
-    'comms.portalTitlePh':'ตัวอย่าง — ประชุมผู้ปกครองและครู','comms.portalDescPh':'ข้อมูลที่ผู้ปกครองควรทราบ','comms.portalRequired':'กรุณากรอกชื่อเรื่องและเวลาเริ่มต้น','comms.portalPublished':'เผยแพร่ไปยัง Parent Portal แล้ว'
+    'comms.portalTitlePh':'ตัวอย่าง — ประชุมผู้ปกครองและครู','comms.portalDescPh':'ข้อมูลที่ผู้ปกครองควรทราบ',    'comms.portalEventType':'ประเภทกิจกรรม',
+    'comms.portalEventMeeting':'ประชุมผู้ปกครอง',
+    'comms.portalEventAnnouncement':'ประกาศ',
+    'comms.portalEventSchool':'กิจกรรมโรงเรียน',
+    'comms.portalEventHoliday':'วันหยุด',
+    'comms.portalTitle':'ชื่อเรื่อง',
+    'comms.portalClass':'ชั้นเรียน',
+    'comms.portalWholeSchool':'ทั้งโรงเรียน',
+    'comms.portalStart':'เริ่มต้น',
+    'comms.portalEnd':'สิ้นสุด',
+    'comms.portalOptional':'ไม่บังคับ',
+    'comms.portalDescription':'รายละเอียด',
+    'comms.portalPublish':'เผยแพร่ไปยัง Parent Portal',
+    'comms.portalCancel':'ยกเลิก',
+'comms.portalRequired':'กรุณากรอกชื่อเรื่องและเวลาเริ่มต้น','comms.portalPublished':'เผยแพร่ไปยัง Parent Portal แล้ว'
   });
   Object.assign(overrides, {});
   Object.assign(overrides, {'err.sessionVerify':'ไม่สามารถตรวจสอบเซสชันที่บันทึกไว้ได้','err.retryHint':'แตะ Retry แล้วลองอีกครั้ง','err.serverUnreachable':'ไม่สามารถเชื่อมต่อเซิร์ฟเวอร์ SCMS ได้','err.technicalDetails':'รายละเอียดทางเทคนิค (โปรดแนบภาพหน้าจอเมื่อขอความช่วยเหลือ):','err.likelyCause':'สาเหตุที่เป็นไปได้: workflow n8n ยังไม่ Active, URL ไม่ถูกต้อง หรือ CORS บล็อกคำขอ'});
