@@ -508,6 +508,46 @@ window.goToPage = function(pageId) {
   });
 };
 
+
+// Dynamic module renderers use t(...) at render time, so static DOM i18n alone
+// is not enough after a language switch. Repaint the active page from its
+// existing APP/cache state and refresh the sidebar/FAB labels without forcing
+// a full app reload.
+if (!window._i18nPageRefreshBound) {
+  window._i18nPageRefreshBound = true;
+  window.addEventListener('languageChanged', () => {
+    const pageId = window.APP?.currentPage;
+    const renderers = {
+      dashboard: window.renderDashboard,
+      students: window.renderStudents,
+      attend: window.renderAttendance,
+      daily: window.renderDaily,
+      hw: window.renderHomework,
+      parents: window.renderComms,
+      incidents: window.renderIncidents,
+      timetable: window.renderTimetable,
+      summary: window.renderSummary,
+      grades: window.renderGrades,
+      billing: window.renderBilling,
+      admissions: window.renderAdmissions,
+      library: window.renderLibrary,
+      transport: window.renderTransport,
+      leave: window.renderLeaveRequests,
+      more: window.renderMore,
+    };
+    const render = renderers[pageId];
+    if (typeof render === 'function') {
+      try {
+        void render();
+      } catch (e) {
+        console.warn('[i18n] active page refresh failed:', e);
+      }
+    }
+    if (typeof window.renderSidebar === 'function') window.renderSidebar();
+    if (typeof window._updateFabForPage === 'function') window._updateFabForPage(pageId);
+  });
+}
+
 function _applyDashboardContext(pageId) {
   const ctx = window.APP?.dashboardContext;
   document.querySelectorAll('.dashboard-context-highlight').forEach(el => el.classList.remove('dashboard-context-highlight'));
