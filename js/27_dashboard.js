@@ -231,7 +231,7 @@ function _paintDashboard(container) {
        ${todaysClasses.length ? `
     <div class="more-section-title">${t('dash.todaysSchedule')}</div>
     ${todaysClasses.map(x => `
-      <div class="list-card" data-class="${esc(x.class)}" onclick="_dashboardGoToAttendance(this.dataset.class)">
+      <div class="list-card dashboard-link-card dashboard-class-card" data-class="${esc(x.class)}" onclick="_dashboardGoToAttendance(this.dataset.class)" role="button" tabindex="0">
         <div class="card-row">
           <div class="card-avatar" style="background:${_classColor(x.class)}">${x.period ?? '·'}</div>
           <div class="card-info">
@@ -240,6 +240,32 @@ function _paintDashboard(container) {
               <span class="class-tag">${esc(x.start_time || '')}</span>
               ${x.room ? `<span>${esc(x.room)}</span>` : ''}
             </div>
+          </div>
+        </div>
+      </div>`).join('')}` : ''}
+
+    ${missingAttendance.length ? `
+    <div class="more-section-title">${t('dash.notYetMarked')}</div>
+    ${missingAttendance.map(className => `
+      <div class="list-card dashboard-link-card dashboard-missing-attendance-card" data-class="${esc(className)}" onclick="_dashboardGoToAttendance(this.dataset.class)" role="button" tabindex="0">
+        <div class="card-row">
+          <div class="card-avatar">⚠</div>
+          <div class="card-info">
+            <div class="card-name">${esc(className)}</div>
+            <div class="card-sub">${t('dash.notYetMarked')}</div>
+          </div>
+        </div>
+      </div>`).join('')}` : ''}
+
+    ${recentHomework.length ? `
+    <div class="more-section-title">${t('dash.homeworkLogged2d')}</div>
+    ${recentHomework.slice(0, 8).map(h => `
+      <div class="list-card dashboard-link-card dashboard-homework-card" onclick="window.goToPage('hw')" role="button" tabindex="0">
+        <div class="card-row">
+          <div class="card-avatar">📝</div>
+          <div class="card-info">
+            <div class="card-name">${esc(h.title || h.subject || h.class || t('dash.homeworkLogged2d'))}</div>
+            <div class="card-sub">${esc(h.class || '')} ${h.date ? '— ' + esc(h.date) : ''}</div>
           </div>
         </div>
       </div>`).join('')}` : ''}
@@ -254,8 +280,8 @@ function _paintDashboard(container) {
 
     ${attentionList.length ? `
     <div class="more-section-title">${t('dash.studentsAttention')}</div>
-    ${attentionList.map(([, v]) => `
-      <div class="list-card">
+    ${attentionList.map(([studentId, v]) => `
+      <div class="list-card dashboard-link-card dashboard-attention-card" data-student-id="${esc(studentId)}" onclick="_dashboardOpenStudent(this.dataset.studentId)" role="button" tabindex="0">
         <div class="card-row">
           <div class="card-avatar">${avatarContent({ name_en: v.name })}</div>
           <div class="card-info">
@@ -298,6 +324,11 @@ function _dashboardGoToAttendance(className) {
 window._dashboardOpenIncidentStudent = function(studentId) {
   window.APP.dashboardIncidentStudentId = studentId || '';
   window.goToPage('incidents');
+};
+
+window._dashboardOpenStudent = function(studentId) {
+  window.APP.dashboardStudentId = studentId || '';
+  window.goToPage('students');
 };
 
 function _isoDaysAgo(n) {
