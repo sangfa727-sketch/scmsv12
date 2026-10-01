@@ -212,6 +212,7 @@ window.I18N_EN = {
   'dash.pendingHomework': 'Pending Homework',
 'dash.leaveRequests': 'Leave requests',
 'dash.notifications': 'Notifications',
+  'dash.fromDashboard': 'Dashboard selection',
 'dash.newCount': '{n} new',
 'dash.leavePendingOne': '{n} leave request pending',
 'dash.leavePendingMany': '{n} leave requests pending',
