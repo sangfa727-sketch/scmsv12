@@ -110,3 +110,30 @@ test('dashboard scope controls stay localized and functional', () => {
   assert.match(en, /'dash\.wholeSchool': 'Whole school'/);
   assert.match(my, /'dash\.wholeSchool': 'ကျောင်းတစ်ကျောင်းလုံး'/);
 });
+
+
+test('all supported locales keep the English translation key contract', () => {
+  const localeFiles = [
+    'js/00a_locales_en.js',
+    'js/00b_locales_my.js',
+    'js/00_locales_jp.js',
+    'js/00_locales_thai.js',
+    'js/00d_locales_ms.js',
+    'js/00e_locales_km.js',
+    'js/00e_locales_zh.js',
+  ];
+  const keySet = (source) => {
+    const keys = new Set();
+    const re = /(?:'([^']+)'|"([^"]+)")\\s*:/g;
+    let match;
+    while ((match = re.exec(source))) keys.add(match[1] || match[2]);
+    return keys;
+  };
+  const english = keySet(read(localeFiles[0]));
+  for (const file of localeFiles.slice(1)) {
+    const locale = keySet(read(file));
+    for (const key of english) {
+      assert.ok(locale.has(key), `${file} is missing locale key: ${key}`);
+    }
+  }
+});
