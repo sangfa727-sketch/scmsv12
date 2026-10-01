@@ -542,7 +542,7 @@ async function _renderStudentCardQr(el, value) {
   } catch (e) {
     console.warn('[Student ID Card] QR render failed:', e);
   }
-  el.innerHTML = '<span style="font-size:10px;color:#777;text-align:center;padding:4px">${esc(t('idCard.qrUnavailable'))}</span>';
+  el.innerHTML = `<span style="font-size:10px;color:#777;text-align:center;padding:4px">${esc(t('idCard.qrUnavailable'))}</span>`;
   return false;
 }
 
