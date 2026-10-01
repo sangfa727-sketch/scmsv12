@@ -526,14 +526,16 @@ function _applyDashboardContext(pageId) {
     }
     if (target) {
       target.classList.add('dashboard-context-highlight');
-      target.scrollIntoView({ behavior: 'smooth', block: 'center' });
     }
   });
 }
 
 window.clearDashboardContext = function() {
   delete window.APP.dashboardContext;
-  document.querySelectorAll('.dashboard-context-highlight').forEach(el => el.classList.remove('dashboard-context-highlight'));
+  document.querySelectorAll('.dashboard-context-highlight').forEach(el => {
+    el.classList.add('dashboard-context-fade');
+    window.setTimeout(() => el.classList.remove('dashboard-context-highlight', 'dashboard-context-fade'), 340);
+  });
 };
 
 // Dashboard context is a one-interaction hint: once the user clicks/taps
