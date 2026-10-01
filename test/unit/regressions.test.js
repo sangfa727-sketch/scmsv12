@@ -263,11 +263,11 @@ test('student detail actions and parent contact labels stay localized', () => {
     'idCard.qrUnavailable','students.parentGuardianName','students.phone','students.phone2','students.email',
     'students.linked','students.sendParentLink','students.saveParentDetails'
   ]) assert.ok(students.includes("t('" + key + "')"), 'missing localized student detail key: ' + key);
-  assert.doesNotMatch(students, />History<\\/button>/);
-  assert.doesNotMatch(students, />Parent<\\/button>/);
-  assert.doesNotMatch(students, />Reactivate<\\/button>/);
+  assert.doesNotMatch(students, />History<\/button>/);
+  assert.doesNotMatch(students, />Parent<\/button>/);
+  assert.doesNotMatch(students, />Reactivate<\/button>/);
   assert.doesNotMatch(students, /aria-label="Class and grade"/);
-  assert.doesNotMatch(students, />QR unavailable<\\/span>/);
-  assert.doesNotMatch(students, />Send parent link<\\/button>/);
-  assert.doesNotMatch(students, />Save parent details<\\/button>/);
+  assert.doesNotMatch(students, />QR unavailable<\/span>/);
+  assert.doesNotMatch(students, />Send parent link<\/button>/);
+  assert.doesNotMatch(students, />Save parent details<\/button>/);
 });
