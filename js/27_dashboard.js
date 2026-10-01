@@ -130,44 +130,61 @@ async function _loadDashboardData() {
   _syncDashboardLeaveCount(safeLeaveRequests);
 }
 
-function _dashboardScopedRows(rows) {
-  if (!_dashboardScopeMine) return rows;
+function _dashboardScopedRows(rows, classSet = null) {
+  if (!_dashboardScopeMine) return Array.isArray(rows) ? rows : [];
   const myId = window.APP?.teacher_id || '';
-  return rows.filter(r => r.teacher_id === myId);
+  const source = Array.isArray(rows) ? rows : [];
+  if (!classSet) return source.filter(r => r?.teacher_id === myId);
+  return source.filter(r => classSet.has(r?.class));
+}
+
+function _dashboardMyClassSet(d) {
+  const myId = window.APP?.teacher_id || '';
+  if (!myId) return new Set();
+  return new Set((Array.isArray(d?.timetable) ? d.timetable : [])
+    .filter(row => row?.teacher_id === myId && row?.class)
+    .map(row => row.class));
 }
 
 window.setDashboardScope = function(mine) {
   _dashboardScopeMine = mine;
-  document.querySelectorAll('#dashboardScopeChips .chip').forEach(b =>
-    b.classList.toggle('active', (b.dataset.scope === 'mine') === mine)
-  );
+  document.querySelectorAll('#dashboardScopeChips .chip').forEach(b => {
+    const active = (b.dataset.scope === 'mine') === mine;
+    b.classList.toggle('active', active);
+    b.setAttribute('aria-pressed', String(active));
+  });
   const container = document.getElementById('dashboardContent');
   if (container) _paintDashboard(container); // re-render from cache, no re-fetch
 };
 
 function _paintDashboard(container) {
   const d = _dashboardCache;
+  const myClassSet = _dashboardMyClassSet(d);
+  const scopedTimetable = _dashboardScopedRows(d.timetable, myClassSet);
+  const scopedAttendance = _dashboardScopeMine ? d.attendance.filter(a => myClassSet.has(a?.class)) : d.attendance;
+  const scopedHomework = _dashboardScopedRows(d.homework, myClassSet);
+  const scopedIncidents = _dashboardScopedRows(d.incidents, myClassSet);
   const todayName = new Date().toLocaleDateString('en-US', { weekday: 'long' });
   const todayISO  = new Date().toISOString().slice(0, 10);
 
-  const todaysClasses = _dashboardScopedRows(d.timetable)
+  const todaysClasses = scopedTimetable
     .filter(x => x.day === todayName)
     .sort((a, b) => (a.period ?? 0) - (b.period ?? 0));
 
   const classesToday = [...new Set(todaysClasses.map(x => x.class))];
-  const markedToday  = new Set(d.attendance.filter(a => a.date === todayISO).map(a => a.class));
+  const markedToday  = new Set(scopedAttendance.filter(a => a.date === todayISO).map(a => a.class));
   const missingAttendance = classesToday.filter(c => !markedToday.has(c));
 
-  const recentHomework = _dashboardScopedRows(d.homework)
+  const recentHomework = scopedHomework
     .filter(h => h.date === todayISO || h.date === _isoDaysAgo(1));
 
-  const recentIncidents = _dashboardScopedRows(d.incidents).slice(0, 6);
+  const recentIncidents = scopedIncidents.slice(0, 6);
   const queuedComms     = d.comms.filter(c => c.status === 'Queued');
   const leaveTotal       = d.leaveRequests.length;
   const leavePending     = d.leaveRequests.filter(r => r.status === 'Pending').length;
 
   const absenceCounts = {};
-  for (const a of d.attendance) {
+  for (const a of scopedAttendance {
     if (a.status !== 'P') {
       absenceCounts[a.student_id] = absenceCounts[a.student_id] || { name: a.name_en, count: 0 };
       absenceCounts[a.student_id].count++;
@@ -179,10 +196,11 @@ function _paintDashboard(container) {
     .slice(0, 8);
 
   container.innerHTML = `
-    <div class="chips-row" id="dashboardScopeChips">
-      <button class="chip${!_dashboardScopeMine ? ' active' : ''}" data-scope="all" onclick="setDashboardScope(false)">${t('dash.wholeSchool')}</button>
-      <button class="chip${_dashboardScopeMine ? ' active' : ''}" data-scope="mine" onclick="setDashboardScope(true)">${t('dash.myClassesOnly')}</button>
+    <div class="chips-row" id="dashboardScopeChips" role="group" aria-label="${t('dash.dashboardScope')}">
+      <button type="button" class="chip${!_dashboardScopeMine ? ' active' : ''}" data-scope="all" aria-pressed="${!_dashboardScopeMine}" onclick="setDashboardScope(false)">${t('dash.wholeSchool')}</button>
+      <button type="button" class="chip${_dashboardScopeMine ? ' active' : ''}" data-scope="mine" aria-pressed="${_dashboardScopeMine}" onclick="setDashboardScope(true)">${t('dash.myClassesOnly')}</button>
     </div>
+    ${_dashboardScopeMine && !myClassSet.size ? '<div class="dashboard-scope-empty">' + t('dash.noAssignedClasses') + '</div>' : ''}
 
     <div class="stats-grid">
       <div class="stat-card dashboard-link-card" onclick="window.goToPage('attend')" role="button" tabindex="0">
