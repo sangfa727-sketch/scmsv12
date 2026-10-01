@@ -254,3 +254,20 @@ test('i18n registration and language switching stay complete', () => {
   assert.match(i18n, /window\.dispatchEvent\(new CustomEvent\('languageChanged'/);
   assert.match(i18n, /LANGUAGE_ALIASES/);
 });
+
+
+test('student detail actions and parent contact labels stay localized', () => {
+  const students = read('js/04_students.js');
+  for (const key of [
+    'students.history.action','students.parent.action','students.reactivate','students.classAndGrade',
+    'idCard.qrUnavailable','students.parentGuardianName','students.phone','students.phone2','students.email',
+    'students.linked','students.sendParentLink','students.saveParentDetails'
+  ]) assert.ok(students.includes("t('" + key + "')"), 'missing localized student detail key: ' + key);
+  assert.doesNotMatch(students, />History<\\/button>/);
+  assert.doesNotMatch(students, />Parent<\\/button>/);
+  assert.doesNotMatch(students, />Reactivate<\\/button>/);
+  assert.doesNotMatch(students, /aria-label="Class and grade"/);
+  assert.doesNotMatch(students, />QR unavailable<\\/span>/);
+  assert.doesNotMatch(students, />Send parent link<\\/button>/);
+  assert.doesNotMatch(students, />Save parent details<\\/button>/);
+});
