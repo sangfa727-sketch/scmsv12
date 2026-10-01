@@ -92,35 +92,35 @@ window.openParentPortalEventModal = function() {
       <h3 class="modal-title">${t("comms.portalScheduleTitle")}</h3>
       <p class="modal-subtitle">${t("comms.portalScheduleSub")}</p>
 
-      <label class="field-label">Event type</label>
+      <label class="field-label">${t('comms.portalEventType')}</label>
       <select class="form-input" id="ppeType">
-        <option value="meeting">Parent meeting</option>
-        <option value="announcement">Announcement</option>
-        <option value="event">School event</option>
-        <option value="holiday">Holiday</option>
+        <option value="meeting">${t('comms.portalEventMeeting')}</option>
+        <option value="announcement">${t('comms.portalEventAnnouncement')}</option>
+        <option value="event">${t('comms.portalEventSchool')}</option>
+        <option value="holiday">${t('comms.portalEventHoliday')}</option>
       </select>
 
-      <label class="field-label">Title</label>
+      <label class="field-label">${t('comms.portalTitle')}</label>
       <input class="form-input" id="ppeTitle" placeholder="${esc(t("comms.portalTitlePh"))}">
 
-      <label class="field-label">Class</label>
+      <label class="field-label">${t('comms.portalClass')}</label>
       <select class="form-input" id="ppeClass">
-        <option value="">Whole school</option>
+        <option value="">${t('comms.portalWholeSchool')}</option>
         ${classes.map(cls => `<option value="${esc(cls)}">${esc(cls)}</option>`).join('')}
       </select>
 
-      <label class="field-label">Start</label>
+      <label class="field-label">${t('comms.portalStart')}</label>
       <input class="form-input" id="ppeStart" type="datetime-local">
 
-      <label class="field-label">End <span class="optional">optional</span></label>
+      <label class="field-label">${t('comms.portalEnd')} <span class="optional">${t('comms.portalOptional')}</span></label>
       <input class="form-input" id="ppeEnd" type="datetime-local">
 
-      <label class="field-label">Description</label>
+      <label class="field-label">${t('comms.portalDescription')}</label>
       <textarea class="form-textarea" id="ppeDesc" rows="3" placeholder="${esc(t("comms.portalDescPh"))}"></textarea>
 
       <div class="modal-footer">
-<button class="btn-primary mt16" id="ppeSaveBtn" onclick="saveParentPortalEvent()">Publish to Parent Portal</button>
-<button class="btn-secondary" onclick="closeModal()">Cancel</button>
+<button class="btn-primary mt16" id="ppeSaveBtn" onclick="saveParentPortalEvent()">${t('comms.portalPublish')}</button>
+<button class="btn-secondary" onclick="closeModal()">${t('comms.portalCancel')}</button>
 </div>
     </div>
   `);
