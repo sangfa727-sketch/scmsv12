@@ -104,6 +104,27 @@ test('dashboard notifications and keyboard interaction stay protected', () => {
 });
 
 
+test('dashboard-to-detail context handoff remains wired', () => {
+  const dashboard = read('js/27_dashboard.js');
+  const app = read('js/14_app.js');
+  const students = read('js/04_students.js');
+  const homework = read('js/07_homework.js');
+  const incidents = read('js/09_incidents.js');
+  const css = read('dashboard.css');
+
+  for (const token of ['_dashboardSetContext', "type: 'attendance'", "type: 'student'", "type: 'homework'", "type: 'incident'", '_dashboardOpenHomework']) {
+    assert.ok(dashboard.includes(token), 'missing dashboard context token: ' + token);
+  }
+  for (const token of ['_applyDashboardContext', 'dashboard-context-banner', 'dashboard-context-highlight', 'clearDashboardContext', "t('dash.fromDashboard')"]) {
+    assert.ok(app.includes(token), 'missing destination context token: ' + token);
+  }
+  assert.match(students, /data-student-id="\\$\\{esc\\(s\\.student_id\\)\\}"/);
+  assert.match(homework, /data-hw-id="\\$\\{esc\\(h\\.id\\)\\}"/);
+  assert.match(incidents, /data-incident-id="\\$\\{esc\\(i\\.id\\)\\}"/);
+  assert.ok(css.includes('.dashboard-context-banner'));
+  assert.ok(css.includes('.dashboard-context-highlight'));
+});
+
 test('dashboard scope controls stay localized and functional', () => {
   const dashboard = read('js/27_dashboard.js');
   const en = read('js/00a_locales_en.js');
