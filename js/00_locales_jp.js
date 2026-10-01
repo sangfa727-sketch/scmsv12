@@ -107,5 +107,18 @@
   Object.assign(overrides, {'login.loading':'ログインを読み込み中…','login.waitRetry':'少し待ってから、もう一度お試しください。','cg.required':'Class と Grade の両方を入力してください。'});
   Object.assign(overrides, {'teacher.editTitle':'教師を編集','teacher.editSubtitle':'IDカードと教師ログインで使用する教師名とログイン名を更新します。','teacher.superAdmin':'スーパー管理者'});
   Object.assign(overrides, {'settings.theme':'テーマ','settings.themeLight':'☀️ ライト','settings.themeDark':'🌙 ダーク'});
+  Object.assign(overrides, {
+    'login.loginNamePh':'例: teacher1','cg.pairHint':'クラスと学年をまとめて管理します。','cg.pairExample':'例：5年生 + A組、5年生 + B組、幼稚園 + K1','cg.classGrade':'クラス → 学年',
+    'tm.teacherIdCardTitle':'教師IDカード','settings.actionsLabel':'設定の操作','tm.editTeacher':'教師を編集','tm.manageAccess':'アクセスを管理',
+    'branding.logoTitle':'学校ロゴ','branding.logoSubtitle':'サイドバー、アプリのヘッダー、「その他」ページに表示します。','branding.logoTip':'正方形の画像を使用してください。透明背景のPNGがおすすめです。256×256に自動調整されます。',
+    'branding.coverTitle':'カバー画像','branding.coverSubtitle':'サイドバー上部の学校ロゴの背後に表示するバナー画像です。','branding.coverTip':'横長の画像（約3:1）を使用してください。中央から1200×400に自動トリミングします。',
+    'branding.photoTitle':'プロフィール画像','branding.photoSubtitle':'サイドバーとプロフィールカードに表示します。','branding.photoTip':'正面の鮮明な写真をおすすめします。正方形に自動トリミングします。',
+    'branding.processing':'処理中…','branding.uploading':'アップロード中…','branding.removing':'削除中…','branding.saved':'保存しました ✓','branding.removed':'削除しました ✓',
+    'branding.removeConfirmTitle':'削除しますか？','branding.removeConfirmText':'この画像を削除してもよいですか？','branding.removeConfirmButton':'削除','branding.savedToast':'保存しました','branding.removedToast':'削除しました',
+    'tm.requiredEdit':'ユーザー名と教師名は必須です。','tm.updated':'教師情報を更新しました','tm.saveChanges':'変更を保存',
+    'branding.readImageFailed':'画像を読み込めませんでした','branding.processImageFailed':'画像を処理できませんでした','branding.failed':'失敗しました','branding.saveFailed':'保存に失敗しました',
+    'tm.editTeacherLabel':'教師を編集','tm.editTeacherSubtitle':'教師IDカードと教師ログインに使用する教師名とログイン名を更新します。','tm.teacherId':'教師ID','tm.loginName':'ログイン名','tm.teacherName':'教師名','tm.email':'メール','tm.role':'権限','tm.roleTeacher':'教師','tm.roleAdmin':'管理者','tm.roleSuperAdmin':'スーパー管理者','tm.saving':'保存中…','tm.cancel':'キャンセル','tm.teacherIdCardLabel':'教師ID','tm.loginNameLabel':'ログイン名','tm.teacherLoginQr':'教師ログインQRコード','tm.qrUnavailable':'QRコードを利用できません',
+    'subject.exists':'この科目はすでに存在します。','subject.addFailed':'科目を追加できませんでした。','picker.noMatch':'「{query}」に一致する生徒が見つかりません。','teacher.updateRequired':'ユーザー名と教師名は必須です。','teacher.qrUnavailable':'QRコードを利用できません','password.hide':'パスワードを非表示','password.show':'パスワードを表示'
+  });
   window.I18N_JP = Object.assign({}, base, overrides);
 })();
