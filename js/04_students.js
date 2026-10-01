@@ -372,33 +372,31 @@ window.openStudentDetail = function(studentId) {
 window.showStudentParent = function(studentId) {
   const s = window.APP.students.find(x => x.student_id === studentId);
   if (!s) return;
-  openModal(
-    '<div class="modal-sheet" onclick="event.stopPropagation()">' +
-    '<div class="modal-handle"></div>' +
-    '<h3 class="modal-title">${t("students.form.parentGuardian")}</h3>' +
-    '<div class="parent-contact-card">' +
-    '<div class="detail-section">Primary contact</div>' +
-    '<label class="field-label">${t('students.parentGuardianName')}</label>' +
-    '<input class="form-input" id="parentEditName" maxlength="120" value="' + esc(s.parent_name || "") + '">' +
-    '<label class="field-label">${t('students.phone')}</label>' +
-    '<input class="form-input" id="parentEditPhone" type="tel" inputmode="tel" maxlength="40" value="' + esc(s.parent_phone || "") + '">' +
-    '<label class="field-label">${t('students.phone2')}</label>' +
-    '<input class="form-input" id="parentEditPhone2" type="tel" inputmode="tel" maxlength="40" value="' + esc(s.parent_phone2 || "") + '">' +
-    '<label class="field-label">${t('students.email')}</label>' +
-    '<input class="form-input" id="parentEditEmail" type="email" maxlength="160" value="' + esc(s.parent_email || "") + '">' +
-    '<div class="detail-section">Telegram</div>' +
-    (s.parent_tg_id ? '<div class="tg-linked-box">✓ ${t('students.linked')} · <code>' + esc(s.parent_tg_id) + '</code></div>' : '<button type="button" class="link-btn" data-id="' + esc(s.student_id) + '" onclick="showParentLinkQR(this.dataset.id)">${t('students.sendParentLink')}</button>') +
-    '<div class="modal-footer parent-form-footer">' +
-
-    '<button class="btn-secondary" type="button" onclick="closeModal()">${t('common.cancel')}</button>' +
-
-    '<button class="btn-primary" type="button" id="saveParentBtn" data-id="' + esc(s.student_id) + '" onclick="saveStudentParent(this.dataset.id)">${t('students.saveParentDetails')}</button>' +
-
-    '</div>' +
-    '</div></div>'
-  );
+  openModal(`
+    <div class="modal-sheet" onclick="event.stopPropagation()">
+      <div class="modal-handle"></div>
+      <h3 class="modal-title">${t("students.form.parentGuardian")}</h3>
+      <div class="parent-contact-card">
+        <div class="detail-section">${t("students.parent.primaryContact")}</div>
+        <label class="field-label">${t('students.parentGuardianName')}</label>
+        <input class="form-input" id="parentEditName" maxlength="120" value="${esc(s.parent_name || "")}">
+        <label class="field-label">${t('students.phone')}</label>
+        <input class="form-input" id="parentEditPhone" type="tel" inputmode="tel" maxlength="40" value="${esc(s.parent_phone || "")}">
+        <label class="field-label">${t('students.phone2')}</label>
+        <input class="form-input" id="parentEditPhone2" type="tel" inputmode="tel" maxlength="40" value="${esc(s.parent_phone2 || "")}">
+        <label class="field-label">${t('students.email')}</label>
+        <input class="form-input" id="parentEditEmail" type="email" maxlength="160" value="${esc(s.parent_email || "")}">
+        <div class="detail-section">${t("students.parent.telegram")}</div>
+        ${s.parent_tg_id
+          ? `<div class="tg-linked-box">✓ ${t('students.linked')} · <code>${esc(s.parent_tg_id)}</code></div>`
+          : `<button type="button" class="link-btn" data-id="${esc(s.student_id)}" onclick="showParentLinkQR(this.dataset.id)">${t('students.sendParentLink')}</button>`}
+        <div class="modal-footer parent-form-footer">
+          <button class="btn-secondary" type="button" onclick="closeModal()">${t('common.cancel')}</button>
+          <button class="btn-primary" type="button" id="saveParentBtn" data-id="${esc(s.student_id)}" onclick="saveStudentParent(this.dataset.id)">${t('students.saveParentDetails')}</button>
+        </div>
+      </div>
+    </div>`);
 };
-
 window.saveStudentParent = async function(studentId) {
   const name = (document.getElementById("parentEditName")?.value || "").trim();
   const phone = (document.getElementById("parentEditPhone")?.value || "").trim();
