@@ -187,7 +187,7 @@ test('all supported locales keep the English translation key contract', () => {
   ];
   const parseLocale = (source) => {
     const entries = new Map();
-    const re = /'([^'\\]*(?:\\.[^'\\]*)*)'\\s*:\\s*'((?:\\.|[^'\\])*)'/g;
+    const re = /(['"])([^\\]*?)\\1\\s*:\\s*(['"])((?:\\\\.|(?!\\3).)*)\\3/g;
     let match;
     while ((match = re.exec(source))) entries.set(match[2], match[4]);
     return entries;
