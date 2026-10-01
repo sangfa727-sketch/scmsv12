@@ -84,6 +84,34 @@ window.refreshDashboardNotifications = async function() {
 
 window.refreshDashboardLeaveRequests = window.refreshDashboardNotifications;
 
+window.refreshDashboardAttendance = async function() {
+  try {
+    const attendance = await API.getAttendance(14);
+    if (_dashboardCache) _dashboardCache.attendance = attendance || [];
+    const container = document.getElementById('dashboardContent');
+    const dashboardPage = document.getElementById('page-dashboard');
+    if (container && dashboardPage?.classList.contains('active') && _dashboardCache) _paintDashboard(container);
+    return attendance || [];
+  } catch (e) {
+    console.warn('[dashboard] attendance refresh failed:', e);
+    return null;
+  }
+};
+
+window.refreshDashboardHomework = async function() {
+  try {
+    const homework = await API.getHomework(14);
+    if (_dashboardCache) _dashboardCache.homework = homework || [];
+    const container = document.getElementById('dashboardContent');
+    const dashboardPage = document.getElementById('page-dashboard');
+    if (container && dashboardPage?.classList.contains('active') && _dashboardCache) _paintDashboard(container);
+    return homework || [];
+  } catch (e) {
+    console.warn('[dashboard] homework refresh failed:', e);
+    return null;
+  }
+};
+
 window.refreshDashboardIncidents = async function() {
   try {
     const incidents = await API.getIncidents(14);
