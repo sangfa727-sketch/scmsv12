@@ -565,7 +565,10 @@ if (!window._dashboardContextInteractionBound) {
     // controls live outside the page container and must also dismiss it.
     window.clearDashboardContext();
   };
-  document.addEventListener('pointerdown', dismissDashboardContextOnInteraction, true);
+  // Use window-level capture listeners so the dismissal survives page containers,
+  // sidebar/tab overlays, and controls that may stop propagation lower in the DOM.
+  window.addEventListener('pointerdown', dismissDashboardContextOnInteraction, true);
+  window.addEventListener('click', dismissDashboardContextOnInteraction, true);
   document.addEventListener('keydown', (event) => {
     if (!event.isTrusted || !window.APP?.dashboardContext) return;
     if (!['Enter', ' '].includes(event.key)) return;
