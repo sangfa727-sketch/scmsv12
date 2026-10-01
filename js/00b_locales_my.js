@@ -212,6 +212,7 @@ window.I18N_MY = {
   'dash.pendingHomework': 'ကျန်ရှိနေသော အိမ်စာ',
 'dash.leaveRequests': 'ခွင့်တောင်းဆိုမှုများ',
 'dash.notifications': 'အသိပေးချက်များ',
+  'dash.fromDashboard': 'Dashboard မှ ရွေးထားသည်',
 'dash.newCount': 'အသစ် {n} ခု',
 'dash.leavePendingOne': 'ခွင့်တောင်းဆိုမှု {n} ခု စောင့်ဆိုင်းနေသည်',
 'dash.leavePendingMany': 'ခွင့်တောင်းဆိုမှု {n} ခု စောင့်ဆိုင်းနေသည်',
