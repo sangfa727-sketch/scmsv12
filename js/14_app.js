@@ -572,8 +572,8 @@ if (!window._dashboardContextInteractionBound) {
   document.addEventListener('keydown', (event) => {
     if (!event.isTrusted || !window.APP?.dashboardContext) return;
     if (!['Enter', ' '].includes(event.key)) return;
-    const page = event.target?.closest?.('.page.active');
-    if (!page) return;
+    const activePage = event.target?.closest?.('.page.active');
+    if (!activePage) return;
     window.clearDashboardContext();
   }, true);
 }
