@@ -88,11 +88,11 @@ function _renderAdmissionsFilters() {
   if (!clsEl || !statusEl) return;
 
   clsEl.innerHTML = classes.map(c =>
-    `<button class="chip${c === _admClass ? ' active' : ''}" data-value="${esc(c)}" onclick="selectAdmClass('${esc(c)}')">${esc(c === 'All' ? t('common.all') : c)}</button>`
+    `<button type="button" class="chip${c === _admClass ? ' active' : ''}" aria-pressed="${c === _admClass ? 'true' : 'false'}" data-value="${esc(c)}" onclick="selectAdmClass('${esc(c)}')">${esc(c === 'All' ? t('common.all') : c)}</button>`
   ).join('');
 
   statusEl.innerHTML = ADM_STATUSES.map(s =>
-    `<button class="chip${s === _admStatus ? ' active' : ''}" data-value="${esc(s)}" onclick="selectAdmStatus('${esc(s)}')">${esc(tv('admStatus', s))}</button>`
+    `<button type="button" class="chip${s === _admStatus ? ' active' : ''}" aria-pressed="${s === _admStatus ? 'true' : 'false'}" data-value="${esc(s)}" onclick="selectAdmStatus('${esc(s)}')">${esc(tv('admStatus', s))}</button>`
   ).join('');
 }
 
