@@ -433,3 +433,11 @@ test('filter controls preserve native button semantics and selected state', () =
     assert.match(source, second);
   }
 });
+test('sidebar navigation preserves active and native button accessibility state', () => {
+  const sidebar = read('js/17_sidebar.js');
+  assert.match(sidebar, /<button type="button" class="sidebar-item \\${window\\.APP\\.currentPage === it\\.id \\? 'active' : ''\\}"/);
+  assert.match(sidebar, /data-page="\\${esc\\(it\\.id\\)}" aria-current="\\${window\\.APP\\.currentPage === it\\.id \\? 'page' : 'false'\\}"/);
+  assert.match(sidebar, /sidebar-badge" aria-label="\\${badgeCount}"/);
+  assert.match(sidebar, /<button type="button" class="sidebar-item" onclick="sidebarGo\\('more'\\)">/);
+  assert.match(sidebar, /<button type="button" class="sidebar-item sidebar-signout"/);
+});
