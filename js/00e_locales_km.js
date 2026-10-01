@@ -184,6 +184,7 @@ window.I18N_KM = {
   "dash.pendingHomework": "កិច្ចការផ្ទះកំពុងរង់ចាំ",
   "dash.leaveRequests": "សំណើសុំច្បាប់",
   "dash.notifications": "ការជូនដំណឹង",
+  "dash.fromDashboard": "បានជ្រើសពីផ្ទាំងគ្រប់គ្រង",
   "dash.newCount": "{n} ថ្មី",
   "dash.leavePendingOne": "មានសំណើសុំច្បាប់ {n} កំពុងរង់ចាំ",
   "dash.leavePendingMany": "មានសំណើសុំច្បាប់ {n} កំពុងរង់ចាំ",
