@@ -67,7 +67,7 @@ test('dashboard summary cards and incident entry points stay protected', () => {
   assert.match(dashboard, /data-student-id=/);
   assert.match(css, /#102A43/);
   assert.match(css, /dashboard-link-card/);
-  assert.ok(html.includes('dashboard.css?v=20261001i'));
+  assert.ok(html.includes('dashboard.css?v=20261001j'));
 });
 
 
@@ -99,7 +99,7 @@ test('dashboard notifications and keyboard interaction stay protected', () => {
   assert.match(css, /dashboard-notification-menu/);
   assert.match(css, /dashboard-notification-badge/);
   assert.match(css, /dashboard-notification-item:focus-visible/);
-  assert.ok(html.includes('dashboard.css?v=20261001i'));
+  assert.ok(html.includes('dashboard.css?v=20261001j'));
   assert.match(html, /27_dashboard\.js\?v=20261001h/);
 });
 
@@ -129,6 +129,10 @@ test('dashboard-to-detail context handoff remains wired', () => {
   assert.ok(incidents.includes('data-incident-id="${esc(i.id)}"'));
   assert.ok(css.includes('.dashboard-context-highlight'));
   assert.doesNotMatch(app, /dashboard-context-banner/);
+  assert.ok(app.includes('dashboard-context-fade'));
+  assert.ok(app.includes("el.classList.add('dashboard-context-fade')"));
+  assert.ok(!app.includes("scrollIntoView({ behavior: 'smooth', block: 'center' })"));
+  assert.ok(!css.includes('dashboard-context-banner'));
 });
 
 test('dashboard scope controls stay localized and functional', () => {
