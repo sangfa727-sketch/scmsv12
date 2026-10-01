@@ -14,7 +14,7 @@ function renderComms() {
 
   const types = ['All','General','Absent Alert','Daily Report','Praise','Incident','Homework','Broadcast'];
   el.innerHTML = types.map(ty =>
-    `<button class="chip${ty === _commsType ? ' active' : ''}" data-type="${esc(ty)}"
+    `<button type="button" class="chip${ty === _commsType ? ' active' : ''}" aria-pressed="${ty === _commsType ? 'true' : 'false'}" data-type="${esc(ty)}"
       onclick="filterCommsType('${esc(ty)}')">${esc(tv('commType', ty))}</button>`
   ).join('');
 
