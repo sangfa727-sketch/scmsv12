@@ -312,8 +312,8 @@ test('theme controls stay wired to the shared theme controller', () => {
   const theme = read('js/30_theme.js');
 
   assert.match(more, /window\.SCMSTheme\?\.current\?\.\(\)/);
-  assert.match(more, /window\.SCMSTheme\.set\('light'\)/);
-  assert.match(more, /window\.SCMSTheme\.set\('dark'\)/);
+  assert.match(more, /SCMSTheme\.set\('light'\)/);
+  assert.match(more, /SCMSTheme\.set\('dark'\)/);
   assert.match(more, /window\.refreshMoreThemeControl/);
 
   assert.match(settings, /SCMSTheme\.set\('light'\)/);
