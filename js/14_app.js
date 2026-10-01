@@ -781,16 +781,16 @@ window.showPasswordPrompt = function (title, message, onSubmit) {
       <div class="modal-handle"></div>
       <h3 class="modal-title">${esc(title)}</h3>
       <p class="modal-subtitle password-prompt-message">${esc(message)}</p>
-      <label class="field-label" for="_passwordPromptInput">Password အသစ်</label>
+      <label class="field-label" for="_passwordPromptInput">${t('password.newLabel')}</label>
       <div class="password-prompt-input-wrap">
         <input class="form-input" id="_passwordPromptInput" type="password"
                autocomplete="new-password" minlength="6"
-               placeholder="အနည်းဆုံး ၆ လုံး">
+               placeholder="${esc(t('password.newPlaceholder'))}">
         <button type="button" class="password-prompt-toggle" id="_passwordPromptToggle"
-                aria-label="Show password">👁️</button>
+                aria-label="${esc(t('password.show'))}">👁️</button>
       </div>
       <div class="generic-confirm-actions">
-        <button class="btn-danger solid" id="_passwordPromptSubmit">Password ပြန်သတ်မှတ်မည်</button>
+        <button class="btn-danger solid" id="_passwordPromptSubmit">${t('password.reset')}</button>
         <button class="btn-secondary" id="_passwordPromptCancel">${t('common.cancel')}</button>
       </div>
     </div>`;
