@@ -162,7 +162,7 @@ window.I18N_ZH = {
   "dash.myClassesOnly": "仅我的班级",
   "dash.wholeSchool": "全校",
   "dash.dashboardScope": "仪表板范围",
-  "dash.noAssignedClasses": "您的教师账户尚未分配任何班级。"
+  "dash.noAssignedClasses": "您的教师账户尚未分配任何班级。",
   "dash.todaysSchedule": "今日课表",
   "dash.noClassesToday": "今天没有安排课程。",
   "dash.quickActions": "快捷操作",
