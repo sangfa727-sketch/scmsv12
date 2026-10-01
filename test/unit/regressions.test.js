@@ -118,6 +118,8 @@ test('dashboard-to-detail context handoff remains wired', () => {
   for (const token of ['_applyDashboardContext', 'dashboard-context-banner', 'dashboard-context-highlight', 'clearDashboardContext', "t('dash.fromDashboard')"]) {
     assert.ok(app.includes(token), 'missing destination context token: ' + token);
   }
+  assert.ok(app.includes("_applyDashboardContext(pageId);"));
+  assert.ok(app.includes("window.requestAnimationFrame(retryDashboardContext);"));
   assert.ok(students.includes('data-student-id="${esc(s.student_id)}"'));
   assert.ok(homework.includes('data-hw-id="${esc(h.id)}"'));
   assert.ok(incidents.includes('data-incident-id="${esc(i.id)}"'));
