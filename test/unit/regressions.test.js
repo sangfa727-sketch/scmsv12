@@ -112,6 +112,16 @@ test('dashboard scope controls stay localized and functional', () => {
 });
 
 
+test('password prompt remains fully localized', () => {
+  const app = read('js/14_app.js');
+  for (const key of ['password.newLabel', 'password.newPlaceholder', 'password.show', 'password.reset']) {
+    assert.match(app, new RegExp('t\\(\\'' + key.replace('.', '\\\\.') + '\\'\\)'));
+  }
+  assert.doesNotMatch(app, /Password အသစ်/);
+  assert.doesNotMatch(app, /အနည်းဆုံး ၆ လုံး/);
+  assert.doesNotMatch(app, /Password ပြန်သတ်မှတ်မည်/);
+});
+
 test('all supported locales keep the English translation key contract', () => {
   const localeFiles = [
     'js/00a_locales_en.js',
