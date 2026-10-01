@@ -403,3 +403,14 @@ test('notification data flow keeps API transport contracts aligned', () => {
   assert.match(leave, /await renderLeaveRequests\(\)/);
   assert.match(leave, /await window\.refreshDashboardNotifications\(\)/);
 });
+
+
+test('communication and leave filters preserve accessible selected state', () => {
+  const comms = read('js/08_comms.js');
+  const leave = read('js/28_leave_requests.js');
+  assert.match(comms, /data-value="class" aria-pressed="true"/);
+  assert.match(comms, /data-value="student" aria-pressed="false"/);
+  assert.match(comms, /setAttribute\('aria-pressed', active \? 'true' : 'false'\)/);
+  assert.match(leave, /id="leaveFilterChips" role="group"/);
+  assert.match(leave, /data-filter="\$\{s\}" aria-pressed="\$\{_leaveRequestFilter === s \? 'true' : 'false'\}"/);
+});
