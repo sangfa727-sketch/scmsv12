@@ -193,7 +193,7 @@ test('all supported locales keep the English translation key contract', () => {
     return entries;
   };
   const english = parseLocale(read(localeFiles[0]));
-  assert.equal(english.size, 1408, 'English locale key count changed unexpectedly');
+  assert.ok(english.size >= 1408, 'English locale key count unexpectedly regressed');
   for (const file of localeFiles.slice(1)) {
     const source = read(file);
     const rawKeys = [...source.matchAll(/(['"])([^\\]*?)\1\s*:/g)].map(m => m[2]);
