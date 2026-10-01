@@ -353,13 +353,13 @@ window.openStudentDetail = function(studentId) {
 
       <div class="student-action-grid mt16">
         <button class="btn-primary" data-id="${esc(s.student_id)}" onclick="openEditStudentModal(this.dataset.id)">✏️ ${t("common.edit")}</button>
-        <button class="btn-secondary" data-id="${esc(s.student_id)}" onclick="showStudentHistory(this.dataset.id)">🕘 History</button>
-        <button class="btn-secondary" data-id="${esc(s.student_id)}" onclick="showStudentParent(this.dataset.id)">👨‍👩‍👧 Parent</button>
+        <button class="btn-secondary" data-id="${esc(s.student_id)}" onclick="showStudentHistory(this.dataset.id)">🕘 ${t('students.history.action')}</button>
+        <button class="btn-secondary" data-id="${esc(s.student_id)}" onclick="showStudentParent(this.dataset.id)">👨‍👩‍👧 ${t('students.parent.action')}</button>
         ${s.status === "Active" ? `<button class="btn-secondary" data-id="${esc(s.student_id)}" onclick="showStudentIdCard(this.dataset.id)">🪪 ${t("idCard.title")}</button>` : ""}
         ${s.status === "Active" ? `<button class="btn-secondary" data-id="${esc(s.student_id)}" onclick="showHealthRecord(this.dataset.id)">🏥 ${t("students.btn.health")}</button>` : ""}
         ${s.status === "Active" ? `<button class="btn-secondary" data-id="${esc(s.student_id)}" onclick="showStudentLibrary(this.dataset.id)">📚 ${t("stuLib.title")}</button>` : ""}
         ${s.status === "Active" ? `<button class="btn-secondary" data-id="${esc(s.student_id)}" onclick="showStudentTransport(this.dataset.id)">🚌 ${t("stuTr.title")}</button>` : ""}
-        ${s.status === "Inactive" && window.APP.is_admin ? `<button class="btn-primary" data-id="${esc(s.student_id)}" onclick="reactivateStudent(this.dataset.id)">↻ Reactivate</button>` : ""}
+        ${s.status === "Inactive" && window.APP.is_admin ? `<button class="btn-primary" data-id="${esc(s.student_id)}" onclick="reactivateStudent(this.dataset.id)">↻ ${t('students.reactivate')}</button>` : ""}
       </div>
       <div class="modal-footer student-detail-footer">
         <button class="btn-secondary" type="button" onclick="closeModal()">${t('common.close')}</button>
@@ -378,21 +378,21 @@ window.showStudentParent = function(studentId) {
     '<h3 class="modal-title">${t("students.form.parentGuardian")}</h3>' +
     '<div class="parent-contact-card">' +
     '<div class="detail-section">Primary contact</div>' +
-    '<label class="field-label">Parent / Guardian name</label>' +
+    '<label class="field-label">${t('students.parentGuardianName')}</label>' +
     '<input class="form-input" id="parentEditName" maxlength="120" value="' + esc(s.parent_name || "") + '">' +
-    '<label class="field-label">Phone</label>' +
+    '<label class="field-label">${t('students.phone')}</label>' +
     '<input class="form-input" id="parentEditPhone" type="tel" inputmode="tel" maxlength="40" value="' + esc(s.parent_phone || "") + '">' +
-    '<label class="field-label">Phone 2</label>' +
+    '<label class="field-label">${t('students.phone2')}</label>' +
     '<input class="form-input" id="parentEditPhone2" type="tel" inputmode="tel" maxlength="40" value="' + esc(s.parent_phone2 || "") + '">' +
-    '<label class="field-label">Email</label>' +
+    '<label class="field-label">${t('students.email')}</label>' +
     '<input class="form-input" id="parentEditEmail" type="email" maxlength="160" value="' + esc(s.parent_email || "") + '">' +
     '<div class="detail-section">Telegram</div>' +
-    (s.parent_tg_id ? '<div class="tg-linked-box">✓ Linked · <code>' + esc(s.parent_tg_id) + '</code></div>' : '<button type="button" class="link-btn" data-id="' + esc(s.student_id) + '" onclick="showParentLinkQR(this.dataset.id)">Send parent link</button>') +
+    (s.parent_tg_id ? '<div class="tg-linked-box">✓ ${t('students.linked')} · <code>' + esc(s.parent_tg_id) + '</code></div>' : '<button type="button" class="link-btn" data-id="' + esc(s.student_id) + '" onclick="showParentLinkQR(this.dataset.id)">${t('students.sendParentLink')}</button>') +
     '<div class="modal-footer parent-form-footer">' +
 
-    '<button class="btn-secondary" type="button" onclick="closeModal()">Cancel</button>' +
+    '<button class="btn-secondary" type="button" onclick="closeModal()">${t('common.cancel')}</button>' +
 
-    '<button class="btn-primary" type="button" id="saveParentBtn" data-id="' + esc(s.student_id) + '" onclick="saveStudentParent(this.dataset.id)">Save parent details</button>' +
+    '<button class="btn-primary" type="button" id="saveParentBtn" data-id="' + esc(s.student_id) + '" onclick="saveStudentParent(this.dataset.id)">${t('students.saveParentDetails')}</button>' +
 
     '</div>' +
     '</div></div>'
@@ -429,7 +429,7 @@ window.showStudentHistory = async function(studentId) {
     + "<div class=\"modal-handle\"></div>"
     + "<h3 class=\"modal-title\">" + t("students.history.title") + "</h3>"
     + "<div id=\"studentHistoryBody\">" + skeletonCards(2) + "</div>"
-    + "<button class=\"btn-secondary mt16\" data-id=\"" + esc(studentId) + "\" onclick=\"openStudentDetail(this.dataset.id)\">Back</button>"
+    + "<button class=\"btn-secondary mt16\" data-id=\"" + esc(studentId) + "\" onclick=\"openStudentDetail(this.dataset.id)\">${t('common.back')}</button>"
     + "</div>"
   );
   const el = document.getElementById("studentHistoryBody");
@@ -477,7 +477,7 @@ function _idCardHtml(s, qrTargetId) {
   const className = (s.class || '').trim();
   const gradeName = (s.grade || '').trim();
   const academic = `
-    <div class="idc-academic" aria-label="Class and grade">
+    <div class="idc-academic" aria-label="${esc(t('students.classAndGrade'))}">
       ${className ? `<span class="idc-class">${esc(className)}</span>` : ''}
       ${gradeName ? `<span class="idc-grade">${esc(gradeName)}</span>` : ''}
     </div>`;
@@ -544,7 +544,7 @@ async function _renderStudentCardQr(el, value) {
   } catch (e) {
     console.warn('[Student ID Card] QR render failed:', e);
   }
-  el.innerHTML = '<span style="font-size:10px;color:#777;text-align:center;padding:4px">QR unavailable</span>';
+  el.innerHTML = '<span style="font-size:10px;color:#777;text-align:center;padding:4px">${esc(t('idCard.qrUnavailable'))}</span>';
   return false;
 }
 
