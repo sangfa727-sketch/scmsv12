@@ -496,7 +496,6 @@ window.goToPage = function(pageId) {
 
 function _applyDashboardContext(pageId) {
   const ctx = window.APP?.dashboardContext;
-  document.querySelectorAll('.dashboard-context-banner').forEach(el => el.remove());
   document.querySelectorAll('.dashboard-context-highlight').forEach(el => el.classList.remove('dashboard-context-highlight'));
   if (!ctx) return;
 
@@ -509,15 +508,7 @@ function _applyDashboardContext(pageId) {
   if (allowed[pageId] !== ctx.type) return;
 
   const page = document.getElementById('page-' + pageId);
-  const header = page?.querySelector('.page-header');
-  if (!page || !header) return;
-
-  const banner = document.createElement('div');
-  banner.className = 'dashboard-context-banner';
-  banner.innerHTML = '<span class="dashboard-context-dot" aria-hidden="true"></span>' +
-    '<span><strong>' + t('dash.fromDashboard') + '</strong><small>' + esc(ctx.label || ctx.className || '') + '</small></span>' +
-    '<button type="button" aria-label="' + esc(t('common.close')) + '" title="' + esc(t('common.close')) + '" onclick="clearDashboardContext()">×</button>';
-  header.appendChild(banner);
+  if (!page) return;
 
   requestAnimationFrame(() => {
     let target = null;
