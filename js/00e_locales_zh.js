@@ -184,6 +184,7 @@ window.I18N_ZH = {
   "dash.pendingHomework": "待完成作业",
   "dash.leaveRequests": "请假申请",
   "dash.notifications": "通知",
+  "dash.fromDashboard": "从仪表板选择",
   "dash.newCount": "{n} 条新通知",
   "dash.leavePendingOne": "{n} 条请假申请待处理",
   "dash.leavePendingMany": "{n} 条请假申请待处理",
