@@ -184,6 +184,7 @@ window.I18N_MS = {
   "dash.pendingHomework": "Kerja Rumah Tertangguh",
   "dash.leaveRequests": "Permohonan cuti",
   "dash.notifications": "Pemberitahuan",
+  "dash.fromDashboard": "Dipilih dari papan pemuka",
   "dash.newCount": "{n} baharu",
   "dash.leavePendingOne": "{n} permohonan cuti menunggu",
   "dash.leavePendingMany": "{n} permohonan cuti menunggu",
