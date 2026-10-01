@@ -124,6 +124,10 @@ test('dashboard-to-detail context handoff remains wired', () => {
   assert.ok(app.includes("event.isTrusted"));
   assert.ok(app.includes("dismissDashboardContextOnInteraction"));
   assert.ok(app.includes("document.addEventListener('pointerdown', dismissDashboardContextOnInteraction, true)"));
+  assert.ok(app.includes('dashboardContextPages'));
+  assert.ok(app.includes('dashboardContextPages[pageId] !== window.APP.dashboardContext.type'));
+  assert.ok(app.includes('sidebar/tab'));
+  assert.doesNotMatch(app, /const page = event\.target\?\.closest\?\.\('\.page\.active'\)/);
   assert.ok(students.includes('data-student-id="${esc(s.student_id)}"'));
   assert.ok(homework.includes('data-hw-id="${esc(h.id)}"'));
   assert.ok(incidents.includes('data-incident-id="${esc(i.id)}"'));
