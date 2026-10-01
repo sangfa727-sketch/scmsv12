@@ -16,7 +16,7 @@ function renderSummary() {
   )].sort()];
 
   el.innerHTML = classes.map(c =>
-    `<button class="chip${c === _sumClass ? ' active' : ''}" data-class="${esc(c)}"
+    `<button type="button" class="chip${c === _sumClass ? ' active' : ''}" aria-pressed="${c === _sumClass ? 'true' : 'false'}" data-class="${esc(c)}"
       onclick="filterSumClass('${esc(c)}')">${esc(c === 'All' ? t('common.all') : c)}</button>`
   ).join('');
 
