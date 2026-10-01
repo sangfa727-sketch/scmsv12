@@ -120,6 +120,10 @@ test('dashboard-to-detail context handoff remains wired', () => {
   }
   assert.ok(app.includes("_applyDashboardContext(pageId);"));
   assert.ok(app.includes("window.requestAnimationFrame(retryDashboardContext);"));
+  assert.ok(app.includes("window._dashboardContextInteractionBound"));
+  assert.ok(app.includes("event.isTrusted"));
+  assert.ok(app.includes("dismissDashboardContextOnInteraction"));
+  assert.ok(app.includes("document.addEventListener('pointerdown', dismissDashboardContextOnInteraction, true)"));
   assert.ok(students.includes('data-student-id="${esc(s.student_id)}"'));
   assert.ok(homework.includes('data-hw-id="${esc(h.id)}"'));
   assert.ok(incidents.includes('data-incident-id="${esc(i.id)}"'));
