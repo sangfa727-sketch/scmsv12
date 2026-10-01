@@ -335,7 +335,13 @@ test('dashboard notification locale placeholders stay consistent', () => {
     'dash.messageNotDeliveredOne', 'dash.messageNotDeliveredMany'
   ];
   const placeholders = (value) => [...value.matchAll(/\\{([a-zA-Z0-9_]+)\\}/g)].map(m => m[1]).sort();
-  const valueFor = (source, key) => {\n    const escaped = key.replace(/[.*+?^${}()|[\\]\\\\]/g, '\\\\$&');\n    const match = source.match(new RegExp("['\\\"]" + escaped + "['\\\"]\\\\s*:\\\\s*([^,\\\\n]+)"));\n    assert.ok(match, 'missing notification locale value: ' + key);\n    return match[1];\n  };\n  const baseline = Object.fromEntries(keys.map(key => [key, placeholders(valueFor(read(localeFiles[0]), key))]));
+  const valueFor = (source, key) => {
+    const escaped = key.replace(/[.*+?^${}()|[\\]\\\\]/g, '\\\\$&');
+    const match = source.match(new RegExp("['\\\"]" + escaped + "['\\\"]\\\\s*:\\\\s*([^,\\\\n]+)"));
+    assert.ok(match, 'missing notification locale value: ' + key);
+    return match[1];
+  };
+  const baseline = Object.fromEntries(keys.map(key => [key, placeholders(valueFor(read(localeFiles[0]), key))]));
   for (const file of localeFiles.slice(1)) {
     for (const key of keys) {
       assert.deepEqual(placeholders(valueFor(read(file), key)), baseline[key], file + ' placeholder mismatch for ' + key);
