@@ -260,6 +260,18 @@ test('parent portal event form stays fully localized', () => {
 });
 
 
+test('dashboard summary caches refresh after attendance and homework mutations', () => {
+  const dashboard = read('js/27_dashboard.js');
+  const attendance = read('js/05_attendance.js');
+  const homework = read('js/07_homework.js');
+  assert.match(dashboard, /refreshDashboardAttendance/);
+  assert.match(dashboard, /API\.getAttendance\(14\)/);
+  assert.match(dashboard, /refreshDashboardHomework/);
+  assert.match(dashboard, /API\.getHomework\(14\)/);
+  assert.match(attendance, /refreshDashboardAttendance/);
+  assert.match(homework, /refreshDashboardHomework/);
+});
+
 test('notification state stays synchronized after parent communication and leave mutations', () => {
   const dashboard = read('js/27_dashboard.js');
   const comms = read('js/08_comms.js');
