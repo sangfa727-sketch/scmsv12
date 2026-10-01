@@ -167,7 +167,7 @@ function _renderStatusChips() {
   const el = document.getElementById('studentStatusChips');
   if (!el) return;
   const items = [['Active','Active'], ['Inactive','Inactive'], ['All','All']];
-  el.innerHTML = items.map(([value,label]) => '<button class="chip' + (value === _stuStatus ? ' active' : '') + '" data-status="' + esc(value) + '" onclick="filterStuStatus(\'' + esc(value) + '\')">' + esc(label) + '</button>').join('');
+  el.innerHTML = items.map(([value,label]) => '<button type="button" class="chip' + (value === _stuStatus ? ' active' : '') + '" aria-pressed="' + (value === _stuStatus ? 'true' : 'false') + '" data-status="' + esc(value) + '" onclick="filterStuStatus(\'' + esc(value) + '\')">' + esc(label) + '</button>').join('');
 }
 window.filterStuStatus = function(status) {
   _stuStatus = status || 'Active';
@@ -188,7 +188,7 @@ function _renderClassChips() {
   )].sort()];
 
   el.innerHTML = classes.map(c =>
-    `<button class="chip${c === _stuClass ? ' active' : ''}" data-class="${esc(c)}" onclick="filterStuClass('${esc(c)}')">${esc(c)}</button>`
+    `<button type="button" class="chip${c === _stuClass ? ' active' : ''}" aria-pressed="${c === _stuClass ? 'true' : 'false'}" data-class="${esc(c)}" onclick="filterStuClass('${esc(c)}')">${esc(c)}</button>`
   ).join('');
 }
 
