@@ -350,6 +350,13 @@ window.closeDashboardNotifications = function() {
 };
 
 if (!window._dashboardNotificationEventsInstalled) {
+  document.addEventListener('keydown', (event) => {
+    if (!['Enter', ' '].includes(event.key)) return;
+    const card = event.target?.closest?.('.dashboard-link-card[role="button"][tabindex="0"]');
+    if (!card) return;
+    event.preventDefault();
+    card.click();
+  });
   document.addEventListener('pointerdown', (event) => {
     const wrap = document.getElementById('dashboardNotificationWrap');
     if (!wrap?.contains(event.target)) window.closeDashboardNotifications();
