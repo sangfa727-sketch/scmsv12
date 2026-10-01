@@ -150,6 +150,7 @@ window.saveHomework = async function() {
 
     closeModal();
     _renderHwList();
+    if (typeof window.refreshDashboardHomework === 'function') void window.refreshDashboardHomework();
     showToast(t('hw.saved'));
     if (window.APP.tg?.HapticFeedback) window.APP.tg.HapticFeedback.notificationOccurred('success');
   } catch (e) {
@@ -235,6 +236,7 @@ window.saveEditHomework = async function(id) {
     if (idx >= 0) window.APP.homework[idx] = { ...window.APP.homework[idx], ...patch };
     closeModal();
     _renderHwList();
+    if (typeof window.refreshDashboardHomework === 'function') void window.refreshDashboardHomework();
     showToast(t('hw.updated'));
   } catch (e) {
     btn.disabled = false; btn.textContent = t('common.saveChanges');
@@ -255,6 +257,7 @@ async function doDeleteHomework(id) {
     await API.deleteHomework(id);
     window.APP.homework = window.APP.homework.filter(x => String(x.id) !== String(id));
     _renderHwList();
+    if (typeof window.refreshDashboardHomework === 'function') void window.refreshDashboardHomework();
     showToast(t('common.deleted'));
   } catch (e) {
     showToast(t('common.deleteFailed', { err: e.message || t('common.error') }));
