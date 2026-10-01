@@ -175,8 +175,8 @@ window.openParentCommModal = function() {
 
       <label class="field-label">${t('comms.sendTo')}</label>
       <div class="pill-group" id="commTargetPills">
-        <button type="button" class="pill active" data-value="class" onclick="selectCommTarget('class')">${t('comms.wholeClass')}</button>
-        <button type="button" class="pill" data-value="student" onclick="selectCommTarget('student')">${t('comms.individual')}</button>
+        <button type="button" class="pill active" data-value="class" aria-pressed="true" onclick="selectCommTarget('class')">${t('comms.wholeClass')}</button>
+        <button type="button" class="pill" data-value="student" aria-pressed="false" onclick="selectCommTarget('student')">${t('comms.individual')}</button>
       </div>
 
       <div id="commClassTarget" class="comm-target-panel is-active" aria-hidden="false">
