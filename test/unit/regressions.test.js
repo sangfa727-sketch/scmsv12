@@ -56,6 +56,14 @@ test('dashboard summary cards and incident entry points stay protected', () => {
   assert.match(dashboard, /window\.goToPage\('incidents'\)/);
   assert.match(dashboard, /window\.goToPage\('parents'\)/);
   assert.match(dashboard, /_dashboardOpenIncidentStudent/);
+  assert.match(dashboard, /_dashboardOpenStudent/);
+  assert.match(dashboard, /dashboard-class-card/);
+  assert.match(dashboard, /dashboard-missing-attendance-card/);
+  assert.match(dashboard, /dashboard-homework-card/);
+  assert.match(dashboard, /dashboard-attention-card/);
+  assert.match(dashboard, /window\.goToPage\('students'\)/);
+  assert.match(dashboard, /window\.goToPage\('hw'\)/);
+  assert.match(dashboard, /_dashboardGoToAttendance\(this\.dataset\.class\)/);
   assert.match(dashboard, /data-student-id=/);
   assert.match(css, /#102A43/);
   assert.match(css, /dashboard-link-card/);
