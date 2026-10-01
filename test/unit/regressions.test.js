@@ -76,6 +76,10 @@ test('dashboard notifications and keyboard interaction stay protected', () => {
   assert.match(dashboard, /id="dashboardNotificationMenu"/);
   assert.match(dashboard, /closeDashboardNotifications/);
   assert.match(dashboard, /event\.key !== 'Escape'/);
+  assert.match(dashboard, /\['Enter', ' '\]\.includes\(event\.key\)/);
+  assert.match(dashboard, /closest\?\.\('\.dashboard-link-card\[role="button"\]\[tabindex="0"\]'\)/);
+  assert.match(dashboard, /event\.preventDefault\(\)/);
+  assert.match(dashboard, /card\.click\(\)/);
   assert.match(dashboard, /pointerdown/);
   assert.match(dashboard, /dash\.noNewNotifications/);
   assert.match(dashboard, /role="button"/);
