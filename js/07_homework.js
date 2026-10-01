@@ -50,7 +50,7 @@ function _renderHwList() {
   el.innerHTML = list.map(h => {
     const color = typeColors[h.type] || '#6B7280';
     return `
-      <div class="list-card" data-hw-id="${esc(h.id)}">
+      <div class="list-card" data-hw-id="${esc(h.id)}" data-class="${esc(h.class || '')}" data-date="${esc(h.date || '')}">
         <div class="card-row">
           <div class="hw-type-dot" style="background:${color}"></div>
           <div class="card-info">
