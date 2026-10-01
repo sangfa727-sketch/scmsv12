@@ -61,3 +61,24 @@ test('dashboard summary cards and incident entry points stay protected', () => {
   assert.match(css, /dashboard-link-card/);
   assert.ok(html.includes('dashboard.css?v=20261001e'));
 });
+
+
+test('dashboard notifications and keyboard interaction stay protected', () => {
+  const dashboard = read('js/27_dashboard.js');
+  const css = read('dashboard.css');
+  assert.match(dashboard, /refreshDashboardNotifications/);
+  assert.match(dashboard, /_renderDashboardNotificationBell/);
+  assert.match(dashboard, /dashboard-notification-btn/);
+  assert.match(dashboard, /dashboard-notification-badge/);
+  assert.match(dashboard, /aria-label="\$\{t\('dash\.notifications'\)\}"/);
+  assert.match(dashboard, /aria-expanded="false"/);
+  assert.match(dashboard, /aria-controls="dashboardNotificationMenu"/);
+  assert.match(dashboard, /id="dashboardNotificationMenu"/);
+  assert.match(dashboard, /closeDashboardNotifications/);
+  assert.match(dashboard, /event\.key !== 'Escape'/);
+  assert.match(dashboard, /pointerdown/);
+  assert.match(dashboard, /dash\.noNewNotifications/);
+  assert.match(dashboard, /role="button"/);
+  assert.match(dashboard, /tabindex="0"/);
+  assert.match(css, /dashboard-link-card:focus-visible/);
+});
