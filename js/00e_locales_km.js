@@ -162,7 +162,7 @@ window.I18N_KM = {
   "dash.myClassesOnly": "តែថ្នាក់របស់ខ្ញុំប៉ុណ្ណោះ",
   "dash.wholeSchool": "ទូទាំងសាលា",
   "dash.dashboardScope": "វិសាលភាពផ្ទាំងគ្រប់គ្រង",
-  "dash.noAssignedClasses": "មិនមានថ្នាក់ដែលបានកំណត់ឱ្យគណនីគ្រូរបស់អ្នកទេ។"
+  "dash.noAssignedClasses": "មិនមានថ្នាក់ដែលបានកំណត់ឱ្យគណនីគ្រូរបស់អ្នកទេ។",
   "dash.todaysSchedule": "កាលវិភាគថ្ងៃនេះ",
   "dash.noClassesToday": "ថ្ងៃនេះមិនមានថ្នាក់រៀនតាមកាលវិភាគទេ។",
   "dash.quickActions": "សកម្មភាពរហ័ស",
