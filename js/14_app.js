@@ -533,7 +533,6 @@ function _applyDashboardContext(pageId) {
 
 window.clearDashboardContext = function() {
   delete window.APP.dashboardContext;
-  document.querySelectorAll('.dashboard-context-banner').forEach(el => el.remove());
   document.querySelectorAll('.dashboard-context-highlight').forEach(el => el.classList.remove('dashboard-context-highlight'));
 };
 
