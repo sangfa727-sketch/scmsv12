@@ -59,13 +59,14 @@ test('dashboard summary cards and incident entry points stay protected', () => {
   assert.match(dashboard, /data-student-id=/);
   assert.match(css, /#102A43/);
   assert.match(css, /dashboard-link-card/);
-  assert.ok(html.includes('dashboard.css?v=20261001e'));
+  assert.ok(html.includes('dashboard.css?v=20261001f'));
 });
 
 
 test('dashboard notifications and keyboard interaction stay protected', () => {
   const dashboard = read('js/27_dashboard.js');
   const css = read('dashboard.css');
+  const html = read('index.html');
   assert.match(dashboard, /refreshDashboardNotifications/);
   assert.match(dashboard, /_renderDashboardNotificationBell/);
   assert.match(dashboard, /dashboard-notification-btn/);
