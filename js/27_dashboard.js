@@ -272,10 +272,10 @@ function _paintDashboard(container) {
 
     <div class="more-section-title">${t('dash.quickActions')}</div>
     <div class="dashboard-actions">
-      <button onclick="window.goToPage('attend')">${t('dash.takeAttendance')}</button>
-      <button onclick="window.goToPage('hw')">${t('dash.logHomework')}</button>
-      <button onclick="window.goToPage('parents')">${t('dash.messageParent')}</button>
-      <button onclick="window.goToPage('incidents')">${t('dash.recordIncident')}</button>
+      <button type="button" onclick="window.goToPage('attend')">${t('dash.takeAttendance')}</button>
+      <button type="button" onclick="window.goToPage('hw')">${t('dash.logHomework')}</button>
+      <button type="button" onclick="window.goToPage('parents')">${t('dash.messageParent')}</button>
+      <button type="button" onclick="window.goToPage('incidents')">${t('dash.recordIncident')}</button>
     </div>
 
     ${attentionList.length ? `
