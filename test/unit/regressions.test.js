@@ -319,7 +319,7 @@ test('dashboard notification labels remain localized across supported locales', 
   ]) {
     assert.match(dashboard, new RegExp(key.replace('.', '\\.') + '\\s*[\'\"]'), 'dashboard missing notification key: ' + key);
     for (const file of localeFiles) {
-      assert.match(read(file), new RegExp("['\\\"]" + key.replace('.', '\\\\.') + "['\\\"]\\s*:"), file + ' missing ' + key);
+      assert.match(read(file), new RegExp("['\\\"]" + key.replace('.', '\\.') + "['\\\"]\\s*:"), file + ' missing ' + key);
     }
   }
 });
