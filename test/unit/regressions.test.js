@@ -124,7 +124,7 @@ test('teacher access localization covers all supported UI languages', () => {
 test('password prompt remains fully localized', () => {
   const app = read('js/14_app.js');
   for (const key of ['password.newLabel', 'password.newPlaceholder', 'password.show', 'password.reset']) {
-    assert.match(app, new RegExp('t\\(\\'' + key.replace('.', '\\\\.') + '\\'\\)'));
+    assert.ok(app.includes(`t('${key}')`), `missing localized password key: ${key}`);
   }
   assert.doesNotMatch(app, /Password အသစ်/);
   assert.doesNotMatch(app, /အနည်းဆုံး ၆ လုံး/);
