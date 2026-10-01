@@ -54,9 +54,9 @@ function _paintLeaveRequests(container) {
       <div class="stat-card red"><div class="stat-num">${counts.Rejected}</div><div class="stat-lbl">${t('leave.status.Rejected')}</div></div>
     </div>
 
-    <div class="chips-row" id="leaveFilterChips">
+    <div class="chips-row" id="leaveFilterChips" role="group" aria-label="${t('leave.filter')}">
       ${['Pending', 'Approved', 'Rejected', 'all'].map(s => `
-        <button class="chip${_leaveRequestFilter === s ? ' active' : ''}" data-filter="${s}" onclick="setLeaveFilter('${s}')">
+        <button type="button" class="chip${_leaveRequestFilter === s ? ' active' : ''}" data-filter="${s}" aria-pressed="${_leaveRequestFilter === s ? 'true' : 'false'}" onclick="setLeaveFilter('${s}')">
           ${s === 'all' ? t('common.all') || 'All' : t('leave.status.' + s)}
         </button>`).join('')}
     </div>
