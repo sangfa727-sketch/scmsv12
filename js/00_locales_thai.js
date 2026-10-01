@@ -107,5 +107,18 @@
   Object.assign(overrides, {'login.loading':'กำลังโหลดการเข้าสู่ระบบ…','login.waitRetry':'โปรดรอสักครู่แล้วลองอีกครั้ง','cg.required':'โปรดกรอกทั้ง Class และ Grade'});
   Object.assign(overrides, {'teacher.editTitle':'แก้ไขครู','teacher.editSubtitle':'แก้ไขชื่อครูและ Login Name ที่ใช้สำหรับบัตรประจำตัวและการเข้าสู่ระบบครู','teacher.superAdmin':'ผู้ดูแลระบบสูงสุด'});
   Object.assign(overrides, {'settings.theme':'ธีม','settings.themeLight':'☀️ สว่าง','settings.themeDark':'🌙 มืด'});
+  Object.assign(overrides, {
+    'login.loginNamePh':'เช่น teacher1','cg.pairHint':'จัดการชั้นเรียนและระดับชั้นได้ในที่เดียว','cg.pairExample':'ตัวอย่าง: Grade 5 + ห้อง A, Grade 5 + ห้อง B, Kindergarten + K1','cg.classGrade':'ชั้นเรียน → ระดับชั้น',
+    'tm.teacherIdCardTitle':'บัตรประจำตัวครู','settings.actionsLabel':'การดำเนินการตั้งค่า','tm.editTeacher':'แก้ไขครู','tm.manageAccess':'จัดการสิทธิ์การเข้าถึง',
+    'branding.logoTitle':'โลโก้โรงเรียน','branding.logoSubtitle':'แสดงในแถบด้านข้าง ส่วนหัวแอป และหน้าเพิ่มเติม','branding.logoTip':'ใช้รูปสี่เหลี่ยมจัตุรัส แนะนำ PNG พื้นหลังโปร่งใส ระบบจะปรับเป็น 256×256 อัตโนมัติ',
+    'branding.coverTitle':'ภาพหน้าปก','branding.coverSubtitle':'ภาพแบนเนอร์ที่แสดงด้านหลังโลโก้โรงเรียนด้านบนของแถบด้านข้าง','branding.coverTip':'ใช้ภาพแนวนอนประมาณ 3:1 ระบบจะครอปจากตรงกลางเป็น 1200×400 อัตโนมัติ',
+    'branding.photoTitle':'รูปโปรไฟล์ของฉัน','branding.photoSubtitle':'แสดงในแถบด้านข้างและการ์ดโปรไฟล์','branding.photoTip':'แนะนำรูปหน้าตรงที่คมชัด ระบบจะครอปเป็นสี่เหลี่ยมจัตุรัสอัตโนมัติ',
+    'branding.processing':'กำลังประมวลผล…','branding.uploading':'กำลังอัปโหลด…','branding.removing':'กำลังลบ…','branding.saved':'บันทึกแล้ว ✓','branding.removed':'ลบแล้ว ✓',
+    'branding.removeConfirmTitle':'ลบหรือไม่?','branding.removeConfirmText':'คุณแน่ใจหรือไม่ว่าต้องการลบรูปนี้?','branding.removeConfirmButton':'ลบ','branding.savedToast':'บันทึกแล้ว','branding.removedToast':'ลบแล้ว',
+    'tm.requiredEdit':'ต้องกรอกชื่อผู้ใช้และชื่อครู','tm.updated':'อัปเดตข้อมูลครูแล้ว','tm.saveChanges':'บันทึกการเปลี่ยนแปลง',
+    'branding.readImageFailed':'ไม่สามารถอ่านรูปภาพได้','branding.processImageFailed':'ไม่สามารถประมวลผลรูปภาพได้','branding.failed':'ดำเนินการไม่สำเร็จ','branding.saveFailed':'บันทึกไม่สำเร็จ',
+    'tm.editTeacherLabel':'แก้ไขครู','tm.editTeacherSubtitle':'อัปเดตชื่อครูและ Login Name ที่ใช้สำหรับบัตรครูและการเข้าสู่ระบบ','tm.teacherId':'รหัสครู','tm.loginName':'ชื่อเข้าสู่ระบบ','tm.teacherName':'ชื่อครู','tm.email':'อีเมล','tm.role':'บทบาท','tm.roleTeacher':'ครู','tm.roleAdmin':'ผู้ดูแลระบบ','tm.roleSuperAdmin':'ผู้ดูแลระบบสูงสุด','tm.saving':'กำลังบันทึก…','tm.cancel':'ยกเลิก','tm.teacherIdCardLabel':'รหัสครู','tm.loginNameLabel':'ชื่อเข้าสู่ระบบ','tm.teacherLoginQr':'QR สำหรับเข้าสู่ระบบครู','tm.qrUnavailable':'ไม่สามารถใช้ QR ได้',
+    'subject.exists':'มีวิชานี้อยู่แล้ว','subject.addFailed':'เพิ่มวิชาไม่สำเร็จ','picker.noMatch':'ไม่พบนักเรียนที่ตรงกับ “{query}”','teacher.updateRequired':'ต้องกรอกชื่อผู้ใช้และชื่อครู','teacher.qrUnavailable':'ไม่สามารถใช้ QR ได้','password.hide':'ซ่อนรหัสผ่าน','password.show':'แสดงรหัสผ่าน'
+  });
   window.I18N_TH = Object.assign({}, base, overrides);
 })();
