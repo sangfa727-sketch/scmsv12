@@ -546,6 +546,27 @@ window.clearDashboardContext = function() {
   document.querySelectorAll('.dashboard-context-highlight').forEach(el => el.classList.remove('dashboard-context-highlight'));
 };
 
+// Dashboard context is a one-interaction hint: once the user clicks/taps
+// anywhere on the destination page, the handoff indicator disappears.
+// isTrusted keeps the automatic attendance chip selection from clearing it.
+if (!window._dashboardContextInteractionBound) {
+  window._dashboardContextInteractionBound = true;
+  const dismissDashboardContextOnInteraction = (event) => {
+    if (!event.isTrusted || !window.APP?.dashboardContext) return;
+    const page = event.target?.closest?.('.page.active');
+    if (!page) return;
+    window.clearDashboardContext();
+  };
+  document.addEventListener('pointerdown', dismissDashboardContextOnInteraction, true);
+  document.addEventListener('keydown', (event) => {
+    if (!event.isTrusted || !window.APP?.dashboardContext) return;
+    if (!['Enter', ' '].includes(event.key)) return;
+    const page = event.target?.closest?.('.page.active');
+    if (!page) return;
+    window.clearDashboardContext();
+  }, true);
+}
+
 // ─── LANGUAGE SWITCH → re-render JS-generated text ──────────────────────────
 // Static [data-i18n] nodes are handled by I18N.apply(); everything built in JS
 // with t() has to be rebuilt, so re-render the landing screen / sidebar / the
