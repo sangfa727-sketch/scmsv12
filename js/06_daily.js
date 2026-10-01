@@ -31,7 +31,7 @@ function _renderDailyClassChips() {
   if (!_dailyClass || !classes.includes(_dailyClass)) _dailyClass = classes[0];
 
   el.innerHTML = classes.map(c =>
-    `<button class="chip${c === _dailyClass ? ' active' : ''}" data-class="${esc(c)}" onclick="selectDailyClass('${esc(c)}')">${esc(c)}</button>`
+    `<button type="button" class="chip${c === _dailyClass ? ' active' : ''}" aria-pressed="${c === _dailyClass ? 'true' : 'false'}" data-class="${esc(c)}" onclick="selectDailyClass('${esc(c)}')">${esc(c)}</button>`
   ).join('');
 
   _renderDailyList(_dailyClass);
