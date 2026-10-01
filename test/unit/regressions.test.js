@@ -417,7 +417,7 @@ test('communication and leave filters preserve accessible selected state', () =>
 
 test('filter controls preserve native button semantics and selected state', () => {
   const files = [
-    ['js/04_students.js', /<button type="button" class="chip' + (value === _stuStatus/, /aria-pressed="'/],
+    ['js/04_students.js', /<button type="button" class="chip' \+ \(value === _stuStatus/, /aria-pressed="/],
     ['js/06_daily.js', /<button type="button" class="chip\$\{c === _dailyClass/, /aria-pressed="\$\{c === _dailyClass/],
     ['js/07_homework.js', /<button type="button" class="chip\$\{c === _hwClass/, /aria-pressed="\$\{c === _hwClass/],
     ['js/08_comms.js', /<button type="button" class="chip\$\{ty === _commsType/, /aria-pressed="\$\{ty === _commsType/],
