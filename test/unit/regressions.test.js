@@ -210,3 +210,20 @@ test('all supported locales keep the English translation key contract', () => {
     }
   }
 });
+
+
+test('parent portal event form stays fully localized', () => {
+  const comms = read('js/08_comms.js');
+  for (const key of [
+    'comms.portalEventType', 'comms.portalEventMeeting', 'comms.portalEventAnnouncement',
+    'comms.portalEventSchool', 'comms.portalEventHoliday', 'comms.portalTitle', 'comms.portalClass',
+    'comms.portalWholeSchool', 'comms.portalStart', 'comms.portalEnd', 'comms.portalOptional',
+    'comms.portalDescription', 'comms.portalPublish', 'comms.portalCancel'
+  ]) {
+    assert.ok(comms.includes("t('" + key + "')"), 'missing localized parent portal key: ' + key);
+  }
+  assert.doesNotMatch(comms, /Event type/);
+  assert.doesNotMatch(comms, /Parent meeting/);
+  assert.doesNotMatch(comms, /School event/);
+  assert.doesNotMatch(comms, /Publish to Parent Portal/);
+});
