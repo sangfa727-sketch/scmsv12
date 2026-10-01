@@ -115,7 +115,7 @@ test('dashboard-to-detail context handoff remains wired', () => {
   for (const token of ['_dashboardSetContext', "type: 'attendance'", "type: 'student'", "type: 'homework'", "type: 'incident'", '_dashboardOpenHomework']) {
     assert.ok(dashboard.includes(token), 'missing dashboard context token: ' + token);
   }
-  for (const token of ['_applyDashboardContext', 'dashboard-context-banner', 'dashboard-context-highlight', 'clearDashboardContext', "t('dash.fromDashboard')"]) {
+  for (const token of ['_applyDashboardContext', 'dashboard-context-highlight', 'clearDashboardContext']) {
     assert.ok(app.includes(token), 'missing destination context token: ' + token);
   }
   assert.ok(app.includes("_applyDashboardContext(pageId);"));
@@ -127,8 +127,8 @@ test('dashboard-to-detail context handoff remains wired', () => {
   assert.ok(students.includes('data-student-id="${esc(s.student_id)}"'));
   assert.ok(homework.includes('data-hw-id="${esc(h.id)}"'));
   assert.ok(incidents.includes('data-incident-id="${esc(i.id)}"'));
-  assert.ok(css.includes('.dashboard-context-banner'));
   assert.ok(css.includes('.dashboard-context-highlight'));
+  assert.doesNotMatch(app, /dashboard-context-banner/);
 });
 
 test('dashboard scope controls stay localized and functional', () => {
