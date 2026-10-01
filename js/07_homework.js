@@ -18,7 +18,7 @@ function renderHomework() {
   if ((!_hwClass || !classes.includes(_hwClass)) && classes.length) _hwClass = classes[0];
 
   el.innerHTML = classes.map(c =>
-    `<button class="chip${c === _hwClass ? ' active' : ''}" data-class="${esc(c)}" onclick="selectHwClass('${esc(c)}')">${esc(c)}</button>`
+    `<button type="button" class="chip${c === _hwClass ? ' active' : ''}" aria-pressed="${c === _hwClass ? 'true' : 'false'}" data-class="${esc(c)}" onclick="selectHwClass('${esc(c)}')">${esc(c)}</button>`
   ).join('');
 
   _renderHwList();
