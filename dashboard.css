@@ -370,3 +370,86 @@
 .dashboard-context-highlight{position:relative;outline:2px solid rgba(59,130,246,.42)!important;outline-offset:2px;box-shadow:0 8px 26px rgba(59,130,246,.12)!important;animation:dashboardContextPulse 1.8s ease 1;transition:outline-color .32s ease,box-shadow .32s ease}.dashboard-context-highlight::after{content:'';position:absolute;inset:0;border-radius:inherit;pointer-events:none;background:linear-gradient(90deg,rgba(59,130,246,.07),transparent 42%);opacity:1;transition:opacity .32s ease}.dashboard-context-highlight.dashboard-context-fade{animation:none!important;outline-color:transparent!important;box-shadow:0 8px 26px rgba(59,130,246,0)!important}.dashboard-context-highlight.dashboard-context-fade::after{opacity:0}
 @keyframes dashboardContextPulse{0%,100%{box-shadow:0 8px 26px rgba(59,130,246,.12)}45%{box-shadow:0 8px 30px rgba(59,130,246,.24)}}
 [data-theme="dark"] .dashboard-context-highlight{outline-color:rgba(96,165,250,.48)!important;box-shadow:0 8px 28px rgba(37,99,235,.22)!important}
+
+
+/* ============================================================
+   SCMS v12 — Premium Dark Theme refinement
+   Graphite surfaces + restrained slate/navy hierarchy.
+   Keeps dashboard cards integrated with the dark theme instead
+   of reading as bright blue blocks.
+   ============================================================ */
+[data-theme="dark"] #page-dashboard .stat-card,
+[data-theme="dark"] #page-dashboard .list-card {
+  background: #27313B;
+  border: 1px solid rgba(205,220,234,0.09);
+  box-shadow:
+    0 1px 2px rgba(0,0,0,0.20),
+    0 6px 18px rgba(0,0,0,0.16);
+}
+
+[data-theme="dark"] #page-dashboard .stat-card:hover,
+[data-theme="dark"] #page-dashboard .list-card:hover {
+  background: #2B3641;
+  border-color: rgba(205,220,234,0.13);
+  box-shadow:
+    0 3px 8px rgba(0,0,0,0.22),
+    0 10px 24px rgba(0,0,0,0.18);
+}
+
+[data-theme="dark"] #page-dashboard .dashboard-link-card.stat-card,
+[data-theme="dark"] #page-dashboard .dashboard-link-card.stat-card.red,
+[data-theme="dark"] #page-dashboard .dashboard-link-card.stat-card.green {
+  background: #27313B;
+  border: 1px solid rgba(133,164,192,0.13);
+}
+
+[data-theme="dark"] #page-dashboard .dashboard-link-card.stat-card:hover,
+[data-theme="dark"] #page-dashboard .dashboard-link-card.stat-card.red:hover,
+[data-theme="dark"] #page-dashboard .dashboard-link-card.stat-card.green:hover {
+  background: #2B3641;
+}
+
+[data-theme="dark"] #page-dashboard .dashboard-link-card.stat-card .stat-num {
+  color: #EEF2F6;
+}
+
+[data-theme="dark"] #page-dashboard .dashboard-link-card.stat-card .stat-lbl {
+  color: #B8C2CC;
+}
+
+[data-theme="dark"] #page-dashboard .stat-card.green .stat-num {
+  color: #78B89A;
+}
+
+[data-theme="dark"] #page-dashboard .stat-card.red .stat-num {
+  color: #D88F91;
+}
+
+[data-theme="dark"] #page-dashboard .dashboard-actions button {
+  background: #2B3948;
+  color: #EEF2F6;
+  border: 1px solid rgba(157,181,204,0.12);
+}
+
+[data-theme="dark"] #page-dashboard .dashboard-actions button:hover {
+  background: #30404F;
+}
+
+[data-theme="dark"] #page-dashboard .dashboard-banner {
+  background: #222B34;
+  border-color: rgba(214,168,91,0.48);
+}
+
+[data-theme="dark"] .dashboard-notification-btn,
+[data-theme="dark"] .dashboard-notification-menu {
+  background: #202730;
+  border-color: rgba(214,226,238,0.10);
+}
+
+[data-theme="dark"] .dashboard-notification-item:hover {
+  background: #27313B;
+}
+
+[data-theme="dark"] .dashboard-notification-badge {
+  border-color: #171B20;
+}
