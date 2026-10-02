@@ -31,20 +31,22 @@
 }
 
 [data-theme="dark"] {
-  --bg:      #0E1012;
-  --bg2:     #15181B;
-  --bg3:     #1D2226;
-  --surface: #171B1F;
-  --surface2:#20262B;
-  --border:  rgba(255,255,255,0.085);
-  --border2: rgba(255,255,255,0.15);
-  --text:    #F1F3F4;
-  --text2:   #B7BEC4;
-  --muted:   #737C83;
-  --accent:  #F1F3F4;
-  --accent2: #D3D8DC;
-  --shadow:  0 1px 3px rgba(0,0,0,0.48), 0 10px 28px rgba(0,0,0,0.20);
-  --tg-bg:   #0E1012;
+  /* SCMS v12 Premium Dark — graphite foundation with restrained navy accents. */
+  --bg:      #171B20;
+  --bg2:     #1D232A;
+  --bg3:     #252D36;
+  --surface: #202730;
+  --surface2:#29323D;
+  --border:  rgba(214,226,238,0.10);
+  --border2: rgba(214,226,238,0.17);
+  --text:    #EEF2F6;
+  --text2:   #B8C2CC;
+  --muted:   #7F8B97;
+  --accent:  #E8EDF2;
+  --accent2: #CAD4DE;
+  --blue:    #6F8FAA;
+  --shadow:  0 1px 2px rgba(0,0,0,0.22), 0 8px 24px rgba(0,0,0,0.20);
+  --tg-bg:   #171B20;
 }
 
 /* ── Reset ─────────────────────────────────────────────────────── */
@@ -1472,6 +1474,12 @@ html[data-platform="web"] .tab-btn-chat {
   color: #FFFFFF;
 }
 .sidebar-item.active .sidebar-icon { color: #FFFFFF; }
+[data-theme="dark"] .sidebar-item.active {
+  background: #2B3948;
+  color: #F3F6F9;
+  box-shadow: inset 0 0 0 1px rgba(157,181,204,0.14);
+}
+[data-theme="dark"] .sidebar-item.active .sidebar-icon { color: #F3F6F9; }
 .sidebar-badge {
   margin-left: auto;
   background: var(--red);

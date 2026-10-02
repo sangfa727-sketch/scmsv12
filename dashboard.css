@@ -132,35 +132,6 @@
     0 14px 36px rgba(0, 0, 0, 0.05);
 }
 
-/* 3. Dark mode — heavier shadows so they read on the dark bg */
-[data-theme="dark"] #page-dashboard .stat-card {
-  background: #1E1E1C;
-  box-shadow:
-    0 1px 2px rgba(0, 0, 0, 0.35),
-    0 4px 12px rgba(0, 0, 0, 0.28),
-    0 8px 24px rgba(0, 0, 0, 0.18);
-}
-[data-theme="dark"] #page-dashboard .stat-card:hover {
-  box-shadow:
-    0 2px 4px rgba(0, 0, 0, 0.4),
-    0 8px 20px rgba(0, 0, 0, 0.35),
-    0 16px 40px rgba(0, 0, 0, 0.25);
-}
-[data-theme="dark"] #page-dashboard .list-card {
-  background: #1E1E1C;
-  box-shadow:
-    0 1px 2px rgba(0, 0, 0, 0.35),
-    0 3px 10px rgba(0, 0, 0, 0.28),
-    0 8px 24px rgba(0, 0, 0, 0.18);
-}
-[data-theme="dark"] #page-dashboard .list-card:hover {
-  box-shadow:
-    0 2px 4px rgba(0, 0, 0, 0.4),
-    0 8px 20px rgba(0, 0, 0, 0.35),
-    0 14px 36px rgba(0, 0, 0, 0.25);
-}
-
-
 /* ============================================================
    SCMS v12 — compact density alignment
    dashboard.css loads after style.css, so keep dashboard cards
@@ -201,6 +172,7 @@
     box-shadow: 0 1px 5px rgba(0,0,0,.035);
   }
 }
+
 
 
 /* SCMS v12 — FINAL compact/grid override (loaded after style.css) */
@@ -251,24 +223,13 @@
 }
 
 
-/* Dashboard summary cards: calm, authoritative navy-blue surface in dark theme. */
-#page-dashboard .dashboard-link-card { cursor: pointer; }
-#page-dashboard .dashboard-link-card:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
-[data-theme="dark"] #page-dashboard .dashboard-link-card.stat-card {
-  background: #102A43;
-  border: 1px solid rgba(89, 149, 210, 0.18);
-  box-shadow: 0 1px 2px rgba(0,0,0,.42), 0 5px 14px rgba(0,0,0,.30), inset 0 1px 0 rgba(255,255,255,.035);
+
+
+/* Keyboard focus for dashboard summary cards */
+.dashboard-link-card:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
 }
-[data-theme="dark"] #page-dashboard .dashboard-link-card.stat-card .stat-num,
-[data-theme="dark"] #page-dashboard .dashboard-link-card.stat-card .stat-lbl { color: #F3F7FB; }
-[data-theme="dark"] #page-dashboard .dashboard-link-card.stat-card:hover {
-  background: #123553;
-  box-shadow: 0 3px 8px rgba(0,0,0,.44), 0 10px 24px rgba(0,0,0,.30), inset 0 1px 0 rgba(255,255,255,.045);
-}
-[data-theme="dark"] #page-dashboard .dashboard-link-card.stat-card.red,
-[data-theme="dark"] #page-dashboard .dashboard-link-card.stat-card.green { background: #102A43; }
-[data-theme="dark"] #page-dashboard .dashboard-link-card.stat-card.red:hover,
-[data-theme="dark"] #page-dashboard .dashboard-link-card.stat-card.green:hover { background: #123553; }
 
 /* ── Dashboard notification bell/menu ───────────────────────── */
 .dashboard-notification-wrap {
@@ -358,8 +319,11 @@
 .dashboard-notification-item small { margin-top: 2px; color: var(--muted); font-size: 11px; line-height: 1.35; }
 .dashboard-notification-empty { padding: 12px 8px; color: var(--muted); font-size: 12px; text-align: center; }
 [data-theme="dark"] .dashboard-notification-btn,
-[data-theme="dark"] .dashboard-notification-menu { background: #102A43; }
-[data-theme="dark"] .dashboard-notification-item:hover { background: #123553; }
+[data-theme="dark"] .dashboard-notification-menu {
+  background: #202730;
+  border-color: rgba(214,226,238,0.10);
+}
+[data-theme="dark"] .dashboard-notification-item:hover { background: #27313B; }
 @media (max-width: 520px) {
   .dashboard-notification-wrap { top: 10px; right: 10px; }
   .dashboard-notification-menu { width: min(300px, calc(100vw - 20px)); }
@@ -369,4 +333,88 @@
 /* Dashboard → detail-page context handoff */
 .dashboard-context-highlight{position:relative;outline:2px solid rgba(59,130,246,.42)!important;outline-offset:2px;box-shadow:0 8px 26px rgba(59,130,246,.12)!important;animation:dashboardContextPulse 1.8s ease 1;transition:outline-color .32s ease,box-shadow .32s ease}.dashboard-context-highlight::after{content:'';position:absolute;inset:0;border-radius:inherit;pointer-events:none;background:linear-gradient(90deg,rgba(59,130,246,.07),transparent 42%);opacity:1;transition:opacity .32s ease}.dashboard-context-highlight.dashboard-context-fade{animation:none!important;outline-color:transparent!important;box-shadow:0 8px 26px rgba(59,130,246,0)!important}.dashboard-context-highlight.dashboard-context-fade::after{opacity:0}
 @keyframes dashboardContextPulse{0%,100%{box-shadow:0 8px 26px rgba(59,130,246,.12)}45%{box-shadow:0 8px 30px rgba(59,130,246,.24)}}
-[data-theme="dark"] .dashboard-context-highlight{outline-color:rgba(96,165,250,.48)!important;box-shadow:0 8px 28px rgba(37,99,235,.22)!important}
+[data-theme="dark"] .dashboard-context-highlight{outline-color:rgba(126,156,183,.42)!important;box-shadow:0 8px 28px rgba(65,88,110,.20)!important}
+[data-theme="dark"] .dashboard-context-highlight::after{background:linear-gradient(90deg,rgba(111,143,170,.08),transparent 42%)}
+
+
+/* ============================================================
+   SCMS v12 — Premium Dark Theme refinement
+   Graphite surfaces + restrained slate/navy hierarchy.
+   Keeps dashboard cards integrated with the dark theme instead
+   of reading as bright blue blocks.
+   ============================================================ */
+[data-theme="dark"] #page-dashboard .stat-card,
+[data-theme="dark"] #page-dashboard .list-card {
+  background: #27313B;
+  border: 1px solid rgba(205,220,234,0.09);
+  box-shadow:
+    0 1px 2px rgba(0,0,0,0.20),
+    0 6px 18px rgba(0,0,0,0.16);
+}
+
+[data-theme="dark"] #page-dashboard .stat-card:hover,
+[data-theme="dark"] #page-dashboard .list-card:hover {
+  background: #2B3641;
+  border-color: rgba(205,220,234,0.13);
+  box-shadow:
+    0 3px 8px rgba(0,0,0,0.22),
+    0 10px 24px rgba(0,0,0,0.18);
+}
+
+[data-theme="dark"] #page-dashboard .dashboard-link-card.stat-card,
+[data-theme="dark"] #page-dashboard .dashboard-link-card.stat-card.red,
+[data-theme="dark"] #page-dashboard .dashboard-link-card.stat-card.green {
+  background: #27313B;
+  border: 1px solid rgba(133,164,192,0.13);
+}
+
+[data-theme="dark"] #page-dashboard .dashboard-link-card.stat-card:hover,
+[data-theme="dark"] #page-dashboard .dashboard-link-card.stat-card.red:hover,
+[data-theme="dark"] #page-dashboard .dashboard-link-card.stat-card.green:hover {
+  background: #2B3641;
+}
+
+[data-theme="dark"] #page-dashboard .dashboard-link-card.stat-card .stat-num {
+  color: #EEF2F6;
+}
+
+[data-theme="dark"] #page-dashboard .dashboard-link-card.stat-card .stat-lbl {
+  color: #B8C2CC;
+}
+
+[data-theme="dark"] #page-dashboard .stat-card.green .stat-num {
+  color: #78B89A;
+}
+
+[data-theme="dark"] #page-dashboard .stat-card.red .stat-num {
+  color: #D88F91;
+}
+
+[data-theme="dark"] #page-dashboard .dashboard-actions button {
+  background: #2B3948;
+  color: #EEF2F6;
+  border: 1px solid rgba(157,181,204,0.12);
+}
+
+[data-theme="dark"] #page-dashboard .dashboard-actions button:hover {
+  background: #30404F;
+}
+
+[data-theme="dark"] #page-dashboard .dashboard-banner {
+  background: #222B34;
+  border-color: rgba(214,168,91,0.48);
+}
+
+[data-theme="dark"] .dashboard-notification-btn,
+[data-theme="dark"] .dashboard-notification-menu {
+  background: #202730;
+  border-color: rgba(214,226,238,0.10);
+}
+
+[data-theme="dark"] .dashboard-notification-item:hover {
+  background: #27313B;
+}
+
+[data-theme="dark"] .dashboard-notification-badge {
+  border-color: #171B20;
+}
