@@ -118,3 +118,15 @@ test('management admin handlers remain explicitly gated', () => {
     assert.ok(block.includes("showToast(t('cg.adminOnly'))"), name + ' must provide admin denial feedback');
   }
 });
+
+
+test('grades UI preserves school-local dates and surfaces grade-load failures', () => {
+  const source = read('js/20_grades.js');
+  assert.ok(source.includes('function _gradesISODate'), 'grades local-date helper missing');
+  assert.ok(source.includes('window.APP?.config?.timezone'), 'grades date must respect configured timezone');
+  assert.ok(source.includes('Intl.DateTimeFormat'), 'grades date must use timezone-aware formatting');
+  assert.ok(!source.includes('new Date().toISOString().slice(0, 10)'), 'grades date must not use UTC date slicing');
+  assert.ok(source.includes("await API.getGrades(assessmentId)"), 'grade read API contract missing');
+  assert.ok(source.includes("showToast(t('common.loadFailed'"), 'grade-load failures must surface to the user');
+  assert.ok(!source.includes('/* fresh assessment, no grades yet */'), 'grade-load failures must not be treated as an empty assessment');
+});
