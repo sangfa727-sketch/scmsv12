@@ -123,6 +123,18 @@ test('assessment grade RPCs enforce view/edit permission contracts', () => {
 });
 
 
+test('database cleanup migration only removes confirmed redundant objects', () => {
+  const migration = read('supabase/migrations/20261003040000_duplicate_index_policy_cleanup.sql');
+  for (const name of ['idx_attendance_date','idx_attendance_school_date','idx_attendance_student_date','idx_dr_date','idx_ms_ym','n8n_state_tg_uq','students_school_idx','students_class_idx','teachers_school_idx','teachers_tg_idx']) {
+    assert.ok(migration.includes('DROP INDEX IF EXISTS public.' + name), 'missing safe index cleanup: ' + name);
+  }
+  for (const name of ['svc_all','srv_all','service_role_all_n8n_state']) {
+    assert.ok(migration.includes('DROP POLICY IF EXISTS ' + name + ' ON public.n8n_state'), 'missing redundant n8n policy cleanup: ' + name);
+  }
+  assert.ok(!migration.includes('DROP INDEX public.n8n_state_pkey'), 'primary key index must never be dropped');
+  assert.ok(!migration.includes('DROP INDEX public.n8n_state_telegram_id_key'), 'constraint-owned unique index must never be dropped');
+});
+
 test('admissions access is admin-gated end-to-end', () => {
   const migration = read('supabase/migrations/20261003030000_admissions_permission_domain_hardening.sql');
   const more = read('js/12_more.js');
