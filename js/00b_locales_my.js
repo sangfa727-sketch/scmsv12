@@ -791,6 +791,8 @@ window.I18N_MY = {
   'grades.year': 'ပညာသင်နှစ်',
   'grades.yearPh': 'ဥပမာ 2026-2027',
   'grades.start': 'စတင်ရက်',
+  'grades.startTime': 'စတင်ချိန်',
+  'grades.endTime': 'ပြီးဆုံးချိန်',
   'grades.end': 'ပြီးဆုံးရက်',
   'grades.enterTermName': 'ကာလအမည် ထည့်ပါ',
   'grades.termAdded': '✓ ကာလ ထည့်ပြီးပါပြီ',
