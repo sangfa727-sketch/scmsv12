@@ -79,3 +79,11 @@ test('assessment grade RPCs enforce view/edit permission contracts', () => {
   assert.ok(migration.includes('v_assessment.subject_id'), 'grade permission scope must include subject');
   assert.ok(migration.includes('v_assessment.class'), 'grade permission scope must include class');
 });
+
+
+test('student photo RPC enforces the existing students.edit permission contract', () => {
+  const migration = read('supabase/migrations/20261002060000_student_photo_rpc_permission_hardening.sql');
+  assert.ok(migration.includes('CREATE OR REPLACE FUNCTION public.rpc_set_student_photo'), 'missing hardened student photo RPC');
+  assert.equal((migration.match(/private\.web_has_permission\(\s*p_session_token,\s*'students\.edit'/g) || []).length, 1, 'students.edit must guard student photo updates');
+  assert.ok(migration.includes("'permission_denied'"), 'permission denial contract missing');
+});
