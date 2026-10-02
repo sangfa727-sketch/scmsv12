@@ -48,7 +48,7 @@ test('supported locales preserve the English key set', () => {
 test('teacher permission locale map covers all supported languages', () => {
   const source = read('js/29_teacher_access.js');
   for (const lang of ['en','my','th','jp','zh','km','ms']) assert.ok(source.includes(lang + ':'), 'missing locale: ' + lang);
-  for (const key of ['dashboard.view','students.view','attendance.manage','homework.manage','permissions.manage']) assert.ok(source.includes(key), 'missing permission key: ' + key);
+  for (const key of ['dashboard.view','students.view','attendance.view','homework.view','permissions.manage']) assert.ok(source.includes(key), 'missing permission key: ' + key);
 });
 
 test('critical page renderers stay wired at boot', () => {
