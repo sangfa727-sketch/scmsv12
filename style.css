@@ -8636,8 +8636,11 @@ html[lang="zh"] textarea {
 }
 
 [data-theme="dark"] .modal-overlay {
-  background: rgba(5,9,13,.58);
+  background: rgba(0,0,0,0);
   transition: opacity .18s ease, background-color .18s ease;
+}
+[data-theme="dark"] .modal-overlay.active {
+  background: rgba(5,9,13,.45);
 }
 [data-theme="dark"] .modal-sheet,
 [data-theme="dark"] .generic-confirm-sheet,
