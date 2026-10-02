@@ -132,6 +132,47 @@
     0 14px 36px rgba(0, 0, 0, 0.05);
 }
 
+/* ============================================================
+   SCMS v12 — compact density alignment
+   dashboard.css loads after style.css, so keep dashboard cards
+   aligned with the global compact responsive system.
+   ============================================================ */
+#page-dashboard .stat-card {
+  padding: 9px 8px;
+  border-radius: 10px;
+  box-shadow: 0 1px 5px rgba(0,0,0,.035);
+}
+#page-dashboard .list-card {
+  border-radius: 10px;
+  padding: 10px 11px;
+  box-shadow: 0 1px 5px rgba(0,0,0,.035);
+}
+.dashboard-banner {
+  padding: 9px 11px;
+  margin: 0 12px 8px;
+  border-radius: 10px;
+}
+.dashboard-actions {
+  gap: 6px;
+  padding: 0 12px 10px;
+}
+.dashboard-actions button {
+  min-width: 0;
+  padding: 8px 9px;
+  border-radius: 9px;
+  font-size: 12px;
+  line-height: 1.25;
+  white-space: normal;
+  overflow-wrap: anywhere;
+}
+.skeleton-loading { padding: 28px 12px; }
+@media (min-width: 900px) {
+  #page-dashboard .stat-card,
+  #page-dashboard .list-card {
+    box-shadow: 0 1px 5px rgba(0,0,0,.035);
+  }
+}
+
 
 
 /* SCMS v12 — FINAL compact/grid override (loaded after style.css) */
