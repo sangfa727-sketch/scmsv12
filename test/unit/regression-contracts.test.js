@@ -35,6 +35,18 @@ test('attendance history labels remain localized', () => {
   for (const text of ['>Days</span>','>Marked</span>','>Present</span>','>Late <b>','>Sick <b>','>Audit</button>','>Refresh</button>','>Close</button>','>Edit</button>','>Load</button>','>Loading audit…</div>']) assert.ok(!source.includes(text), 'attendance history contains hard-coded UI: ' + text);
 });
 
+test('premium select controls stay in-app and keyboard accessible', () => {
+  const js = read('js/31_premium_selects.js');
+  const css = read('premium-selects.css');
+  for (const token of ['scms-select-trigger','scms-select-menu','role="listbox"','role="option"','ArrowDown','ArrowUp','Escape','MutationObserver']) {
+    assert.ok(js.includes(token), 'premium select contract missing: ' + token);
+  }
+  assert.ok(css.includes('position:fixed'), 'premium select menu must escape page overflow');
+  assert.ok(css.includes('z-index:10050'), 'premium select menu must stay above page surfaces');
+  assert.ok(css.includes('.scms-select-menu.is-open'), 'premium select open state styling missing');
+  assert.ok(css.includes('.scms-select-wrap>select{position:absolute'), 'native select must be visually hidden behind the in-app control');
+});
+
 test('grades assessment time labels remain localized', () => {
   const source = read('js/20_grades.js');
   const locale = read('js/00a_locales_en.js');
