@@ -8441,3 +8441,68 @@ html[lang="zh"] textarea {
 [data-theme="dark"] .notif-badge {
   color: var(--text2);
 }
+
+
+/* ================================================================
+   SCMS v12 Premium Dark — Phase 6: navigation + selection states
+   Crisp hierarchy for tabs, filters, attendance controls and overlays.
+   No blur, no page-wide visual effects, no layout/navigation logic changes.
+   ================================================================ */
+[data-theme="dark"] .tab-btn { color: var(--muted); }
+[data-theme="dark"] .tab-btn:hover { color: var(--text2); background: var(--bg2); }
+[data-theme="dark"] .tab-btn.active { color: var(--text); background: var(--surface2); font-weight: 650; transform: none !important; box-shadow: inset 0 -2px 0 var(--blue); }
+[data-theme="dark"] .chip,
+[data-theme="dark"] .date-chip,
+[data-theme="dark"] .day-tab,
+[data-theme="dark"] .help-tab { background: var(--bg2); border-color: var(--border); color: var(--text2); }
+[data-theme="dark"] .chip:hover,
+[data-theme="dark"] .date-chip:hover,
+[data-theme="dark"] .day-tab:hover,
+[data-theme="dark"] .help-tab:hover { background: var(--surface2); color: var(--text); border-color: var(--border2); }
+[data-theme="dark"] .chip.active,
+[data-theme="dark"] .date-chip.active,
+[data-theme="dark"] .day-tab.active,
+[data-theme="dark"] .help-tab.active { background: var(--surface2); color: var(--text); border-color: rgba(120,168,208,0.42); box-shadow: inset 0 0 0 1px rgba(120,168,208,0.08); }
+[data-theme="dark"] .date-chip.active span { color: var(--text); }
+[data-theme="dark"] .day-tab.today { border-color: rgba(120,168,208,0.46); }
+[data-theme="dark"] .att-code,
+[data-theme="dark"] .att-code-pill { background: var(--bg2); border-color: var(--border2); color: var(--text2); }
+[data-theme="dark"] .att-code:hover,
+[data-theme="dark"] .att-code-pill:hover { background: var(--surface2); border-color: var(--border2); color: var(--text); }
+[data-theme="dark"] .att-code.sel { border-color: var(--blue); }
+[data-theme="dark"] .att-code-pill.sel[data-code="P"] { background: #16805F; color: #E8FFF4; }
+[data-theme="dark"] .att-code-pill.sel[data-code="A"] { background: #A83B40; color: #FFF0F1; }
+[data-theme="dark"] .att-code-pill.sel[data-code="L"],
+[data-theme="dark"] .att-code-pill.sel[data-code="T"] { background: #9A6A16; color: #FFF4D8; }
+[data-theme="dark"] .att-code-pill.sel[data-code="S"] { background: #5C55A6; color: #F1EFFF; }
+[data-theme="dark"] .att-code-pill.sel[data-code="E"] { background: #704FA1; color: #F6EEFF; }
+[data-theme="dark"] .att-code-pill.sel[data-code="H"] { background: #197D91; color: #ECFBFF; }
+[data-theme="dark"] .tt-row:hover,
+[data-theme="dark"] .attend-row:hover,
+[data-theme="dark"] .attend-row-clean:hover { background: var(--bg2); }
+[data-theme="dark"] .tt-period,
+[data-theme="dark"] .att-avatar,
+[data-theme="dark"] .att-note-btn,
+[data-theme="dark"] .class-tag,
+[data-theme="dark"] .id-tag { background: var(--bg2); color: var(--text2); border-color: var(--border); }
+[data-theme="dark"] .modal-overlay { transition: opacity .18s ease, background-color .18s ease; }
+[data-theme="dark"] .modal-sheet,
+[data-theme="dark"] .vp-sheet,
+[data-theme="dark"] .help-sheet { background: var(--surface); border-color: var(--border2); color: var(--text); }
+[data-theme="dark"] .modal-sheet .modal-title,
+[data-theme="dark"] .help-hero-title,
+[data-theme="dark"] .help-section-head h4,
+[data-theme="dark"] .help-feature-head h4 { color: var(--text); }
+[data-theme="dark"] .modal-sheet .modal-subtitle,
+[data-theme="dark"] .help-hero-sub,
+[data-theme="dark"] .help-section-text,
+[data-theme="dark"] .help-step-text,
+[data-theme="dark"] .help-feature-list li { color: var(--text2); }
+[data-theme="dark"] .vp-row:hover,
+[data-theme="dark"] .vp-row.sel { background: var(--surface2); }
+[data-theme="dark"] .modal-close-x:hover { background: var(--surface2); color: var(--text); }
+[data-theme="dark"] .sidebar-item:hover,
+[data-theme="dark"] .sidebar-item:active,
+[data-theme="dark"] .tab-btn:active,
+[data-theme="dark"] .header-actions .icon-btn:active,
+[data-theme="dark"] .header-actions .lang-switch:active { transform: none !important; }
