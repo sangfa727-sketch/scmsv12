@@ -39,7 +39,7 @@ test('attendance history labels remain localized', () => {
 test('premium select controls stay in-app and keyboard accessible', () => {
   const js = read('js/31_premium_selects.js');
   const css = read('premium-selects.css');
-  for (const token of ['scms-select-trigger','scms-select-menu','role="listbox"','role="option"','ArrowDown','ArrowUp','Escape','MutationObserver']) {
+  for (const token of ['scms-select-trigger','scms-select-menu','setAttribute(\'role\', \'listbox\')','setAttribute(\'role\', \'option\')','ArrowDown','ArrowUp','Escape','MutationObserver']) {
     assert.ok(js.includes(token), 'premium select contract missing: ' + token);
   }
   assert.ok(css.includes('position:fixed'), 'premium select menu must escape page overflow');
