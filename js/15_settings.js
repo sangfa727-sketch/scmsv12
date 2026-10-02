@@ -519,7 +519,7 @@ window.openTeacherCardModal = async function(teacherId, teacherName, teacherLogi
     if (!root) return;
     if (!result?.ok) throw new Error(result?.error || 'card_failed');
 
-    const loginUrl = location.origin + location.pathname + '?teacher_card=' + encodeURIComponent(result.token);
+    const loginUrl = location.origin + location.pathname + '#teacher_card=' + encodeURIComponent(result.token);
     const resolvedName = teacherProfile?.teacher_name || result.teacher_name || teacherName || '';
     const resolvedLogin = teacherProfile?.login_name || result.login_name || teacherLoginName || '';
     const photoValue = teacherProfile?.photo_url || result.photo_url || '';
