@@ -269,11 +269,11 @@ window.openNewAssessmentModal = function() {
 
       <div class="form-row">
         <div class="form-col">
-          <label class="field-label">Start time</label>
+          <label class="field-label">${t('grades.startTime')}</label>
           <input class="form-input" id="gaStartTime" type="time">
         </div>
         <div class="form-col">
-          <label class="field-label">End time</label>
+          <label class="field-label">${t('grades.endTime')}</label>
           <input class="form-input" id="gaEndTime" type="time">
         </div>
       </div>

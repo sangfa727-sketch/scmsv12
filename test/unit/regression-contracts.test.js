@@ -24,9 +24,51 @@ test('management center actions resolve to existing handlers', () => {
   for (const fn of ['openTeacherManager','openManageClassesModal','showAdminInfo','openSchoolLogoModal','openSchoolCoverModal','openModulesMenu','openSettings']) assert.ok(source.includes(fn + '(') || source.includes(fn + ' ('), 'missing handler: ' + fn);
 });
 
+test('attendance history labels remain localized', () => {
+  const source = read('js/05_attendance.js');
+  const locale = read('js/00a_locales_en.js');
+  for (const key of ['common.all','att.present','att.absent','att.code.E.label','att.code.H.label','att.code.T.label','att.code.S.label','att.historyEmpty','att.historyDays','att.stat.marked','att.auditTitle','btn.refresh','common.close','common.edit']) {
+    assert.ok(source.includes("t('" + key + "')") || locale.includes("'" + key + "'"), 'missing attendance i18n contract: ' + key);
+  }
+  assert.ok(!source.includes('<option value="">All classes</option>'), 'attendance class filters must not hard-code English');
+  assert.ok(!source.includes('No attendance history found.'), 'attendance history empty state must use i18n');
+  for (const text of ['>Days</span>','>Marked</span>','>Present</span>','>Late <b>','>Sick <b>','>Audit</button>','>Refresh</button>','>Close</button>','>Edit</button>','>Load</button>','>Loading audit…</div>']) assert.ok(!source.includes(text), 'attendance history contains hard-coded UI: ' + text);
+  assert.ok(!source.includes('empty-state-text">${t("att.auditLoading")}'), 'audit loading must interpolate the translation key');
+});
+
+test('premium select controls stay in-app and keyboard accessible', () => {
+  const js = read('js/31_premium_selects.js');
+  const css = read('premium-selects.css');
+  for (const token of ['scms-select-trigger','scms-select-menu','setAttribute(\'role\', \'listbox\')','setAttribute(\'role\', \'option\')','ArrowDown','ArrowUp','Escape','MutationObserver']) {
+    assert.ok(js.includes(token), 'premium select contract missing: ' + token);
+  }
+  assert.ok(css.includes('position:fixed'), 'premium select menu must escape page overflow');
+  assert.ok(css.includes('z-index:10050'), 'premium select menu must stay above page surfaces');
+  assert.ok(css.includes('.scms-select-menu.is-open'), 'premium select open state styling missing');
+  assert.ok(css.includes('.scms-select-wrap>select{position:absolute'), 'native select must be visually hidden behind the in-app control');
+});
+
+test('grades assessment time labels remain localized', () => {
+  const source = read('js/20_grades.js');
+  const locale = read('js/00a_locales_en.js');
+  assert.ok(source.includes("t('grades.startTime')"), 'start time label must use i18n');
+  assert.ok(source.includes("t('grades.endTime')"), 'end time label must use i18n');
+  assert.ok(locale.includes("'grades.startTime'") && locale.includes("'grades.endTime'"), 'grade time locale keys missing');
+  assert.ok(!source.includes('<label class="field-label">Start time</label>'), 'start time must not be hard-coded');
+  assert.ok(!source.includes('<label class="field-label">End time</label>'), 'end time must not be hard-coded');
+});
+
 test('student ID card flow keeps QR API contract', () => {
   const source = read('js/04_students.js');
   for (const token of ['showStudentIdCard','getOrCreateStudentQr','idCard.failed','qr_token']) assert.ok(source.includes(token), 'missing ID-card contract: ' + token);
+});
+
+test('student ID card labels remain localized', () => {
+  const source = read('js/04_students.js');
+  const locale = read('js/00a_locales_en.js');
+  assert.ok(source.includes("t('idCard.studentId')"), 'student ID card label must use i18n');
+  assert.ok(locale.includes("'idCard.studentId'"), 'student ID card locale key missing');
+  assert.ok(!source.includes('<div class="idc-label">Student ID</div>'), 'student ID card label must not be hard-coded');
 });
 
 test('dashboard scope, notifications and context handoff stay wired', () => {
@@ -80,6 +122,66 @@ test('assessment grade RPCs enforce view/edit permission contracts', () => {
   assert.ok(migration.includes('v_assessment.class'), 'grade permission scope must include class');
 });
 
+
+test('n8n state keeps telegram_id uniqueness through the primary key only', () => {
+  const migration = read('supabase/migrations/20261003060000_n8n_state_redundant_unique_constraint_cleanup.sql');
+  assert.ok(migration.includes('DROP CONSTRAINT IF EXISTS n8n_state_telegram_id_key'));
+  assert.ok(migration.includes('n8n_state'));
+});
+
+test('n8n state RLS policy uses an init-plan-safe auth.role call', () => {
+  const migration = read('supabase/migrations/20261003050000_n8n_state_rls_initplan_cleanup.sql');
+  assert.ok(migration.includes('USING ((select auth.role()) = \'service_role\')'));
+  assert.ok(migration.includes('WITH CHECK ((select auth.role()) = \'service_role\')'));
+  assert.ok(!migration.includes('USING (auth.role()'));
+});
+
+test('database cleanup migration only removes confirmed redundant objects', () => {
+  const migration = read('supabase/migrations/20261003040000_duplicate_index_policy_cleanup.sql');
+  for (const name of ['idx_attendance_date','idx_attendance_school_date','idx_attendance_student_date','idx_dr_date','idx_ms_ym','n8n_state_tg_uq','students_school_idx','students_class_idx','teachers_school_idx','teachers_tg_idx']) {
+    assert.ok(migration.includes('DROP INDEX IF EXISTS public.' + name), 'missing safe index cleanup: ' + name);
+  }
+  for (const name of ['svc_all','srv_all','service_role_all_n8n_state']) {
+    assert.ok(migration.includes('DROP POLICY IF EXISTS ' + name + ' ON public.n8n_state'), 'missing redundant n8n policy cleanup: ' + name);
+  }
+  assert.ok(!migration.includes('DROP INDEX public.n8n_state_pkey'), 'primary key index must never be dropped');
+  assert.ok(!migration.includes('DROP INDEX public.n8n_state_telegram_id_key'), 'constraint-owned unique index must never be dropped');
+});
+
+test('admissions access is admin-gated end-to-end', () => {
+  const migration = read('supabase/migrations/20261003030000_admissions_permission_domain_hardening.sql');
+  const more = read('js/12_more.js');
+  for (const key of ['admissions.view','admissions.manage']) assert.ok(migration.includes("'" + key + "'"), 'missing admissions permission: ' + key);
+  for (const fn of ['rpc_convert_admission_to_student','rpc_create_admission','rpc_delete_admission','rpc_link_admission_invoice','rpc_set_admission_photo','rpc_update_admission_status','rpc_update_admission']) {
+    assert.ok(migration.includes('CREATE OR REPLACE FUNCTION public.' + fn), 'missing admissions write guard: ' + fn);
+  }
+  for (const fn of ['rpc_get_admission_detail','rpc_get_admissions']) {
+    assert.ok(migration.includes('CREATE OR REPLACE FUNCTION public.' + fn), 'missing admissions read guard: ' + fn);
+  }
+  assert.equal((migration.match(/private\.web_has_permission\(p_session_token, 'admissions\.manage'/g) || []).length, 7);
+  assert.equal((migration.match(/private\.web_has_permission\(p_session_token, 'admissions\.view'/g) || []).length, 2);
+  assert.ok(more.includes("id !== 'admissions' || !!window.APP?.is_admin"), 'admissions must be hidden from non-admin module lists');
+  assert.ok(more.includes("pageId === 'admissions' && !window.APP?.is_admin"), 'direct admissions navigation must be admin-gated');
+});
+
+test('student health delete RPCs enforce students.edit', () => {
+  const migration = read('supabase/migrations/20261003020000_student_health_delete_permission_hardening.sql');
+  for (const fn of ['rpc_delete_health_visit','rpc_delete_vaccination']) {
+    assert.ok(migration.includes('CREATE OR REPLACE FUNCTION public.' + fn), 'missing hardened health delete RPC: ' + fn);
+  }
+  assert.equal((migration.match(/private\.web_has_permission\(p_session_token, 'students\.edit'/g) || []).length, 2);
+  assert.equal((migration.match(/'permission_denied'/g) || []).length, 2);
+});
+
+test('remaining student-domain RPCs enforce view/edit permission contracts', () => {
+  const migration = read('supabase/migrations/20261003010000_student_domain_permission_hardening.sql');
+  const editFns = ['rpc_activate_student','rpc_add_health_visit','rpc_add_vaccination','rpc_assign_student_transport','rpc_deactivate_student','rpc_delete_student','rpc_reactivate_student','rpc_remove_student_transport','rpc_update_student_parent','rpc_upsert_health_profile'];
+  const viewFns = ['rpc_get_health_profile','rpc_get_student_by_id','rpc_get_student_checkouts','rpc_get_student_history','rpc_get_student_transport'];
+  for (const fn of [...editFns, ...viewFns]) assert.ok(migration.includes('CREATE OR REPLACE FUNCTION public.' + fn), 'missing hardened RPC: ' + fn);
+  assert.equal((migration.match(/private\.web_has_permission\(p_session_token, 'students\.edit'/g) || []).length, editFns.length, 'all student mutations must enforce students.edit');
+  assert.equal((migration.match(/private\.web_has_permission\(p_session_token, 'students\.view'/g) || []).length, viewFns.length, 'all student reads must enforce students.view');
+  assert.equal((migration.match(/'permission_denied'/g) || []).length, editFns.length + viewFns.length, 'each hardened RPC must expose permission_denied');
+});
 
 test('student photo RPC enforces the existing students.edit permission contract', () => {
   const migration = read('supabase/migrations/20261002060000_student_photo_rpc_permission_hardening.sql');

@@ -121,7 +121,7 @@ window.printSelectedIdCards = async function() {
 
   // QRCode needs the target element already in the DOM — instantiate after innerHTML is set.
   await Promise.all(pages.flatMap((page, pi) => page.map((s, si) => {
-    const portalUrl = new URL('parent.html?t=' + encodeURIComponent(s.qr_token), location.href).href;
+    const portalUrl = new URL('parent.html#t=' + encodeURIComponent(s.qr_token), location.href).href;
     const target = document.getElementById(`bulkQr_${pi}_${si}`);
     return _renderStudentCardQr(target, portalUrl);
   })));
@@ -507,7 +507,7 @@ function _idCardHtml(s, qrTargetId) {
       <div class="idc-right">
         ${brand}
         <div class="idc-field">
-          <div class="idc-label">Student ID</div>
+          <div class="idc-label">${t('idCard.studentId')}</div>
           <div class="idc-value idc-sid">${esc(s.student_id)}</div>
         </div>
         ${qr}

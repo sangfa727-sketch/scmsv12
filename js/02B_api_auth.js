@@ -25,9 +25,6 @@ Object.assign(API, {
       platform:      window.APP.platform,
     };
 
-    console.log('[API.bootstrap] POST', SCMS_CONFIG.N8N_BOOTSTRAP);
-    console.log('[API.bootstrap] body keys:', Object.keys(body));
-    console.log('[API.bootstrap] telegram_id:', telegram_id, 'has initData:', !!initData);
 
     let resp;
     try {
