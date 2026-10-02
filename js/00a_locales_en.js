@@ -1386,6 +1386,7 @@ window.I18N_EN = {
   'students.history.empty': 'No history recorded yet.',
   'students.toast.reactivated': 'Student reactivated',
   'att.historyRecent': 'Recent records and 30-day summary.',
+  'att.historyEmpty': 'No attendance history found.',
   'att.report30': '30-day report',
   'att.auditWebOnly': 'Audit viewer is available on web sessions only.',
   'att.auditTitle': 'Attendance audit',
