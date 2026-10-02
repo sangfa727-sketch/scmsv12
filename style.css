@@ -31,22 +31,22 @@
 }
 
 [data-theme="dark"] {
-  /* SCMS v12 Premium Dark — graphite foundation with restrained navy accents. */
-  --bg:      #171B20;
-  --bg2:     #1D232A;
-  --bg3:     #252D36;
-  --surface: #202730;
-  --surface2:#29323D;
-  --border:  rgba(214,226,238,0.10);
-  --border2: rgba(214,226,238,0.17);
-  --text:    #EEF2F6;
-  --text2:   #B8C2CC;
-  --muted:   #7F8B97;
-  --accent:  #E8EDF2;
-  --accent2: #CAD4DE;
-  --blue:    #6F8FAA;
-  --shadow:  0 1px 2px rgba(0,0,0,0.22), 0 8px 24px rgba(0,0,0,0.20);
-  --tg-bg:   #171B20;
+  /* SCMS v12 Premium Dark — Phase 1: deep graphite + restrained steel-blue. */
+  --bg:      #10151B;
+  --bg2:     #161D25;
+  --bg3:     #1E2832;
+  --surface: #19232D;
+  --surface2:#22303C;
+  --border:  rgba(214,228,242,0.10);
+  --border2: rgba(214,228,242,0.17);
+  --text:    #F2F6F9;
+  --text2:   #C2CDD6;
+  --muted:   #8996A3;
+  --accent:  #E3EBF2;
+  --accent2: #CBD8E3;
+  --blue:    #78A8D0;
+  --shadow:  0 1px 2px rgba(0,0,0,0.28), 0 7px 20px rgba(0,0,0,0.18);
+  --tg-bg:   #10151B;
 }
 
 /* ── Reset ─────────────────────────────────────────────────────── */
