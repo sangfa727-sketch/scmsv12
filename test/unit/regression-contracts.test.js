@@ -27,11 +27,12 @@ test('management center actions resolve to existing handlers', () => {
 test('attendance history labels remain localized', () => {
   const source = read('js/05_attendance.js');
   const locale = read('js/00a_locales_en.js');
-  for (const key of ['common.all','att.present','att.absent','att.code.E.label','att.code.H.label','att.historyEmpty']) {
+  for (const key of ['common.all','att.present','att.absent','att.code.E.label','att.code.H.label','att.code.T.label','att.code.S.label','att.historyEmpty','att.historyDays','att.stat.marked','att.auditTitle','btn.refresh','common.close','common.edit']) {
     assert.ok(source.includes("t('" + key + "')") || locale.includes("'" + key + "'"), 'missing attendance i18n contract: ' + key);
   }
   assert.ok(!source.includes('<option value="">All classes</option>'), 'attendance class filters must not hard-code English');
   assert.ok(!source.includes('No attendance history found.'), 'attendance history empty state must use i18n');
+  for (const text of ['>Days</span>','>Marked</span>','>Present</span>','>Late <b>','>Sick <b>','>Audit</button>','>Refresh</button>','>Close</button>','>Edit</button>','>Load</button>','>Loading audit…</div>']) assert.ok(!source.includes(text), 'attendance history contains hard-coded UI: ' + text);
 });
 
 test('grades assessment time labels remain localized', () => {
