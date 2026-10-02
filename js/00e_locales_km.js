@@ -220,6 +220,7 @@ window.I18N_KM = {
   "students.detail.meal": "អាហារ៖",
   "students.btn.health": "កំណត់ត្រាសុខភាព",
   "idCard.title": "កាតសម្គាល់សិស្ស",
+  "idCard.studentId": "លេខសម្គាល់សិស្ស",
   "idCard.failed": "មិនអាចបង្កើតកាតបានទេ៖ {err}។ សិស្សត្រូវតែស្ថិតក្នុងស្ថានភាពសកម្ម។",
   "idCard.scanHint": "មាតាបិតាស្កេននេះ ដើម្បីចូលទៅកាន់ Parent Portal។",
   "idCard.copyLink": "ចម្លងតំណ",
