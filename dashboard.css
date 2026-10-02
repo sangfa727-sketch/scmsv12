@@ -418,3 +418,94 @@
 [data-theme="dark"] .dashboard-notification-badge {
   border-color: #171B20;
 }
+
+
+/* ================================================================
+   SCMS v12 Premium Dark — Phase 3 dashboard cards
+   Keep dashboard surfaces aligned with the global card system.
+   ================================================================ */
+[data-theme="dark"] #page-dashboard .stat-card,
+[data-theme="dark"] #page-dashboard .list-card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  box-shadow: 0 1px 2px rgba(0,0,0,0.24), 0 5px 16px rgba(0,0,0,0.12);
+  transform: none;
+}
+[data-theme="dark"] #page-dashboard .stat-card:hover,
+[data-theme="dark"] #page-dashboard .list-card:hover {
+  background: var(--surface2);
+  border-color: var(--border2);
+  box-shadow: 0 2px 5px rgba(0,0,0,0.26), 0 7px 18px rgba(0,0,0,0.14);
+  transform: none;
+}
+[data-theme="dark"] #page-dashboard .dashboard-link-card.stat-card,
+[data-theme="dark"] #page-dashboard .dashboard-link-card.stat-card.red,
+[data-theme="dark"] #page-dashboard .dashboard-link-card.stat-card.green {
+  background: var(--surface);
+  border-color: var(--border);
+}
+[data-theme="dark"] #page-dashboard .dashboard-link-card.stat-card .stat-num {
+  color: var(--text);
+}
+[data-theme="dark"] #page-dashboard .dashboard-link-card.stat-card .stat-lbl {
+  color: var(--muted);
+}
+[data-theme="dark"] #page-dashboard .dashboard-actions button {
+  background: var(--surface2);
+  color: var(--text2);
+  border: 1px solid var(--border);
+}
+[data-theme="dark"] #page-dashboard .dashboard-actions button:hover {
+  background: var(--bg3);
+  color: var(--text);
+}
+[data-theme="dark"] #page-dashboard .dashboard-banner {
+  background: var(--surface);
+  border-color: rgba(214,168,91,0.42);
+}
+[data-theme="dark"] #page-dashboard .dashboard-notification-btn,
+[data-theme="dark"] #page-dashboard .dashboard-notification-menu {
+  background: var(--surface);
+  border-color: var(--border);
+}
+[data-theme="dark"] #page-dashboard .dashboard-notification-item:hover {
+  background: var(--bg2);
+}
+[data-theme="dark"] #page-dashboard .dashboard-notification-badge {
+  border-color: var(--bg);
+}
+
+
+/* ================================================================
+   SCMS v12 Premium Dark — Phase 4 dashboard interaction refinement
+   Crisp bounded states; no blur or page-wide visual effects.
+   ================================================================ */
+[data-theme="dark"] #page-dashboard .dashboard-actions button {
+  box-shadow: 0 1px 2px rgba(0,0,0,0.16);
+}
+
+[data-theme="dark"] #page-dashboard .dashboard-actions button:focus-visible {
+  outline: 2px solid var(--blue);
+  outline-offset: 2px;
+  box-shadow: 0 0 0 3px rgba(120,168,208,0.12);
+}
+
+[data-theme="dark"] #page-dashboard .dashboard-link-card.stat-card:focus-visible {
+  outline: 2px solid var(--blue);
+  outline-offset: 2px;
+}
+
+[data-theme="dark"] #page-dashboard .dashboard-link-card.stat-card:active {
+  border-color: rgba(120,168,208,0.30);
+}
+
+[data-theme="dark"] #page-dashboard .dashboard-banner {
+  box-shadow: 0 1px 2px rgba(0,0,0,0.20), 0 5px 14px rgba(0,0,0,0.10);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  [data-theme="dark"] #page-dashboard .dashboard-actions button,
+  [data-theme="dark"] #page-dashboard .dashboard-notification-btn {
+    transition: none !important;
+  }
+}

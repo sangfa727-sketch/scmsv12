@@ -31,22 +31,22 @@
 }
 
 [data-theme="dark"] {
-  /* SCMS v12 Premium Dark — graphite foundation with restrained navy accents. */
-  --bg:      #171B20;
-  --bg2:     #1D232A;
-  --bg3:     #252D36;
-  --surface: #202730;
-  --surface2:#29323D;
-  --border:  rgba(214,226,238,0.10);
-  --border2: rgba(214,226,238,0.17);
-  --text:    #EEF2F6;
-  --text2:   #B8C2CC;
-  --muted:   #7F8B97;
-  --accent:  #E8EDF2;
-  --accent2: #CAD4DE;
-  --blue:    #6F8FAA;
-  --shadow:  0 1px 2px rgba(0,0,0,0.22), 0 8px 24px rgba(0,0,0,0.20);
-  --tg-bg:   #171B20;
+  /* SCMS v12 Premium Dark — Phase 1: deep graphite + restrained steel-blue. */
+  --bg:      #10151B;
+  --bg2:     #161D25;
+  --bg3:     #1E2832;
+  --surface: #19232D;
+  --surface2:#22303C;
+  --border:  rgba(214,228,242,0.10);
+  --border2: rgba(214,228,242,0.17);
+  --text:    #F2F6F9;
+  --text2:   #C2CDD6;
+  --muted:   #8996A3;
+  --accent:  #E3EBF2;
+  --accent2: #CBD8E3;
+  --blue:    #78A8D0;
+  --shadow:  0 1px 2px rgba(0,0,0,0.28), 0 7px 20px rgba(0,0,0,0.18);
+  --tg-bg:   #10151B;
 }
 
 /* ── Reset ─────────────────────────────────────────────────────── */
@@ -7994,4 +7994,350 @@ html[lang="zh"] textarea {
 @media (max-width:360px) {
   .more-theme-card { align-items:flex-start; flex-direction:column; }
   .more-theme-toggle { align-self:flex-end; }
+}
+
+
+/* ================================================================
+   SCMS v12 Premium Dark — Phase 2: core navigation + controls
+   Scope: header, sidebar, tabs, buttons, inputs and search only.
+   No blur/backdrop-filter, no layout changes, no modal/navigation logic.
+   ================================================================ */
+[data-theme="dark"] .app-header,
+[data-theme="dark"] .tab-bar {
+  background: var(--surface);
+  border-color: var(--border);
+  box-shadow: 0 1px 0 rgba(255,255,255,0.018);
+}
+
+[data-theme="dark"] .school-name,
+[data-theme="dark"] .school-info,
+[data-theme="dark"] .page-title {
+  color: var(--text);
+}
+
+[data-theme="dark"] .school-sub,
+[data-theme="dark"] .page-subtitle {
+  color: var(--text2);
+}
+
+[data-theme="dark"] .icon-btn-burger {
+  color: var(--text2);
+  background: transparent;
+}
+[data-theme="dark"] .icon-btn-burger:hover {
+  color: var(--text);
+  background: var(--surface2);
+}
+[data-theme="dark"] .icon-btn-burger:focus-visible,
+[data-theme="dark"] .tab-btn:focus-visible,
+[data-theme="dark"] .sidebar-item:focus-visible,
+[data-theme="dark"] .btn-primary:focus-visible,
+[data-theme="dark"] .btn-secondary:focus-visible,
+[data-theme="dark"] .btn-icon-round:focus-visible,
+[data-theme="dark"] .clear-btn:focus-visible {
+  outline: 2px solid var(--blue);
+  outline-offset: 2px;
+}
+
+[data-theme="dark"] .tab-btn {
+  color: var(--muted);
+}
+[data-theme="dark"] .tab-btn:hover {
+  color: var(--text2);
+  background: var(--bg2);
+}
+[data-theme="dark"] .tab-btn.active {
+  color: var(--blue);
+  background: transparent;
+}
+
+[data-theme="dark"] .sidebar {
+  background: var(--surface);
+  border-right-color: var(--border);
+  box-shadow: 4px 0 20px rgba(0,0,0,0.20);
+}
+[data-theme="dark"] .sidebar-header {
+  background: var(--bg2);
+  color: var(--text);
+  border-bottom-color: var(--border);
+}
+[data-theme="dark"] .sidebar-avatar {
+  background: var(--surface2);
+  color: var(--text);
+}
+[data-theme="dark"] .sidebar-profile-meta,
+[data-theme="dark"] .sidebar-school-row {
+  color: var(--text2);
+}
+[data-theme="dark"] .sidebar-item {
+  color: var(--text2);
+}
+[data-theme="dark"] .sidebar-item:hover {
+  background: var(--bg2);
+  color: var(--text);
+}
+[data-theme="dark"] .sidebar-item.active {
+  background: #26384A;
+  color: #F4F7FA;
+  box-shadow: inset 3px 0 0 var(--blue), inset 0 0 0 1px rgba(120,168,208,0.12);
+}
+[data-theme="dark"] .sidebar-item.active .sidebar-icon {
+  color: var(--blue);
+}
+[data-theme="dark"] .sidebar-icon {
+  color: var(--muted);
+}
+[data-theme="dark"] .sidebar-item:hover .sidebar-icon {
+  color: var(--text2);
+}
+[data-theme="dark"] .sidebar-footer {
+  border-top-color: var(--border);
+}
+
+[data-theme="dark"] .sidebar-backdrop {
+  background: rgba(4,7,10,0.48);
+}
+
+[data-theme="dark"] .search-bar {
+  background: var(--surface);
+  border-color: var(--border2);
+  box-shadow: 0 1px 2px rgba(0,0,0,0.14);
+}
+[data-theme="dark"] .search-bar:focus-within {
+  border-color: rgba(120,168,208,0.58);
+  box-shadow: 0 0 0 3px rgba(120,168,208,0.10);
+}
+[data-theme="dark"] .search-icon {
+  color: var(--muted);
+}
+[data-theme="dark"] .search-bar input {
+  color: var(--text);
+}
+[data-theme="dark"] .search-bar input::placeholder {
+  color: var(--muted);
+}
+[data-theme="dark"] .clear-btn {
+  color: var(--muted);
+}
+[data-theme="dark"] .clear-btn:hover {
+  color: var(--text);
+}
+
+[data-theme="dark"] .btn-primary {
+  background: var(--blue);
+  color: #0E151B;
+  box-shadow: 0 1px 2px rgba(0,0,0,0.22);
+}
+[data-theme="dark"] .btn-primary:hover {
+  background: #86B5DB;
+}
+[data-theme="dark"] .btn-primary:active {
+  background: #6F9FC6;
+  opacity: 1;
+}
+[data-theme="dark"] .btn-secondary {
+  background: var(--surface2);
+  color: var(--text2);
+  border: 1px solid var(--border);
+}
+[data-theme="dark"] .btn-secondary:hover {
+  background: var(--bg3);
+  color: var(--text);
+}
+[data-theme="dark"] .btn-secondary:active {
+  background: var(--bg3);
+}
+[data-theme="dark"] .btn-icon-round {
+  border: 1px solid var(--border);
+}
+[data-theme="dark"] .btn-add {
+  background: var(--blue);
+  color: #0E151B;
+}
+[data-theme="dark"] .btn-edit {
+  background: var(--surface2);
+  color: var(--text);
+}
+
+[data-theme="dark"] .form-input,
+[data-theme="dark"] .form-textarea {
+  background: var(--bg2);
+  border-color: var(--border2);
+  color: var(--text);
+}
+[data-theme="dark"] .form-input:hover,
+[data-theme="dark"] .form-textarea:hover {
+  border-color: rgba(214,228,242,0.24);
+}
+[data-theme="dark"] .form-input:focus,
+[data-theme="dark"] .form-textarea:focus {
+  border-color: var(--blue);
+  box-shadow: 0 0 0 3px rgba(120,168,208,0.10);
+}
+[data-theme="dark"] .form-input::placeholder,
+[data-theme="dark"] .form-textarea::placeholder {
+  color: var(--muted);
+}
+[data-theme="dark"] .field-label {
+  color: var(--text2);
+}
+
+[data-theme="dark"] .pill {
+  background: var(--bg2);
+  border-color: var(--border);
+  color: var(--text2);
+}
+[data-theme="dark"] .pill:hover {
+  background: var(--surface2);
+  border-color: var(--border2);
+  color: var(--text);
+}
+[data-theme="dark"] .pill.active {
+  background: var(--blue);
+  border-color: var(--blue);
+  color: #0E151B;
+}
+
+
+/* ================================================================
+   SCMS v12 Premium Dark — Phase 3: cards + lists
+   Crisp bounded surfaces, compact hierarchy, restrained elevation.
+   No blur, no backdrop-filter, no page-wide effects.
+   ================================================================ */
+[data-theme="dark"] .stat-card,
+[data-theme="dark"] .list-card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  box-shadow: 0 1px 2px rgba(0,0,0,0.24), 0 5px 16px rgba(0,0,0,0.12);
+  color: var(--text);
+}
+
+[data-theme="dark"] .stat-card:hover,
+[data-theme="dark"] .list-card:hover {
+  background: var(--surface2);
+  border-color: var(--border2);
+}
+
+[data-theme="dark"] .stat-num {
+  color: var(--text);
+}
+[data-theme="dark"] .stat-lbl {
+  color: var(--muted);
+}
+[data-theme="dark"] .stat-card.green .stat-num {
+  color: #7FC7A2;
+}
+[data-theme="dark"] .stat-card.red .stat-num {
+  color: #E19A9D;
+}
+
+[data-theme="dark"] .card-avatar {
+  background: var(--bg3);
+  color: var(--text);
+  border: 1px solid var(--border);
+}
+[data-theme="dark"] .card-name {
+  color: var(--text);
+}
+[data-theme="dark"] .card-sub,
+[data-theme="dark"] .card-note,
+[data-theme="dark"] .card-parent {
+  color: var(--text2);
+}
+[data-theme="dark"] .card-action {
+  color: var(--blue);
+}
+[data-theme="dark"] .list-card.card-done {
+  border-color: rgba(127,199,162,0.46);
+}
+
+
+/* ================================================================
+   SCMS v12 Premium Dark — Phase 4: interaction + hierarchy refinement
+   Bounded, crisp states only. No blur, no backdrop-filter, no geometry changes.
+   ================================================================ */
+[data-theme="dark"] .stat-card,
+[data-theme="dark"] .list-card,
+[data-theme="dark"] .search-bar,
+[data-theme="dark"] .form-input,
+[data-theme="dark"] .form-textarea {
+  border-radius: 12px;
+}
+
+[data-theme="dark"] .stat-card:focus-within,
+[data-theme="dark"] .list-card:focus-within {
+  border-color: rgba(120,168,208,0.42);
+  box-shadow: 0 0 0 2px rgba(120,168,208,0.08), 0 5px 16px rgba(0,0,0,0.12);
+}
+
+[data-theme="dark"] .stat-card:active,
+[data-theme="dark"] .list-card:active {
+  border-color: rgba(120,168,208,0.30);
+}
+
+[data-theme="dark"] .card-action:hover {
+  color: #9BC7E9;
+}
+
+[data-theme="dark"] .icon-btn:hover,
+[data-theme="dark"] .btn-icon-round:hover {
+  background: var(--surface2);
+  color: var(--text);
+}
+
+[data-theme="dark"] .icon-btn:focus-visible,
+[data-theme="dark"] .btn-icon-round:focus-visible,
+[data-theme="dark"] .btn-add:focus-visible,
+[data-theme="dark"] .btn-edit:focus-visible {
+  outline: 2px solid var(--blue);
+  outline-offset: 2px;
+}
+
+[data-theme="dark"] .btn-primary:focus-visible,
+[data-theme="dark"] .btn-secondary:focus-visible {
+  box-shadow: 0 0 0 3px rgba(120,168,208,0.16);
+}
+
+[data-theme="dark"] .sidebar-item:active,
+[data-theme="dark"] .tab-btn:active {
+  background: var(--surface2);
+}
+
+[data-theme="dark"] .sidebar-item.active:hover {
+  background: #2A3D50;
+}
+
+[data-theme="dark"] .tab-btn.active {
+  font-weight: 650;
+}
+
+[data-theme="dark"] .dashboard-notification-btn:hover {
+  background: var(--surface2);
+  border-color: var(--border2);
+}
+
+[data-theme="dark"] .dashboard-notification-btn:active {
+  background: var(--bg3);
+}
+
+[data-theme="dark"] .dashboard-notification-menu {
+  box-shadow: 0 12px 28px rgba(0,0,0,0.24);
+}
+
+[data-theme="dark"] .dashboard-notification-item:focus-visible {
+  outline-color: var(--blue);
+}
+
+[data-theme="dark"] .dashboard-context-highlight {
+  outline-color: rgba(120,168,208,0.46) !important;
+  box-shadow: 0 6px 20px rgba(70,101,130,0.16) !important;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  [data-theme="dark"] .stat-card,
+  [data-theme="dark"] .list-card,
+  [data-theme="dark"] .icon-btn,
+  [data-theme="dark"] .btn-icon-round {
+    transition: none !important;
+  }
 }
