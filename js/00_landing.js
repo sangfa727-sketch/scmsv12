@@ -513,6 +513,131 @@ window.closeWebLoginModal = function () {
   document.getElementById('webLoginModal')?.remove();
 };
 
+window.completeWebLogin = function (result) {
+  const webSession = {
+    type: 'web',
+    session_token: result.session_token,
+    teacher_id: result.teacher_id,
+    teacher_name: result.teacher_name,
+    school_id: result.school_id,
+    role: result.role,
+    must_change_password: result.must_change_password,
+    logged_in_at: Date.now(),
+  };
+  try { localStorage.setItem(_WEB_SESSION_KEY, JSON.stringify(webSession)); } catch (e) {}
+  closeWebLoginModal();
+  if (result.must_change_password) {
+    openChangePasswordModal({ first_time: true });
+  } else if (typeof window.bootAfterLogin === 'function') {
+    window.bootAfterLogin({ webSession });
+  } else {
+    window.location.reload();
+  }
+  return webSession;
+};
+
+window.handleTeacherCardQuery = async function () {
+  const url = new URL(window.location.href);
+  let token = url.searchParams.get('teacher_card');
+  const hashMatch = window.location.hash.match(/^#teacher_card=([^&]+)$/);
+  if (!token && hashMatch) {
+    try { token = decodeURIComponent(hashMatch[1]); } catch (e) { token = null; }
+  }
+  if (!token) return false;
+
+  try {
+    const cleanUrl = url.pathname + (url.hash.startsWith('#teacher_card=') ? '' : url.hash);
+    history.replaceState(history.state, '', cleanUrl);
+  } catch (e) {}
+
+  try {
+    const resp = await fetch(`${SCMS_CONFIG.SUPABASE_URL}/rest/v1/rpc/rpc_teacher_card_login_start`, {
+      method: 'POST',
+      headers: {
+        'apikey': SCMS_CONFIG.SUPABASE_ANON,
+        'Authorization': `Bearer ${SCMS_CONFIG.SUPABASE_ANON}`,
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({ p_token: token }),
+    });
+    const result = await resp.json().catch(() => null);
+    if (!resp.ok || !result?.ok) throw new Error(result?.message || t('login.failed'));
+
+    const wrap = document.createElement('div');
+    wrap.id = 'teacherCardLoginModal';
+    wrap.className = 'modal-overlay';
+    wrap.innerHTML = `
+      <div class="modal-sheet" onclick="event.stopPropagation()" style="max-width:380px">
+        <div class="modal-handle"></div>
+        <h3 class="modal-title">🪪 ${t('tm.idCard')}</h3>
+        <p class="modal-subtitle">${esc(t('tm.cardScan'))}</p>
+        <p class="muted-note" style="margin-top:8px">${esc(result.teacher_name || '')}</p>
+        <label class="field-label">${t('login.pin')}</label>
+        <input class="form-input" id="teacherCardPin" type="password" autocomplete="current-password"
+               placeholder="••••••••" onkeydown="if(event.key==='Enter')doTeacherCardLogin()">
+        <div id="teacherCardLoginError" class="form-error" style="display:none"></div>
+        <button class="btn-primary mt16" id="teacherCardLoginBtn" onclick="doTeacherCardLogin()">${t('login.btn')}</button>
+        <button class="btn-secondary" onclick="closeTeacherCardLoginModal()">${t('common.cancel')}</button>
+      </div>`;
+    wrap.onclick = closeTeacherCardLoginModal;
+    document.body.appendChild(wrap);
+    wrap.classList.add('active');
+    setTimeout(() => document.getElementById('teacherCardPin')?.focus(), 50);
+
+    window._teacherCardLoginContext = { teacherId: result.teacher_id };
+  } catch (e) {
+    showToast(t('login.failed'));
+  }
+  return true;
+};
+
+window.closeTeacherCardLoginModal = function () {
+  document.getElementById('teacherCardLoginModal')?.remove();
+  window._teacherCardLoginContext = null;
+};
+
+window.doTeacherCardLogin = async function () {
+  const ctx = window._teacherCardLoginContext;
+  const pin = document.getElementById('teacherCardPin')?.value || '';
+  const errEl = document.getElementById('teacherCardLoginError');
+  const btn = document.getElementById('teacherCardLoginBtn');
+  if (!ctx?.teacherId || !pin) {
+    if (errEl) { errEl.textContent = t('login.needBoth'); errEl.style.display = 'block'; }
+    return;
+  }
+  if (errEl) errEl.style.display = 'none';
+  btn.disabled = true;
+  btn.textContent = t('login.signingIn');
+  try {
+    const resp = await fetch(`${SCMS_CONFIG.SUPABASE_URL}/rest/v1/rpc/rpc_teacher_web_login`, {
+      method: 'POST',
+      headers: {
+        'apikey': SCMS_CONFIG.SUPABASE_ANON,
+        'Authorization': `Bearer ${SCMS_CONFIG.SUPABASE_ANON}`,
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        p_teacher_id: ctx.teacherId,
+        p_password: pin,
+        p_device_ua: navigator.userAgent.slice(0, 200),
+      }),
+    });
+    const result = await resp.json().catch(() => null);
+    if (!resp.ok || !result?.ok) {
+      if (errEl) { errEl.textContent = result?.message || t('login.failed'); errEl.style.display = 'block'; }
+      btn.disabled = false;
+      btn.textContent = t('login.btn');
+      return;
+    }
+    window._teacherCardLoginContext = null;
+    completeWebLogin(result);
+  } catch (e) {
+    if (errEl) { errEl.textContent = t('login.connErr'); errEl.style.display = 'block'; }
+    btn.disabled = false;
+    btn.textContent = t('login.btn');
+  }
+};
+
 window.doWebLogin = async function () {
   const id = document.getElementById('webLoginId')?.value.trim();
   const pw = document.getElementById('webLoginPw')?.value;
@@ -560,31 +685,7 @@ window.doWebLogin = async function () {
       return;
     }
 
-    // Save the web session — distinct shape from TG session
-    const webSession = {
-      type:                'web',
-      session_token:       result.session_token,
-      teacher_id:          result.teacher_id,
-      teacher_name:        result.teacher_name,
-      school_id:           result.school_id,
-      role:                result.role,
-      must_change_password: result.must_change_password,
-      logged_in_at:        Date.now(),
-    };
-    try { localStorage.setItem(_WEB_SESSION_KEY, JSON.stringify(webSession)); } catch (e) {}
-
-    // Tell the rest of the app to boot with this session
-    closeWebLoginModal();
-    if (result.must_change_password) {
-      // Force the user to change their password before continuing
-      openChangePasswordModal({ first_time: true });
-    } else {
-      if (typeof window.bootAfterLogin === 'function') {
-        window.bootAfterLogin({ webSession });
-      } else {
-        window.location.reload();
-      }
-    }
+    completeWebLogin(result);
   } catch (e) {
     if (errEl) {
       errEl.textContent = t('login.connErr');
