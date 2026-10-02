@@ -586,7 +586,7 @@ window.handleTeacherCardQuery = async function () {
 
     window._teacherCardLoginContext = { teacherId: result.teacher_id };
   } catch (e) {
-    showToast(t('login.failed'));
+    if (typeof renderLanding === 'function') renderLanding();
   }
   return true;
 };
