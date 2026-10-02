@@ -64,3 +64,15 @@ test('teacher access includes Khmer permission descriptions', () => {
   assert.match(source, /km:\{['"]dashboard\.view['"]:/);
   assert.match(source, /['"]permissions\.manage['"]:\s*['"]គ្រប់គ្រងសិទ្ធិ['"]/);
 });
+
+test('classes and grades save lifecycle prevents concurrent writes and stale UI on failure', () => {
+  const source = read('js/12_more.js');
+  assert.match(source, /let _cgSaveInFlight = false/);
+  assert.match(source, /if \(_cgSaveInFlight\) return;/);
+  assert.match(source, /_cgSetSaveBusy\(true\)/);
+  assert.match(source, /_cgSetSaveBusy\(false\)/);
+  assert.match(source, /const saved = await _cgSavePaired/);
+  assert.match(source, /if \(!saved\) return;/);
+  assert.match(source, /return true;/);
+  assert.match(source, /return false;/);
+});
