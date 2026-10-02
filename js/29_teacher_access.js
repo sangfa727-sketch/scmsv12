@@ -105,6 +105,7 @@ function _taText(key) {
     zh:{'dashboard.view':'查看仪表板','students.view':'查看学生','students.edit':'编辑学生信息','leave.view':'查看请假申请','leave.approve':'批准 / 拒绝请假申请','attendance.view':'查看考勤','attendance.edit':'编辑考勤','homework.view':'查看作业','homework.create':'创建作业','homework.edit':'编辑作业','homework.delete':'删除作业','assessment.view':'查看评估','assessment.create':'创建评估','assessment.edit':'编辑评估','assessment.delete':'删除评估','billing.view':'查看账单','billing.write':'编辑账单','teachers.view':'查看教师','teachers.manage':'管理教师','permissions.manage':'管理权限'},
   };
   return (dict[_taLang()]?.[key] || dict.en[key] || key);
+}
 function _taCategory(key) {
   const dict = {
     en:{dashboard:'Dashboard',students:'Students',leave:'Leave Requests',attendance:'Attendance',homework:'Homework',assessment:'Assessments',billing:'Billing',teachers:'Teachers',permissions:'Permissions'},
