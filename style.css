@@ -8341,3 +8341,103 @@ html[lang="zh"] textarea {
     transition: none !important;
   }
 }
+
+
+/* ================================================================
+   SCMS v12 Premium Dark — Phase 5: component consistency
+   Tables, native selects and semantic status surfaces.
+   Bounded/crisp only; no blur, no page-wide visual effects.
+   ================================================================ */
+[data-theme="dark"] .report-table {
+  color: var(--text2);
+}
+[data-theme="dark"] .report-table th {
+  color: var(--muted);
+  background: var(--bg2);
+  border-bottom-color: var(--border2);
+}
+[data-theme="dark"] .report-table td {
+  border-bottom-color: var(--border);
+}
+[data-theme="dark"] .report-table tbody tr:hover td {
+  background: var(--surface2);
+}
+[data-theme="dark"] .report-table .report-name {
+  color: var(--text);
+}
+[data-theme="dark"] .report-table .report-overall {
+  color: var(--text);
+}
+
+[data-theme="dark"] select,
+[data-theme="dark"] .attend-class-select {
+  border-color: var(--border2);
+}
+[data-theme="dark"] select:focus-visible,
+[data-theme="dark"] .attend-class-select:focus-visible {
+  outline: 2px solid var(--blue);
+  outline-offset: 2px;
+}
+[data-theme="dark"] select {
+  background-color: var(--bg2);
+  color: var(--text);
+}
+[data-theme="dark"] option {
+  background: var(--surface);
+  color: var(--text);
+}
+[data-theme="dark"] .attend-class-select {
+  background: var(--blue);
+  color: #0E151B;
+}
+[data-theme="dark"] .attend-class-select-wrap::after {
+  color: #0E151B;
+}
+
+[data-theme="dark"] .billing-status-unpaid,
+[data-theme="dark"] .adm-status-waitlisted {
+  background: rgba(217,119,6,0.16);
+  color: #F2C879;
+}
+[data-theme="dark"] .billing-status-partial,
+[data-theme="dark"] .adm-status-applied {
+  background: rgba(120,168,208,0.16);
+  color: #9BC7E9;
+}
+[data-theme="dark"] .billing-status-paid,
+[data-theme="dark"] .adm-status-accepted,
+[data-theme="dark"] .adm-status-enrolled {
+  background: rgba(127,199,162,0.15);
+  color: #91D1AF;
+}
+[data-theme="dark"] .billing-status-overdue,
+[data-theme="dark"] .adm-status-rejected {
+  background: rgba(225,154,157,0.15);
+  color: #E9AEB1;
+}
+[data-theme="dark"] .billing-status-cancelled,
+[data-theme="dark"] .adm-status-withdrawn {
+  background: var(--bg3);
+  color: var(--muted);
+}
+[data-theme="dark"] .adm-status-interview-scheduled,
+[data-theme="dark"] .adm-status-interview-done {
+  background: rgba(155,135,211,0.15);
+  color: #C7B9EC;
+}
+
+[data-theme="dark"] .role-badge {
+  background: var(--bg3);
+  color: var(--text2);
+  border: 1px solid var(--border);
+}
+[data-theme="dark"] .sidebar-badge {
+  box-shadow: 0 0 0 2px var(--surface);
+}
+[data-theme="dark"] .grade-badge {
+  color: var(--text);
+}
+[data-theme="dark"] .sev-badge,
+[data-theme="dark"] .notif-badge {
+  color: var(--text2);
+}
