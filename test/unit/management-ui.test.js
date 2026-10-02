@@ -86,3 +86,20 @@ test('teacher profile edit prevents non-super-admin role escalation', () => {
   assert.match(source, /v_target_role='super_admin'/);
   assert.match(source, /'insufficient_role'/);
 });
+
+
+test('sensitive teacher management actions block non-super-admin access to super_admin targets', () => {
+  const source = read('supabase/migrations/20261002200000_management_sensitive_actions_superadmin_guard.sql');
+  for (const fn of [
+    'rpc_admin_reset_teacher_password',
+    'rpc_admin_set_teacher_login_name',
+    'rpc_admin_create_teacher_card',
+    'rpc_admin_revoke_teacher_card'
+  ]) {
+    assert.match(source, new RegExp('create or replace function public\\.' + fn));
+  }
+  const guards = (source.match(/insufficient_role/g) || []).length;
+  assert.ok(guards >= 4, 'each sensitive action should have a super_admin target guard');
+  assert.match(source, /v_admin\.admin_role <> 'super_admin' and v_target_role='super_admin'/);
+  assert.match(source, /a\.admin_role <> 'super_admin' and teacher_row\.role='super_admin'/);
+});
