@@ -747,6 +747,8 @@ window.I18N_MS = {
   "grades.year": "Tahun akademik",
   "grades.yearPh": "cth. 2026-2027",
   "grades.start": "Tarikh mula",
+  "grades.startTime": "Masa mula",
+  "grades.endTime": "Masa tamat",
   "grades.end": "Tarikh tamat",
   "grades.enterTermName": "Masukkan nama penggal",
   "grades.termAdded": "✓ Penggal ditambah",
