@@ -442,7 +442,7 @@ window.openAttendanceHistory = function() {
       <div class="att-history-toolbar">
         <button class="btn-pill-action ghost" onclick="openAttendanceAudit()">Audit</button>
         <select class="form-input" id="attHistoryClass">
-          <option value="">All classes</option>
+          <option value="">${t('common.all')}</option>
           ${_attendanceClasses().map(c => `<option value="${esc(c)}">${esc(c)}</option>`).join('')}
         </select>
         <button class="btn-pill-action ghost" onclick="renderAttendanceHistoryRows()">Refresh</button>
@@ -450,9 +450,9 @@ window.openAttendanceHistory = function() {
       <div id="attHistoryRows">${rows}</div>
       <div class="att-history-report"><div class="att-history-report-title">${t("att.report30")}</div>
         <div class="att-report-grid">
-          <span>Present <b>${report.P}</b></span><span>Absent <b>${report.A}</b></span>
+          <span>${t('att.present')} <b>${report.P}</b></span><span>${t('att.absent')} <b>${report.A}</b></span>
           <span>Late <b>${report.L}</b></span><span>Sick <b>${report.S}</b></span>
-          <span>Excused <b>${report.E}</b></span><span>Half-day <b>${report.H}</b></span>
+          <span>${t('att.code.E.label')} <b>${report.E}</b></span><span>${t('att.code.H.label')} <b>${report.H}</b></span>
         </div>
       </div>
       <button class="btn-secondary mt16" onclick="closeModal()">Close</button>
@@ -463,7 +463,7 @@ function _attendanceHistoryRows(){
   const data=(window.APP.attendance||[]).filter(a=>a&&a.date&&a.class), cls=document.getElementById('attHistoryClass')?.value||'', grouped=new Map();
   data.forEach(a=>{if(cls&&a.class!==cls)return;const k=a.date+'|'+a.class;if(!grouped.has(k))grouped.set(k,[]);grouped.get(k).push(a);});
   const groups=[...grouped.entries()].sort((a,b)=>b[0].localeCompare(a[0])).slice(0,20);
-  if(!groups.length)return '<div class="empty-state"><div class="empty-state-icon">📋</div><div class="empty-state-text">No attendance history found.</div></div>';
+  if(!groups.length)return `<div class="empty-state"><div class="empty-state-icon">📋</div><div class="empty-state-text">${esc(t('att.historyEmpty'))}</div></div>`;
   return `<div class="att-history-list">${groups.map(([key,items])=>{
     const [date,className]=key.split('|'), counts=items.reduce((m,x)=>(m[x.status]=(m[x.status]||0)+1,m),{});
     return `<div class="att-history-item"><div class="att-history-main"><strong>${esc(className)}</strong><span>${esc(fmtDateLong(date))}</span></div>
@@ -485,7 +485,7 @@ window.openAttendanceAudit = async function() {
       <p class="modal-subtitle">${t("att.auditSubtitle")}</p>
       <div class="att-history-toolbar">
         <select class="form-input" id="attAuditClass">
-          <option value="">All classes</option>
+          <option value="">${t('common.all')}</option>
           ${_attendanceClasses().map(c => `<option value="${esc(c)}">${esc(c)}</option>`).join('')}
         </select>
         <button class="btn-pill-action ghost" onclick="loadAttendanceAudit()">Load</button>
