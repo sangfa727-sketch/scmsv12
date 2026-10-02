@@ -593,3 +593,48 @@
 [data-theme="dark"] #page-dashboard .dashboard-notification-item:hover {
   background: #293641 !important;
 }
+
+
+/* ================================================================
+   SCMS v12 — Dashboard v4 / Modern clarity
+   Keep metrics visually strong without haze, gradients or blur.
+   ================================================================ */
+[data-theme="dark"] #page-dashboard .stat-card,
+[data-theme="dark"] #page-dashboard .list-card {
+  background: #1C242C !important;
+  border: 1px solid rgba(229,237,244,.11) !important;
+  box-shadow: 0 3px 12px rgba(0,0,0,.16) !important;
+}
+[data-theme="dark"] #page-dashboard .stat-card:hover,
+[data-theme="dark"] #page-dashboard .list-card:hover {
+  background: #222B34 !important;
+  border-color: rgba(229,237,244,.18) !important;
+  box-shadow: 0 6px 18px rgba(0,0,0,.19) !important;
+  transform: none !important;
+}
+[data-theme="dark"] #page-dashboard .stat-card .stat-num {
+  color: #F8FAFC !important;
+  font-family: 'Inter Tight', system-ui, sans-serif !important;
+  font-weight: 750;
+  letter-spacing: -.025em;
+}
+[data-theme="dark"] #page-dashboard .stat-card .stat-lbl {
+  color: #AEB9C4 !important;
+  font-weight: 550;
+}
+[data-theme="dark"] #page-dashboard .list-card .list-card-title,
+[data-theme="dark"] #page-dashboard .list-card .card-name {
+  color: #F3F7FA !important;
+}
+[data-theme="dark"] #page-dashboard .list-card .list-card-subtitle,
+[data-theme="dark"] #page-dashboard .list-card .card-sub {
+  color: #A8B4BF !important;
+}
+[data-theme="dark"] #page-dashboard .dashboard-link-card.stat-card::before,
+[data-theme="dark"] #page-dashboard .stat-card::before {
+  display: none !important;
+}
+[data-theme="dark"] #page-dashboard .dashboard-section-title,
+[data-theme="dark"] #page-dashboard .section-title {
+  color: #EEF3F6 !important;
+}
