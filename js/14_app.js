@@ -127,9 +127,7 @@ async function initApp() {
 
     if (telegram_id && SCMS_CONFIG.N8N_BOOTSTRAP && !SCMS_CONFIG.N8N_BOOTSTRAP.includes('your-n8n')) {
       try {
-        console.log('[boot] POST', SCMS_CONFIG.N8N_BOOTSTRAP, 'telegram_id=', telegram_id);
         bootstrapData = await API.bootstrap(telegram_id);
-        console.log('[boot] response:', bootstrapData);
       } catch (e) {
         bootstrapError = e;
         console.error('[boot] bootstrap fetch failed:', e);
@@ -138,7 +136,6 @@ async function initApp() {
     } else if (webSession && SCMS_CONFIG.N8N_BOOTSTRAP && !SCMS_CONFIG.N8N_BOOTSTRAP.includes('your-n8n')) {
       // Web-session bootstrap — single RPC, then fetch lists from Supabase
       try {
-        console.log('[boot] web bootstrap for teacher=', webSession.teacher_id);
         const webData = await API.bootstrapByTeacher(webSession.teacher_id, webSession.session_token);
         // Adapt the web RPC's flat shape into the Telegram bootstrap shape.
         bootstrapData = {
@@ -169,7 +166,6 @@ async function initApp() {
           incidents:     [],
           timetable:     [],
         };
-        console.log('[boot] web bootstrap OK', bootstrapData);
       } catch (e) {
         bootstrapError = e;
         console.error('[boot] web bootstrap failed:', e);
