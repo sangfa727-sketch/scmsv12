@@ -3,6 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+<meta name="referrer" content="no-referrer">
 <title id="pageTitle">Parent Portal</title>
 <script src="https://accounts.google.com/gsi/client" async defer></script>
 <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -111,7 +112,14 @@ const GOOGLE_CLIENT_ID = '71086878167-t6q46hrv5j5n46h9nfmeuk8sdoftb5lt.apps.goog
 const PARENT_LOGIN_URL = SUPABASE_URL + '/functions/v1/parent-google-login';
 
 const qs = new URLSearchParams(location.search);
-const qrtoken = qs.get('t') || qs.get('token') || '';
+const hash = new URLSearchParams((location.hash || '').replace(/^#/, ''));
+const qrtoken = qs.get('t') || qs.get('token') || hash.get('t') || hash.get('token') || '';
+if (qrtoken) {
+  try {
+    const clean = location.pathname + (qs.has('lang') ? '?lang=' + encodeURIComponent(qs.get('lang')) : '');
+    history.replaceState(history.state, '', clean);
+  } catch (_) {}
+}
 const appEl = document.getElementById('app');
 
 function esc(s) {
