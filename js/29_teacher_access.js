@@ -105,33 +105,6 @@ function _taText(key) {
     zh:{'dashboard.view':'查看仪表板','students.view':'查看学生','students.edit':'编辑学生信息','leave.view':'查看请假申请','leave.approve':'批准 / 拒绝请假申请','attendance.view':'查看考勤','attendance.edit':'编辑考勤','homework.view':'查看作业','homework.create':'创建作业','homework.edit':'编辑作业','homework.delete':'删除作业','assessment.view':'查看评估','assessment.create':'创建评估','assessment.edit':'编辑评估','assessment.delete':'删除评估','billing.view':'查看账单','billing.write':'编辑账单','teachers.view':'查看教师','teachers.manage':'管理教师','permissions.manage':'管理权限'},
   };
   return (dict[_taLang()]?.[key] || dict.en[key] || key);
-}
-function _taCategory(key) {
-  const dict = {
-    en:{dashboard:'Dashboard',students:'Students',leave:'Leave Requests',attendance:'Attendance',homework:'Homework',assessment:'Assessments',billing:'Billing',teachers:'Teachers',permissions:'Permissions'},
-    my:{dashboard:'ပင်မစာမျက်နှာ',students:'ကျောင်းသားများ',leave:'ခွင့်တောင်းစာ',attendance:'တက်ရောက်မှု',homework:'အိမ်စာ',assessment:'အကဲဖြတ်ချက်',billing:'ငွေစာရင်း',teachers:'ဆရာ/ဆရာမများ',permissions:'လုပ်ပိုင်ခွင့်များ'},
-    ms:{dashboard:'Papan Pemuka',students:'Pelajar',leave:'Permohonan Cuti',attendance:'Kehadiran',homework:'Kerja Rumah',assessment:'Penilaian',billing:'Bil',teachers:'Guru',permissions:'Kebenaran'},
-    ms:{dashboard:'Papan Pemuka',students:'Pelajar',leave:'Permohonan Cuti',attendance:'Kehadiran',homework:'Kerja Rumah',assessment:'Penilaian',billing:'Bil',teachers:'Guru',permissions:'Kebenaran'},
-    th:{dashboard:'แดชบอร์ด',students:'นักเรียน',leave:'คำขอลา',attendance:'การเข้าเรียน',homework:'การบ้าน',assessment:'การประเมิน',billing:'การเรียกเก็บเงิน',teachers:'ครู',permissions:'สิทธิ์'},
-    zh:{dashboard:'仪表板',students:'学生',leave:'请假申请',attendance:'考勤',homework:'作业',assessment:'评估',billing:'账单',teachers:'教师',permissions:'权限'},
-    jp:{dashboard:'ダッシュボード',students:'生徒',leave:'休暇申請',attendance:'出欠',homework:'宿題',assessment:'評価',billing:'請求',teachers:'教師',permissions:'権限'}
-  };
-  return dict[_taLang()]?.[key] || dict.en[key] || key;
-}
-function _taDescription(key, fallback) { return _taText(key); }
-function _taAssignmentTypeLabel(type) {
-  const dict = {
-    en:{class_teacher:'Class Teacher',assistant:'Assistant Teacher',subject_teacher:'Subject Teacher',other:'Other'},
-    my:{class_teacher:'အတန်းပိုင်ဆရာ/ဆရာမ',assistant:'အကူဆရာ/ဆရာမ',subject_teacher:'ဘာသာရပ်ဆရာ/ဆရာမ',other:'အခြားတာဝန်'},
-    ms:{class_teacher:'Guru Kelas',assistant:'Guru Pembantu',subject_teacher:'Guru Mata Pelajaran',other:'Lain-lain'},
-    ms:{class_teacher:'Guru Kelas',assistant:'Guru Pembantu',subject_teacher:'Guru Mata Pelajaran',other:'Lain-lain'},
-    th:{class_teacher:'ครูประจำชั้น',assistant:'ครูผู้ช่วย',subject_teacher:'ครูประจำวิชา',other:'อื่นๆ'},
-    zh:{class_teacher:'班主任',assistant:'助理教师',subject_teacher:'科任教师',other:'其他'},
-    jp:{class_teacher:'担任',assistant:'補助教員',subject_teacher:'教科担当',other:'その他'},
-    km:{'dashboard.view':'ផ្ទាំងគ្រប់គ្រង','students.view':'មើលសិស្ស','students.edit':'កែសម្រួលព័ត៌មានសិស្ស','leave.view':'មើលសំណើសុំច្បាប់ឈប់','leave.approve':'អនុម័ត / បដិសេធសំណើសុំច្បាប់ឈប់','attendance.view':'មើលវត្តមាន','attendance.edit':'កែសម្រួលវត្តមាន','homework.view':'មើលកិច្ចការផ្ទះ','homework.create':'បង្កើតកិច្ចការផ្ទះ','homework.edit':'កែសម្រួលកិច្ចការផ្ទះ','homework.delete':'លុបកិច្ចការផ្ទះ','assessment.view':'មើលការវាយតម្លៃ','assessment.create':'បង្កើតការវាយតម្លៃ','assessment.edit':'កែសម្រួលការវាយតម្លៃ','assessment.delete':'លុបការវាយតម្លៃ','billing.view':'មើលវិក្កយបត្រ','billing.write':'កែសម្រួលវិក្កយបត្រ','teachers.view':'មើលគ្រូ','teachers.manage':'គ្រប់គ្រងគ្រូ','permissions.manage':'គ្រប់គ្រងសិទ្ធិ'}
-  };
-  return (dict[_taLang()]?.[key] || dict.en[key] || key);
-}
 function _taCategory(key) {
   const dict = {
     en:{dashboard:'Dashboard',students:'Students',leave:'Leave Requests',attendance:'Attendance',homework:'Homework',assessment:'Assessments',billing:'Billing',teachers:'Teachers',permissions:'Permissions'},
