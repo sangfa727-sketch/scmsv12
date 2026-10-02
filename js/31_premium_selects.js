@@ -78,7 +78,7 @@
     });
   }
   function open(wrap) {
-    const trigger = wrap.querySelector('.scms-select-trigger'), menu = wrap.querySelector('.scms-select-menu'), select = wrap.querySelector('select');
+    const trigger = wrap.querySelector('.scms-select-trigger'), menu = getMenu(wrap), select = wrap.querySelector('select');
     if (!trigger || !menu || !select || select.disabled) return;
     closeAll(wrap); renderMenu(wrap); menu.classList.add('is-open');
     trigger.setAttribute('aria-expanded', 'true'); openWrap = wrap;
