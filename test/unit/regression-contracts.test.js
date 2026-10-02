@@ -87,3 +87,34 @@ test('student photo RPC enforces the existing students.edit permission contract'
   assert.equal((migration.match(/private\.web_has_permission\(\s*p_session_token,\s*'students\.edit'/g) || []).length, 1, 'students.edit must guard student photo updates');
   assert.ok(migration.includes("'permission_denied'"), 'permission denial contract missing');
 });
+
+test('management admin handlers remain explicitly gated', () => {
+  const more = read('js/12_more.js');
+  const settings = read('js/15_settings.js');
+  const moreStart = more.indexOf('window.showAdminInfo = function () {');
+  const moreEnd = more.indexOf('\n};', moreStart);
+  assert.ok(moreStart >= 0 && moreEnd > moreStart, 'school settings handler missing');
+  const moreBlock = more.slice(moreStart, moreEnd);
+  assert.ok(moreBlock.includes('window.APP?.is_admin'), 'school settings handler must enforce admin access');
+  assert.ok(moreBlock.includes("showToast(t('cg.adminOnly'))"), 'school settings denial feedback missing');
+
+  const handlers = [
+    'openTeacherManager',
+    'openInviteCodeModal',
+    'doGenerateInvite',
+    'openCreateTeacherModal',
+    'openTeacherEditModal',
+    'saveTeacherEdit',
+    'doCreateTeacher',
+    'openTeacherCardModal',
+    'resetTeacherPassword'
+  ];
+  for (const name of handlers) {
+    const start = settings.indexOf('window.' + name + ' = ');
+    const end = settings.indexOf('\n};', start);
+    assert.ok(start >= 0 && end > start, 'teacher management handler missing: ' + name);
+    const block = settings.slice(start, end);
+    assert.ok(block.includes('window.APP?.is_admin'), name + ' must enforce admin access');
+    assert.ok(block.includes("showToast(t('cg.adminOnly'))"), name + ' must provide admin denial feedback');
+  }
+});
