@@ -8250,3 +8250,94 @@ html[lang="zh"] textarea {
 [data-theme="dark"] .list-card.card-done {
   border-color: rgba(127,199,162,0.46);
 }
+
+
+/* ================================================================
+   SCMS v12 Premium Dark — Phase 4: interaction + hierarchy refinement
+   Bounded, crisp states only. No blur, no backdrop-filter, no geometry changes.
+   ================================================================ */
+[data-theme="dark"] .stat-card,
+[data-theme="dark"] .list-card,
+[data-theme="dark"] .search-bar,
+[data-theme="dark"] .form-input,
+[data-theme="dark"] .form-textarea {
+  border-radius: 12px;
+}
+
+[data-theme="dark"] .stat-card:focus-within,
+[data-theme="dark"] .list-card:focus-within {
+  border-color: rgba(120,168,208,0.42);
+  box-shadow: 0 0 0 2px rgba(120,168,208,0.08), 0 5px 16px rgba(0,0,0,0.12);
+}
+
+[data-theme="dark"] .stat-card:active,
+[data-theme="dark"] .list-card:active {
+  border-color: rgba(120,168,208,0.30);
+}
+
+[data-theme="dark"] .card-action:hover {
+  color: #9BC7E9;
+}
+
+[data-theme="dark"] .icon-btn:hover,
+[data-theme="dark"] .btn-icon-round:hover {
+  background: var(--surface2);
+  color: var(--text);
+}
+
+[data-theme="dark"] .icon-btn:focus-visible,
+[data-theme="dark"] .btn-icon-round:focus-visible,
+[data-theme="dark"] .btn-add:focus-visible,
+[data-theme="dark"] .btn-edit:focus-visible {
+  outline: 2px solid var(--blue);
+  outline-offset: 2px;
+}
+
+[data-theme="dark"] .btn-primary:focus-visible,
+[data-theme="dark"] .btn-secondary:focus-visible {
+  box-shadow: 0 0 0 3px rgba(120,168,208,0.16);
+}
+
+[data-theme="dark"] .sidebar-item:active,
+[data-theme="dark"] .tab-btn:active {
+  background: var(--surface2);
+}
+
+[data-theme="dark"] .sidebar-item.active:hover {
+  background: #2A3D50;
+}
+
+[data-theme="dark"] .tab-btn.active {
+  font-weight: 650;
+}
+
+[data-theme="dark"] .dashboard-notification-btn:hover {
+  background: var(--surface2);
+  border-color: var(--border2);
+}
+
+[data-theme="dark"] .dashboard-notification-btn:active {
+  background: var(--bg3);
+}
+
+[data-theme="dark"] .dashboard-notification-menu {
+  box-shadow: 0 12px 28px rgba(0,0,0,0.24);
+}
+
+[data-theme="dark"] .dashboard-notification-item:focus-visible {
+  outline-color: var(--blue);
+}
+
+[data-theme="dark"] .dashboard-context-highlight {
+  outline-color: rgba(120,168,208,0.46) !important;
+  box-shadow: 0 6px 20px rgba(70,101,130,0.16) !important;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  [data-theme="dark"] .stat-card,
+  [data-theme="dark"] .list-card,
+  [data-theme="dark"] .icon-btn,
+  [data-theme="dark"] .btn-icon-round {
+    transition: none !important;
+  }
+}
