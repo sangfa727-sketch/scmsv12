@@ -465,7 +465,17 @@ window.openManageClassesModal = function () {
   window._cgRenderRows = renderRows;
 };
 
+let _cgSaveInFlight = false;
+
+function _cgSetSaveBusy(busy) {
+  _cgSaveInFlight = !!busy;
+  document.querySelectorAll('.cg-add-pair-btn, .cg-remove').forEach((button) => {
+    button.disabled = !!busy;
+  });
+}
+
 window._cgAddPair = async function () {
+  if (_cgSaveInFlight) return;
   const classInput = document.getElementById('cgClassInput');
   const gradeInput = document.getElementById('cgGradeInput');
   const cls = (classInput?.value || '').trim();
@@ -484,7 +494,8 @@ window._cgAddPair = async function () {
   if (!grades.includes(grade)) grades.push(grade);
   map[cls] = grade;
 
-  await _cgSavePaired({ classes, grades, class_grade_map: map });
+  const saved = await _cgSavePaired({ classes, grades, class_grade_map: map });
+  if (!saved) return;
 
   const list = document.getElementById('cgPairList');
   if (list && typeof window._cgRenderRows === 'function') list.innerHTML = window._cgRenderRows();
@@ -496,6 +507,7 @@ window._cgAddPair = async function () {
 };
 
 window._cgRemoveClass = async function (cls) {
+  if (_cgSaveInFlight) return;
   if (!confirm(t('cg.confirmRemove', { value: cls, list: t('picker.list.classes') }))) return;
 
   const cfg = window.APP.config || {};
@@ -504,7 +516,8 @@ window._cgRemoveClass = async function (cls) {
   const map = (cfg.class_grade_map && typeof cfg.class_grade_map === 'object') ? { ...cfg.class_grade_map } : {};
   delete map[cls];
 
-  await _cgSavePaired({ classes, grades, class_grade_map: map });
+  const saved = await _cgSavePaired({ classes, grades, class_grade_map: map });
+  if (!saved) return;
 
   const list = document.getElementById('cgPairList');
   if (list && typeof window._cgRenderRows === 'function') list.innerHTML = window._cgRenderRows();
@@ -513,16 +526,22 @@ window._cgRemoveClass = async function (cls) {
 };
 
 async function _cgSavePaired(updated) {
+  if (_cgSaveInFlight) return false;
+  _cgSetSaveBusy(true);
   try {
     const res = await API.updateSchoolConfig(updated);
     if (res && (res.ok === true || res.success === true)) {
       window.APP.config = window.APP.config || {};
       Object.assign(window.APP.config, updated);
       showToast(t('common.saved'));
-    } else {
-      showToast(t('common.saveFailedShort'));
+      return true;
     }
+    showToast(t('common.saveFailedShort'));
+    return false;
   } catch (e) {
     showToast(t('cg.couldNotSave', { err: e.message || t('common.unknown') }));
+    return false;
+  } finally {
+    _cgSetSaveBusy(false);
   }
 }
