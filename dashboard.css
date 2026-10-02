@@ -184,6 +184,12 @@
 
 
 
+/* Keyboard focus for dashboard summary cards */
+.dashboard-link-card:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+}
+
 /* ── Dashboard notification bell/menu ───────────────────────── */
 .dashboard-notification-wrap {
   position: absolute;
