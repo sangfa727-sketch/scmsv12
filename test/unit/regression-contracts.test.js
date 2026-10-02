@@ -123,6 +123,12 @@ test('assessment grade RPCs enforce view/edit permission contracts', () => {
 });
 
 
+test('n8n state keeps telegram_id uniqueness through the primary key only', () => {
+  const migration = read('supabase/migrations/20261003060000_n8n_state_redundant_unique_constraint_cleanup.sql');
+  assert.ok(migration.includes('DROP CONSTRAINT IF EXISTS n8n_state_telegram_id_key'));
+  assert.ok(migration.includes('n8n_state'));
+});
+
 test('n8n state RLS policy uses an init-plan-safe auth.role call', () => {
   const migration = read('supabase/migrations/20261003050000_n8n_state_rls_initplan_cleanup.sql');
   assert.ok(migration.includes('USING ((select auth.role()) = \'service_role\')'));
