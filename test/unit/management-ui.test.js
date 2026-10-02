@@ -47,3 +47,20 @@ test('teacher access helpers stay defined once to avoid shadowed localization lo
     assert.equal(count, 1, name + ' should have one canonical definition');
   }
 });
+
+
+test('branding labels resolve from i18n at modal-open time', () => {
+  const source = read('js/26_branding.js');
+  assert.match(source, /titleKey:\s*['"]branding\.logoTitle['"]/);
+  assert.match(source, /subtitleKey:\s*['"]branding\.logoSubtitle['"]/);
+  assert.match(source, /esc\(t\(K\.titleKey\)\)/);
+  assert.match(source, /esc\(t\(K\.subtitleKey\)\)/);
+  assert.match(source, /esc\(t\(K\.tipKey\)\)/);
+  assert.doesNotMatch(source, /title:\s*t\('branding\.logoTitle'\)/);
+});
+
+test('teacher access includes Khmer permission descriptions', () => {
+  const source = read('js/29_teacher_access.js');
+  assert.match(source, /km:\{['"]dashboard\.view['"]:/);
+  assert.match(source, /['"]permissions\.manage['"]:\s*['"]គ្រប់គ្រងសិទ្ធិ['"]/);
+});
