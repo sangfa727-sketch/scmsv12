@@ -435,27 +435,27 @@ window.openAttendanceHistory = function() {
       <div class="modal-handle"></div><h3 class="modal-title">${t("att.historyTitle")}</h3>
       <p class="modal-subtitle">${t("att.historyRecent")}</p>
       <div class="att-history-summary">
-        <div><strong>${report.days}</strong><span>Days</span></div>
-        <div><strong>${report.marked}</strong><span>Marked</span></div>
-        <div><strong>${report.presentPct}%</strong><span>Present</span></div>
+        <div><strong>${report.days}</strong><span>${t('att.historyDays')}</span></div>
+        <div><strong>${report.marked}</strong><span>${t('att.stat.marked')}</span></div>
+        <div><strong>${report.presentPct}%</strong><span>${t('att.present')}</span></div>
       </div>
       <div class="att-history-toolbar">
-        <button class="btn-pill-action ghost" onclick="openAttendanceAudit()">Audit</button>
+        <button class="btn-pill-action ghost" onclick="openAttendanceAudit()">${t('att.auditTitle')}</button>
         <select class="form-input" id="attHistoryClass">
           <option value="">${t('common.all')}</option>
           ${_attendanceClasses().map(c => `<option value="${esc(c)}">${esc(c)}</option>`).join('')}
         </select>
-        <button class="btn-pill-action ghost" onclick="renderAttendanceHistoryRows()">Refresh</button>
+        <button class="btn-pill-action ghost" onclick="renderAttendanceHistoryRows()">${t('btn.refresh')}</button>
       </div>
       <div id="attHistoryRows">${rows}</div>
       <div class="att-history-report"><div class="att-history-report-title">${t("att.report30")}</div>
         <div class="att-report-grid">
           <span>${t('att.present')} <b>${report.P}</b></span><span>${t('att.absent')} <b>${report.A}</b></span>
-          <span>Late <b>${report.L}</b></span><span>Sick <b>${report.S}</b></span>
+          <span>${t('att.code.T.label')} <b>${report.L}</b></span><span>${t('att.code.S.label')} <b>${report.S}</b></span>
           <span>${t('att.code.E.label')} <b>${report.E}</b></span><span>${t('att.code.H.label')} <b>${report.H}</b></span>
         </div>
       </div>
-      <button class="btn-secondary mt16" onclick="closeModal()">Close</button>
+      <button class="btn-secondary mt16" onclick="closeModal()">${t('common.close')}</button>
     </div>`);
 };
 function _attendanceClasses(){return [...new Set((window.APP.students||[]).map(s=>s.class).filter(Boolean))].sort();}
@@ -468,7 +468,7 @@ function _attendanceHistoryRows(){
     const [date,className]=key.split('|'), counts=items.reduce((m,x)=>(m[x.status]=(m[x.status]||0)+1,m),{});
     return `<div class="att-history-item"><div class="att-history-main"><strong>${esc(className)}</strong><span>${esc(fmtDateLong(date))}</span></div>
       <div class="att-history-counts"><span>P ${counts.P||0}</span><span>A ${counts.A||0}</span><span>L ${counts.L||0}</span><span>S ${counts.S||0}</span></div>
-      <button class="btn-secondary att-history-edit" onclick="correctAttendance('${esc(className)}','${esc(date)}')">Edit</button></div>`;
+      <button class="btn-secondary att-history-edit" onclick="correctAttendance('${esc(className)}','${esc(date)}')">${t('common.edit')}</button></div>`;
   }).join('')}</div>`;
 }
 window.renderAttendanceHistoryRows=function(){const el=document.getElementById('attHistoryRows');if(el)el.innerHTML=_attendanceHistoryRows();};
@@ -488,9 +488,9 @@ window.openAttendanceAudit = async function() {
           <option value="">${t('common.all')}</option>
           ${_attendanceClasses().map(c => `<option value="${esc(c)}">${esc(c)}</option>`).join('')}
         </select>
-        <button class="btn-pill-action ghost" onclick="loadAttendanceAudit()">Load</button>
+        <button class="btn-pill-action ghost" onclick="loadAttendanceAudit()">${t('btn.refresh')}</button>
       </div>
-      <div id="attAuditRows"><div class="empty-state"><div class="empty-state-icon">🛡️</div><div class="empty-state-text">Loading audit…</div></div></div>
+      <div id="attAuditRows"><div class="empty-state"><div class="empty-state-icon">🛡️</div><div class="empty-state-text">${esc(t("att.auditLoading"))}</div></div></div>
       <button class="btn-secondary mt16" onclick="closeModal()">Close</button>
     </div>`);
   await loadAttendanceAudit();
