@@ -57,3 +57,13 @@ test('critical page renderers stay wired at boot', () => {
 });
 
 console.log('SCMS regression contract suite loaded.');
+
+test('student RPCs enforce the existing student permission contracts', () => {
+  const migration = read('supabase/migrations/20261002030000_student_rpc_permission_hardening.sql');
+  for (const fn of ['rpc_get_students','rpc_register_student','rpc_update_student']) {
+    assert.ok(migration.includes('CREATE OR REPLACE FUNCTION public.' + fn), 'missing hardened RPC: ' + fn);
+  }
+  assert.ok(migration.includes("private.web_has_permission(p_session_token, 'students.view', NULL, NULL)"), 'students.view permission missing');
+  assert.equal((migration.match(/private\.web_has_permission\(p_session_token, 'students\.edit'/g) || []).length, 2, 'students.edit must guard register and update');
+  assert.ok(migration.includes("RETURN jsonb_build_object('ok', false, 'error', 'permission_denied')"), 'permission denial contract missing');
+});
