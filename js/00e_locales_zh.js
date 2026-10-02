@@ -1333,6 +1333,7 @@ window.I18N_ZH = {
   "students.history.empty": "暂无历史记录。",
   "students.toast.reactivated": "学生已重新启用",
   "att.historyRecent": "最近记录和 30 天摘要。",
+  "att.historyEmpty": "未找到考勤记录。",
   "att.report30": "30 天报告",
   "att.auditWebOnly": "考勤审计查看器仅适用于 Web 会话。",
   "att.auditTitle": "考勤审计",
