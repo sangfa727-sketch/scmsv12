@@ -14,22 +14,16 @@
 
 const _BRAND_KINDS = {
   logo: {
-    title: t('branding.logoTitle'),
-    subtitle: t('branding.logoSubtitle'),
+    titleKey: 'branding.logoTitle', subtitleKey: 'branding.logoSubtitle', tipKey: 'branding.logoTip',
     adminOnly: true, frame: 'square', maxW: 256, maxH: 256, crop: false, keepAlpha: true,
-    tip: t('branding.logoTip'),
   },
   cover: {
-    title: t('branding.coverTitle'),
-    subtitle: t('branding.coverSubtitle'),
+    titleKey: 'branding.coverTitle', subtitleKey: 'branding.coverSubtitle', tipKey: 'branding.coverTip',
     adminOnly: true, frame: 'wide', maxW: 1200, maxH: 400, crop: true, keepAlpha: false,
-    tip: t('branding.coverTip'),
   },
   photo: {
-    title: t('branding.photoTitle'),
-    subtitle: t('branding.photoSubtitle'),
+    titleKey: 'branding.photoTitle', subtitleKey: 'branding.photoSubtitle', tipKey: 'branding.photoTip',
     adminOnly: false, frame: 'round', maxW: 320, maxH: 320, crop: true, keepAlpha: false,
-    tip: t('branding.photoTip'),
   },
 };
 
@@ -102,8 +96,8 @@ window.openBrandingModal = function (kind) {
   openModal(`
     <div class="modal-sheet branding-form-sheet" onclick="event.stopPropagation()">
       <div class="modal-handle"></div>
-      <h3 class="modal-title">${esc(K.title)}</h3>
-      <p class="modal-subtitle">${esc(K.subtitle)}</p>
+      <h3 class="modal-title">${esc(t(K.titleKey))}</h3>
+      <p class="modal-subtitle">${esc(t(K.subtitleKey))}</p>
 
       <div class="brand-preview brand-preview-${K.frame}" id="brandPreview">${_brandPreviewHtml(kind, cur)}</div>
 
@@ -114,7 +108,7 @@ window.openBrandingModal = function (kind) {
       </div>
 
       <div class="info-tip" style="margin-top:14px">
-        <span class="info-tip-icon">💡</span><div>${esc(K.tip)}</div>
+        <span class="info-tip-icon">💡</span><div>${esc(t(K.tipKey))}</div>
       </div>
 
       <div id="brandStatus" class="brand-status" style="display:none"></div>
