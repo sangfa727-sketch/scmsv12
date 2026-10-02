@@ -13,6 +13,15 @@ test('dashboard navigation targets resolve to real app pages', () => {
   assert.ok(html.includes('id="page-attend"') && html.includes('id="page-hw"') && html.includes('id="page-incidents"'));
 });
 
+test('dashboard date filters use the configured school timezone', () => {
+  const source = read('js/27_dashboard.js');
+  assert.ok(source.includes('_dashboardISODate'), 'dashboard local-date helper missing');
+  assert.ok(source.includes('window.APP?.config?.timezone'), 'school timezone must be considered');
+  assert.ok(source.includes('Intl.DateTimeFormat'), 'date formatting must be timezone-aware');
+  assert.ok(!source.includes("new Date().toISOString().slice(0, 10)"), 'dashboard must not derive calendar dates from UTC');
+  assert.ok(source.includes('return _dashboardISODate(d);'), 'relative dashboard dates must use the same date helper');
+});
+
 test('dashboard drill-down handlers keep destination contracts', () => {
   const source = read('js/27_dashboard.js');
   for (const fn of ['_dashboardGoToAttendance','_dashboardOpenHomework','_dashboardOpenIncidentStudent','_dashboardOpenStudent']) assert.ok(source.includes(fn), 'missing handler: ' + fn);
