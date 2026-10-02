@@ -106,7 +106,7 @@
     'students.sendParentLink':'保護者リンクを送信',
     'students.saveParentDetails':'保護者情報を保存',
 'students.history.title':'生徒履歴','students.history.empty':'履歴はまだありません','students.toast.reactivated':'生徒を再有効化しました',
-    'att.historyRecent':'最近の記録と30日間の概要。','att.historyEmpty':'出欠履歴が見つかりません。','att.report30':'30日間レポート','att.auditWebOnly':'監査ビューアーはWebセッションでのみ利用できます。',
+    'att.historyRecent':'最近の記録と30日間の概要。','att.historyEmpty':'出欠履歴が見つかりません。','att.historyDays':'日数','att.report30':'30日間レポート','att.auditWebOnly':'監査ビューアーはWebセッションでのみ利用できます。',
     'att.auditTitle':'出欠監査','att.auditSubtitle':'この学校の出欠保存履歴は管理者のみ閲覧できます。','att.auditLoading':'監査履歴を読み込み中…',
     'att.auditEmpty':'出欠監査の記録はありません。','att.auditLoadFailed':'監査履歴を読み込めませんでした。','att.correctionMode':'修正モード：選択した日付を確認して保存してください。',
     'comms.portalScheduleTitle':'保護者ポータルの予定','comms.portalScheduleSub':'学校の面談、告知、イベントを保護者ポータルに表示します。',
