@@ -353,6 +353,11 @@ function _applyLogoToHeader() {
 window._applyLogoToHeader = _applyLogoToHeader;
 
 window.showAdminInfo = function () {
+  if (!window.APP?.is_admin) {
+    showToast(t('cg.adminOnly'));
+    return;
+  }
+
   const cfg = window.APP.config || {};
   const html = `
     <div class="modal-sheet" onclick="event.stopPropagation()">
