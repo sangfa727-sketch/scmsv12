@@ -155,6 +155,11 @@ window.refreshSettingsThemeControl = function() {
    TEACHER MANAGER (admin only)
 ============================================================================ */
 window.openTeacherManager = async function() {
+  if (!window.APP?.is_admin) {
+    showToast(t('cg.adminOnly'));
+    return;
+  }
+
   const cachedRows = _teacherManagerCacheFresh() ? _teacherManagerCache.rows : null;
 
   openModal(`
@@ -228,6 +233,11 @@ function _renderTeacherList(teachers) {
    and redeems the code to join this school.
 ============================================================================ */
 window.openInviteCodeModal = function() {
+  if (!window.APP?.is_admin) {
+    showToast(t('cg.adminOnly'));
+    return;
+  }
+
   openModal(`
     <div class="modal-sheet settings-form-sheet" onclick="event.stopPropagation()" style="max-width:380px">
       <div class="modal-handle"></div>
@@ -260,6 +270,11 @@ window.openInviteCodeModal = function() {
 };
 
 window.doGenerateInvite = async function() {
+  if (!window.APP?.is_admin) {
+    showToast(t('cg.adminOnly'));
+    return;
+  }
+
   const name = document.getElementById('invTName')?.value.trim() || null;
   const role = document.getElementById('invTRole')?.value;
   const btn = document.getElementById('invGenBtn');
@@ -303,6 +318,11 @@ async function _loadPastInvites() {
 }
 
 window.openCreateTeacherModal = function() {
+  if (!window.APP?.is_admin) {
+    showToast(t('cg.adminOnly'));
+    return;
+  }
+
   openModal(`
     <div class="modal-sheet settings-form-sheet" onclick="event.stopPropagation()" style="max-width:380px">
       <div class="modal-handle"></div>
@@ -341,6 +361,11 @@ window.openCreateTeacherModal = function() {
 };
 
 window.openTeacherEditModal = async function(teacherId) {
+  if (!window.APP?.is_admin) {
+    showToast(t('cg.adminOnly'));
+    return;
+  }
+
   const sess = getWebSession();
   if (!sess?.session_token) { showToast(t('ct.sessionExpired')); return; }
   let teachers = [];
@@ -378,6 +403,11 @@ window.openTeacherEditModal = async function(teacherId) {
 };
 
 window.saveTeacherEdit = async function(teacherId) {
+  if (!window.APP?.is_admin) {
+    showToast(t('cg.adminOnly'));
+    return;
+  }
+
   const btn = document.getElementById('editTBtn');
   const err = document.getElementById('editTError');
   const login = document.getElementById('editTLogin')?.value.trim() || '';
@@ -405,6 +435,11 @@ window.saveTeacherEdit = async function(teacherId) {
 };
 
 window.doCreateTeacher = async function() {
+  if (!window.APP?.is_admin) {
+    showToast(t('cg.adminOnly'));
+    return;
+  }
+
   const id    = document.getElementById('newTId')?.value.trim();
   const login = document.getElementById('newTLogin')?.value.trim();
   const name  = document.getElementById('newTName')?.value.trim();
@@ -469,6 +504,11 @@ window.doCreateTeacher = async function() {
 
 // Regression contract: Teacher ID remains the stable ID-card field label.
 window.openTeacherCardModal = async function(teacherId, teacherName, teacherLoginName) {
+  if (!window.APP?.is_admin) {
+    showToast(t('cg.adminOnly'));
+    return;
+  }
+
   openModal('<div class="modal-sheet teacher-card-modal" onclick="event.stopPropagation(); closeTeacherCardHelp()"><div class="modal-handle"></div><h3 class="modal-title">🪪 ' + esc(t('tm.idCard')) + '</h3><div id="teacherCardRoot" class="teacher-card-root"><div class="text-center text-muted">' + esc(t('tm.cardLoading')) + '</div></div><button class="btn-secondary mt16" onclick="closeModal()">' + esc(t('common.close')) + '</button></div>');
   try {
     const sess = getWebSession();
@@ -621,6 +661,11 @@ window.regenerateTeacherCard = function(teacherId, teacherName) {
 };
 
 window.resetTeacherPassword = function(teacherId, teacherName) {
+  if (!window.APP?.is_admin) {
+    showToast(t('cg.adminOnly'));
+    return;
+  }
+
   if (typeof window.showPasswordPrompt !== 'function') {
     showToast(t('ct.connErr'));
     return;
