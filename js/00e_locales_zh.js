@@ -747,6 +747,8 @@ window.I18N_ZH = {
   "grades.year": "学年",
   "grades.yearPh": "例如：2026-2027",
   "grades.start": "开始日期",
+  "grades.startTime": "开始时间",
+  "grades.endTime": "结束时间",
   "grades.end": "结束日期",
   "grades.enterTermName": "请输入学期名称",
   "grades.termAdded": "✓ 学期已添加",
