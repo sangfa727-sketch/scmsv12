@@ -369,7 +369,8 @@
 /* Dashboard → detail-page context handoff */
 .dashboard-context-highlight{position:relative;outline:2px solid rgba(59,130,246,.42)!important;outline-offset:2px;box-shadow:0 8px 26px rgba(59,130,246,.12)!important;animation:dashboardContextPulse 1.8s ease 1;transition:outline-color .32s ease,box-shadow .32s ease}.dashboard-context-highlight::after{content:'';position:absolute;inset:0;border-radius:inherit;pointer-events:none;background:linear-gradient(90deg,rgba(59,130,246,.07),transparent 42%);opacity:1;transition:opacity .32s ease}.dashboard-context-highlight.dashboard-context-fade{animation:none!important;outline-color:transparent!important;box-shadow:0 8px 26px rgba(59,130,246,0)!important}.dashboard-context-highlight.dashboard-context-fade::after{opacity:0}
 @keyframes dashboardContextPulse{0%,100%{box-shadow:0 8px 26px rgba(59,130,246,.12)}45%{box-shadow:0 8px 30px rgba(59,130,246,.24)}}
-[data-theme="dark"] .dashboard-context-highlight{outline-color:rgba(96,165,250,.48)!important;box-shadow:0 8px 28px rgba(37,99,235,.22)!important}
+[data-theme="dark"] .dashboard-context-highlight{outline-color:rgba(126,156,183,.42)!important;box-shadow:0 8px 28px rgba(65,88,110,.20)!important}
+[data-theme="dark"] .dashboard-context-highlight::after{background:linear-gradient(90deg,rgba(111,143,170,.08),transparent 42%)}
 
 
 /* ============================================================
