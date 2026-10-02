@@ -192,8 +192,9 @@ function _paintDashboard(container) {
   const scopedAttendance = _dashboardScopeMine ? d.attendance.filter(a => myClassSet.has(a?.class)) : d.attendance;
   const scopedHomework = _dashboardScopedRows(d.homework, myClassSet);
   const scopedIncidents = _dashboardScopedRows(d.incidents, myClassSet);
-  const todayName = new Date().toLocaleDateString('en-US', { weekday: 'long' });
-  const todayISO  = new Date().toISOString().slice(0, 10);
+  const today = new Date();
+  const todayName = today.toLocaleDateString('en-US', { weekday: 'long' });
+  const todayISO  = _dashboardISODate(today);
 
   const todaysClasses = scopedTimetable
     .filter(x => x.day === todayName)
@@ -371,10 +372,30 @@ window._dashboardOpenStudent = function(studentId, label) {
   window.goToPage('students');
 };
 
+function _dashboardISODate(date = new Date()) {
+  const configuredTimeZone = window.APP?.config?.timezone || window.APP?.school_timezone || '';
+  const options = { year: 'numeric', month: '2-digit', day: '2-digit' };
+  if (configuredTimeZone) options.timeZone = configuredTimeZone;
+
+  try {
+    const parts = new Intl.DateTimeFormat('en-US', options).formatToParts(date);
+    const values = Object.fromEntries(parts
+      .filter(part => part.type !== 'literal')
+      .map(part => [part.type, part.value]));
+    return values.year + '-' + values.month + '-' + values.day;
+  } catch (e) {
+    // Invalid/unavailable school timezone: fall back to the browser's local date.
+    const y = date.getFullYear();
+    const m = String(date.getMonth() + 1).padStart(2, '0');
+    const d = String(date.getDate()).padStart(2, '0');
+    return y + '-' + m + '-' + d;
+  }
+}
+
 function _isoDaysAgo(n) {
   const d = new Date();
   d.setDate(d.getDate() - n);
-  return d.toISOString().slice(0, 10);
+  return _dashboardISODate(d);
 }
 
 
