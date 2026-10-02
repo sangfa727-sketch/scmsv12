@@ -123,6 +123,15 @@ test('assessment grade RPCs enforce view/edit permission contracts', () => {
 });
 
 
+test('student health delete RPCs enforce students.edit', () => {
+  const migration = read('supabase/migrations/20261003020000_student_health_delete_permission_hardening.sql');
+  for (const fn of ['rpc_delete_health_visit','rpc_delete_vaccination']) {
+    assert.ok(migration.includes('CREATE OR REPLACE FUNCTION public.' + fn), 'missing hardened health delete RPC: ' + fn);
+  }
+  assert.equal((migration.match(/private\.web_has_permission\(p_session_token, 'students\.edit'/g) || []).length, 2);
+  assert.equal((migration.match(/'permission_denied'/g) || []).length, 2);
+});
+
 test('remaining student-domain RPCs enforce view/edit permission contracts', () => {
   const migration = read('supabase/migrations/20261003010000_student_domain_permission_hardening.sql');
   const editFns = ['rpc_activate_student','rpc_add_health_visit','rpc_add_vaccination','rpc_assign_student_transport','rpc_deactivate_student','rpc_delete_student','rpc_reactivate_student','rpc_remove_student_transport','rpc_update_student_parent','rpc_upsert_health_profile'];
