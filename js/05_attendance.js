@@ -491,7 +491,7 @@ window.openAttendanceAudit = async function() {
         <button class="btn-pill-action ghost" onclick="loadAttendanceAudit()">${t('btn.refresh')}</button>
       </div>
       <div id="attAuditRows"><div class="empty-state"><div class="empty-state-icon">🛡️</div><div class="empty-state-text">${esc(t("att.auditLoading"))}</div></div></div>
-      <button class="btn-secondary mt16" onclick="closeModal()">Close</button>
+      <button class="btn-secondary mt16" onclick="closeModal()">${t('common.close')}</button>
     </div>`);
   await loadAttendanceAudit();
 };
@@ -499,7 +499,7 @@ window.loadAttendanceAudit = async function() {
   const el = document.getElementById('attAuditRows');
   if (!el) return;
   const className = document.getElementById('attAuditClass')?.value || null;
-  el.innerHTML = '<div class="empty-state"><div class="empty-state-icon">⏳</div><div class="empty-state-text">${t("att.auditLoading")}</div></div>';
+  el.innerHTML = `<div class="empty-state"><div class="empty-state-icon">⏳</div><div class="empty-state-text">${esc(t("att.auditLoading"))}</div></div>`;
   try {
     const rows = await API.getAttendanceAudit({ className, limit: 100 });
     if (!rows.length) {
