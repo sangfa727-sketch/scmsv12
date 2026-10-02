@@ -258,6 +258,7 @@ window.I18N_MY = {
   'students.detail.meal': 'အစာ:',
   'students.btn.health': 'ကျန်းမာရေး မှတ်တမ်း',
   'idCard.title': 'ကျောင်းသား မှတ်ပုံတင်ကတ်',
+  'idCard.studentId': 'ကျောင်းသား ID',
   'idCard.failed': 'ကတ် ထုတ်၍မရပါ: {err}။ ကျောင်းသားက Active ဖြစ်ရပါမယ်။',
   'idCard.scanHint': 'မိဘများက ဒီ QR ကို စကန်ဖတ်ပြီး Parent Portal သို့ ဝင်ရောက်နိုင်ပါတယ်။',
   'idCard.copyLink': 'လင့် ကူးရန်',
