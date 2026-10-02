@@ -106,7 +106,7 @@
     'students.sendParentLink':'ส่งลิงก์ผู้ปกครอง',
     'students.saveParentDetails':'บันทึกข้อมูลผู้ปกครอง',
 'students.history.title':'ประวัตินักเรียน','students.history.empty':'ยังไม่มีประวัติ','students.toast.reactivated':'เปิดใช้งานนักเรียนอีกครั้งแล้ว',
-    'att.historyRecent':'รายการล่าสุดและสรุป 30 วัน','att.historyEmpty':'ไม่พบประวัติการเข้าเรียน','att.report30':'รายงาน 30 วัน','att.auditWebOnly':'ดูประวัติการตรวจสอบได้เฉพาะเซสชันเว็บ',
+    'att.historyRecent':'รายการล่าสุดและสรุป 30 วัน','att.historyEmpty':'ไม่พบประวัติการเข้าเรียน','att.historyDays':'วัน','att.report30':'รายงาน 30 วัน','att.auditWebOnly':'ดูประวัติการตรวจสอบได้เฉพาะเซสชันเว็บ',
     'att.auditTitle':'ประวัติการตรวจสอบการเข้าเรียน','att.auditSubtitle':'ประวัติการบันทึกการเข้าเรียนสำหรับผู้ดูแลระบบของโรงเรียนนี้เท่านั้น','att.auditLoading':'กำลังโหลดประวัติการตรวจสอบ…',
     'att.auditEmpty':'ไม่พบประวัติการตรวจสอบการเข้าเรียน','att.auditLoadFailed':'ไม่สามารถโหลดประวัติการตรวจสอบได้','att.correctionMode':'โหมดแก้ไข: ตรวจสอบและบันทึกวันที่ที่เลือก',
     'comms.portalScheduleTitle':'กำหนดการ Parent Portal','comms.portalScheduleSub':'แสดงการประชุม ประกาศ และกิจกรรมของโรงเรียนใน Parent Portal',
