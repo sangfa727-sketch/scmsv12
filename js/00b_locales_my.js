@@ -1382,6 +1382,7 @@ window.I18N_MY = {
   'students.history.empty': 'မှတ်တမ်း မရှိသေးပါ။',
   'students.toast.reactivated': 'ကျောင်းသားကို ပြန်လည်အသက်သွင်းပြီးပါပြီ။',
   'att.historyRecent': 'လတ်တလောမှတ်တမ်းများနှင့် ရက် ၃၀ အကျဉ်းချုပ်။',
+  'att.historyEmpty': 'တက်ရောက်မှုမှတ်တမ်း မတွေ့ပါ။',
   'att.report30': 'ရက် ၃၀ အစီရင်ခံစာ',
   'att.auditWebOnly': 'Audit ကြည့်ရှုခြင်းကို web session များတွင်သာ အသုံးပြုနိုင်ပါသည်။',
   'att.auditTitle': 'Attendance audit',
