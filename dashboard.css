@@ -532,3 +532,64 @@
       inset 0 1px 0 rgba(255,255,255,0.022);
   }
 }
+
+
+/* SCMS v12 — Dark Theme v3 dashboard clarity.
+   Keep dashboard cards opaque and text-forward. */
+[data-theme="dark"] #page-dashboard .stat-card,
+[data-theme="dark"] #page-dashboard .list-card {
+  background: #27323D !important;
+  border-color: rgba(220,232,242,0.13) !important;
+  box-shadow: 0 2px 10px rgba(0,0,0,0.18) !important;
+}
+
+[data-theme="dark"] #page-dashboard .stat-card:hover,
+[data-theme="dark"] #page-dashboard .list-card:hover {
+  background: #2C3844 !important;
+  border-color: rgba(220,232,242,0.20) !important;
+  box-shadow: 0 4px 14px rgba(0,0,0,0.22) !important;
+  transform: none;
+}
+
+[data-theme="dark"] #page-dashboard .dashboard-link-card.stat-card::before {
+  display: none !important;
+}
+
+[data-theme="dark"] #page-dashboard .dashboard-link-card.stat-card .stat-num {
+  color: #F4F7FA !important;
+}
+
+[data-theme="dark"] #page-dashboard .dashboard-link-card.stat-card .stat-lbl {
+  color: #C6CFD8 !important;
+}
+
+[data-theme="dark"] #page-dashboard .stat-card.green .stat-num {
+  color: #8CC7A8 !important;
+}
+
+[data-theme="dark"] #page-dashboard .stat-card.red .stat-num {
+  color: #E0A0A2 !important;
+}
+
+[data-theme="dark"] #page-dashboard .dashboard-actions button {
+  background: #2B3946 !important;
+  color: #EEF3F7 !important;
+  border-color: rgba(220,232,242,0.14) !important;
+  box-shadow: none !important;
+}
+
+[data-theme="dark"] #page-dashboard .dashboard-actions button:hover {
+  background: #334452 !important;
+  border-color: rgba(220,232,242,0.22) !important;
+}
+
+[data-theme="dark"] #page-dashboard .dashboard-notification-btn,
+[data-theme="dark"] #page-dashboard .dashboard-notification-menu {
+  background: #202832 !important;
+  backdrop-filter: none !important;
+  -webkit-backdrop-filter: none !important;
+}
+
+[data-theme="dark"] #page-dashboard .dashboard-notification-item:hover {
+  background: #293641 !important;
+}
