@@ -220,6 +220,7 @@ window.I18N_ZH = {
   "students.detail.meal": "餐食：",
   "students.btn.health": "健康记录",
   "idCard.title": "学生证",
+  "idCard.studentId": "学生编号",
   "idCard.failed": "无法生成卡片：{err}。学生必须处于在读状态。",
   "idCard.scanHint": "家长扫描此二维码登录家长门户。",
   "idCard.copyLink": "复制链接",
