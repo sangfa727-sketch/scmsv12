@@ -76,3 +76,13 @@ test('classes and grades save lifecycle prevents concurrent writes and stale UI 
   assert.match(source, /return true;/);
   assert.match(source, /return false;/);
 });
+
+
+test('teacher profile edit prevents non-super-admin role escalation', () => {
+  const source = read('supabase/migrations/20261002183000_teacher_manager_role_escalation_hardening.sql');
+  assert.match(source, /v_target_role text/);
+  assert.match(source, /v_admin\.admin_role <> 'super_admin'/);
+  assert.match(source, /v_role in \('admin','super_admin'\)/);
+  assert.match(source, /v_target_role='super_admin'/);
+  assert.match(source, /'insufficient_role'/);
+});
