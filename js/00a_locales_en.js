@@ -789,6 +789,8 @@ window.I18N_EN = {
   'grades.year': 'Academic year',
   'grades.yearPh': 'e.g. 2026-2027',
   'grades.start': 'Start date',
+  'grades.startTime': 'Start time',
+  'grades.endTime': 'End time',
   'grades.end': 'End date',
   'grades.enterTermName': 'Enter a term name',
   'grades.termAdded': '✓ Term added',
