@@ -509,7 +509,7 @@ window.openTeacherCardModal = async function(teacherId, teacherName, teacherLogi
     return;
   }
 
-  openModal('<div class="modal-sheet teacher-card-modal" onclick="event.stopPropagation(); closeTeacherCardHelp()"><div class="modal-handle"></div><h3 class="modal-title">🪪 ' + esc(t('tm.idCard')) + '</h3><div id="teacherCardRoot" class="teacher-card-root"><div class="text-center text-muted">' + esc(t('tm.cardLoading')) + '</div></div><button class="btn-secondary mt16" onclick="closeModal()">' + esc(t('common.close')) + '</button></div>');
+  openModal('<div class="modal-sheet teacher-card-modal teacher-card-preparing" onclick="event.stopPropagation(); closeTeacherCardHelp()" style="visibility:hidden"><div class="modal-handle"></div><h3 class="modal-title">🪪 ' + esc(t('tm.idCard')) + '</h3><div id="teacherCardRoot" class="teacher-card-root"><div class="text-center text-muted">' + esc(t('tm.cardLoading')) + '</div></div><button class="btn-secondary mt16" onclick="closeModal()">' + esc(t('common.close')) + '</button></div>');
   try {
     const sess = getWebSession();
     if (!sess?.session_token) throw new Error('session_expired');
@@ -564,9 +564,21 @@ window.openTeacherCardModal = async function(teacherId, teacherName, teacherLogi
 
     const qrEl = root.querySelector('.teacher-id-card-qr');
     _renderTeacherCardQr(qrEl, loginUrl);
+    const sheet = document.querySelector('.teacher-card-modal');
+    if (sheet) {
+      sheet.classList.remove('teacher-card-preparing');
+      sheet.classList.add('teacher-card-ready');
+      sheet.style.visibility = 'visible';
+    }
   } catch (e) {
     const root = document.getElementById('teacherCardRoot');
     if (root) root.innerHTML = '<div class="form-error">' + esc(t('tm.cardFailed')) + '<br><small>' + esc(e?.message || String(e)) + '</small></div>';
+    const sheet = document.querySelector('.teacher-card-modal');
+    if (sheet) {
+      sheet.classList.remove('teacher-card-preparing');
+      sheet.classList.add('teacher-card-ready');
+      sheet.style.visibility = 'visible';
+    }
   }
 };
 
