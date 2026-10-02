@@ -24,6 +24,16 @@ test('management center actions resolve to existing handlers', () => {
   for (const fn of ['openTeacherManager','openManageClassesModal','showAdminInfo','openSchoolLogoModal','openSchoolCoverModal','openModulesMenu','openSettings']) assert.ok(source.includes(fn + '(') || source.includes(fn + ' ('), 'missing handler: ' + fn);
 });
 
+test('attendance history labels remain localized', () => {
+  const source = read('js/05_attendance.js');
+  const locale = read('js/00a_locales_en.js');
+  for (const key of ['common.all','att.present','att.absent','att.code.E.label','att.code.H.label','att.historyEmpty']) {
+    assert.ok(source.includes("t('" + key + "')") || locale.includes("'" + key + "'"), 'missing attendance i18n contract: ' + key);
+  }
+  assert.ok(!source.includes('<option value="">All classes</option>'), 'attendance class filters must not hard-code English');
+  assert.ok(!source.includes('No attendance history found.'), 'attendance history empty state must use i18n');
+});
+
 test('student ID card flow keeps QR API contract', () => {
   const source = read('js/04_students.js');
   for (const token of ['showStudentIdCard','getOrCreateStudentQr','idCard.failed','qr_token']) assert.ok(source.includes(token), 'missing ID-card contract: ' + token);
