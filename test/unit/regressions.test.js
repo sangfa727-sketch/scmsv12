@@ -65,7 +65,7 @@ test('dashboard summary cards and incident entry points stay protected', () => {
   assert.match(dashboard, /window\.goToPage\('hw'\)/);
   assert.match(dashboard, /_dashboardGoToAttendance\(this\.dataset\.class\)/);
   assert.match(dashboard, /data-student-id=/);
-  assert.match(css, /#102A43/);
+  assert.match(css, /\[data-theme="dark"\] #page-dashboard \.dashboard-link-card\.stat-card/);
   assert.match(css, /dashboard-link-card/);
   assert.ok(html.includes('dashboard.css?v=20261001j'));
 });
