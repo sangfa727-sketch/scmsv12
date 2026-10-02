@@ -1333,6 +1333,7 @@ window.I18N_KM = {
   "students.history.empty": "មិនទាន់មានប្រវត្តិទេ។",
   "students.toast.reactivated": "សិស្សបានធ្វើឱ្យសកម្មឡើងវិញ",
   "att.historyRecent": "កំណត់ត្រាថ្មីៗ និងសេចក្តីសង្ខេប 30 ថ្ងៃ។",
+  "att.historyEmpty": "រកមិនឃើញប្រវត្តិវត្តមានទេ។",
   "att.report30": "របាយការណ៍ 30 ថ្ងៃ",
   "att.auditWebOnly": "កម្មវិធីមើល Audit មានសម្រាប់ Web session ប៉ុណ្ណោះ។",
   "att.auditTitle": "Audit វត្តមាន",
