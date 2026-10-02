@@ -34,6 +34,16 @@ test('attendance history labels remain localized', () => {
   assert.ok(!source.includes('No attendance history found.'), 'attendance history empty state must use i18n');
 });
 
+test('grades assessment time labels remain localized', () => {
+  const source = read('js/20_grades.js');
+  const locale = read('js/00a_locales_en.js');
+  assert.ok(source.includes("t('grades.startTime')"), 'start time label must use i18n');
+  assert.ok(source.includes("t('grades.endTime')"), 'end time label must use i18n');
+  assert.ok(locale.includes("'grades.startTime'") && locale.includes("'grades.endTime'"), 'grade time locale keys missing');
+  assert.ok(!source.includes('<label class="field-label">Start time</label>'), 'start time must not be hard-coded');
+  assert.ok(!source.includes('<label class="field-label">End time</label>'), 'end time must not be hard-coded');
+});
+
 test('student ID card flow keeps QR API contract', () => {
   const source = read('js/04_students.js');
   for (const token of ['showStudentIdCard','getOrCreateStudentQr','idCard.failed','qr_token']) assert.ok(source.includes(token), 'missing ID-card contract: ' + token);
