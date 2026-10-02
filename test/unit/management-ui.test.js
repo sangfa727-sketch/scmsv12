@@ -39,3 +39,11 @@ test('management center keeps admin gating and core management actions wired', (
   assert.match(source, /data-management-action/);
   assert.match(source, /setTimeout\(item\[2\], 190\)/);
 });
+
+test('teacher access helpers stay defined once to avoid shadowed localization logic', () => {
+  const source = read('js/29_teacher_access.js');
+  for (const name of ['_taCategory', '_taDescription', '_taAssignmentTypeLabel']) {
+    const count = (source.match(new RegExp('function ' + name + '\\s*\\(', 'g')) || []).length;
+    assert.equal(count, 1, name + ' should have one canonical definition');
+  }
+});
