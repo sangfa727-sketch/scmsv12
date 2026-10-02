@@ -747,6 +747,8 @@ window.I18N_KM = {
   "grades.year": "ឆ្នាំសិក្សា",
   "grades.yearPh": "ឧ. 2026-2027",
   "grades.start": "ថ្ងៃចាប់ផ្តើម",
+  "grades.startTime": "ពេលចាប់ផ្តើម",
+  "grades.endTime": "ពេលបញ្ចប់",
   "grades.end": "ថ្ងៃបញ្ចប់",
   "grades.enterTermName": "សូមបញ្ចូលឈ្មោះវគ្គសិក្សា",
   "grades.termAdded": "✓ បានបន្ថែមវគ្គសិក្សា",
