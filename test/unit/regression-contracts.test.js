@@ -123,6 +123,22 @@ test('assessment grade RPCs enforce view/edit permission contracts', () => {
 });
 
 
+test('admissions access is admin-gated end-to-end', () => {
+  const migration = read('supabase/migrations/20261003030000_admissions_permission_domain_hardening.sql');
+  const more = read('js/12_more.js');
+  for (const key of ['admissions.view','admissions.manage']) assert.ok(migration.includes("'" + key + "'"), 'missing admissions permission: ' + key);
+  for (const fn of ['rpc_convert_admission_to_student','rpc_create_admission','rpc_delete_admission','rpc_link_admission_invoice','rpc_set_admission_photo','rpc_update_admission_status','rpc_update_admission']) {
+    assert.ok(migration.includes('CREATE OR REPLACE FUNCTION public.' + fn), 'missing admissions write guard: ' + fn);
+  }
+  for (const fn of ['rpc_get_admission_detail','rpc_get_admissions']) {
+    assert.ok(migration.includes('CREATE OR REPLACE FUNCTION public.' + fn), 'missing admissions read guard: ' + fn);
+  }
+  assert.equal((migration.match(/private\.web_has_permission\(p_session_token, 'admissions\.manage'/g) || []).length, 7);
+  assert.equal((migration.match(/private\.web_has_permission\(p_session_token, 'admissions\.view'/g) || []).length, 2);
+  assert.ok(more.includes("id !== 'admissions' || !!window.APP?.is_admin"), 'admissions must be hidden from non-admin module lists');
+  assert.ok(more.includes("pageId === 'admissions' && !window.APP?.is_admin"), 'direct admissions navigation must be admin-gated');
+});
+
 test('student health delete RPCs enforce students.edit', () => {
   const migration = read('supabase/migrations/20261003020000_student_health_delete_permission_hardening.sql');
   for (const fn of ['rpc_delete_health_visit','rpc_delete_vaccination']) {
