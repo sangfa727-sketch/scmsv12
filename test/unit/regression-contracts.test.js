@@ -33,6 +33,7 @@ test('attendance history labels remain localized', () => {
   assert.ok(!source.includes('<option value="">All classes</option>'), 'attendance class filters must not hard-code English');
   assert.ok(!source.includes('No attendance history found.'), 'attendance history empty state must use i18n');
   for (const text of ['>Days</span>','>Marked</span>','>Present</span>','>Late <b>','>Sick <b>','>Audit</button>','>Refresh</button>','>Close</button>','>Edit</button>','>Load</button>','>Loading audit…</div>']) assert.ok(!source.includes(text), 'attendance history contains hard-coded UI: ' + text);
+  assert.ok(!source.includes('empty-state-text">${t("att.auditLoading")}'), 'audit loading must interpolate the translation key');
 });
 
 test('premium select controls stay in-app and keyboard accessible', () => {
