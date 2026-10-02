@@ -95,6 +95,8 @@
     const id = 'scms-select-menu-' + Math.random().toString(36).slice(2);
     trigger.setAttribute('aria-controls', id); trigger.disabled = select.disabled;
     const value = document.createElement('span'); value.className = 'scms-select-value';
+    const labelId = select.getAttribute('aria-label');
+    if (labelId) trigger.setAttribute('aria-label', labelId);
     const chevron = document.createElement('span'); chevron.className = 'scms-select-chevron';
     chevron.setAttribute('aria-hidden', 'true'); chevron.textContent = '⌄';
     trigger.append(value, chevron);
@@ -104,6 +106,23 @@
     trigger.addEventListener('keydown', e => {
       if (['ArrowDown','ArrowUp','Enter',' '].includes(e.key)) { e.preventDefault(); open(wrap); }
     });
+    menu.addEventListener('keydown', e => {
+      const rows = Array.from(menu.querySelectorAll('[role="option"]:not(:disabled)'));
+      const current = document.activeElement;
+      const index = rows.indexOf(current);
+      if (e.key === 'Escape') { e.preventDefault(); close(wrap); trigger.focus(); return; }
+      if (e.key === 'ArrowDown' || e.key === 'ArrowUp') {
+        e.preventDefault();
+        if (!rows.length) return;
+        const next = rows[(index + (e.key === 'ArrowDown' ? 1 : -1) + rows.length) % rows.length];
+        next.focus(); next.scrollIntoView({ block: 'nearest' });
+      }
+      if (e.key === 'Home' || e.key === 'End') {
+        e.preventDefault();
+        const next = rows[e.key === 'Home' ? 0 : rows.length - 1];
+        next?.focus(); next?.scrollIntoView({ block: 'nearest' });
+      }
+    });
     select.addEventListener('change', () => { updateValue(wrap, false); trigger.disabled = select.disabled; });
     updateValue(wrap, false);
   }
@@ -111,6 +130,7 @@
     const scope = root && root.querySelectorAll ? root : document;
     scope.querySelectorAll(SELECTOR).forEach(enhance);
     if (scope.matches?.('select')) enhance(scope);
+    document.querySelectorAll('.scms-select-wrap > select').forEach(select => updateValue(select.parentElement, false));
   }
   function scheduleScan() {
     cancelAnimationFrame(raf); raf = requestAnimationFrame(() => scan(document));
