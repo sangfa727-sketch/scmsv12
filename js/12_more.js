@@ -183,20 +183,22 @@ MODULE_ITEMS.forEach(m => Object.defineProperty(m, 'label', { get: () => t('modu
 /** Module ids shown in the sidebar (default: all until the user saves a choice). */
 window.getSidebarModuleIds = function () {
   const saved = window.APP.ui_prefs && window.APP.ui_prefs.sidebar_modules;
-  return Array.isArray(saved) ? saved : MODULE_ITEMS.map(m => m.id);
+  const ids = Array.isArray(saved) ? saved : MODULE_ITEMS.map(m => m.id);
+  return ids.filter(id => id !== 'admissions' || !!window.APP?.is_admin);
 };
 
 let _modulesDraft = null;   // Set of ids ticked in the open sheet (not saved yet)
 
 window.openModulesMenu = function () {
   _modulesDraft = new Set(getSidebarModuleIds());
+  const visibleModuleItems = MODULE_ITEMS.filter(m => m.id !== 'admissions' || !!window.APP?.is_admin);
   openModal(`
     <div class="modal-sheet" onclick="event.stopPropagation()">
       <div class="modal-handle"></div>
       <h3 class="modal-title">${t('modules.title')}</h3>
       <p class="modal-subtitle">${t('modules.hint')}</p>
       <div class="more-grid" style="padding:8px 0 4px">
-        ${MODULE_ITEMS.map(m => `
+        ${visibleModuleItems.map(m => `
         <div class="more-tile module-card" role="button" tabindex="0" onclick="modulesGo('${m.id}')">
           <label class="module-check" onclick="event.stopPropagation()" title="${esc(t('modules.showInSidebar'))}">
             <input type="checkbox" ${_modulesDraft.has(m.id) ? 'checked' : ''}
@@ -236,6 +238,10 @@ window.saveSidebarModules = async function () {
 };
 
 window.modulesGo = function (pageId) {
+  if (pageId === 'admissions' && !window.APP?.is_admin) {
+    showToast(t('cg.adminOnly'));
+    return;
+  }
   closeModal();
   setTimeout(() => goToPage(pageId), 150);
 };
