@@ -45,6 +45,18 @@ test('supported locales preserve the English key set', () => {
   }
 });
 
+test('legacy Thai/Japanese locales preserve English fallback contract', () => {
+  for (const [file, globalName] of [
+    ['js/00_locales_thai.js', 'I18N_TH'],
+    ['js/00_locales_jp.js', 'I18N_JP']
+  ]) {
+    const source = read(file);
+    assert.ok(source.includes('const base = window.I18N_EN || {};'), file + ' must inherit the English base locale');
+    assert.ok(source.includes('Object.assign({}, base, overrides)'), file + ' must merge overrides onto the English base');
+    assert.ok(source.includes('window.' + globalName + ' = Object.assign'), file + ' must publish the merged locale');
+  }
+});
+
 test('teacher permission locale map covers all supported languages', () => {
   const source = read('js/29_teacher_access.js');
   for (const lang of ['en','my','th','jp','zh','km','ms']) assert.ok(source.includes(lang + ':'), 'missing locale: ' + lang);
