@@ -1334,6 +1334,7 @@ window.I18N_MS = {
   "students.toast.reactivated": "Murid diaktifkan semula",
   "att.historyRecent": "Rekod terkini dan ringkasan 30 hari.",
   "att.historyEmpty": "Tiada sejarah kehadiran ditemui",
+  "att.historyDays": "Hari",
   "att.historyEmpty": "Tiada sejarah kehadiran ditemui.",
   "att.report30": "Laporan 30 hari",
   "att.auditWebOnly": "Paparan audit hanya tersedia dalam sesi web.",
