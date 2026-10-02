@@ -446,9 +446,13 @@ window.goToPage = function(pageId) {
     stopChatPolling();
   }
 
-  // Close the native sidebar immediately after selection so navigation feels
-  // like one continuous interaction instead of two competing animations.
-  if (typeof closeSidebar === 'function') closeSidebar();
+  // Navigation is the boundary for transient UI. Close every managed
+  // full-screen interaction layer so a previous modal cannot dim the new page.
+  if (typeof window._dismissTransientOverlaysForNavigation === 'function') {
+    window._dismissTransientOverlaysForNavigation();
+  } else if (typeof closeSidebar === 'function') {
+    closeSidebar();
+  }
 
   const tabs  = document.querySelectorAll('.tab-btn');
   const pages = document.querySelectorAll('.page');
@@ -856,21 +860,45 @@ window.closeModal = function(onCloseOverride) {
   const overlay = document.getElementById('modalOverlay');
   const top = window._modalStack.pop();
   if (!top) {
-    overlay.classList.remove('active');
-    overlay.innerHTML = '';
+    overlay?.classList.remove('active');
+    if (overlay) overlay.innerHTML = '';
     return;
   }
   if (top.closing) return;
   top.closing = true;
   top.layer.classList.add('is-closing');
+
+  // Remove the full-screen dimmer as soon as the last modal is logically
+  // closed. The sheet may finish its short exit animation, but the page
+  // underneath must never remain visually dimmed during navigation.
+  if (!window._modalStack.length) overlay?.classList.remove('active');
+
   const removeLayer = () => {
     top.layer.remove();
-    if (!window._modalStack.length) overlay.classList.remove('active');
     const cb = onCloseOverride || top.onClose;
     if (typeof cb === 'function') cb();
   };
   if (window.matchMedia?.('(prefers-reduced-motion: reduce)').matches) removeLayer();
   else setTimeout(removeLayer, 170);
+};
+
+// Navigation owns transient overlay cleanup. Each overlay keeps its existing
+// close callback/lifecycle; navigation simply invokes those public closers in
+// a deterministic order instead of leaving independent full-screen layers
+// behind.
+window._dismissTransientOverlaysForNavigation = function () {
+  while (window._modalStack?.length) {
+    window.closeModal();
+  }
+  if (typeof window._closeGenericConfirm === 'function') {
+    window._closeGenericConfirm();
+  }
+  if (typeof window._closePasswordPrompt === 'function') {
+    window._closePasswordPrompt();
+  }
+  if (typeof window.closeSidebar === 'function') {
+    window.closeSidebar();
+  }
 };
 // ─── GENERIC CONFIRM DIALOG (replaces native confirm()) ─────────────────────
 window.showConfirm = function (title, message, confirmLabel, onConfirm, opts = {}) {
