@@ -507,7 +507,7 @@ function _idCardHtml(s, qrTargetId) {
       <div class="idc-right">
         ${brand}
         <div class="idc-field">
-          <div class="idc-label">Student ID</div>
+          <div class="idc-label">${t('idCard.studentId')}</div>
           <div class="idc-value idc-sid">${esc(s.student_id)}</div>
         </div>
         ${qr}
