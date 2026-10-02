@@ -83,6 +83,11 @@ function renderMore() {
     ${isAdmin ? `
     <div class="more-section-title">${t('more.admin')}</div>
     <div class="more-list">
+      <button class="more-row more-row-management" onclick="openManagementCenter()">
+        <span class="more-row-icon">🛠️</span>
+        <span class="more-row-label">${t('more.admin')}</span>
+        <span class="more-row-chevron">›</span>
+      </button>
       <button class="more-row" onclick="openSchoolLogoModal()">
         <span class="more-row-icon">🖼️</span>
         <span class="more-row-label">${t('more.logo')}</span>
@@ -233,6 +238,44 @@ window.saveSidebarModules = async function () {
 window.modulesGo = function (pageId) {
   closeModal();
   setTimeout(() => goToPage(pageId), 150);
+};
+
+/* ─── Management Center (admin) ────────────────────────────────── */
+window.openManagementCenter = function () {
+  if (!window.APP?.is_admin) {
+    showToast(t('cg.adminOnly'));
+    return;
+  }
+
+  const items = [
+    ['👥', 'more.teachers', () => openTeacherManager()],
+    ['🏷️', 'more.classes', () => openManageClassesModal()],
+    ['🏫', 'more.schoolSettings', () => showAdminInfo()],
+    ['🖼️', 'more.logo', () => openSchoolLogoModal()],
+    ['🌄', 'more.cover', () => openSchoolCoverModal()],
+    ['🗂️', 'more.modules', () => openModulesMenu()],
+    ['⚙️', 'settings.title', () => openSettings()]
+  ];
+  const html = [
+    '<div class="modal-sheet management-center-sheet" onclick="event.stopPropagation()">',
+    '<div class="modal-handle"></div>',
+    '<h3 class="modal-title">🛠️ ' + esc(t('more.admin')) + '</h3>',
+    '<p class="modal-subtitle">' + esc(t('schoolInfo.hint')) + '</p>',
+    '<div class="more-grid management-center-grid">',
+    items.map((item, index) => '<button type="button" class="more-tile" data-management-action="' + index + '"><span class="more-icon">' + item[0] + '</span><span>' + esc(t(item[1])) + '</span></button>').join(''),
+    '</div>',
+    '<button type="button" class="btn-secondary mt16" onclick="closeModal()">' + esc(t('common.close')) + '</button>',
+    '</div>'
+  ].join('');
+  openModal(html);
+  document.querySelectorAll('[data-management-action]').forEach((button) => {
+    button.addEventListener('click', () => {
+      const item = items[Number(button.dataset.managementAction)];
+      if (!item) return;
+      closeModal();
+      setTimeout(item[2], 190);
+    });
+  });
 };
 
 /* Desktop bottom tab bar: on by default, can be switched off (device-local). */
