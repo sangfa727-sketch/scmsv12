@@ -50,6 +50,14 @@ test('student ID card flow keeps QR API contract', () => {
   for (const token of ['showStudentIdCard','getOrCreateStudentQr','idCard.failed','qr_token']) assert.ok(source.includes(token), 'missing ID-card contract: ' + token);
 });
 
+test('student ID card labels remain localized', () => {
+  const source = read('js/04_students.js');
+  const locale = read('js/00a_locales_en.js');
+  assert.ok(source.includes("t('idCard.studentId')"), 'student ID card label must use i18n');
+  assert.ok(locale.includes("'idCard.studentId'"), 'student ID card locale key missing');
+  assert.ok(!source.includes('<div class="idc-label">Student ID</div>'), 'student ID card label must not be hard-coded');
+});
+
 test('dashboard scope, notifications and context handoff stay wired', () => {
   const dashboard = read('js/27_dashboard.js');
   const app = read('js/14_app.js');
