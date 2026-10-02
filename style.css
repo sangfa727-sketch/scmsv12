@@ -8239,3 +8239,37 @@ html[lang="zh"] textarea {
   backdrop-filter: none !important;
   -webkit-backdrop-filter: none !important;
 }
+
+
+/* SCMS v12 — Dark Theme v2 clarity hotfix.
+   Disable backdrop-filter in the dark theme. On affected mobile/WebView
+   renderers it can make the entire screen appear hazy even when the filter
+   is declared only on a fixed surface. Keep the premium depth through
+   opaque/translucent backgrounds and shadows instead. */
+[data-theme="dark"] .app-header,
+[data-theme="dark"] .tab-bar,
+[data-theme="dark"] .sidebar,
+[data-theme="dark"] .modal-overlay,
+[data-theme="dark"] .modal-sheet,
+[data-theme="dark"] .modal-content,
+[data-theme="dark"] .modal-card,
+[data-theme="dark"] .toast,
+[data-theme="dark"] .popover,
+[data-theme="dark"] .dropdown-menu,
+[data-theme="dark"] #page-dashboard .dashboard-notification-btn,
+[data-theme="dark"] #page-dashboard .dashboard-notification-menu {
+  backdrop-filter: none !important;
+  -webkit-backdrop-filter: none !important;
+}
+
+@media (max-width: 520px) {
+  [data-theme="dark"] .app-header,
+  [data-theme="dark"] .tab-bar,
+  [data-theme="dark"] .sidebar,
+  [data-theme="dark"] .modal-sheet,
+  [data-theme="dark"] .modal-content,
+  [data-theme="dark"] .modal-card {
+    backdrop-filter: none !important;
+    -webkit-backdrop-filter: none !important;
+  }
+}
