@@ -86,6 +86,14 @@ async function initApp() {
     // If we're not inside Telegram AND we have no saved session, show the
     // landing screen and let the user sign in.
     let webSession = null;
+    if (!isTWA() && SCMS_CONFIG.BACKEND_ENABLED !== false &&
+        typeof window.handleTeacherCardQuery === 'function') {
+      const teacherCardHandled = await window.handleTeacherCardQuery();
+      if (teacherCardHandled) {
+        if (bootScreen) bootScreen.style.display = 'none';
+        return;
+      }
+    }
     if (!isTWA() && SCMS_CONFIG.BACKEND_ENABLED !== false) {
       const saved = (typeof getSavedSession === 'function') ? getSavedSession() : null;
       if (saved && saved.telegram_id) {
