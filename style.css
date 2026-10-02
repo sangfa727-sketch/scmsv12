@@ -7995,3 +7995,205 @@ html[lang="zh"] textarea {
   .more-theme-card { align-items:flex-start; flex-direction:column; }
   .more-theme-toggle { align-self:flex-end; }
 }
+
+
+/* ================================================================
+   SCMS v12 Premium Dark — Phase 2: core navigation + controls
+   Scope: header, sidebar, tabs, buttons, inputs and search only.
+   No blur/backdrop-filter, no layout changes, no modal/navigation logic.
+   ================================================================ */
+[data-theme="dark"] .app-header,
+[data-theme="dark"] .tab-bar {
+  background: var(--surface);
+  border-color: var(--border);
+  box-shadow: 0 1px 0 rgba(255,255,255,0.018);
+}
+
+[data-theme="dark"] .school-name,
+[data-theme="dark"] .school-info,
+[data-theme="dark"] .page-title {
+  color: var(--text);
+}
+
+[data-theme="dark"] .school-sub,
+[data-theme="dark"] .page-subtitle {
+  color: var(--text2);
+}
+
+[data-theme="dark"] .icon-btn-burger {
+  color: var(--text2);
+  background: transparent;
+}
+[data-theme="dark"] .icon-btn-burger:hover {
+  color: var(--text);
+  background: var(--surface2);
+}
+[data-theme="dark"] .icon-btn-burger:focus-visible,
+[data-theme="dark"] .tab-btn:focus-visible,
+[data-theme="dark"] .sidebar-item:focus-visible,
+[data-theme="dark"] .btn-primary:focus-visible,
+[data-theme="dark"] .btn-secondary:focus-visible,
+[data-theme="dark"] .btn-icon-round:focus-visible,
+[data-theme="dark"] .clear-btn:focus-visible {
+  outline: 2px solid var(--blue);
+  outline-offset: 2px;
+}
+
+[data-theme="dark"] .tab-btn {
+  color: var(--muted);
+}
+[data-theme="dark"] .tab-btn:hover {
+  color: var(--text2);
+  background: var(--bg2);
+}
+[data-theme="dark"] .tab-btn.active {
+  color: var(--blue);
+  background: transparent;
+}
+
+[data-theme="dark"] .sidebar {
+  background: var(--surface);
+  border-right-color: var(--border);
+  box-shadow: 4px 0 20px rgba(0,0,0,0.20);
+}
+[data-theme="dark"] .sidebar-header {
+  background: var(--bg2);
+  color: var(--text);
+  border-bottom-color: var(--border);
+}
+[data-theme="dark"] .sidebar-avatar {
+  background: var(--surface2);
+  color: var(--text);
+}
+[data-theme="dark"] .sidebar-profile-meta,
+[data-theme="dark"] .sidebar-school-row {
+  color: var(--text2);
+}
+[data-theme="dark"] .sidebar-item {
+  color: var(--text2);
+}
+[data-theme="dark"] .sidebar-item:hover {
+  background: var(--bg2);
+  color: var(--text);
+}
+[data-theme="dark"] .sidebar-item.active {
+  background: #26384A;
+  color: #F4F7FA;
+  box-shadow: inset 3px 0 0 var(--blue), inset 0 0 0 1px rgba(120,168,208,0.12);
+}
+[data-theme="dark"] .sidebar-item.active .sidebar-icon {
+  color: var(--blue);
+}
+[data-theme="dark"] .sidebar-icon {
+  color: var(--muted);
+}
+[data-theme="dark"] .sidebar-item:hover .sidebar-icon {
+  color: var(--text2);
+}
+[data-theme="dark"] .sidebar-footer {
+  border-top-color: var(--border);
+}
+
+[data-theme="dark"] .sidebar-backdrop {
+  background: rgba(4,7,10,0.48);
+}
+
+[data-theme="dark"] .search-bar {
+  background: var(--surface);
+  border-color: var(--border2);
+  box-shadow: 0 1px 2px rgba(0,0,0,0.14);
+}
+[data-theme="dark"] .search-bar:focus-within {
+  border-color: rgba(120,168,208,0.58);
+  box-shadow: 0 0 0 3px rgba(120,168,208,0.10);
+}
+[data-theme="dark"] .search-icon {
+  color: var(--muted);
+}
+[data-theme="dark"] .search-bar input {
+  color: var(--text);
+}
+[data-theme="dark"] .search-bar input::placeholder {
+  color: var(--muted);
+}
+[data-theme="dark"] .clear-btn {
+  color: var(--muted);
+}
+[data-theme="dark"] .clear-btn:hover {
+  color: var(--text);
+}
+
+[data-theme="dark"] .btn-primary {
+  background: var(--blue);
+  color: #0E151B;
+  box-shadow: 0 1px 2px rgba(0,0,0,0.22);
+}
+[data-theme="dark"] .btn-primary:hover {
+  background: #86B5DB;
+}
+[data-theme="dark"] .btn-primary:active {
+  background: #6F9FC6;
+  opacity: 1;
+}
+[data-theme="dark"] .btn-secondary {
+  background: var(--surface2);
+  color: var(--text2);
+  border: 1px solid var(--border);
+}
+[data-theme="dark"] .btn-secondary:hover {
+  background: var(--bg3);
+  color: var(--text);
+}
+[data-theme="dark"] .btn-secondary:active {
+  background: var(--bg3);
+}
+[data-theme="dark"] .btn-icon-round {
+  border: 1px solid var(--border);
+}
+[data-theme="dark"] .btn-add {
+  background: var(--blue);
+  color: #0E151B;
+}
+[data-theme="dark"] .btn-edit {
+  background: var(--surface2);
+  color: var(--text);
+}
+
+[data-theme="dark"] .form-input,
+[data-theme="dark"] .form-textarea {
+  background: var(--bg2);
+  border-color: var(--border2);
+  color: var(--text);
+}
+[data-theme="dark"] .form-input:hover,
+[data-theme="dark"] .form-textarea:hover {
+  border-color: rgba(214,228,242,0.24);
+}
+[data-theme="dark"] .form-input:focus,
+[data-theme="dark"] .form-textarea:focus {
+  border-color: var(--blue);
+  box-shadow: 0 0 0 3px rgba(120,168,208,0.10);
+}
+[data-theme="dark"] .form-input::placeholder,
+[data-theme="dark"] .form-textarea::placeholder {
+  color: var(--muted);
+}
+[data-theme="dark"] .field-label {
+  color: var(--text2);
+}
+
+[data-theme="dark"] .pill {
+  background: var(--bg2);
+  border-color: var(--border);
+  color: var(--text2);
+}
+[data-theme="dark"] .pill:hover {
+  background: var(--surface2);
+  border-color: var(--border2);
+  color: var(--text);
+}
+[data-theme="dark"] .pill.active {
+  background: var(--blue);
+  border-color: var(--blue);
+  color: #0E151B;
+}
