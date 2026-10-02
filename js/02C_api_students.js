@@ -201,6 +201,40 @@ Object.assign(API, {
     };
   },
 
+  // ─── BRANDING & PROFILE PHOTOS (web only — secure Edge Function upload) ──
+  // Upload authorization is enforced server-side using the existing app web
+  // session token. The browser never receives a service-role credential.
+  async uploadSchoolAsset(kind, blob) {
+    const allowed = ['logo', 'cover', 'teacher'];
+    if (!allowed.includes(kind)) throw new Error('Invalid asset type');
+    if (!(blob instanceof Blob) || blob.size <= 0) throw new Error('Invalid image');
+    if (blob.size > 5 * 1024 * 1024) throw new Error('Image is too large');
+    if (!/^image\/(jpeg|png|webp)$/i.test(blob.type || '')) {
+      throw new Error('Unsupported image type');
+    }
+
+    const form = new FormData();
+    form.append('session_token', _webSessionToken());
+    form.append('kind', kind);
+    form.append('file', blob, `scms-${kind}.${blob.type === 'image/png' ? 'png' : 'jpg'}`);
+
+    const resp = await fetch(
+      `${SCMS_CONFIG.SUPABASE_URL}/functions/v1/upload-school-asset`,
+      {
+        method: 'POST',
+        headers: { 'apikey': SCMS_CONFIG.SUPABASE_ANON },
+        body: form,
+      }
+    );
+    const body = await resp.text().catch(() => '');
+    let data = null;
+    try { data = body ? JSON.parse(body) : null; } catch (_) {}
+    if (!resp.ok || !data?.url) {
+      throw new Error(data?.error || `Asset upload failed (${resp.status})`);
+    }
+    return data.url;
+  },
+
   // ─── BRANDING & PROFILE PHOTOS (web only — direct Supabase, no n8n) ──────
   // Images are stored in the public `school-assets` bucket; only the URL is
   // kept in the DB (schools.config_json.school_logo / school_cover and
