@@ -220,6 +220,7 @@ window.I18N_MS = {
   "students.detail.meal": "Hidangan:",
   "students.btn.health": "Rekod Kesihatan",
   "idCard.title": "Kad ID Murid",
+  "idCard.studentId": "ID Murid",
   "idCard.failed": "Tidak dapat menjana kad: {err}. Murid mestilah Aktif.",
   "idCard.scanHint": "Ibu bapa mengimbas ini untuk log masuk ke Portal Ibu Bapa.",
   "idCard.copyLink": "Salin pautan",
