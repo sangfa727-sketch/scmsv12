@@ -8445,3 +8445,91 @@ html[lang="zh"] textarea {
 [data-theme="dark"] .content {
   filter: none !important;
 }
+
+
+/* ============================================================
+   SCMS v12 — Dark Theme v3.1 / Visual Clarity Hardening
+   Glass language = translucent surface + border + shadow.
+   Blur is intentionally not used for application UI.
+   ============================================================ */
+
+/* Remove legacy transition references that can reintroduce filter
+   compositing in some mobile/WebView engines. */
+[data-theme="dark"] .modal-overlay {
+  transition: background-color .18s ease, opacity .18s ease !important;
+}
+
+/* Full-screen backdrops must dim only. They must never soften content. */
+[data-theme="dark"] .sidebar-backdrop,
+[data-theme="dark"] .sidebar-backdrop.show,
+[data-theme="dark"] .sidebar-backdrop.open {
+  backdrop-filter: none !important;
+  -webkit-backdrop-filter: none !important;
+  filter: none !important;
+}
+
+[data-theme="dark"] .sidebar-backdrop.show,
+[data-theme="dark"] .sidebar-backdrop.open {
+  background: rgba(7,10,13,0.42) !important;
+}
+
+/* Crisp typography on every primary dark surface. */
+[data-theme="dark"] .page-title,
+[data-theme="dark"] .page-subtitle,
+[data-theme="dark"] .section-title,
+[data-theme="dark"] .card-title,
+[data-theme="dark"] .list-card,
+[data-theme="dark"] .stat-card,
+[data-theme="dark"] .table-wrap,
+[data-theme="dark"] .data-table {
+  text-shadow: none !important;
+}
+
+[data-theme="dark"] .page-title,
+[data-theme="dark"] .section-title,
+[data-theme="dark"] .card-title {
+  color: #F5F7FA !important;
+}
+
+[data-theme="dark"] .page-subtitle {
+  color: #B9C4CE !important;
+}
+
+/* Bounded "glass" controls: translucency without backdrop blur. */
+[data-theme="dark"] .chip,
+[data-theme="dark"] .date-chip,
+[data-theme="dark"] .day-tab,
+[data-theme="dark"] .icon-btn {
+  background: rgba(255,255,255,0.055) !important;
+  border-color: rgba(220,232,242,0.16) !important;
+  box-shadow: inset 0 1px 0 rgba(255,255,255,0.035) !important;
+}
+
+[data-theme="dark"] .chip:hover,
+[data-theme="dark"] .date-chip:hover,
+[data-theme="dark"] .day-tab:hover,
+[data-theme="dark"] .icon-btn:hover {
+  background: rgba(255,255,255,0.085) !important;
+  border-color: rgba(220,232,242,0.22) !important;
+}
+
+/* Avoid low-opacity application states becoming a permanent washed-out UI. */
+[data-theme="dark"] .is-loading {
+  opacity: 0.88;
+}
+
+/* Keep dashboard content visually separated without gradients/blur. */
+[data-theme="dark"] #page-dashboard .stat-card,
+[data-theme="dark"] #page-dashboard .list-card {
+  color: #EAF0F4 !important;
+}
+
+[data-theme="dark"] #page-dashboard .stat-card .stat-num {
+  font-weight: 700;
+  letter-spacing: -0.01em;
+}
+
+[data-theme="dark"] #page-dashboard .stat-card .stat-lbl,
+[data-theme="dark"] #page-dashboard .list-card .list-card-subtitle {
+  color: #BFC9D2 !important;
+}
