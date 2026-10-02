@@ -67,3 +67,15 @@ test('student RPCs enforce the existing student permission contracts', () => {
   assert.equal((migration.match(/private\.web_has_permission\(p_session_token, 'students\.edit'/g) || []).length, 2, 'students.edit must guard register and update');
   assert.ok(migration.includes("RETURN jsonb_build_object('ok', false, 'error', 'permission_denied')"), 'permission denial contract missing');
 });
+
+test('assessment grade RPCs enforce view/edit permission contracts', () => {
+  const migration = read('supabase/migrations/20261002050000_assessment_rpc_permission_hardening.sql');
+  for (const fn of ['rpc_get_grades','rpc_save_grades']) {
+    assert.ok(migration.includes('CREATE OR REPLACE FUNCTION public.' + fn), 'missing hardened RPC: ' + fn);
+  }
+  assert.equal((migration.match(/'assessment\.view'/g) || []).length, 1, 'assessment.view must guard grade reads');
+  assert.equal((migration.match(/'assessment\.edit'/g) || []).length, 1, 'assessment.edit must guard grade writes');
+  assert.equal((migration.match(/'permission_denied'/g) || []).length, 2, 'both grade RPCs must expose permission_denied');
+  assert.ok(migration.includes('v_assessment.subject_id'), 'grade permission scope must include subject');
+  assert.ok(migration.includes('v_assessment.class'), 'grade permission scope must include class');
+});
