@@ -110,6 +110,16 @@ test('assessment grade RPCs enforce view/edit permission contracts', () => {
 });
 
 
+test('remaining student-domain RPCs enforce view/edit permission contracts', () => {
+  const migration = read('supabase/migrations/20261003010000_student_domain_permission_hardening.sql');
+  const editFns = ['rpc_activate_student','rpc_add_health_visit','rpc_add_vaccination','rpc_assign_student_transport','rpc_deactivate_student','rpc_delete_student','rpc_reactivate_student','rpc_remove_student_transport','rpc_update_student_parent','rpc_upsert_health_profile'];
+  const viewFns = ['rpc_get_health_profile','rpc_get_student_by_id','rpc_get_student_checkouts','rpc_get_student_history','rpc_get_student_transport'];
+  for (const fn of [...editFns, ...viewFns]) assert.ok(migration.includes('CREATE OR REPLACE FUNCTION public.' + fn), 'missing hardened RPC: ' + fn);
+  assert.equal((migration.match(/private\.web_has_permission\(p_session_token, 'students\.edit'/g) || []).length, editFns.length, 'all student mutations must enforce students.edit');
+  assert.equal((migration.match(/private\.web_has_permission\(p_session_token, 'students\.view'/g) || []).length, viewFns.length, 'all student reads must enforce students.view');
+  assert.equal((migration.match(/'permission_denied'/g) || []).length, editFns.length + viewFns.length, 'each hardened RPC must expose permission_denied');
+});
+
 test('student photo RPC enforces the existing students.edit permission contract', () => {
   const migration = read('supabase/migrations/20261002060000_student_photo_rpc_permission_hardening.sql');
   assert.ok(migration.includes('CREATE OR REPLACE FUNCTION public.rpc_set_student_photo'), 'missing hardened student photo RPC');
