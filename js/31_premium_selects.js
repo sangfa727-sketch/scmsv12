@@ -12,9 +12,10 @@
     return select && !select.dataset.scmsSelectEnhanced &&
       !select.closest('.lang-picker') && !select.closest('.form-picker-trigger');
   }
+  function getMenu(wrap) { const id = wrap?.dataset.scmsSelectMenu; return id ? document.getElementById(id) : null; }
   function close(wrap) {
     if (!wrap) return;
-    const menu = wrap.querySelector('.scms-select-menu');
+    const menu = getMenu(wrap);
     const trigger = wrap.querySelector('.scms-select-trigger');
     if (menu) menu.classList.remove('is-open');
     if (trigger) trigger.setAttribute('aria-expanded', 'false');
@@ -24,7 +25,7 @@
     document.querySelectorAll('.scms-select-wrap').forEach(w => { if (w !== except) close(w); });
   }
   function syncPosition(wrap) {
-    const trigger = wrap.querySelector('.scms-select-trigger'), menu = wrap.querySelector('.scms-select-menu');
+    const trigger = wrap.querySelector('.scms-select-trigger'), menu = getMenu(wrap);
     if (!trigger || !menu || !menu.classList.contains('is-open')) return;
     const r = trigger.getBoundingClientRect(), gap = 6, pad = 8;
     const width = Math.max(r.width, 180), maxH = Math.min(300, window.innerHeight - pad * 2);
@@ -36,7 +37,7 @@
     menu.style.top = (up ? Math.max(pad, r.top - height - gap) : Math.min(window.innerHeight - pad - height, r.bottom + gap)) + 'px';
   }
   function updateValue(wrap, focusSelected) {
-    const select = wrap.querySelector('select'), value = wrap.querySelector('.scms-select-value'), menu = wrap.querySelector('.scms-select-menu');
+    const select = wrap.querySelector('select'), value = wrap.querySelector('.scms-select-value'), menu = getMenu(wrap);
     if (!select || !value) return;
     const option = select.options[select.selectedIndex];
     value.textContent = option ? option.textContent.trim() : '';
@@ -52,7 +53,7 @@
     }
   }
   function renderMenu(wrap) {
-    const select = wrap.querySelector('select'), menu = wrap.querySelector('.scms-select-menu');
+    const select = wrap.querySelector('select'), menu = getMenu(wrap);
     if (!select || !menu) return;
     menu.replaceChildren();
     Array.from(select.options).forEach((item, index) => {
@@ -80,7 +81,8 @@
     const trigger = wrap.querySelector('.scms-select-trigger'), menu = wrap.querySelector('.scms-select-menu'), select = wrap.querySelector('select');
     if (!trigger || !menu || !select || select.disabled) return;
     closeAll(wrap); renderMenu(wrap); menu.classList.add('is-open');
-    trigger.setAttribute('aria-expanded', 'true'); openWrap = wrap; syncPosition(wrap);
+    trigger.setAttribute('aria-expanded', 'true'); openWrap = wrap;
+    requestAnimationFrame(() => { if (openWrap === wrap && menu.classList.contains('is-open')) syncPosition(wrap); });
     menu.querySelector('[role="option"][aria-selected="true"]')?.scrollIntoView({ block: 'nearest' });
   }
   function enhance(select) {
@@ -93,6 +95,7 @@
     trigger.type = 'button'; trigger.className = 'scms-select-trigger';
     trigger.setAttribute('aria-haspopup', 'listbox'); trigger.setAttribute('aria-expanded', 'false');
     const id = 'scms-select-menu-' + Math.random().toString(36).slice(2);
+    wrap.dataset.scmsSelectMenu = id;
     trigger.setAttribute('aria-controls', id); trigger.disabled = select.disabled;
     const value = document.createElement('span'); value.className = 'scms-select-value';
     const labelId = select.getAttribute('aria-label');
@@ -101,7 +104,9 @@
     chevron.setAttribute('aria-hidden', 'true'); chevron.textContent = '⌄';
     trigger.append(value, chevron);
     const menu = document.createElement('div'); menu.className = 'scms-select-menu'; menu.id = id; menu.setAttribute('role', 'listbox');
-    wrap.append(trigger, menu);
+    wrap.append(trigger);
+    menu.dataset.scmsSelectOwner = id;
+    document.body.appendChild(menu);
     trigger.addEventListener('click', () => menu.classList.contains('is-open') ? close(wrap) : open(wrap));
     trigger.addEventListener('keydown', e => {
       if (['ArrowDown','ArrowUp','Enter',' '].includes(e.key)) { e.preventDefault(); open(wrap); }
@@ -126,16 +131,18 @@
     select.addEventListener('change', () => { updateValue(wrap, false); trigger.disabled = select.disabled; });
     updateValue(wrap, false);
   }
+  function cleanupOrphans() { document.querySelectorAll('.scms-select-menu[data-scms-select-owner]').forEach(menu => { if (!document.querySelector('.scms-select-wrap[data-scms-select-menu="' + menu.id + '"]')) menu.remove(); }); }
   function scan(root) {
     const scope = root && root.querySelectorAll ? root : document;
     scope.querySelectorAll(SELECTOR).forEach(enhance);
     if (scope.matches?.('select')) enhance(scope);
-    document.querySelectorAll('.scms-select-wrap > select').forEach(select => updateValue(select.parentElement, false));
+    document.querySelectorAll('.scms-select-wrap').forEach(wrap => updateValue(wrap, false));
+    cleanupOrphans();
   }
   function scheduleScan() {
     cancelAnimationFrame(raf); raf = requestAnimationFrame(() => scan(document));
   }
-  document.addEventListener('click', e => { if (!e.target.closest('.scms-select-wrap')) closeAll(); });
+  document.addEventListener('click', e => { if (!e.target.closest('.scms-select-wrap') && !e.target.closest('.scms-select-menu')) closeAll(); });
   document.addEventListener('keydown', e => { if (e.key === 'Escape') closeAll(); });
   window.addEventListener('resize', () => openWrap && syncPosition(openWrap), { passive: true });
   window.addEventListener('scroll', () => openWrap && syncPosition(openWrap), { passive: true, capture: true });
