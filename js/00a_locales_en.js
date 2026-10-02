@@ -256,6 +256,7 @@ window.I18N_EN = {
   'students.detail.meal': 'Meal:',
   'students.btn.health': 'Health Record',
   'idCard.title': 'Student ID Card',
+  'idCard.studentId': 'Student ID',
   'idCard.failed': 'Couldn\'t generate a card: {err}. The student must be Active.',
   'idCard.scanHint': 'Parent scans this to sign in to the Parent Portal.',
   'idCard.copyLink': 'Copy link',
