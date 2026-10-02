@@ -18,6 +18,25 @@ let _gradesTerms       = [];
 let _gradesSubjects    = [];
 let _gradesAssessments = [];
 
+function _gradesISODate(date = new Date()) {
+  const configuredTimeZone = window.APP?.config?.timezone || window.APP?.school_timezone || '';
+  const options = { year: 'numeric', month: '2-digit', day: '2-digit' };
+  if (configuredTimeZone) options.timeZone = configuredTimeZone;
+
+  try {
+    const parts = new Intl.DateTimeFormat('en-US', options).formatToParts(date);
+    const values = Object.fromEntries(parts
+      .filter(part => part.type !== 'literal')
+      .map(part => [part.type, part.value]));
+    return values.year + '-' + values.month + '-' + values.day;
+  } catch (e) {
+    const y = date.getFullYear();
+    const m = String(date.getMonth() + 1).padStart(2, '0');
+    const d = String(date.getDate()).padStart(2, '0');
+    return y + '-' + m + '-' + d;
+  }
+}
+
 async function renderGrades() {
   const listEl = document.getElementById('gradesAssessmentList');
   if (listEl) listEl.innerHTML = skeletonCards(2);
@@ -246,7 +265,7 @@ window.openNewAssessmentModal = function() {
       </div>
 
       <label class="field-label">${t('grades.date')}</label>
-      <input class="form-input" id="gaDate" type="date" value="${new Date().toISOString().slice(0, 10)}">
+      <input class="form-input" id="gaDate" type="date" value="${_gradesISODate()}">
 
       <div class="form-row">
         <div class="form-col">
@@ -324,7 +343,12 @@ window.openGradeEntry = async function(assessmentId) {
     .sort((x, y) => (x.name_en || '').localeCompare(y.name_en || ''));
 
   let existing = [];
-  try { existing = await API.getGrades(assessmentId); } catch (e) { /* fresh assessment, no grades yet */ }
+  try {
+    existing = await API.getGrades(assessmentId);
+  } catch (e) {
+    showToast(t('common.loadFailed', { err: e.message || t('common.error') }));
+    return;
+  }
   const byStudent = Object.fromEntries(existing.map(g => [g.student_id, g]));
 
   openModal(`
