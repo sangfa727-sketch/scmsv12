@@ -172,7 +172,7 @@ function _taOverride(overrides, key, scope, cls, subject) {
   });
 }
 
-async function _renderTeacherAccess() {
+async async function _renderTeacherAccess() {
   const root = document.getElementById('teacherAccessRoot');
   if (!root) return;
   const teacherId = root.dataset.teacherId;
