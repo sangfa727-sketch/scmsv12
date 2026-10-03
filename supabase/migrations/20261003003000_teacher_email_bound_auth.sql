@@ -27,6 +27,8 @@ create unique index if not exists teachers_email_ci_unique_idx
   on public.teachers (lower(trim(email)))
   where nullif(trim(email), '') is not null;
 
+drop function if exists public.rpc_teacher_login(text, text, text);
+
 create or replace function public.rpc_teacher_login(
   p_email text,
   p_password text,
