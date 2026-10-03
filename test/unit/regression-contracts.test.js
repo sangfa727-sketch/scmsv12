@@ -332,3 +332,13 @@ test('client roles cannot directly access GraphQL/Data API base tables', () => {
   assert.ok(!migration.includes('GRANT UPDATE'));
   assert.ok(!migration.includes('GRANT DELETE'));
 });
+
+
+test('all production locale modules have unique translation keys', () => {
+  const files = ['js/00a_locales_en.js','js/00b_locales_my.js','js/00_locales_jp.js','js/00_locales_thai.js','js/00d_locales_ms.js','js/00e_locales_km.js','js/00e_locales_zh.js'];
+  for (const file of files) {
+    const source = read(file);
+    const keys = [...source.matchAll(/['"]([A-Za-z0-9_.-]+)['"]\\s*:/g)].map(m => m[1]);
+    assert.equal(new Set(keys).size, keys.length, file + ' contains duplicate locale keys');
+  }
+});
