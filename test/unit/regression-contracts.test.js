@@ -287,5 +287,5 @@ test('daily report save never trusts client class, teacher, or school fields', (
   assert.ok(save.includes('v_student.class'));
   assert.ok(save.includes('v_sess.teacher_id'));
   assert.ok(save.includes('v_sess.school_id'));
-  assert.ok(!save.match(/values\\s*\\([^\\n]*p_class/i));
+  assert.ok(!save.match(/values\s*\([^\n]*p_class/i));
 });
