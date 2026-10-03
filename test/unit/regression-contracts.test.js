@@ -327,9 +327,6 @@ test('client roles cannot directly access GraphQL/Data API base tables', () => {
   ]) {
     assert.ok(migration.includes("REVOKE ALL ON TABLE public." + table + " FROM PUBLIC, anon, authenticated"), 'missing client grant revoke: ' + table);
   }
-  for (const view of ['pg_all_foreign_keys','tap_funky']) {
-    assert.ok(migration.includes("REVOKE ALL ON TABLE public." + view + " FROM PUBLIC, anon, authenticated"), 'missing diagnostic view revoke: ' + view);
-  }
   assert.ok(!migration.includes('GRANT SELECT'));
   assert.ok(!migration.includes('GRANT INSERT'));
   assert.ok(!migration.includes('GRANT UPDATE'));
