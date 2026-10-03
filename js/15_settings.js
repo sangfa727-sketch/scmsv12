@@ -208,13 +208,14 @@ function _renderTeacherList(teachers) {
     const lastLogin = teacher.last_web_login_at
       ? new Date(teacher.last_web_login_at).toLocaleDateString(I18N.dateLocale())
       : t('tm.never');
-    const roleBadge = (teacher.role === 'admin' || teacher.role === 'super_admin') ? ' 👑' : '';\n    const teacherEmail = (teacher.email || '').trim();
+    const roleBadge = (teacher.role === 'admin' || teacher.role === 'super_admin') ? ' 👑' : '';
+    const teacherEmail = (teacher.email || '').trim();
     const statusDot = teacher.status === 'active' ? '🟢' : '⚪';
     return `
       <div class="teacher-row teacher-row-card" data-tid="${esc(teacher.teacher_id)}" onclick="openTeacherEditModal('${esc(teacher.teacher_id)}')">
         <div class="teacher-row-info">
           <div class="teacher-row-name">${statusDot} ${esc(teacher.teacher_name)}${roleBadge}</div>
-          <div class="teacher-row-sub">${esc(teacher.login_name || teacher.teacher_id)} · ${esc(teacher.teacher_id)} · ${esc(teacher.role ? tv('roleName', teacher.role) : t('inv.roleTeacher'))} · ${t('tm.lastLogin', { date: lastLogin })}</div>
+          <div class="teacher-row-sub">${esc(teacher.teacher_id)} · ${esc(teacher.role ? tv('roleName', teacher.role) : t('inv.roleTeacher'))}${teacherEmail ? ' · ' + esc(teacherEmail) : ' · ' + esc(t('ct.email')) + ' ⚠️'} · ${t('tm.lastLogin', { date: lastLogin })}</div>
         </div>
         <div class="teacher-row-actions">
           <button class="icon-btn-mini teacher-edit-btn" onclick="event.stopPropagation(); openTeacherEditModal('${esc(teacher.teacher_id)}')" title="${esc(t('common.edit'))}">✏️</button>
