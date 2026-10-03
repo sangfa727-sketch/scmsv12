@@ -112,7 +112,7 @@ test('teacher access management blocks non-super-admin changes to super_admin ta
 test('teacher photo RPC returns only a safe profile payload', () => {
   const source = read('supabase/migrations/20261003090000_harden_teacher_photo_rpc.sql');
   assert.match(source, /create or replace function public\.rpc_set_teacher_photo/);
-  assert.match(source, /and school_id = v_sess\.school_id/);
+  assert.match(source, /and\s+school_id\s*=\s*v_sess\.school_id/);
   assert.match(source, /jsonb_build_object\(/);
   assert.match(source, /'teacher_id'/);
   assert.match(source, /'teacher_name'/);
