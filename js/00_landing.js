@@ -584,7 +584,7 @@ window.handleTeacherCardQuery = async function () {
     wrap.classList.add('active');
     setTimeout(() => document.getElementById('teacherCardPin')?.focus(), 50);
 
-    window._teacherCardLoginContext = { teacherId: result.teacher_id };
+    window._teacherCardLoginContext = { challengeId: result.challenge_id };
   } catch (e) {
     if (typeof renderLanding === 'function') renderLanding();
   }
@@ -601,7 +601,7 @@ window.doTeacherCardLogin = async function () {
   const pin = document.getElementById('teacherCardPin')?.value || '';
   const errEl = document.getElementById('teacherCardLoginError');
   const btn = document.getElementById('teacherCardLoginBtn');
-  if (!ctx?.teacherId || !pin) {
+  if (!ctx?.challengeId || !pin) {
     if (errEl) { errEl.textContent = t('login.needBoth'); errEl.style.display = 'block'; }
     return;
   }
@@ -617,7 +617,7 @@ window.doTeacherCardLogin = async function () {
         'Content-Type': 'application/json',
       },
       body: JSON.stringify({
-        p_teacher_id: ctx.teacherId,
+        p_challenge: ctx.challengeId,
         p_password: pin,
         p_device_ua: navigator.userAgent.slice(0, 200),
       }),
