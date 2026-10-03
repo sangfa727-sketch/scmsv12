@@ -278,11 +278,6 @@ begin
     'school_id', t.school_id,
     'requires_pin', true
   );
-    'teacher_name', t.teacher_name,
-    'role', t.role,
-    'school_id', t.school_id,
-    'requires_pin', true
-  );
 end;
 $function$;
 
