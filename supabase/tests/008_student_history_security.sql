@@ -1,0 +1,3 @@
+-- Student history response security regression tests
+-- Response must expose only id, ts, source, actor, action.
+-- payload must not be serialized by the RPC.
