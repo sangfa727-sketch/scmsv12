@@ -241,3 +241,11 @@ test('grades UI preserves school-local dates and surfaces grade-load failures', 
   assert.ok(source.includes("showToast(t('common.loadFailed'"), 'grade-load failures must surface to the user');
   assert.ok(!source.includes('/* fresh assessment, no grades yet */'), 'grade-load failures must not be treated as an empty assessment');
 });
+
+
+test('diagnostic views stay inaccessible to public web roles', () => {
+  const migration = read('supabase/migrations/20261003070000_revoke_public_diagnostic_views.sql');
+  for (const view of ['public.pg_all_foreign_keys','public.tap_funky']) {
+    assert.ok(migration.includes('REVOKE ALL ON TABLE ' + view + ' FROM PUBLIC, anon, authenticated;'), 'public access must be revoked: ' + view);
+  }
+});
