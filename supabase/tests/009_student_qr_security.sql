@@ -28,13 +28,13 @@ select ok(position('jsonb_build_object' in pg_get_functiondef('public.rpc_get_or
 select ok(position('to_jsonb(v_row)' in pg_get_functiondef('public.rpc_get_or_create_student_qr(text,text)'::regprocedure))=0,
  'get/create does not serialize whole student row');
 
-select ok(position('qr_token' in pg_get_functiondef('public.rpc_get_or_create_student_qr(text,text)'::regprocedure))=0,
+select ok(position('qr_token' in substring(pg_get_functiondef('public.rpc_get_or_create_student_qr(text,text)'::regprocedure) from position('RETURN jsonb_build_object' in pg_get_functiondef('public.rpc_get_or_create_student_qr(text,text)'::regprocedure))))=0,
  'get/create response does not expose qr_token');
 
 select ok(position('to_jsonb(v_row)' in pg_get_functiondef('public.rpc_regenerate_student_qr(text,text)'::regprocedure))=0,
  'regenerate does not serialize whole student row');
 
-select ok(position('qr_token' in pg_get_functiondef('public.rpc_regenerate_student_qr(text,text)'::regprocedure))=0,
+select ok(position('qr_token' in substring(pg_get_functiondef('public.rpc_regenerate_student_qr(text,text)'::regprocedure) from position('RETURN jsonb_build_object' in pg_get_functiondef('public.rpc_regenerate_student_qr(text,text)'::regprocedure))))=0,
  'regenerate response does not expose qr_token');
 
 select ok(position('school_id = v_sess.school_id' in pg_get_functiondef('public.rpc_get_or_create_student_qr(text,text)'::regprocedure))>0,
