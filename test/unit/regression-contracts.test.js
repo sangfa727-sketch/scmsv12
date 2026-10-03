@@ -241,3 +241,28 @@ test('grades UI preserves school-local dates and surfaces grade-load failures', 
   assert.ok(source.includes("showToast(t('common.loadFailed'"), 'grade-load failures must surface to the user');
   assert.ok(!source.includes('/* fresh assessment, no grades yet */'), 'grade-load failures must not be treated as an empty assessment');
 });
+
+
+test('teacher QR auth challenge contract stays one-time and school-bound', () => {
+  const migration = read('supabase/migrations/20261003003000_teacher_email_bound_auth.sql');
+  const fix = read('supabase/migrations/20261003020000_fix_teacher_card_challenge_school_id.sql');
+  const landing = read('js/00_landing.js');
+
+  assert.ok(migration.includes('create table if not exists public.teacher_card_login_challenges'));
+  assert.ok(migration.includes('challenge_hash text not null unique'));
+  assert.ok(migration.includes('expires_at timestamptz not null'));
+  assert.ok(migration.includes('consumed_at timestamptz'));
+  assert.ok(migration.includes("set consumed_at = now()"));
+  assert.ok(migration.includes("and consumed_at is null"));
+  assert.ok(migration.includes("v_challenge.expires_at <= now()"));
+  assert.ok(migration.includes("where teacher_id = v_challenge.teacher_id"));
+  assert.ok(migration.includes("and school_id = v_challenge.school_id"));
+  assert.ok(migration.includes("encode(extensions.digest(trim(p_challenge), 'sha256'), 'hex')"));
+
+  assert.ok(fix.includes('alter column school_id type text'));
+  assert.ok(fix.includes('using school_id::text'));
+
+  assert.ok(landing.includes("p_challenge: ctx.challengeId"));
+  assert.ok(!landing.includes("p_teacher_id: ctx.teacherId"));
+  assert.ok(landing.includes("window._teacherCardLoginContext = { challengeId: result.challenge_id }"));
+});
