@@ -266,3 +266,26 @@ test('teacher QR auth challenge contract stays one-time and school-bound', () =>
   assert.ok(!landing.includes("p_teacher_id: ctx.teacherId"));
   assert.ok(landing.includes("window._teacherCardLoginContext = { challengeId: result.challenge_id }"));
 });
+
+
+test('daily report RPCs enforce session school isolation and class permissions', () => {
+  const migration = read('supabase/migrations/20261003110000_daily_report_secure_rpc.sql');
+  for (const fn of ['rpc_save_daily_report','rpc_update_daily_report','rpc_delete_daily_report']) {
+    assert.ok(migration.includes('create or replace function public.' + fn), 'missing secure daily report RPC: ' + fn);
+  }
+  const guarded = (migration.match(/private\.web_has_permission\(p_session_token,'daily_report\.(edit|delete)'/g) || []).length;
+  assert.equal(guarded, 3);
+  assert.ok(migration.includes('s.school_id=v_sess.school_id'), 'student/report access must be school-scoped');
+  assert.ok(migration.includes('where id=v_report.id and school_id=v_sess.school_id'), 'delete must re-bind school scope');
+  for (const action of ['daily_report.save','daily_report.update','daily_report.delete']) assert.ok(migration.includes(action));
+  assert.ok(migration.includes("'error','forbidden'"), 'permission denial must fail closed');
+});
+
+test('daily report save never trusts client class, teacher, or school fields', () => {
+  const migration = read('supabase/migrations/20261003110000_daily_report_secure_rpc.sql');
+  const save = migration.slice(migration.indexOf('create or replace function public.rpc_save_daily_report'), migration.indexOf('create or replace function public.rpc_update_daily_report'));
+  assert.ok(save.includes('v_student.class'));
+  assert.ok(save.includes('v_sess.teacher_id'));
+  assert.ok(save.includes('v_sess.school_id'));
+  assert.ok(!save.match(/values\s*\([^\n]*p_class/i));
+});
