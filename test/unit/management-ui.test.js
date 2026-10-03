@@ -48,7 +48,6 @@ test('teacher access helpers stay defined once to avoid shadowed localization lo
   }
 });
 
-
 test('branding labels resolve from i18n at modal-open time', () => {
   const source = read('js/26_branding.js');
   assert.match(source, /titleKey:\s*['"]branding\.logoTitle['"]/);
@@ -77,7 +76,6 @@ test('classes and grades save lifecycle prevents concurrent writes and stale UI 
   assert.match(source, /return false;/);
 });
 
-
 test('teacher profile edit prevents non-super-admin role escalation', () => {
   const source = read('supabase/migrations/20261002183000_teacher_manager_role_escalation_hardening.sql');
   assert.match(source, /v_target_role text/);
@@ -86,7 +84,6 @@ test('teacher profile edit prevents non-super-admin role escalation', () => {
   assert.match(source, /v_target_role='super_admin'/);
   assert.match(source, /'insufficient_role'/);
 });
-
 
 test('sensitive teacher management actions block non-super-admin access to super_admin targets', () => {
   const source = read('supabase/migrations/20261002200000_management_sensitive_actions_superadmin_guard.sql');
@@ -110,4 +107,17 @@ test('teacher access management blocks non-super-admin changes to super_admin ta
   assert.match(source, /if v_admin\.role <> 'super_admin' and v_teacher\.role='super_admin'/);
   assert.match(source, /'insufficient_role'/);
   assert.match(source, /school_id=v_admin\.school_id/);
+});
+
+test('teacher photo RPC returns only a safe profile payload', () => {
+  const source = read('supabase/migrations/20261003090000_harden_teacher_photo_rpc.sql');
+  assert.match(source, /create or replace function public\.rpc_set_teacher_photo/);
+  assert.match(source, /and\s+school_id\s*=\s*v_sess\.school_id/);
+  assert.match(source, /jsonb_build_object\(/);
+  assert.match(source, /'teacher_id'/);
+  assert.match(source, /'teacher_name'/);
+  assert.match(source, /'photo_url'/);
+  assert.doesNotMatch(source, /to_jsonb\(v_teacher\)/);
+  assert.doesNotMatch(source, /to_jsonb\(v_row\)/);
+  assert.doesNotMatch(source, /password_hash/);
 });
