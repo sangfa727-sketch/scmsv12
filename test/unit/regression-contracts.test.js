@@ -353,3 +353,12 @@ test('RPCs do not rely on implicit PUBLIC EXECUTE privileges', () => {
   assert.ok(migration.includes('REVOKE EXECUTE ON FUNCTION public.%I(%s) FROM PUBLIC'), 'migration must remove implicit PUBLIC execute');
   assert.ok(migration.includes('DO $$'), 'RPC privilege cleanup must be transactional');
 });
+
+
+test('future PostgreSQL public objects do not inherit client-role grants', () => {
+  const migration = read('supabase/migrations/20261003_lock_down_postgres_default_client_grants.sql');
+  assert.ok(migration.includes('ALTER DEFAULT PRIVILEGES FOR ROLE postgres IN SCHEMA public'));
+  assert.ok(migration.includes('REVOKE ALL ON TABLES FROM anon, authenticated'));
+  assert.ok(migration.includes('REVOKE EXECUTE ON FUNCTIONS FROM PUBLIC, anon, authenticated'));
+  assert.ok(migration.includes('REVOKE ALL ON SEQUENCES FROM anon, authenticated'));
+});
