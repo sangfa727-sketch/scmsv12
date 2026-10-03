@@ -134,3 +134,26 @@ test('student photo RPC returns only a safe profile payload', () => {
   assert.doesNotMatch(source, /to_jsonb\(v_row\)/);
   assert.doesNotMatch(source, /password/);
 });
+
+
+
+test('health profile RPC returns only health-domain fields and preserves school/session boundaries', () => {
+  const source = read('supabase/migrations/20261003100000_harden_health_profile_rpc_response.sql');
+  assert.match(source, /create\s+or\s+replace\s+function\s+public\.rpc_get_health_profile/);
+  assert.match(source, /private\.web_has_permission\(p_session_token,\s*'students\.view'/);
+  assert.match(source, /school_id\s*=\s*v_sess\.school_id/);
+  for (const field of [
+    'blood_type',
+    'emergency_contact_relation',
+    'vaccine_name',
+    'dose_number',
+    'reason',
+    'treatment'
+  ]) {
+    assert.match(source, new RegExp(field));
+  }
+  assert.doesNotMatch(source, /to_jsonb\(i\)/);
+  assert.doesNotMatch(source, /to_jsonb\(h\)/);
+  assert.doesNotMatch(source, /updated_by/);
+  assert.doesNotMatch(source, /created_by/);
+});
