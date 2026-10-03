@@ -106,8 +106,8 @@ test('sensitive teacher management actions block non-super-admin access to super
 
 test('teacher access management blocks non-super-admin changes to super_admin targets', () => {
   const source = read('supabase/migrations/20261003070000_teacher_access_superadmin_guard.sql');
-  assert.match(source, /create or replace function public\\.rpc_manage_teacher_access/);
-  assert.match(source, /if v_admin\\.role <> 'super_admin' and v_teacher\\.role='super_admin'/);
+  assert.match(source, /create or replace function public\.rpc_manage_teacher_access/);
+  assert.match(source, /if v_admin\.role <> 'super_admin' and v_teacher\.role='super_admin'/);
   assert.match(source, /'insufficient_role'/);
   assert.match(source, /school_id=v_admin\\.school_id/);
 });
