@@ -344,3 +344,12 @@ test('all production locale modules have unique translation keys', () => {
     assert.equal(new Set(keys).size, keys.length, file + ' contains duplicate locale keys');
   }
 });
+
+
+test('RPCs do not rely on implicit PUBLIC EXECUTE privileges', () => {
+  const migration = read('supabase/migrations/20261003_revoke_rpc_public_execute.sql');
+  assert.ok(migration.includes('p.proname LIKE \'rpc_%\''), 'migration must target SCMS RPCs only');
+  assert.ok(migration.includes('pg_get_function_identity_arguments(p.oid)'), 'migration must preserve overloaded RPC signatures');
+  assert.ok(migration.includes('REVOKE EXECUTE ON FUNCTION public.%I(%s) FROM PUBLIC'), 'migration must remove implicit PUBLIC execute');
+  assert.ok(migration.includes('DO $$'), 'RPC privilege cleanup must be transactional');
+});
