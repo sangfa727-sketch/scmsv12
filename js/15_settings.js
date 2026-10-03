@@ -209,12 +209,13 @@ function _renderTeacherList(teachers) {
       ? new Date(teacher.last_web_login_at).toLocaleDateString(I18N.dateLocale())
       : t('tm.never');
     const roleBadge = (teacher.role === 'admin' || teacher.role === 'super_admin') ? ' 👑' : '';
+    const teacherEmail = (teacher.email || '').trim();
     const statusDot = teacher.status === 'active' ? '🟢' : '⚪';
     return `
       <div class="teacher-row teacher-row-card" data-tid="${esc(teacher.teacher_id)}" onclick="openTeacherEditModal('${esc(teacher.teacher_id)}')">
         <div class="teacher-row-info">
           <div class="teacher-row-name">${statusDot} ${esc(teacher.teacher_name)}${roleBadge}</div>
-          <div class="teacher-row-sub">${esc(teacher.login_name || teacher.teacher_id)} · ${esc(teacher.teacher_id)} · ${esc(teacher.role ? tv('roleName', teacher.role) : t('inv.roleTeacher'))} · ${t('tm.lastLogin', { date: lastLogin })}</div>
+          <div class="teacher-row-sub">${esc(teacher.teacher_id)} · ${esc(teacher.role ? tv('roleName', teacher.role) : t('inv.roleTeacher'))}${teacherEmail ? ' · ' + esc(teacherEmail) : ' · ' + esc(t('ct.email')) + ' ⚠️'} · ${t('tm.lastLogin', { date: lastLogin })}</div>
         </div>
         <div class="teacher-row-actions">
           <button class="icon-btn-mini teacher-edit-btn" onclick="event.stopPropagation(); openTeacherEditModal('${esc(teacher.teacher_id)}')" title="${esc(t('common.edit'))}">✏️</button>
@@ -414,7 +415,7 @@ window.saveTeacherEdit = async function(teacherId) {
   const name = document.getElementById('editTName')?.value.trim() || '';
   const email = document.getElementById('editTEmail')?.value.trim() || null;
   const role = document.getElementById('editTRole')?.value || 'teacher';
-  if (!login || !name) { err.textContent = t('teacher.updateRequired'); err.style.display = 'block'; return; }
+  if (!login || !name || !email) { err.textContent = t('teacher.updateRequired') + ' · ' + t('ct.email'); err.style.display = 'block'; return; }
   const sess = getWebSession();
   if (!sess?.session_token) { err.textContent = t('ct.sessionExpired'); err.style.display = 'block'; return; }
   btn.disabled = true; btn.textContent = t('common.saving');
@@ -450,7 +451,7 @@ window.doCreateTeacher = async function() {
   const btn   = document.getElementById('newTBtn');
   errEl.style.display = 'none';
 
-  if (!id || !login || !name || !pw) {
+  if (!id || !login || !name || !email || !pw) {
     errEl.textContent = t('ct.needFields');
     errEl.style.display = 'block';
     return;
@@ -522,6 +523,7 @@ window.openTeacherCardModal = async function(teacherId, teacherName, teacherLogi
     const loginUrl = location.origin + location.pathname + '#teacher_card=' + encodeURIComponent(result.token);
     const resolvedName = teacherProfile?.teacher_name || result.teacher_name || teacherName || '';
     const resolvedLogin = teacherProfile?.login_name || result.login_name || teacherLoginName || '';
+    const resolvedEmail = teacherProfile?.email || result.email || '';
     const photoValue = teacherProfile?.photo_url || result.photo_url || '';
     const photo = typeof photoValue === 'string' ? photoValue.trim() : '';
     const role = teacherProfile?.role || result.role || 'teacher';
@@ -544,7 +546,7 @@ window.openTeacherCardModal = async function(teacherId, teacherName, teacherLogi
         '</div>' +
         '<div class="teacher-id-card-fields">' +
           '<div><span>' + esc(t('ct.teacherId')) + '</span><strong>' + esc(result.teacher_id || teacherId) + '</strong></div>' +
-          '<div><span>' + esc(t('ct.loginName')) + '</span><strong>' + esc(resolvedLogin || '—') + '</strong></div>' +
+          '<div><span>' + esc(t('ct.email')) + '</span><strong>' + esc(resolvedEmail || '—') + '</strong></div>' +
         '</div>' +
         '<div class="teacher-id-card-qr" data-token="' + esc(result.token) + '" aria-label="' + esc(t('tm.idCard')) + '"></div>' +
         '<div class="teacher-id-card-instruction">' + esc(t('tm.cardScan')) + '</div>' +

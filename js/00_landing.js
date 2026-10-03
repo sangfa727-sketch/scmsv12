@@ -470,7 +470,7 @@ window.clearSavedSession = function () {
 /* ============================================================================
    WEB LOGIN (v11.6 — Phase 1)
    ============================================================================
-   Login name + PIN login, separate from the Telegram path.
+   Email + password login, separate from the Telegram path.
    Session token stored in localStorage, verified on each app boot.
 ============================================================================ */
 
@@ -486,11 +486,11 @@ window.openWebLoginModal = function () {
       <h3 class="modal-title">${t('login.title')}</h3>
       <p class="modal-subtitle">${t('login.sub')}</p>
 
-      <label class="field-label">${t('login.loginName')}</label>
-      <input class="form-input" id="webLoginId" type="text" autocomplete="username"
-             placeholder="${esc(t('login.loginNamePh'))}" autocapitalize="off" autocorrect="off">
+      <label class="field-label">${t('ct.email')}</label>
+      <input class="form-input" id="webLoginEmail" type="email" autocomplete="username"
+             placeholder="teacher@school.edu" autocapitalize="off" autocorrect="off">
 
-      <label class="field-label">${t('login.pin')}</label>
+      <label class="field-label">${t('ct.startPw')}</label>
       <input class="form-input" id="webLoginPw" type="password" autocomplete="current-password"
              placeholder="••••••••" onkeydown="if(event.key==='Enter')doWebLogin()">
 
@@ -506,7 +506,7 @@ window.openWebLoginModal = function () {
   wrap.onclick = closeWebLoginModal;
   document.body.appendChild(wrap);
   wrap.classList.add('active');
-  setTimeout(() => document.getElementById('webLoginId')?.focus(), 50);
+  setTimeout(() => document.getElementById('webLoginEmail')?.focus(), 50);
 };
 
 window.closeWebLoginModal = function () {
@@ -639,14 +639,14 @@ window.doTeacherCardLogin = async function () {
 };
 
 window.doWebLogin = async function () {
-  const id = document.getElementById('webLoginId')?.value.trim();
+  const email = document.getElementById('webLoginEmail')?.value.trim().toLowerCase();
   const pw = document.getElementById('webLoginPw')?.value;
   const errEl = document.getElementById('webLoginError');
   const btn = document.getElementById('webLoginBtn');
 
   if (errEl) errEl.style.display = 'none';
 
-  if (!id || !pw) {
+  if (!email || !pw) {
     if (errEl) {
       errEl.textContent = t('login.needBoth');
       errEl.style.display = 'block';
@@ -666,8 +666,8 @@ window.doWebLogin = async function () {
         'Content-Type':  'application/json',
       },
       body: JSON.stringify({
-        p_login_name: id,
-        p_pin:        pw,
+        p_email:       email,
+        p_password:    pw,
         p_device_ua:  navigator.userAgent.slice(0, 200),
       }),
     });
