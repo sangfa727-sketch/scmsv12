@@ -95,8 +95,25 @@ begin
 end;
 $function$;
 
+create table if not exists public.teacher_card_login_challenges (
+  challenge_id uuid primary key default extensions.gen_random_uuid(),
+  challenge_hash text not null unique,
+  card_id uuid not null references public.teacher_id_cards(card_id) on delete cascade,
+  teacher_id text not null references public.teachers(teacher_id) on delete cascade,
+  school_id uuid not null,
+  expires_at timestamptz not null default (now() + interval '2 minutes'),
+  consumed_at timestamptz,
+  created_at timestamptz not null default now()
+);
+
+create index if not exists teacher_card_login_challenges_expiry_idx
+  on public.teacher_card_login_challenges (expires_at)
+  where consumed_at is null;
+
+drop function if exists public.rpc_teacher_web_login(text, text, text);
+
 create or replace function public.rpc_teacher_web_login(
-  p_teacher_id text,
+  p_challenge text,
   p_password text,
   p_device_ua text default null
 )
@@ -106,19 +123,51 @@ security definer
 set search_path to 'public', 'extensions', 'pg_temp'
 as $function$
 declare
+  v_challenge record;
   v_teacher record;
   v_token text;
 begin
+  if coalesce(length(trim(p_challenge)), 0) < 32
+     or coalesce(p_password, '') = '' then
+    return jsonb_build_object(
+      'ok', false,
+      'error', 'invalid_credentials',
+      'message', 'Teacher card သို့မဟုတ် password မှားနေပါတယ်'
+    );
+  end if;
+
+  select ch.challenge_id, ch.card_id, ch.teacher_id, ch.school_id,
+         ch.expires_at, ch.consumed_at
+    into v_challenge
+    from public.teacher_card_login_challenges ch
+   where ch.challenge_hash =
+         encode(extensions.digest(trim(p_challenge), 'sha256'), 'hex')
+   for update;
+
+  if v_challenge is null
+     or v_challenge.consumed_at is not null
+     or v_challenge.expires_at <= now()
+  then
+    return jsonb_build_object(
+      'ok', false,
+      'error', 'invalid_challenge',
+      'message', 'Teacher card session expired. Please scan the card again.'
+    );
+  end if;
+
   select teacher_id, teacher_name, school_id, status, role, password_hash,
          must_change_password, email
     into v_teacher
     from public.teachers
-   where lower(teacher_id) = lower(trim(p_teacher_id))
+   where teacher_id = v_challenge.teacher_id
+     and school_id = v_challenge.school_id
    limit 1;
 
   if v_teacher is null
      or v_teacher.status <> 'active'
      or nullif(trim(v_teacher.email), '') is null
+     or v_teacher.password_hash is null
+     or not (v_teacher.password_hash = extensions.crypt(p_password, v_teacher.password_hash))
   then
     return jsonb_build_object(
       'ok', false,
@@ -127,19 +176,16 @@ begin
     );
   end if;
 
-  if v_teacher.password_hash is null then
-    return jsonb_build_object(
-      'ok', false,
-      'error', 'invalid_credentials',
-      'message', 'Teacher card သို့မဟုတ် password မှားနေပါတယ်'
-    );
-  end if;
+  update public.teacher_card_login_challenges
+     set consumed_at = now()
+   where challenge_id = v_challenge.challenge_id
+     and consumed_at is null;
 
-  if not (v_teacher.password_hash = extensions.crypt(p_password, v_teacher.password_hash)) then
+  if not found then
     return jsonb_build_object(
       'ok', false,
-      'error', 'invalid_credentials',
-      'message', 'Teacher card သို့မဟုတ် password မှားနေပါတယ်'
+      'error', 'invalid_challenge',
+      'message', 'Teacher card session expired. Please scan the card again.'
     );
   end if;
 
@@ -176,6 +222,8 @@ declare
   h text;
   c record;
   t record;
+  raw_challenge text;
+  challenge_hash text;
 begin
   if coalesce(length(trim(p_token)), 0) < 20 then
     return jsonb_build_object('ok', false, 'error', 'invalid_card');
@@ -213,10 +261,20 @@ begin
      set last_used_at = now()
    where card_id = c.card_id;
 
+  -- The QR proof is converted into a short-lived, one-time challenge.
+  -- Store only the challenge hash; never persist the raw challenge.
+  raw_challenge := encode(extensions.gen_random_bytes(32), 'hex');
+  challenge_hash := encode(extensions.digest(raw_challenge, 'sha256'), 'hex');
+
+  insert into public.teacher_card_login_challenges
+    (challenge_hash, card_id, teacher_id, school_id, expires_at)
+  values
+    (challenge_hash, c.card_id, t.teacher_id, t.school_id, now() + interval '2 minutes');
+
   return jsonb_build_object(
     'ok', true,
     'card_id', c.card_id,
-    'teacher_id', t.teacher_id,
+    'challenge_id', raw_challenge,
     'teacher_name', t.teacher_name,
     'role', t.role,
     'school_id', t.school_id,

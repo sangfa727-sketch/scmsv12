@@ -474,3 +474,25 @@ test('dashboard load failure stays on a localized error key', () => {
   assert.match(en, /['\"]dash\.loadFailed['\"]\s*:/);
   assert.doesNotMatch(dashboard, /t\\('dash\\.loadError'\\)/);
 });
+
+
+test('teacher QR login requires a short-lived one-time challenge', () => {
+  const landing = read('js/00_landing.js');
+  const migration = read('supabase/migrations/20261003003000_teacher_email_bound_auth.sql');
+  const html = read('index.html');
+
+  assert.match(landing, /_teacherCardLoginContext = \{ challengeId: result\.challenge_id \}/);
+  assert.match(landing, /p_challenge: ctx\.challengeId/);
+  assert.doesNotMatch(landing, /p_teacher_id: ctx\.teacherId/);
+
+  assert.match(migration, /create table if not exists public\.teacher_card_login_challenges/);
+  assert.match(migration, /expires_at timestamptz not null default \(now\(\) \+ interval '2 minutes'\)/);
+  assert.match(migration, /consumed_at timestamptz/);
+  assert.match(migration, /extensions\.digest\(trim\(p_challenge\), 'sha256'\)/);
+  assert.match(migration, /consumed_at = now\(\)/);
+  assert.match(migration, /where challenge_id = v_challenge\.challenge_id/);
+  assert.match(migration, /'challenge_id', raw_challenge/);
+  assert.match(migration, /'error', 'invalid_challenge'/);
+
+  assert.ok(html.includes('js/00_landing.js?v=20261003b'));
+});
