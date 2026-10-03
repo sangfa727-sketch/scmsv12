@@ -220,6 +220,8 @@ declare
   h text;
   c record;
   t record;
+  raw_challenge text;
+  challenge_hash text;
 begin
   if coalesce(length(trim(p_token)), 0) < 20 then
     return jsonb_build_object('ok', false, 'error', 'invalid_card');
@@ -259,28 +261,23 @@ begin
 
   -- The QR proof is converted into a short-lived, one-time challenge.
   -- Store only the challenge hash; never persist the raw challenge.
-  declare
-    raw_challenge text;
-    challenge_hash text;
-  begin
-    raw_challenge := encode(extensions.gen_random_bytes(32), 'hex');
-    challenge_hash := encode(extensions.digest(raw_challenge, 'sha256'), 'hex');
+  raw_challenge := encode(extensions.gen_random_bytes(32), 'hex');
+  challenge_hash := encode(extensions.digest(raw_challenge, 'sha256'), 'hex');
 
-    insert into public.teacher_card_login_challenges
-      (challenge_hash, card_id, teacher_id, school_id, expires_at)
-    values
-      (challenge_hash, c.card_id, t.teacher_id, t.school_id, now() + interval '2 minutes');
+  insert into public.teacher_card_login_challenges
+    (challenge_hash, card_id, teacher_id, school_id, expires_at)
+  values
+    (challenge_hash, c.card_id, t.teacher_id, t.school_id, now() + interval '2 minutes');
 
-    return jsonb_build_object(
-      'ok', true,
-      'card_id', c.card_id,
-      'challenge_id', raw_challenge,
-      'teacher_name', t.teacher_name,
-      'role', t.role,
-      'school_id', t.school_id,
-      'requires_pin', true
-    );
-  end;
+  return jsonb_build_object(
+    'ok', true,
+    'card_id', c.card_id,
+    'challenge_id', raw_challenge,
+    'teacher_name', t.teacher_name,
+    'role', t.role,
+    'school_id', t.school_id,
+    'requires_pin', true
+  );
     'teacher_name', t.teacher_name,
     'role', t.role,
     'school_id', t.school_id,
