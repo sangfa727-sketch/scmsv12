@@ -121,3 +121,16 @@ test('teacher photo RPC returns only a safe profile payload', () => {
   assert.doesNotMatch(source, /to_jsonb\(v_row\)/);
   assert.doesNotMatch(source, /password_hash/);
 });
+
+
+test('student photo RPC returns only a safe profile payload', () => {
+  const source = read('supabase/migrations/20261003070000_harden_student_photo_rpc_response.sql');
+  assert.match(source, /create or replace function public\\.rpc_set_student_photo/);
+  assert.match(source, /and\\s+school_id\\s*=\\s*v_sess\\.school_id/);
+  assert.match(source, /jsonb_build_object\\(/);
+  assert.match(source, /'student_id'/);
+  assert.match(source, /'name_en'/);
+  assert.match(source, /'photo_url'/);
+  assert.doesNotMatch(source, /to_jsonb\\(v_row\\)/);
+  assert.doesNotMatch(source, /password/);
+});
