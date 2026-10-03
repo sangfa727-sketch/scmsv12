@@ -13,6 +13,3 @@ BEGIN
     EXECUTE format('REVOKE ALL ON TABLE public.%I FROM PUBLIC, anon, authenticated', v_table);
   END LOOP;
 END $$;
-
-REVOKE ALL ON TABLE public.pg_all_foreign_keys FROM PUBLIC, anon, authenticated;
-REVOKE ALL ON TABLE public.tap_funky FROM PUBLIC, anon, authenticated;
