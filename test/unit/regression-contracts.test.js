@@ -289,3 +289,30 @@ test('daily report save never trusts client class, teacher, or school fields', (
   assert.ok(save.includes('v_sess.school_id'));
   assert.ok(!save.match(/values\s*\([^\n]*p_class/i));
 });
+
+
+test('AI confirmation persistence migration enforces session scope, expiry, replay protection and RPC boundaries', () => {
+  const migration = read('supabase/migrations/20261003_ai_confirmation_persistence.sql');
+  assert.ok(migration.includes('CREATE TABLE IF NOT EXISTS public.ai_confirmation_pending'));
+  assert.ok(migration.includes('ALTER TABLE public.ai_confirmation_pending ENABLE ROW LEVEL SECURITY'));
+  assert.ok(migration.includes('REVOKE ALL ON TABLE public.ai_confirmation_pending FROM PUBLIC, anon, authenticated'));
+  assert.ok(migration.includes('SET search_path=public,extensions'));
+  assert.ok(migration.includes("s.session_token=p_session_token AND s.expires_at>now()"));
+  assert.ok(migration.includes("t.status='active'"));
+  assert.ok(migration.includes("encode(digest(p_session_token,'sha256'),'hex')"));
+  assert.ok(migration.includes("p_expires_at>now()+interval '5 minutes'"));
+  assert.ok(migration.includes("v_row.session_id<>v_session_id OR v_row.teacher_id<>v_sess.teacher_id OR v_row.school_id<>v_sess.school_id"));
+  assert.ok(migration.includes("v_row.action_digest<>trim(p_action_digest)"));
+  assert.ok(migration.includes("v_row.consumed_at IS NOT NULL"));
+  assert.ok(migration.includes("v_row.cancelled_at IS NOT NULL"));
+  assert.ok(migration.includes("SELECT * INTO v_row FROM public.ai_confirmation_pending WHERE confirmation_id=trim(p_confirmation_id) FOR UPDATE"));
+  assert.ok(migration.includes("SET consumed_at=now() WHERE confirmation_id=v_row.confirmation_id"));
+  assert.ok(migration.includes("UPDATE public.ai_confirmation_pending SET cancelled_at=now()"));
+  assert.ok(migration.includes("p_resolved_rpc) !~ '^rpc_[a-z0-9_]+$'"));
+  assert.ok(migration.includes('GRANT EXECUTE ON FUNCTION public.rpc_ai_confirmation_create'));
+  assert.ok(migration.includes('GRANT EXECUTE ON FUNCTION public.rpc_ai_confirmation_consume'));
+  assert.ok(migration.includes('GRANT EXECUTE ON FUNCTION public.rpc_ai_confirmation_cancel'));
+  assert.ok(!migration.includes('GRANT SELECT ON TABLE public.ai_confirmation_pending'));
+  assert.ok(!migration.includes('GRANT INSERT ON TABLE public.ai_confirmation_pending'));
+  assert.ok(!migration.includes('service_role'));
+});
