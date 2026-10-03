@@ -316,3 +316,49 @@ test('AI confirmation persistence migration enforces session scope, expiry, repl
   assert.ok(!migration.includes('GRANT INSERT ON TABLE public.ai_confirmation_pending'));
   assert.ok(!migration.includes('service_role'));
 });
+
+
+test('client roles cannot directly access GraphQL/Data API base tables', () => {
+  const migration = read('supabase/migrations/20261003_revoke_direct_client_table_grants.sql');
+  assert.ok(migration.includes('FOREACH v_table IN ARRAY ARRAY['), 'grant cleanup must enumerate the protected client tables');
+  for (const table of [
+    'assessments','attendance','communications','daily_reports','grades',
+    'homework','homework_log','incidents','monthly_summary','parent_comms',
+    'schools','students','subjects','teachers','terms','timetable'
+  ]) {
+    assert.ok(migration.includes("'" + table + "'"), 'missing protected client table: ' + table);
+  }
+  assert.ok(migration.includes('REVOKE ALL ON TABLE public.%I FROM PUBLIC, anon, authenticated'), 'client grant revoke must cover inherited PUBLIC grants');
+  assert.ok(!migration.includes('GRANT SELECT'));
+  assert.ok(!migration.includes('GRANT INSERT'));
+  assert.ok(!migration.includes('GRANT UPDATE'));
+  assert.ok(!migration.includes('GRANT DELETE'));
+});
+
+
+test('all production locale modules have unique translation keys', () => {
+  const files = ['js/00a_locales_en.js','js/00b_locales_my.js','js/00_locales_jp.js','js/00_locales_thai.js','js/00d_locales_ms.js','js/00e_locales_km.js','js/00e_locales_zh.js'];
+  for (const file of files) {
+    const source = read(file);
+    const keys = [...source.matchAll(/['"]([A-Za-z0-9_.-]+)['"]\\s*:/g)].map(m => m[1]);
+    assert.equal(new Set(keys).size, keys.length, file + ' contains duplicate locale keys');
+  }
+});
+
+
+test('RPCs do not rely on implicit PUBLIC EXECUTE privileges', () => {
+  const migration = read('supabase/migrations/20261003_revoke_rpc_public_execute.sql');
+  assert.ok(migration.includes('p.proname LIKE \'rpc_%\''), 'migration must target SCMS RPCs only');
+  assert.ok(migration.includes('pg_get_function_identity_arguments(p.oid)'), 'migration must preserve overloaded RPC signatures');
+  assert.ok(migration.includes('REVOKE EXECUTE ON FUNCTION public.%I(%s) FROM PUBLIC'), 'migration must remove implicit PUBLIC execute');
+  assert.ok(migration.includes('DO $$'), 'RPC privilege cleanup must be transactional');
+});
+
+
+test('future PostgreSQL public objects do not inherit client-role grants', () => {
+  const migration = read('supabase/migrations/20261003_lock_down_postgres_default_client_grants.sql');
+  assert.ok(migration.includes('ALTER DEFAULT PRIVILEGES FOR ROLE postgres IN SCHEMA public'));
+  assert.ok(migration.includes('REVOKE ALL ON TABLES FROM anon, authenticated'));
+  assert.ok(migration.includes('REVOKE EXECUTE ON FUNCTIONS FROM PUBLIC, anon, authenticated'));
+  assert.ok(migration.includes('REVOKE ALL ON SEQUENCES FROM anon, authenticated'));
+});
