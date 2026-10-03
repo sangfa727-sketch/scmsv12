@@ -316,3 +316,22 @@ test('AI confirmation persistence migration enforces session scope, expiry, repl
   assert.ok(!migration.includes('GRANT INSERT ON TABLE public.ai_confirmation_pending'));
   assert.ok(!migration.includes('service_role'));
 });
+
+
+test('client roles cannot directly access GraphQL/Data API base tables', () => {
+  const migration = read('supabase/migrations/20261003_revoke_direct_client_table_grants.sql');
+  for (const table of [
+    'assessments','attendance','communications','daily_reports','grades',
+    'homework','homework_log','incidents','monthly_summary','parent_comms',
+    'schools','students','subjects','teachers','terms','timetable'
+  ]) {
+    assert.ok(migration.includes("REVOKE ALL ON TABLE public." + table + " FROM anon, authenticated"), 'missing client grant revoke: ' + table);
+  }
+  for (const view of ['pg_all_foreign_keys','tap_funky']) {
+    assert.ok(migration.includes("REVOKE ALL ON TABLE public." + view + " FROM anon, authenticated"), 'missing diagnostic view revoke: ' + view);
+  }
+  assert.ok(!migration.includes('GRANT SELECT'));
+  assert.ok(!migration.includes('GRANT INSERT'));
+  assert.ok(!migration.includes('GRANT UPDATE'));
+  assert.ok(!migration.includes('GRANT DELETE'));
+});
