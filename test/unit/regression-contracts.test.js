@@ -273,7 +273,7 @@ test('daily report RPCs enforce session school isolation and class permissions',
   for (const fn of ['rpc_save_daily_report','rpc_update_daily_report','rpc_delete_daily_report']) {
     assert.ok(migration.includes('create or replace function public.' + fn), 'missing secure daily report RPC: ' + fn);
   }
-  const guarded = (migration.match(/private\\.web_has_permission\\(p_session_token,'daily_report\\.(edit|delete)'/g) || []).length;
+  const guarded = (migration.match(/private\.web_has_permission\(p_session_token,'daily_report\.(edit|delete)'/g) || []).length;
   assert.equal(guarded, 3);
   assert.ok(migration.includes('s.school_id=v_sess.school_id'), 'student/report access must be school-scoped');
   assert.ok(migration.includes('where id=v_report.id and school_id=v_sess.school_id'), 'delete must re-bind school scope');
