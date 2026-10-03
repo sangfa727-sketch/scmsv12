@@ -506,7 +506,7 @@ window.openWebLoginModal = function () {
   wrap.onclick = closeWebLoginModal;
   document.body.appendChild(wrap);
   wrap.classList.add('active');
-  setTimeout(() => document.getElementById('webLoginId')?.focus(), 50);
+  setTimeout(() => document.getElementById('webLoginEmail')?.focus(), 50);
 };
 
 window.closeWebLoginModal = function () {
