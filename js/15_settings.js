@@ -522,7 +522,8 @@ window.openTeacherCardModal = async function(teacherId, teacherName, teacherLogi
 
     const loginUrl = location.origin + location.pathname + '#teacher_card=' + encodeURIComponent(result.token);
     const resolvedName = teacherProfile?.teacher_name || result.teacher_name || teacherName || '';
-    const resolvedLogin = teacherProfile?.login_name || result.login_name || teacherLoginName || '';\n    const resolvedEmail = teacherProfile?.email || result.email || '';
+    const resolvedLogin = teacherProfile?.login_name || result.login_name || teacherLoginName || '';
+    const resolvedEmail = teacherProfile?.email || result.email || '';
     const photoValue = teacherProfile?.photo_url || result.photo_url || '';
     const photo = typeof photoValue === 'string' ? photoValue.trim() : '';
     const role = teacherProfile?.role || result.role || 'teacher';
