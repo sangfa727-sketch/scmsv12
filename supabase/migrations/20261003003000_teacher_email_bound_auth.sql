@@ -110,6 +110,8 @@ create index if not exists teacher_card_login_challenges_expiry_idx
   on public.teacher_card_login_challenges (expires_at)
   where consumed_at is null;
 
+drop function if exists public.rpc_teacher_web_login(text, text, text);
+
 create or replace function public.rpc_teacher_web_login(
   p_challenge text,
   p_password text,
