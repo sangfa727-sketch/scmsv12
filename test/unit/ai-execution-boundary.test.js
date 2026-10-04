@@ -14,17 +14,24 @@ const CONTROL_RPCS = new Set([
   'rpc_qr_resolve'
 ]);
 
+const VALID_FAILURE_MODES = new Set([
+  'permission_denied',
+  'scope_denied',
+  'confirmation_required',
+  'target_invalid',
+  'conflict',
+  'not_found',
+  'validation_error',
+  'execution_failed'
+]);
+
 function executeBoundary(input) {
   if (!input?.contract) return { decision: 'DENY', reason: 'missing_contract' };
   if (!input.session?.active) return { decision: 'DENY', reason: 'session_required' };
   if (!input.authority?.allowed) return { decision: 'DENY', reason: 'authority_denied' };
   if (!input.scope?.allowed) return { decision: 'DENY', reason: 'scope_denied' };
-  if (CONTROL_RPCS.has(input.contract.rpc)) {
-    return { decision: 'DENY', reason: 'internal_control_rpc' };
-  }
-  if (input.contract.risk_level === 'UNKNOWN') {
-    return { decision: 'DENY', reason: 'unknown_risk' };
-  }
+  if (CONTROL_RPCS.has(input.contract.rpc)) return { decision: 'DENY', reason: 'internal_control_rpc' };
+  if (input.contract.risk_level === 'UNKNOWN') return { decision: 'DENY', reason: 'unknown_risk' };
   if (['HIGH', 'VERY_HIGH', 'CRITICAL'].includes(input.contract.risk_level) &&
       !input.confirmation?.valid) {
     return { decision: 'CONFIRM_REQUIRED', reason: 'confirmation_required' };
@@ -35,8 +42,23 @@ function executeBoundary(input) {
   if (input.contract.rpc !== input.resolved?.rpc) {
     return { decision: 'DENY', reason: 'rpc_substitution' };
   }
-  if (input.action_digest !== input.confirmation?.action_digest && input.confirmation?.valid) {
+  if (input.confirmation?.valid &&
+      input.action_digest !== input.confirmation.action_digest) {
     return { decision: 'DENY', reason: 'action_digest_mismatch' };
+  }
+  if (input.contract.classification === 'MUTATION') {
+    if (input.contract.session_required !== true) {
+      return { decision: 'DENY', reason: 'mutation_session_required' };
+    }
+    if (!input.contract.audit_required) {
+      return { decision: 'DENY', reason: 'mutation_audit_required' };
+    }
+    if (!input.contract.idempotency || input.contract.idempotency === 'read-only') {
+      return { decision: 'DENY', reason: 'mutation_idempotency_required' };
+    }
+    if (!VALID_FAILURE_MODES.has(input.contract.failure_mode)) {
+      return { decision: 'DENY', reason: 'failure_semantics_required' };
+    }
   }
   return { decision: 'ALLOW', rpc: input.contract.rpc };
 }
@@ -128,4 +150,46 @@ test('target validation runs before execution', () => {
     target: { valid: false }
   };
   assert.equal(executeBoundary(input).reason, 'target_validation_failed');
+});
+
+test('mutation contracts require audit and non-read-only idempotency', () => {
+  const base = {
+    contract: {
+      rpc: 'rpc_update_student',
+      risk_level: 'MEDIUM',
+      classification: 'MUTATION',
+      session_required: true,
+      failure_mode: 'execution_failed',
+      idempotency: 'request-key',
+      audit_required: true
+    },
+    resolved: { rpc: 'rpc_update_student' },
+    session: { active: true },
+    authority: { allowed: true },
+    scope: { allowed: true }
+  };
+  assert.equal(executeBoundary({ ...base, contract: { ...base.contract, audit_required: false } }).reason, 'mutation_audit_required');
+  assert.equal(executeBoundary({ ...base, contract: { ...base.contract, idempotency: 'read-only' } }).reason, 'mutation_idempotency_required');
+  assert.equal(executeBoundary(base).decision, 'ALLOW');
+});
+
+test('mutation contracts require explicit failure semantics', () => {
+  const base = {
+    contract: {
+      rpc: 'rpc_update_student',
+      risk_level: 'MEDIUM',
+      classification: 'MUTATION',
+      session_required: true,
+      audit_required: true,
+      idempotency: 'request-key',
+      failure_mode: 'execution_failed'
+    },
+    resolved: { rpc: 'rpc_update_student' },
+    session: { active: true },
+    authority: { allowed: true },
+    scope: { allowed: true }
+  };
+  assert.equal(executeBoundary({ ...base, contract: { ...base.contract, failure_mode: '' } }).reason, 'failure_semantics_required');
+  assert.equal(executeBoundary({ ...base, contract: { ...base.contract, failure_mode: 'unknown' } }).reason, 'failure_semantics_required');
+  assert.equal(executeBoundary(base).decision, 'ALLOW');
 });
