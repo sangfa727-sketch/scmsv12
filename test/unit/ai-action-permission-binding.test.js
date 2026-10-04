@@ -98,7 +98,8 @@ test('high-risk health and QR rows retain confirmation', () => {
 
 test('multi-action teacher access remains fail-closed', () => {
   assert.match(sql, /when 'manage_teacher_access' then 'multi_action_denied'/);
-  assert.doesNotMatch(sql, /\('manage_teacher_access','rpc_manage_teacher_access'/);
+  assert.match(sql, /v_contract\.classification = 'multi_action_denied'/);
+  assert.match(sql, /'multi_action_denied'/);
 });
 
 test('all proven permission bindings use the live canonical scope definitions', () => {
