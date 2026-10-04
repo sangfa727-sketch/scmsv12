@@ -29,9 +29,10 @@ Object.assign(API, {
         });
         return res.rows;
       }
-      const since = new Date(Date.now() - daysBack * 86400000).toISOString().slice(0, 10);
-      return sbQuery('attendance',
-        `school_id=eq.${window.APP.school_id}&date=gte.${since}&order=date.desc,class`);
+      return twaPost('get_attendance', {
+        school_id: window.APP.school_id,
+        days_back: daysBack,
+      });
     },
   
     // ─── STUDENTS ────────────────────────────────────────────────────────────
