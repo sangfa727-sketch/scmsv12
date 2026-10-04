@@ -2,7 +2,7 @@ name: SCMS tests
 
 on:
   push:
-    branches: [main]
+    branches: [main, audit/full-system-regression-20261003b]
   pull_request:
   workflow_dispatch: {}
   schedule:
