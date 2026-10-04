@@ -16,9 +16,9 @@ const registryRows = registrySql.match(
 ) || [];
 
 const mappingBlock =
-  (bindingSql.match(/values([\\s\\S]*?)\\) as v\\(action,permission_key\\)/i) || [])[1] || '';
+  (bindingSql.match(/values([\s\S]*?)\) as v\(action,permission_key\)/i) || [])[1] || '';
 const mappings = [...mappingBlock.matchAll(
-  /\\('([a-z0-9_]+)','([^']+)'\\)/g
+  /\('([a-z0-9_]+)','([^']+)'\)/g
 )].map((m) => [m[1], m[2]]);
 
 test('canonical registry remains exactly 117 actions', () => {
