@@ -196,7 +196,7 @@ begin
     return jsonb_build_object('ok',false,'error','action_not_allowed');
   end if;
 
-  if v_contract.risk in ('high','very_high','critical')
+  if v_contract.confirmation_required
      and p_confirmed is not true then
     return jsonb_build_object('ok',false,'error','confirmation_required','risk',v_contract.risk);
   end if;
