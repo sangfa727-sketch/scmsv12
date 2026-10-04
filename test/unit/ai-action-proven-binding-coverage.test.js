@@ -32,7 +32,7 @@ test('proven permission binding coverage is explicit and unique', () => {
 
   for (const [action, permission] of mappings) {
     assert.match(action, /^[a-z0-9_]+$/);
-    assert.match(permission, /^[a-z0-9_]+\\.[a-z0-9_]+$/);
+    assert.match(permission, /^[a-z0-9_]+\.[a-z0-9_]+$/);
   }
 });
 
@@ -64,16 +64,15 @@ test('newly proven admin and billing bindings are explicit', () => {
 });
 
 test('unmapped actions remain fail-closed', () => {
-  assert.match(bindingSql, /v_contract\\.permission_key is null/);
+  assert.match(bindingSql, /v_contract\.permission_key is null/);
   assert.match(bindingSql, /'action_permission_unmapped'/);
-  assert.match(bindingSql, /permission_key cannot be inferred|/);
   assert.match(bindingSql, /where action=p_action/);
   assert.match(bindingSql, /and rpc=p_rpc/);
 });
 
 test('caller-supplied permission cannot override the server binding', () => {
-  assert.match(bindingSql, /p_permission_key <> v_contract\\.permission_key/);
+  assert.match(bindingSql, /p_permission_key <> v_contract\.permission_key/);
   assert.match(bindingSql, /'permission_binding_mismatch'/);
-  assert.match(bindingSql, /private\\.web_has_permission\\(/);
-  assert.match(bindingSql, /v_contract\\.permission_key/);
+  assert.match(bindingSql, /private\.web_has_permission\(/);
+  assert.match(bindingSql, /v_contract\.permission_key/);
 });
