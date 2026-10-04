@@ -19,6 +19,8 @@ set permission_key = v.permission_key,
     scope_type = pd.scope_type
 from (
   values
+    ('get_students','students.view'),
+    ('update_student','students.edit'),
     ('activate_student','students.edit'),
     ('add_health_visit','students.edit'),
     ('add_vaccination','students.edit'),
