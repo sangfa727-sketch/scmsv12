@@ -15,7 +15,8 @@ test('AI execution uses the canonical hashed session identity', () => {
 
 test('reserve persists hashed session identity and detects replay/conflict', () => {
   assert.match(sql, /session_id=v_session_id/i);
-  assert.match(sql, /idempotency_key_conflict/i);\n  assert.match(sql, /if found then/i);
+  assert.match(sql, /idempotency_key_conflict/i);
+  assert.match(sql, /if found then/i);
   assert.match(sql, /'replayed',true/i);
 });
 
