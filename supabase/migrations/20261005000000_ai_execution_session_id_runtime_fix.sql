@@ -179,7 +179,7 @@ begin
    where idempotency_key=trim(p_idempotency_key)
    for update;
 
-  if v_existing is not null then
+  if found then
     if v_existing.session_id<>v_session_id
        or v_existing.school_id<>v_sess.school_id
        or v_existing.teacher_id<>v_sess.teacher_id
