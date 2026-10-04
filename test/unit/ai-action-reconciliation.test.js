@@ -95,15 +95,25 @@ test('canonical reconciliation rejects duplicate action IDs and control rows', (
   assert.ok(errors.some((e) => e.includes('internal/system control')));
 });
 
-test('canonical reconciliation rejects multi-action rows and unsafe mutations', () => {
+test('canonical reconciliation rejects multi-action rows', () => {
   const row = {
-    action_id:'x',domain:'STUDENT',actor:'admin',session_required:false,scope:'school',
+    action_id:'x',domain:'STUDENT',actor:'admin',session_required:true,scope:'school',
     permission:'admin',risk_level:'MEDIUM',confirmation_required:false,target_validation:'',
-    rpc:'rpc_x',audit_required:false,idempotency:'read-only',failure_mode:'forbidden',
+    rpc:'rpc_x',audit_required:true,idempotency:'safe-retry',failure_mode:'forbidden',
     classification:'MULTI_ACTION'
   };
   const errors = validateCanonicalRows(Array.from({length:117}, (_, i) => ({...row, action_id:`x_${i}`})));
   assert.ok(errors.some((e) => e.includes('multi-action')));
+});
+
+test('canonical reconciliation rejects unsafe mutations', () => {
+  const row = {
+    action_id:'x',domain:'STUDENT',actor:'admin',session_required:false,scope:'school',
+    permission:'admin',risk_level:'MEDIUM',confirmation_required:false,target_validation:'',
+    rpc:'rpc_x',audit_required:false,idempotency:'read-only',failure_mode:'forbidden',
+    classification:'MUTATION'
+  };
+  const errors = validateCanonicalRows(Array.from({length:117}, (_, i) => ({...row, action_id:`x_${i}`})));
   assert.ok(errors.some((e) => e.includes('mutation requires session_required')));
   assert.ok(errors.some((e) => e.includes('mutation requires audit_required')));
   assert.ok(errors.some((e) => e.includes('read-only idempotency')));
