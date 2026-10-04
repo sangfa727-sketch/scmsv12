@@ -43,6 +43,7 @@ from (
     ('delete_payment','billing.write'),
     ('record_payment','billing.write'),
     ('update_fee_item','billing.write'),
+    ('register_student','students.edit'),
     ('get_students','students.view'),
     ('update_student','students.edit'),
     ('activate_student','students.edit'),
