@@ -333,7 +333,7 @@ test('AI confirmation persistence migration enforces session scope, expiry, repl
 
 
 test('client roles cannot directly access GraphQL/Data API base tables', () => {
-  const migration = read('supabase/migrations/20261003_revoke_direct_client_table_grants.sql');
+  const migration = read('supabase/migrations/20261004090000_revoke_direct_client_table_grants.sql');
   assert.ok(migration.includes('FOREACH v_table IN ARRAY ARRAY['), 'grant cleanup must enumerate the protected client tables');
   for (const table of [
     'assessments','attendance','communications','daily_reports','grades',
@@ -382,7 +382,7 @@ test('all production locale modules have unique translation keys', () => {
 
 
 test('RPCs do not rely on implicit PUBLIC EXECUTE privileges', () => {
-  const migration = read('supabase/migrations/20261003_revoke_rpc_public_execute.sql');
+  const migration = read('supabase/migrations/20261004090001_revoke_rpc_public_execute.sql');
   assert.ok(migration.includes('p.proname LIKE \'rpc_%\''), 'migration must target SCMS RPCs only');
   assert.ok(migration.includes('pg_get_function_identity_arguments(p.oid)'), 'migration must preserve overloaded RPC signatures');
   assert.ok(migration.includes('REVOKE EXECUTE ON FUNCTION public.%I(%s) FROM PUBLIC'), 'migration must remove implicit PUBLIC execute');
@@ -391,7 +391,7 @@ test('RPCs do not rely on implicit PUBLIC EXECUTE privileges', () => {
 
 
 test('future PostgreSQL public objects do not inherit client-role grants', () => {
-  const migration = read('supabase/migrations/20261003_lock_down_postgres_default_client_grants.sql');
+  const migration = read('supabase/migrations/20261004090002_lock_down_postgres_default_client_grants.sql');
   assert.ok(migration.includes('ALTER DEFAULT PRIVILEGES FOR ROLE postgres IN SCHEMA public'));
   assert.ok(migration.includes('REVOKE ALL ON TABLES FROM anon, authenticated'));
   assert.ok(migration.includes('ALTER DEFAULT PRIVILEGES FOR ROLE postgres\n  REVOKE EXECUTE ON FUNCTIONS FROM PUBLIC'), 'PUBLIC function execute default must be removed at role level');
@@ -400,7 +400,7 @@ test('future PostgreSQL public objects do not inherit client-role grants', () =>
 });
 
 test('legacy SECURITY DEFINER mutation RPCs are closed to client roles', () => {
-  const migration = read('supabase/migrations/20261003_revoke_legacy_unsafe_rpc_client_execute.sql');
+  const migration = read('supabase/migrations/20261004090003_revoke_legacy_unsafe_rpc_client_execute.sql');
   for (const fn of ['rpc_approve_school','rpc_reject_school','rpc_seed_default_config','rpc_update_school_config','rpc_chat_send','rpc_bootstrap','rpc_app_login_bind','rpc_generate_school_id','rpc_save_attendance']) {
     assert.ok(migration.includes("p.proname IN ('rpc_approve_school','rpc_reject_school','rpc_seed_default_config','rpc_update_school_config','rpc_chat_send','rpc_bootstrap','rpc_app_login_bind')") || migration.includes("p.proname = '" + fn + "'"), 'legacy RPC must be covered: ' + fn);
   }
