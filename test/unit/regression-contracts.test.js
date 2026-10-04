@@ -402,7 +402,7 @@ test('future PostgreSQL public objects do not inherit client-role grants', () =>
 test('legacy SECURITY DEFINER mutation RPCs are closed to client roles', () => {
   const migration = read('supabase/migrations/20261004090003_revoke_legacy_unsafe_rpc_client_execute.sql');
   for (const fn of ['rpc_approve_school','rpc_reject_school','rpc_seed_default_config','rpc_update_school_config','rpc_chat_send','rpc_bootstrap','rpc_app_login_bind','rpc_generate_school_id','rpc_save_attendance']) {
-    assert.ok(migration.includes("p.proname IN ('rpc_approve_school','rpc_reject_school','rpc_seed_default_config','rpc_update_school_config','rpc_chat_send','rpc_bootstrap','rpc_app_login_bind')") || migration.includes("p.proname = '" + fn + "'"), 'legacy RPC must be covered: ' + fn);
+    assert.ok(migration.includes("'" + fn + "'"), 'legacy RPC must be covered: ' + fn);
   }
   assert.ok(migration.includes('REVOKE EXECUTE ON FUNCTION public.%I(%s) FROM PUBLIC, anon, authenticated'));
   assert.ok(!migration.includes('GRANT EXECUTE'));
