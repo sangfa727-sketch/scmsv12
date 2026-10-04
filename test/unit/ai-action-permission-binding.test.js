@@ -123,9 +123,8 @@ test('all proven permission bindings use the live canonical scope definitions', 
     ['daily_report.delete','class']
   ];
   for (const [permission, scope] of expectedScopes) {
-    assert.match(
-      sql,
-      new RegExp("\\('" + permission.replace('.', '\\\\.') + "',\\'" + scope + "'\\)"),
+    assert.ok(
+      sql.includes("('" + permission + "','" + scope + "')"),
       "missing canonical permission/scope binding: " + permission
     );
   }
