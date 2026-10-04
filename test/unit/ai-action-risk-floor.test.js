@@ -38,7 +38,9 @@ test('confirmation persistence is session-bound, expiring, digest-bound and repl
   assert.match(confirmationSql, /digest/i);
   assert.match(confirmationSql, /rpc_ai_confirmation_consume/i);
   assert.match(confirmationSql, /rpc_ai_confirmation_cancel/i);
-  assert.match(confirmationSql, /replay/i);
+  assert.match(confirmationSql, /consumed_at/i);
+  assert.match(confirmationSql, /cancelled_at/i);
+  assert.match(confirmationSql, /uq_ai_confirmation_pending_active_session/i);
   assert.match(confirmationSql, /enable row level security/i);
 });
 
