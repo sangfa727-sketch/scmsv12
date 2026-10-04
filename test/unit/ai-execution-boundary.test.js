@@ -76,18 +76,16 @@ test('mutation audit event must bind to the canonical action id',()=>{
   assert.equal(executeBoundary({...mutationBase,contract:{...mutationBase.contract,audit_event:''}}).reason,'audit_event_integrity_required');
   assert.equal(executeBoundary(mutationBase).decision,'ALLOW');
 });
-
 test('failure results must use declared failure semantics and cannot report success',()=>{
   const failure={status:'failure',failure_mode:'execution_failed',error_code:'RPC_ERROR'};
   assert.equal(VALID_FAILURE_MODES.has(failure.failure_mode),true);
   assert.notEqual(failure.status,'success');
   assert.equal(VALID_FAILURE_MODES.has('made_up_mode'),false);
 });
-
 test('mutation idempotency requires an explicit replay strategy, not authorization bypass',()=>{
   const strategies=new Set(['request-key','idempotency-key','natural-key','unique-constraint']);
   assert.equal(strategies.has(mutationBase.contract.idempotency),true);
   assert.equal(executeBoundary({...mutationBase,contract:{...mutationBase.contract,idempotency:'read-only'}}).reason,'mutation_idempotency_required');
-  assert.equal(executeBoundary({...mutationBase,confirmation:{valid:true,action_digest:'x'}}).decision,'ALLOW');
+  assert.equal(executeBoundary({...mutationBase,confirmation:{valid:true,action_digest:'x'},action_digest:'x'}).decision,'ALLOW');
   assert.equal(executeBoundary({...mutationBase,confirmation:{valid:true,action_digest:'x'},action_digest:'y'}).reason,'action_digest_mismatch');
 });
