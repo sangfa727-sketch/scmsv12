@@ -100,3 +100,33 @@ test('multi-action teacher access remains fail-closed', () => {
   assert.match(sql, /when 'manage_teacher_access' then 'multi_action_denied'/);
   assert.doesNotMatch(sql, /\('manage_teacher_access','rpc_manage_teacher_access'/);
 });
+
+test('all proven permission bindings use the live canonical scope definitions', () => {
+  const expectedScopes = [
+    ['students.view','global'],
+    ['students.edit','global'],
+    ['assessment.create','class_subject'],
+    ['assessment.delete','class_subject'],
+    ['assessment.view','class_subject'],
+    ['assessment.edit','class_subject'],
+    ['homework.create','class_subject'],
+    ['homework.edit','class_subject'],
+    ['homework.delete','class_subject'],
+    ['homework.view','class_subject'],
+    ['leave.approve','class'],
+    ['leave.view','class'],
+    ['attendance.edit','class'],
+    ['attendance.view','class'],
+    ['admissions.manage','global'],
+    ['admissions.view','global'],
+    ['daily_report.edit','class'],
+    ['daily_report.delete','class']
+  ];
+  for (const [permission, scope] of expectedScopes) {
+    assert.match(
+      sql,
+      new RegExp("\\('" + permission.replace('.', '\\\\.') + "',\\'" + scope + "'\\)"),
+      "missing canonical permission/scope binding: " + permission
+    );
+  }
+});
