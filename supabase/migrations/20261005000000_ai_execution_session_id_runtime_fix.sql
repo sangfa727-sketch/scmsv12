@@ -13,7 +13,7 @@ create or replace function public.rpc_ai_execution_authorize(
 ) returns jsonb
 language plpgsql
 security definer
-set search_path = public, private, pg_temp
+set search_path = public, private, extensions, pg_temp
 as $function$
 declare
   v_sess record;
@@ -143,7 +143,7 @@ create or replace function public.rpc_ai_execution_reserve(
 ) returns jsonb
 language plpgsql
 security definer
-set search_path = public, private, pg_temp
+set search_path = public, private, extensions, pg_temp
 as $function$
 declare
   v_sess record;
@@ -225,7 +225,7 @@ create or replace function public.rpc_ai_execution_complete(
 ) returns jsonb
 language plpgsql
 security definer
-set search_path = public, private, pg_temp
+set search_path = public, private, extensions, pg_temp
 as $function$
 declare
   v_sess record;
