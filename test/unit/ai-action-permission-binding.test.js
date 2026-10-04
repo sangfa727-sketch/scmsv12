@@ -95,16 +95,11 @@ test('audited sensitive rows retain high risk and confirmation in the server reg
 });
 
 test('high-risk health and QR rows retain confirmation', () => {
-  for (const [action, risk] of [
-    ["add_health_visit","high"],
-    ["add_vaccination","high"],
-    ["upsert_health_profile","high"],
-    ["regenerate_student_qr","high"]
+  for (const action of [
+    'add_health_visit','add_vaccination','upsert_health_profile','regenerate_student_qr'
   ]) {
-    assert.ok(
-      sql.includes("'" + action + "','rpc_" + action + "','" + risk + "',true"),
-      "risk/confirmation drift: " + action
-    );
+    assert.ok(sql.includes("when '" + action + "' then 'high'"), "risk floor missing: " + action);
+    assert.ok(sql.includes("when '" + action + "' then true"), "confirmation floor missing: " + action);
   }
 });
 
@@ -116,29 +111,18 @@ test('multi-action teacher access remains fail-closed', () => {
 
 test('all proven permission bindings use the live canonical scope definitions', () => {
   const expectedScopes = [
-    ['students.view','global'],
-    ['students.edit','global'],
-    ['assessment.create','class_subject'],
-    ['assessment.delete','class_subject'],
-    ['assessment.view','class_subject'],
-    ['assessment.edit','class_subject'],
-    ['homework.create','class_subject'],
-    ['homework.edit','class_subject'],
-    ['homework.delete','class_subject'],
-    ['homework.view','class_subject'],
-    ['leave.approve','class'],
-    ['leave.view','class'],
-    ['attendance.edit','class'],
-    ['attendance.view','class'],
-    ['admissions.manage','global'],
-    ['admissions.view','global'],
-    ['daily_report.edit','class'],
-    ['daily_report.delete','class']
+    ['students.view','global'],['students.edit','global'],
+    ['assessment.create','class_subject'],['assessment.delete','class_subject'],
+    ['assessment.view','class_subject'],['assessment.edit','class_subject'],
+    ['homework.create','class_subject'],['homework.edit','class_subject'],
+    ['homework.delete','class_subject'],['homework.view','class_subject'],
+    ['leave.approve','class'],['leave.view','class'],
+    ['attendance.edit','class'],['attendance.view','class'],
+    ['admissions.manage','global'],['admissions.view','global'],
+    ['daily_report.edit','class'],['daily_report.delete','class']
   ];
   for (const [permission, scope] of expectedScopes) {
-    assert.ok(
-      sql.includes("('" + permission + "','" + scope + "')"),
-      "missing canonical permission/scope binding: " + permission
-    );
+    const pattern = new RegExp("\\('" + permission.replace('.', '\\\\.') + "'\\s*,\\s*'" + scope + "'\\)");
+    assert.match(sql, pattern, "missing canonical permission/scope binding: " + permission);
   }
 });
