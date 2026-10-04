@@ -418,7 +418,7 @@ test('notification data flow keeps API transport contracts aligned', () => {
   assert.match(commsApi, /async getParentComms\(daysBack = 30\)/);
   assert.match(commsApi, /rpc_get_parent_comms/);
   assert.match(commsApi, /p_days_back: daysBack/);
-  assert.match(commsApi, /sbQuery\('parent_comms'/);
+  assert.match(commsApi, /twaPost\('get_parent_comms'/);
 
   assert.match(dashboard, /API\.getLeaveRequests\(\)\.catch\(\(\) => \[\]\)/);
   assert.match(dashboard, /API\.getParentComms\(14\)\.catch\(\(\) => \[\]\)/);
