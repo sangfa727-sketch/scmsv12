@@ -82,6 +82,18 @@ test('final risk classifications are explicit for the ten audited policy rows', 
   assert.match(sql, /classification is null or classification in/);
 });
 
+test('audited sensitive rows retain high risk and confirmation in the server registry', () => {
+  const actions = [
+    'add_health_visit','add_vaccination','upsert_health_profile','regenerate_student_qr',
+    'get_health_profile','get_grades','get_invoice_detail','get_invoices','get_report_card',
+    'manage_teacher_access'
+  ];
+  for (const action of actions) {
+    assert.ok(sql.includes("when '" + action + "' then 'high'"), "risk floor missing: " + action);
+    assert.ok(sql.includes("when '" + action + "' then true"), "confirmation floor missing: " + action);
+  }
+});
+
 test('high-risk health and QR rows retain confirmation', () => {
   for (const [action, risk] of [
     ["add_health_visit","high"],
