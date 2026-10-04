@@ -29,9 +29,10 @@ Object.assign(API, {
         });
         return res.rows;
       }
-      const since = new Date(Date.now() - daysBack * 86400000).toISOString().slice(0, 10);
-      return sbQuery('daily_reports',
-        `school_id=eq.${window.APP.school_id}&date=gte.${since}&order=date.desc,name_en`);
+      return twaPost('get_daily_reports', {
+        school_id: window.APP.school_id,
+        days_back: daysBack,
+      });
     },
   
     // ─── HOMEWORK ────────────────────────────────────────────────────────────
@@ -78,9 +79,10 @@ Object.assign(API, {
         });
         return res.rows;
       }
-      const since = new Date(Date.now() - daysBack * 86400000).toISOString().slice(0, 10);
-      return sbQuery('homework_log',
-        `school_id=eq.${window.APP.school_id}&date=gte.${since}&order=date.desc`);
+      return twaPost('get_homework', {
+        school_id: window.APP.school_id,
+        days_back: daysBack,
+      });
     },
   
     // ─── INCIDENTS ───────────────────────────────────────────────────────────
@@ -125,9 +127,10 @@ Object.assign(API, {
         });
         return res.rows;
       }
-      const since = new Date(Date.now() - daysBack * 86400000).toISOString().slice(0, 10);
-      return sbQuery('incidents',
-        `school_id=eq.${window.APP.school_id}&date=gte.${since}&order=date.desc`);
+      return twaPost('get_incidents', {
+        school_id: window.APP.school_id,
+        days_back: daysBack,
+      });
     },
   
     // ─── LEAVE REQUESTS ──────────────────────────────────────────────────────
@@ -188,8 +191,9 @@ Object.assign(API, {
         const res = await _webRpc('rpc_get_timetable', { p_session_token: _webSessionToken() });
         return res.rows;
       }
-      return sbQuery('timetable',
-        `school_id=eq.${window.APP.school_id}&order=day,period`);
+      return twaPost('get_timetable', {
+        school_id: window.APP.school_id,
+      });
     },
   
     // ─── MONTHLY SUMMARY ─────────────────────────────────────────────────────
@@ -202,8 +206,10 @@ Object.assign(API, {
         });
         return res.rows;
       }
-      return sbQuery('monthly_summary',
-        `school_id=eq.${window.APP.school_id}&year_month=eq.${ym}&order=class,name_en`);
+      return twaPost('get_monthly_summary', {
+        school_id: window.APP.school_id,
+        year_month: ym,
+      });
     },
   
     // ─── SCHOOL CONFIG ───────────────────────────────────────────────────────
