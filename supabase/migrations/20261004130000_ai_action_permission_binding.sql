@@ -80,6 +80,39 @@ join public.permission_definitions pd
 where private.ai_action_execution_registry.action = v.action;
 
 update private.ai_action_execution_registry
+set risk = case action
+  when 'add_health_visit' then 'high'
+  when 'add_vaccination' then 'high'
+  when 'upsert_health_profile' then 'high'
+  when 'regenerate_student_qr' then 'high'
+  when 'get_health_profile' then 'high'
+  when 'get_grades' then 'high'
+  when 'get_invoice_detail' then 'high'
+  when 'get_invoices' then 'high'
+  when 'get_report_card' then 'high'
+  when 'manage_teacher_access' then 'high'
+  else risk
+end,
+    confirmation_required = case action
+  when 'add_health_visit' then true
+  when 'add_vaccination' then true
+  when 'upsert_health_profile' then true
+  when 'regenerate_student_qr' then true
+  when 'get_health_profile' then true
+  when 'get_grades' then true
+  when 'get_invoice_detail' then true
+  when 'get_invoices' then true
+  when 'get_report_card' then true
+  when 'manage_teacher_access' then true
+  else confirmation_required
+end
+where action in (
+  'add_health_visit','add_vaccination','upsert_health_profile','regenerate_student_qr',
+  'get_health_profile','get_grades','get_invoice_detail','get_invoices','get_report_card',
+  'manage_teacher_access'
+);
+
+update private.ai_action_execution_registry
 set classification = case action
   when 'add_health_visit' then 'health_mutation'
   when 'add_vaccination' then 'health_mutation'
