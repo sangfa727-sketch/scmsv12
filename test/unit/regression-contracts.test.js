@@ -6,6 +6,20 @@ const path = require('node:path');
 const ROOT = path.resolve(__dirname, '..', '..');
 const read = (file) => fs.readFileSync(path.join(ROOT, file), 'utf8');
 
+test('all static goToPage targets resolve to real app pages', () => {
+  const html = read('index.html');
+  const jsDir = path.join(ROOT, 'js');
+  const files = fs.readdirSync(jsDir).filter(f => f.endsWith('.js'));
+  const targets = new Set();
+  for (const file of files) {
+    const source = fs.readFileSync(path.join(jsDir, file), 'utf8');
+    for (const match of source.matchAll(/goToPage\(\s*['"]([^'"]+)['"]\s*\)/g)) targets.add(match[1]);
+  }
+  for (const target of targets) {
+    assert.ok(html.includes('id="page-' + target + '"'), 'missing page target: ' + target);
+  }
+});
+
 test('dashboard navigation targets resolve to real app pages', () => {
   const dashboard = read('js/27_dashboard.js');
   const html = read('index.html');
