@@ -17,8 +17,11 @@ Object.assign(API, {
       const res = await _webRpc('rpc_get_students', { p_session_token: _webSessionToken() });
       return res.rows;
     }
-    return sbQuery('students',
-      `school_id=eq.${window.APP.school_id}&status=eq.Active&order=class,name_en`);
+    return twaPost('get_students', {
+      school_id: window.APP.school_id,
+      status: 'Active',
+      order: 'class,name_en',
+    });
   },
 
     /** Register new student.
@@ -92,9 +95,8 @@ Object.assign(API, {
     });
   },
   /** Edit / update an existing student.
-   *  Backend has no `update_student` TWA route yet — we PATCH Supabase directly
-   *  (allowed by RLS for authenticated reads). For best results, replicate
-   *  fields the bot's `/editstudent` wizard supports. */
+   *  Web sessions use the session-bound RPC; Telegram/native platforms stay
+   *  behind the TWA backend and never access the students table directly. */
 
   async updateStudent(studentId, patch) {
     if (window.APP.platform === 'web') return _webRpc('rpc_update_student', {
@@ -112,33 +114,10 @@ Object.assign(API, {
       p_parent_email: patch.parent_email || null,
     });
 
-    // Whitelist fields that exist in the DB schema (matches Apply Student Edit)
-    const allowed = ['name_en', 'name_mm', 'name_local', 'class', 'grade',
-                     'gender', 'date_of_birth', 'parent_name', 'parent_phone',
-                     'parent_tg_id', 'status', 'parent_email', 'home_color'];
-    const clean = {};
-    for (const k of allowed) if (k in patch) clean[k] = patch[k];
-    clean.updated_at = new Date().toISOString();
-
-    const url = `${SCMS_CONFIG.SUPABASE_URL}/rest/v1/students`
-              + `?student_id=eq.${encodeURIComponent(studentId)}`
-              + `&school_id=eq.${encodeURIComponent(window.APP.school_id)}`;
-    const resp = await fetch(url, {
-      method:  'PATCH',
-      headers: {
-        'Content-Type':  'application/json',
-        'apikey':        SCMS_CONFIG.SUPABASE_ANON,
-        'Authorization': `Bearer ${SCMS_CONFIG.SUPABASE_ANON}`,
-        'Prefer':        'return=representation',
-      },
-      body: JSON.stringify(clean),
+    return twaPost('update_student', {
+      student_id: studentId,
+      patch,
     });
-    if (!resp.ok) {
-      const t = await resp.text();
-      throw new Error(`update_student failed (${resp.status}): ${t}`);
-    }
-    const rows = await resp.json();
-    return { ok: true, success: true, student: rows[0] || null };
   },
 
   /** Soft-delete (status=Inactive) — admin only. */
@@ -153,26 +132,10 @@ Object.assign(API, {
       p_student_id: studentId,
     });
 
-    const url = `${SCMS_CONFIG.SUPABASE_URL}/rest/v1/students`
-              + `?student_id=eq.${encodeURIComponent(studentId)}`
-              + `&school_id=eq.${encodeURIComponent(window.APP.school_id)}`;
-    const resp = await fetch(url, {
-      method:  'PATCH',
-      headers: {
-        'Content-Type':  'application/json',
-        'apikey':        SCMS_CONFIG.SUPABASE_ANON,
-        'Authorization': `Bearer ${SCMS_CONFIG.SUPABASE_ANON}`,
-      },
-      body: JSON.stringify({
-        status: 'Inactive',
-        updated_at: new Date().toISOString(),
-      }),
+    return twaPost('delete_student', {
+      student_id: studentId,
+      school_id: window.APP.school_id,
     });
-    if (!resp.ok) {
-      const t = await resp.text();
-      throw new Error(`delete_student failed (${resp.status}): ${t}`);
-    }
-    return { ok: true, success: true };
   },
 
   /** Poll Supabase to see if the bot has captured the parent's Telegram ID
@@ -180,25 +143,11 @@ Object.assign(API, {
    *  Returns { parent_tg_id, parent_name } once linked, else { parent_tg_id: null }. */
 
   async checkParentLink(studentId) {
-    const url = `${SCMS_CONFIG.SUPABASE_URL}/rest/v1/students`
-              + `?student_id=eq.${encodeURIComponent(studentId)}`
-              + `&school_id=eq.${encodeURIComponent(window.APP.school_id)}`
-              + `&select=parent_tg_id,parent_name`;
-    const resp = await fetch(url, {
-      headers: {
-        'apikey':        SCMS_CONFIG.SUPABASE_ANON,
-        'Authorization': `Bearer ${SCMS_CONFIG.SUPABASE_ANON}`,
-      },
+    const result = await twaPost('check_parent_link', {
+      student_id: studentId,
+      school_id: window.APP.school_id,
     });
-    if (!resp.ok) return { parent_tg_id: null };
-    const rows = await resp.json();
-    const r = rows[0] || {};
-    const tg = r.parent_tg_id ? String(r.parent_tg_id).trim() : '';
-    return {
-      ok: true,
-      parent_tg_id: tg || null,
-      parent_name:  r.parent_name || null,
-    };
+    return result || { parent_tg_id: null };
   },
 
   // ─── BRANDING & PROFILE PHOTOS (web only — secure Edge Function upload) ──
