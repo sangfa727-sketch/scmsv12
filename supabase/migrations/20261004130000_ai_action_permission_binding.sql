@@ -162,6 +162,14 @@ begin
     return jsonb_build_object('ok',false,'error','action_not_allowed');
   end if;
 
+  if v_contract.classification = 'multi_action_denied' then
+    return jsonb_build_object(
+      'ok',false,
+      'error','multi_action_denied',
+      'message','This multi-action control cannot be exposed as a single AI business action.'
+    );
+  end if;
+
   if v_contract.permission_key is null
      or v_contract.scope_type is null then
     return jsonb_build_object(
