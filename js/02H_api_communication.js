@@ -52,9 +52,10 @@ Object.assign(API, {
         });
         return res.rows;
       }
-      const since = new Date(Date.now() - daysBack * 86400000).toISOString().slice(0, 10);
-      return sbQuery('parent_comms',
-        `school_id=eq.${window.APP.school_id}&date=gte.${since}&order=date.desc`);
+      return twaPost('get_parent_comms', {
+        school_id: window.APP.school_id,
+        days_back: daysBack,
+      });
     },
   
     // ─── TIMETABLE ───────────────────────────────────────────────────────────
