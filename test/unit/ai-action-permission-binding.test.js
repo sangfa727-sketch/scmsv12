@@ -56,3 +56,47 @@ test('proven mappings are explicit rather than inferred from action names', () =
     "('regenerate_student_qr','students.edit')"
   ]) assert.ok(sql.includes(pair), `missing proven mapping: ${pair}`);
 });
+
+
+test('final risk classifications are explicit for the ten audited policy rows', () => {
+  const expected = [
+    ["add_health_visit","health_mutation"],
+    ["add_vaccination","health_mutation"],
+    ["upsert_health_profile","health_mutation"],
+    ["regenerate_student_qr","qr_regeneration"],
+    ["get_health_profile","sensitive_read"],
+    ["get_grades","sensitive_read"],
+    ["get_invoice_detail","sensitive_financial_read"],
+    ["get_invoices","sensitive_financial_read"],
+    ["get_report_card","sensitive_read"],
+    ["manage_teacher_access","multi_action_denied"]
+  ];
+  assert.match(sql, /add column if not exists classification text/);
+  for (const [action, classification] of expected) {
+    assert.match(
+      sql,
+      new RegExp("when '" + action + "' then '" + classification + "'"),
+      "missing final classification for " + action
+    );
+  }
+  assert.match(sql, /classification is null or classification in/);
+});
+
+test('high-risk health and QR rows retain confirmation', () => {
+  for (const [action, risk] of [
+    ["add_health_visit","high"],
+    ["add_vaccination","high"],
+    ["upsert_health_profile","high"],
+    ["regenerate_student_qr","high"]
+  ]) {
+    assert.ok(
+      sql.includes("'" + action + "','rpc_" + action + "','" + risk + "',true"),
+      "risk/confirmation drift: " + action
+    );
+  }
+});
+
+test('multi-action teacher access remains fail-closed', () => {
+  assert.match(sql, /when 'manage_teacher_access' then 'multi_action_denied'/);
+  assert.doesNotMatch(sql, /\('manage_teacher_access','rpc_manage_teacher_access'/);
+});
