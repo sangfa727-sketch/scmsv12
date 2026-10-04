@@ -54,5 +54,5 @@ test('proven mappings are explicit rather than inferred from action names', () =
     "('get_admissions','admissions.view')",
     "('save_daily_report','daily_report.edit')",
     "('regenerate_student_qr','students.edit')"
-  ]) assert.match(sql, new RegExp(pair.replace(/[.*+?^$\{}()|[\]\\]/g, '\\$&')));
+  ]) assert.ok(sql.includes(pair), `missing proven mapping: ${pair}`);
 });
