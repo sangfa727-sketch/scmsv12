@@ -17,8 +17,11 @@ Object.assign(API, {
       const res = await _webRpc('rpc_get_students', { p_session_token: _webSessionToken() });
       return res.rows;
     }
-    return sbQuery('students',
-      `school_id=eq.${window.APP.school_id}&status=eq.Active&order=class,name_en`);
+    return twaPost('get_students', {
+      school_id: window.APP.school_id,
+      status: 'Active',
+      order: 'class,name_en',
+    });
   },
 
     /** Register new student.
