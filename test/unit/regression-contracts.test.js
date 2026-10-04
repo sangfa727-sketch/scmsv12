@@ -380,6 +380,7 @@ test('future PostgreSQL public objects do not inherit client-role grants', () =>
   const migration = read('supabase/migrations/20261003_lock_down_postgres_default_client_grants.sql');
   assert.ok(migration.includes('ALTER DEFAULT PRIVILEGES FOR ROLE postgres IN SCHEMA public'));
   assert.ok(migration.includes('REVOKE ALL ON TABLES FROM anon, authenticated'));
-  assert.ok(migration.includes('REVOKE EXECUTE ON FUNCTIONS FROM PUBLIC, anon, authenticated'));
+  assert.ok(migration.includes('ALTER DEFAULT PRIVILEGES FOR ROLE postgres\n  REVOKE EXECUTE ON FUNCTIONS FROM PUBLIC'), 'PUBLIC function execute default must be removed at role level');
+  assert.ok(migration.includes('REVOKE EXECUTE ON FUNCTIONS FROM anon, authenticated'), 'client function defaults must remain closed');
   assert.ok(migration.includes('REVOKE ALL ON SEQUENCES FROM anon, authenticated'));
 });
