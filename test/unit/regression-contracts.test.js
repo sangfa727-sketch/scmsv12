@@ -398,3 +398,19 @@ test('future PostgreSQL public objects do not inherit client-role grants', () =>
   assert.ok(migration.includes('REVOKE EXECUTE ON FUNCTIONS FROM anon, authenticated'), 'client function defaults must remain closed');
   assert.ok(migration.includes('REVOKE ALL ON SEQUENCES FROM anon, authenticated'));
 });
+
+test('billing mutation RPCs stay admin-session and school scoped', () => {
+  const migrationFns = ['rpc_add_fee_item','rpc_update_fee_item','rpc_delete_fee_item','rpc_create_invoice','rpc_delete_invoice','rpc_record_payment','rpc_delete_payment'];
+  // Billing RPCs are SECURITY DEFINER, so the shared admin-session gate is the critical boundary.
+  // Keep this contract source-based so a future refactor cannot silently remove it.
+  const sql = read('supabase/migrations/20261003_billing_admin_session_hardening.sql');
+  for (const fn of migrationFns) assert.ok(sql.includes('CREATE OR REPLACE FUNCTION public.' + fn), 'missing billing RPC contract: ' + fn);
+  assert.ok(sql.includes('CREATE OR REPLACE FUNCTION public._billing_admin_session'), 'shared billing admin-session gate missing');
+  assert.ok(sql.includes("t.role in ('admin','super_admin')"), 'billing gate must remain admin/super_admin only');
+  assert.ok(sql.includes("s.expires_at > now()"), 'billing gate must reject expired sessions');
+  assert.ok(sql.includes("t.status = 'active'"), 'billing gate must require active teachers');
+  assert.equal((sql.match(/select \* into v_sess from public\._billing_admin_session\(p_session_token\)/g) || []).length, migrationFns.length, 'every billing mutation must use the shared session gate');
+  assert.ok(sql.includes('where id=p_id and school_id=v_sess.v_school_id'), 'fee-item mutations must remain school scoped');
+  assert.ok(sql.includes('where id=p_id and school_id=v_sess.v_school_id'), 'invoice mutations must remain school scoped');
+  assert.ok(sql.includes('where id=p_invoice_id and school_id=v_sess.v_school_id'), 'payment mutations must remain invoice-school scoped');
+});
