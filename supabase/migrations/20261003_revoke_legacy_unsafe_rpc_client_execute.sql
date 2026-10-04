@@ -13,7 +13,7 @@ BEGIN
     WHERE n.nspname = 'public'
       AND p.prosecdef
       AND (
-        p.proname IN ('rpc_approve_school','rpc_reject_school','rpc_seed_default_config','rpc_update_school_config','rpc_chat_send','rpc_bootstrap')
+        p.proname IN ('rpc_approve_school','rpc_reject_school','rpc_seed_default_config','rpc_update_school_config','rpc_chat_send','rpc_bootstrap','rpc_app_login_bind')
         OR p.proname = 'rpc_generate_school_id'
         OR p.proname = 'rpc_save_attendance'
       )
