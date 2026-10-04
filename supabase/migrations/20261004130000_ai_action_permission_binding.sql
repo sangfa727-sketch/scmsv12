@@ -11,6 +11,13 @@ alter table private.ai_action_execution_registry
   add column if not exists scope_type text;
 
 alter table private.ai_action_execution_registry
+  add column if not exists classification text;
+
+alter table private.ai_action_execution_registry
+  add constraint ai_action_execution_registry_classification_ck
+  check (classification is null or classification in ('sensitive_read','sensitive_financial_read','health_mutation','qr_regeneration','multi_action_denied'));
+
+alter table private.ai_action_execution_registry
   add constraint ai_action_execution_registry_scope_ck
   check (scope_type is null or scope_type in ('global','class','subject','class_subject'));
 
@@ -72,6 +79,26 @@ join public.permission_definitions pd
  and pd.is_active = true
 where private.ai_action_execution_registry.action = v.action;
 
+update private.ai_action_execution_registry
+set classification = case action
+  when 'add_health_visit' then 'health_mutation'
+  when 'add_vaccination' then 'health_mutation'
+  when 'upsert_health_profile' then 'health_mutation'
+  when 'regenerate_student_qr' then 'qr_regeneration'
+  when 'get_health_profile' then 'sensitive_read'
+  when 'get_grades' then 'sensitive_read'
+  when 'get_invoice_detail' then 'sensitive_financial_read'
+  when 'get_invoices' then 'sensitive_financial_read'
+  when 'get_report_card' then 'sensitive_read'
+  when 'manage_teacher_access' then 'multi_action_denied'
+  else classification
+end
+where action in (
+  'add_health_visit','add_vaccination','upsert_health_profile','regenerate_student_qr',
+  'get_health_profile','get_grades','get_invoice_detail','get_invoices','get_report_card',
+  'manage_teacher_access'
+);
+
 create or replace function public.rpc_ai_execution_authorize(
   p_session_token text,
   p_action text,
@@ -123,7 +150,7 @@ begin
     return jsonb_build_object('ok',false,'error','internal_or_invalid_rpc');
   end if;
 
-  select action,rpc,risk,confirmation_required,permission_key,scope_type
+  select action,rpc,risk,confirmation_required,permission_key,scope_type,classification
     into v_contract
     from private.ai_action_execution_registry
    where action=p_action
@@ -197,6 +224,7 @@ begin
     'ok',true,'authorized',true,
     'action',v_contract.action,'rpc',v_contract.rpc,'risk',v_contract.risk,
     'permission_key',v_contract.permission_key,'scope_type',v_contract.scope_type,
+    'classification',v_contract.classification,
     'confirmation_required',v_contract.confirmation_required,
     'session_id',v_sess.session_id,'teacher_id',v_sess.teacher_id,'school_id',v_sess.school_id
   );
