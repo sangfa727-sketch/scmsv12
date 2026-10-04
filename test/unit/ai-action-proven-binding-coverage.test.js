@@ -26,7 +26,7 @@ test('canonical registry remains exactly 117 actions', () => {
 });
 
 test('proven permission binding coverage is explicit and unique', () => {
-  assert.equal(mappings.length, 64);
+  assert.equal(mappings.length, 65);
   const actions = mappings.map(([action]) => action);
   assert.equal(new Set(actions).size, actions.length);
 
@@ -38,6 +38,7 @@ test('proven permission binding coverage is explicit and unique', () => {
 
 test('newly proven admin and billing bindings are explicit', () => {
   const expected = new Map([
+    ['register_student', 'students.edit'],
     ['admin_create_invite', 'teachers.manage'],
     ['admin_create_teacher', 'teachers.manage'],
     ['admin_create_teacher_card', 'teachers.manage'],
