@@ -20,6 +20,7 @@ const REQUIRED_FIELDS = [
 
 const INTERNAL_CLASSIFICATIONS = new Set(['INTERNAL_SYSTEM', 'CONTROL']);
 const HIGH_RISK = new Set(['HIGH', 'VERY_HIGH', 'CRITICAL']);
+const DESTRUCTIVE_ACTIONS = new Set(['DELETE', 'DESTRUCTIVE']);
 
 function validateActionContract(action) {
   const errors = [];
@@ -51,6 +52,23 @@ function validateActionContract(action) {
 
   if (INTERNAL_CLASSIFICATIONS.has(action.classification)) {
     errors.push('internal-system-action-not-exposed');
+  }
+
+  if (action.classification === 'MULTI_ACTION' || action.classification === 'MULTI-ACTION') {
+    errors.push('multi-action-rpc-not-exposed-as-single-business-action');
+  }
+
+  if (action.classification === 'MUTATION' && action.session_required !== true) {
+    errors.push('mutation-session-required');
+  }
+
+  if (action.classification === 'MUTATION' && String(action.idempotency).toLowerCase() === 'read-only') {
+    errors.push('mutation-idempotency-required');
+  }
+
+  if (DESTRUCTIVE_ACTIONS.has(String(action.classification).toUpperCase()) &&
+      (!action.target_validation || String(action.target_validation).trim() === '')) {
+    errors.push('destructive-target-validation-required');
   }
 
   if (HIGH_RISK.has(action.risk_level) && action.confirmation_required !== true) {
@@ -223,4 +241,67 @@ test('AI action contract gate validates RPC boundary syntax', () => {
     classification: 'MUTATION'
   };
   assert.ok(validateActionContract(action).includes('invalid:rpc'));
+});
+
+
+test('AI action contract gate requires session binding and idempotency for mutations', () => {
+  const action = {
+    action_id: 'student.write',
+    domain: 'Student',
+    actor: 'teacher',
+    session_required: false,
+    scope: 'school',
+    permission: 'students.edit',
+    risk_level: 'MEDIUM',
+    confirmation_required: false,
+    target_validation: 'student_scope',
+    rpc: 'rpc_update_student',
+    audit_required: true,
+    idempotency: 'read-only',
+    failure_mode: 'permission_denied',
+    classification: 'MUTATION'
+  };
+  const errors = validateActionContract(action);
+  assert.ok(errors.includes('mutation-session-required'));
+  assert.ok(errors.includes('mutation-idempotency-required'));
+});
+
+test('AI action contract gate rejects multi-action RPC exposure', () => {
+  const action = {
+    action_id: 'management.multi',
+    domain: 'Management',
+    actor: 'admin',
+    session_required: true,
+    scope: 'school',
+    permission: 'management.edit',
+    risk_level: 'HIGH',
+    confirmation_required: true,
+    target_validation: 'teacher_scope',
+    rpc: 'rpc_manage_teacher_access',
+    audit_required: true,
+    idempotency: 'atomic-once',
+    failure_mode: 'conflict',
+    classification: 'MULTI_ACTION'
+  };
+  assert.ok(validateActionContract(action).includes('multi-action-rpc-not-exposed-as-single-business-action'));
+});
+
+test('AI action contract gate requires target validation for destructive actions', () => {
+  const action = {
+    action_id: 'student.delete',
+    domain: 'Student',
+    actor: 'admin',
+    session_required: true,
+    scope: 'school',
+    permission: 'students.edit',
+    risk_level: 'CRITICAL',
+    confirmation_required: true,
+    target_validation: '',
+    rpc: 'rpc_delete_student',
+    audit_required: true,
+    idempotency: 'strict-once',
+    failure_mode: 'target_state_invalid',
+    classification: 'DELETE'
+  };
+  assert.ok(validateActionContract(action).includes('destructive-target-validation-required'));
 });
