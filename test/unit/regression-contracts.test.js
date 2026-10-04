@@ -336,6 +336,27 @@ test('client roles cannot directly access GraphQL/Data API base tables', () => {
 });
 
 
+test('client runtime does not bypass the RPC/TWA data boundary', () => {
+  const files = [
+    'js/02C_api_students.js','js/02D_api_attendance.js','js/02E_api_academics.js',
+    'js/02F_api_billing.js','js/02G_api_admissions.js','js/02H_api_communication.js',
+    'js/02I_api_resources.js','js/02J_api_transport.js','js/02K_api_health.js',
+    'js/02L_api_chat.js'
+  ];
+  const protectedTables = [
+    'assessments','attendance','communications','daily_reports','grades',
+    'homework','homework_log','incidents','monthly_summary','parent_comms',
+    'schools','students','subjects','teachers','terms','timetable'
+  ];
+  for (const file of files) {
+    const source = read(file);
+    assert.ok(!source.includes('sbQuery('), file + ' must not use direct table reads');
+    for (const table of protectedTables) {
+      assert.ok(!source.includes('/rest/v1/' + table), file + ' must not call protected table REST endpoint: ' + table);
+    }
+  }
+});
+
 test('all production locale modules have unique translation keys', () => {
   const files = ['js/00a_locales_en.js','js/00b_locales_my.js','js/00_locales_jp.js','js/00_locales_thai.js','js/00d_locales_ms.js','js/00e_locales_km.js','js/00e_locales_zh.js'];
   for (const file of files) {
