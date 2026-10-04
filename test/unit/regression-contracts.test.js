@@ -329,6 +329,9 @@ test('client roles cannot directly access GraphQL/Data API base tables', () => {
     assert.ok(migration.includes("'" + table + "'"), 'missing protected client table: ' + table);
   }
   assert.ok(migration.includes('REVOKE ALL ON TABLE public.%I FROM PUBLIC, anon, authenticated'), 'client grant revoke must cover inherited PUBLIC grants');
+  for (const view of ['pg_all_foreign_keys','tap_funky']) {
+    assert.ok(migration.includes(view), 'internal diagnostic view must remain client-inaccessible: ' + view);
+  }
   assert.ok(!migration.includes('GRANT SELECT'));
   assert.ok(!migration.includes('GRANT INSERT'));
   assert.ok(!migration.includes('GRANT UPDATE'));
