@@ -34,6 +34,8 @@ function _billingAllowedClasses() {
 let _billingLoadedOnce = false;
 
 async function renderBilling() {
+  const feeBtn = document.getElementById('billingFeeItemsBtn');
+  if (feeBtn) feeBtn.hidden = !_billingCanManageFees();
   const listEl = document.getElementById('billingInvoiceList');
   // Only show the skeleton on the very first load — a page revisit already
   // has content on screen, so re-clearing it here just causes a flash.
