@@ -88,6 +88,12 @@ from (values ('admin'),('super_admin')) r(role)
 join public.permission_definitions p on p.permission_key='billing.fees.manage'
 on conflict (role, permission_key) do update set allowed=true;
 
+insert into public.role_permissions(role,permission_key,allowed)
+select r.role,p.permission_key,true
+from (values ('teacher'),('assistant_teacher'),('senior_teacher'),('school_coordinator'),('administrative_assistant')) r(role)
+join public.permission_definitions p on p.permission_key in ('billing.class.view','billing.class.write')
+on conflict (role,permission_key) do update set allowed=true;
+
 -- Class-assigned teacher roles automatically receive billing view/manage,
 -- but the server-side class scope still applies.
 update public.role_permissions
