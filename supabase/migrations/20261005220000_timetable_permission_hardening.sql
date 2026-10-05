@@ -21,7 +21,7 @@ begin
  if v_sess is null then return jsonb_build_object('ok',false,'error','invalid_session'); end if;
  select coalesce(jsonb_agg(to_jsonb(x) order by x.day,x.period),'[]'::jsonb) into v_rows
  from (select * from public.timetable where school_id=v_sess.school_id
-       and private.web_has_permission(p_session_token,'timetable.view',nullif(trim(class_name),''),null)) x;
+       and private.web_has_permission(p_session_token,'timetable.view',nullif(trim(class),''),null)) x;
  return jsonb_build_object('ok',true,'rows',v_rows);
 end;$f$;
 
