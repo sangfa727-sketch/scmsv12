@@ -5,6 +5,10 @@
 
 'use strict';
 
+const SCMS_OPERATIONAL_ROLES = Object.freeze(['teacher','assistant_teacher','senior_teacher','school_coordinator','administrative_assistant','admin','super_admin']);
+function _teacherRoleLabel(role) { const key='enum.roleName.'+String(role||'teacher'); const translated=typeof t==='function'?t(key):''; return translated&&translated!==key?translated:String(role||'teacher'); }
+function _teacherRoleOptions(currentRole='teacher') { const isSuperAdmin=window.APP?.teacher_role==='super_admin'; return SCMS_OPERATIONAL_ROLES.filter(role=>isSuperAdmin||!['admin','super_admin'].includes(role)).map(role=>'<option value="'+esc(role)+'"'+(role===currentRole?' selected':'')+'>'+esc(_teacherRoleLabel(role))+'</option>').join(''); }
+
 function _loginMethodLabel(isWeb) {
   if (!isWeb) return t('settings.telegram');
   const mode = window.APP.webSession?.auth_mode;
@@ -89,6 +93,12 @@ window.openSettings = function() {
           </div>
         </div>
         <div class="settings-action-list">
+          ${!isAdmin ? `
+            <div class="settings-action-row">
+              <div class="settings-action-copy"><strong>${t('settings.myAccess')}</strong></div>
+              <button type="button" class="settings-action-button" onclick="openMyAccessSettings()">${t('settings.myAccess')}</button>
+            </div>
+          ` : ''}
           ${isAdmin ? `
             <div class="settings-action-row">
               <div class="settings-action-copy"><strong>${t('settings.manageTeachers')}</strong></div>
@@ -215,7 +225,7 @@ function _renderTeacherList(teachers) {
       <div class="teacher-row teacher-row-card" data-tid="${esc(teacher.teacher_id)}" onclick="openTeacherEditModal('${esc(teacher.teacher_id)}')">
         <div class="teacher-row-info">
           <div class="teacher-row-name">${statusDot} ${esc(teacher.teacher_name)}${roleBadge}</div>
-          <div class="teacher-row-sub">${esc(teacher.teacher_id)} · ${esc(teacher.role ? tv('roleName', teacher.role) : t('inv.roleTeacher'))}${teacherEmail ? ' · ' + esc(teacherEmail) : ' · ' + esc(t('ct.email')) + ' ⚠️'} · ${t('tm.lastLogin', { date: lastLogin })}</div>
+          <div class="teacher-row-sub">${esc(teacher.teacher_id)} · ${esc(_teacherRoleLabel(teacher.role || 'teacher'))}${teacherEmail ? ' · ' + esc(teacherEmail) : ' · ' + esc(t('ct.email')) + ' ⚠️'} · ${t('tm.lastLogin', { date: lastLogin })}</div>
         </div>
         <div class="teacher-row-actions">
           <button class="icon-btn-mini teacher-edit-btn" onclick="event.stopPropagation(); openTeacherEditModal('${esc(teacher.teacher_id)}')" title="${esc(t('common.edit'))}">✏️</button>
@@ -250,8 +260,7 @@ window.openInviteCodeModal = function() {
 
       <label class="field-label">${t('inv.role')}</label>
       <select class="form-input" id="invTRole">
-        <option value="teacher">${t('inv.roleTeacher')}</option>
-        <option value="admin">${t('inv.roleAdmin')}</option>
+        ${_teacherRoleOptions('teacher')}
       </select>
 
       <div class="modal-footer">
@@ -344,8 +353,7 @@ window.openCreateTeacherModal = function() {
 
       <label class="field-label">${t('inv.role')}</label>
       <select class="form-input" id="newTRole">
-        <option value="teacher">${t('inv.roleTeacher')}</option>
-        <option value="admin">${t('ct.roleAdmin')}</option>
+        ${_teacherRoleOptions('teacher')}
       </select>
 
       <label class="field-label">${t('ct.startPw')}</label>
@@ -392,9 +400,7 @@ window.openTeacherEditModal = async function(teacherId) {
       <input class="form-input" id="editTEmail" type="email" value="${esc(teacher.email || teacher.teacher_email || '')}">
       <label class="field-label">${t('inv.role')}</label>
       <select class="form-input" id="editTRole">
-        <option value="teacher" ${teacher.role === 'teacher' ? 'selected' : ''}>${t('inv.roleTeacher')}</option>
-        <option value="admin" ${teacher.role === 'admin' ? 'selected' : ''}>${t('inv.roleAdmin')}</option>
-        <option value="super_admin" ${teacher.role === 'super_admin' ? 'selected' : ''}>${t('teacher.superAdmin')}</option>
+        ${_teacherRoleOptions(teacher.role || 'teacher')}
       </select>
       <div id="editTError" class="form-error" style="display:none"></div>
       <button class="btn-primary mt16" id="editTBtn" onclick="saveTeacherEdit('${esc(teacher.teacher_id)}')">${t('common.saveChanges')}</button>
@@ -717,4 +723,12 @@ window.resetTeacherPassword = function(teacherId, teacherName) {
       }
     }
   );
+};
+
+window.openMyAccessSettings = function() {
+  const A=window.APP||{}; const permissions=Array.isArray(A.permissions)?A.permissions:[]; const classes=Array.isArray(A.assigned_classes)?A.assigned_classes:[]; const subjects=Array.isArray(A.assigned_subjects)?A.assigned_subjects:[];
+  const rows=permissions.map(p=>'<div class="info-row"><span>'+esc(p)+'</span><span>✓</span></div>').join('');
+  const classRows=classes.length?classes.map(x=>'<span class="chip active">'+esc(x)+'</span>').join(''):'<span class="text-muted">—</span>';
+  const subjectRows=subjects.length?subjects.map(x=>'<span class="chip active">'+esc((x.class_name||'')+(x.subject_name?' · '+x.subject_name:''))+'</span>').join(''):'<span class="text-muted">—</span>';
+  openModal('<div class="modal-sheet settings-modal-sheet" onclick="event.stopPropagation()"><div class="modal-handle"></div><h3 class="modal-title">'+esc(t('settings.myAccess'))+'</h3><div class="info-row"><span>'+esc(t('settings.role'))+'</span><span>'+esc(_teacherRoleLabel(A.teacher_role))+'</span></div><div class="field-label">Classes</div><div class="chips-row">'+classRows+'</div><div class="field-label mt16">Subjects</div><div class="chips-row">'+subjectRows+'</div><div class="field-label mt16">Permissions</div>'+rows+'<button class="btn-secondary settings-close mt16" onclick="closeModal()">'+esc(t('common.close'))+'</button></div>');
 };
