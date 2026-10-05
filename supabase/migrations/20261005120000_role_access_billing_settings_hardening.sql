@@ -584,7 +584,20 @@ begin
 end
 $function$;
 
--- 8) Explicit grants. These functions still validate the session and permissions
+revoke execute on function public.rpc_get_fee_items(text) from public,anon,authenticated;
+revoke execute on function public.rpc_get_invoices(text,text,text,bigint) from public,anon,authenticated;
+revoke execute on function public.rpc_get_invoice_detail(text,bigint) from public,anon,authenticated;
+revoke execute on function public.rpc_get_billing_summary(text,text,bigint) from public,anon,authenticated;
+revoke execute on function public.rpc_add_fee_item(text,text,text,numeric,boolean) from public,anon,authenticated;
+revoke execute on function public.rpc_update_fee_item(text,bigint,text,text,numeric,boolean,boolean) from public,anon,authenticated;
+revoke execute on function public.rpc_delete_fee_item(text,bigint) from public,anon,authenticated;
+revoke execute on function public.rpc_create_invoice(text,text,bigint,date,text,jsonb) from public,anon,authenticated;
+revoke execute on function public.rpc_record_payment(text,bigint,numeric,date,text,text) from public,anon,authenticated;
+revoke execute on function public.rpc_delete_payment(text,bigint) from public,anon,authenticated;
+revoke execute on function public.rpc_delete_invoice(text,bigint) from public,anon,authenticated;
+revoke execute on function public._recalc_invoice(bigint) from public,anon,authenticated;
+
+-- 8) Explicit grants. Remove PostgreSQL's default PUBLIC execute privilege first. These functions still validate the session and permissions
 -- server-side; execute grants are not authorization.
 grant execute on function public.rpc_get_fee_items(text) to anon,authenticated;
 grant execute on function public.rpc_get_invoices(text,text,text,bigint) to anon,authenticated;
