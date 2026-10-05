@@ -4,7 +4,7 @@ var API = window.API || {};
 Object.assign(API, {
   async uploadSchoolAsset(kind, blob) {
       if (!['logo', 'cover', 'teacher'].includes(kind)) throw new Error('Invalid asset type');
-      if (!blob || !blob.type || !/^image\\/(jpeg|png|webp)$/.test(blob.type)) {
+      if (!blob || !blob.type || /^image\/(jpeg|png|webp)$/.test(blob.type) === false) {
         throw new Error('Unsupported image type');
       }
       if (blob.size <= 0 || blob.size > 5 * 1024 * 1024) {
