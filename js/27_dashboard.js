@@ -84,6 +84,23 @@ window.refreshDashboardNotifications = async function() {
 
 window.refreshDashboardLeaveRequests = window.refreshDashboardNotifications;
 
+window.refreshDashboardData = async function() {
+  try {
+    await _loadDashboardData();
+    _dashboardLoadedOnce = true;
+    const container = document.getElementById('dashboardContent');
+    const dashboardPage = document.getElementById('page-dashboard');
+    if (container && dashboardPage?.classList.contains('active') && _dashboardCache) {
+      _paintDashboard(container);
+    }
+    return _dashboardCache;
+  } catch (e) {
+    console.warn('[dashboard] full refresh failed:', e);
+    return null;
+  }
+};
+
+
 window.refreshDashboardAttendance = async function() {
   try {
     const attendance = await API.getAttendance(14);
@@ -144,6 +161,21 @@ function _syncDashboardLeaveCount(rows, repaintSidebar = true) {
 }
 
 async function _loadDashboardData() {
+  if (window.APP.platform === 'web' && window.SCMSDataLoader) {
+    const data = await window.SCMSDataLoader.loadDashboardData();
+    const safeLeaveRequests = Array.isArray(data.leaveRequests) ? data.leaveRequests : [];
+    _dashboardCache = {
+      timetable: data.timetable || [],
+      attendance: data.attendance || [],
+      homework: data.homework || [],
+      incidents: data.incidents || [],
+      comms: data.comms || [],
+      leaveRequests: safeLeaveRequests,
+    };
+    _syncDashboardLeaveCount(safeLeaveRequests);
+    return;
+  }
+
   const [timetable, attendance, homework, incidents, comms, leaveRequests] = await Promise.all([
     API.getTimetable().catch(() => []),
     API.getAttendance(14).catch(() => []),
