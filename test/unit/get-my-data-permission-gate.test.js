@@ -12,15 +12,22 @@ test('get_my_data hardening fails closed if the target RPC contract changes', ()
   assert.match(migration, /authorization marker not found; refusing unsafe rewrite/);
 });
 
-test('supported generic tables require explicit existing permissions', () => {
+test('students uses only the existing global read permission', () => {
   assert.match(migration, /p_table = 'students'[\s\S]*students\.view/);
-  assert.match(migration, /p_table = 'attendance'[\s\S]*attendance\.view/);
-  assert.match(migration, /p_table = 'homework_log'[\s\S]*homework\.view/);
 });
 
-test('tables without dedicated read permissions remain fail-closed', () => {
-  assert.match(migration, /'daily_reports','incidents','parent_comms','timetable','subjects','terms'/);
-  assert.equal((migration.match(/'permission_denied'/g) || []).length, 4);
+test('scoped or undefined domains remain fail-closed', () => {
+  assert.match(
+    migration,
+    /'attendance','homework_log','daily_reports','incidents'[\s\S]*'parent_comms','timetable','subjects','terms'/
+  );
+  assert.match(migration, /scoped permissions cannot safely authorize/i);
+  assert.equal((migration.match(/'permission_denied'/g) || []).length, 2);
+});
+
+test('no scoped permission is reused without scope arguments', () => {
+  assert.doesNotMatch(migration, /p_table = 'attendance'[\s\S]*attendance\.view/);
+  assert.doesNotMatch(migration, /p_table = 'homework_log'[\s\S]*homework\.view/);
 });
 
 test('existing execute surface remains explicit', () => {
