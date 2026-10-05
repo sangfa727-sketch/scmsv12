@@ -22,6 +22,15 @@ let _newInvoiceItems   = [];
 
 const BILLING_STATUSES = ['All', 'Unpaid', 'Partial', 'Paid', 'Overdue'];
 
+function _billingIsAdmin() { return !!window.APP?.is_admin; }
+function _billingCanView() { return _billingIsAdmin() || (Array.isArray(window.APP?.permissions) && window.APP.permissions.includes('billing.view')); }
+function _billingCanWrite() { return _billingIsAdmin() || (Array.isArray(window.APP?.permissions) && window.APP.permissions.includes('billing.write')); }
+function _billingCanManageFees() { return _billingIsAdmin() || (Array.isArray(window.APP?.permissions) && window.APP.permissions.includes('billing.fees.manage')); }
+function _billingAllowedClasses() {
+  const xs = Array.isArray(window.APP?.billing_classes) ? window.APP.billing_classes.filter(Boolean) : [];
+  return _billingIsAdmin() ? ['All', ...[...new Set(xs)].sort()] : [...new Set(xs)].sort();
+}
+
 let _billingLoadedOnce = false;
 
 async function renderBilling() {
@@ -49,11 +58,12 @@ async function renderBilling() {
 }
 
 function _renderBillingFilters() {
-  const classes = ['All', ...getClassList()];
+  const classes = _billingAllowedClasses();
   const clsEl    = document.getElementById('billingClassPicker');
   const statusEl = document.getElementById('billingStatusPicker');
   const termEl   = document.getElementById('billingTermPicker');
   if (!clsEl || !statusEl || !termEl) return;
+  if (!_billingIsAdmin() && !classes.includes(_billingClass)) _billingClass = classes[0] || '';
 
   clsEl.innerHTML = classes.map(c =>
     `<button type="button" class="chip${c === _billingClass ? ' active' : ''}" aria-pressed="${c === _billingClass ? 'true' : 'false'}" data-value="${esc(c)}" onclick="selectBillingClass('${esc(c)}')">${esc(c === 'All' ? t('common.all') : c)}</button>`
@@ -163,6 +173,7 @@ function _renderBillingSummary(el, s) {
 /* ─── New invoice ────────────────────────────────────────────────────── */
 
 window.openNewInvoiceModal = function() {
+  if (!_billingCanWrite()) { showToast(t('cg.adminOnly')); return; }
   _newInvoiceStudent = null;
   _newInvoiceItems   = [];
   openModal(`
@@ -205,6 +216,7 @@ window.openNewInvoiceModal = function() {
 window._pickInvoiceStudent = function() {
   openStudentPicker({
     title: t('bill.pickerTitle'),
+    classAllowlist: _billingAllowedClasses().filter(c => c !== 'All'),
     onPick: (s) => {
       _newInvoiceStudent = s;
       const btn = document.getElementById('niStudentBtn');
@@ -397,6 +409,7 @@ window._makeStudentActive = async function(invoiceId, studentId) {
 };
 
 window._openRecordPayment = function(invoiceId, balance) {
+  if (!_billingCanWrite()) { showToast(t('cg.adminOnly')); return; }
   openModal(`
     <div class="modal-sheet" onclick="event.stopPropagation()" style="max-width:360px">
       <div class="modal-handle"></div>
@@ -444,6 +457,7 @@ window._saveRecordPayment = async function(invoiceId) {
 };
 
 window._confirmDeletePayment = function(paymentId, invoiceId) {
+  if (!_billingCanWrite()) { showToast(t('cg.adminOnly')); return; }
   showConfirm(
     t('bill.removePayTitle'),
     t('bill.removePayBody'),
@@ -462,6 +476,7 @@ window._confirmDeletePayment = function(paymentId, invoiceId) {
 };
 
 window._confirmDeleteInvoice = function(id) {
+  if (!_billingCanWrite()) { showToast(t('cg.adminOnly')); return; }
   showConfirm(
     t('bill.delInvTitle'),
     t('bill.delInvBody'),
@@ -482,6 +497,7 @@ window._confirmDeleteInvoice = function(id) {
 /* ─── Fee items catalog (manage from Billing page) ─────────────────────── */
 
 window.openFeeItemsManager = function() {
+  if (!_billingCanManageFees()) { showToast(t('cg.adminOnly')); return; }
   openModal(`
     <div class="modal-sheet" onclick="event.stopPropagation()" style="max-height:85vh;overflow-y:auto">
       <div class="modal-handle"></div>
@@ -517,6 +533,7 @@ function _renderFeeItemsList() {
 }
 
 window._openAddFeeItem = function() {
+  if (!_billingCanManageFees()) { showToast(t('cg.adminOnly')); return; }
   openModal(`
     <div class="modal-sheet" onclick="event.stopPropagation()" style="max-width:360px">
       <div class="modal-handle"></div>
@@ -563,6 +580,7 @@ window._saveNewFeeItem = async function() {
 };
 
 window._confirmDeleteFeeItem = function(id) {
+  if (!_billingCanManageFees()) { showToast(t('cg.adminOnly')); return; }
   showConfirm(
     t('bill.delFeeTitle'),
     t('bill.delFeeBody'),
