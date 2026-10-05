@@ -220,3 +220,17 @@ test('health authorization is dedicated and class-scoped at the RPC boundary', (
     assert.ok(api.includes(fn));
   }
 });
+
+
+test('communications authorization is dedicated and class-scoped at the RPC boundary', () => {
+  const migration = read('supabase/migrations/20261005210000_communication_permission_hardening.sql');
+  const api = read('js/02H_api_communication.js');
+  for (const key of ['communication.view','communication.send','communication.manage']) assert.ok(migration.includes(key));
+  for (const fn of ['rpc_send_parent_comm','rpc_get_parent_comms','rpc_delete_parent_comm','rpc_parent_portal_event_create','rpc_parent_portal_event_delete']) {
+    assert.ok(migration.includes('function public.' + fn));
+  }
+  assert.ok(migration.includes("private.web_has_permission(p_session_token,'communication.send'"));
+  assert.ok(migration.includes("private.web_has_permission(p_session_token,'communication.view'"));
+  assert.ok(migration.includes("private.web_has_permission(p_session_token,'communication.manage'"));
+  for (const fn of ['sendParentComm','createParentPortalEvent','deleteParentPortalEvent','deleteParentComm','getParentComms']) assert.ok(api.includes(fn));
+});
