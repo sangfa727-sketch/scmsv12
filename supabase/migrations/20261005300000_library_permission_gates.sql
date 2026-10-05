@@ -52,10 +52,6 @@ BEGIN
       CONTINUE;
     END IF;
 
-    IF position(v_marker in v_def) = 0 THEN
-      RAISE EXCEPTION 'Library permission migration refused: session marker missing for %', v_item.fn;
-    END IF;
-
     v_gate := E'  IF NOT private.web_has_permission(p_session_token, ''' ||
       v_item.permission_key || E''') THEN\n    RETURN jsonb_build_object(''ok'', false, ''error'', ''permission_denied'');\n  END IF;\n';
 
