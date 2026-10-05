@@ -194,3 +194,12 @@ test('resources and library authorization is dedicated and session-bound at the 
     assert.match(api, new RegExp(fn));
   }
 });
+
+
+test('school asset uploads use the server-authorized upload function', () => {
+  const api = read('js/02I_api_resources.js');
+  assert.ok(api.includes('functions/v1/upload-school-asset'));
+  assert.ok(api.includes('session_token'));
+  assert.ok(api.includes('FormData'));
+  assert.equal(api.includes('storage/v1/object/school-assets/'), false);
+});
