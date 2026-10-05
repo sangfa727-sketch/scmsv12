@@ -23,8 +23,8 @@ let _newInvoiceItems   = [];
 const BILLING_STATUSES = ['All', 'Unpaid', 'Partial', 'Paid', 'Overdue'];
 
 function _billingIsAdmin() { return !!window.APP?.is_admin; }
-function _billingCanView() { return _billingIsAdmin() || (Array.isArray(window.APP?.permissions) && window.APP.permissions.includes('billing.view')); }
-function _billingCanWrite() { return _billingIsAdmin() || (Array.isArray(window.APP?.permissions) && window.APP.permissions.includes('billing.write')); }
+function _billingCanView() { return _billingIsAdmin() || (Array.isArray(window.APP?.permissions) && (window.APP.permissions.includes('billing.view') || window.APP.permissions.includes('billing.class.view'))); }
+function _billingCanWrite() { return _billingIsAdmin() || (Array.isArray(window.APP?.permissions) && (window.APP.permissions.includes('billing.write') || window.APP.permissions.includes('billing.class.write'))); }
 function _billingCanManageFees() { return _billingIsAdmin() || (Array.isArray(window.APP?.permissions) && window.APP.permissions.includes('billing.fees.manage')); }
 function _billingAllowedClasses() {
   const xs = Array.isArray(window.APP?.billing_classes) ? window.APP.billing_classes.filter(Boolean) : [];
