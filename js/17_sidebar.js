@@ -51,6 +51,7 @@ function _sidebarCanAccess(pageId) {
   if (A.platform !== 'web' || A.is_admin) return true;
   const permission = SIDEBAR_PERMISSION[pageId];
   if (!permission) return true; // No permission contract exists for this module yet.
+  if (pageId === 'billing') return Array.isArray(A.permissions) && (A.permissions.includes('billing.view') || A.permissions.includes('billing.class.view'));
   return Array.isArray(A.permissions) && A.permissions.includes(permission);
 }
 
