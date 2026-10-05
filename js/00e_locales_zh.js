@@ -1021,6 +1021,7 @@ window.I18N_ZH = {
   "tr.delTitle": "🗑 删除此路线？",
   "tr.delBody": "路线上的学生只会被取消分配，不会从学校系统中删除。",
   "settings.title": "⚙️ 设置",
+  "settings.myAccess": "🔐 我的权限",
   "settings.version": "版本",
   "settings.platform": "平台",
   "settings.school": "学校",
