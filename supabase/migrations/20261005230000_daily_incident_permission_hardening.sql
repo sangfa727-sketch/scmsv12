@@ -25,7 +25,6 @@ begin
  select s.school_id into v_sess from public.app_web_sessions s join public.teachers t on t.teacher_id=s.teacher_id and t.school_id=s.school_id
  where s.session_token=p_session_token and s.expires_at>now() and t.status='active' limit 1;
  if v_sess is null then return jsonb_build_object('ok',false,'error','invalid_session'); end if;
- if not private.web_has_permission(p_session_token,'daily_report.view',null,null) then return jsonb_build_object('ok',false,'error','permission_denied'); end if;
  v_days:=least(greatest(coalesce(p_days_back,7),0),365);
  select coalesce(jsonb_agg(to_jsonb(x) order by x.date desc,x.name_en),'[]'::jsonb) into v_rows
  from (select * from public.daily_reports where school_id=v_sess.school_id and date>=current_date-(v_days||' days')::interval
@@ -40,7 +39,6 @@ begin
  select s.school_id into v_sess from public.app_web_sessions s join public.teachers t on t.teacher_id=s.teacher_id and t.school_id=s.school_id
  where s.session_token=p_session_token and s.expires_at>now() and t.status='active' limit 1;
  if v_sess is null then return jsonb_build_object('ok',false,'error','invalid_session'); end if;
- if not private.web_has_permission(p_session_token,'incident.view',null,null) then return jsonb_build_object('ok',false,'error','permission_denied'); end if;
  v_days:=least(greatest(coalesce(p_days_back,30),0),365);
  select coalesce(jsonb_agg(to_jsonb(x) order by x.date desc),'[]'::jsonb) into v_rows
  from (select * from public.incidents where school_id=v_sess.school_id and date>=current_date-(v_days||' days')::interval
