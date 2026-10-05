@@ -158,11 +158,12 @@ async function initApp() {
           user: {
             teacher_id:   webData.teacher_id,
             teacher_name: webData.teacher_name,
-            role:         webData.is_admin ? 'Admin' : (webData.teacher_role || 'Teacher'),
+            role:         webData.teacher_role || (webData.is_admin ? 'admin' : 'teacher'),
             classes:      Array.isArray(webData.classes) ? webData.classes.join(',') : '',
             telegram_id:  webData.telegram_id || null,
             photo_url:    webData.teacher_photo_url || '',
             ui_prefs:     webData.ui_prefs || {},
+          permissions:  Array.isArray(webData.permissions) ? webData.permissions : [],
           },
           config:        webData.school_config || {},
           // The lists below will be filled by a follow-up fetch
@@ -222,7 +223,14 @@ async function initApp() {
     window.APP.teacher_name   = u.teacher_name || tgUser?.first_name || '';
     window.APP.teacher_role   = u.role || '';
     window.APP.teacher_classes = u.classes || '';
-    window.APP.is_admin       = ['Admin', 'Principal', 'HT'].includes(u.role);
+    window.APP.assigned_classes = Array.isArray(u.assigned_classes) ? u.assigned_classes : [];
+    window.APP.assigned_subjects = Array.isArray(u.assigned_subjects) ? u.assigned_subjects : [];
+    window.APP.billing_classes = Array.isArray(u.billing_classes) ? u.billing_classes : [];
+    window.APP.permissions    = Array.isArray(u.permissions) ? u.permissions : (Array.isArray(bootstrapData.permissions) ? bootstrapData.permissions : []);
+    window.APP.is_admin       = ['admin', 'super_admin', 'Admin', 'Principal', 'HT'].includes(String(u.role || ''));
+    if (bootstrapData.auth_mode === 'web' && Array.isArray(webSession?.permissions)) {
+      window.APP.permissions = webSession.permissions;
+    }
     window.APP.telegram_id    = u.telegram_id || telegram_id || null;
     window.APP.config         = bootstrapData.config || {};
     window.APP.currentTerm    = bootstrapData.currentTerm || null;
@@ -420,8 +428,32 @@ window.signOut = function () {
 
 // ─── PAGE NAVIGATION ────────────────────────────────────────────────────────
 
+const PAGE_PERMISSION = Object.freeze({
+  dashboard: 'dashboard.view',
+  students: 'students.view',
+  attend: 'attendance.view',
+  hw: 'homework.view',
+  grades: 'assessment.view',
+  billing: 'billing.view',
+  admissions: 'admissions.view',
+  leave: 'leave.view',
+});
+
+function _pageAccessAllowed(pageId) {
+  const A = window.APP || {};
+  if (A.platform !== 'web' || A.is_admin) return true;
+  const permission = PAGE_PERMISSION[pageId];
+  if (!permission) return true;
+  if (pageId === 'billing') return Array.isArray(A.permissions) && (A.permissions.includes('billing.view') || A.permissions.includes('billing.class.view'));
+  return Array.isArray(A.permissions) && A.permissions.includes(permission);
+}
+
 window.goToPage = function(pageId) {
   if (!pageId) return;
+  if (!_pageAccessAllowed(pageId)) {
+    if (typeof showToast === 'function') showToast('Permission denied');
+    return;
+  }
   const currentPage = window.APP.currentPage;
 
   // Ignore accidental double taps on the already-visible page.
@@ -717,7 +749,8 @@ function _updateFabForPage(pageId) {
   const fab = document.getElementById('fab');
   if (!fab) return;
   const conf = FAB_PAGES[pageId];
-  if (conf) {
+  const blocked = pageId === 'billing' && !window.APP?.is_admin && !(Array.isArray(window.APP?.permissions) && window.APP.permissions.includes('billing.write'));
+  if (conf && !blocked) {
     fab.style.display = 'flex';
     fab.setAttribute('aria-label', t(conf.titleKey));
     fab.setAttribute('title', t(conf.titleKey));

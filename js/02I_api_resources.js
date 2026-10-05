@@ -3,31 +3,37 @@
 var API = window.API || {};
 Object.assign(API, {
   async uploadSchoolAsset(kind, blob) {
-      const ext = blob.type === 'image/png' ? 'png' : 'jpg';
-      const school = window.APP.school_id;
-      let path;
-      const uid = Date.now().toString(36) + Math.random().toString(36).slice(2, 6);
-      if (kind === 'teacher') path = `${school}/teachers/${window.APP.teacher_id}-${uid}.${ext}`;
-      else                    path = `${school}/${kind}-${uid}.${ext}`;
+      if (!['logo', 'cover', 'teacher'].includes(kind)) throw new Error('Invalid asset type');
+      if (!blob || !blob.type || /^image\/(jpeg|png|webp)$/.test(blob.type) === false) {
+        throw new Error('Unsupported image type');
+      }
+      if (blob.size <= 0 || blob.size > 5 * 1024 * 1024) {
+        throw new Error('Image exceeds the 5 MB limit');
+      }
+
+      const form = new FormData();
+      form.append('session_token', _webSessionToken());
+      form.append('kind', kind);
+      form.append('file', blob, 'asset');
+
       const resp = await fetch(
-        `${SCMS_CONFIG.SUPABASE_URL}/storage/v1/object/school-assets/${path}`,
+        `${SCMS_CONFIG.SUPABASE_URL}/functions/v1/upload-school-asset`,
         {
-          method:  'POST',
+          method: 'POST',
           headers: {
-            'apikey':        SCMS_CONFIG.SUPABASE_ANON,
-            'Authorization': `Bearer ${SCMS_CONFIG.SUPABASE_ANON}`,
-            'Content-Type':  blob.type,
+            'apikey': SCMS_CONFIG.SUPABASE_ANON,
           },
-          body: blob,
+          body: form,
         }
       );
-      if (!resp.ok) {
-        const t = await resp.text().catch(() => '');
-        throw new Error(`Upload failed (${resp.status}): ${t.slice(0, 200)}`);
+
+      const data = await resp.json().catch(() => ({}));
+      if (!resp.ok || !data.ok || !data.url) {
+        throw new Error(data.error || `Upload failed (${resp.status})`);
       }
-      return `${SCMS_CONFIG.SUPABASE_URL}/storage/v1/object/public/school-assets/${path}?t=${Date.now()}`;
+      return data.url;
     },
-  
+
     /** patch: { school_logo?: url|null, school_cover?: url|null } — admin only (server-enforced). */
   
   async setSchoolBranding(patch) {

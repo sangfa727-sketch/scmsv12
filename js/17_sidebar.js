@@ -35,6 +35,26 @@ const SIDEBAR_ITEMS = [
   { id: 'chat',      icon: '🗨️', key: 'sb.chat', hideInTWA: true  },
 ];
 
+const SIDEBAR_PERMISSION = Object.freeze({
+  dashboard: 'dashboard.view',
+  students: 'students.view',
+  attend: 'attendance.view',
+  hw: 'homework.view',
+  grades: 'assessment.view',
+  billing: 'billing.view',
+  admissions: 'admissions.view',
+  leave: 'leave.view',
+});
+
+function _sidebarCanAccess(pageId) {
+  const A = window.APP || {};
+  if (A.platform !== 'web' || A.is_admin) return true;
+  const permission = SIDEBAR_PERMISSION[pageId];
+  if (!permission) return true; // No permission contract exists for this module yet.
+  if (pageId === 'billing') return Array.isArray(A.permissions) && (A.permissions.includes('billing.view') || A.permissions.includes('billing.class.view'));
+  return Array.isArray(A.permissions) && A.permissions.includes(permission);
+}
+
 function renderSidebar() {
   const sidebar = document.getElementById('sidebar');
   if (!sidebar) return;
@@ -50,7 +70,8 @@ function renderSidebar() {
   const isModule = id => (typeof MODULE_ITEMS !== 'undefined') && MODULE_ITEMS.some(m => m.id === id);
   const items = SIDEBAR_ITEMS
     .filter(it => !it.hideInTWA || !isTWA())
-    .filter(it => !enabledMods || !isModule(it.id) || enabledMods.includes(it.id));
+    .filter(it => !enabledMods || !isModule(it.id) || enabledMods.includes(it.id))
+    .filter(it => _sidebarCanAccess(it.id));
 
   const A = window.APP;
   const cfg = A.config || {};

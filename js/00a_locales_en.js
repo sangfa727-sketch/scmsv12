@@ -1071,6 +1071,7 @@ window.I18N_EN = {
 
   // ── Added: Batch E1: settings, teacher manager, google auth, register, branding leftovers (v11.8) ──
   'settings.title': '⚙️ Settings',
+  'settings.myAccess': 'My Access',
   'settings.version': 'Version',
   'settings.platform': 'Platform',
   'settings.school': 'School',
@@ -1219,6 +1220,10 @@ window.I18N_EN = {
   'enum.roleName.admin': 'Admin',
   'enum.roleName.teacher': 'Teacher',
   'enum.roleName.super_admin': 'Super Admin',
+  'enum.roleName.assistant_teacher': 'Assistant Teacher',
+  'enum.roleName.senior_teacher': 'Senior Teacher',
+  'enum.roleName.school_coordinator': 'School Coordinator',
+  'enum.roleName.administrative_assistant': 'Administrative Assistant',
 
   // ── Added: Batch E2: Help page and first-launch tour (v11.8) ──
   'help.title': 'How to use SCMS',

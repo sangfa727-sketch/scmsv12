@@ -87,3 +87,181 @@ test('admin settings use the shared session-aware RPC path for teacher listing',
   assert.match(block, /_webRpc\(/);
   assert.match(block, /p_session_token/);
 });
+
+
+test('teacher web login accepts Teacher ID/Login Name with PIN and page navigation is permission-aware', () => {
+  const landing = read('js/00_landing.js');
+  const authMigration = read('supabase/migrations/20261005100000_teacher_role_login_page_access.sql');
+  const app = read('js/14_app.js');
+  const sidebar = read('js/17_sidebar.js');
+
+  assert.match(landing, /webLoginIdentity/);
+  assert.match(landing, /webLoginPin/);
+  assert.match(landing, /p_login_name:\s+identity/);
+  assert.match(landing, /p_pin:\s+pin/);
+
+  assert.match(authMigration, /lower\(login_name\)\s*=\s*lower\(v_identity\)/);
+  assert.match(authMigration, /lower\(teacher_id\)\s*=\s*lower\(v_identity\)/);
+  assert.match(authMigration, /'permissions',\s*v_permissions/);
+
+  for (const key of [
+    'dashboard.view',
+    'students.view',
+    'attendance.view',
+    'homework.view',
+    'assessment.view',
+    'billing.view',
+    'admissions.view',
+    'leave.view',
+  ]) {
+    assert.match(app, new RegExp(key.replace('.', '\\.'), 'g'));
+  }
+
+  assert.match(app, /function _pageAccessAllowed/);
+  assert.match(app, /if \(!_pageAccessAllowed\(pageId\)\)/);
+  assert.match(sidebar, /function _sidebarCanAccess/);
+  assert.match(sidebar, /A\.platform !== 'web'/);
+  assert.match(app, /A\.platform !== 'web'/);
+  assert.match(sidebar, /\.filter\(it => _sidebarCanAccess\(it\.id\)\)/);
+});
+
+
+test('operational roles, scoped billing, and role-aware settings are explicit', () => {
+  const settings = read('js/15_settings.js');
+  const billing = read('js/21_billing.js');
+  const picker = read('js/03b_student_picker.js');
+  const index = read('index.html');
+  const migration = read('supabase/migrations/20261005120000_role_access_billing_settings_hardening.sql');
+
+  for (const role of ['assistant_teacher','senior_teacher','school_coordinator','administrative_assistant']) {
+    assert.match(settings, new RegExp(role));
+    assert.match(migration, new RegExp(role));
+  }
+  assert.match(settings, /settings\.myAccess/);
+  assert.match(settings, /openMyAccessSettings/);
+  assert.match(settings, /SCMS_OPERATIONAL_ROLES/);
+  assert.match(migration, /billing\.fees\.manage/);
+  assert.match(migration, /scope_type='class'/);
+  assert.match(migration, /private\.web_has_permission\(p_session_token,'billing\.write'/);
+  assert.match(billing, /_billingAllowedClasses/);
+  assert.match(billing, /_billingCanWrite/);
+  assert.match(billing, /_billingCanManageFees/);
+  assert.match(billing, /classAllowlist/);
+  assert.match(picker, /classAllowlist/);
+  assert.match(index, /billingFeeItemsBtn/);
+});
+
+
+test('transport authorization is dedicated and class-scoped at the RPC boundary', () => {
+  const migration = read('supabase/migrations/20261005150000_transport_permission_hardening.sql');
+  const api = read('js/02J_api_transport.js');
+  for (const key of ['transport.view','transport.edit','transport.manage']) assert.match(migration, new RegExp(key.replaceAll('.', '\\\\.')));
+  for (const fn of ['rpc_get_routes','rpc_add_route','rpc_update_route','rpc_delete_route','rpc_get_route_detail','rpc_assign_student_transport','rpc_get_student_transport','rpc_remove_student_transport']) {
+    const idx = migration.indexOf('function public.' + fn);
+    assert.ok(idx >= 0, fn + ' missing');
+  }
+  assert.match(migration, /rpc_add_route[\\s\\S]{0,5000}transport\\.manage/);
+  assert.match(migration, /rpc_update_route[\\s\\S]{0,5000}transport\\.manage/);
+  assert.match(migration, /rpc_delete_route[\\s\\S]{0,5000}transport\\.manage/);
+  assert.match(migration, /rpc_assign_student_transport[\\s\\S]{0,6000}transport\\.edit/);
+  assert.match(migration, /rpc_get_student_transport[\\s\\S]{0,5000}transport\\.view/);
+  assert.match(migration, /rpc_remove_student_transport[\\s\\S]{0,5000}transport\\.edit/);
+  assert.match(migration, /private\\.web_has_permission\\(p_session_token,'transport\\.view',nullif\\(trim\\(v_student\\.class\\)/);
+  assert.match(api, /rpc_get_routes|rpc_add_route|rpc_update_route|rpc_delete_route|rpc_get_route_detail/);
+});
+
+
+test('resources and library authorization is dedicated and session-bound at the RPC boundary', () => {
+  const migration = read('supabase/migrations/20261005170000_resources_library_permission_hardening.sql');
+  const api = read('js/02I_api_resources.js');
+
+  for (const key of ['library.view', 'library.manage']) {
+    assert.match(migration, new RegExp(key.replaceAll('.', '\\.')));
+  }
+  for (const fn of [
+    'rpc_get_books','rpc_add_book','rpc_update_book','rpc_delete_book',
+    'rpc_get_book_checkouts','rpc_checkout_book','rpc_return_book','rpc_get_student_checkouts'
+  ]) {
+    assert.match(migration, new RegExp('function public\\.' + fn));
+  }
+  assert.match(migration, /rpc_get_books[\\s\\S]{0,5000}library\\.view/);
+  for (const fn of ['rpc_add_book','rpc_update_book','rpc_delete_book','rpc_checkout_book','rpc_return_book']) {
+    assert.match(migration, new RegExp(fn + '[\\s\\S]{0,5000}library\\.manage'));
+  }
+  assert.match(migration, /rpc_get_student_checkouts[\\s\\S]{0,7000}students\\.view/);
+  assert.match(migration, /rpc_get_student_checkouts[\\s\\S]{0,7000}v_student\\.class/);
+  for (const fn of ['getBooks','addBook','updateBook','deleteBook','getBookCheckouts','checkoutBook','returnBook','getStudentCheckouts']) {
+    assert.match(api, new RegExp(fn));
+  }
+});
+
+
+test('school asset uploads use the server-authorized upload function', () => {
+  const api = read('js/02I_api_resources.js');
+  assert.ok(api.includes('functions/v1/upload-school-asset'));
+  assert.ok(api.includes('session_token'));
+  assert.ok(api.includes('FormData'));
+  assert.equal(api.includes('storage/v1/object/school-assets/'), false);
+});
+
+
+test('health authorization is dedicated and class-scoped at the RPC boundary', () => {
+  const migration = read('supabase/migrations/20261005190000_health_permission_hardening.sql');
+  const api = read('js/02K_api_health.js');
+  assert.ok(migration.includes('health.view'));
+  assert.ok(migration.includes('health.edit'));
+  for (const fn of ['rpc_get_health_profile','rpc_upsert_health_profile','rpc_add_vaccination','rpc_delete_vaccination','rpc_add_health_visit','rpc_delete_health_visit']) {
+    assert.ok(migration.includes('function public.' + fn));
+  }
+  assert.ok(migration.includes("private.web_has_permission(p_session_token,'health.view',nullif(trim(v_student.class),''),null)"));
+  assert.ok(migration.includes("private.web_has_permission(p_session_token,'health.edit',nullif(trim(v_student.class),''),null)"));
+  assert.ok(migration.includes("private.web_has_permission(p_session_token,'health.edit',nullif(trim((select s.class"));
+  for (const fn of ['getHealthProfile','upsertHealthProfile','addVaccination','deleteVaccination','addHealthVisit','deleteHealthVisit']) {
+    assert.ok(api.includes(fn));
+  }
+});
+
+
+test('communications authorization is dedicated and class-scoped at the RPC boundary', () => {
+  const migration = read('supabase/migrations/20261005210000_communication_permission_hardening.sql');
+  const api = read('js/02H_api_communication.js');
+  for (const key of ['communication.view','communication.send','communication.manage']) assert.ok(migration.includes(key));
+  for (const fn of ['rpc_send_parent_comm','rpc_get_parent_comms','rpc_delete_parent_comm','rpc_parent_portal_event_create','rpc_parent_portal_event_delete']) {
+    assert.ok(migration.includes('function public.' + fn));
+  }
+  assert.ok(migration.includes("private.web_has_permission(p_session_token,'communication.send'"));
+  assert.ok(migration.includes("private.web_has_permission(p_session_token,'communication.view'"));
+  assert.ok(migration.includes("private.web_has_permission(p_session_token,'communication.manage'"));
+  for (const fn of ['sendParentComm','createParentPortalEvent','deleteParentPortalEvent','deleteParentComm','getParentComms']) assert.ok(api.includes(fn));
+});
+
+
+test('timetable authorization is dedicated and class-scoped at the RPC boundary', () => {
+  const migration = read('supabase/migrations/20261005220000_timetable_permission_hardening.sql');
+  for (const key of ['timetable.view','timetable.manage']) assert.ok(migration.includes(key));
+  for (const fn of ['rpc_get_timetable','rpc_save_timetable','rpc_update_timetable','rpc_delete_timetable']) assert.ok(migration.includes('function public.' + fn));
+  assert.ok(migration.includes("private.web_has_permission(p_session_token,'timetable.view'"));
+  assert.ok(migration.includes("private.web_has_permission(p_session_token,'timetable.manage'"));
+});
+
+
+test('daily reports and incidents authorization is dedicated and class-scoped', () => {
+  const migration = read('supabase/migrations/20261005230000_daily_incident_permission_hardening.sql');
+  for (const key of ['daily_report.view','incident.view','incident.create','incident.edit','incident.delete']) assert.ok(migration.includes(key));
+  for (const fn of ['rpc_get_daily_reports','rpc_save_daily_report','rpc_update_daily_report','rpc_delete_daily_report','rpc_get_incidents','rpc_save_incident','rpc_update_incident','rpc_delete_incident']) {
+    assert.ok(migration.includes('function public.' + fn) || migration.includes("web_has_permission(p_session_token,'daily_report"));
+  }
+  assert.ok(migration.includes("private.web_has_permission(p_session_token,'incident.view'"));
+  assert.ok(migration.includes("private.web_has_permission(p_session_token,'incident.create'"));
+  assert.ok(migration.includes("private.web_has_permission(p_session_token,'incident.edit'"));
+  assert.ok(migration.includes("private.web_has_permission(p_session_token,'incident.delete'"));
+  assert.ok(migration.includes("private.web_has_permission(p_session_token,'daily_report.view'"));
+});
+
+
+test('summary authorization is dedicated and class-scoped', () => {
+  const migration = read('supabase/migrations/20261005240000_summary_permission_hardening.sql');
+  assert.ok(migration.includes('summary.view'));
+  assert.ok(migration.includes('function public.rpc_get_monthly_summary'));
+  assert.ok(migration.includes("private.web_has_permission(p_session_token,'summary.view'"));
+});

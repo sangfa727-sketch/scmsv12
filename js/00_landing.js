@@ -486,12 +486,12 @@ window.openWebLoginModal = function () {
       <h3 class="modal-title">${t('login.title')}</h3>
       <p class="modal-subtitle">${t('login.sub')}</p>
 
-      <label class="field-label">${t('ct.email')}</label>
-      <input class="form-input" id="webLoginEmail" type="email" autocomplete="username"
-             placeholder="teacher@school.edu" autocapitalize="off" autocorrect="off">
+      <label class="field-label">Teacher ID / Login Name</label>
+      <input class="form-input" id="webLoginIdentity" type="text" autocomplete="username"
+             placeholder="Teacher ID or Login Name" autocapitalize="off" autocorrect="off">
 
-      <label class="field-label">${t('ct.startPw')}</label>
-      <input class="form-input" id="webLoginPw" type="password" autocomplete="current-password"
+      <label class="field-label">PIN / Password</label>
+      <input class="form-input" id="webLoginPin" type="password" autocomplete="current-password"
              placeholder="••••••••" onkeydown="if(event.key==='Enter')doWebLogin()">
 
       <div id="webLoginError" class="form-error" style="display:none"></div>
@@ -506,7 +506,7 @@ window.openWebLoginModal = function () {
   wrap.onclick = closeWebLoginModal;
   document.body.appendChild(wrap);
   wrap.classList.add('active');
-  setTimeout(() => document.getElementById('webLoginEmail')?.focus(), 50);
+  setTimeout(() => document.getElementById('webLoginIdentity')?.focus(), 50);
 };
 
 window.closeWebLoginModal = function () {
@@ -639,14 +639,14 @@ window.doTeacherCardLogin = async function () {
 };
 
 window.doWebLogin = async function () {
-  const email = document.getElementById('webLoginEmail')?.value.trim().toLowerCase();
-  const pw = document.getElementById('webLoginPw')?.value;
+  const identity = document.getElementById('webLoginIdentity')?.value.trim();
+  const pin = document.getElementById('webLoginPin')?.value;
   const errEl = document.getElementById('webLoginError');
   const btn = document.getElementById('webLoginBtn');
 
   if (errEl) errEl.style.display = 'none';
 
-  if (!email || !pw) {
+  if (!identity || !pin) {
     if (errEl) {
       errEl.textContent = t('login.needBoth');
       errEl.style.display = 'block';
@@ -666,8 +666,8 @@ window.doWebLogin = async function () {
         'Content-Type':  'application/json',
       },
       body: JSON.stringify({
-        p_email:       email,
-        p_password:    pw,
+        p_login_name:   identity,
+        p_pin:         pin,
         p_device_ua:  navigator.userAgent.slice(0, 200),
       }),
     });

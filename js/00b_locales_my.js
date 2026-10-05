@@ -1073,6 +1073,7 @@ window.I18N_MY = {
 
   // ── Added: Batch E1: settings, teacher manager, google auth, register, branding leftovers (v11.8) ──
   'settings.title': '⚙️ ဆက်တင်',
+  'settings.myAccess': '🔐 ကျွန်ုပ်၏ Access',
   'settings.version': 'ဗားရှင်း',
   'settings.platform': 'ပလက်ဖောင်း',
   'settings.school': 'ကျောင်း',
@@ -1219,6 +1220,10 @@ window.I18N_MY = {
   'enum.roleName.admin': 'Admin',
   'enum.roleName.teacher': 'ဆရာ/ဆရာမ',
   'enum.roleName.super_admin': 'Super Admin',
+  'enum.roleName.assistant_teacher': 'အကူဆရာ/ဆရာမ',
+  'enum.roleName.senior_teacher': 'အကြီးတန်းဆရာ/ဆရာမ',
+  'enum.roleName.school_coordinator': 'ကျောင်းညှိနှိုင်းရေးမှူး',
+  'enum.roleName.administrative_assistant': 'အုပ်ချုပ်ရေးအကူဝန်ထမ်း',
 
   // ── Added: Batch E2: Help page and first-launch tour (v11.8) ──
   'help.title': 'SCMS အသုံးပြုနည်း',
