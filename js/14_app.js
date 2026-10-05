@@ -438,7 +438,7 @@ const PAGE_PERMISSION = Object.freeze({
 
 function _pageAccessAllowed(pageId) {
   const A = window.APP || {};
-  if (A.is_admin) return true;
+  if (A.platform !== 'web' || A.is_admin) return true;
   const permission = PAGE_PERMISSION[pageId];
   if (!permission) return true;
   return Array.isArray(A.permissions) && A.permissions.includes(permission);
