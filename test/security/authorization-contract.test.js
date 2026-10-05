@@ -234,3 +234,12 @@ test('communications authorization is dedicated and class-scoped at the RPC boun
   assert.ok(migration.includes("private.web_has_permission(p_session_token,'communication.manage'"));
   for (const fn of ['sendParentComm','createParentPortalEvent','deleteParentPortalEvent','deleteParentComm','getParentComms']) assert.ok(api.includes(fn));
 });
+
+
+test('timetable authorization is dedicated and class-scoped at the RPC boundary', () => {
+  const migration = read('supabase/migrations/20261005220000_timetable_permission_hardening.sql');
+  for (const key of ['timetable.view','timetable.manage']) assert.ok(migration.includes(key));
+  for (const fn of ['rpc_get_timetable','rpc_save_timetable','rpc_update_timetable','rpc_delete_timetable']) assert.ok(migration.includes('function public.' + fn));
+  assert.ok(migration.includes("private.web_has_permission(p_session_token,'timetable.view'"));
+  assert.ok(migration.includes("private.web_has_permission(p_session_token,'timetable.manage'"));
+});
