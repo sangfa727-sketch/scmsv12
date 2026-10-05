@@ -75,6 +75,32 @@
     await Promise.all(names.map(name => load(name)));
   }
 
+  async function loadDashboardData() {
+    const names = ['dashboard:timetable', 'dashboard:attendance', 'dashboard:homework', 'dashboard:incidents', 'dashboard:comms', 'dashboard:leave'];
+    const loaders = {
+      'dashboard:timetable': () => API.getTimetable(),
+      'dashboard:attendance': () => API.getAttendance(14),
+      'dashboard:homework': () => API.getHomework(14),
+      'dashboard:incidents': () => API.getIncidents(14),
+      'dashboard:comms': () => API.getParentComms(14),
+      'dashboard:leave': () => API.getLeaveRequests(),
+    };
+    const values = await Promise.all(names.map(name => {
+      if (inflight.has(name)) return inflight.get(name);
+      const promise = Promise.resolve().then(loaders[name]).then(v => Array.isArray(v) ? v : []).finally(() => inflight.delete(name));
+      inflight.set(name, promise);
+      return promise;
+    }));
+    return {
+      timetable: values[0],
+      attendance: values[1],
+      homework: values[2],
+      incidents: values[3],
+      comms: values[4],
+      leaveRequests: values[5],
+    };
+  }
+
   async function refreshAll() {
     const names = Object.keys(specs);
     invalidate(names);
@@ -82,7 +108,7 @@
     return results;
   }
 
-  window.SCMSDataLoader = { load, invalidate, clear, ensurePageData, refreshAll };
+  window.SCMSDataLoader = { load, loadDashboardData, invalidate, clear, ensurePageData, refreshAll };
 
   Object.assign(window.API, {
     loadData: load,
