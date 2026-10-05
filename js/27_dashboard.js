@@ -144,6 +144,21 @@ function _syncDashboardLeaveCount(rows, repaintSidebar = true) {
 }
 
 async function _loadDashboardData() {
+  if (window.APP.platform === 'web' && window.SCMSDataLoader) {
+    const data = await window.SCMSDataLoader.loadDashboardData();
+    const safeLeaveRequests = Array.isArray(data.leaveRequests) ? data.leaveRequests : [];
+    _dashboardCache = {
+      timetable: data.timetable || [],
+      attendance: data.attendance || [],
+      homework: data.homework || [],
+      incidents: data.incidents || [],
+      comms: data.comms || [],
+      leaveRequests: safeLeaveRequests,
+    };
+    _syncDashboardLeaveCount(safeLeaveRequests);
+    return;
+  }
+
   const [timetable, attendance, homework, incidents, comms, leaveRequests] = await Promise.all([
     API.getTimetable().catch(() => []),
     API.getAttendance(14).catch(() => []),
