@@ -169,3 +169,28 @@ test('transport authorization is dedicated and class-scoped at the RPC boundary'
   assert.match(migration, /private\\.web_has_permission\\(p_session_token,'transport\\.view',nullif\\(trim\\(v_student\\.class\\)/);
   assert.match(api, /rpc_get_routes|rpc_add_route|rpc_update_route|rpc_delete_route|rpc_get_route_detail/);
 });
+
+
+test('resources and library authorization is dedicated and session-bound at the RPC boundary', () => {
+  const migration = read('supabase/migrations/20261005170000_resources_library_permission_hardening.sql');
+  const api = read('js/02I_api_resources.js');
+
+  for (const key of ['library.view', 'library.manage']) {
+    assert.match(migration, new RegExp(key.replaceAll('.', '\\.')));
+  }
+  for (const fn of [
+    'rpc_get_books','rpc_add_book','rpc_update_book','rpc_delete_book',
+    'rpc_get_book_checkouts','rpc_checkout_book','rpc_return_book','rpc_get_student_checkouts'
+  ]) {
+    assert.match(migration, new RegExp('function public\\.' + fn));
+  }
+  assert.match(migration, /rpc_get_books[\\s\\S]{0,5000}library\\.view/);
+  for (const fn of ['rpc_add_book','rpc_update_book','rpc_delete_book','rpc_checkout_book','rpc_return_book']) {
+    assert.match(migration, new RegExp(fn + '[\\s\\S]{0,5000}library\\.manage'));
+  }
+  assert.match(migration, /rpc_get_student_checkouts[\\s\\S]{0,7000}students\\.view/);
+  assert.match(migration, /rpc_get_student_checkouts[\\s\\S]{0,7000}v_student\\.class/);
+  for (const fn of ['getBooks','addBook','updateBook','deleteBook','getBookCheckouts','checkoutBook','returnBook','getStudentCheckouts']) {
+    assert.match(api, new RegExp(fn));
+  }
+});
