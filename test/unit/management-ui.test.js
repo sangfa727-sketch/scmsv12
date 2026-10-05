@@ -157,3 +157,23 @@ test('health profile RPC returns only health-domain fields and preserves school/
   assert.doesNotMatch(source, /updated_by/);
   assert.doesNotMatch(source, /created_by/);
 });
+
+
+test('admission detail RPC returns explicit admission fields without serializing the full row', () => {
+  const source = read('supabase/migrations/20261003110000_harden_admission_detail_rpc_response.sql');
+  assert.match(source, /create\\s+or\\s+replace\\s+function\\s+public\\.rpc_get_admission_detail/);
+  assert.match(source, /private\\.web_has_permission\\(p_session_token,\\s*'admissions\\.view'/);
+  assert.match(source, /school_id\\s*=\\s*v_sess\\.school_id/);
+  for (const field of [
+    'applicant_name_en',
+    'applicant_name_local',
+    'parent_phone',
+    'parent_email',
+    'status',
+    'converted_student_id',
+    'registration_invoice_id'
+  ]) {
+    assert.match(source, new RegExp(field));
+  }
+  assert.doesNotMatch(source, /to_jsonb\\(v_row\\)/);
+});
