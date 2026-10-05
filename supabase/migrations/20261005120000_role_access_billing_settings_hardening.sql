@@ -48,7 +48,7 @@ where role = 'school_coordinator'
     'attendance.view','attendance.edit',
     'homework.view','homework.create','homework.edit',
     'assessment.view','assessment.create','assessment.edit',
-    'billing.view','billing.write'
+    'billing.class.view','billing.class.write'
   );
 
 update public.role_permissions
@@ -58,7 +58,7 @@ where role = 'administrative_assistant'
     'dashboard.view','students.view','students.edit',
     'leave.view','leave.approve',
     'attendance.view','attendance.edit',
-    'billing.view','billing.write'
+    'billing.class.view','billing.class.write'
   );
 
 -- 2) Billing is class-scoped for non-admin staff.
@@ -386,7 +386,7 @@ begin
     'total_billed',coalesce((select sum(i.total_amount) from public.invoices i join public.students s on s.student_id=i.student_id and s.school_id=i.school_id
       where i.school_id=v_sess.v_school_id and i.status<>'Cancelled'
         and (p_class is null or s.class=p_class) and (p_term_id is null or i.term_id=p_term_id)
-        and (v_sess.v_role in ('admin','super_admin') or private.web_has_permission(p_session_token,'billing.view',nullif(trim(s.class),'')::text,null))),0),
+        and (v_sess.v_role in ('admin','super_admin') or (private.web_has_permission(p_session_token,'billing.view',null,null) or private.web_has_permission(p_session_token,'billing.class.view',nullif(trim(s.class),'')::text,null)))),0),
     'total_collected',coalesce((select sum(i.paid_amount) from public.invoices i join public.students s on s.student_id=i.student_id and s.school_id=i.school_id
       where i.school_id=v_sess.v_school_id and i.status<>'Cancelled'
         and (p_class is null or s.class=p_class) and (p_term_id is null or i.term_id=p_term_id)
@@ -541,7 +541,7 @@ begin
    where p.id=p_payment_id and i.school_id=v_sess.v_school_id for update;
   if v_invoice.id is null then return jsonb_build_object('ok',false,'error','not_found'); end if;
   if v_sess.v_role not in ('admin','super_admin')
-     and not private.web_has_permission(p_session_token,'billing.write',nullif(trim(v_invoice.student_class),'')::text,null)
+     and not (private.web_has_permission(p_session_token,'billing.write',null,null) or private.web_has_permission(p_session_token,'billing.class.write',nullif(trim(v_invoice.student_class),'')::text,null))
   then return jsonb_build_object('ok',false,'error','permission_denied'); end if;
   select * into v_row from public.payments where id=p_payment_id and invoice_id=v_invoice.id;
   if v_row.id is null then return jsonb_build_object('ok',false,'error','not_found'); end if;
