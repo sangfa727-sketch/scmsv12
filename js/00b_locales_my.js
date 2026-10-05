@@ -1073,6 +1073,7 @@ window.I18N_MY = {
 
   // ── Added: Batch E1: settings, teacher manager, google auth, register, branding leftovers (v11.8) ──
   'settings.title': '⚙️ ဆက်တင်',
+  'settings.myAccess': '🔐 ကျွန်ုပ်၏ Access',
   'settings.version': 'ဗားရှင်း',
   'settings.platform': 'ပလက်ဖောင်း',
   'settings.school': 'ကျောင်း',
