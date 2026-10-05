@@ -223,6 +223,9 @@ async function initApp() {
     window.APP.teacher_name   = u.teacher_name || tgUser?.first_name || '';
     window.APP.teacher_role   = u.role || '';
     window.APP.teacher_classes = u.classes || '';
+    window.APP.assigned_classes = Array.isArray(u.assigned_classes) ? u.assigned_classes : [];
+    window.APP.assigned_subjects = Array.isArray(u.assigned_subjects) ? u.assigned_subjects : [];
+    window.APP.billing_classes = Array.isArray(u.billing_classes) ? u.billing_classes : [];
     window.APP.permissions    = Array.isArray(u.permissions) ? u.permissions : (Array.isArray(bootstrapData.permissions) ? bootstrapData.permissions : []);
     window.APP.is_admin       = ['admin', 'super_admin', 'Admin', 'Principal', 'HT'].includes(String(u.role || ''));
     if (bootstrapData.auth_mode === 'web' && Array.isArray(webSession?.permissions)) {
