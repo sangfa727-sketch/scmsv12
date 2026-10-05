@@ -748,7 +748,8 @@ function _updateFabForPage(pageId) {
   const fab = document.getElementById('fab');
   if (!fab) return;
   const conf = FAB_PAGES[pageId];
-  if (conf) {
+  const blocked = pageId === 'billing' && !window.APP?.is_admin && !(Array.isArray(window.APP?.permissions) && window.APP.permissions.includes('billing.write'));
+  if (conf && !blocked) {
     fab.style.display = 'flex';
     fab.setAttribute('aria-label', t(conf.titleKey));
     fab.setAttribute('title', t(conf.titleKey));
