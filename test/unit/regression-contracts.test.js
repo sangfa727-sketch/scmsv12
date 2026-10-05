@@ -330,3 +330,15 @@ test('teacher role save accepts the full canonical operational role set', () => 
   assert.ok(migration.includes("'insufficient_role'"), 'admin/super-admin escalation boundary must remain');
   assert.ok(migration.includes('teacher_email=v_email'), 'teacher email mirror must remain synchronized');
 });
+
+
+test('teacher creation accepts the full canonical role set and preserves escalation guards', () => {
+  const migration = read('supabase/migrations/20261005143000_sync_teacher_create_role_validation.sql');
+  const roles = ['teacher','assistant_teacher','senior_teacher','school_coordinator','administrative_assistant','admin','super_admin'];
+  for (const role of roles) assert.ok(migration.includes("'" + role + "'"), 'role missing from teacher-create validation: ' + role);
+  assert.ok(migration.includes("v_role text:=lower(trim(coalesce(p_role,'teacher'))"), 'create role input must be normalized');
+  assert.ok(migration.includes("'invalid_role'"), 'invalid create role must fail closed');
+  assert.ok(migration.includes("'insufficient_role'"), 'create Admin/Super Admin escalation boundary must remain');
+  assert.ok(migration.includes('v_role,v_email'), 'normalized role must be persisted');
+  assert.ok(migration.includes('revoke execute on function public.rpc_admin_create_teacher_v2'), 'create RPC execute boundary must be explicit');
+});
