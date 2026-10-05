@@ -87,3 +87,38 @@ test('admin settings use the shared session-aware RPC path for teacher listing',
   assert.match(block, /_webRpc\(/);
   assert.match(block, /p_session_token/);
 });
+
+
+test('teacher web login accepts Teacher ID/Login Name with PIN and page navigation is permission-aware', () => {
+  const landing = read('js/00_landing.js');
+  const authMigration = read('supabase/migrations/20261005100000_teacher_role_login_page_access.sql');
+  const app = read('js/14_app.js');
+  const sidebar = read('js/17_sidebar.js');
+
+  assert.match(landing, /webLoginIdentity/);
+  assert.match(landing, /webLoginPin/);
+  assert.match(landing, /p_login_name:\s+identity/);
+  assert.match(landing, /p_pin:\s+pin/);
+
+  assert.match(authMigration, /lower\(login_name\)\s*=\s*lower\(v_identity\)/);
+  assert.match(authMigration, /lower\(teacher_id\)\s*=\s*lower\(v_identity\)/);
+  assert.match(authMigration, /'permissions',\s*v_permissions/);
+
+  for (const key of [
+    'dashboard.view',
+    'students.view',
+    'attendance.view',
+    'homework.view',
+    'assessment.view',
+    'billing.view',
+    'admissions.view',
+    'leave.view',
+  ]) {
+    assert.match(app, new RegExp(key.replace('.', '\\.'), 'g'));
+  }
+
+  assert.match(app, /function _pageAccessAllowed/);
+  assert.match(app, /if \(!_pageAccessAllowed\(pageId\)\)/);
+  assert.match(sidebar, /function _sidebarCanAccess/);
+  assert.match(sidebar, /\.filter\(it => _sidebarCanAccess\(it\.id\)\)/);
+});
