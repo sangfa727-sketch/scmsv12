@@ -84,6 +84,23 @@ window.refreshDashboardNotifications = async function() {
 
 window.refreshDashboardLeaveRequests = window.refreshDashboardNotifications;
 
+window.refreshDashboardData = async function() {
+  try {
+    await _loadDashboardData();
+    _dashboardLoadedOnce = true;
+    const container = document.getElementById('dashboardContent');
+    const dashboardPage = document.getElementById('page-dashboard');
+    if (container && dashboardPage?.classList.contains('active') && _dashboardCache) {
+      _paintDashboard(container);
+    }
+    return _dashboardCache;
+  } catch (e) {
+    console.warn('[dashboard] full refresh failed:', e);
+    return null;
+  }
+};
+
+
 window.refreshDashboardAttendance = async function() {
   try {
     const attendance = await API.getAttendance(14);
