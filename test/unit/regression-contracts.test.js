@@ -316,3 +316,17 @@ test('AI confirmation persistence migration enforces session scope, expiry, repl
   assert.ok(!migration.includes('GRANT INSERT ON TABLE public.ai_confirmation_pending'));
   assert.ok(!migration.includes('service_role'));
 });
+
+
+test('teacher role save accepts the full canonical operational role set', () => {
+  const migration = read('supabase/migrations/20261005133000_sync_teacher_role_validation.sql');
+  const settings = read('js/15_settings.js');
+  for (const role of ['teacher','assistant_teacher','senior_teacher','school_coordinator','administrative_assistant','admin','super_admin']) {
+    assert.ok(migration.includes("'" + role + "'"), 'role missing from live-sync validation: ' + role);
+    assert.ok(settings.includes(role), 'role missing from Teacher Manager UI: ' + role);
+  }
+  assert.ok(migration.includes("v_role text:=lower(trim(coalesce(p_role,'teacher'))"), 'role input must be normalized');
+  assert.ok(migration.includes("'invalid_role'"), 'invalid role must still fail closed');
+  assert.ok(migration.includes("'insufficient_role'"), 'admin/super-admin escalation boundary must remain');
+  assert.ok(migration.includes('teacher_email=v_email'), 'teacher email mirror must remain synchronized');
+});
