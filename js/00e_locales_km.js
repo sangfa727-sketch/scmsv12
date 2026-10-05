@@ -1021,6 +1021,7 @@ window.I18N_KM = {
   "tr.delTitle": "🗑 លុបផ្លូវនេះមែនទេ?",
   "tr.delBody": "សិស្សដែលស្ថិតក្នុងផ្លូវនេះនឹងត្រូវដកចេញពីការចាត់ផ្លូវប៉ុណ្ណោះ មិនត្រូវបានលុបចេញពីសាលាទេ។",
   "settings.title": "⚙️ ការកំណត់",
+  "settings.myAccess": "🔐 សិទ្ធិរបស់ខ្ញុំ",
   "settings.version": "កំណែ",
   "settings.platform": "វេទិកា",
   "settings.school": "សាលា",
