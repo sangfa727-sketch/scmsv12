@@ -329,7 +329,10 @@ async function initApp() {
     document.getElementById('btnRefresh').addEventListener('click', async () => {
       showToast(t('toast.refreshing'));
       try {
-        await API.refreshAll();
+        await (window.APP.platform === 'web' && typeof API.refreshAllData === 'function' ? API.refreshAllData() : API.refreshAll());
+        if (window.APP.platform === 'web' && typeof window.refreshDashboardData === 'function') {
+          await window.refreshDashboardData();
+        }
         if (typeof renderSidebar === 'function') renderSidebar();
         if (typeof window.refreshDashboardNotifications === 'function') {
           void window.refreshDashboardNotifications();
