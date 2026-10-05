@@ -356,7 +356,6 @@ test('teacher role validation stays synchronized across create, update and invit
   assert.ok(migration.includes('rpc_admin_create_invite'));
   assert.match(migration, /revoke execute on function public\.rpc_admin_create_invite/i);
   assert.ok(migration.includes('t.role in (\'admin\',\'super_admin\')'));
-  assert.ok(migration.includes("v_admin.teacher_role<>'super_admin' AND v_role IN ('admin','super_admin')"));
-  assert.ok(migration.includes("v_admin.admin_role<>'super_admin' AND v_role IN ('admin','super_admin')"));
+  assert.ok((migration.match(/v_admin\\.(?:admin_role|teacher_role)<>['"]super_admin['"]\\s+AND\\s+v_role\\s+IN\\s*\\(['"]admin['"]\\s*,\\s*['"]super_admin['"]\\)/gi) || []).length >= 3);
   assert.ok(migration.includes("v_admin.admin_role<>'super_admin' AND v_target_role='super_admin'"));
 });
