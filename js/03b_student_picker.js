@@ -23,6 +23,7 @@
 let _pickerState = {
   search:      '',
   classFilter: 'All',
+  classAllowlist: null,
   onPick:      null,
 };
 
@@ -30,12 +31,15 @@ window.openStudentPicker = function(opts = {}) {
   _pickerState = {
     search:      '',
     classFilter: opts.classFilter || 'All',
+    classAllowlist: Array.isArray(opts.classAllowlist) ? [...new Set(opts.classAllowlist.filter(Boolean))] : null,
     onPick:      opts.onPick || (() => {}),
   };
 
-  const classes = ['All', ...[...new Set(
-    window.APP.students.filter(s => s.status === 'Active').map(s => s.class).filter(Boolean)
-  )].sort()];
+  const allowed = Array.isArray(_pickerState.classAllowlist) ? new Set(_pickerState.classAllowlist) : null;
+  const classes = [ ...(allowed ? [] : ['All']), ...[...new Set(
+    window.APP.students.filter(s => s.status === 'Active').map(s => s.class).filter(c => c && (!allowed || allowed.has(c)))
+  )].sort() ];
+  if (allowed && !_pickerState.classFilter) _pickerState.classFilter = classes[0] || 'All';
 
   const html = `
     <div class="modal-sheet picker-sheet" onclick="event.stopPropagation()">
@@ -102,7 +106,8 @@ function _renderPickerList() {
   const el = document.getElementById('pickerList');
   if (!el) return;
 
-  let list = window.APP.students.filter(s => s.status === 'Active');
+  const allowed = Array.isArray(_pickerState.classAllowlist) ? new Set(_pickerState.classAllowlist) : null;
+  let list = window.APP.students.filter(s => s.status === 'Active' && (!allowed || allowed.has(s.class)));
 
   if (_pickerState.classFilter !== 'All') {
     list = list.filter(s => s.class === _pickerState.classFilter);
