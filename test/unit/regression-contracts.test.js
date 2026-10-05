@@ -107,6 +107,26 @@ test('critical page renderers stay wired at boot', () => {
   for (const fn of ['renderDashboard','renderStudents','renderAttendance','renderHomework','renderComms','renderIncidents','renderMore','renderSidebar']) assert.ok(source.includes(fn), 'missing boot renderer: ' + fn);
 });
 
+test('web boot defers bulk list RPC fan-out to the shared loader', () => {
+  const app = read('js/14_app.js');
+  const loader = read('js/02M_data_loader.js');
+  assert.ok(app.includes('list RPC fan-out deferred'), 'web boot must defer list loading');
+  assert.ok(app.includes('SCMSDataLoader.ensurePageData'), 'navigation must use the shared page loader');
+  assert.ok(loader.includes('inflight'), 'loader must track in-flight requests');
+  assert.ok(loader.includes('Promise.all(names.map'), 'loader must dedupe concurrent page resources');
+  assert.ok(loader.includes('loadDashboardData'), 'dashboard must have a dedicated loader');
+  assert.ok(!app.includes('API.getStudents().catch(() => [])'), 'web boot must not preload students');
+});
+
+test('shared loader keeps APP compatibility and supports explicit refresh', () => {
+  const loader = read('js/02M_data_loader.js');
+  for (const token of ['window.APP.students','window.APP.attendance','window.APP.homework','window.APP.incidents','window.APP.timetable']) {
+    assert.ok(loader.includes(token), 'APP compatibility assignment missing: ' + token);
+  }
+  assert.ok(loader.includes('force = false'), 'loader force-refresh contract missing');
+  assert.ok(loader.includes('refreshAllData'), 'public refresh facade missing');
+});
+
 console.log('SCMS regression contract suite loaded.');
 
 test('student RPCs enforce the existing student permission contracts', () => {
