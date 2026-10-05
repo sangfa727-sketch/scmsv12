@@ -1071,6 +1071,7 @@ window.I18N_EN = {
 
   // ── Added: Batch E1: settings, teacher manager, google auth, register, branding leftovers (v11.8) ──
   'settings.title': '⚙️ Settings',
+  'settings.myAccess': 'My Access',
   'settings.version': 'Version',
   'settings.platform': 'Platform',
   'settings.school': 'School',
