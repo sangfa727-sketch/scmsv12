@@ -257,3 +257,11 @@ test('daily reports and incidents authorization is dedicated and class-scoped', 
   assert.ok(migration.includes("private.web_has_permission(p_session_token,'incident.delete'"));
   assert.ok(migration.includes("private.web_has_permission(p_session_token,'daily_report.view'"));
 });
+
+
+test('summary authorization is dedicated and class-scoped', () => {
+  const migration = read('supabase/migrations/20261005240000_summary_permission_hardening.sql');
+  assert.ok(migration.includes('summary.view'));
+  assert.ok(migration.includes('function public.rpc_get_monthly_summary'));
+  assert.ok(migration.includes("private.web_has_permission(p_session_token,'summary.view'"));
+});
