@@ -1021,6 +1021,7 @@ window.I18N_MS = {
   "tr.delTitle": "🗑 Padam laluan ini?",
   "tr.delBody": "Mana-mana murid di dalamnya hanya akan dinyahset, bukan dibuang daripada sekolah.",
   "settings.title": "⚙️ Tetapan",
+  "settings.myAccess": "🔐 Akses Saya",
   "settings.version": "Versi",
   "settings.platform": "Platform",
   "settings.school": "Sekolah",
