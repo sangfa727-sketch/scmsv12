@@ -19,7 +19,6 @@ begin
  select s.school_id into v_sess from public.app_web_sessions s join public.teachers t on t.teacher_id=s.teacher_id and t.school_id=s.school_id
  where s.session_token=p_session_token and s.expires_at>now() and t.status='active' limit 1;
  if v_sess is null then return jsonb_build_object('ok',false,'error','invalid_session'); end if;
- if not private.web_has_permission(p_session_token,'timetable.view',null,null) then return jsonb_build_object('ok',false,'error','permission_denied'); end if;
  select coalesce(jsonb_agg(to_jsonb(x) order by x.day,x.period),'[]'::jsonb) into v_rows
  from (select * from public.timetable where school_id=v_sess.school_id) x;
  return jsonb_build_object('ok',true,'rows',v_rows);
