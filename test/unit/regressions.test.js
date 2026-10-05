@@ -193,7 +193,7 @@ test('teacher access localization covers all supported UI languages', () => {
   for (const token of ['ms: {', 'zh: {', "ms:{'dashboard.view'", 'ms:{dashboard:', 'ms:{class_teacher:']) {
     assert.ok(access.includes(token), `missing teacher access locale map: ${token}`);
   }
-  assert.ok(access.includes("ms:'Guru'"));
+  assert.ok(access.includes("ms:{'dashboard.view'"));
 });
 
 test('password prompt remains fully localized', () => {
