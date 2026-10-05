@@ -48,7 +48,7 @@ const SIDEBAR_PERMISSION = Object.freeze({
 
 function _sidebarCanAccess(pageId) {
   const A = window.APP || {};
-  if (A.is_admin) return true;
+  if (A.platform !== 'web' || A.is_admin) return true;
   const permission = SIDEBAR_PERMISSION[pageId];
   if (!permission) return true; // No permission contract exists for this module yet.
   return Array.isArray(A.permissions) && A.permissions.includes(permission);
