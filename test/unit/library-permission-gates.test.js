@@ -17,10 +17,16 @@ const expected = [
 
 assert.match(sql, /'library\.view'/);
 assert.match(sql, /'library\.manage'/);
+
 for (const [fn, permission] of expected) {
-  assert.match(sql, new RegExp(fn.replace(/[.*+?^$(){}|[\]\\]/g, '\\$&')));
-  assert.match(sql, new RegExp("v_item\\.permission_key.*" + permission.replace('.', '\\.')));
+  const escapedFn = fn.replace(/[.*+?^$(){}|[\]\\]/g, '\\$&');
+  assert.match(sql, new RegExp(escapedFn));
+  assert.match(
+    sql,
+    new RegExp("('" + escapedFn + "\\([^)]*\\)'::regprocedure, '" + permission.replace('.', '\\.') + "')")
+  );
 }
+
 assert.match(sql, /permission_denied/);
 assert.match(sql, /REVOKE ALL ON FUNCTION/);
 assert.match(sql, /GRANT EXECUTE ON FUNCTION/);
