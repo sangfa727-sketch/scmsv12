@@ -150,3 +150,22 @@ test('operational roles, scoped billing, and role-aware settings are explicit', 
   assert.match(picker, /classAllowlist/);
   assert.match(index, /billingFeeItemsBtn/);
 });
+
+
+test('transport authorization is dedicated and class-scoped at the RPC boundary', () => {
+  const migration = read('supabase/migrations/20261005150000_transport_permission_hardening.sql');
+  const api = read('js/02J_api_transport.js');
+  for (const key of ['transport.view','transport.edit','transport.manage']) assert.match(migration, new RegExp(key.replaceAll('.', '\\\\.')));
+  for (const fn of ['rpc_get_routes','rpc_add_route','rpc_update_route','rpc_delete_route','rpc_get_route_detail','rpc_assign_student_transport','rpc_get_student_transport','rpc_remove_student_transport']) {
+    const idx = migration.indexOf('function public.' + fn);
+    assert.ok(idx >= 0, fn + ' missing');
+  }
+  assert.match(migration, /rpc_add_route[\\s\\S]{0,5000}transport\\.manage/);
+  assert.match(migration, /rpc_update_route[\\s\\S]{0,5000}transport\\.manage/);
+  assert.match(migration, /rpc_delete_route[\\s\\S]{0,5000}transport\\.manage/);
+  assert.match(migration, /rpc_assign_student_transport[\\s\\S]{0,6000}transport\\.edit/);
+  assert.match(migration, /rpc_get_student_transport[\\s\\S]{0,5000}transport\\.view/);
+  assert.match(migration, /rpc_remove_student_transport[\\s\\S]{0,5000}transport\\.edit/);
+  assert.match(migration, /private\\.web_has_permission\\(p_session_token,'transport\\.view',nullif\\(trim\\(v_student\\.class\\)/);
+  assert.match(api, /rpc_get_routes|rpc_add_route|rpc_update_route|rpc_delete_route|rpc_get_route_detail/);
+});
