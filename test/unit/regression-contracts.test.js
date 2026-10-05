@@ -74,7 +74,7 @@ test('student ID card flow keeps QR API contract', () => {
 
 test('student ID card QR RPC returns the QR token contract', () => {
   const migration = read('supabase/migrations/20261005250000_student_qr_token_response_fix.sql');
-  assert.ok(migration.includes('v_row.student_id, v_row.name_mm, v_row.name_en, v_row.name_local, v_row.class, v_row.grade, v_row.gender,'), 'QR RPC projection must include the card fields');
+  assert.ok(/v_row\.student_id, v_row\.name_mm, v_row\.name_en, v_row\.name_local, v_row\.class, v_row\.grade, v_row\.gender,\s*date_of_birth/.test(migration), 'QR RPC projection must include the card fields');
   assert.ok(migration.includes('date_of_birth, status, photo_url, house, home_color, qr_token'), 'QR RPC must project qr_token');
   assert.ok(migration.includes("'qr_token', v_row.qr_token"), 'QR RPC response must return qr_token');
   assert.ok(migration.includes('rpc_regenerate_student_qr'), 'regenerate QR RPC must remain covered');
