@@ -118,6 +118,7 @@ declare
   v_classes jsonb;
   v_assigned_classes jsonb;
   v_assigned_subjects jsonb;
+  v_billing_classes jsonb;
   v_permissions jsonb;
 begin
   select s.teacher_id,s.school_id,s.role,
@@ -166,6 +167,20 @@ begin
    where a.school_id=v_sess.school_id
      and a.teacher_id=v_sess.teacher_id
      and a.is_active=true;
+
+  select coalesce(jsonb_agg(x.class_name order by x.class_name),'[]'::jsonb)
+    into v_billing_classes
+    from (
+      select distinct trim(s.class) as class_name
+        from public.students s
+       where s.school_id=v_sess.school_id
+         and s.status='Active'
+         and nullif(trim(s.class),'') is not null
+         and (
+           v_sess.role in ('admin','super_admin')
+           or private.web_has_permission(p_session_token,'billing.view',trim(s.class),null)
+         )
+    ) x;
 
   select coalesce(jsonb_agg(p.permission_key order by p.display_order,p.permission_key),'[]'::jsonb)
     into v_permissions
@@ -247,6 +262,7 @@ begin
     'classes',v_classes,
     'assigned_classes',v_assigned_classes,
     'assigned_subjects',v_assigned_subjects,
+    'billing_classes',v_billing_classes,
     'permissions',v_permissions,
     'is_admin',v_sess.role in ('admin','super_admin'),
     'ui_prefs',coalesce(v_sess.ui_prefs,'{}'::jsonb)
