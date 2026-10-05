@@ -41,7 +41,7 @@ BEGIN
      AND school_id = v_sess.school_id
      AND status = 'Active'
    RETURNING student_id, name_mm, name_en, name_local, class, grade, gender,
-             date_of_birth, status, photo_url, house, home_color, qr_token
+             date_of_birth, status, photo_url, house, home_color
         INTO v_row;
 
   IF v_row IS NULL THEN
@@ -62,8 +62,7 @@ BEGIN
       'status', v_row.status,
       'photo_url', v_row.photo_url,
       'house', v_row.house,
-      'home_color', v_row.home_color,
-      'qr_token', v_row.qr_token
+      'home_color', v_row.home_color
     )
   );
 END;
