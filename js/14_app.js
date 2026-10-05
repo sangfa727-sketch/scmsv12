@@ -265,30 +265,11 @@ async function initApp() {
 
     window.APP.ready = true;
 
-    // ── Step 4b: Web-session — load students/lists from Supabase ─────────
-    // The web bootstrap RPC returns school+teacher only; lists come direct.
+    // ── Step 4b: Web-session lists are now lazy-loaded ─────────────────────
+    // Keep boot limited to identity/config. Dashboard and page navigation
+    // request only the data they actually need through SCMSDataLoader.
     if (bootstrapData.auth_mode === 'web') {
-      try {
-        const [students, attendance, daily, homework, comms, incidents, tt] = await Promise.all([
-          API.getStudents().catch(() => []),
-          API.getAttendance(30).catch(() => []),
-          API.getDailyReports(7).catch(() => []),
-          API.getHomework(30).catch(() => []),
-          API.getParentComms(30).catch(() => []),
-          API.getIncidents(30).catch(() => []),
-          API.getTimetable().catch(() => []),
-        ]);
-        window.APP.students     = students || [];
-        window.APP.attendance   = attendance || [];
-        window.APP.dailyReports = daily || [];
-        window.APP.homework     = homework || [];
-        window.APP.parentComms  = comms || [];
-        window.APP.incidents    = incidents || [];
-        window.APP.timetable    = tt || [];
-        console.log('[boot] web-mode lists loaded:', window.APP.students.length, 'students');
-      } catch (e) {
-        console.warn('[boot] partial list load failed:', e);
-      }
+      console.log('[boot] web-mode: list RPC fan-out deferred to page/dashboard loaders');
     }
 
     // ── Step 5: Init Supabase client ─────────────────────────────────────
@@ -315,19 +296,25 @@ async function initApp() {
     // ── Step 8: Render modules ───────────────────────────────────────────
     setStatus(t('boot.building'), '');
 
-    if (typeof renderDashboard  === 'function') renderDashboard();
-    if (typeof renderStudents   === 'function') renderStudents();
-    if (typeof renderAttendance === 'function') renderAttendance();
-    if (typeof renderDaily      === 'function') renderDaily();
-    if (typeof renderHomework   === 'function') renderHomework();
-    if (typeof renderComms      === 'function') renderComms();
-    if (typeof renderIncidents  === 'function') renderIncidents();
-    if (typeof renderTimetable  === 'function') renderTimetable();
-    if (typeof renderSummary    === 'function') renderSummary();
-    if (typeof renderGrades     === 'function') renderGrades();
-    if (typeof renderBilling    === 'function') renderBilling();
-    if (typeof renderAdmissions === 'function') renderAdmissions();
-    if (typeof renderMore       === 'function') renderMore();
+    if (window.APP.platform === 'web') {
+      // Web boot renders only the landing dashboard. Other data-heavy pages
+      // are rendered after their page-specific loader completes.
+      if (typeof renderDashboard === 'function') void renderDashboard();
+    } else {
+      if (typeof renderDashboard  === 'function') renderDashboard();
+      if (typeof renderStudents   === 'function') renderStudents();
+      if (typeof renderAttendance === 'function') renderAttendance();
+      if (typeof renderDaily      === 'function') renderDaily();
+      if (typeof renderHomework   === 'function') renderHomework();
+      if (typeof renderComms      === 'function') renderComms();
+      if (typeof renderIncidents  === 'function') renderIncidents();
+      if (typeof renderTimetable  === 'function') renderTimetable();
+      if (typeof renderSummary    === 'function') renderSummary();
+      if (typeof renderGrades     === 'function') renderGrades();
+      if (typeof renderBilling    === 'function') renderBilling();
+      if (typeof renderAdmissions === 'function') renderAdmissions();
+      if (typeof renderMore       === 'function') renderMore();
+    }
     if (typeof renderSidebar    === 'function') renderSidebar();
     if (typeof _applyLogoToHeader === 'function') _applyLogoToHeader();
     // Chat is rendered lazily when user opens it
@@ -500,19 +487,42 @@ window.goToPage = function(pageId) {
 
     if (typeof _updateFabForPage === 'function') _updateFabForPage(pageId);
 
-    // Lazy renders / per-page hooks
-  if (pageId === 'chat') {
-    if (typeof renderChat === 'function') renderChat();
-    if (typeof startChatPolling === 'function') startChatPolling();
-  }
-  if (pageId === 'more' && typeof renderMore === 'function') renderMore();
-  if (pageId === 'billing' && typeof renderBilling === 'function') renderBilling();
-  if (pageId === 'admissions' && typeof renderAdmissions === 'function') renderAdmissions();
-  if (pageId === 'library' && typeof renderLibrary === 'function') renderLibrary();
-  if (pageId === 'transport' && typeof renderTransport === 'function') renderTransport();
-  if (pageId === 'grades' && typeof renderGrades === 'function') renderGrades();
-  if (pageId === 'dashboard' && typeof renderDashboard === 'function') renderDashboard();
-  if (pageId === 'leave' && typeof renderLeaveRequests === 'function') renderLeaveRequests();
+    // Lazy renders / per-page hooks. Data-heavy web pages wait for their
+  // page-specific loader; concurrent callers share the same in-flight Promise.
+  const renderPage = () => {
+    if (pageId === 'chat') {
+      if (typeof renderChat === 'function') renderChat();
+      if (typeof startChatPolling === 'function') startChatPolling();
+      return;
+    }
+    if (pageId === 'more' && typeof renderMore === 'function') return renderMore();
+    if (pageId === 'billing' && typeof renderBilling === 'function') return renderBilling();
+    if (pageId === 'admissions' && typeof renderAdmissions === 'function') return renderAdmissions();
+    if (pageId === 'library' && typeof renderLibrary === 'function') return renderLibrary();
+    if (pageId === 'transport' && typeof renderTransport === 'function') return renderTransport();
+    if (pageId === 'grades' && typeof renderGrades === 'function') return renderGrades();
+    if (pageId === 'dashboard' && typeof renderDashboard === 'function') return renderDashboard();
+    if (pageId === 'leave' && typeof renderLeaveRequests === 'function') return renderLeaveRequests();
+    if (pageId === 'students' && typeof renderStudents === 'function') return renderStudents();
+    if (pageId === 'attend' && typeof renderAttendance === 'function') return renderAttendance();
+    if (pageId === 'daily' && typeof renderDaily === 'function') return renderDaily();
+    if (pageId === 'hw' && typeof renderHomework === 'function') return renderHomework();
+    if (pageId === 'parents' && typeof renderComms === 'function') return renderComms();
+    if (pageId === 'incidents' && typeof renderIncidents === 'function') return renderIncidents();
+    if (pageId === 'timetable' && typeof renderTimetable === 'function') return renderTimetable();
+    if (pageId === 'summary' && typeof renderSummary === 'function') return renderSummary();
+  };
+  const loadAndRender = async () => {
+    try {
+      if (window.APP.platform === 'web' && window.SCMSDataLoader) {
+        await window.SCMSDataLoader.ensurePageData(pageId);
+      }
+      await renderPage();
+    } catch (e) {
+      console.warn('[navigation] page load failed:', e);
+    }
+  };
+  void loadAndRender();
 
   // Dashboard → detail handoff: show the selected item after the destination
   // page has been activated/rendered. A couple of frame retries cover pages
