@@ -342,3 +342,20 @@ test('teacher creation accepts the full canonical role set and preserves escalat
   assert.ok(migration.includes('v_role,v_email'), 'normalized role must be persisted');
   assert.ok(migration.includes('revoke execute on function public.rpc_admin_create_teacher_v2'), 'create RPC execute boundary must be explicit');
 });
+
+
+test('teacher role validation stays synchronized across create, update and invite flows', () => {
+  const migration = read('supabase/migrations/20261005152000_sync_teacher_role_validation_all_flows.sql');
+  const roles = ['teacher','assistant_teacher','senior_teacher','school_coordinator','administrative_assistant','admin','super_admin'];
+  for (const role of roles) assert.ok(migration.includes("'" + role + "'"), 'role missing from unified validation: ' + role);
+  assert.ok((migration.match(/v_role text:=lower\(trim\(coalesce\(p_role,'teacher'\)\)\)/g) || []).length >= 3);
+  assert.equal((migration.match(/'invalid_role'/g) || []).length, 3);
+  assert.ok((migration.match(/'insufficient_role'/g) || []).length >= 3, 'each active flow must retain an escalation guard');
+  assert.ok(migration.includes('rpc_admin_create_teacher_v2'));
+  assert.ok(migration.includes('rpc_admin_update_teacher_profile'));
+  assert.ok(migration.includes('rpc_admin_create_invite'));
+  assert.match(migration, /revoke execute on function public\.rpc_admin_create_invite/i);
+  assert.ok(migration.includes('t.role in (\'admin\',\'super_admin\')'));
+  assert.ok((migration.match(/v_admin\.(?:admin_role|teacher_role)<>['"]super_admin['"]\s+AND\s+v_role\s+IN\s*\(['"]admin['"]\s*,\s*['"]super_admin['"]\)/gi) || []).length >= 3);
+  assert.ok(migration.includes("v_admin.admin_role<>'super_admin' AND v_target_role='super_admin'"));
+});
