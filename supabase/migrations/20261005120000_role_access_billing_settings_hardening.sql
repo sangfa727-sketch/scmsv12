@@ -65,6 +65,8 @@ where role = 'administrative_assistant'
 insert into public.permission_definitions
 (permission_key, category, description, scope_type, is_sensitive, display_order)
 values
+('billing.class.view','billing','View billing for assigned or explicitly scoped classes','class',true,70),
+('billing.class.write','billing','Create and modify billing for assigned or explicitly scoped classes','class',true,71),
 ('billing.fees.manage','billing','Manage the school-wide fee catalog','global',true,72)
 on conflict (permission_key) do update set
   category=excluded.category,
@@ -75,20 +77,10 @@ on conflict (permission_key) do update set
   is_active=true;
 
 update public.permission_definitions
-set scope_type='class',
-    description='View billing information for an authorized class',
-    is_sensitive=true,
-    display_order=70,
-    is_active=true
-where permission_key='billing.view';
-
-update public.permission_definitions
-set scope_type='class',
-    description='Create and modify billing records for an authorized class',
-    is_sensitive=true,
-    display_order=71,
-    is_active=true
-where permission_key='billing.write';
+set scope_type='global', description='View billing information for the whole school', is_sensitive=true, display_order=68, is_active=true where permission_key='billing.view';
+update public.permission_definitions set scope_type='global', description='Create and modify billing records for the whole school', is_sensitive=true, display_order=69, is_active=true where permission_key='billing.write';
+update public.permission_definitions set scope_type='class', description='View billing for assigned or explicitly scoped classes', is_sensitive=true, display_order=70, is_active=true where permission_key='billing.class.view';
+update public.permission_definitions set scope_type='class', description='Create and modify billing for assigned or explicitly scoped classes', is_sensitive=true, display_order=71, is_active=true where permission_key='billing.class.write';
 
 insert into public.role_permissions(role, permission_key, allowed)
 select r.role, p.permission_key, true
@@ -101,7 +93,7 @@ on conflict (role, permission_key) do update set allowed=true;
 update public.role_permissions
 set allowed=true
 where role in ('teacher','assistant_teacher','senior_teacher','school_coordinator','administrative_assistant')
-  and permission_key in ('billing.view','billing.write');
+  and permission_key in ('billing.class.view','billing.class.write');
 
 -- 3) Rebuild web bootstrap effective permission calculation so scoped permissions
 -- only appear in frontend navigation when the user actually has at least one
@@ -178,7 +170,7 @@ begin
          and nullif(trim(s.class),'') is not null
          and (
            v_sess.role in ('admin','super_admin')
-           or private.web_has_permission(p_session_token,'billing.view',trim(s.class),null)
+           or private.web_has_permission(p_session_token,'billing.class.view',trim(s.class),null)
          )
     ) x;
 
@@ -309,7 +301,7 @@ begin
         where s.school_id=v_sess.v_school_id
           and s.status='Active'
           and nullif(trim(s.class),'') is not null
-          and private.web_has_permission(p_session_token,'billing.view',trim(s.class),null)
+          and private.web_has_permission(p_session_token,'billing.class.view',trim(s.class),null)
      ) then
     return jsonb_build_object('ok',false,'error','permission_denied');
   end if;
@@ -348,7 +340,7 @@ begin
            and (p_status is null or i.status=p_status or
                 (p_status='Overdue' and i.status in ('Unpaid','Partial') and i.due_date<current_date))
            and (v_sess.v_role in ('admin','super_admin')
-                or private.web_has_permission(p_session_token,'billing.view',nullif(trim(s.class),'')::text,null))
+                or (private.web_has_permission(p_session_token,'billing.view',null,null) or private.web_has_permission(p_session_token,'billing.class.view',nullif(trim(s.class),'')::text,null)))
       ) x
   ),'[]'::jsonb));
 end
@@ -370,7 +362,7 @@ begin
 
   if v_invoice.id is null then return jsonb_build_object('ok',false,'error','not_found'); end if;
   if v_sess.v_role not in ('admin','super_admin')
-     and not private.web_has_permission(p_session_token,'billing.view',nullif(trim(v_invoice.class),'')::text,null)
+     and not (private.web_has_permission(p_session_token,'billing.view',null,null) or private.web_has_permission(p_session_token,'billing.class.view',nullif(trim(v_invoice.class),'')::text,null))
   then return jsonb_build_object('ok',false,'error','permission_denied'); end if;
 
   return jsonb_build_object(
@@ -481,7 +473,7 @@ begin
   select s.* into v_student from public.students s where s.student_id=p_student_id and s.school_id=v_sess.v_school_id limit 1;
   if v_student is null then return jsonb_build_object('ok',false,'error','student_not_found'); end if;
   if v_sess.v_role not in ('admin','super_admin')
-     and not private.web_has_permission(p_session_token,'billing.write',nullif(trim(v_student.class),'')::text,null)
+     and not (private.web_has_permission(p_session_token,'billing.write',null,null) or private.web_has_permission(p_session_token,'billing.class.write',nullif(trim(v_student.class),'')::text,null))
   then return jsonb_build_object('ok',false,'error','permission_denied'); end if;
   if p_term_id is not null and not exists(select 1 from public.terms t where t.id=p_term_id and t.school_id=v_sess.v_school_id) then return jsonb_build_object('ok',false,'error','term_not_found'); end if;
   if p_items is null or jsonb_typeof(p_items)<>'array' or jsonb_array_length(p_items)=0 then return jsonb_build_object('ok',false,'error','no_items','message','Add at least one line item'); end if;
@@ -521,7 +513,7 @@ begin
    where i.id=p_invoice_id and i.school_id=v_sess.v_school_id for update;
   if v_invoice.id is null then return jsonb_build_object('ok',false,'error','not_found'); end if;
   if v_sess.v_role not in ('admin','super_admin')
-     and not private.web_has_permission(p_session_token,'billing.write',nullif(trim(v_invoice.student_class),'')::text,null)
+     and not (private.web_has_permission(p_session_token,'billing.write',null,null) or private.web_has_permission(p_session_token,'billing.class.write',nullif(trim(v_invoice.student_class),'')::text,null))
   then return jsonb_build_object('ok',false,'error','permission_denied'); end if;
   if p_amount is null or p_amount<=0 then return jsonb_build_object('ok',false,'error','invalid_amount'); end if;
   if p_method is null or trim(p_method)='' then return jsonb_build_object('ok',false,'error','payment_method_required'); end if;
