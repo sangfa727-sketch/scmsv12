@@ -46,7 +46,7 @@ begin
   v_def := replace(
     v_def,
     v_marker,
-    v_marker || E'\\n' || v_gate
+    v_marker || E'\n' || v_gate
   );
 
   execute v_def;
