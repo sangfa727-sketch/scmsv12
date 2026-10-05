@@ -390,7 +390,7 @@ begin
     'total_collected',coalesce((select sum(i.paid_amount) from public.invoices i join public.students s on s.student_id=i.student_id and s.school_id=i.school_id
       where i.school_id=v_sess.v_school_id and i.status<>'Cancelled'
         and (p_class is null or s.class=p_class) and (p_term_id is null or i.term_id=p_term_id)
-        and (v_sess.v_role in ('admin','super_admin') or private.web_has_permission(p_session_token,'billing.view',nullif(trim(s.class),'')::text,null))),0),
+        and (v_sess.v_role in ('admin','super_admin') or (private.web_has_permission(p_session_token,'billing.view',null,null) or private.web_has_permission(p_session_token,'billing.class.view',nullif(trim(s.class),'')::text,null)))),0),
     'outstanding',coalesce((select sum(i.total_amount-i.paid_amount) from public.invoices i join public.students s on s.student_id=i.student_id and s.school_id=i.school_id
       where i.school_id=v_sess.v_school_id and i.status<>'Cancelled'
         and (p_class is null or s.class=p_class) and (p_term_id is null or i.term_id=p_term_id)
@@ -565,7 +565,7 @@ begin
    where i.id=p_id and i.school_id=v_sess.v_school_id for update;
   if v_invoice.id is null then return jsonb_build_object('ok',false,'error','not_found'); end if;
   if v_sess.v_role not in ('admin','super_admin')
-     and not private.web_has_permission(p_session_token,'billing.write',nullif(trim(v_invoice.student_class),'')::text,null)
+     and not (private.web_has_permission(p_session_token,'billing.write',null,null) or private.web_has_permission(p_session_token,'billing.class.write',nullif(trim(v_invoice.student_class),'')::text,null))
   then return jsonb_build_object('ok',false,'error','permission_denied'); end if;
   if exists(select 1 from public.payments where invoice_id=p_id) or coalesce(v_invoice.paid_amount,0)>0 then
     return jsonb_build_object('ok',false,'error','invoice_has_payments','message','Invoices with payment history cannot be deleted.');
