@@ -91,3 +91,17 @@ begin
  delete from public.incidents where id=p_id and school_id=v_sess.school_id;
  return jsonb_build_object('ok',true);
 end;$f$;
+
+-- Explicit RPC execution boundary. Keep these privileged functions callable only
+-- through the session-token contract exposed to the web client.
+revoke execute on function public.rpc_get_daily_reports(text,integer) from public,anon,authenticated;
+revoke execute on function public.rpc_get_incidents(text,integer) from public,anon,authenticated;
+revoke execute on function public.rpc_save_incident(text,text,text,text,text,text,text,text,boolean,date) from public,anon,authenticated;
+revoke execute on function public.rpc_update_incident(text,bigint,text,text,text,text,boolean) from public,anon,authenticated;
+revoke execute on function public.rpc_delete_incident(text,bigint) from public,anon,authenticated;
+
+grant execute on function public.rpc_get_daily_reports(text,integer) to anon,authenticated;
+grant execute on function public.rpc_get_incidents(text,integer) to anon,authenticated;
+grant execute on function public.rpc_save_incident(text,text,text,text,text,text,text,text,boolean,date) to anon,authenticated;
+grant execute on function public.rpc_update_incident(text,bigint,text,text,text,text,boolean) to anon,authenticated;
+grant execute on function public.rpc_delete_incident(text,bigint) to anon,authenticated;
