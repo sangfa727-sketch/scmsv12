@@ -304,8 +304,12 @@ begin
   if v_sess.v_school_id is null then return jsonb_build_object('ok',false,'error','invalid_session'); end if;
   if v_sess.v_role not in ('admin','super_admin')
      and not exists (
-       select 1 from public.permission_definitions p
-        where p.permission_key='billing.view' and p.is_active=true
+       select 1
+         from public.students s
+        where s.school_id=v_sess.v_school_id
+          and s.status='Active'
+          and nullif(trim(s.class),'') is not null
+          and private.web_has_permission(p_session_token,'billing.view',trim(s.class),null)
      ) then
     return jsonb_build_object('ok',false,'error','permission_denied');
   end if;
@@ -648,7 +652,7 @@ begin
   if char_length(v_name)<1 or char_length(v_name)>120 then return jsonb_build_object('ok',false,'error','invalid_teacher_name'); end if;
   if char_length(v_login)<3 or char_length(v_login)>64 or v_login !~ '^[A-Za-z0-9][A-Za-z0-9._-]*$' then return jsonb_build_object('ok',false,'error','invalid_login_name'); end if;
   if exists(select 1 from public.teachers where lower(login_name)=lower(v_login) and teacher_id<>p_teacher_id) then return jsonb_build_object('ok',false,'error','duplicate_login_name'); end if;
-  update public.teachers set teacher_name=v_name,login_name=v_login,email=nullif(trim(coalesce(p_email,''),''),''),teacher_email=nullif(trim(coalesce(p_email,''),''),''),role=v_role,updated_at=now()
+  update public.teachers set teacher_name=v_name,login_name=v_login,email=nullif(trim(coalesce(p_email,'')),''),teacher_email=nullif(trim(coalesce(p_email,''),''),''),role=v_role,updated_at=now()
    where teacher_id=p_teacher_id and school_id=v_admin.school_id
    returning teacher_id,login_name,teacher_name,role,email,teacher_email,photo_url,status into v_teacher;
   if not found then return jsonb_build_object('ok',false,'error','teacher_not_found'); end if;
