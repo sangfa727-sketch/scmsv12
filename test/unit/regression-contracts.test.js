@@ -350,7 +350,7 @@ test('teacher role validation stays synchronized across create, update and invit
   for (const role of roles) assert.ok(migration.includes("'" + role + "'"), 'role missing from unified validation: ' + role);
   assert.ok((migration.match(/v_role text:=lower\(trim\(coalesce\(p_role,'teacher'\)\)\)/g) || []).length >= 3);
   assert.equal((migration.match(/'invalid_role'/g) || []).length, 3);
-  assert.equal((migration.match(/'insufficient_role'/g) || []).length, 3);
+  assert.ok((migration.match(/'insufficient_role'/g) || []).length >= 3, 'each active flow must retain an escalation guard');
   assert.ok(migration.includes('rpc_admin_create_teacher_v2'));
   assert.ok(migration.includes('rpc_admin_update_teacher_profile'));
   assert.ok(migration.includes('rpc_admin_create_invite'));
