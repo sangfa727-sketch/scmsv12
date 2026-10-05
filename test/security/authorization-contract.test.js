@@ -203,3 +203,20 @@ test('school asset uploads use the server-authorized upload function', () => {
   assert.ok(api.includes('FormData'));
   assert.equal(api.includes('storage/v1/object/school-assets/'), false);
 });
+
+
+test('health authorization is dedicated and class-scoped at the RPC boundary', () => {
+  const migration = read('supabase/migrations/20261005190000_health_permission_hardening.sql');
+  const api = read('js/02K_api_health.js');
+  assert.ok(migration.includes('health.view'));
+  assert.ok(migration.includes('health.edit'));
+  for (const fn of ['rpc_get_health_profile','rpc_upsert_health_profile','rpc_add_vaccination','rpc_delete_vaccination','rpc_add_health_visit','rpc_delete_health_visit']) {
+    assert.ok(migration.includes('function public.' + fn));
+  }
+  assert.ok(migration.includes("private.web_has_permission(p_session_token,'health.view',nullif(trim(v_student.class),''),null)"));
+  assert.ok(migration.includes("private.web_has_permission(p_session_token,'health.edit',nullif(trim(v_student.class),''),null)"));
+  assert.ok(migration.includes("private.web_has_permission(p_session_token,'health.edit',nullif(trim((select s.class"));
+  for (const fn of ['getHealthProfile','upsertHealthProfile','addVaccination','deleteVaccination','addHealthVisit','deleteHealthVisit']) {
+    assert.ok(api.includes(fn));
+  }
+});
