@@ -47,6 +47,7 @@ begin
  if v_sess is null then return jsonb_build_object('ok',false,'error','invalid_session'); end if;
  select coalesce(jsonb_agg(to_jsonb(x) order by x.date desc),'[]'::jsonb) into v_rows from (
    select * from public.parent_comms where school_id=v_sess.school_id and date>=current_date-(least(greatest(coalesce(p_days_back,30),0),365)||' days')::interval
+     and private.web_has_permission(p_session_token,'communication.view',nullif(trim(class),''),null)
  ) x;
  return jsonb_build_object('ok',true,'rows',v_rows);
 end;$f$;
