@@ -9,24 +9,17 @@ declare
   end if;
 $marker$;
   v_gate text := $gate$
-  -- Explicit authorization contract. Do not infer permissions from table names.
+  -- Only the global students permission can safely authorize this scope-less RPC.
   if p_table = 'students'
      and not private.web_has_permission(p_session_token, 'students.view') then
     return jsonb_build_object('ok', false, 'error', 'permission_denied');
   end if;
 
-  if p_table = 'attendance'
-     and not private.web_has_permission(p_session_token, 'attendance.view') then
-    return jsonb_build_object('ok', false, 'error', 'permission_denied');
-  end if;
-
-  if p_table = 'homework_log'
-     and not private.web_has_permission(p_session_token, 'homework.view') then
-    return jsonb_build_object('ok', false, 'error', 'permission_denied');
-  end if;
-
+  -- Scoped permissions cannot safely authorize this school-wide legacy RPC
+  -- because it has no class/subject scope arguments. Fail closed.
   if p_table in (
-    'daily_reports','incidents','parent_comms','timetable','subjects','terms'
+    'attendance','homework_log','daily_reports','incidents',
+    'parent_comms','timetable','subjects','terms'
   ) then
     return jsonb_build_object('ok', false, 'error', 'permission_denied');
   end if;
