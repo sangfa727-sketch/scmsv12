@@ -176,6 +176,7 @@ begin
          and nullif(trim(s.class),'') is not null
          and (
            v_sess.role in ('admin','super_admin')
+           or private.web_has_permission(p_session_token,'billing.view',null,null)
            or private.web_has_permission(p_session_token,'billing.class.view',trim(s.class),null)
          )
     ) x;
