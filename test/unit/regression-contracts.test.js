@@ -72,6 +72,14 @@ test('student ID card flow keeps QR API contract', () => {
   for (const token of ['showStudentIdCard','getOrCreateStudentQr','idCard.failed','qr_token']) assert.ok(source.includes(token), 'missing ID-card contract: ' + token);
 });
 
+test('student ID card QR RPC returns the QR token contract', () => {
+  const migration = read('supabase/migrations/20261005250000_student_qr_token_response_fix.sql');
+  assert.ok(migration.includes('RETURNING student_id, name_mm, name_en, name_local, class, grade, gender,'), 'QR RPC projection must include the card fields');
+  assert.ok(migration.includes('date_of_birth, status, photo_url, house, home_color, qr_token'), 'QR RPC must project qr_token');
+  assert.ok(migration.includes("'qr_token', v_row.qr_token"), 'QR RPC response must return qr_token');
+  assert.ok(migration.includes('rpc_regenerate_student_qr'), 'regenerate QR RPC must remain covered');
+});
+
 test('student ID card labels remain localized', () => {
   const source = read('js/04_students.js');
   const locale = read('js/00a_locales_en.js');
