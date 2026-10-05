@@ -124,3 +124,29 @@ test('teacher web login accepts Teacher ID/Login Name with PIN and page navigati
   assert.match(app, /A\.platform !== 'web'/);
   assert.match(sidebar, /\.filter\(it => _sidebarCanAccess\(it\.id\)\)/);
 });
+
+
+test('operational roles, scoped billing, and role-aware settings are explicit', () => {
+  const settings = read('js/15_settings.js');
+  const billing = read('js/21_billing.js');
+  const picker = read('js/03b_student_picker.js');
+  const index = read('index.html');
+  const migration = read('supabase/migrations/20261005120000_role_access_billing_settings_hardening.sql');
+
+  for (const role of ['assistant_teacher','senior_teacher','school_coordinator','administrative_assistant']) {
+    assert.match(settings, new RegExp(role));
+    assert.match(migration, new RegExp(role));
+  }
+  assert.match(settings, /settings\.myAccess/);
+  assert.match(settings, /openMyAccessSettings/);
+  assert.match(settings, /SCMS_OPERATIONAL_ROLES/);
+  assert.match(migration, /billing\.fees\.manage/);
+  assert.match(migration, /scope_type='class'/);
+  assert.match(migration, /private\.web_has_permission\(p_session_token,'billing\.write'/);
+  assert.match(billing, /_billingAllowedClasses/);
+  assert.match(billing, /_billingCanWrite/);
+  assert.match(billing, /_billingCanManageFees/);
+  assert.match(billing, /classAllowlist/);
+  assert.match(picker, /classAllowlist/);
+  assert.match(index, /billingFeeItemsBtn/);
+});
