@@ -32,7 +32,9 @@ DECLARE
   v_item record;
   v_def text;
   v_marker text := E'  IF v_sess IS NULL THEN\n    RETURN jsonb_build_object(''ok'', false, ''error'', ''invalid_session'');\n  END IF;\n';
+  v_marker_compact text := E' IF v_sess IS NULL THEN RETURN jsonb_build_object(''ok'',false,''error'',''invalid_session''); END IF; ';
   v_gate text;
+  v_rewritten text;
 BEGIN
   FOR v_item IN
     SELECT *
@@ -55,8 +57,14 @@ BEGIN
     v_gate := E'  IF NOT private.web_has_permission(p_session_token, ''' ||
       v_item.permission_key || E''') THEN\n    RETURN jsonb_build_object(''ok'', false, ''error'', ''permission_denied'');\n  END IF;\n';
 
-    v_def := replace(v_def, v_marker, v_marker || E'\n' || v_gate);
-    EXECUTE v_def;
+    v_rewritten := replace(v_def, v_marker, v_marker || E'\n' || v_gate);
+    IF v_rewritten = v_def THEN
+      v_rewritten := replace(v_def, v_marker_compact, v_marker_compact || E'\n' || v_gate);
+    END IF;
+    IF v_rewritten = v_def THEN
+      RAISE EXCEPTION 'Library permission migration refused: session marker missing for %', v_item.fn;
+    END IF;
+    EXECUTE v_rewritten;
   END LOOP;
 END $$;
 
