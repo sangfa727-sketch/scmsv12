@@ -120,5 +120,7 @@ test('teacher web login accepts Teacher ID/Login Name with PIN and page navigati
   assert.match(app, /function _pageAccessAllowed/);
   assert.match(app, /if \(!_pageAccessAllowed\(pageId\)\)/);
   assert.match(sidebar, /function _sidebarCanAccess/);
+  assert.match(sidebar, /A\.platform !== 'web'/);
+  assert.match(app, /A\.platform !== 'web'/);
   assert.match(sidebar, /\.filter\(it => _sidebarCanAccess\(it\.id\)\)/);
 });
