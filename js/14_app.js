@@ -444,6 +444,7 @@ function _pageAccessAllowed(pageId) {
   if (A.platform !== 'web' || A.is_admin) return true;
   const permission = PAGE_PERMISSION[pageId];
   if (!permission) return true;
+  if (pageId === 'billing') return Array.isArray(A.permissions) && (A.permissions.includes('billing.view') || A.permissions.includes('billing.class.view'));
   return Array.isArray(A.permissions) && A.permissions.includes(permission);
 }
 
