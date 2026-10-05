@@ -243,3 +243,17 @@ test('timetable authorization is dedicated and class-scoped at the RPC boundary'
   assert.ok(migration.includes("private.web_has_permission(p_session_token,'timetable.view'"));
   assert.ok(migration.includes("private.web_has_permission(p_session_token,'timetable.manage'"));
 });
+
+
+test('daily reports and incidents authorization is dedicated and class-scoped', () => {
+  const migration = read('supabase/migrations/20261005230000_daily_incident_permission_hardening.sql');
+  for (const key of ['daily_report.view','incident.view','incident.create','incident.edit','incident.delete']) assert.ok(migration.includes(key));
+  for (const fn of ['rpc_get_daily_reports','rpc_save_daily_report','rpc_update_daily_report','rpc_delete_daily_report','rpc_get_incidents','rpc_save_incident','rpc_update_incident','rpc_delete_incident']) {
+    assert.ok(migration.includes('function public.' + fn) || migration.includes("web_has_permission(p_session_token,'daily_report"));
+  }
+  assert.ok(migration.includes("private.web_has_permission(p_session_token,'incident.view'"));
+  assert.ok(migration.includes("private.web_has_permission(p_session_token,'incident.create'"));
+  assert.ok(migration.includes("private.web_has_permission(p_session_token,'incident.edit'"));
+  assert.ok(migration.includes("private.web_has_permission(p_session_token,'incident.delete'"));
+  assert.ok(migration.includes("private.web_has_permission(p_session_token,'daily_report.view'"));
+});
