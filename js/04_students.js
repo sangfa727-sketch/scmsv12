@@ -427,7 +427,7 @@ window.showStudentHistory = async function(studentId) {
     + "<div class=\"modal-handle\"></div>"
     + "<h3 class=\"modal-title\">" + t("students.history.title") + "</h3>"
     + "<div id=\"studentHistoryBody\">" + skeletonCards(2) + "</div>"
-    + "<button class=\"btn-secondary mt16\" data-id=\"" + esc(studentId) + "\" onclick=\"openStudentDetail(this.dataset.id)\">${t('common.back')}</button>"
+    + "<button class=\"btn-secondary mt16\" data-id=\"" + esc(studentId) + "\" onclick=\"openStudentDetail(this.dataset.id)\">" + t('common.back') + "</button>"
     + "</div>"
   );
   const el = document.getElementById("studentHistoryBody");
