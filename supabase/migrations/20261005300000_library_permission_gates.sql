@@ -1,5 +1,5 @@
 -- Library permission contract: view/manage gates without changing existing RPC bodies.
--- Preserves the live function signatures, return shapes, school isolation, and business logic.
+-- Preserves live function signatures, return shapes, school isolation, and business logic.
 
 BEGIN;
 
@@ -31,7 +31,7 @@ DO $$
 DECLARE
   v_item record;
   v_def text;
-  v_marker text := E'  IF v_sess IS NULL THEN\\n    RETURN jsonb_build_object(''ok'', false, ''error'', ''invalid_session'');\\n  END IF;\\n';
+  v_marker text := E'  IF v_sess IS NULL THEN\n    RETURN jsonb_build_object(''ok'', false, ''error'', ''invalid_session'');\n  END IF;\n';
   v_gate text;
 BEGIN
   FOR v_item IN
@@ -57,9 +57,9 @@ BEGIN
     END IF;
 
     v_gate := E'  IF NOT private.web_has_permission(p_session_token, ''' ||
-      v_item.permission_key || E''') THEN\\n    RETURN jsonb_build_object(''ok'', false, ''error'', ''permission_denied'');\\n  END IF;\\n';
+      v_item.permission_key || E''') THEN\n    RETURN jsonb_build_object(''ok'', false, ''error'', ''permission_denied'');\n  END IF;\n';
 
-    v_def := replace(v_def, v_marker, v_marker || E'\\n' || v_gate);
+    v_def := replace(v_def, v_marker, v_marker || E'\n' || v_gate);
     EXECUTE v_def;
   END LOOP;
 END $$;
