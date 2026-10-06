@@ -490,8 +490,8 @@ test('view permissions do not imply mutation permissions in the navigation contr
   assert.ok(sidebar.includes("billing: 'billing.view'"));
 
   const fabSource = app.slice(app.indexOf('function _updateFabForPage'), app.indexOf('function _updateFabForPage') + 9000);
-  assert.ok(fabSource.includes('billing.write') || fabSource.includes('billing.class.view'),
-    'billing actions must not be exposed solely by page visibility');
+  assert.ok(fabSource.includes('billing.write') || fabSource.includes('billing.class.write'),
+    'billing actions must require a billing mutation permission');
 });
 
 test('administrative assistant keeps attendance view/edit distinction', () => {
