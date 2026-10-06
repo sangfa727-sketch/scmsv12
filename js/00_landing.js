@@ -24,6 +24,25 @@
 
 'use strict';
 
+// Bound authentication/network actions so restricted network paths cannot
+// leave the UI in an indefinite loading state.
+async function _fetchWithTimeout(url, options = {}, timeoutMs = 10000) {
+  const controller = new AbortController();
+  const timer = setTimeout(() => controller.abort(), timeoutMs);
+  try {
+    return await fetch(url, { ...options, signal: controller.signal });
+  } catch (e) {
+    if (e?.name === 'AbortError') {
+      const err = new Error('Request timed out. Please check your connection and retry.');
+      err.code = 'TIMEOUT';
+      throw err;
+    }
+    throw e;
+  } finally {
+    clearTimeout(timer);
+  }
+}
+
 let _loginPollTimer = null;
 let _loginToken     = null;
 let _loginPollCount = 0;
@@ -355,7 +374,7 @@ async function _preregisterSession(token) {
   // Insert (or upsert) a placeholder row so the polling SELECT has something
   // to find. The bot will fill in telegram_id + teacher_id on its side.
   const url = `${SCMS_CONFIG.SUPABASE_URL}/rest/v1/app_sessions`;
-  const resp = await fetch(url, {
+  const resp = await _fetchWithTimeout(url, {
     method:  'POST',
     headers: {
       'Content-Type':  'application/json',
@@ -369,7 +388,7 @@ async function _preregisterSession(token) {
       device_ua:  navigator.userAgent.slice(0, 200),
       created_at: new Date().toISOString(),
     }),
-  });
+  }, 8000);
   // 201 created or 200 merged is fine; 4xx means RLS blocked us — that's OK
   // because the bot will create the row itself.
   return resp.ok;
@@ -413,7 +432,7 @@ async function _checkSession(token) {
   if (!token) return null;
   try {
     const url = SCMS_CONFIG.SUPABASE_URL + '/rest/v1/rpc/rpc_app_session_poll';
-    const resp = await fetch(url, {
+    const resp = await _fetchWithTimeout(url, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
@@ -421,7 +440,7 @@ async function _checkSession(token) {
         'Authorization': 'Bearer ' + SCMS_CONFIG.SUPABASE_ANON,
       },
       body: JSON.stringify({ p_token: token }),
-    });
+    }, 8000);
     if (!resp.ok) return null;
     const result = await resp.json();
     return result?.ok && result?.linked ? (result.session || null) : null;
@@ -551,7 +570,7 @@ window.handleTeacherCardQuery = async function () {
   } catch (e) {}
 
   try {
-    const resp = await fetch(`${SCMS_CONFIG.SUPABASE_URL}/rest/v1/rpc/rpc_teacher_card_login_start`, {
+    const resp = await _fetchWithTimeout(`${SCMS_CONFIG.SUPABASE_URL}/rest/v1/rpc/rpc_teacher_card_login_start`, {
       method: 'POST',
       headers: {
         'apikey': SCMS_CONFIG.SUPABASE_ANON,
@@ -559,7 +578,7 @@ window.handleTeacherCardQuery = async function () {
         'Content-Type': 'application/json',
       },
       body: JSON.stringify({ p_token: token }),
-    });
+    }, 10000);
     const result = await resp.json().catch(() => null);
     if (!resp.ok || !result?.ok) throw new Error(result?.message || t('login.failed'));
 
@@ -609,7 +628,7 @@ window.doTeacherCardLogin = async function () {
   btn.disabled = true;
   btn.textContent = t('login.signingIn');
   try {
-    const resp = await fetch(`${SCMS_CONFIG.SUPABASE_URL}/rest/v1/rpc/rpc_teacher_web_login`, {
+    const resp = await _fetchWithTimeout(`${SCMS_CONFIG.SUPABASE_URL}/rest/v1/rpc/rpc_teacher_web_login`, {
       method: 'POST',
       headers: {
         'apikey': SCMS_CONFIG.SUPABASE_ANON,
@@ -621,7 +640,7 @@ window.doTeacherCardLogin = async function () {
         p_password: pin,
         p_device_ua: navigator.userAgent.slice(0, 200),
       }),
-    });
+    }, 10000);
     const result = await resp.json().catch(() => null);
     if (!resp.ok || !result?.ok) {
       if (errEl) { errEl.textContent = result?.message || t('login.failed'); errEl.style.display = 'block'; }
@@ -658,7 +677,7 @@ window.doWebLogin = async function () {
   btn.textContent = t('login.signingIn');
 
   try {
-    const resp = await fetch(`${SCMS_CONFIG.SUPABASE_URL}/rest/v1/rpc/rpc_teacher_login`, {
+    const resp = await _fetchWithTimeout(`${SCMS_CONFIG.SUPABASE_URL}/rest/v1/rpc/rpc_teacher_login`, {
       method: 'POST',
       headers: {
         'apikey':        SCMS_CONFIG.SUPABASE_ANON,
@@ -670,7 +689,7 @@ window.doWebLogin = async function () {
         p_pin:         pin,
         p_device_ua:  navigator.userAgent.slice(0, 200),
       }),
-    });
+    }, 10000);
 
     const result = await resp.json();
 
@@ -764,7 +783,7 @@ window.webLogout = async function () {
   const sess = getWebSession();
   if (sess && sess.session_token) {
     try {
-      await fetch(`${SCMS_CONFIG.SUPABASE_URL}/rest/v1/rpc/rpc_web_logout`, {
+      await _fetchWithTimeout(`${SCMS_CONFIG.SUPABASE_URL}/rest/v1/rpc/rpc_web_logout`, {
         method: 'POST',
         headers: {
           'apikey':        SCMS_CONFIG.SUPABASE_ANON,
@@ -772,7 +791,7 @@ window.webLogout = async function () {
           'Content-Type':  'application/json',
         },
         body: JSON.stringify({ p_session_token: sess.session_token }),
-      });
+      }, 5000);
     } catch (e) {}
   }
   clearWebSession();
