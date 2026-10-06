@@ -86,7 +86,7 @@ begin
   if v_changed<>v_expected then
     raise exception 'student permission migration coverage mismatch: changed %, expected %', v_changed, v_expected;
   end if;
-end $;
+end $$;
 
 do $$
 declare r record; d text; newd text; v_changed integer := 0; v_expected integer := 2;
@@ -106,7 +106,7 @@ begin
   if v_changed<>v_expected then
     raise exception 'health/vaccination delete migration coverage mismatch: changed %, expected %', v_changed, v_expected;
   end if;
-end $;
+end $$;
 
 do $$
 declare r record; d text; newd text; v_changed integer := 0; v_expected integer := 1;
@@ -122,7 +122,7 @@ begin
   if v_changed<>v_expected then
     raise exception 'student registration migration coverage mismatch: changed %, expected %', v_changed, v_expected;
   end if;
-end $;
+end $$;
 
 revoke all on function private.web_has_student_class_permission(text,text,text) from public,anon,authenticated;
 revoke all on function private.web_has_student_permission(text,text,text) from public,anon,authenticated;
