@@ -136,14 +136,13 @@ test('shared loader keeps APP compatibility and supports explicit refresh', () =
 });
 
 test('attendance write RPC remains session-bound and permission-checked', () => {
-  const attendance = read('supabase/migrations/20261006122628_sync_web_bootstrap_teacher_permissions.sql');
-  assert.ok(attendance.includes('role_permissions'), 'bootstrap permission source must remain canonical');
-
-  const app = read('js/05_attendance.js');
-  assert.ok(app.includes('API.saveAttendance'), 'attendance UI must use the authenticated API path');
-
-  const rpc = read('supabase/migrations/20261003110000_daily_report_secure_rpc.sql');
-  assert.ok(rpc.includes('private.web_has_permission'), 'secure RPC contracts must retain backend permission enforcement');
+  const rpc = read('supabase/migrations/20260929072000_teacher_permission_scope_leave_attendance.sql');
+  assert.ok(rpc.includes('create or replace function public.rpc_save_attendance('), 'session-bound attendance RPC must remain present');
+  assert.ok(rpc.includes('p_session_token text'), 'attendance write must require a session token');
+  assert.ok(rpc.includes("private.web_has_permission(p_session_token, 'attendance.edit', trim(p_class), null)"), 'attendance edit permission must be enforced server-side');
+  assert.ok(rpc.includes("return jsonb_build_object('ok', false, 'error', 'permission_denied')"), 'attendance mutation must fail closed');
+  assert.ok(rpc.includes('st.school_id = v_sess.school_id'), 'student validation must remain school-scoped');
+  assert.ok(rpc.includes('st.class = trim(p_class)'), 'student validation must remain class-scoped');
 });
 
 console.log('SCMS regression contract suite loaded.');
