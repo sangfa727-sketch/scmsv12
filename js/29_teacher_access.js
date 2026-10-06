@@ -179,6 +179,14 @@ function _taEffectiveAllowed(teacher, permission, roleDefault, overrides, classA
   if (override) return !!override.allowed;
   // Keep the same admin bypass semantics as private.web_has_permission().
   if (teacher.role === 'admin' || teacher.role === 'super_admin') return true;
+  // Student data is assignment-scoped for teacher-like roles even though the
+  // catalog permission itself is global. This mirrors the server-side
+  // student-scope guard used by rpc_get_students and student RPCs.
+  if ((permission.permission_key === 'students.view' || permission.permission_key === 'students.edit') &&
+      ['teacher','senior_teacher','assistant_teacher'].includes(teacher.role)) {
+    if (!roleDefault) return false;
+    return (classAssignments || []).some(function(a){ return a.is_active; });
+  }
   if (!roleDefault) return false;
   if (scope === 'global') return true;
   if (scope === 'class') {
