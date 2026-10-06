@@ -281,7 +281,8 @@ function _renderTeacherList(teachers) {
           <button class="icon-btn-mini teacher-edit-btn" onclick="event.stopPropagation(); openTeacherEditModal('${esc(teacher.teacher_id)}')" title="${esc(t('common.edit'))}">✏️</button>
           <button class="icon-btn-mini teacher-access-btn" onclick="event.stopPropagation(); closeModal(() => openTeacherAccess('${esc(teacher.teacher_id)}', '${esc(teacher.teacher_name)}'))" title="${esc(t('tm.title'))}">🔐</button>
           <button class="icon-btn-mini" onclick="event.stopPropagation(); openTeacherCardModal('${esc(teacher.teacher_id)}', '${esc(teacher.teacher_name)}', '${esc(teacher.login_name || '')}')" title="${esc(t('tm.idCard'))}">🪪</button>
-          <button class="icon-btn-mini" onclick="event.stopPropagation(); resetTeacherPassword('${esc(teacher.teacher_id)}', '${esc(teacher.teacher_name)}')" title="${esc(t('tm.resetPassword'))}">🔑</button>\n          <button class="icon-btn-mini" data-teacher-lifecycle type="button" onclick="event.stopPropagation(); setTeacherLifecycle('${esc(teacher.teacher_id)}', '${teacher.status === 'active' ? 'deactivate' : 'reactivate'}')" title="${esc(_teacherLifecycleCopy(teacher.status === 'active' ? 'deactivate' : 'reactivate'))}">${teacher.status === 'active' ? '⏸️' : '▶️'}</button>
+          <button class="icon-btn-mini" onclick="event.stopPropagation(); resetTeacherPassword('${esc(teacher.teacher_id)}', '${esc(teacher.teacher_name)}')" title="${esc(t('tm.resetPassword'))}">🔑</button>
+          <button class="icon-btn-mini" data-teacher-lifecycle type="button" onclick="event.stopPropagation(); setTeacherLifecycle('${esc(teacher.teacher_id)}', '${teacher.status === 'active' ? 'deactivate' : 'reactivate'}')" title="${esc(_teacherLifecycleCopy(teacher.status === 'active' ? 'deactivate' : 'reactivate'))}">${teacher.status === 'active' ? '⏸️' : '▶️'}</button>
         </div>
       </div>`;
   }).join('');
