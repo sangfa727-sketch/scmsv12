@@ -12,6 +12,7 @@ const _TA_UI = {
     selectClass:'Select class', selectSubject:'Select subject', add:'Add', closeButton:'Close',
     noClasses:'No class assignments yet.', noSubjects:'No subject assignments yet.',
     default:'Default', allowed:'Allow', denied:'Deny', defaultAllowed:'Allowed', defaultDenied:'Denied',
+    allowedState:'Allowed', deniedState:'Denied', defaultState:'Default', notConfiguredState:'Not configured',
     permissionHelp:'Default permission follows the teacher role. For class/subject-specific access, select the relevant class and subject.',
     classRequired:'Please select a class first.', classSubjectRequired:'Please select a class and subject first.',
     saved:'Permission saved.', saveFailed:'Could not save permission.', classAddFailed:'Could not add class.',
@@ -24,6 +25,7 @@ const _TA_UI = {
     selectClass:'အတန်းရွေးပါ', selectSubject:'ဘာသာရပ်ရွေးပါ', add:'ထည့်မည်', closeButton:'ပိတ်မည်',
     noClasses:'အတန်းတာဝန်ပေးထားခြင်း မရှိသေးပါ။', noSubjects:'ဘာသာရပ်တာဝန်ပေးထားခြင်း မရှိသေးပါ။',
     default:'မူလ', allowed:'ခွင့်ပြု', denied:'ပိတ်ပင်', defaultAllowed:'ခွင့်ပြု', defaultDenied:'ပိတ်ပင်',
+    allowedState:'ခွင့်ပြုထား', deniedState:'ပိတ်ပင်ထား', defaultState:'မူလ', notConfiguredState:'မသတ်မှတ်ရသေး',
     permissionHelp:'မူလခွင့်ပြုချက်သည် ဆရာ/ဆရာမ၏ role အတိုင်းဖြစ်သည်။ အတန်း/ဘာသာရပ်အလိုက် ခွင့်ပြုချက်အတွက် သက်ဆိုင်ရာအတန်းနှင့် ဘာသာရပ်ကို ရွေးပါ။',
     classRequired:'အတန်းကို အရင်ရွေးပါ။', classSubjectRequired:'အတန်းနှင့် ဘာသာရပ်ကို အရင်ရွေးပါ။',
     saved:'လုပ်ပိုင်ခွင့် သိမ်းပြီးပါပြီ။', saveFailed:'လုပ်ပိုင်ခွင့် သိမ်း၍ မရပါ။', classAddFailed:'အတန်းထည့်၍ မရပါ။',
@@ -36,6 +38,7 @@ const _TA_UI = {
     selectClass:'Pilih kelas', selectSubject:'Pilih subjek', add:'Tambah', closeButton:'Tutup',
     noClasses:'Tiada tugasan kelas lagi.', noSubjects:'Tiada tugasan subjek lagi.',
     default:'Lalai', allowed:'Benarkan', denied:'Tolak', defaultAllowed:'Dibenarkan', defaultDenied:'Ditolak',
+    allowedState:'Dibenarkan', deniedState:'Ditolak', defaultState:'Lalai', notConfiguredState:'Belum dikonfigurasi',
     permissionHelp:'Kebenaran lalai mengikut peranan guru. Untuk akses khusus kelas/subjek, pilih kelas dan subjek berkaitan.',
     classRequired:'Sila pilih kelas dahulu.', classSubjectRequired:'Sila pilih kelas dan subjek dahulu.',
     saved:'Kebenaran disimpan.', saveFailed:'Tidak dapat menyimpan kebenaran.', classAddFailed:'Tidak dapat menambah kelas.',
@@ -48,6 +51,7 @@ const _TA_UI = {
     selectClass:'选择班级', selectSubject:'选择科目', add:'添加', closeButton:'关闭',
     noClasses:'暂无班级分配。', noSubjects:'暂无科目分配。',
     default:'默认', allowed:'允许', denied:'拒绝', defaultAllowed:'已允许', defaultDenied:'已拒绝',
+    allowedState:'允许', deniedState:'拒绝', defaultState:'默认', notConfiguredState:'未配置',
     permissionHelp:'默认权限遵循教师角色。若要设置班级或科目专属权限，请选择对应班级和科目。',
     classRequired:'请先选择班级。', classSubjectRequired:'请先选择班级和科目。',
     saved:'权限已保存。', saveFailed:'无法保存权限。', classAddFailed:'无法添加班级。',
@@ -209,6 +213,15 @@ function _taEffectiveAllowed(teacher, permission, roleDefault, overrides, classA
 function _taEffectiveLabel(allowed) {
   return allowed ? '✓ ' + _taUi('defaultAllowed') : '✕ ' + _taUi('defaultDenied');
 }
+function _taStateLabel(state) {
+  if (state === 'allow') return '✓ ' + _taUi('allowedState');
+  if (state === 'deny') return '✕ ' + _taUi('deniedState');
+  if (state === 'default') return '— ' + _taUi('defaultState');
+  return '• ' + _taUi('notConfiguredState');
+}
+function _taStateClass(state) {
+  return 'teacher-access-state teacher-access-state-' + (state || 'not-configured');
+}
 
 async function _renderTeacherAccess() {
   const root = document.getElementById('teacherAccessRoot');
@@ -275,6 +288,7 @@ async function _renderTeacherAccess() {
         html += '<div class="teacher-access-perm-row" data-permission="' + esc(p.permission_key) + '" data-scope="' + esc(p.scope_type) + '">' +
           '<div class="teacher-access-perm-copy"><strong>' + esc(_taText(p.permission_key)) + '</strong><small>' + esc(_taDescription(p.permission_key, p.description || '')) +
           '</small></div>' + _taScopeControls(p,catalog) +
+          '<span class="' + _taStateClass(state) + '" data-config-state>' + esc(_taStateLabel(state)) + '</span>' +
           '<span class="teacher-access-effective" data-effective-state>' + esc(targetHint) + '</span>' +
           '<select class="teacher-access-perm-state" aria-label="' + _taUi('permissions') + '"><option value="default"' + (state === 'default' ? ' selected' : '') +
           '>' + _taUi('default') + '</option><option value="allow"' + (state === 'allow' ? ' selected' : '') +
@@ -298,9 +312,16 @@ async function _renderTeacherAccess() {
         const permission = (catalog.permissions || []).find(function(x){ return x.permission_key === row.dataset.permission; });
         const roleDefault = (roleDefaults.find(function(x){ return x.role === teacher.role && x.permission_key === row.dataset.permission; }) || {}).allowed;
         const override = _taOverride(overrides, row.dataset.permission, scope, cls, subject);
-        state.value = override ? (override.allowed ? 'allow' : 'deny') : 'default';
-        const effective = row.querySelector('[data-effective-state]');
+        const nextState = override ? (override.allowed ? 'allow' : 'deny') : 'default';
+        state.value = nextState;
+        const configState = row.querySelector('[data-config-state]');
         const targetReady = scope === 'global' || (scope === 'class' && !!cls) || (scope === 'subject' && !!subject) || (scope === 'class_subject' && !!cls && !!subject);
+        const displayState = targetReady ? nextState : 'not-configured';
+        if (configState) {
+          configState.className = _taStateClass(displayState);
+          configState.textContent = _taStateLabel(displayState);
+        }
+        const effective = row.querySelector('[data-effective-state]');
         if (effective) {
           effective.textContent = targetReady
             ? _taEffectiveLabel(_taEffectiveAllowed(teacher, permission || {permission_key: row.dataset.permission, scope_type: scope}, !!roleDefault, overrides, classAssignments, subjectAssignments, cls, subject))
