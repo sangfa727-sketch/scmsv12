@@ -545,5 +545,7 @@ test('Manage Access displays effective permission state, not only role defaults'
   for (const token of ['classAssignments','subjectAssignments','teacher.role === \'admin\'','teacher.role === \'super_admin\'','data-effective-state','_taEffectiveLabel']) {
     assert.ok(access.includes(token), 'effective access indicator contract missing: ' + token);
   }
+  assert.ok(access.includes("permission.permission_key === 'students.view' || permission.permission_key === 'students.edit'"), 'student permissions must reflect assignment scope in the UI');
+  assert.ok(access.includes("['teacher','senior_teacher','assistant_teacher'].includes(teacher.role)"), 'teacher-like student access must be assignment-bound');
   assert.ok(access.includes('await _renderTeacherAccess();'), 'permission save must re-read persisted state');
 });
