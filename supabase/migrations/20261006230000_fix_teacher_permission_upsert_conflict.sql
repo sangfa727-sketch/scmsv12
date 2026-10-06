@@ -39,6 +39,26 @@ begin
     return jsonb_build_object('ok',false,'error','admin_required');
   end if;
 
+  if p_action = 'catalog'
+     and not private.web_has_permission(p_session_token, 'permissions.manage') then
+    return jsonb_build_object('ok',false,'error','permission_denied');
+  end if;
+
+  if p_action = 'list'
+     and not private.web_has_permission(p_session_token, 'teachers.view') then
+    return jsonb_build_object('ok',false,'error','permission_denied');
+  end if;
+
+  if p_action in ('class_add','class_remove','subject_add','subject_remove')
+     and not private.web_has_permission(p_session_token, 'teachers.manage') then
+    return jsonb_build_object('ok',false,'error','permission_denied');
+  end if;
+
+  if p_action in ('permission_set','permission_remove')
+     and not private.web_has_permission(p_session_token, 'permissions.manage') then
+    return jsonb_build_object('ok',false,'error','permission_denied');
+  end if;
+
   if p_action='catalog' then
     return jsonb_build_object(
       'ok',true,
