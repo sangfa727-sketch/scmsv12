@@ -145,6 +145,43 @@ test('attendance write RPC remains session-bound and permission-checked', () => 
   assert.ok(rpc.includes('st.class = trim(p_class)'), 'student validation must remain class-scoped');
 });
 
+
+test('teacher access permission controls persist through the RPC wiring', () => {
+  const access = read('js/29_teacher_access.js');
+  for (const token of [
+    "p_action: action",
+    "p_teacher_id: teacherId",
+    "permission_set",
+    "permission_remove",
+    "p_permission_key:key",
+    "p_allowed:select.value === 'allow'",
+    "p_scope_type:scope",
+    "p_class_name:cls",
+    "p_subject_id:subject"
+  ]) assert.ok(access.includes(token), 'teacher access save payload contract missing: ' + token);
+  assert.ok(access.includes("_webRpc('rpc_manage_teacher_access'"), 'permission controls must call the live teacher-access RPC');
+  assert.ok(access.includes("showToast('' + _taUi('saved') + '')"), 'successful permission save must surface persisted-save feedback');
+  assert.ok(access.includes("catch(e) { showToast(e?.message || '' + _taUi('saveFailed') + ''); }"), 'permission-save failures must surface an error');
+});
+
+test('teacher access UI must not claim scoped overrides are global-only', () => {
+  const access = read('js/29_teacher_access.js');
+  assert.ok(access.includes("_taOverride(overrides, row.dataset.permission, scope, cls, subject)"), 'scoped override lookup must use the selected class/subject');
+  assert.ok(access.includes("const override = p.scope_type === 'global' ? _taOverride(overrides,p.permission_key,p.scope_type,null,null) : null;"), 'initial global state must remain distinct from scoped selection state');
+  assert.ok(access.includes("row.querySelectorAll('.teacher-access-class, .teacher-access-subject').forEach"), 'changing scope selectors must recompute the persisted override state');
+});
+
+test('teacher access RPC writes and removes teacher permission overrides server-side', () => {
+  const migration = read('supabase/migrations/20260928223720_teacher_access_management_hardening.sql');
+  assert.ok(migration.includes('rpc_manage_teacher_access'), 'teacher access RPC migration contract must remain present');
+  assert.ok(migration.includes("p_action='permission_set'"), 'permission_set action must remain server-side');
+  assert.ok(migration.includes("insert into public.teacher_permissions"), 'Allow/Deny must persist to teacher_permissions');
+  assert.ok(migration.includes("on conflict(school_id,teacher_id,permission_key,scope_type,class_name,subject_id)"), 'permission writes must be idempotent');
+  assert.ok(migration.includes("p_action='permission_remove'"), 'Default must remove the teacher-specific override');
+  assert.ok(migration.includes('delete from public.teacher_permissions'), 'Default must remove the persisted override');
+  assert.ok(migration.includes("'admin_required'"), 'teacher access management must remain admin-gated');
+});
+
 console.log('SCMS regression contract suite loaded.');
 
 test('student RPCs enforce the existing student permission contracts', () => {
