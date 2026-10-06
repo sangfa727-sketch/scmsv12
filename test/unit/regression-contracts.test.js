@@ -536,3 +536,14 @@ test('action FABs require mutation permissions', () => {
   assert.ok(app.includes('required.some((p) => perms.includes(p))'), 'FAB must require an effective permission');
   assert.ok(app.includes("timetable: null"), 'unsupported timetable mutation must not be inferred as a teacher permission');
 });
+
+
+test('Manage Access displays effective permission state, not only role defaults', () => {
+  const access = read('js/29_teacher_access.js');
+  assert.ok(access.includes('function _taEffectiveAllowed'), 'effective permission evaluator missing');
+  assert.ok(access.includes('private.web_has_permission') === false || access.includes('_taEffectiveAllowed'), 'UI must use the shared effective-state model');
+  for (const token of ['classAssignments','subjectAssignments','teacher.role === \'admin\'','teacher.role === \'super_admin\'','data-effective-state','_taEffectiveLabel']) {
+    assert.ok(access.includes(token), 'effective access indicator contract missing: ' + token);
+  }
+  assert.ok(access.includes('await _renderTeacherAccess();'), 'permission save must re-read persisted state');
+});
