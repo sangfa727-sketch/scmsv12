@@ -102,7 +102,7 @@ window.openSettings = function() {
           ${isAdmin ? `
             <div class="settings-action-row">
               <div class="settings-action-copy"><strong>${t('settings.manageTeachers')}</strong></div>
-              <button type="button" class="settings-action-button settings-action-primary" onclick="closeModal(); setTimeout(() => openTeacherManager(), 190)">${t('settings.manageTeachers')}</button>
+              <button type="button" class="settings-action-button settings-action-primary" onclick="closeModal(() => openTeacherManager())">${t('settings.manageTeachers')}</button>
             </div>
           ` : ''}
 
@@ -229,7 +229,7 @@ function _renderTeacherList(teachers) {
         </div>
         <div class="teacher-row-actions">
           <button class="icon-btn-mini teacher-edit-btn" onclick="event.stopPropagation(); openTeacherEditModal('${esc(teacher.teacher_id)}')" title="${esc(t('common.edit'))}">✏️</button>
-          <button class="icon-btn-mini teacher-access-btn" onclick="event.stopPropagation(); closeModal(); setTimeout(() => openTeacherAccess('${esc(teacher.teacher_id)}', '${esc(teacher.teacher_name)}'), 190)" title="${esc(t('tm.title'))}">🔐</button>
+          <button class="icon-btn-mini teacher-access-btn" onclick="event.stopPropagation(); closeModal(() => openTeacherAccess('${esc(teacher.teacher_id)}', '${esc(teacher.teacher_name)}'))" title="${esc(t('tm.title'))}">🔐</button>
           <button class="icon-btn-mini" onclick="event.stopPropagation(); openTeacherCardModal('${esc(teacher.teacher_id)}', '${esc(teacher.teacher_name)}', '${esc(teacher.login_name || '')}')" title="${esc(t('tm.idCard'))}">🪪</button>
           <button class="icon-btn-mini" onclick="event.stopPropagation(); resetTeacherPassword('${esc(teacher.teacher_id)}', '${esc(teacher.teacher_name)}')" title="${esc(t('tm.resetPassword'))}">🔑</button>
         </div>
@@ -273,7 +273,7 @@ window.openInviteCodeModal = function() {
 
       <div id="invPastList" class="mt16"></div>
 
-      <button class="btn-secondary mt16" onclick="closeModal(); openTeacherManager()">${t('inv.back')}</button>
+      <button class="btn-secondary mt16" onclick="closeModal(() => openTeacherManager())">${t('inv.back')}</button>
     </div>
   `);
   _loadPastInvites();
@@ -432,8 +432,7 @@ window.saveTeacherEdit = async function(teacherId) {
     });
     if (!result?.ok) throw new Error(result?.error || 'save_failed');
     _invalidateTeacherManagerCache();
-    closeModal(); showToast(t('toast.updated'));
-    setTimeout(() => openTeacherManager(), 190);
+    closeModal(() => { showToast(t('toast.updated')); openTeacherManager(); });
   } catch (e) {
     err.textContent = e?.message || String(e); err.style.display = 'block';
   } finally {

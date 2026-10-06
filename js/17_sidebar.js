@@ -39,10 +39,13 @@ const SIDEBAR_PERMISSION = Object.freeze({
   dashboard: 'dashboard.view',
   students: 'students.view',
   attend: 'attendance.view',
+  daily: 'daily_report.edit',
   hw: 'homework.view',
   grades: 'assessment.view',
   billing: 'billing.view',
   admissions: 'admissions.view',
+  library: 'library.view',
+  transport: 'transport.view',
   leave: 'leave.view',
 });
 
@@ -52,6 +55,7 @@ function _sidebarCanAccess(pageId) {
   const permission = SIDEBAR_PERMISSION[pageId];
   if (!permission) return true; // No permission contract exists for this module yet.
   if (pageId === 'billing') return Array.isArray(A.permissions) && (A.permissions.includes('billing.view') || A.permissions.includes('billing.class.view'));
+  if (pageId === 'daily') return Array.isArray(A.permissions) && (A.permissions.includes('daily_report.edit') || A.permissions.includes('daily_report.delete'));
   return Array.isArray(A.permissions) && A.permissions.includes(permission);
 }
 

@@ -387,3 +387,48 @@ test('teacher role validation stays synchronized across create, update and invit
   assert.ok((migration.match(/v_admin\.(?:admin_role|teacher_role)<>['"]super_admin['"]\s+AND\s+v_role\s+IN\s*\(['"]admin['"]\s*,\s*['"]super_admin['"]\)/gi) || []).length >= 3);
   assert.ok(migration.includes("v_admin.admin_role<>'super_admin' AND v_target_role='super_admin'"));
 });
+
+
+test('web bootstrap restores effective role permissions and assignments', () => {
+  const migration = read('supabase/migrations/20261006122628_sync_web_bootstrap_teacher_permissions.sql');
+  for (const token of [
+    'role_permissions',
+    'teacher_permissions',
+    'permission_definitions',
+    "'permissions', v_permissions",
+    "'assigned_classes', v_assigned_classes",
+    "'assigned_subjects', v_assigned_subjects"
+  ]) assert.ok(migration.includes(token), 'web bootstrap permission contract missing: ' + token);
+  assert.ok(migration.includes('when go.allowed is not null then go.allowed'), 'global override precedence must be explicit');
+  assert.ok(migration.includes('scope_type <> \'global\''), 'scoped teacher permissions must be considered');
+  assert.ok(migration.includes("t.status = 'active'"), 'bootstrap must remain active-teacher gated');
+  assert.ok(migration.includes('s.school_id = t.school_id'), 'bootstrap must remain tenant-bound');
+});
+
+test('role-gated navigation covers canonical permission-backed modules', () => {
+  const app = read('js/14_app.js');
+  const sidebar = read('js/17_sidebar.js');
+  for (const token of [
+    "attend: 'attendance.view'",
+    "daily: 'daily_report.edit'",
+    "hw: 'homework.view'",
+    "grades: 'assessment.view'",
+    "billing: 'billing.view'",
+    "admissions: 'admissions.view'",
+    "library: 'library.view'",
+    "transport: 'transport.view'",
+    "leave: 'leave.view'"
+  ]) {
+    assert.ok(app.includes(token), 'page permission mapping missing: ' + token);
+    assert.ok(sidebar.includes(token), 'sidebar permission mapping missing: ' + token);
+  }
+  assert.ok(app.includes("A.permissions.includes('daily_report.edit') || A.permissions.includes('daily_report.delete')"), 'daily page access must use a valid daily-report permission');
+  assert.ok(sidebar.includes("A.permissions.includes('daily_report.edit') || A.permissions.includes('daily_report.delete')"), 'daily sidebar access must use a valid daily-report permission');
+});
+
+test('Manage Teacher reopen waits for modal close', () => {
+  const settings = read('js/15_settings.js');
+  assert.ok(settings.includes("closeModal(() => openTeacherManager())"), 'Manage Teacher must reopen from close callback');
+  assert.ok(settings.includes("closeModal(() => { showToast(t('toast.updated')); openTeacherManager(); });"), 'Edit Teacher save must reopen only after close completes');
+  assert.ok(!settings.includes("closeModal(); setTimeout(() => openTeacherManager(), 190)"), 'stale timeout reopen race must be removed');
+});
