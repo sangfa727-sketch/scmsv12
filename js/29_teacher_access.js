@@ -172,6 +172,35 @@ function _taOverride(overrides, key, scope, cls, subject) {
        (scope === 'class_subject' && x.class_name === cls && String(x.subject_id) === String(subject)));
   });
 }
+function _taEffectiveAllowed(teacher, permission, roleDefault, overrides, classAssignments, subjectAssignments, cls, subject) {
+  const scope = permission.scope_type;
+  const override = _taOverride(overrides, permission.permission_key, scope, cls, subject);
+  // Explicit teacher Allow/Deny is authoritative for the selected target.
+  if (override) return !!override.allowed;
+  // Keep the same admin bypass semantics as private.web_has_permission().
+  if (teacher.role === 'admin' || teacher.role === 'super_admin') return true;
+  if (!roleDefault) return false;
+  if (scope === 'global') return true;
+  if (scope === 'class') {
+    return !!(cls && (classAssignments || []).some(function(a) {
+      return a.is_active && a.class_name === cls;
+    }));
+  }
+  if (scope === 'subject') {
+    return !!(subject && (subjectAssignments || []).some(function(a) {
+      return a.is_active && String(a.subject_id) === String(subject);
+    }));
+  }
+  if (scope === 'class_subject') {
+    return !!(cls && subject && (subjectAssignments || []).some(function(a) {
+      return a.is_active && a.class_name === cls && String(a.subject_id) === String(subject);
+    }));
+  }
+  return false;
+}
+function _taEffectiveLabel(allowed) {
+  return allowed ? '✓ ' + _taUi('defaultAllowed') : '✕ ' + _taUi('defaultDenied');
+}
 
 async function _renderTeacherAccess() {
   const root = document.getElementById('teacherAccessRoot');
@@ -233,11 +262,14 @@ async function _renderTeacherAccess() {
         const roleDefault = (roleDefaults.find(function(x){ return x.role === teacher.role && x.permission_key === p.permission_key; }) || {}).allowed;
         const override = p.scope_type === 'global' ? _taOverride(overrides,p.permission_key,p.scope_type,null,null) : null;
         const state = override ? (override.allowed ? 'allow' : 'deny') : 'default';
+        const initialAllowed = _taEffectiveAllowed(teacher, p, !!roleDefault, overrides, classAssignments, subjectAssignments, null, null);
+        const targetHint = p.scope_type === 'global' ? _taEffectiveLabel(initialAllowed) : '—';
         html += '<div class="teacher-access-perm-row" data-permission="' + esc(p.permission_key) + '" data-scope="' + esc(p.scope_type) + '">' +
           '<div class="teacher-access-perm-copy"><strong>' + esc(_taText(p.permission_key)) + '</strong><small>' + esc(_taDescription(p.permission_key, p.description || '')) +
           '</small></div>' + _taScopeControls(p,catalog) +
+          '<span class="teacher-access-effective" data-effective-state>' + esc(targetHint) + '</span>' +
           '<select class="teacher-access-perm-state" aria-label="' + _taUi('permissions') + '"><option value="default"' + (state === 'default' ? ' selected' : '') +
-          '>' + _taUi('default') + (roleDefault ? ' (' + _taUi('allowed') + ')' : ' (' + _taUi('denied') + ')') + '</option><option value="allow"' + (state === 'allow' ? ' selected' : '') +
+          '>' + _taUi('default') + '</option><option value="allow"' + (state === 'allow' ? ' selected' : '') +
           '>' + _taUi('allowed') + '</option><option value="deny"' + (state === 'deny' ? ' selected' : '') + '>' + _taUi('denied') + '</option></select></div>';
       });
       html += '</div>';
@@ -255,8 +287,17 @@ async function _renderTeacherAccess() {
         const cls = row.querySelector('.teacher-access-class')?.value || null;
         const raw = row.querySelector('.teacher-access-subject')?.value || null;
         const subject = raw ? Number(raw) : null;
+        const permission = (catalog.permissions || []).find(function(x){ return x.permission_key === row.dataset.permission; });
+        const roleDefault = (roleDefaults.find(function(x){ return x.role === teacher.role && x.permission_key === row.dataset.permission; }) || {}).allowed;
         const override = _taOverride(overrides, row.dataset.permission, scope, cls, subject);
         state.value = override ? (override.allowed ? 'allow' : 'deny') : 'default';
+        const effective = row.querySelector('[data-effective-state]');
+        const targetReady = scope === 'global' || (scope === 'class' && !!cls) || (scope === 'subject' && !!subject) || (scope === 'class_subject' && !!cls && !!subject);
+        if (effective) {
+          effective.textContent = targetReady
+            ? _taEffectiveLabel(_taEffectiveAllowed(teacher, permission || {permission_key: row.dataset.permission, scope_type: scope}, !!roleDefault, overrides, classAssignments, subjectAssignments, cls, subject))
+            : '—';
+        }
       };
       row.querySelectorAll('.teacher-access-class, .teacher-access-subject').forEach(function(sel) {
         sel.addEventListener('change', refresh);
