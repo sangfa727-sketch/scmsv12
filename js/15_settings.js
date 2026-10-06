@@ -170,6 +170,12 @@ window.openTeacherManager = async function() {
     return;
   }
 
+  const existingManager = document.querySelector('#modalOverlay .teacher-manager-sheet');
+  if (existingManager) {
+    _refreshTeacherManagerList();
+    return;
+  }
+
   const cachedRows = _teacherManagerCacheFresh() ? _teacherManagerCache.rows : null;
 
   openModal(`
@@ -206,6 +212,27 @@ window.openTeacherManager = async function() {
     }
   }
 };
+
+async function _refreshTeacherManagerList() {
+  const listEl = document.getElementById('teacherList');
+  if (!listEl) return;
+
+  listEl.innerHTML = `<div class="teacher-manager-loading" aria-busy="true">
+    <span class="teacher-manager-loading-dot"></span>
+    <span>${t('tm.loading')}</span>
+  </div>`;
+
+  try {
+    const rows = await _fetchTeacherManagerRows();
+    if (document.getElementById('teacherList')) _renderTeacherList(rows);
+  } catch (e) {
+    const current = document.getElementById('teacherList');
+    if (!current) return;
+    const msg = e?.message || String(e);
+    current.innerHTML =
+      `<div class="form-error">${esc(t('tm.loadFailed'))}<br><small>${esc(msg.slice(0, 180))}</small></div>`;
+  }
+}
 
 function _renderTeacherList(teachers) {
   const el = document.getElementById('teacherList');
@@ -432,7 +459,10 @@ window.saveTeacherEdit = async function(teacherId) {
     });
     if (!result?.ok) throw new Error(result?.error || 'save_failed');
     _invalidateTeacherManagerCache();
-    closeModal(() => { showToast(t('toast.updated')); openTeacherManager(); });
+    closeModal(() => {
+      showToast(t('toast.updated'));
+      _refreshTeacherManagerList();
+    });
   } catch (e) {
     err.textContent = e?.message || String(e); err.style.display = 'block';
   } finally {

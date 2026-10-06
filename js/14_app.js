@@ -166,7 +166,9 @@ async function initApp() {
             telegram_id:  webData.telegram_id || null,
             photo_url:    webData.teacher_photo_url || '',
             ui_prefs:     webData.ui_prefs || {},
-          permissions:  Array.isArray(webData.permissions) ? webData.permissions : [],
+            assigned_classes: Array.isArray(webData.assigned_classes) ? webData.assigned_classes : [],
+            assigned_subjects: Array.isArray(webData.assigned_subjects) ? webData.assigned_subjects : [],
+            permissions:  Array.isArray(webData.permissions) ? webData.permissions : [],
           },
           config:        webData.school_config || {},
           // The lists below will be filled by a follow-up fetch
@@ -765,12 +767,29 @@ const FAB_PAGES = {
   timetable: { titleKey: 'tt.addTitle', action: () => openAddTimetable() },
 };
 
+const FAB_PERMISSION = {
+  students: ['students.edit'],
+  daily: ['daily_report.edit', 'daily_report.delete'],
+  hw: ['homework.create', 'homework.edit'],
+  grades: ['assessment.create', 'assessment.edit'],
+  billing: ['billing.write', 'billing.class.write'],
+  admissions: ['admissions.manage'],
+  library: ['library.manage'],
+  transport: ['transport.manage'],
+  timetable: null,
+  incidents: null,
+  parents: null,
+};
+
 function _updateFabForPage(pageId) {
   const fab = document.getElementById('fab');
   if (!fab) return;
   const conf = FAB_PAGES[pageId];
-  const blocked = pageId === 'billing' && !window.APP?.is_admin && !(Array.isArray(window.APP?.permissions) && window.APP.permissions.includes('billing.write'));
-  if (conf && !blocked) {
+  const perms = Array.isArray(window.APP?.permissions) ? window.APP.permissions : [];
+  const required = Object.prototype.hasOwnProperty.call(FAB_PERMISSION, pageId) ? FAB_PERMISSION[pageId] : null;
+  const allowed = window.APP?.is_admin === true ||
+    (Array.isArray(required) && required.some((p) => perms.includes(p)));
+  if (conf && allowed) {
     fab.style.display = 'flex';
     fab.setAttribute('aria-label', t(conf.titleKey));
     fab.setAttribute('title', t(conf.titleKey));
