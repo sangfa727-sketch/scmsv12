@@ -172,7 +172,7 @@ test('teacher access UI must not claim scoped overrides are global-only', () => 
 });
 
 test('teacher access RPC writes and removes teacher permission overrides server-side', () => {
-  const migration = read('supabase/migrations/20260928223720_teacher_access_management_hardening.sql');
+  const migration = read('supabase/migrations/20260929075000_teacher_access_management_rpc.sql');
   assert.ok(migration.includes('rpc_manage_teacher_access'), 'teacher access RPC migration contract must remain present');
   assert.ok(migration.includes("p_action='permission_set'"), 'permission_set action must remain server-side');
   assert.ok(migration.includes("insert into public.teacher_permissions"), 'Allow/Deny must persist to teacher_permissions');
