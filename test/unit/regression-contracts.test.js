@@ -536,3 +536,34 @@ test('action FABs require mutation permissions', () => {
   assert.ok(app.includes('required.some((p) => perms.includes(p))'), 'FAB must require an effective permission');
   assert.ok(app.includes("timetable: null"), 'unsupported timetable mutation must not be inferred as a teacher permission');
 });
+
+
+test('Manage Access displays effective permission state, not only role defaults', () => {
+  const access = read('js/29_teacher_access.js');
+  const styles = read('style.css');
+  assert.ok(access.includes('function _taEffectiveAllowed'), 'effective permission evaluator missing');
+  assert.ok(access.includes('private.web_has_permission') === false || access.includes('_taEffectiveAllowed'), 'UI must use the shared effective-state model');
+  for (const token of ['classAssignments','subjectAssignments','teacher.role === \'admin\'','teacher.role === \'super_admin\'','data-effective-state','_taEffectiveLabel','_taStateLabel','allowedState','deniedState','defaultState','notConfiguredState']) {
+    assert.ok(access.includes(token), 'effective access indicator contract missing: ' + token);
+  }
+  for (const token of ['teacher-access-state-allow','teacher-access-state-deny']) {
+    assert.ok(styles.includes(token), 'effective access state CSS contract missing: ' + token);
+  }
+  assert.ok(access.includes("permission.permission_key === 'students.view' || permission.permission_key === 'students.edit'"), 'student permissions must reflect assignment scope in the UI');
+  assert.ok(access.includes("['teacher','senior_teacher','assistant_teacher'].includes(teacher.role)"), 'teacher-like student access must be assignment-bound');
+  assert.ok(access.includes('await _renderTeacherAccess();'), 'permission save must re-read persisted state');
+});
+
+
+test('teacher permission Allow/Deny persistence targets the expression-based unique index', () => {
+  const migration = read('supabase/migrations/20261006230000_fix_teacher_permission_upsert_conflict.sql');
+  assert.ok(migration.includes('on conflict ('));
+  assert.ok(migration.includes('teacher_id,'));
+  assert.ok(migration.includes('permission_key,'));
+  assert.ok(migration.includes('scope_type,'));
+  assert.ok(migration.includes('(coalesce(class_name,\'\'))'));
+  assert.ok(migration.includes('(coalesce(subject_id,0))'));
+  assert.ok(migration.includes('allowed=excluded.allowed'));
+  assert.ok(migration.includes('teacher.permission_set'));
+  assert.ok(!migration.includes('on conflict(school_id,teacher_id,p_permission_key'));
+});

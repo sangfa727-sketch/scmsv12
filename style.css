@@ -7079,6 +7079,46 @@ input.form-input {
 .teacher-access-perm-copy small { display:block; color:var(--text2); font-size:9.5px; line-height:1.35; margin-top:2px; }
 .teacher-access-scope-controls { display:flex; gap:5px; min-width:0; }
 .teacher-access-scope-controls .form-input { min-width:0; font-size:10.5px; padding:6px 7px; }
+.teacher-access-state {
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+  min-width:76px;
+  padding:4px 7px;
+  border:1px solid var(--border);
+  border-radius:999px;
+  font-size:9.5px;
+  font-weight:700;
+  line-height:1.2;
+  white-space:nowrap;
+  letter-spacing:.01em;
+}
+.teacher-access-state-allow {
+  color:#9fe3b1;
+  background:rgba(74,180,105,.12);
+  border-color:rgba(74,180,105,.32);
+}
+.teacher-access-state-deny {
+  color:#ff9d9d;
+  background:rgba(220,75,75,.12);
+  border-color:rgba(220,75,75,.32);
+}
+.teacher-access-state-default {
+  color:var(--text2);
+  background:var(--bg2);
+}
+.teacher-access-state-not-configured {
+  color:#e6c77a;
+  background:rgba(210,170,70,.10);
+  border-color:rgba(210,170,70,.28);
+}
+.teacher-access-effective {
+  color:var(--text2);
+  font-size:9.5px;
+  min-width:58px;
+  text-align:center;
+  white-space:nowrap;
+}
 .teacher-access-perm-state { min-width:92px; font-size:10.5px; padding:6px 7px; }
 @media (max-width:600px) {
   .teacher-access-add-grid { grid-template-columns:1fr 1fr; }
