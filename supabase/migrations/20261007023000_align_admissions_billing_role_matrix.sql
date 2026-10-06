@@ -8,8 +8,7 @@
 -- mismatch so UI/effective-permission state matches actual backend access.
 
 UPDATE public.role_permissions
-SET allowed = false,
-    updated_at = now()
+SET allowed = false
 WHERE role = 'administrative_assistant'
   AND permission_key = 'billing.write';
 
