@@ -747,8 +747,14 @@ window.verifyWebSession = async function () {
     } catch (e) {}
     return updated;
   } catch (e) {
-    if (e?.name === 'AbortError') throw new Error(t('err.sessionVerify') + ' ' + t('err.retryHint'));
-    throw e;
+    // Web boot must remain resilient when the Supabase session endpoint is
+    // temporarily unreachable (e.g. a restricted network path/VPN-off).
+    // A failed session verification is not proof that the application itself
+    // is unavailable. Clear the stale session and let the normal landing/login
+    // flow continue instead of trapping the user on a connection error screen.
+    clearWebSession();
+    console.warn('[web-session] verification unavailable; continuing to landing flow', e);
+    return null;
   } finally {
     clearTimeout(timer);
   }
