@@ -89,7 +89,7 @@ begin
 end $;
 
 do $$
-declare r record; d text; newd text;
+declare r record; d text; newd text; v_changed integer := 0; v_expected integer := 2;
 begin
   for r in
     select p.oid,p.proname,pg_get_functiondef(p.oid) as definition
@@ -101,12 +101,15 @@ begin
       'private\\.web_has_permission\\(\\s*p_session_token\\s*,\\s*''students\\.edit''\\s*,\\s*null\\s*,\\s*null\\s*\\)',
       'private.web_has_student_record_permission(p_session_token, ''students.edit'', ' ||
        case when r.proname='rpc_delete_health_visit' then '''health_visit''' else '''vaccination''' end || ', p_id)','gi');
-    if newd<>d then execute newd; end if;
+    if newd<>d then execute newd; v_changed:=v_changed+1; end if;
   end loop;
-end $$;
+  if v_changed<>v_expected then
+    raise exception 'health/vaccination delete migration coverage mismatch: changed %, expected %', v_changed, v_expected;
+  end if;
+end $;
 
-do $$
-declare r record; d text; newd text;
+do $
+declare r record; d text; newd text; v_changed integer := 0; v_expected integer := 1;
 begin
   select p.oid,pg_get_functiondef(p.oid) as definition into r
     from pg_proc p join pg_namespace n on n.oid=p.pronamespace
@@ -115,8 +118,11 @@ begin
   newd:=regexp_replace(d,
     'private\\.web_has_permission\\(\\s*p_session_token\\s*,\\s*''students\\.edit''\\s*,\\s*null\\s*,\\s*null\\s*\\)',
     'private.web_has_student_class_permission(p_session_token, ''students.edit'', p_class)','gi');
-  if newd<>d then execute newd; end if;
-end $$;
+  if newd<>d then execute newd; v_changed:=v_changed+1; end if;
+  if v_changed<>v_expected then
+    raise exception 'student registration migration coverage mismatch: changed %, expected %', v_changed, v_expected;
+  end if;
+end $;
 
 revoke all on function private.web_has_student_class_permission(text,text,text) from public,anon,authenticated;
 revoke all on function private.web_has_student_permission(text,text,text) from public,anon,authenticated;
