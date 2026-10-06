@@ -405,6 +405,19 @@ test('web bootstrap restores effective role permissions and assignments', () => 
   assert.ok(migration.includes('s.school_id = t.school_id'), 'bootstrap must remain tenant-bound');
 });
 
+test('web bootstrap assignments propagate into APP context', () => {
+  const app = read('js/14_app.js');
+  const assignmentTokens = [
+    "assigned_classes: Array.isArray(webData.assigned_classes) ? webData.assigned_classes : []",
+    "assigned_subjects: Array.isArray(webData.assigned_subjects) ? webData.assigned_subjects : []",
+    "window.APP.assigned_classes = Array.isArray(u.assigned_classes) ? u.assigned_classes : [];",
+    "window.APP.assigned_subjects = Array.isArray(u.assigned_subjects) ? u.assigned_subjects : [];"
+  ];
+  for (const token of assignmentTokens) {
+    assert.ok(app.includes(token), 'web bootstrap assignment propagation missing: ' + token);
+  }
+});
+
 test('role-gated navigation covers canonical permission-backed modules', () => {
   const app = read('js/14_app.js');
   const sidebar = read('js/17_sidebar.js');
