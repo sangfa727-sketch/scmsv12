@@ -439,10 +439,12 @@ test('role-gated navigation covers canonical permission-backed modules', () => {
   assert.ok(sidebar.includes("A.permissions.includes('daily_report.edit') || A.permissions.includes('daily_report.delete')"), 'daily sidebar access must use a valid daily-report permission');
 });
 
-test('Manage Teacher reopen waits for modal close', () => {
+test('Manage Teacher uses a single modal instance after edit', () => {
   const settings = read('js/15_settings.js');
-  assert.ok(settings.includes("closeModal(() => openTeacherManager())"), 'Manage Teacher must reopen from close callback');
-  assert.ok(settings.includes("closeModal(() => { showToast(t('toast.updated')); openTeacherManager(); });"), 'Edit Teacher save must reopen only after close completes');
+  assert.ok(settings.includes("document.querySelector('#modalOverlay .teacher-manager-sheet')"), 'Manager must detect an existing modal instance');
+  assert.ok(settings.includes('async function _refreshTeacherManagerList()'), 'Manager must refresh the existing list instead of reopening a second card');
+  assert.ok(settings.includes("closeModal(() => {\n      showToast(t('toast.updated'));\n      _refreshTeacherManagerList();\n    });"), 'Edit Teacher save must refresh the existing Manager after the edit modal closes');
+  assert.ok(!settings.includes("closeModal(() => { showToast(t('toast.updated')); openTeacherManager(); });"), 'Edit Teacher save must not reopen a second Manager modal');
   assert.ok(!settings.includes("closeModal(); setTimeout(() => openTeacherManager(), 190)"), 'stale timeout reopen race must be removed');
 });
 
