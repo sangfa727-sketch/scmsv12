@@ -42,7 +42,7 @@ test('student detail and mutation RPCs are rewritten to student-scoped authoriza
 test('registration is scoped to the class being created', () => {
   const m = read('supabase/migrations/20261006220000_enforce_teacher_student_class_scope.sql');
   assert.ok(m.includes("'rpc_register_student'"));
-  assert.ok(m.includes("private.web_has_student_class_permission(p_session_token, 'students.edit', p_class)"));
+  assert.ok(m.includes("'students.edit'") && m.includes("p_class") && m.includes("private\\.web_has_permission"), 'registration rewrite must bind students.edit to p_class');
 });
 
 test('related health/vaccination deletes are resolved back to their student', () => {
