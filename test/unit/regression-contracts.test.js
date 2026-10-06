@@ -505,3 +505,22 @@ test('administrative assistant keeps attendance view/edit distinction', () => {
   assert.ok(access.includes('attendance.view'), 'attendance view permission must remain defined');
   assert.ok(access.includes('attendance.edit'), 'attendance edit permission must remain defined');
 });
+
+
+test('action FABs require mutation permissions', () => {
+  const app = read('js/14_app.js');
+  const expected = [
+    "students: ['students.edit']",
+    "daily: ['daily_report.edit', 'daily_report.delete']",
+    "hw: ['homework.create', 'homework.edit']",
+    "grades: ['assessment.create', 'assessment.edit']",
+    "billing: ['billing.write', 'billing.class.write']",
+    "admissions: ['admissions.manage']",
+    "library: ['library.manage']",
+    "transport: ['transport.manage']"
+  ];
+  for (const token of expected) assert.ok(app.includes(token), 'FAB mutation gate missing: ' + token);
+  assert.ok(app.includes('FAB_PERMISSION'), 'FAB permission contract must exist');
+  assert.ok(app.includes('required.some((p) => perms.includes(p))'), 'FAB must require an effective permission');
+  assert.ok(app.includes("timetable: null"), 'unsupported timetable mutation must not be inferred as a teacher permission');
+});
