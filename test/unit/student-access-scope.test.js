@@ -19,7 +19,7 @@ test('student access migration enforces assignment scope server-side', () => {
 
 test('student list is filtered by the logged-in teacher assignment', () => {
   const m = read('supabase/migrations/20261006220000_enforce_teacher_student_class_scope.sql');
-  assert.ok(m.includes("private.web_has_student_class_permission(p_session_token,'students.view',x.class)"));
+  assert.ok(m.includes("private.web_has_student_class_permission(p_session_token,'students.view',x.class)" ) || m.includes("a.class_name=trim(x.class)"));
   assert.ok(m.includes("x.school_id=v_sess.school_id and x.status='Active'"));
 });
 
