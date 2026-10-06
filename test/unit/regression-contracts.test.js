@@ -399,7 +399,7 @@ test('web bootstrap restores effective role permissions and assignments', () => 
     "'assigned_classes', v_assigned_classes",
     "'assigned_subjects', v_assigned_subjects"
   ]) assert.ok(migration.includes(token), 'web bootstrap permission contract missing: ' + token);
-  assert.ok(migration.includes('global teacher override'), 'global override precedence must be documented');
+  assert.ok(migration.includes('when go.allowed is not null then go.allowed'), 'global override precedence must be explicit');
   assert.ok(migration.includes('scope_type <> \'global\''), 'scoped teacher permissions must be considered');
   assert.ok(migration.includes("t.status = 'active'"), 'bootstrap must remain active-teacher gated');
   assert.ok(migration.includes('s.school_id = t.school_id'), 'bootstrap must remain tenant-bound');
