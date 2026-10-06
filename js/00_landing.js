@@ -511,7 +511,7 @@ window.openWebLoginModal = function () {
 
       <label class="field-label">Password</label>
       <input class="form-input" id="webLoginPin" type="password" autocomplete="current-password"
-             placeholder="••••••••" autocomplete="current-password" onkeydown="if(event.key==='Enter')doWebLogin()">
+             placeholder="••••••••" onkeydown="if(event.key==='Enter')doWebLogin()">
 
       <div id="webLoginError" class="form-error" style="display:none"></div>
 
