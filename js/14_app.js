@@ -96,8 +96,11 @@ async function initApp() {
     }
     if (!isTWA() && SCMS_CONFIG.BACKEND_ENABLED !== false) {
       const saved = (typeof getSavedSession === 'function') ? getSavedSession() : null;
-      if (saved && saved.telegram_id) {
-        // Silent login: reuse saved telegram_id for bootstrap
+      if (saved && saved.telegram_id && isTWA()) {
+        // Legacy Telegram sessions are only valid inside Telegram. On the
+        // normal web app, do not route boot through n8n just because an old
+        // Telegram session remains in storage; that can trap VPN-off users
+        // behind the legacy n8n network path. Use the web-session/login flow.
         telegram_id = String(saved.telegram_id);
         window.APP.savedSession = saved;
       } else if (typeof verifyWebSession === 'function') {
