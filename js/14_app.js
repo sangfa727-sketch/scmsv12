@@ -166,7 +166,9 @@ async function initApp() {
             telegram_id:  webData.telegram_id || null,
             photo_url:    webData.teacher_photo_url || '',
             ui_prefs:     webData.ui_prefs || {},
-          permissions:  Array.isArray(webData.permissions) ? webData.permissions : [],
+            assigned_classes: Array.isArray(webData.assigned_classes) ? webData.assigned_classes : [],
+            assigned_subjects: Array.isArray(webData.assigned_subjects) ? webData.assigned_subjects : [],
+            permissions:  Array.isArray(webData.permissions) ? webData.permissions : [],
           },
           config:        webData.school_config || {},
           // The lists below will be filled by a follow-up fetch
