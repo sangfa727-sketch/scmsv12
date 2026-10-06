@@ -234,6 +234,29 @@ async function _refreshTeacherManagerList() {
   }
 }
 
+function _teacherLifecycleCopy(action) {
+  const lang = window.I18N?.current || 'en';
+  const copy = {en:{deactivate:'Deactivate',reactivate:'Reactivate',confirmDeactivate:'Deactivate this teacher account? Their active web sessions will be signed out immediately.',confirmReactivate:'Reactivate this teacher account?',deactivated:'Teacher account deactivated.',reactivated:'Teacher account reactivated.'},my:{deactivate:'အကောင့်ပိတ်မည်',reactivate:'အကောင့်ပြန်ဖွင့်မည်',confirmDeactivate:'ဤဆရာ/ဆရာမအကောင့်ကို ပိတ်မည်လား။ လက်ရှိ web session များကို ချက်ချင်း sign out လုပ်မည်။',confirmReactivate:'ဤဆရာ/ဆရာမအကောင့်ကို ပြန်ဖွင့်မည်လား။',deactivated:'ဆရာ/ဆရာမအကောင့် ပိတ်ပြီးပါပြီ။',reactivated:'ဆရာ/ဆရာမအကောင့် ပြန်ဖွင့်ပြီးပါပြီ။'},zh:{deactivate:'停用',reactivate:'重新启用',confirmDeactivate:'确定停用此教师账户吗？其当前 Web 会话将立即退出。',confirmReactivate:'确定重新启用此教师账户吗？',deactivated:'教师账户已停用。',reactivated:'教师账户已重新启用。'},th:{deactivate:'ปิดใช้งาน',reactivate:'เปิดใช้งาน',confirmDeactivate:'ต้องการปิดใช้งานบัญชีครูนี้หรือไม่? เซสชันเว็บที่ใช้งานอยู่จะถูกออกจากระบบทันที',confirmReactivate:'ต้องการเปิดใช้งานบัญชีครูนี้อีกครั้งหรือไม่',deactivated:'ปิดใช้งานบัญชีครูแล้ว',reactivated:'เปิดใช้งานบัญชีครูแล้ว'},jp:{deactivate:'無効化',reactivate:'再有効化',confirmDeactivate:'この教師アカウントを無効化しますか？現在のWebセッションは直ちにサインアウトされます。',confirmReactivate:'この教師アカウントを再有効化しますか？',deactivated:'教師アカウントを無効化しました。',reactivated:'教師アカウントを再有効化しました。'},km:{deactivate:'បិទដំណើរការ',reactivate:'បើកដំណើរការឡើងវិញ',confirmDeactivate:'តើបិទគណនីគ្រូនេះឬទេ? Web session ដែលកំពុងប្រើនឹងត្រូវចាកចេញភ្លាមៗ។',confirmReactivate:'តើបើកគណនីគ្រូនេះឡើងវិញឬទេ?',deactivated:'បានបិទគណនីគ្រូ។',reactivated:'បានបើកគណនីគ្រូឡើងវិញ។'},ms:{deactivate:'Nyahaktifkan',reactivate:'Aktifkan Semula',confirmDeactivate:'Nyahaktifkan akaun guru ini? Semua sesi web aktif akan dilog keluar serta-merta.',confirmReactivate:'Aktifkan semula akaun guru ini?',deactivated:'Akaun guru telah dinyahaktifkan.',reactivated:'Akaun guru telah diaktifkan semula.'}};
+  return (copy[lang] || copy.en)[action] || copy.en[action] || action;
+}
+window.setTeacherLifecycle = async function(teacherId, action) {
+  if (!window.APP?.is_admin) { showToast(t('cg.adminOnly')); return; }
+  if (!teacherId || !['deactivate','reactivate'].includes(action)) return;
+  if (!window.confirm(_teacherLifecycleCopy(action === 'deactivate' ? 'confirmDeactivate' : 'confirmReactivate'))) return;
+  const sess = getWebSession();
+  if (!sess?.session_token) { showToast(t('ct.sessionExpired')); return; }
+  const rpc = action === 'deactivate' ? 'rpc_admin_deactivate_teacher' : 'rpc_admin_reactivate_teacher';
+  document.querySelectorAll('[data-teacher-lifecycle]').forEach(btn => { btn.disabled = true; btn.setAttribute('aria-busy','true'); });
+  try {
+    const result = await _webRpc(rpc, { p_session_token: sess.session_token, p_teacher_id: teacherId });
+    if (!result?.ok) throw new Error(result?.error || 'lifecycle_failed');
+    _invalidateTeacherManagerCache();
+    showToast(_teacherLifecycleCopy(action === 'deactivate' ? 'deactivated' : 'reactivated'));
+    await _refreshTeacherManagerList();
+  } catch (e) { showToast(e?.message || String(e)); }
+  finally { document.querySelectorAll('[data-teacher-lifecycle]').forEach(btn => { btn.disabled = false; btn.removeAttribute('aria-busy'); }); }
+};
+
 function _renderTeacherList(teachers) {
   const el = document.getElementById('teacherList');
   if (!el) return;
@@ -258,7 +281,7 @@ function _renderTeacherList(teachers) {
           <button class="icon-btn-mini teacher-edit-btn" onclick="event.stopPropagation(); openTeacherEditModal('${esc(teacher.teacher_id)}')" title="${esc(t('common.edit'))}">✏️</button>
           <button class="icon-btn-mini teacher-access-btn" onclick="event.stopPropagation(); closeModal(() => openTeacherAccess('${esc(teacher.teacher_id)}', '${esc(teacher.teacher_name)}'))" title="${esc(t('tm.title'))}">🔐</button>
           <button class="icon-btn-mini" onclick="event.stopPropagation(); openTeacherCardModal('${esc(teacher.teacher_id)}', '${esc(teacher.teacher_name)}', '${esc(teacher.login_name || '')}')" title="${esc(t('tm.idCard'))}">🪪</button>
-          <button class="icon-btn-mini" onclick="event.stopPropagation(); resetTeacherPassword('${esc(teacher.teacher_id)}', '${esc(teacher.teacher_name)}')" title="${esc(t('tm.resetPassword'))}">🔑</button>
+          <button class="icon-btn-mini" onclick="event.stopPropagation(); resetTeacherPassword('${esc(teacher.teacher_id)}', '${esc(teacher.teacher_name)}')" title="${esc(t('tm.resetPassword'))}">🔑</button>\n          <button class="icon-btn-mini" data-teacher-lifecycle type="button" onclick="event.stopPropagation(); setTeacherLifecycle('${esc(teacher.teacher_id)}', '${teacher.status === 'active' ? 'deactivate' : 'reactivate'}')" title="${esc(_teacherLifecycleCopy(teacher.status === 'active' ? 'deactivate' : 'reactivate'))}">${teacher.status === 'active' ? '⏸️' : '▶️'}</button>
         </div>
       </div>`;
   }).join('');
