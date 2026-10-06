@@ -34,31 +34,21 @@ function _teacherProfileFromCache(teacherId) {
 async function _fetchTeacherManagerRows() {
   if (_teacherManagerCacheFresh()) return _teacherManagerCache.rows;
   if (_teacherManagerLoadPromise) return _teacherManagerLoadPromise;
+
   _teacherManagerLoadPromise = (async () => {
-    let sess = getWebSession();
+    const sess = getWebSession();
     if (!sess?.session_token) throw new Error('Web session is missing or expired');
+
     try {
       const res = await _webRpc('rpc_admin_list_teachers', { p_session_token: sess.session_token });
       const rows = Array.isArray(res?.rows) ? res.rows : [];
       _teacherManagerCache = { rows, at: Date.now() };
       return rows;
-    } catch (firstError) {
-      if (typeof verifyWebSession === 'function') {
-        const verified = await verifyWebSession();
-        if (verified?.session_token) {
-          window.APP.webSession = verified;
-          sess = verified;
-          const res = await _webRpc('rpc_admin_list_teachers', { p_session_token: sess.session_token });
-          const rows = Array.isArray(res?.rows) ? res.rows : [];
-          _teacherManagerCache = { rows, at: Date.now() };
-          return rows;
-        }
-      }
-      throw firstError;
     } finally {
       _teacherManagerLoadPromise = null;
     }
   })();
+
   return _teacherManagerLoadPromise;
 }
 function _prefetchTeacherManagerList() { _fetchTeacherManagerRows().catch(() => {}); }
@@ -379,9 +369,11 @@ window.openTeacherEditModal = async function(teacherId) {
   if (!sess?.session_token) { showToast(t('ct.sessionExpired')); return; }
   let teachers = [];
   try {
-    const res = await _webRpc('rpc_admin_list_teachers', { p_session_token: sess.session_token });
-    teachers = Array.isArray(res?.rows) ? res.rows : [];
-  } catch (_) {}
+    teachers = await _fetchTeacherManagerRows();
+  } catch (e) {
+    showToast(e?.message || t('tm.loadFailed'));
+    return;
+  }
   const teacher = teachers.find(row => row.teacher_id === teacherId);
   if (!teacher) { showToast(t('tm.loadFailed')); return; }
 
@@ -431,7 +423,18 @@ window.saveTeacherEdit = async function(teacherId) {
       p_teacher_name: name, p_login_name: login, p_email: email, p_role: role
     });
     if (!result?.ok) throw new Error(result?.error || 'save_failed');
-    _invalidateTeacherManagerCache();
+    // Keep the manager list hot after an edit so reopening the manager never
+    // shows an avoidable loading state or issues a second RPC request.
+    const updatedTeacher = result?.teacher;
+    const currentRows = Array.isArray(_teacherManagerCache?.rows) ? _teacherManagerCache.rows : [];
+    if (updatedTeacher?.teacher_id) {
+      const nextRows = currentRows.some(row => row.teacher_id === updatedTeacher.teacher_id)
+        ? currentRows.map(row => row.teacher_id === updatedTeacher.teacher_id ? { ...row, ...updatedTeacher } : row)
+        : [...currentRows, updatedTeacher];
+      _teacherManagerCache = { rows: nextRows, at: Date.now() };
+    } else {
+      _invalidateTeacherManagerCache();
+    }
     closeModal(); showToast(t('toast.updated'));
     setTimeout(() => openTeacherManager(), 190);
   } catch (e) {
