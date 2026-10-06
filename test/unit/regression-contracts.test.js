@@ -135,6 +135,17 @@ test('shared loader keeps APP compatibility and supports explicit refresh', () =
   assert.ok(loader.includes('refreshAllData'), 'public refresh facade missing');
 });
 
+test('attendance write RPC remains session-bound and permission-checked', () => {
+  const attendance = read('supabase/migrations/20261006122628_sync_web_bootstrap_teacher_permissions.sql');
+  assert.ok(attendance.includes('role_permissions'), 'bootstrap permission source must remain canonical');
+
+  const app = read('js/05_attendance.js');
+  assert.ok(app.includes('API.saveAttendance'), 'attendance UI must use the authenticated API path');
+
+  const rpc = read('supabase/migrations/20261003110000_daily_report_secure_rpc.sql');
+  assert.ok(rpc.includes('private.web_has_permission'), 'secure RPC contracts must retain backend permission enforcement');
+});
+
 console.log('SCMS regression contract suite loaded.');
 
 test('student RPCs enforce the existing student permission contracts', () => {
