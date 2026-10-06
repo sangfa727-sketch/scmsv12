@@ -489,7 +489,7 @@ window.clearSavedSession = function () {
 /* ============================================================================
    WEB LOGIN (v11.6 — Phase 1)
    ============================================================================
-   Login name + PIN/password login, separate from the Telegram path.
+   Email + password login for the standard web/admin sign-in, separate from the Teacher Login Name/PIN path.
    Session token stored in localStorage, verified on each app boot.
 ============================================================================ */
 
@@ -505,11 +505,11 @@ window.openWebLoginModal = function () {
       <h3 class="modal-title">${t('login.title')}</h3>
       <p class="modal-subtitle">${t('login.sub')}</p>
 
-      <label class="field-label">Teacher ID / Login Name</label>
+      <label class="field-label">Email</label>
       <input class="form-input" id="webLoginIdentity" type="text" autocomplete="username"
-             placeholder="Teacher ID or Login Name" autocapitalize="off" autocorrect="off">
+             placeholder="Email address" autocapitalize="off" autocorrect="off">
 
-      <label class="field-label">PIN / Password</label>
+      <label class="field-label">Password</label>
       <input class="form-input" id="webLoginPin" type="password" autocomplete="current-password"
              placeholder="••••••••" onkeydown="if(event.key==='Enter')doWebLogin()">
 
@@ -677,7 +677,7 @@ window.doWebLogin = async function () {
   btn.textContent = t('login.signingIn');
 
   try {
-    const resp = await _fetchWithTimeout(`${SCMS_CONFIG.SUPABASE_URL}/rest/v1/rpc/rpc_teacher_login_by_login_name`, {
+    const resp = await _fetchWithTimeout(`${SCMS_CONFIG.SUPABASE_URL}/rest/v1/rpc/rpc_teacher_login`, {
       method: 'POST',
       headers: {
         'apikey':        SCMS_CONFIG.SUPABASE_ANON,
@@ -685,7 +685,7 @@ window.doWebLogin = async function () {
         'Content-Type':  'application/json',
       },
       body: JSON.stringify({
-        p_login_name: identity,
+        p_email: identity,
         p_password: pin,
         p_device_ua:  navigator.userAgent.slice(0, 200),
       }),
