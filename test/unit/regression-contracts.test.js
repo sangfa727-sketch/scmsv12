@@ -540,10 +540,14 @@ test('action FABs require mutation permissions', () => {
 
 test('Manage Access displays effective permission state, not only role defaults', () => {
   const access = read('js/29_teacher_access.js');
+  const styles = read('styles.css');
   assert.ok(access.includes('function _taEffectiveAllowed'), 'effective permission evaluator missing');
   assert.ok(access.includes('private.web_has_permission') === false || access.includes('_taEffectiveAllowed'), 'UI must use the shared effective-state model');
-  for (const token of ['classAssignments','subjectAssignments','teacher.role === \'admin\'','teacher.role === \'super_admin\'','data-effective-state','_taEffectiveLabel','_taStateLabel','allowedState','deniedState','defaultState','notConfiguredState','teacher-access-state-allow','teacher-access-state-deny']) {
+  for (const token of ['classAssignments','subjectAssignments','teacher.role === \'admin\'','teacher.role === \'super_admin\'','data-effective-state','_taEffectiveLabel','_taStateLabel','allowedState','deniedState','defaultState','notConfiguredState']) {
     assert.ok(access.includes(token), 'effective access indicator contract missing: ' + token);
+  }
+  for (const token of ['teacher-access-state-allow','teacher-access-state-deny']) {
+    assert.ok(styles.includes(token), 'effective access state CSS contract missing: ' + token);
   }
   assert.ok(access.includes("permission.permission_key === 'students.view' || permission.permission_key === 'students.edit'"), 'student permissions must reflect assignment scope in the UI');
   assert.ok(access.includes("['teacher','senior_teacher','assistant_teacher'].includes(teacher.role)"), 'teacher-like student access must be assignment-bound');
