@@ -425,10 +425,13 @@ const PAGE_PERMISSION = Object.freeze({
   dashboard: 'dashboard.view',
   students: 'students.view',
   attend: 'attendance.view',
+  daily: 'daily_report.edit',
   hw: 'homework.view',
   grades: 'assessment.view',
   billing: 'billing.view',
   admissions: 'admissions.view',
+  library: 'library.view',
+  transport: 'transport.view',
   leave: 'leave.view',
 });
 
@@ -438,6 +441,7 @@ function _pageAccessAllowed(pageId) {
   const permission = PAGE_PERMISSION[pageId];
   if (!permission) return true;
   if (pageId === 'billing') return Array.isArray(A.permissions) && (A.permissions.includes('billing.view') || A.permissions.includes('billing.class.view'));
+  if (pageId === 'daily') return Array.isArray(A.permissions) && (A.permissions.includes('daily_report.edit') || A.permissions.includes('daily_report.delete'));
   return Array.isArray(A.permissions) && A.permissions.includes(permission);
 }
 
