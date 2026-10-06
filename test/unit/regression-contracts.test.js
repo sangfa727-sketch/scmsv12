@@ -491,8 +491,8 @@ test('view permissions do not imply mutation permissions in the navigation contr
   assert.ok(app.includes("billing: 'billing.view'"));
   assert.ok(sidebar.includes("billing: 'billing.view'"));
 
-  const fabSource = app.slice(app.indexOf('function _updateFabForPage'), app.indexOf('function _updateFabForPage') + 9000);
-  assert.ok(fabSource.includes('billing.write') || fabSource.includes('billing.class.write'),
+  const fabSource = app.slice(app.indexOf('const FAB_PERMISSION'), app.indexOf('function _updateFabForPage'));
+  assert.ok(fabSource.includes("billing: ['billing.write', 'billing.class.write']"),
     'billing actions must require a billing mutation permission');
 });
 
