@@ -549,3 +549,17 @@ test('Manage Access displays effective permission state, not only role defaults'
   assert.ok(access.includes("['teacher','senior_teacher','assistant_teacher'].includes(teacher.role)"), 'teacher-like student access must be assignment-bound');
   assert.ok(access.includes('await _renderTeacherAccess();'), 'permission save must re-read persisted state');
 });
+
+
+test('teacher permission Allow/Deny persistence targets the expression-based unique index', () => {
+  const migration = read('supabase/migrations/20261006230000_fix_teacher_permission_upsert_conflict.sql');
+  assert.ok(migration.includes('on conflict ('));
+  assert.ok(migration.includes('teacher_id,'));
+  assert.ok(migration.includes('permission_key,'));
+  assert.ok(migration.includes('scope_type,'));
+  assert.ok(migration.includes('(coalesce(class_name,\'\'))'));
+  assert.ok(migration.includes('(coalesce(subject_id,0))'));
+  assert.ok(migration.includes('allowed=excluded.allowed'));
+  assert.ok(migration.includes('teacher.permission_set'));
+  assert.ok(!migration.includes('on conflict(school_id,teacher_id,p_permission_key'));
+});
