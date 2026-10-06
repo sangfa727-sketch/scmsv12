@@ -494,5 +494,5 @@ test('teacher QR login requires a short-lived one-time challenge', () => {
   assert.match(migration, /'challenge_id', raw_challenge/);
   assert.match(migration, /'error', 'invalid_challenge'/);
 
-  assert.ok(html.includes('js/00_landing.js?v=20261003b'));
+  assert.ok(html.includes('js/00_landing.js?v=20261006a'));
 });
