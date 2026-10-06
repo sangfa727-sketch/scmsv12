@@ -108,7 +108,7 @@ begin
   end if;
 end $;
 
-do $
+do $$
 declare r record; d text; newd text; v_changed integer := 0; v_expected integer := 1;
 begin
   select p.oid,pg_get_functiondef(p.oid) as definition into r
