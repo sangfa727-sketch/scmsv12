@@ -337,6 +337,12 @@ window.teacherAccessSavePermission = async function(select) {
     } else {
       await _teacherAccessRpc('permission_set', root.dataset.teacherId, {p_permission_key:key,p_allowed:select.value === 'allow',p_scope_type:scope,p_class_name:cls,p_subject_id:subject});
     }
+    // Re-read the persisted server state before claiming the change is saved.
+    // This prevents a local <select> value from looking successful when the DB write failed.
+    await _renderTeacherAccess();
     showToast('' + _taUi('saved') + '');
-  } catch(e) { showToast(e?.message || '' + _taUi('saveFailed') + ''); }
+  } catch(e) {
+    await _renderTeacherAccess();
+    showToast(e?.message || '' + _taUi('saveFailed') + '');
+  }
 };
