@@ -93,7 +93,7 @@ begin
     newd:=regexp_replace(d,
       'private\\.web_has_permission\\(\\s*p_session_token\\s*,\\s*''(students\\.(?:view|edit))''\\s*,\\s*null\\s*,\\s*null\\s*\\)',
       case when r.proname='rpc_update_student'
-        then 'private.web_has_student_permission(p_session_token, ''\\1'', p_student_id) OR NOT private.web_has_student_class_permission(p_session_token, ''students.edit'', p_class)'
+        then 'private.web_has_student_permission(p_session_token, ''\\1'', p_student_id) AND private.web_has_student_class_permission(p_session_token, ''students.edit'', p_class)'
         else 'private.web_has_student_permission(p_session_token, ''\\1'', p_student_id)'
       end,'gi');
     if newd<>d then execute newd; v_changed:=v_changed+1; end if;
