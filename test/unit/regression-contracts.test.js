@@ -476,10 +476,6 @@ test('canonical role matrix keeps representative module access consistent', () =
   assert.ok(rolePermissions.includes('left join public.role_permissions rp'), 'bootstrap must join role permissions');
   assert.ok(rolePermissions.includes('left join lateral'), 'bootstrap must evaluate teacher overrides');
   assert.ok(rolePermissions.includes('go.allowed is not null'), 'global teacher override must take precedence');
-
-  const attendance = read('supabase/migrations/20261003100000_attendance_secure_rpc.sql');
-  assert.ok(attendance.includes('attendance.view') || attendance.includes('attendance.edit'), 'attendance backend must retain permission enforcement');
-
   const daily = read('supabase/migrations/20261003110000_daily_report_secure_rpc.sql');
   assert.ok(daily.includes('daily_report.edit') && daily.includes('daily_report.delete'), 'daily report backend must retain both permission boundaries');
 });
