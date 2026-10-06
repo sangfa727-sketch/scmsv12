@@ -540,7 +540,7 @@ test('action FABs require mutation permissions', () => {
 
 test('Manage Access displays effective permission state, not only role defaults', () => {
   const access = read('js/29_teacher_access.js');
-  const styles = read('styles.css');
+  const styles = read('style.css');
   assert.ok(access.includes('function _taEffectiveAllowed'), 'effective permission evaluator missing');
   assert.ok(access.includes('private.web_has_permission') === false || access.includes('_taEffectiveAllowed'), 'UI must use the shared effective-state model');
   for (const token of ['classAssignments','subjectAssignments','teacher.role === \'admin\'','teacher.role === \'super_admin\'','data-effective-state','_taEffectiveLabel','_taStateLabel','allowedState','deniedState','defaultState','notConfiguredState']) {
