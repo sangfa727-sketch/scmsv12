@@ -26,16 +26,26 @@ Object.assign(API, {
     };
 
 
+    const controller = new AbortController();
+    const timer = setTimeout(() => controller.abort(), 12000);
     let resp;
     try {
       resp = await fetch(SCMS_CONFIG.N8N_BOOTSTRAP, {
         method:  'POST',
         headers: { 'Content-Type': 'application/json' },
         body:    JSON.stringify(body),
+        signal: controller.signal,
       });
     } catch (netErr) {
+      if (netErr?.name === 'AbortError') {
+        const err = new Error('Bootstrap request timed out. Please retry.');
+        err.code = 'TIMEOUT';
+        throw err;
+      }
       // Network / CORS / DNS failure
       throw new Error('Network error: ' + (netErr.message || netErr));
+    } finally {
+      clearTimeout(timer);
     }
 
     if (!resp.ok) {
