@@ -489,7 +489,7 @@ window.clearSavedSession = function () {
 /* ============================================================================
    WEB LOGIN (v11.6 — Phase 1)
    ============================================================================
-   Email + password login, separate from the Telegram path.
+   Login name + PIN/password login, separate from the Telegram path.
    Session token stored in localStorage, verified on each app boot.
 ============================================================================ */
 
@@ -677,7 +677,7 @@ window.doWebLogin = async function () {
   btn.textContent = t('login.signingIn');
 
   try {
-    const resp = await _fetchWithTimeout(`${SCMS_CONFIG.SUPABASE_URL}/rest/v1/rpc/rpc_teacher_login`, {
+    const resp = await _fetchWithTimeout(`${SCMS_CONFIG.SUPABASE_URL}/rest/v1/rpc/rpc_teacher_login_by_login_name`, {
       method: 'POST',
       headers: {
         'apikey':        SCMS_CONFIG.SUPABASE_ANON,
@@ -685,8 +685,8 @@ window.doWebLogin = async function () {
         'Content-Type':  'application/json',
       },
       body: JSON.stringify({
-        p_login_name:   identity,
-        p_pin:         pin,
+        p_login_name: identity,
+        p_password: pin,
         p_device_ua:  navigator.userAgent.slice(0, 200),
       }),
     }, 10000);
