@@ -445,3 +445,67 @@ test('Manage Teacher reopen waits for modal close', () => {
   assert.ok(settings.includes("closeModal(() => { showToast(t('toast.updated')); openTeacherManager(); });"), 'Edit Teacher save must reopen only after close completes');
   assert.ok(!settings.includes("closeModal(); setTimeout(() => openTeacherManager(), 190)"), 'stale timeout reopen race must be removed');
 });
+
+
+test('canonical role matrix keeps representative module access consistent', () => {
+  const roles = ['teacher','assistant_teacher','senior_teacher','school_coordinator','administrative_assistant','admin','super_admin'];
+  const migration = read('supabase/migrations/20261006122628_sync_web_bootstrap_teacher_permissions.sql');
+  const app = read('js/14_app.js');
+  const sidebar = read('js/17_sidebar.js');
+
+  assert.equal(roles.length, 7, 'canonical operational role count must remain seven');
+  for (const role of roles) {
+    assert.ok(migration.includes("role_permissions"), role + ' must resolve through role_permissions');
+  }
+
+  for (const token of [
+    "attend: 'attendance.view'",
+    "daily: 'daily_report.edit'",
+    "hw: 'homework.view'",
+    "grades: 'assessment.view'",
+    "billing: 'billing.view'",
+    "library: 'library.view'",
+    "transport: 'transport.view'",
+    "leave: 'leave.view'"
+  ]) {
+    assert.ok(app.includes(token), 'app mapping missing: ' + token);
+    assert.ok(sidebar.includes(token), 'sidebar mapping missing: ' + token);
+  }
+
+  const rolePermissions = read('supabase/migrations/20261006122628_sync_web_bootstrap_teacher_permissions.sql');
+  assert.ok(rolePermissions.includes('left join public.role_permissions rp'), 'bootstrap must join role permissions');
+  assert.ok(rolePermissions.includes('left join lateral'), 'bootstrap must evaluate teacher overrides');
+  assert.ok(rolePermissions.includes('go.allowed is not null'), 'global teacher override must take precedence');
+
+  const attendance = read('supabase/migrations/20261003100000_attendance_secure_rpc.sql');
+  assert.ok(attendance.includes('attendance.view') || attendance.includes('attendance.edit'), 'attendance backend must retain permission enforcement');
+
+  const daily = read('supabase/migrations/20261003110000_daily_report_secure_rpc.sql');
+  assert.ok(daily.includes('daily_report.edit') && daily.includes('daily_report.delete'), 'daily report backend must retain both permission boundaries');
+});
+
+test('view permissions do not imply mutation permissions in the navigation contract', () => {
+  const app = read('js/14_app.js');
+  const sidebar = read('js/17_sidebar.js');
+
+  assert.ok(app.includes("attend: 'attendance.view'"));
+  assert.ok(sidebar.includes("attend: 'attendance.view'"));
+  assert.ok(app.includes("billing: 'billing.view'"));
+  assert.ok(sidebar.includes("billing: 'billing.view'"));
+
+  const fabSource = app.slice(app.indexOf('function _updateFabForPage'), app.indexOf('function _updateFabForPage') + 9000);
+  assert.ok(fabSource.includes('billing.write') || fabSource.includes('billing.class.view'),
+    'billing actions must not be exposed solely by page visibility');
+});
+
+test('administrative assistant keeps attendance view/edit distinction', () => {
+  const migration = read('supabase/migrations/20261006122628_sync_web_bootstrap_teacher_permissions.sql');
+  assert.ok(migration.includes('role_permissions'), 'bootstrap must use canonical role permissions');
+
+  const settings = read('js/15_settings.js');
+  assert.ok(settings.includes('administrative_assistant'), 'role must remain selectable in Teacher Manager');
+
+  const access = read('js/29_teacher_access.js');
+  assert.ok(access.includes('attendance.view'), 'attendance view permission must remain defined');
+  assert.ok(access.includes('attendance.edit'), 'attendance edit permission must remain defined');
+});
