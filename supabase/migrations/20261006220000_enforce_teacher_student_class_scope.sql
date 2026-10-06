@@ -59,7 +59,19 @@ begin
   ) order by x.class,x.name_en),'[]'::jsonb) into v_rows
   from public.students x
   where x.school_id=v_sess.school_id and x.status='Active'
-    and private.web_has_student_class_permission(p_session_token,'students.view',x.class);
+    and (
+      v_sess.role in ('admin','super_admin','school_coordinator','administrative_assistant')
+      or (
+        v_sess.role in ('teacher','senior_teacher','assistant_teacher')
+        and exists (
+          select 1 from public.teacher_class_assignments a
+          where a.school_id=v_sess.school_id
+            and a.teacher_id=v_sess.teacher_id
+            and a.class_name=trim(x.class)
+            and a.is_active=true
+        )
+      )
+    );
   return jsonb_build_object('ok',true,'rows',v_rows);
 end; $$;
 
@@ -80,7 +92,10 @@ begin
     d:=r.definition;
     newd:=regexp_replace(d,
       'private\\.web_has_permission\\(\\s*p_session_token\\s*,\\s*''(students\\.(?:view|edit))''\\s*,\\s*null\\s*,\\s*null\\s*\\)',
-      'private.web_has_student_permission(p_session_token, ''\\1'', p_student_id)','gi');
+      case when r.proname='rpc_update_student'
+        then 'private.web_has_student_permission(p_session_token, ''\\1'', p_student_id) OR NOT private.web_has_student_class_permission(p_session_token, ''students.edit'', p_class)'
+        else 'private.web_has_student_permission(p_session_token, ''\\1'', p_student_id)'
+      end,'gi');
     if newd<>d then execute newd; v_changed:=v_changed+1; end if;
   end loop;
   if v_changed<>v_expected then
