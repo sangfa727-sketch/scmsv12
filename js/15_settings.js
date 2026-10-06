@@ -435,8 +435,17 @@ window.saveTeacherEdit = async function(teacherId) {
     } else {
       _invalidateTeacherManagerCache();
     }
-    closeModal(); showToast(t('toast.updated'));
-    setTimeout(() => openTeacherManager(), 190);
+    closeModal();
+    showToast(t('toast.updated'));
+
+    // Edit Teacher is opened on top of Manage Teachers. Do not reopen a second
+    // manager modal after saving; update the existing underlying list in place.
+    // This prevents stacked manager cards and the second modal's loading state.
+    const listEl = document.getElementById('teacherList');
+    if (listEl) {
+      const rows = Array.isArray(_teacherManagerCache?.rows) ? _teacherManagerCache.rows : [];
+      _renderTeacherList(rows);
+    }
   } catch (e) {
     err.textContent = e?.message || String(e); err.style.display = 'block';
   } finally {
