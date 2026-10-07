@@ -208,3 +208,20 @@ test('teacher management mutation and access entry points fail closed for non-ad
   assert.ok(rpcIdx >= 0, '_teacherAccessRpc missing');
   assert.match(access.slice(rpcIdx, rpcIdx + 700), /if \(!window\.APP\?\.is_admin\) throw new Error\('ADMIN_REQUIRED'\)/);
 });
+
+test('billing mutation and activation action handlers fail closed for unauthorized UI calls', () => {
+  const source = read('js/21_billing.js');
+
+  assert.match(source, /function _billingCanActivateStudent\(\)/);
+  for (const [fn, guard] of [
+    ['_saveNewInvoice', '_billingCanWrite'],
+    ['_saveRecordPayment', '_billingCanWrite'],
+    ['_saveNewFeeItem', '_billingCanManageFees'],
+    ['_makeStudentActive', '_billingCanActivateStudent'],
+  ]) {
+    const idx = source.indexOf('window.' + fn);
+    assert.ok(idx >= 0, fn + ' missing');
+    const block = source.slice(idx, idx + 500);
+    assert.match(block, new RegExp('if \\(!' + guard + '\\(\\)\\)'), fn + ' must fail closed');
+  }
+});
