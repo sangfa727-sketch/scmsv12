@@ -1,10 +1,18 @@
 -- Security hardening: require daily_report.view for daily report reads.
 -- Keep the change isolated from the broader incident hardening migration.
 
-INSERT INTO public.permission_definitions(permission_key, scope_type, is_active)
-VALUES ('daily_report.view', 'class', true)
+INSERT INTO public.permission_definitions(permission_key, category, description, scope_type, is_active)
+VALUES (
+  'daily_report.view',
+  'daily',
+  'View daily reports for assigned classes',
+  'class',
+  true
+)
 ON CONFLICT(permission_key) DO UPDATE
-SET scope_type = EXCLUDED.scope_type,
+SET category = EXCLUDED.category,
+    description = EXCLUDED.description,
+    scope_type = EXCLUDED.scope_type,
     is_active = EXCLUDED.is_active;
 
 INSERT INTO public.role_permissions(role, permission_key, allowed)
