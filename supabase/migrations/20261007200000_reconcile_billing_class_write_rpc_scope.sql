@@ -195,7 +195,7 @@ begin
       return jsonb_build_object('ok',false,'error','description_required');
     end if;
     if nullif(v_item->>'amount','') is null
-       or (v_item->>'amount') !~ '^([0-9]+)(\\.[0-9]+)?$' then
+       or (v_item->>'amount') !~ '^([0-9]+)(\.[0-9]+)?$' then
       return jsonb_build_object('ok',false,'error','invalid_amount');
     end if;
     v_amount:=(v_item->>'amount')::numeric;
