@@ -97,7 +97,8 @@ function _renderDailyList(cls) {
   }).join('');
 }
 
-window.confirmDeleteDaily = function(id) {\n  if (typeof hasWebPermission === 'function' && !hasWebPermission('daily_report.delete')) { showToast('Permission denied'); return; }
+window.confirmDeleteDaily = function(id) {
+  if (typeof hasWebPermission === 'function' && !hasWebPermission('daily_report.delete')) { showToast('Permission denied'); return; }
   if (!confirm(t('daily.confirmDelete'))) return;
   doDeleteDaily(id);
 };
@@ -115,7 +116,8 @@ async function doDeleteDaily(id) {
 
 // ─── Daily report modal ───────────────────────────────────────────────────
 
-window.openDailyModal = function(studentId, studentName) {\n  if (typeof hasWebPermission === 'function' && !hasWebPermission('daily_report.edit')) { showToast('Permission denied'); return; }
+window.openDailyModal = function(studentId, studentName) {
+  if (typeof hasWebPermission === 'function' && !hasWebPermission('daily_report.edit')) { showToast('Permission denied'); return; }
   const existing = window.APP.dailyReports.find(
     r => r.date === new Date().toISOString().slice(0, 10) &&
          (r.student_id === studentId || r.name_en === studentName)
@@ -230,7 +232,8 @@ window.saveDailyReport = async function(studentId, studentName) {
 };
 
 // FAB entry point — open the student picker first, then jump into the modal
-window.openDailyReportModal = function() {\n  if (typeof hasWebPermission === 'function' && !hasWebPermission('daily_report.edit')) { showToast('Permission denied'); return; }
+window.openDailyReportModal = function() {
+  if (typeof hasWebPermission === 'function' && !hasWebPermission('daily_report.edit')) { showToast('Permission denied'); return; }
   openStudentPicker({
     title:       t('daily.pickerTitle'),
     subtitle:    t('daily.pickerSub', { date: new Date().toLocaleDateString(I18N.dateLocale(), { weekday:'long', month:'long', day:'numeric' }) }),
