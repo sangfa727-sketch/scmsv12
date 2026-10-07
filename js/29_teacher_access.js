@@ -137,6 +137,8 @@ function _taAssignmentTypeLabel(type) {
 }
 
 async function _teacherAccessRpc(action, teacherId, extra) {
+  // Manage Access is an administrative capability. Fail closed in the UI; the RPC remains authoritative.
+  if (!window.APP?.is_admin) throw new Error('ADMIN_REQUIRED');
   const sess = getWebSession();
   if (!sess?.session_token) throw new Error('AUTH_REQUIRED');
   return _webRpc('rpc_manage_teacher_access', Object.assign({
@@ -338,6 +340,11 @@ async function _renderTeacherAccess() {
 }
 
 window.openTeacherAccess = async function(teacherId, teacherName) {
+  if (!window.APP?.is_admin) {
+    showToast(t('cg.adminOnly'));
+    return;
+  }
+
   /*
    * Do not paint the generic modal loading sheet.  The generic modal starts
    * with its own full-width/bottom-sheet animation, so showing "Loading…"
