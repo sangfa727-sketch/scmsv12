@@ -447,6 +447,13 @@ function _pageAccessAllowed(pageId) {
   return Array.isArray(A.permissions) && A.permissions.includes(permission);
 }
 
+// UI affordances are convenience only; server-side RPC authorization remains authoritative.
+window.hasWebPermission = function(permissionKey) {
+  const A = window.APP || {};
+  if (A.platform !== 'web' || A.is_admin) return true;
+  return Array.isArray(A.permissions) && A.permissions.includes(permissionKey);
+};
+
 window.goToPage = function(pageId) {
   if (!pageId) return;
   if (!_pageAccessAllowed(pageId)) {
@@ -776,7 +783,7 @@ const FAB_PERMISSION = {
   admissions: ['admissions.manage'],
   library: ['library.manage'],
   transport: ['transport.manage'],
-  timetable: null,
+  timetable: ['timetable.edit'],
   incidents: null,
   parents: null,
 };
