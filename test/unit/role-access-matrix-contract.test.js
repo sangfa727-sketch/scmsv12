@@ -75,3 +75,20 @@ test('Billing whole-school versus class-scoped authority is explicit', () => {
     assert.equal(has(ROLE_MATRIX[role].billing, 'fees.manage'), true, role);
   }
 });
+
+
+test('backend billing role matrix is explicitly locked in the hardening migration', () => {
+  const migration = read('supabase/migrations/20261005120000_role_access_billing_settings_hardening.sql');
+
+  for (const role of ['teacher','assistant_teacher','senior_teacher','school_coordinator','administrative_assistant']) {
+    const roleBlock = migration.match(new RegExp(`update public\\\\.role_permissions[\\\\s\\\\S]{0,900}where role in \\(\\\\'\\${role}\\\\'\\`));
+    assert.ok(roleBlock, role + ' role billing update missing');
+  }
+
+  assert.match(migration, /join public\\.permission_definitions p on p\\.permission_key in \\('billing\\.class\\.view','billing\\.class\\.write'\\)/);
+  assert.match(migration, /select r\\.role,p\\.permission_key,true[\\s\\S]{0,250}from \\(values \\('admin'\\),\\('super_admin'\\)\\)/);
+  assert.match(migration, /p\\.permission_key='billing\\.fees\\.manage'/);
+
+  // Non-admin operational roles must not receive whole-school billing grants here.
+  assert.doesNotMatch(migration, /from \\(values \\('teacher'\\),\\('assistant_teacher'\\),\\('senior_teacher'\\),\\('school_coordinator'\\),\\('administrative_assistant'\\)\\)[\\s\\S]{0,500}permission_key in \\('billing\\.view','billing\\.write'\\)/);
+});
