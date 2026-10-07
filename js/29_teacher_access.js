@@ -123,7 +123,30 @@ function _taCategory(key) {
   };
   return dict[_taLang()]?.[key] || dict.en[key] || key;
 }
-function _taDescription(key, fallback) { return _taText(key); }
+function _taPermissionFallback(key) {
+  const raw = String(key || '').trim();
+  if (!raw) return '';
+  return raw.split('.').map(function(part) {
+    return part.replace(/[_-]+/g, ' ').replace(/\b\w/g, function(c){ return c.toUpperCase(); });
+  }).join(' · ');
+}
+function _taText(key) {
+  const lang = _taLang();
+  const dict = {
+    en: {'daily_report.view':'View Daily Reports','daily_report.edit':'Edit Daily Reports','daily_report.delete':'Delete Daily Reports','library.view':'View Library','library.manage':'Manage Library','report_card.view':'View Report Cards','timetable.view':'View Timetable','timetable.edit':'Edit Timetable','transport.view':'View Transport','transport.manage':'Manage Transport'},
+    my: {'daily_report.view':'နေ့စဉ်အစီရင်ခံစာ ကြည့်ရှုရန်','daily_report.edit':'နေ့စဉ်အစီရင်ခံစာ ပြင်ဆင်ရန်','daily_report.delete':'နေ့စဉ်အစီရင်ခံစာ ဖျက်ရန်','library.view':'စာကြည့်တိုက် ကြည့်ရှုရန်','library.manage':'စာကြည့်တိုက် စီမံရန်','report_card.view':'Report Card ကြည့်ရှုရန်','timetable.view':'အချိန်ဇယား ကြည့်ရှုရန်','timetable.edit':'အချိန်ဇယား ပြင်ဆင်ရန်','transport.view':'ပို့ဆောင်ရေး ကြည့်ရှုရန်','transport.manage':'ပို့ဆောင်ရေး စီမံရန်'},
+    ms: {'daily_report.view':'Lihat Laporan Harian','daily_report.edit':'Edit Laporan Harian','daily_report.delete':'Padam Laporan Harian','library.view':'Lihat Perpustakaan','library.manage':'Urus Perpustakaan','report_card.view':'Lihat Kad Laporan','timetable.view':'Lihat Jadual Waktu','timetable.edit':'Edit Jadual Waktu','transport.view':'Lihat Pengangkutan','transport.manage':'Urus Pengangkutan'},
+    th: {'daily_report.view':'ดูรายงานประจำวัน','daily_report.edit':'แก้ไขรายงานประจำวัน','daily_report.delete':'ลบรายงานประจำวัน','library.view':'ดูห้องสมุด','library.manage':'จัดการห้องสมุด','report_card.view':'ดูสมุดรายงาน','timetable.view':'ดูตารางเรียน','timetable.edit':'แก้ไขตารางเรียน','transport.view':'ดูการเดินทาง','transport.manage':'จัดการการเดินทาง'},
+    jp: {'daily_report.view':'日次レポートを見る','daily_report.edit':'日次レポートを編集','daily_report.delete':'日次レポートを削除','library.view':'図書館を見る','library.manage':'図書館を管理','report_card.view':'成績表を見る','timetable.view':'時間割を見る','timetable.edit':'時間割を編集','transport.view':'送迎を見る','transport.manage':'送迎を管理'},
+    zh: {'daily_report.view':'查看日报','daily_report.edit':'编辑日报','daily_report.delete':'删除日报','library.view':'查看图书馆','library.manage':'管理图书馆','report_card.view':'查看成绩单','timetable.view':'查看课表','timetable.edit':'编辑课表','transport.view':'查看交通','transport.manage':'管理交通'},
+    km: {'daily_report.view':'មើលរបាយការណ៍ប្រចាំថ្ងៃ','daily_report.edit':'កែសម្រួលរបាយការណ៍ប្រចាំថ្ងៃ','daily_report.delete':'លុបរបាយការណ៍ប្រចាំថ្ងៃ','library.view':'មើលបណ្ណាល័យ','library.manage':'គ្រប់គ្រងបណ្ណាល័យ','report_card.view':'មើលប័ណ្ណរបាយការណ៍','timetable.view':'មើលកាលវិភាគ','timetable.edit':'កែសម្រួលកាលវិភាគ','transport.view':'មើលការដឹកជញ្ជូន','transport.manage':'គ្រប់គ្រងការដឹកជញ្ជូន'}
+  };
+  const existing = (dict[lang] && dict[lang][key]) || null;
+  if (existing) return existing;
+  const base = dict.en[key];
+  return base || _taPermissionFallback(key);
+}
+function _taDescription(key, fallback) { return _taText(key) || fallback || ''; }
 function _taAssignmentTypeLabel(type) {
   const dict = {
     en:{class_teacher:'Class Teacher',assistant:'Assistant Teacher',subject_teacher:'Subject Teacher',other:'Other'},
