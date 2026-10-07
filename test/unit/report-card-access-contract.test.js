@@ -6,11 +6,13 @@ const path = require('node:path');
 const ROOT = path.resolve(__dirname, '..', '..');
 const read = (file) => fs.readFileSync(path.join(ROOT, file), 'utf8');
 
-test('report-card RPC enforces class-scoped assessment.view before returning grades', () => {
+test('report-card RPC enforces dedicated class-scoped report_card.view before returning grades', () => {
   const migration = read('supabase/migrations/20261007130000_report_card_access_scope.sql');
   assert.ok(migration.includes('CREATE OR REPLACE FUNCTION public.rpc_get_report_card'));
+  assert.ok(migration.includes('permission_key'));
+  assert.ok(migration.includes("'report_card.view'"));
+  assert.ok(migration.includes("'class'"));
   assert.ok(migration.includes("private.web_has_permission("));
-  assert.ok(migration.includes("'assessment.view'"));
   assert.ok(migration.includes("trim(p_class)"));
   assert.ok(migration.includes("'permission_denied'"));
   assert.ok(migration.includes("st.class = trim(p_class)"));
