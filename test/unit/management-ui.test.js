@@ -251,3 +251,11 @@ test('Admissions direct action handlers fail closed for unauthorized UI calls', 
     assert.match(block, new RegExp('if \\(!' + guard + '\\(\\)\\)'), fn + ' must fail closed');
   }
 });
+
+test('billing invoice detail view fails closed for unauthorized UI calls', () => {
+  const source = read('js/21_billing.js');
+  const idx = source.indexOf('window.openInvoiceDetail');
+  assert.ok(idx >= 0, 'openInvoiceDetail missing');
+  const block = source.slice(idx, idx + 350);
+  assert.match(block, /if \(!_billingCanView\(\)\)/);
+});
