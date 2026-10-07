@@ -31,6 +31,19 @@
 'use strict';
 
 let _admStatus     = 'All';
+
+// UI guards mirror effective session permissions; backend RPCs remain authoritative.
+function _admCan(permission) {
+  const A = window.APP || {};
+  if (A.is_super_admin || A.role === 'super_admin' || A.is_admin || A.role === 'admin') return true;
+  return Array.isArray(A.permissions) && A.permissions.includes(permission);
+}
+function _admCanManage() { return _admCan('admissions.manage'); }
+function _admCanView() { return _admCan('admissions.view'); }
+function _admCanRegistrationBilling() {
+  const A = window.APP || {};
+  return A.is_super_admin || A.role === 'super_admin' || A.is_admin || A.role === 'admin';
+}
 let _admClass      = 'All';
 let _admissionsAll = [];
 let _admPendingPhotoFile   = null; // File picked in the New/Edit applicant form, uploaded on save
@@ -57,6 +70,11 @@ const ADM_NEXT_STATUSES = {
 let _admissionsLoadedOnce = false;
 
 async function renderAdmissions() {
+  if (!_admCanView()) {
+    const denied = document.getElementById('admissionsList');
+    if (denied) denied.innerHTML = '<div class="empty-state">Access denied</div>';
+    return;
+  }
   const listEl = document.getElementById('admissionsList');
   if (_admissionsLoadedOnce) {
     // Already have data from a previous visit — show it instantly (no
@@ -185,6 +203,7 @@ function _renderAdmissionsList() {
 // detail sheet. "Interview Scheduled" is left out here — it needs a date,
 // so that one still goes through the detail view.
 function _admQuickMoveHtml(a) {
+  if (!_admCanManage()) return '';
   const options = (ADM_NEXT_STATUSES[a.status] || []).filter(s => s !== 'Interview Scheduled');
   if (!options.length) return '';
   return `
@@ -221,6 +240,7 @@ window._quickMoveAdmission = async function(id, status, btn) {
 // a teacher accepting/enrolling a whole batch of walk-ins doesn't have to
 // open each applicant individually.
 function _admSelectionBarHtml(rows) {
+  if (!_admCanManage()) return '';
   const n = _admSelected.size;
   if (!n) return '';
   const selectedRows = rows.filter(a => _admSelected.has(a.id));
@@ -253,6 +273,7 @@ window._clearAdmSelection = function() {
 };
 
 window._bulkMoveAdmissions = async function(status) {
+  if (!_admCanManage()) return;
   const ids = Array.from(_admSelected);
   if (!ids.length) return;
   showToast(t('adm.bulkMoving', { n: ids.length, status: tv('admStatus', status) }));
@@ -266,6 +287,7 @@ window._bulkMoveAdmissions = async function(status) {
 };
 
 window._bulkEnrollAdmissions = async function() {
+  if (!_admCanManage()) return;
   const ids = Array.from(_admSelected);
   if (!ids.length) return;
 
@@ -297,6 +319,7 @@ function _admStatusSlug(s) {
 /* ─── New applicant ──────────────────────────────────────────────────── */
 
 window.openNewAdmissionModal = function() {
+  if (!_admCanManage()) return;
   _admPendingPhotoFile = null;
   _admRemovePhotoRequested = false;
   openModal(`
@@ -494,22 +517,22 @@ function _admDetailHtml(a, student, invoice) {
     </div>
     ${a.notes ? `<p class="billing-notes">${esc(a.notes)}</p>` : ''}
 
-    ${nextStatuses.length ? `
+    ${_admCanManage() && nextStatuses.length ? `
       <div class="billing-section-title mt16">${t('adm.moveToTitle')}</div>
       <div class="pill-group">
         ${nextStatuses.map(s => `<button type="button" class="pill" onclick="_moveAdmissionStatus(${a.id}, '${esc(s)}')">${esc(tv('admStatus', s))}</button>`).join('')}
       </div>
     ` : ''}
 
-    ${a.status === 'Accepted' && !a.converted_student_id ? `
+    ${_admCanManage() && a.status === 'Accepted' && !a.converted_student_id ? `
       <div class="modal-footer">
 <button class="btn-primary mt16" onclick="_showConvertAdmissionView(${a.id}, '${esc((a.desired_class || '').replace(/'/g, "\\'"))}')">${t('adm.enrollBtn')}</button>
     ` : ''}
 
     ${student ? _admEnrollmentSectionHtml(a, student, invoice) : ''}
 
-    <button class="btn-secondary mt16" onclick="_showEditAdmissionView(${a.id})">${t('adm.editDetails')}</button>
-<button class="btn-secondary" onclick="_confirmDeleteAdmission(${a.id})">${t('adm.deleteApplicant')}</button>
+    ${_admCanManage() ? `<button class="btn-secondary mt16" onclick="_showEditAdmissionView(${a.id})">${t('adm.editDetails')}</button>
+<button class="btn-secondary" onclick="_confirmDeleteAdmission(${a.id})">${t('adm.deleteApplicant')}</button>` : ''}
 </div>
   `;
 }
@@ -527,7 +550,7 @@ function _admEnrollmentSectionHtml(a, student, invoice) {
     <div class="billing-section-title mt16">${t('bill.enrollment')}</div>
     <p class="billing-notes">${t('adm.pendingCreated', { id: esc(student.student_id) })}</p>`;
 
-  if (!invoice) {
+  if (!invoice && _admCanRegistrationBilling()) {
     body += `<button class="btn-primary" onclick="_showRegistrationInvoiceView(${a.id}, '${esc(student.student_id)}')">${t('adm.createRegInvoice')}</button>`;
   } else {
     const balance = Number(invoice.total_amount) - Number(invoice.paid_amount);
@@ -545,6 +568,7 @@ function _admEnrollmentSectionHtml(a, student, invoice) {
 }
 
 window._moveAdmissionStatus = async function(id, status) {
+  if (!_admCanManage()) return;
   if (status === 'Interview Scheduled') {
     _showInterviewDateView(id);
     return;
@@ -560,6 +584,7 @@ window._moveAdmissionStatus = async function(id, status) {
 };
 
 function _showInterviewDateView(id) {
+  if (!_admCanManage()) return;
   const el = document.getElementById('admDetailBody');
   if (!el) return;
   el.innerHTML = `
@@ -574,6 +599,7 @@ function _showInterviewDateView(id) {
 }
 
 window._saveInterviewDate = async function(id) {
+  if (!_admCanManage()) return;
   const date = document.getElementById('admInterviewDate').value || null;
   try {
     await API.updateAdmissionStatus(id, 'Interview Scheduled', { interview_date: date });
@@ -586,6 +612,7 @@ window._saveInterviewDate = async function(id) {
 };
 
 window._showEditAdmissionView = async function(id) {
+  if (!_admCanManage()) return;
   const el = document.getElementById('admDetailBody');
   if (!el) return;
   el.innerHTML = skeletonCards(1);
@@ -642,6 +669,7 @@ window._showEditAdmissionView = async function(id) {
 };
 
 window._saveEditAdmission = async function(id) {
+  if (!_admCanManage()) return;
   const nameEn = document.getElementById('eaNameEn').value.trim();
   if (!nameEn) { showToast(t('adm.nameRequired')); return; }
   const parentEmail = document.getElementById('eaParentEmail').value.trim();
@@ -687,6 +715,7 @@ window._saveEditAdmission = async function(id) {
 /* ─── Convert to student (Pending) ──────────────────────────────────────── */
 
 window._showConvertAdmissionView = function(id, desiredClass) {
+  if (!_admCanManage()) return;
   const el = document.getElementById('admDetailBody');
   if (!el) return;
   el.innerHTML = `
@@ -706,6 +735,7 @@ window._showConvertAdmissionView = function(id, desiredClass) {
 };
 
 window._saveConvertAdmission = async function(id) {
+  if (!_admCanManage()) return;
   const cls = document.getElementById('convClass').value.trim();
   if (!cls) { showToast(t('adm.enterClass')); return; }
 
@@ -732,6 +762,7 @@ let _admFeeItemsCatalog  = [];
 // Registration + Uniform + Books etc. all at once, from the same Fee Items
 // catalog configured in Billing, rather than typing one number.
 window._showRegistrationInvoiceView = async function(id, studentId) {
+  if (!_admCanRegistrationBilling()) return;
   const el = document.getElementById('admDetailBody');
   if (!el) return;
   el.innerHTML = skeletonCards(1);
@@ -817,6 +848,7 @@ window._pickAdmCatalogItem = function(sel) {
 };
 
 window._saveRegistrationInvoice = async function(id, studentId) {
+  if (!_admCanRegistrationBilling()) return;
   const items = _admInvoiceItems.filter(it => it.description && it.description.trim() && Number(it.amount) > 0);
   if (!items.length) { showToast(t('adm.needAmountItem')); return; }
 
@@ -853,6 +885,7 @@ window._saveRegistrationInvoice = async function(id, studentId) {
 /* ─── Delete ─────────────────────────────────────────────────────────────── */
 
 window._confirmDeleteAdmission = function(id) {
+  if (!_admCanManage()) return;
   showConfirm(
     t('adm.delTitle'),
     t('adm.delBody'),
