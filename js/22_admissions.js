@@ -221,6 +221,7 @@ function _closeOtherAdmMoveMenus(openedEl) {
 }
 
 window._quickMoveAdmission = async function(id, status, btn) {
+  if (!_admCanManage()) return;
   const details = btn.closest('details');
   if (details) details.removeAttribute('open');
   try {
