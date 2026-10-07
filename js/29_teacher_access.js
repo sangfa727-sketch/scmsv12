@@ -123,6 +123,13 @@ function _taCategory(key) {
   };
   return dict[_taLang()]?.[key] || dict.en[key] || _taPermissionFallback(key);
 }
+function _taPermissionFallback(key) {
+  const raw = String(key || '').trim();
+  if (!raw) return '';
+  return raw.split('.').map(function(part) {
+    return part.replace(/[_-]+/g, ' ').replace(/\\b\\w/g, function(c){ return c.toUpperCase(); });
+  }).join(' · ');
+}
 function _taDescription(key, fallback) { return _taText(key) || fallback || ''; }
 function _taAssignmentTypeLabel(type) {
   const dict = {
