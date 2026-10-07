@@ -72,7 +72,8 @@ function _renderHwList() {
   }).join('');
 }
 
-window.openHomeworkModal = async function() {\n  if (typeof hasWebPermission === 'function' && !hasWebPermission('homework.create')) { showToast('Permission denied'); return; }
+window.openHomeworkModal = async function() {
+  if (typeof hasWebPermission === 'function' && !hasWebPermission('homework.create')) { showToast('Permission denied'); return; }
   const subjectRows = await _ensureSubjectsLoaded();
   const subjects = subjectRows.length
     ? subjectRows.map(s => s.subject_name)
@@ -161,7 +162,8 @@ window.saveHomework = async function() {
 
 /* ─── Edit + Delete ─────────────────────────────────────────────── */
 
-window.openEditHomework = async function(id) {\n  if (typeof hasWebPermission === 'function' && !hasWebPermission('homework.edit')) { showToast('Permission denied'); return; }
+window.openEditHomework = async function(id) {
+  if (typeof hasWebPermission === 'function' && !hasWebPermission('homework.edit')) { showToast('Permission denied'); return; }
   const h = window.APP.homework.find(x => String(x.id) === String(id));
   if (!h) { showToast(t('common.itemNotFound')); return; }
   const subjectRows = await _ensureSubjectsLoaded();
@@ -244,7 +246,8 @@ window.saveEditHomework = async function(id) {
   }
 };
 
-window.confirmDeleteHomework = function(id) {\n  if (typeof hasWebPermission === 'function' && !hasWebPermission('homework.delete')) { showToast('Permission denied'); return; }
+window.confirmDeleteHomework = function(id) {
+  if (typeof hasWebPermission === 'function' && !hasWebPermission('homework.delete')) { showToast('Permission denied'); return; }
   showConfirm(
     t('hw.confirmTitle'),
     t('hw.confirmBody'),
