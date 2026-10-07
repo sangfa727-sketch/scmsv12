@@ -289,6 +289,7 @@ function _renderInvoiceTotal() {
 }
 
 window._saveNewInvoice = async function() {
+  if (!_billingCanWrite()) { showToast(t('cg.adminOnly')); return; }
   if (!_newInvoiceStudent) { showToast(t('bill.chooseStudentToast')); return; }
   const items = _newInvoiceItems.filter(it => it.description && it.description.trim());
   if (!items.length) { showToast(t('bill.needItem')); return; }
@@ -436,6 +437,7 @@ window._openRecordPayment = function(invoiceId, balance) {
 };
 
 window._saveRecordPayment = async function(invoiceId) {
+  if (!_billingCanWrite()) { showToast(t('cg.adminOnly')); return; }
   const amount = Number(document.getElementById('rpAmount').value);
   if (!amount || amount <= 0) { showToast(t('bill.validAmount')); return; }
 
@@ -559,6 +561,7 @@ window._openAddFeeItem = function() {
 };
 
 window._saveNewFeeItem = async function() {
+  if (!_billingCanManageFees()) { showToast(t('cg.adminOnly')); return; }
   const name = document.getElementById('fiName').value.trim();
   if (!name) { showToast(t('bill.enterName')); return; }
 
