@@ -225,3 +225,29 @@ test('billing mutation and activation action handlers fail closed for unauthoriz
     assert.match(block, new RegExp('if \\(!' + guard + '\\(\\)\\)'), fn + ' must fail closed');
   }
 });
+
+test('Admissions direct action handlers fail closed for unauthorized UI calls', () => {
+  const source = read('js/22_admissions.js');
+
+  for (const [fn, guard] of [
+    ['_saveNewAdmission', '_admCanManage'],
+    ['openAdmissionDetail', '_admCanView'],
+    ['_quickMoveAdmission', '_admCanManage'],
+    ['_bulkMoveAdmissions', '_admCanManage'],
+    ['_bulkEnrollAdmissions', '_admCanManage'],
+    ['_moveAdmissionStatus', '_admCanManage'],
+    ['_saveInterviewDate', '_admCanManage'],
+    ['_showEditAdmissionView', '_admCanManage'],
+    ['_saveEditAdmission', '_admCanManage'],
+    ['_showConvertAdmissionView', '_admCanManage'],
+    ['_saveConvertAdmission', '_admCanManage'],
+    ['_showRegistrationInvoiceView', '_admCanRegistrationBilling'],
+    ['_saveRegistrationInvoice', '_admCanRegistrationBilling'],
+    ['_confirmDeleteAdmission', '_admCanManage'],
+  ]) {
+    const idx = source.indexOf('window.' + fn);
+    assert.ok(idx >= 0, fn + ' missing');
+    const block = source.slice(idx, idx + 700);
+    assert.match(block, new RegExp('if \\(!' + guard + '\\(\\)\\)'), fn + ' must fail closed');
+  }
+});
