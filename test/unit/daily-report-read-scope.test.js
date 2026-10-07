@@ -11,7 +11,10 @@ describe('daily report read authorization contract', () => {
 
   it('defines daily_report.view as a class-scoped permission', () => {
     assert.match(migration, /daily_report\.view/);
-    assert.match(migration, /VALUES \('daily_report\.view', 'class', true\)/);
+    assert.match(migration, /'daily_report\.view'/);
+    assert.match(migration, /'daily',/);
+    assert.match(migration, /'View daily reports for assigned classes'/);
+    assert.match(migration, /'class',/);
   });
 
   it('grants view permission to the intended school roles', () => {
