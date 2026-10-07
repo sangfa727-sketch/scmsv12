@@ -317,6 +317,7 @@ window._saveNewInvoice = async function() {
 /* ─── Invoice detail (line items + payments) ────────────────────────── */
 
 window.openInvoiceDetail = async function(id) {
+  if (!_billingCanView()) { showToast(t('cg.adminOnly')); return; }
   openModal(`
     <div class="modal-sheet" onclick="event.stopPropagation()" style="max-height:85vh;overflow-y:auto" id="invoiceDetailSheet">
       <div class="modal-handle"></div>
