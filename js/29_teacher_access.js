@@ -121,9 +121,16 @@ function _taCategory(key) {
     jp:{dashboard:'ダッシュボード',students:'生徒',leave:'休暇申請',attendance:'出欠',homework:'宿題',assessment:'評価',billing:'請求',teachers:'教師',permissions:'権限'},
     km:{dashboard:'ផ្ទាំងគ្រប់គ្រង',students:'សិស្ស',leave:'សំណើសុំច្បាប់ឈប់',attendance:'វត្តមាន',homework:'កិច្ចការផ្ទះ',assessment:'ការវាយតម្លៃ',billing:'វិក្កយបត្រ',teachers:'គ្រូ',permissions:'សិទ្ធិ'}
   };
-  return dict[_taLang()]?.[key] || dict.en[key] || key;
+  return dict[_taLang()]?.[key] || dict.en[key] || _taPermissionFallback(key);
 }
-function _taDescription(key, fallback) { return _taText(key); }
+function _taPermissionFallback(key) {
+  const raw = String(key || '').trim();
+  if (!raw) return '';
+  return raw.split('.').map(function(part) {
+    return part.replace(/[_-]+/g, ' ').replace(/\\b\\w/g, function(c){ return c.toUpperCase(); });
+  }).join(' · ');
+}
+function _taDescription(key, fallback) { return _taText(key) || fallback || ''; }
 function _taAssignmentTypeLabel(type) {
   const dict = {
     en:{class_teacher:'Class Teacher',assistant:'Assistant Teacher',subject_teacher:'Subject Teacher',other:'Other'},
