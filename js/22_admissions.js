@@ -408,6 +408,7 @@ window._removeAdmPhoto = function() {
 };
 
 window._saveNewAdmission = async function() {
+  if (!_admCanManage()) return;
   const nameEn = document.getElementById('naNameEn').value.trim();
   if (!nameEn) { showToast(t('adm.enterName')); return; }
 
@@ -452,6 +453,7 @@ window._saveNewAdmission = async function() {
 /* ─── Detail (single modal — all sub-views swap #admDetailBody in place) ── */
 
 window.openAdmissionDetail = function(id) {
+  if (!_admCanView()) return;
   openModal(`
     <div class="modal-sheet" onclick="event.stopPropagation()" style="max-height:85vh;overflow-y:auto">
       <div class="modal-handle"></div>
