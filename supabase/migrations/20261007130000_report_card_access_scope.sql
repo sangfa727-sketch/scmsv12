@@ -1,6 +1,33 @@
--- Security hardening: require assessment.view for report-card reads.
--- Report cards are class-scoped assessment data and must use the same server-side
--- permission boundary as assessment reads/grades.
+-- Security hardening: require a dedicated class-scoped report_card.view permission.
+-- Report-card reads are class-scoped and must not depend on assessment.view's
+-- class_subject scope because the report-card endpoint is not subject-specific.
+
+insert into public.permission_definitions(permission_key,category,description,scope_type,is_active)
+values (
+  'report_card.view',
+  'academic',
+  'View report cards for assigned classes',
+  'class',
+  true
+)
+on conflict(permission_key) do update
+set category=excluded.category,
+    description=excluded.description,
+    scope_type=excluded.scope_type,
+    is_active=true;
+
+insert into public.role_permissions(role,permission_key,allowed)
+select r.role,'report_card.view',true
+from (values
+  ('teacher'),
+  ('assistant_teacher'),
+  ('senior_teacher'),
+  ('school_coordinator'),
+  ('administrative_assistant'),
+  ('admin'),
+  ('super_admin')
+) r(role)
+on conflict(role,permission_key) do update set allowed=excluded.allowed;
 
 CREATE OR REPLACE FUNCTION public.rpc_get_report_card(
   p_session_token text,
@@ -38,7 +65,7 @@ begin
 
   if not private.web_has_permission(
     p_session_token,
-    'assessment.view',
+    'report_card.view',
     trim(p_class),
     null
   ) then
