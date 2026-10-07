@@ -41,3 +41,13 @@ test('future public-schema client grants are fail-closed by default', () => {
   assert.match(sql, /REVOKE EXECUTE ON FUNCTIONS FROM anon, authenticated/);
   assert.match(sql, /REVOKE ALL ON SEQUENCES FROM anon, authenticated/);
 });
+
+test('internal and sensitive browser views are not directly exposed', () => {
+  const sql = read('supabase/migrations/20261007110000_revoke_internal_public_views_client_grants.sql');
+  for (const view of [
+    'v_students_full','v_today_attendance','pg_all_foreign_keys','tap_funky',
+  ]) {
+    assert.match(sql, new RegExp("'" + view + "'"));
+  }
+  assert.match(sql, /REVOKE ALL ON TABLE public\.%I FROM PUBLIC, anon, authenticated/);
+});
