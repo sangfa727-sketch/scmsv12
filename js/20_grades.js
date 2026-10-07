@@ -160,7 +160,7 @@ async function _loadAndRenderAssessments() {
           <div class="card-sub">${esc(t('grades.metaLine', { date: fmtDate(a.date), max: a.max_score, w: a.weight }))}${a.start_time ? ' · ' + esc(String(a.start_time).slice(0,5)) + (a.end_time ? '–' + esc(String(a.end_time).slice(0,5)) : '') : ''}</div>
         </div>
         <div class="card-actions">
-          <button class="icon-btn-mini danger" onclick="event.stopPropagation();confirmDeleteAssessment(${a.id})" title="${esc(t('btn.delete'))}">🗑</button>
+          ${(typeof hasWebPermission !== 'function' || hasWebPermission('assessment.delete')) ? `<button class="icon-btn-mini danger" onclick="event.stopPropagation();confirmDeleteAssessment(${a.id})" title="${esc(t('btn.delete'))}">🗑</button>` : ''}
         </div>
       </div>
         </div>
@@ -235,6 +235,7 @@ window.openReportCard = async function() {
 /* ─── New assessment ─────────────────────────────────────────────── */
 
 window.openNewAssessmentModal = function() {
+  if (typeof hasWebPermission === 'function' && !hasWebPermission('assessment.create')) { showToast('Permission denied'); return; }
   if (!_gradesClass) { showToast(t('grades.pickClass')); return; }
 
   openModal(`
@@ -316,6 +317,7 @@ window.saveNewAssessment = async function() {
 };
 
 window.confirmDeleteAssessment = function(id) {
+  if (typeof hasWebPermission === 'function' && !hasWebPermission('assessment.delete')) { showToast('Permission denied'); return; }
   showConfirm(
     t('grades.confirmTitle'),
     t('grades.confirmBody'),
@@ -335,6 +337,7 @@ window.confirmDeleteAssessment = function(id) {
 /* ─── Score entry ─────────────────────────────────────────────────── */
 
 window.openGradeEntry = async function(assessmentId) {
+  if (typeof hasWebPermission === 'function' && !hasWebPermission('assessment.view')) { showToast('Permission denied'); return; }
   const a = _gradesAssessments.find(x => x.id === assessmentId);
   if (!a) return;
 
@@ -364,7 +367,7 @@ window.openGradeEntry = async function(assessmentId) {
             <div class="grade-entry-row" data-student="${esc(s.student_id)}">
               <div class="grade-entry-name">${esc(s.name_en || s.name_local || s.student_id)}</div>
               <input class="form-input grade-entry-score" type="number" min="0" max="${esc(String(a.max_score))}"
-                placeholder="—" value="${g && g.score != null ? esc(String(g.score)) : ''}"
+                placeholder="—" value="${g && g.score != null ? esc(String(g.score)) : ''}"${(typeof hasWebPermission === 'function' && !hasWebPermission('assessment.edit')) ? ' readonly' : ''}
                 oninput="_updateGradePreview(this, ${Number(a.max_score) || 0})">
               <div class="grade-entry-pct">${g && g.letter_grade ? `${g.percentage}% · ${esc(g.letter_grade)}` : ''}</div>
             </div>`;
@@ -372,7 +375,7 @@ window.openGradeEntry = async function(assessmentId) {
       </div>
 
       <div class="modal-footer">
-<button class="btn-primary mt16" id="gradeSaveBtn" onclick="saveGradeEntry(${assessmentId})">${t('grades.saveScores')}</button>
+${(typeof hasWebPermission !== 'function' || hasWebPermission('assessment.edit')) ? `<button class="btn-primary mt16" id="gradeSaveBtn" onclick="saveGradeEntry(${assessmentId})">${t('grades.saveScores')}</button>` : ''}
 <button class="btn-secondary" onclick="closeModal()">${t('common.cancel')}</button>
 </div>
     </div>
@@ -389,6 +392,7 @@ window._updateGradePreview = function(input, maxScore) {
 };
 
 window.saveGradeEntry = async function(assessmentId) {
+  if (typeof hasWebPermission === 'function' && !hasWebPermission('assessment.edit')) { showToast('Permission denied'); return; }
   const btn  = document.getElementById('gradeSaveBtn');
   const rows = document.querySelectorAll('#gradeEntryRows .grade-entry-row');
   const records = [...rows].map(row => ({

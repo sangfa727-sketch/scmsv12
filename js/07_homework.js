@@ -59,8 +59,8 @@ function _renderHwList() {
             ${h.description ? `<div class="card-note">${esc(h.description)}</div>` : ''}
           </div>
           <div class="card-actions">
-            <button class="icon-btn-mini" onclick="openEditHomework('${esc(h.id)}')" title="${esc(t('common.edit'))}">✎</button>
-            <button class="icon-btn-mini danger" onclick="confirmDeleteHomework('${esc(h.id)}')" title="${esc(t('btn.delete'))}">🗑</button>
+            ${(typeof hasWebPermission !== 'function' || hasWebPermission('homework.edit')) ? `<button class="icon-btn-mini" onclick="openEditHomework('${esc(h.id)}')" title="${esc(t('common.edit'))}">✎</button>` : ''}
+            ${(typeof hasWebPermission !== 'function' || hasWebPermission('homework.delete')) ? `<button class="icon-btn-mini danger" onclick="confirmDeleteHomework('${esc(h.id)}')" title="${esc(t('btn.delete'))}">🗑</button>` : ''}
           </div>
         </div>
         ${h.lb_page || h.wb_page ? `
@@ -73,6 +73,7 @@ function _renderHwList() {
 }
 
 window.openHomeworkModal = async function() {
+  if (typeof hasWebPermission === 'function' && !hasWebPermission('homework.create')) { showToast('Permission denied'); return; }
   const subjectRows = await _ensureSubjectsLoaded();
   const subjects = subjectRows.length
     ? subjectRows.map(s => s.subject_name)
@@ -162,6 +163,7 @@ window.saveHomework = async function() {
 /* ─── Edit + Delete ─────────────────────────────────────────────── */
 
 window.openEditHomework = async function(id) {
+  if (typeof hasWebPermission === 'function' && !hasWebPermission('homework.edit')) { showToast('Permission denied'); return; }
   const h = window.APP.homework.find(x => String(x.id) === String(id));
   if (!h) { showToast(t('common.itemNotFound')); return; }
   const subjectRows = await _ensureSubjectsLoaded();
@@ -245,6 +247,7 @@ window.saveEditHomework = async function(id) {
 };
 
 window.confirmDeleteHomework = function(id) {
+  if (typeof hasWebPermission === 'function' && !hasWebPermission('homework.delete')) { showToast('Permission denied'); return; }
   showConfirm(
     t('hw.confirmTitle'),
     t('hw.confirmBody'),

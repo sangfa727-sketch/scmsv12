@@ -60,7 +60,7 @@ function _renderTtList() {
         <div class="tt-meta">${esc(row.class || '—')} ${row.room ? '· ' + esc(t('tt.room', { n: row.room })) : ''}</div>
       </div>
       <div class="tt-time">${esc(row.start_time || '')}</div>
-      ${window.APP.is_admin ? `
+      ${(typeof hasWebPermission === 'function' ? hasWebPermission('timetable.edit') : window.APP.is_admin) ? `
       <div class="card-actions">
         <button class="icon-btn-mini" onclick="openEditTimetable('${esc(row.id)}')" title="${esc(t('common.edit'))}">✎</button>
         <button class="icon-btn-mini danger" onclick="confirmDeleteTimetable('${esc(row.id)}')" title="${esc(t('btn.delete'))}">🗑</button>
@@ -75,7 +75,7 @@ function _renderTtList() {
 /* ─── Add / Edit / Delete ──────────────────────────────────────── */
 
 window.openAddTimetable = function() {
-  if (!window.APP.is_admin) { showToast(t('tt.adminOnly')); return; }
+  if (!(typeof hasWebPermission === 'function' ? hasWebPermission('timetable.edit') : window.APP.is_admin)) { showToast(t('tt.adminOnly')); return; }
   _openTimetableForm({ mode: 'add', entry: { day: _ttDay } });
 };
 

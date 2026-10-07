@@ -529,12 +529,13 @@ test('action FABs require mutation permissions', () => {
     "billing: ['billing.write', 'billing.class.write']",
     "admissions: ['admissions.manage']",
     "library: ['library.manage']",
-    "transport: ['transport.manage']"
+    "transport: ['transport.manage']",
+    "timetable: ['timetable.edit']"
   ];
   for (const token of expected) assert.ok(app.includes(token), 'FAB mutation gate missing: ' + token);
   assert.ok(app.includes('FAB_PERMISSION'), 'FAB permission contract must exist');
   assert.ok(app.includes('required.some((p) => perms.includes(p))'), 'FAB must require an effective permission');
-  assert.ok(app.includes("timetable: null"), 'unsupported timetable mutation must not be inferred as a teacher permission');
+  assert.ok(app.includes("timetable: ['timetable.edit']"), 'timetable mutation must require the canonical timetable.edit permission');
 });
 
 
