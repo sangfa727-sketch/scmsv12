@@ -177,3 +177,34 @@ test('admission detail RPC returns explicit admission fields without serializing
   }
   assert.doesNotMatch(source, /to_jsonb\(v_row\)/);
 });
+
+test('teacher management mutation and access entry points fail closed for non-admin UI calls', () => {
+  const settings = read('js/15_settings.js');
+  const access = read('js/29_teacher_access.js');
+
+  const guardedSettingsActions = [
+    'openTeacherManager',
+    'openInviteCodeModal',
+    'openCreateTeacherModal',
+    'openTeacherEditModal',
+    'saveTeacherEdit',
+    'doCreateTeacher',
+    'openTeacherCardModal',
+    'resetTeacherPassword',
+    'setTeacherLifecycle',
+  ];
+  for (const fn of guardedSettingsActions) {
+    const idx = settings.indexOf('window.' + fn);
+    assert.ok(idx >= 0, fn + ' missing');
+    const block = settings.slice(idx, idx + 900);
+    assert.match(block, /if \(!window\.APP\?\.is_admin\)/, fn + ' must fail closed for non-admins');
+  }
+
+  const accessIdx = access.indexOf('window.openTeacherAccess');
+  assert.ok(accessIdx >= 0, 'openTeacherAccess missing');
+  assert.match(access.slice(accessIdx, accessIdx + 700), /if \(!window\.APP\?\.is_admin\)/);
+
+  const rpcIdx = access.indexOf('async function _teacherAccessRpc');
+  assert.ok(rpcIdx >= 0, '_teacherAccessRpc missing');
+  assert.match(access.slice(rpcIdx, rpcIdx + 700), /if \(!window\.APP\?\.is_admin\) throw new Error\('ADMIN_REQUIRED'\)/);
+});
