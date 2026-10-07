@@ -82,12 +82,12 @@ function _renderDailyList(cls) {
             }
           </div>
           <div class="card-actions">
-            <button class="btn-icon-round ${done ? 'btn-edit' : 'btn-add'}"
+            ${(typeof hasWebPermission !== 'function' || hasWebPermission('daily_report.edit')) ? `<button class="btn-icon-round ${done ? 'btn-edit' : 'btn-add'}"
               onclick="openDailyModal('${esc(s.student_id)}','${esc(s.name_en || s.name_local)}')"
               title="${esc(t(done ? 'common.edit' : 'common.add'))}">
               ${done ? '✎' : '+'}
-            </button>
-            ${done && report?.id ? `<button class="icon-btn-mini danger" onclick="confirmDeleteDaily('${esc(report.id)}')" title="${esc(t('btn.delete'))}">🗑</button>` : ''}
+            </button>` : ''}
+            ${done && report?.id && (typeof hasWebPermission !== 'function' || hasWebPermission('daily_report.delete')) ? `<button class="icon-btn-mini danger" onclick="confirmDeleteDaily('${esc(report.id)}')" title="${esc(t('btn.delete'))}">🗑</button>` : ''}
           </div>
         </div>
         ${done && report.behaviour_note
@@ -97,7 +97,7 @@ function _renderDailyList(cls) {
   }).join('');
 }
 
-window.confirmDeleteDaily = function(id) {
+window.confirmDeleteDaily = function(id) {\n  if (typeof hasWebPermission === 'function' && !hasWebPermission('daily_report.delete')) { showToast('Permission denied'); return; }
   if (!confirm(t('daily.confirmDelete'))) return;
   doDeleteDaily(id);
 };
@@ -115,7 +115,7 @@ async function doDeleteDaily(id) {
 
 // ─── Daily report modal ───────────────────────────────────────────────────
 
-window.openDailyModal = function(studentId, studentName) {
+window.openDailyModal = function(studentId, studentName) {\n  if (typeof hasWebPermission === 'function' && !hasWebPermission('daily_report.edit')) { showToast('Permission denied'); return; }
   const existing = window.APP.dailyReports.find(
     r => r.date === new Date().toISOString().slice(0, 10) &&
          (r.student_id === studentId || r.name_en === studentName)
@@ -230,7 +230,7 @@ window.saveDailyReport = async function(studentId, studentName) {
 };
 
 // FAB entry point — open the student picker first, then jump into the modal
-window.openDailyReportModal = function() {
+window.openDailyReportModal = function() {\n  if (typeof hasWebPermission === 'function' && !hasWebPermission('daily_report.edit')) { showToast('Permission denied'); return; }
   openStudentPicker({
     title:       t('daily.pickerTitle'),
     subtitle:    t('daily.pickerSub', { date: new Date().toLocaleDateString(I18N.dateLocale(), { weekday:'long', month:'long', day:'numeric' }) }),
