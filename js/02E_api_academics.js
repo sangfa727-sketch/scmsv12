@@ -15,10 +15,23 @@ Object.assign(API, {
     },
   
   async updateDailyReport(id, patch) {
+      if (window.APP.platform === 'web') return _webRpc('rpc_update_daily_report', {
+        p_session_token: _webSessionToken(),
+        p_id: id,
+        p_meal: patch.meal,
+        p_nap_min: patch.nap_min ?? null,
+        p_mood: patch.mood,
+        p_behaviour_note: patch.behaviour_note || null,
+        p_toilet_ok: patch.toilet_ok ?? null,
+      });
       return twaPost('update_daily_report', { id, patch });
     },
   
   async deleteDailyReport(id) {
+      if (window.APP.platform === 'web') return _webRpc('rpc_delete_daily_report', {
+        p_session_token: _webSessionToken(),
+        p_id: id,
+      });
       return twaPost('delete_daily_report', { id });
     },
   
