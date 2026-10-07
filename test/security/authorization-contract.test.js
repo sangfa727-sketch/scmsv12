@@ -265,3 +265,40 @@ test('summary authorization is dedicated and class-scoped', () => {
   assert.ok(migration.includes('function public.rpc_get_monthly_summary'));
   assert.ok(migration.includes("private.web_has_permission(p_session_token,'summary.view'"));
 });
+
+
+test('teacher lifecycle authorization is session-bound and frontend uses the guarded RPCs', () => {
+  const migration = read('supabase/migrations/20261007030000_add_teacher_lifecycle_controls.sql');
+  const grants = read('supabase/migrations/20261007031000_grant_teacher_lifecycle_rpc_client_execute.sql');
+  const settings = read('js/15_settings.js');
+
+  for (const fn of ['rpc_admin_deactivate_teacher', 'rpc_admin_reactivate_teacher']) {
+    assert.match(migration, new RegExp('CREATE OR REPLACE FUNCTION public\\\\.' + fn));
+    assert.match(migration, new RegExp(fn + '[\\\\s\\\\S]{0,1200}p_session_token text'));
+    assert.match(migration, new RegExp(fn + '[\\\\s\\\\S]{0,5000}expires_at > now\\(\\\\)'));
+    assert.match(migration, new RegExp(fn + '[\\\\s\\\\S]{0,5000}t\\.status = \\'active\\''));
+    assert.match(migration, new RegExp(fn + '[\\\\s\\\\S]{0,7000}school_id = v_admin\\.school_id'));
+    assert.match(migration, new RegExp(fn + '[\\\\s\\\\S]{0,9000}v_admin\\.admin_role <> \\'super_admin\\'[\\\\s\\\\S]{0,500}v_target\\.role = \\'super_admin\\''));
+    assert.match(migration, new RegExp(fn + '[\\\\s\\\\S]{0,10000}audit_log'));
+  }
+
+  assert.match(migration, /cannot_deactivate_self/);
+  assert.match(migration, /SET status = 'inactive'/);
+  assert.match(migration, /SET status = 'active'/);
+  assert.match(migration, /UPDATE public\.app_web_sessions[\\s\\S]{0,600}expires_at = now\(\)/);
+  assert.match(migration, /teacher\.deactivate/);
+  assert.match(migration, /teacher\.reactivate/);
+
+  assert.match(grants, /rpc_admin_deactivate_teacher\(text, text\) TO anon, authenticated/);
+  assert.match(grants, /rpc_admin_reactivate_teacher\(text, text\) TO anon, authenticated/);
+
+  const lifecycleIdx = settings.indexOf('window.setTeacherLifecycle');
+  assert.ok(lifecycleIdx >= 0, 'teacher lifecycle UI handler missing');
+  const lifecycleBlock = settings.slice(lifecycleIdx, lifecycleIdx + 2600);
+  assert.match(lifecycleBlock, /window\.APP\?\.is_admin/);
+  assert.match(lifecycleBlock, /getWebSession\(\)/);
+  assert.match(lifecycleBlock, /p_session_token:\s*sess\.session_token/);
+  assert.match(lifecycleBlock, /rpc_admin_deactivate_teacher/);
+  assert.match(lifecycleBlock, /rpc_admin_reactivate_teacher/);
+  assert.match(lifecycleBlock, /result\?\.ok/);
+});
