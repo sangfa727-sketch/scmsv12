@@ -44,7 +44,7 @@ begin
    select v_id,v_sess.school_id,t.teacher_id from public.teachers t where t.school_id=v_sess.school_id and t.status='active' on conflict do nothing;
  else
    insert into public.staff_announcement_recipients(announcement_id,school_id,teacher_id)
-   select distinct v_id,v_sess.school_id,t.teacher_id from public.teachers t join public.teacher_class_assignments a on a.teacher_id=t.teacher_id and a.school_id=t.school_id where t.school_id=v_sess.school_id and t.status='active' and a.status='active' and lower(a.class_name)=lower(v_target) on conflict do nothing;
+   select distinct v_id,v_sess.school_id,t.teacher_id from public.teachers t join public.teacher_class_assignments a on a.teacher_id=t.teacher_id and a.school_id=t.school_id where t.school_id=v_sess.school_id and t.status='active' and a.is_active=true and lower(a.class_name)=lower(v_target) on conflict do nothing;
  end if;
  select count(*) into v_count from public.staff_announcement_recipients r where r.announcement_id=v_id;
  if v_count=0 then delete from public.staff_announcements where id=v_id; return jsonb_build_object('ok',false,'error','no_verified_recipients'); end if;
