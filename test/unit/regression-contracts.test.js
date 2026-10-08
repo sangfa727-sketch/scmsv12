@@ -568,3 +568,32 @@ test('teacher permission Allow/Deny persistence targets the expression-based uni
   assert.ok(migration.includes('teacher.permission_set'));
   assert.ok(!migration.includes('on conflict(school_id,teacher_id,p_permission_key'));
 });
+
+
+test('public school website stays outside the private SCMS data boundary', () => {
+  const website = read('school-website/README.md');
+  const contract = read('school-website/WEBSITE_CONTENT_CONTRACT.md');
+  const app = read('school-website/app.js');
+  assert.match(website, /private SCMS/i);
+  assert.match(contract, /MUST NOT read or expose/);
+  for (const forbidden of ['students','attendance','billing','health records','staff chat']) {
+    assert.match(contract, new RegExp(forbidden, 'i'));
+  }
+  assert.doesNotMatch(app, /supabase|service_role|students|attendance|billing|health/i);
+  assert.match(app, /window\.location\.hostname/);
+});
+
+test('public admission remains an isolated intake contract and never writes Student Core directly', () => {
+  const form = read('school-website/admission.js');
+  const schema = read('school-website/db/website_admission_schema.sql');
+  const contract = read('school-website/PUBLIC_ADMISSION_CONTRACT.md');
+  assert.match(form, /event\.preventDefault\(\)/);
+  assert.match(form, /no private SCMS write/i);
+  assert.doesNotMatch(form, /supabase|service_role|students|admissions/);
+  assert.match(schema, /website_admission_applications/);
+  assert.match(schema, /enable row level security/);
+  assert.match(schema, /NO anon SELECT\/UPDATE\/DELETE policy/);
+  assert.match(contract, /application.*intake/i);
+  assert.match(contract, /school_id/);
+  assert.match(contract, /trusted hostname/i);
+});
