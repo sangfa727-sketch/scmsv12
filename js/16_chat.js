@@ -427,7 +427,7 @@ function _renderChatMode() {
   _loadChatMessages();
   setTimeout(() => {
     _refreshAdminComposerPreview();
-    if (window.APP?.is_admin) _loadAdminRecipientPreview(document.getElementById('adminMsgGrade')?.value || 'Grade 5');
+    if (window.APP?.is_admin) _loadAdminRecipientPreview('grade', document.getElementById('adminMsgGrade')?.value || 'Grade 5');
   }, 0);
 }
 
