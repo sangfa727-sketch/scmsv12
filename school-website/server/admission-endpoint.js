@@ -5,6 +5,9 @@ const {
   validateAdmissionInput,
   isHoneypotTriggered
 } = require('./admission-security.js');
+const {
+  normalizeAdmissionPersistenceError
+} = require('./admission-persistence.js');
 
 /**
  * Framework-neutral admission request boundary.
@@ -15,7 +18,8 @@ const {
  *
  * Production requirements:
  * - rateLimiter must be shared/infrastructure-backed, not process-local
- * - replay/idempotency must be atomically enforced by persistent storage
+ * - replay guard is an early-abuse filter only
+ * - persistent unique (school_id, idempotency_key) is the final atomic guard
  * - insertApplication must execute the isolated admission transaction only
  */
 async function handleAdmissionRequest({
@@ -66,8 +70,8 @@ async function handleAdmissionRequest({
       sourceHost: hostname,
       ...validation.value
     });
-  } catch {
-    return { status: 503, body: { ok: false, error: 'admission_backend_unavailable' } };
+  } catch (error) {
+    return normalizeAdmissionPersistenceError(error);
   }
 
   return { status: 201, body: { ok: true } };
