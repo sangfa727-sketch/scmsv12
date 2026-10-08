@@ -719,7 +719,7 @@ window.sendDirectChat=async function(ev){
 
 window._directKeydown=function(ev){if(ev.key==='Enter'&&!ev.shiftKey){ev.preventDefault();sendDirectChat(ev);}};
 
-window.switchChatChannel = function(channel) {
+window._showSchoolChatChannels = function() { _chatChannel='staff'; _renderChatMode(); };\n\nfunction _chatChannelBack(label='School Chat') {\n  return `<div class="smart-chat-channel-back-row"><button type="button" class="smart-chat-channel-back" onclick="_showSchoolChatChannels()" aria-label="Back to School Chat">‹ <span>${esc(label)}</span></button></div>`;\n}\n\nwindow.switchChatChannel = function(channel) {
   _chatChannel = channel;
   if (_chatMode !== 'school') return;
   _renderChatMode();
