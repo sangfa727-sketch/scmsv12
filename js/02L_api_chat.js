@@ -21,4 +21,9 @@ Object.assign(API, {
   async markInquiryRead(ticketId){ return _webRpc('rpc_chat_inquiry_mark_read',{p_session_token:_webSessionToken(),p_ticket_id:Number(ticketId)}); },
   async updateInquiryTicket(ticketId,status=null,assignedTeacherId=null){ return _webRpc('rpc_chat_inquiry_update',{p_session_token:_webSessionToken(),p_ticket_id:Number(ticketId),p_status:status,p_assigned_teacher_id:assignedTeacherId||null}); }
 });
+  async getChatGroups(groupType=null,limit=50){ const res=await _webRpc('rpc_chat_group_list',{p_session_token:_webSessionToken(),p_group_type:groupType,p_limit:Number(limit)||50}); return Array.isArray(res.rows)?res.rows:[]; },
+  async createChatGroup(name,description=null,groupType='PROJECT',startsAt=null,endsAt=null,memberTeacherIds=[]){ return _webRpc('rpc_chat_group_create',{p_session_token:_webSessionToken(),p_name:name,p_description:description,p_group_type:groupType,p_starts_at:startsAt,p_ends_at:endsAt,p_member_teacher_ids:Array.isArray(memberTeacherIds)?memberTeacherIds:[]}); },
+  async openChatGroup(groupId){ return _webRpc('rpc_chat_group_open',{p_session_token:_webSessionToken(),p_group_id:Number(groupId)}); },
+  async sendChatGroupMessage(groupId,body){ return _webRpc('rpc_chat_group_send',{p_session_token:_webSessionToken(),p_group_id:Number(groupId),p_body:body}); },
+  async markChatGroupRead(groupId){ return _webRpc('rpc_chat_group_mark_read',{p_session_token:_webSessionToken(),p_group_id:Number(groupId)}); },
 window.API=API;
