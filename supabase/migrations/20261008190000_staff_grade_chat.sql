@@ -24,6 +24,7 @@ create index if not exists idx_staff_grade_messages_lookup
 create index if not exists idx_staff_grade_read_state_teacher
   on public.staff_grade_read_state (school_id, teacher_id, grade_name);
 
+-- SECURITY DEFINER RPCs are the sole data path; keep direct client table access revoked.
 alter table public.staff_grade_messages enable row level security;
 alter table public.staff_grade_read_state enable row level security;
 revoke all on public.staff_grade_messages from anon, authenticated;
