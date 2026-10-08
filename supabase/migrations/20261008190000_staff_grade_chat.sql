@@ -100,15 +100,20 @@ begin
     'ok',true,
     'grade_name',v_grade,
     'rows',coalesce((
-      select jsonb_agg(jsonb_build_object(
-        'id',m.id,'sender_teacher_id',m.sender_teacher_id,
-        'sender_teacher_name',coalesce(t.teacher_name,m.sender_teacher_id),
-        'body',m.body,'created_at',m.created_at
-      ) order by m.created_at asc)
-      from public.staff_grade_messages m
-      left join public.teachers t on t.teacher_id=m.sender_teacher_id and t.school_id=m.school_id
-      where m.school_id=v_school_id and lower(trim(m.grade_name))=lower(trim(v_grade))
-      order by m.created_at desc limit greatest(1,least(coalesce(p_limit,50),100))
+      select jsonb_agg(z.obj order by z.created_at asc)
+      from (
+        select m.created_at,
+          jsonb_build_object(
+            'id',m.id,'sender_teacher_id',m.sender_teacher_id,
+            'sender_teacher_name',coalesce(t.teacher_name,m.sender_teacher_id),
+            'body',m.body,'created_at',m.created_at
+          ) as obj
+        from public.staff_grade_messages m
+        left join public.teachers t on t.teacher_id=m.sender_teacher_id and t.school_id=m.school_id
+        where m.school_id=v_school_id and lower(trim(m.grade_name))=lower(trim(v_grade))
+        order by m.created_at desc
+        limit greatest(1,least(coalesce(p_limit,50),100))
+      ) z
     ),'[]'::jsonb)
   );
 end;
