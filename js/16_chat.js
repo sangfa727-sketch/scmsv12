@@ -19,6 +19,16 @@ let _directPeer = null;
 let _directStaff = [];
 let _directConversations = [];
 
+// Re-render the dynamic Chat workspace when the global language changes.
+// The i18n engine already emits languageChanged; Chat owns its own innerHTML,
+// so a DOM-only translation pass cannot update these runtime templates.
+if (!window.__SCMS_CHAT_I18N_BOUND__) {
+  window.__SCMS_CHAT_I18N_BOUND__ = true;
+  window.addEventListener('languageChanged', () => {
+    if (window.APP?.currentPage === 'chat') renderChat();
+  });
+}
+
 function _chatIcon(name) {
   const icons = {
     chat:'<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>',
