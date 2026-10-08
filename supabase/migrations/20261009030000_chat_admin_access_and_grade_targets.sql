@@ -39,13 +39,8 @@ begin
       select distinct nullif(btrim(s.grade),'') as grade_name
         from public.students s
        where s.school_id = v_sess.school_id
+         and s.status = 'Active'
          and nullif(btrim(s.grade),'') is not null
-      union
-      select distinct nullif(btrim(a.class_name),'') as grade_name
-        from public.teacher_class_assignments a
-       where a.school_id = v_sess.school_id
-         and a.is_active = true
-         and nullif(btrim(a.class_name),'') is not null
     ) x;
 
   return jsonb_build_object('ok', true, 'rows', v_rows);
@@ -554,7 +549,8 @@ begin
      where t.school_id=v_sess.school_id
        and t.status='active'
        and a.is_active=true
-       and lower(trim(s.grade))=lower(v_target)
+       and s.status='Active'
+       and lower(trim(s.grade))=lower(btrim(v_target))
      on conflict do nothing;
   else
     insert into public.staff_announcement_recipients(announcement_id,school_id,teacher_id)
