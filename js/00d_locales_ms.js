@@ -1481,4 +1481,20 @@ window.I18N_MS = {
   'chat.gradeAccess': 'Tiada tugasan gred aktif tersedia untuk akaun staf ini.',
   'chat.gradePrefix': 'Gred: '
   ,'chat.individualPrefix': 'Individu: '
+
+  // Staff Chat workspace localization additions
+  "chat.workspace.department": "Jabatan",
+  "chat.workspace.grade": "Gred",
+  "chat.workspace.groups": "Kumpulan Projek / Acara",
+  "chat.workspace.tickets": "Tiket Pertanyaan",
+  "chat.refresh": "Muat semula",
+  "chat.selectDepartment": "Pilih jabatan",
+  "chat.selectTeacher": "Pilih guru",
+  "chat.selectTicket": "Pilih tiket",
+  "chat.noGradeAccess": "Tiada akses gred lagi",
+  "chat.noDepartmentAccess": "Tiada akses jabatan lagi",
+  "chat.noGroups": "Tiada kumpulan lagi",
+  "chat.startGrade": "Mulakan perbualan gred.",
+  "chat.staffOnlyGrade": "Perbualan gred untuk staf sahaja",
+  "chat.departmentAccess": "Pentadbir mesti memberikan anda jabatan aktif terlebih dahulu.",
 };
