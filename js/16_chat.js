@@ -64,9 +64,9 @@ function _renderAdminComposer() {
         <div>
           <div class="smart-chat-kicker">ADMIN TOOLS</div>
           <h2>Official message</h2>
-          <p>Recipient routing is verified before any real send is enabled.</p>
+          <p>Recipient routing is verified server-side before sending.</p>
         </div>
-        <span class="smart-chat-preview-badge">PREVIEW ONLY</span>
+        <span class="smart-chat-preview-badge">OFFICIAL SEND</span>
       </div>
 
       <div class="smart-chat-form-grid">
