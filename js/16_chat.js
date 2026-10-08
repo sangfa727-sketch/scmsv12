@@ -591,14 +591,14 @@ window._toggleAnnouncementComposer=function(force=null){
   }
 };
 function _renderAnnouncementWorkspace(){
-  return _chatChannelBack('School Chat') +
+  const composer=window.APP?.is_admin ? '<div id="announcementComposer" class="smart-chat-composer-drawer">'+_renderAdminComposer()+'</div>' : '';
+  return _chatChannelBack('School Chat') + composer +
     '<div class="smart-chat-direct-shell smart-chat-announcement-shell'+(_announcementId?' has-selection':'')+'">'+
     '<aside class="smart-chat-direct-list"><div class="smart-chat-direct-list-head"><div><div class="smart-chat-kicker">OFFICIAL</div><strong>Announcements</strong></div><div class="smart-chat-list-actions">'+
-    (window.APP?.is_admin ? '<button type="button" class="smart-chat-add-btn" id="announcementComposerToggle" onclick="_toggleAnnouncementComposer()" aria-expanded="false" title="New official message">+</button>' : '')+
+    (window.APP?.is_admin ? '<button type="button" class="smart-chat-add-btn" id="announcementComposerToggle" onclick="_toggleAnnouncementComposer()" aria-expanded="false" aria-controls="announcementComposer" title="New official message">+</button>' : '')+
     '<button type="button" class="smart-chat-refresh-btn" onclick="_loadAnnouncementWorkspace()" title="Refresh">↻</button></div></div>'+
     '<div id="announcementList" class="smart-chat-conversation-list"></div></aside>'+
-    '<section class="smart-chat-direct-conversation"><div id="announcementHead" class="smart-chat-conversation-head"><div><strong>Official Announcements</strong><small>School-authorized notices for your staff account.</small></div><span class="smart-chat-verified-pill">Verified</span></div><div id="announcementStream" class="chat-stream"><div class="chat-empty"><div class="chat-empty-icon">📢</div><div class="chat-empty-title">Official Announcements</div><div class="chat-empty-sub">Loading…</div></div></div></section></div>' +
-    (window.APP?.is_admin ? '<div id="announcementComposer" class="smart-chat-composer-drawer">'+_renderAdminComposer()+'</div>' : '');
+    '<section class="smart-chat-direct-conversation"><div id="announcementHead" class="smart-chat-conversation-head"><div><strong>Official Announcements</strong><small>School-authorized notices for your staff account.</small></div><span class="smart-chat-verified-pill">Verified</span></div><div id="announcementStream" class="chat-stream"><div class="chat-empty"><div class="chat-empty-icon">📢</div><div class="chat-empty-title">Official Announcements</div><div class="chat-empty-sub">Loading…</div></div></div></section></div>';
 }
 async function _loadAnnouncementWorkspace(autoOpen=true){
   try{
@@ -606,7 +606,7 @@ async function _loadAnnouncementWorkspace(autoOpen=true){
     const list=document.getElementById('announcementList'),stream=document.getElementById('announcementStream');
     if(!list||!stream)return;
     window._chatAnnouncements=rows;
-    if(!rows.length){_announcementId=null;list.innerHTML='<div class="chat-empty-sub">No official announcements yet.</div>';stream.innerHTML='<div class="chat-empty"><div class="chat-empty-icon">📢</div><div class="chat-empty-title">No announcements</div><div class="chat-empty-sub">Official school notices will appear here.</div></div>';return;}
+    if(!rows.length){_announcementId=null;list.innerHTML='<div class="smart-chat-list-empty-card"><div class="icon">📢</div><strong>No official announcements</strong><small>New verified notices will appear here.</small></div>';stream.innerHTML='<div class="chat-empty"><div class="chat-empty-icon">📢</div><div class="chat-empty-title">No announcements</div><div class="chat-empty-sub">Official school notices will appear here.</div></div>';return;}
     list.innerHTML=rows.map(a=>'<button class="smart-chat-channel-card '+(Number(a.id)===Number(_announcementId)?'active':'')+'" onclick="_openAnnouncement('+Number(a.id)+')"><span class="smart-chat-channel-icon">📢</span><span><strong>'+esc(a.message_type||'Official notice')+'</strong><small>'+esc(a.created_at||'')+'</small></span><b>'+(!a.read_at?'•':'›')+'</b></button>').join('');
     if(autoOpen && !_announcementId) await _openAnnouncement(Number(rows[0].id));
   }catch(e){const list=document.getElementById('announcementList');if(list)list.innerHTML='<div class="chat-error">Unable to load announcements.</div>';}
