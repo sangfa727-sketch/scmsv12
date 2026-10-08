@@ -339,6 +339,12 @@ function _renderChatMode() {
     return;
   }
 
+  if (_chatChannel === 'tickets') {
+    root.innerHTML = _renderInquiryWorkspace();
+    _loadInquiryTickets();
+    return;
+  }
+
   root.innerHTML = `
     <div class="smart-chat-school-grid">
       <aside class="smart-chat-channel-list">
@@ -371,6 +377,52 @@ function _renderChatMode() {
 }
 
 
+function _renderInquiryWorkspace() {
+  return `
+    <div class="smart-chat-direct-shell smart-chat-inquiry-shell">
+      <aside class="smart-chat-direct-list">
+        <div class="smart-chat-direct-list-head"><div><div class="smart-chat-kicker">INQUIRY</div><strong>Inquiry Tickets</strong></div><button type="button" onclick="_loadInquiryTickets()" title="Refresh">↻</button></div>
+        <div class="smart-chat-directory-title">Staff-only student / parent issue tracking</div>
+        <div id="inquiryTicketList" class="smart-chat-conversation-list"></div>
+        <button type="button" class="btn-secondary" onclick="_newInquiryTicket()">＋ New ticket</button>
+      </aside>
+      <section class="smart-chat-direct-conversation" style="display:flex">
+        <div id="inquiryTicketHead" class="smart-chat-conversation-head"><div><strong>Select a ticket</strong><small>Only authorized staff in this school can access ticket messages.</small></div><span class="smart-chat-verified-pill">School isolated</span></div>
+        <div id="inquiryMessageStream" class="chat-stream smart-chat-direct-stream"><div class="chat-empty"><div class="chat-empty-icon">🎫</div><div class="chat-empty-title">Inquiry Tickets</div><div class="chat-empty-sub">Create or select a staff ticket.</div></div></div>
+        <form class="chat-composer smart-chat-direct-composer" onsubmit="return _sendInquiryFromComposer(event)">
+          <textarea id="inquiryChatInput" placeholder="Select a ticket..." rows="1" disabled></textarea>
+          <button type="submit" class="chat-send-btn" id="inquirySendBtn" disabled>${_chatIcon('send')}</button>
+        </form>
+      </section>
+    </div>`;
+}
+
+let _inquiryTickets=[], _inquiryTicketId=null;
+async function _loadInquiryTickets(){
+  try{
+    _inquiryTickets=await API.getInquiryTickets();
+    const box=document.getElementById('inquiryTicketList'); if(!box)return;
+    box.innerHTML=_inquiryTickets.length?_inquiryTickets.map(t=>`<button class="smart-chat-channel-card ${Number(t.id)===Number(_inquiryTicketId)?'active':''}" onclick="_openInquiryTicket(${Number(t.id)})"><span class="smart-chat-channel-icon">🎫</span><span><strong>${esc(t.subject)}</strong><small>${esc(t.status)} · ${esc(t.priority)}</small></span><b>›</b></button>`).join(''):'<div class="chat-empty-sub">No tickets yet.</div>';
+    if(_inquiryTicketId) await _openInquiryTicket(_inquiryTicketId);
+  }catch(e){const box=document.getElementById('inquiryTicketList');if(box)box.innerHTML='<div class="chat-error">Unable to load tickets.</div>';}
+}
+async function _openInquiryTicket(id){
+  _inquiryTicketId=Number(id); const r=await API.openInquiryTicket(_inquiryTicketId); if(!r?.ok)return;
+  const h=document.getElementById('inquiryTicketHead'), s=document.getElementById('inquiryMessageStream'), input=document.getElementById('inquiryChatInput'), btn=document.getElementById('inquirySendBtn');
+  if(h)h.innerHTML=`<div><strong>${esc(r.ticket.subject)}</strong><small>${esc(r.ticket.status)} · ${esc(r.ticket.priority)}${r.ticket.student_id?' · Student '+esc(r.ticket.student_id):''}</small></div><span class="smart-chat-verified-pill">Authorized</span>`;
+  if(s)s.innerHTML=(r.messages||[]).map(m=>`<div class="chat-bubble-row"><div class="chat-bubble"><strong>${esc(m.sender_teacher_name)}</strong><div>${esc(m.body).replace(/\n/g,'<br>')}</div><small>${esc(m.created_at||'')}</small></div></div>`).join('')||'<div class="chat-empty-sub">No messages.</div>';
+  if(input){input.disabled=r.ticket.status==='CLOSED';input.placeholder=input.disabled?'Ticket closed':'Write a reply...';}
+  if(btn)btn.disabled=input?.disabled||!_inquiryTicketId;
+}
+async function _sendInquiryFromComposer(e){
+  e?.preventDefault(); const input=document.getElementById('inquiryChatInput'); if(!_inquiryTicketId||!input?.value.trim())return false;
+  const r=await API.sendInquiryMessage(_inquiryTicketId,input.value.trim()); if(r?.ok){input.value='';await _openInquiryTicket(_inquiryTicketId);await _loadInquiryTickets();} else showToast('Message could not be sent.'); return false;
+}
+async function _newInquiryTicket(){
+  const subject=prompt('Ticket subject'); if(!subject?.trim())return; const body=prompt('Describe the issue'); if(!body?.trim())return;
+  const priority=prompt('Priority: LOW, NORMAL, HIGH, URGENT','NORMAL')||'NORMAL';
+  const r=await API.createInquiryTicket(subject.trim(),body.trim(),null,priority.trim().toUpperCase()); if(r?.ok){_inquiryTicketId=r.ticket.id;await _loadInquiryTickets();}else showToast('Ticket could not be created.');
+}
 function _renderDirectWorkspace() {
   return `
     <div class="smart-chat-direct-shell${_directConversationId ? ' has-selection' : ''}">
