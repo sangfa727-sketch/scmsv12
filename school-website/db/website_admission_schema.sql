@@ -18,8 +18,10 @@ create table if not exists public.website_admission_applications (
     check (preferred_contact in ('phone','email')),
   message text check (message is null or char_length(message) <= 4000),
   source_host text not null,
+  idempotency_key text not null check (char_length(trim(idempotency_key)) between 16 and 128),
   created_at timestamptz not null default now(),
-  updated_at timestamptz not null default now()
+  updated_at timestamptz not null default now(),
+  constraint website_admission_school_idempotency_uniq unique (school_id, idempotency_key)
 );
 
 create index if not exists website_admission_school_status_idx
@@ -31,7 +33,7 @@ alter table public.website_admission_applications enable row level security;
 -- Public INSERT must eventually be mediated by a hardened server endpoint:
 -- 1) resolve school_id from trusted hostname/site mapping
 -- 2) validate and rate-limit input
--- 3) prevent replay/abuse
+-- 3) enforce idempotency atomically with (school_id, idempotency_key)
 -- 4) insert with controlled server credentials
 -- Staff review policies are added only after existing SCMS auth/role binding is verified.
 
