@@ -1480,7 +1480,7 @@ window.I18N_MS = {
 
   'chat.gradeAccess': 'Tiada tugasan gred aktif tersedia untuk akaun staf ini.',
   'chat.gradePrefix': 'Gred: '
-  ,'chat.individualPrefix': 'Individu: '
+  ,'chat.individualPrefix': 'Individu: ',
 
   // Staff Chat workspace localization additions
   "chat.workspace.department": "Jabatan",
