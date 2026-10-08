@@ -531,7 +531,7 @@ async function _openInquiryTicket(id){
   const h=document.getElementById('inquiryTicketHead'), s=document.getElementById('inquiryMessageStream'), input=document.getElementById('inquiryChatInput'), btn=document.getElementById('inquirySendBtn');
   _inquiryCurrentTicket=r.ticket;
   const adminControls=window.APP?.is_admin?`<div class="smart-chat-inquiry-admin"><label>${t('chat.status')} <select id="inquiryStatusSelect" onchange="_updateInquiryTicket()"><option value="OPEN">${t('chat.statusOpen')}</option><option value="ASSIGNED">${t('chat.statusAssigned')}</option><option value="IN_PROGRESS">${t('chat.statusInProgress')}</option><option value="WAITING">${t('chat.statusWaiting')}</option><option value="RESOLVED">${t('chat.statusResolved')}</option><option value="CLOSED">${t('chat.statusClosed')}</option></select></label><label>${t('chat.assignee')} <select id="inquiryAssigneeSelect" onchange="_updateInquiryTicket()"><option value="">${t('chat.unassigned')}</option></select></label></div>`:'';
-  if(h)h.innerHTML=`<div class="smart-chat-direct-peer"><button type="button" class="smart-chat-mobile-back" onclick="_clearInquirySelection()" aria-label="${t('chat.backToInquiryTickets')}">‹</button><div><strong>${esc(r.ticket.subject)}</strong><small>${esc(r.ticket.status)} · ${esc(r.ticket.priority)}${r.ticket.student_id?' · Student '+esc(r.ticket.student_id):''}</small></div><span class="smart-chat-verified-pill">${t('chat.authorized')}</span>${adminControls}`;
+  if(h)h.innerHTML=`<div class="smart-chat-direct-peer"><button type="button" class="smart-chat-mobile-back" onclick="_clearInquirySelection()" aria-label="${t('chat.backToInquiryTickets')}">‹</button><div><strong>${esc(r.ticket.subject)}</strong><small>${esc(r.ticket.status)} · ${esc(r.ticket.priority)}${r.ticket.student_id?' · '+t('chat.studentLabel')+' '+esc(r.ticket.student_id):''}</small></div><span class="smart-chat-verified-pill">${t('chat.authorized')}</span>${adminControls}`;
   if(window.APP?.is_admin){
     const ss=document.getElementById('inquiryStatusSelect'), aa=document.getElementById('inquiryAssigneeSelect');
     if(ss)ss.value=r.ticket.status;
@@ -575,7 +575,7 @@ function _renderInquiryDraft(){
       <label>${t('chat.subject')}<input id="inquiryDraftSubject" maxlength="160" required placeholder="${t('chat.whatNeedsAttention')}"></label>
       <label>${t('chat.priority')}<select id="inquiryDraftPriority"><option>NORMAL</option><option>LOW</option><option>HIGH</option><option>URGENT</option></select></label>
       <label>${t('chat.studentId')} <span class="smart-chat-field-note">${t('chat.optionalSameSchool')}</span><input id="inquiryDraftStudent" maxlength="80" placeholder="${t('chat.studentId')}"></label>
-      <label>Details<textarea id="inquiryDraftBody" maxlength="4000" rows="5" required placeholder="${t('chat.describeIssue')}"></textarea></label>
+      <label>${t('chat.details')}<textarea id="inquiryDraftBody" maxlength="4000" rows="5" required placeholder="${t('chat.describeIssue')}"></textarea></label>
       <div class="smart-chat-inquiry-form-actions"><button type="button" class="btn-secondary" onclick="_closeInquiryDraft()">${t('chat.cancel')}</button><button type="submit" class="btn-primary">${t('chat.createTicket')}</button></div>
     </form>`;
 }
