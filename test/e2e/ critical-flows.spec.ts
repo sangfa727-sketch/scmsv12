@@ -79,3 +79,24 @@ test.describe('Staff Chat entry (authenticated shell)', () => {
     await expect(page.locator('#chatRoot')).toContainText('COMMUNICATION CENTER');
   });
 });
+
+
+test.describe('Department Chat (authenticated staging)', () => {
+  test('opens an authorized department conversation from Chat', async ({ page }) => {
+    test.skip(process.env.SCMS_REQUIRE_STAGING !== '1', 'Department Chat E2E requires the staging/manual E2E run');
+    await page.goto(BASE_URL);
+    await page.getByTestId('login-teacher-id').fill(TEACHER_ID);
+    await page.getByTestId('login-password').fill(TEACHER_PW);
+    await page.getByTestId('login-submit').click();
+    await expect(page.getByTestId('sidebar')).toBeVisible();
+
+    await page.getByTestId('nav-chat').click();
+    await page.getByTestId('chat-channel-departments').click();
+    await expect(page.locator('#departmentList')).toBeVisible();
+    await expect(page.locator('[data-testid^="department-row-"]').first()).toBeVisible();
+
+    await page.locator('[data-testid^="department-row-"]').first().click();
+    await expect(page.locator('#departmentMessageStream')).toBeVisible();
+    await expect(page.locator('#departmentChatInput')).toBeEnabled();
+  });
+});

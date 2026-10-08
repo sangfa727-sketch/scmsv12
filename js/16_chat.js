@@ -357,7 +357,7 @@ function _renderChatMode() {
       <aside class="smart-chat-channel-list">
         <div class="smart-chat-list-title">School Chat</div>
         ${visible.map(c => `
-          <button class="smart-chat-channel-card ${c.id === _chatChannel ? 'active' : ''}" onclick="switchChatChannel('${esc(c.id)}')">
+          <button data-testid="chat-channel-${c.id}" class="smart-chat-channel-card ${c.id === _chatChannel ? 'active' : ''}" onclick="switchChatChannel('${esc(c.id)}')">
             <span class="smart-chat-channel-icon">${c.icon}</span>
             <span><strong>${esc(c.name)}</strong><small>${esc(c.sub)}</small></span>
             <b>›</b>
