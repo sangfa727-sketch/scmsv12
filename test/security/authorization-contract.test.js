@@ -488,3 +488,4 @@ test('Official announcement workspace reads only through guarded announcement AP
   assert.match(workspace, /API\\.markStaffAnnouncementRead/);
   assert.match(workspace, /Official Announcements/);
 });
+// Grade Chat hardening regression coverage.
