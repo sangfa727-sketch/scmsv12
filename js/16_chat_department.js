@@ -22,7 +22,7 @@ function _renderDepartmentWorkspace(targetId='smartChatModeBody'){
       </div>
     </section>
   </div>` : '';
-  return _chatChannelBack('School Chat') + composer + `
+  return _chatChannelBack(t('chat.schoolChat')) + composer + `
 <div class="smart-chat-list-title">${t('chat.departmentGrade')} <span style="float:right"><button type="button" class="btn-pill-action" disabled>${t('chat.workspace.department')}</button> <button type="button" class="btn-pill-action" onclick="_showGradeWorkspace()">${t('chat.workspace.grade')}</button></span></div>
 <div class="smart-chat-direct-shell smart-chat-department-shell${_departmentId ? " has-selection" : ""}">
 <aside class="smart-chat-direct-list"><div class="smart-chat-direct-list-head"><div><div class="smart-chat-kicker">${t('chat.workspace.department').toUpperCase()}</div><strong>${t('chat.workspace.department')}</strong></div><div class="smart-chat-list-actions">${window.APP?.is_admin ? `<button type="button" class="smart-chat-add-btn" id="departmentComposerToggle" onclick="_toggleDepartmentComposer()" aria-expanded="false" aria-controls="departmentComposer" title="${t('chat.newDepartment')}">+</button>` : ''}<button type="button" class="smart-chat-refresh-btn" onclick="_loadDepartmentWorkspace()" title="${t('chat.refresh')}">↻</button></div></div>
