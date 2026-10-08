@@ -28,6 +28,10 @@ Object.assign(API, {
   async getDepartmentChats(){ const res=await _webRpc('rpc_chat_department_list',{p_session_token:_webSessionToken()}); return Array.isArray(res.rows)?res.rows:[]; },
   async openDepartmentChat(departmentId,limit=50){ return _webRpc('rpc_chat_department_open',{p_session_token:_webSessionToken(),p_department_id:Number(departmentId),p_limit:Number(limit)||50}); },
   async sendDepartmentMessage(departmentId,body){ return _webRpc('rpc_chat_department_send',{p_session_token:_webSessionToken(),p_department_id:Number(departmentId),p_body:body}); },
-  async markDepartmentRead(departmentId){ return _webRpc('rpc_chat_department_mark_read',{p_session_token:_webSessionToken(),p_department_id:Number(departmentId)}); }
+  async markDepartmentRead(departmentId){ return _webRpc('rpc_chat_department_mark_read',{p_session_token:_webSessionToken(),p_department_id:Number(departmentId)}); },
+  async getGradeChats(){ const res=await _webRpc('rpc_chat_grade_list',{p_session_token:_webSessionToken()}); return Array.isArray(res.rows)?res.rows:[]; },
+  async openGradeChat(gradeName,limit=50){ return _webRpc('rpc_chat_grade_open',{p_session_token:_webSessionToken(),p_grade_name:gradeName,p_limit:Number(limit)||50}); },
+  async sendGradeMessage(gradeName,body){ return _webRpc('rpc_chat_grade_send',{p_session_token:_webSessionToken(),p_grade_name:gradeName,p_body:body}); },
+  async markGradeRead(gradeName){ return _webRpc('rpc_chat_grade_mark_read',{p_session_token:_webSessionToken(),p_grade_name:gradeName}); }
 });
 window.API=API;
