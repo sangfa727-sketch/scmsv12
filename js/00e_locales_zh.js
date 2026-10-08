@@ -1,18 +1,3 @@
-  'chat.workspace.department': '部门',
-  'chat.workspace.grade': '年级',
-  'chat.workspace.groups': '项目 / 活动群组',
-  'chat.workspace.tickets': '咨询工单',
-  'chat.refresh': '刷新',
-  'chat.selectDepartment': '选择部门',
-  'chat.selectTeacher': '选择教师',
-  'chat.selectTicket': '选择工单',
-  'chat.noGradeAccess': '暂无年级访问权限',
-  'chat.noDepartmentAccess': '暂无部门访问权限',
-  'chat.noGroups': '暂无群组',
-  'chat.startGrade': '开始年级会话。',
-  'chat.staffOnlyGrade': '仅限员工的年级会话',
-  'chat.departmentAccess': '管理员需要先将您分配到一个启用的部门。',
-// Simplified Chinese (zh-CN) production locale — assembled from audited staging batches A-H.
 window.I18N_ZH = {
   "app.title": "SCMS — 学校班级管理",
   "common.all": "全部",
