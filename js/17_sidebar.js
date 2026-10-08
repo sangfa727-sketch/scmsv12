@@ -30,7 +30,7 @@ const SIDEBAR_ITEMS = [
   { id: 'incidents', icon: '⚡', key: 'module.incidents',  hideInTWA: false },
   { id: 'leave',     icon: '🌴', key: 'sb.leave',       hideInTWA: false },
   { id: 'timetable', icon: '📅', key: 'module.timetable',  hideInTWA: false },
-  { id: 'summary',   icon: '📊', key: 'module.summary', hideInTWA: false },\n  { id: 'insights',  icon: '✨', key: 'module.summary', hideInTWA: false },
+  { id: 'summary',   icon: '📊', key: 'module.summary', hideInTWA: false },\n  { id: 'insights',  icon: '✨', key: 'module.summary', label: () => ({en:'Class Insights',my:'အတန်းအလိုက် အနှစ်ချုပ်',th:'ภาพรวมชั้นเรียน',jp:'クラス・インサイト',ms:'Class Insights',km:'ព័ត៌មានថ្នាក់រៀន',zh:'班级洞察'}[window.I18N?.current] || 'Class Insights'), hideInTWA: false },
   // Items below are NATIVE-ONLY — hidden inside Telegram
   { id: 'chat',      icon: '🗨️', key: 'sb.chat', hideInTWA: true  },
 ];
@@ -113,7 +113,7 @@ function renderSidebar() {
           data-page="${esc(it.id)}" aria-current="${window.APP.currentPage === it.id ? 'page' : 'false'}"
           onclick="sidebarGo('${esc(it.id)}')">
           <span class="sidebar-icon">${it.icon}</span>
-          <span class="sidebar-label">${esc(t(it.key))}</span>
+          <span class="sidebar-label">${esc(typeof it.label === 'function' ? it.label() : t(it.key))}</span>
           ${badgeCount ? `<span class="sidebar-badge" aria-label="${badgeCount}">${badgeCount > 99 ? '99+' : badgeCount}</span>` : ''}
         </button>`;
       }).join('')}
