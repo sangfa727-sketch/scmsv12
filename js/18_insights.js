@@ -39,12 +39,19 @@ function _shell(){
 async function _loadReport(){
   _insightsReportCard={students:[]};
   try{
-    _insightsTerms=await API.getTerms();
-    if(!_insightsTerms.length)return;
-    if(!_insightsTermId||!_insightsTerms.some(function(t){return Number(t.id)===Number(_insightsTermId);}))_insightsTermId=(_insightsTerms.find(function(t){return t.is_current;})||_insightsTerms[0]).id;
     const students=(window.APP&&window.APP.students||[]).filter(function(s){return s.status==='Active';});
     const classes=_insightsClass==='All'?[...new Set(students.map(function(s){return s.class;}).filter(Boolean))]:[_insightsClass];
-    const results=await Promise.all(classes.map(function(cls){return API.getReportCard(_insightsTermId,cls).catch(function(){return {ok:false,students:[]};});}));
+    const results=await Promise.all(classes.map(async function(cls){
+      try{
+        const res=await API.getAssessments({class:cls,subject_id:null,term_id:null});
+        const rows=Array.isArray(res)?res:(res&&Array.isArray(res.rows)?res.rows:[]);
+        const ids=rows.map(function(x){return x.term_id;}).filter(function(x){return x!=null;});
+        const latest=rows.slice().sort(function(a,b){return String(b.date||'').localeCompare(String(a.date||''));})[0];
+        const termId=latest&&latest.term_id!=null?latest.term_id:(ids.length?ids[ids.length-1]:null);
+        if(termId==null)return {students:[]};
+        return await API.getReportCard(termId,cls).catch(function(){return {ok:false,students:[]};});
+      }catch(e){return {ok:false,students:[]};}
+    }));
     const merged=[];results.forEach(function(r){if(r&&Array.isArray(r.students))merged.push.apply(merged,r.students);});
     _insightsReportCard={students:merged};
   }catch(e){_insightsReportCard={students:[]};}
