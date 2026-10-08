@@ -292,7 +292,18 @@ window._refreshAdminComposerPreview = function() {
   document.head.appendChild(s);
 })();
 
+function _enterChatWorkspace() {
+  const root = document.documentElement;
+  if (root) root.classList.add('scms-chat-workspace');
+}
+
+function _exitChatWorkspace() {
+  const root = document.documentElement;
+  if (root) root.classList.remove('scms-chat-workspace');
+}
+
 function renderChat() {
+  _enterChatWorkspace();
   const page = document.getElementById('page-chat');
   if (!page) return;
 
@@ -327,6 +338,7 @@ function renderChat() {
 }
 
 window._chatBackToMenu = function() {
+  _exitChatWorkspace();
   try {
     if (typeof closeSidebar === 'function') closeSidebar();
     if (typeof isTWA === 'function' && !isTWA() && typeof openSidebar === 'function') {
