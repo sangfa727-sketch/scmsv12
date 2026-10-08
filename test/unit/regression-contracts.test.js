@@ -669,3 +669,16 @@ test('sandbox runtime SQL harness verifies published-only and tenant-isolated pu
   assert.match(sql, /raise exception 'School A published-only invariant failed'/i);
   assert.match(sql, /Draft\/review row leaked into public result/i);
 });
+
+
+test('sandbox RLS harness uses actual PostgreSQL row-level security and FORCE RLS', () => {
+  const sql = read('school-website/db/sandbox_rls_runtime_test.sql');
+  assert.match(sql, /enable row level security/i);
+  assert.match(sql, /force row level security/i);
+  assert.match(sql, /create policy public_published_same_school/i);
+  assert.match(sql, /current_setting\('app\.school_id'/i);
+  assert.match(sql, /publication_status = 'published'/i);
+  assert.match(sql, /school-a/);
+  assert.match(sql, /school-b/);
+  assert.match(sql, /rollback;/i);
+});
