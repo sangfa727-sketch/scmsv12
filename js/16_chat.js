@@ -635,7 +635,7 @@ window._clearAnnouncementSelection=function(){
   _announcementId=null;
   const shell=document.querySelector('.smart-chat-announcement-shell');if(shell)shell.classList.remove('has-selection');
   const head=document.getElementById('announcementHead');
-  if(head)head.innerHTML='<div><strong>${t('chat.officialAnnouncements')}</strong><small>Select an announcement to read it.</small></div><span class="smart-chat-verified-pill">Verified</span>';
+  if(head)head.innerHTML=`<div><strong>${t('chat.officialAnnouncements')}</strong><small>Select an announcement to read it.</small></div><span class="smart-chat-verified-pill">Verified</span>`;
   const stream=document.getElementById('announcementStream');
   if(stream)stream.innerHTML='<div class="chat-empty"><div class="chat-empty-icon">📢</div><div class="chat-empty-title">Select an announcement</div><div class="chat-empty-sub">Choose an official notice from the list.</div></div>';
 };
