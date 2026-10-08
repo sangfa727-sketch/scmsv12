@@ -1518,4 +1518,8 @@ window.I18N_EN = {
   'chat.newConversation': "New conversation",
   'chat.writePrivate': "Write a private message...",
   'chat.noMessages': "No messages.",
+
+  'chat.gradeAccess': 'No active grade assignment is available for this staff account.',
+  'chat.gradePrefix': 'Grade: ',
+  'chat.individualPrefix': 'Individual: ',
 };
