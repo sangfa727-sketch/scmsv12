@@ -3,6 +3,7 @@ const assert = require('node:assert/strict');
 
 const { handleAdmissionRequest } = require('../../school-website/server/admission-endpoint.js');
 const { createReplayGuard, createRateLimiter } = require('../../school-website/server/admission-security.js');
+const { createDistributedRateLimiter } = require('../../school-website/server/distributed-rate-limiter.js');
 
 function setup() {
   return {
@@ -38,6 +39,34 @@ test('admission endpoint resolves school from trusted hostname and inserts only 
   assert.equal(inserted.length, 1);
   assert.equal(inserted[0].schoolId, 'school-a');
   assert.equal(inserted[0].sourceHost, 'school-a.scmsv12.com');
+});
+
+test('admission endpoint awaits asynchronous distributed rate limiter', async () => {
+  const deps = setup();
+  const calls = [];
+  deps.rateLimiter = createDistributedRateLimiter({
+    allow: async (identity) => {
+      calls.push(identity);
+      return true;
+    }
+  });
+
+  const result = await handleAdmissionRequest({
+    ...deps,
+    hostname: 'school-a.scmsv12.com',
+    identity: '  school-a:ip-async  ',
+    body: {
+      studentName: 'Student',
+      guardianName: 'Guardian',
+      phone: '09123456789',
+      grade: 'Grade 5',
+      idempotencyKey: 'admission-key-async'
+    },
+    insertApplication: async () => {}
+  });
+
+  assert.equal(result.status, 201);
+  assert.deepEqual(calls, ['school-a:ip-async']);
 });
 
 test('admission endpoint rejects missing rate-limit identity', async () => {
