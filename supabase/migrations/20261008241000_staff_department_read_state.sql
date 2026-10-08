@@ -1,0 +1,51 @@
+-- SCMS v12 — Department chat read-state hardening
+alter table public.staff_department_members
+  add column if not exists last_read_at timestamptz not null default now();
+
+create index if not exists idx_staff_department_members_unread
+  on public.staff_department_members(department_id, teacher_id, last_read_at);
+
+create or replace function public.rpc_chat_department_open(p_session_token text,p_department_id bigint,p_limit integer default 50)
+returns jsonb language plpgsql security definer set search_path to 'public','pg_temp' as $function$
+declare v_sess record; v_department record; v_rows jsonb; v_unread integer;
+begin
+ select s.school_id,s.teacher_id,s.role into v_sess from public.app_web_sessions s join public.teachers t on t.teacher_id=s.teacher_id
+ where s.session_token=p_session_token and s.expires_at>now() and t.status='active' and t.school_id=s.school_id and t.role=s.role limit 1;
+ if v_sess is null then return jsonb_build_object('ok',false,'error','invalid_session'); end if;
+ select d.id,d.school_id,d.department_code,d.department_name,m.last_read_at into v_department
+ from public.staff_departments d join public.staff_department_members m
+ on m.department_id=d.id and m.school_id=v_sess.school_id and m.teacher_id=v_sess.teacher_id and m.is_active=true
+ where d.id=p_department_id and d.school_id=v_sess.school_id and d.is_active=true limit 1;
+ if v_department is null then return jsonb_build_object('ok',false,'error','forbidden'); end if;
+ select count(*)::integer into v_unread from public.staff_department_messages x
+ where x.department_id=v_department.id and x.school_id=v_sess.school_id
+   and x.created_at>v_department.last_read_at and x.sender_teacher_id<>v_sess.teacher_id;
+ select coalesce(jsonb_agg(to_jsonb(x) order by x.created_at,x.id),'[]'::jsonb) into v_rows from (
+   select m.id,m.department_id,m.sender_teacher_id,coalesce(t.teacher_name,'Staff') sender_teacher_name,m.body,m.created_at
+   from public.staff_department_messages m left join public.teachers t on t.teacher_id=m.sender_teacher_id and t.school_id=v_sess.school_id
+   where m.department_id=v_department.id and m.school_id=v_sess.school_id
+   order by m.created_at desc,m.id desc limit greatest(1,least(coalesce(p_limit,50),100))
+ ) x;
+ return jsonb_build_object('ok',true,'department',jsonb_build_object('id',v_department.id,'department_code',v_department.department_code,'department_name',v_department.department_name),'rows',v_rows,'unread_count',v_unread);
+end $function$;
+
+create or replace function public.rpc_chat_department_mark_read(p_session_token text,p_department_id bigint)
+returns jsonb language plpgsql security definer set search_path to 'public','pg_temp' as $function$
+declare v_sess record; v_ok boolean;
+begin
+ select s.school_id,s.teacher_id,s.role into v_sess from public.app_web_sessions s join public.teachers t on t.teacher_id=s.teacher_id
+ where s.session_token=p_session_token and s.expires_at>now() and t.status='active' and t.school_id=s.school_id and t.role=s.role limit 1;
+ if v_sess is null then return jsonb_build_object('ok',false,'error','invalid_session'); end if;
+ select exists(select 1 from public.staff_departments d join public.staff_department_members m
+   on m.department_id=d.id and m.school_id=v_sess.school_id and m.teacher_id=v_sess.teacher_id and m.is_active=true
+   where d.id=p_department_id and d.school_id=v_sess.school_id and d.is_active=true) into v_ok;
+ if not v_ok then return jsonb_build_object('ok',false,'error','forbidden'); end if;
+ update public.staff_department_members m set last_read_at=now()
+ where m.department_id=p_department_id and m.school_id=v_sess.school_id and m.teacher_id=v_sess.teacher_id and m.is_active=true;
+ return jsonb_build_object('ok',true,'read_at',now());
+end $function$;
+
+revoke all on function public.rpc_chat_department_open(text,bigint,integer) from public;
+revoke all on function public.rpc_chat_department_mark_read(text,bigint) from public;
+grant execute on function public.rpc_chat_department_open(text,bigint,integer) to anon,authenticated;
+grant execute on function public.rpc_chat_department_mark_read(text,bigint) to anon,authenticated;

@@ -422,3 +422,30 @@ test('Staff Inquiry Ticket assignment/status is admin-bound and school-scoped', 
   assert.match(migration, /member_role='ASSIGNEE'/);
   assert.match(migration, /grant execute on function public\.rpc_chat_inquiry_update/);
 });
+
+
+test('Department Chat is session, tenant, membership, and read-state bound', () => {
+  const migration = read('supabase/migrations/20261008240000_staff_department_messaging.sql');
+  const readState = read('supabase/migrations/20261008241000_staff_department_read_state.sql');
+  const api = read('js/02L_api_chat.js');
+  const chat = read('js/16_chat_department.js');
+
+  for (const fn of ['rpc_chat_department_open','rpc_chat_department_send','rpc_chat_department_mark_read']) {
+    assert.match(migration, new RegExp('function public\\\\.' + fn));
+    assert.match(migration, new RegExp(fn + '[\\\\s\\\\S]{0,5000}p_session_token text'));
+    assert.match(migration, new RegExp(fn + '[\\\\s\\\\S]{0,5000}expires_at>now\\\\(\\\\)'));
+    assert.match(migration, new RegExp(fn + '[\\\\s\\\\S]{0,5000}t\\\\.status=\\\\'active\\\\''));
+    assert.match(migration, new RegExp(fn + '[\\\\s\\\\S]{0,5000}t\\\\.school_id=s\\\\.school_id'));
+    assert.match(migration, new RegExp(fn + '[\\\\s\\\\S]{0,7000}school_id=v_sess\\\\.school_id'));
+  }
+  assert.match(migration, /alter table public\\.staff_department_messages enable row level security/);
+  assert.match(migration, /revoke all on public\\.staff_department_messages from anon, authenticated/);
+  assert.match(migration, /return jsonb_build_object\\('ok',false,'error','forbidden'\\)/);
+  assert.match(migration, /grant execute on function public\\.rpc_chat_department_send\\(text,bigint,text\\) to anon,authenticated/);
+  assert.match(readState, /last_read_at timestamptz not null default now\\(\\)/);
+  assert.match(readState, /set last_read_at=now\\(\\)/);
+  assert.match(readState, /unread_count/);
+  for (const fn of ['getDepartmentChats','openDepartmentChat','sendDepartmentMessage','markDepartmentRead']) assert.match(api, new RegExp(fn));
+  assert.match(chat, /setInterval/);
+  assert.match(chat, /API\\.markDepartmentRead/);
+});

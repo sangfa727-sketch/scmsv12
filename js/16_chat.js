@@ -339,6 +339,8 @@ function _renderChatMode() {
     return;
   }
 
+  if (_chatChannel === 'departments' && typeof _renderDepartmentWorkspace === 'function') { root.innerHTML = _renderDepartmentWorkspace(); _loadDepartmentWorkspace(); return; }
+
   if (_chatChannel === 'tickets') {
     root.innerHTML = _renderInquiryWorkspace();
     _loadInquiryTickets();
