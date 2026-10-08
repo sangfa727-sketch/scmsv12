@@ -76,7 +76,7 @@ begin
     if v_sess.role not in ('admin','super_admin') then
       return jsonb_build_object('ok',false,'error','admin_only');
     end if;
-    if p_target is null or length(btrim(p_target)) = 0 or length(p_target) > 100 then
+    if p_target is not null and (length(btrim(p_target)) = 0 or length(p_target) > 100) then
       return jsonb_build_object('ok',false,'error','bad_target');
     end if;
 
@@ -89,9 +89,9 @@ begin
     ), '[]'::jsonb)
       into v_rows
       from public.teachers t
-     where t.teacher_id = btrim(p_target)
-       and t.school_id = v_sess.school_id
-       and t.status = 'active';
+     where t.school_id = v_sess.school_id
+       and t.status = 'active'
+       and (p_target is null or t.teacher_id = btrim(p_target));
   else
     select coalesce(jsonb_agg(
       jsonb_build_object(
