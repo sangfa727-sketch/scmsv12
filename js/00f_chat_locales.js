@@ -87,13 +87,13 @@
 
 
   const micro={
-    en:{'chat.privateLabel':'PRIVATE','chat.noActiveTeacher':'No active teacher found.','chat.ticketCreateFailed':'Ticket could not be created.','chat.studentLabel':'Student','chat.details':'Details'},
-    my:{'chat.privateLabel':'ကိုယ်ပိုင်','chat.noActiveTeacher':'လက်ရှိဆရာ/ဆရာမ မတွေ့ပါ။','chat.ticketCreateFailed':'လက်မှတ် ဖန်တီး၍မရပါ။','chat.studentLabel':'ကျောင်းသား','chat.details':'အသေးစိတ်'},
-    th:{'chat.privateLabel':'ส่วนตัว','chat.noActiveTeacher':'ไม่พบครูที่ใช้งานอยู่','chat.ticketCreateFailed':'ไม่สามารถสร้างตั๋วได้','chat.studentLabel':'นักเรียน','chat.details':'รายละเอียด'},
-    jp:{'chat.privateLabel':'非公開','chat.noActiveTeacher':'有効な教員が見つかりません','chat.ticketCreateFailed':'チケットを作成できませんでした','chat.studentLabel':'生徒','chat.details':'詳細'},
-    ms:{'chat.privateLabel':'PERIBADI','chat.noActiveTeacher':'Tiada guru aktif ditemui.','chat.ticketCreateFailed':'Tiket tidak dapat dicipta.','chat.studentLabel':'Murid','chat.details':'Butiran'},
-    km:{'chat.privateLabel':'ឯកជន','chat.noActiveTeacher':'រកមិនឃើញគ្រូសកម្មទេ។','chat.ticketCreateFailed':'មិនអាចបង្កើតសំបុត្របានទេ។','chat.studentLabel':'សិស្ស','chat.details':'ព័ត៌មានលម្អិត'},
-    zh:{'chat.privateLabel':'私密','chat.noActiveTeacher':'未找到活跃教师。','chat.ticketCreateFailed':'无法创建工单。','chat.studentLabel':'学生','chat.details':'详情'}
+    en:{'chat.privateLabel':'PRIVATE','chat.noActiveTeacher':'No active teacher found.','chat.ticketCreateFailed':'Ticket could not be created.','chat.studentLabel':'Student','chat.details':'Details','chat.ph':'Write a message...','chat.selectTicket':'Select a ticket','chat.unableLoadConversation':'Unable to load conversation.'},
+    my:{'chat.privateLabel':'ကိုယ်ပိုင်','chat.noActiveTeacher':'လက်ရှိဆရာ/ဆရာမ မတွေ့ပါ။','chat.ticketCreateFailed':'လက်မှတ် ဖန်တီး၍မရပါ။','chat.studentLabel':'ကျောင်းသား','chat.details':'အသေးစိတ်','chat.ph':'မက်ဆေ့ချ် ရေးပါ...','chat.selectTicket':'လက်မှတ် ရွေးပါ','chat.unableLoadConversation':'စကားပြောခန်းကို ဖွင့်၍မရပါ။'},
+    th:{'chat.privateLabel':'ส่วนตัว','chat.noActiveTeacher':'ไม่พบครูที่ใช้งานอยู่','chat.ticketCreateFailed':'ไม่สามารถสร้างตั๋วได้','chat.studentLabel':'นักเรียน','chat.details':'รายละเอียด','chat.ph':'เขียนข้อความ...','chat.selectTicket':'เลือกตั๋ว','chat.unableLoadConversation':'ไม่สามารถโหลดการสนทนาได้'},
+    jp:{'chat.privateLabel':'非公開','chat.noActiveTeacher':'有効な教員が見つかりません','chat.ticketCreateFailed':'チケットを作成できませんでした','chat.studentLabel':'生徒','chat.details':'詳細','chat.ph':'メッセージを書く…','chat.selectTicket':'チケットを選択','chat.unableLoadConversation':'会話を読み込めません'},
+    ms:{'chat.privateLabel':'PERIBADI','chat.noActiveTeacher':'Tiada guru aktif ditemui.','chat.ticketCreateFailed':'Tiket tidak dapat dicipta.','chat.studentLabel':'Murid','chat.details':'Butiran','chat.ph':'Tulis mesej...','chat.selectTicket':'Pilih tiket','chat.unableLoadConversation':'Perbualan tidak dapat dimuatkan.'},
+    km:{'chat.privateLabel':'ឯកជន','chat.noActiveTeacher':'រកមិនឃើញគ្រូសកម្មទេ។','chat.ticketCreateFailed':'មិនអាចបង្កើតសំបុត្របានទេ។','chat.studentLabel':'សិស្ស','chat.details':'ព័ត៌មានលម្អិត','chat.ph':'សរសេរសារ...','chat.selectTicket':'ជ្រើសរើសសំបុត្រ','chat.unableLoadConversation':'មិនអាចផ្ទុកការសន្ទនាបានទេ'},
+    zh:{'chat.privateLabel':'私密','chat.noActiveTeacher':'未找到活跃教师。','chat.ticketCreateFailed':'无法创建工单。','chat.studentLabel':'学生','chat.details':'详情','chat.ph':'输入消息…','chat.selectTicket':'选择工单','chat.unableLoadConversation':'无法加载会话。'}
   };
   Object.keys(micro).forEach(code=>Object.assign(chat[code],micro[code]));
 
