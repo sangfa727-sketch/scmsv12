@@ -27,6 +27,9 @@ function validateAdmissionInput(input) {
 
 function isHoneypotTriggered(value) { return typeof value === 'string' && value.trim().length > 0; }
 
+/**
+ * In-memory replay guard for sandbox tests only; not production-grade.
+ */
 function createReplayGuard({ ttlMs = 10 * 60 * 1000, maxEntries = 10000, now = () => Date.now() } = {}) {
   const seen = new Map();
   return {
@@ -43,6 +46,9 @@ function createReplayGuard({ ttlMs = 10 * 60 * 1000, maxEntries = 10000, now = (
   };
 }
 
+/**
+ * In-memory rate limiter for sandbox tests only; not production-grade.
+ */
 function createRateLimiter({ windowMs = 60 * 1000, maxRequests = 10, now = () => Date.now() } = {}) {
   const buckets = new Map();
   return {
