@@ -1,6 +1,6 @@
 -- SCMS v12 — Communications authorization hardening
-insert into public.permission_definitions(permission_key,scope_type,is_active)
-values ('communication.view','class',true),('communication.send','class',true),('communication.manage','class',true)
+insert into public.permission_definitions(permission_key,category,scope_type,is_active)
+values ('communication.view','communication','class',true),('communication.send','communication','class',true),('communication.manage','communication','class',true)
 on conflict(permission_key) do update set scope_type=excluded.scope_type,is_active=true;
 
 insert into public.role_permissions(role,permission_key,allowed)
