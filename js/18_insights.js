@@ -58,7 +58,7 @@ async function _loadReport(){
     _insightsReportCard={students:merged};
   }catch(e){_insightsReportCard={students:[]};}
 }
-function renderInsights(opts){
+async function renderInsights(opts){
   opts=opts||{}; const root=document.getElementById('page-insights'); if(!root)return;
   root.innerHTML=_shell();
   const list=root.querySelector('#insightsList'); if(list)list.innerHTML=typeof skeletonCards==='function'?skeletonCards(3):'';
