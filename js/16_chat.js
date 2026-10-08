@@ -330,7 +330,7 @@ function _renderChatMode() {
     { id:'direct', name:'1-on-1 Direct Messages', icon:'👤', sub:'Private staff-to-staff chat' },
     { id:'events', name:'Project / Event Groups', icon:'🗂️', sub:'Temporary work groups' }
   ];
-  const visible = channels.filter(c => c.id === 'staff' || c.id === 'direct' || window.APP?.is_admin);
+  const visible = channels;
   if (!visible.some(c => c.id === _chatChannel)) _chatChannel = 'staff';
 
   if (_chatChannel === 'direct') {
@@ -339,8 +339,8 @@ function _renderChatMode() {
     return;
   }
 
+  if (_chatChannel === 'announcements' && typeof _renderAnnouncementsWorkspace === 'function') { _renderAnnouncementsWorkspace(); return; }
   if (_chatChannel === 'departments' && typeof _renderDepartmentWorkspace === 'function') { root.innerHTML = _renderDepartmentWorkspace(); _loadDepartmentWorkspace(); return; }
-
   if (_chatChannel === 'tickets') {
     root.innerHTML = _renderInquiryWorkspace();
     _loadInquiryTickets();
