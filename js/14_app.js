@@ -434,7 +434,8 @@ const PAGE_PERMISSION = Object.freeze({
   admissions: 'admissions.view',
   library: 'library.view',
   transport: 'transport.view',
-  leave: 'leave.view',\n  insights: 'students.view',
+  leave: 'leave.view',
+  insights: 'students.view',
 });
 
 function _pageAccessAllowed(pageId) {
