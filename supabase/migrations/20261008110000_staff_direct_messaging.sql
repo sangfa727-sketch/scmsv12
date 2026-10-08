@@ -343,6 +343,16 @@ begin
     return jsonb_build_object('ok', false, 'error', 'recipient_inactive');
   end if;
 
+  if p_reply_to_id is not null and not exists (
+    select 1
+      from public.staff_direct_messages r
+     where r.id=p_reply_to_id
+       and r.conversation_id=p_conversation_id
+       and r.school_id=v_sess.school_id
+  ) then
+    return jsonb_build_object('ok', false, 'error', 'invalid_reply_target');
+  end if;
+
   insert into public.staff_direct_messages(
     conversation_id, school_id, sender_teacher_id, sender_teacher_name, text, reply_to_id
   )
