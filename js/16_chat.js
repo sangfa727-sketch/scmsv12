@@ -150,7 +150,34 @@ window._refreshAdminComposerPreview = function() {
   `;
 };
 
+function _ensureSmartChatMobileStyles() {
+  if (document.getElementById('smartChatMobileStyles')) return;
+  const style = document.createElement('style');
+  style.id = 'smartChatMobileStyles';
+  style.textContent = [
+    '.smart-chat-menu-btn{display:inline-flex;align-items:center;justify-content:center;gap:6px;min-height:36px;padding:7px 10px;border:1px solid var(--border);border-radius:10px;background:var(--surface);color:var(--text);font-weight:700;font-size:12px;cursor:pointer}',
+    '.smart-chat-menu-btn svg{width:16px;height:16px;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}',
+    '.smart-chat-hero{display:flex;align-items:center;justify-content:space-between;gap:10px}',
+    '.smart-chat-hero-actions{display:flex;align-items:center;gap:7px;flex:0 0 auto}',
+    '.smart-chat-school-grid,.smart-chat-channel-list,.smart-chat-conversation,.smart-chat-direct-shell,.smart-chat-direct-list,.smart-chat-direct-conversation{min-width:0}',
+    '.smart-chat-direct-stream{overscroll-behavior:contain;-webkit-overflow-scrolling:touch}',
+    '.smart-chat-direct-item,.smart-chat-directory-item,.smart-chat-channel-card{touch-action:manipulation}',
+    '@media(max-width:700px){.smart-chat-shell{padding-bottom:calc(12px + env(safe-area-inset-bottom))}.smart-chat-hero{align-items:flex-start}.smart-chat-hero-actions{margin-left:auto}.smart-chat-identity{display:none}.smart-chat-menu-btn{min-width:40px;padding:8px}.smart-chat-menu-btn span{display:none}.smart-chat-mode-switch{position:sticky;top:0;z-index:8}.smart-chat-school-grid{display:flex;flex-direction:column;gap:8px}.smart-chat-channel-list{order:0;display:flex;flex-direction:column;max-height:168px;overflow-y:auto}.smart-chat-list-title{padding:5px 2px;font-size:11px}.smart-chat-channel-card{display:flex;align-items:center;text-align:left;width:100%;min-height:46px;padding:7px 9px;border-radius:11px}.smart-chat-channel-card small{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.smart-chat-conversation{order:1;min-height:0}.smart-chat-conversation-head{position:sticky;top:0;z-index:5}.chat-stream{min-height:calc(100dvh - 300px);max-height:calc(100dvh - 300px);overflow-y:auto;padding-bottom:8px}.chat-composer{position:sticky;bottom:0;z-index:6;padding-bottom:calc(7px + env(safe-area-inset-bottom))}.smart-chat-direct-shell{position:relative;min-height:calc(100dvh - 210px)}.smart-chat-direct-list{display:flex;flex-direction:column;min-height:0}.smart-chat-direct-conversation{display:none;min-height:calc(100dvh - 210px);flex-direction:column}.smart-chat-direct-shell.has-selection .smart-chat-direct-list{display:none}.smart-chat-direct-shell.has-selection .smart-chat-direct-conversation{display:flex}.smart-chat-direct-stream{flex:1;min-height:0;max-height:none;height:auto}.smart-chat-direct-composer{position:sticky;bottom:0;background:var(--surface);padding-bottom:calc(8px + env(safe-area-inset-bottom));margin-top:0}.smart-chat-mobile-back{display:inline-flex!important}.smart-chat-direct-search{min-height:42px}.smart-chat-direct-item,.smart-chat-directory-item{min-height:52px}.smart-chat-conversation-list{max-height:34dvh;overflow-y:auto}.smart-chat-directory{max-height:38dvh;overflow-y:auto}}',
+    '@media(min-width:701px){.smart-chat-mobile-back{display:none!important}}'
+  ].join('');
+  document.head.appendChild(style);
+}
+
+window._chatBackToMenu = function(){
+  if (typeof isTWA === 'function' && isTWA()) {
+    if (typeof goToPage === 'function') goToPage('dashboard');
+    return;
+  }
+  if (typeof openSidebar === 'function') openSidebar();
+};
+
 function renderChat() {
+  _ensureSmartChatMobileStyles();
   const page = document.getElementById('page-chat');
   if (!page) return;
 
@@ -161,6 +188,11 @@ function renderChat() {
           <div class="page-eyebrow">COMMUNICATION CENTER</div>
           <h1 class="page-title">Smart <em>Chat</em></h1>
           <p class="page-subtitle">School communication and AI operations — kept separate, one tap away.</p>
+        </div>
+        <div class="smart-chat-hero-actions">
+          <button type="button" class="smart-chat-menu-btn" onclick="_chatBackToMenu()" aria-label="Open menu">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 6h16M4 12h16M4 18h16"/></svg><span>Menu</span>
+          </button>
         </div>
         <div class="smart-chat-identity">
           <span class="smart-chat-avatar">${esc((window.APP?.teacher_name || '?')[0])}</span>
@@ -271,7 +303,7 @@ function _renderChatMode() {
 
 function _renderDirectWorkspace() {
   return `
-    <div class="smart-chat-direct-shell">
+    <div class="smart-chat-direct-shell ${_directConversationId ? "has-selection" : ""}>
       <aside class="smart-chat-direct-list">
         <div class="smart-chat-direct-list-head"><div><div class="smart-chat-kicker">PRIVATE</div><strong>Direct messages</strong></div><button type="button" onclick="_loadDirectWorkspace()" title="Refresh">↻</button></div>
         <label class="smart-chat-direct-search"><span>⌕</span><input id="directStaffSearch" placeholder="Find a teacher..." oninput="_renderDirectDirectory()"></label>
@@ -347,7 +379,7 @@ function _renderDirectHeader(){
   const root=document.getElementById('directConversationHead');
   if(!root||!_directPeer)return;
   root.innerHTML=`
-    <div class="smart-chat-direct-peer"><button class="smart-chat-mobile-back" onclick="_clearDirectSelection"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m15 18-6-6 6-6"/></svg></button><span class="smart-chat-direct-avatar large">${esc((_directPeer.teacher_name||'?')[0])}</span><div><strong>${esc(_directPeer.teacher_name)}</strong><small>${esc(_directPeer.role||'Teacher')} · Private 1-on-1</small></div></div>
+    <div class="smart-chat-direct-peer"><button class="smart-chat-mobile-back" onclick="_clearDirectSelection()" aria-label="Back to conversations"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m15 18-6-6 6-6"/></svg></button><span class="smart-chat-direct-avatar large">${esc((_directPeer.teacher_name||'?')[0])}</span><div><strong>${esc(_directPeer.teacher_name)}</strong><small>${esc(_directPeer.role||'Teacher')} · Private 1-on-1</small></div></div>
     <span class="smart-chat-verified-pill">Private</span>`;
 }
 
