@@ -103,13 +103,13 @@ function _renderAdminComposer() {
           </select>
         </label>
         <label>Reason
-          <input id="adminMsgReason" value="Official school communication"
+          <input id="adminMsgReason" value=${t('chat.official.reasonDefault')}
                  oninput="_refreshAdminComposerPreview()">
         </label>
       </div>
 
       <label class="smart-chat-body-field">Body
-        <textarea id="adminMsgBody" rows="3" placeholder="Write the official message..." oninput="_refreshAdminComposerPreview()"></textarea>
+        <textarea id="adminMsgBody" rows="3" placeholder=${t('chat.official.bodyPlaceholder')} oninput="_refreshAdminComposerPreview()"></textarea>
       </label>
 
       <div class="smart-chat-routing-status blocked" id="adminMsgRoutingStatus">
@@ -179,7 +179,7 @@ window.sendOfficialAnnouncement = async function() {
   const btn = document.getElementById('adminMsgSendBtn');
   const recipients = _adminRecipientRows(recipientType, target);
   if (!recipients.length || (recipientType === 'teacher' && !teacherId)) {
-    showToast('No verified recipient. Message was not sent.');
+    showToast(${t('chat.official.noRecipientSent')});
     return false;
   }
   if (!reason || !body) {
@@ -191,14 +191,14 @@ window.sendOfficialAnnouncement = async function() {
     const result = await API.createStaffAnnouncement(recipientType, target, messageType, reason, body);
     if (!result?.ok) throw new Error(result?.error || 'Send failed');
     if (btn) btn.innerHTML = '✓ Sent';
-    showToast('Official message sent to ' + result.recipient_count + ' verified staff.');
+    showToast(${t('chat.official.sentTo')} + result.recipient_count + ' verified staff.');
     document.getElementById('adminMsgBody').value = '';
     setTimeout(() => {
       if (btn) { btn.innerHTML = _chatIcon('send') + ' Send official message'; btn.disabled = false; }
       _refreshAdminComposerPreview();
     }, 900);
   } catch (e) {
-    showToast('Official message could not be sent.');
+    showToast(${t('chat.official.sendFailed')});
     if (btn) btn.disabled = false;
   }
   return false;
@@ -224,12 +224,12 @@ window._refreshAdminComposerPreview = function() {
   const title = document.getElementById('adminMsgRoutingTitle');
   const names = document.getElementById('adminMsgRoutingNames');
   if (status) status.className = 'smart-chat-routing-status ' + (validRecipient ? 'verified' : 'blocked');
-  if (title) title.textContent = validRecipient ? (recipientType === 'teacher' ? '1 verified recipient' : recipients.length + ' verified recipient(s)') : 'No verified recipient';
+  if (title) title.textContent = validRecipient ? (recipientType === 'teacher' ? '1 verified recipient' : recipients.length + ' verified recipient(s)') : ${t('chat.official.noRecipient')};
   if (names) names.textContent = validRecipient ? (recipientType === 'teacher' ? selectedTeacher.teacher_name : recipients.map(t => t.teacher_name).join(', ')) : 'Server authorization did not return an active same-school recipient.';
   const sendBtn = document.getElementById('adminMsgSendBtn');
   if (sendBtn) sendBtn.disabled = !window.APP?.is_admin || !reason || reason === '—' || !body || body === '—' || !validRecipient;
-  const header = type === 'announcement' ? 'Official Announcements Channel' : type === 'task' ? 'Official Staff Task' : 'Staff Notice';
-  const targetLabel = recipientType === 'all_staff' ? 'All Staff' : recipientType === 'grade' ? 'Grade: ' + grade : 'Individual: ' + (selectedTeacher?.teacher_name || 'Select teacher');
+  const header = type === 'announcement' ? ${t('chat.official.channel')} : type === 'task' ? ${t('chat.official.task')} : 'Staff Notice';
+  const targetLabel = recipientType === 'all_staff' ? 'All Staff' : recipientType === 'grade' ? 'Grade: ' + grade : 'Individual: ' + (selectedTeacher?.teacher_name || ${t('chat.selectTeacher')});
   box.innerHTML = `
     <div class="smart-chat-preview-label">SYSTEM-GENERATED HEADER</div>
     <div class="smart-chat-preview-header">${esc(header)}</div>
@@ -400,7 +400,7 @@ function _renderChatMode() {
         </div>
         <div class="smart-chat-ai-note"><strong>UI shell only</strong><br>AI Universe Layer execution is intentionally not connected yet. When it is ready, this same interface will connect to the authorized AI action flow.</div>
         <div class="smart-chat-ai-composer">
-          <input id="aiChatInput" placeholder="Ask about schedule, students, attendance..." onkeydown="if(event.key==='Enter')_aiPrompt(this.value)">
+          <input id="aiChatInput" placeholder=${t('chat.staff.placeholder')} onkeydown="if(event.key==='Enter')_aiPrompt(this.value)">
           <button onclick="_aiPrompt(document.getElementById('aiChatInput')?.value)">${_chatIcon('send')}</button>
         </div>
       </section>`;
@@ -409,9 +409,9 @@ function _renderChatMode() {
 
   const channels = [
     { id:'staff', name:'All Staff', icon:'👥', sub:'General staff conversation' },
-    { id:'announcements', name:'Official Announcements', icon:'📢', sub:'System-generated official notices' },
+    { id:'announcements', name:${t('chat.official.title')}, icon:'📢', sub:'System-generated official notices' },
     { id:'departments', name:'Department & Grade', icon:'📚', sub:'Class / department channels' },
-    { id:'tickets', name:'Inquiry Tickets', icon:'🎫', sub:'Student / parent conversations' },
+    { id:'tickets', name:${t('chat.tickets.title')}, icon:'🎫', sub:'Student / parent conversations' },
     { id:'direct', name:'1-on-1 Direct Messages', icon:'👤', sub:'Private staff-to-staff chat' },
     { id:'events', name:'Project / Event Groups', icon:'🗂️', sub:'Temporary work groups' }
   ];
@@ -462,7 +462,7 @@ function _renderChatMode() {
         </div>
         <div class="chat-stream" id="chatStream">${skeletonCards(2)}</div>
         <form class="chat-composer" id="chatComposer" onsubmit="return sendChat(event)">
-          <textarea id="chatInput" placeholder="${_chatChannel === 'staff' ? esc(t('chat.ph')) : 'Channel backend is not connected yet'}" rows="1" ${_chatChannel === 'staff' ? '' : 'disabled'} oninput="_autoGrowChatInput(this)" onkeydown="_chatKeydown(event)"></textarea>
+          <textarea id="chatInput" placeholder="${_chatChannel === 'staff' ? esc(t('chat.ph')) : ${t('chat.channelBackendUnavailable')}}" rows="1" ${_chatChannel === 'staff' ? '' : 'disabled'} oninput="_autoGrowChatInput(this)" onkeydown="_chatKeydown(event)"></textarea>
           <button type="submit" class="chat-send-btn" id="chatSendBtn" ${_chatChannel === 'staff' ? '' : 'disabled'}>${_chatChannel === 'staff' ? _chatIcon('send') : 'Preview'}</button>
         </form>
       </section>
@@ -489,7 +489,7 @@ function _renderInquiryWorkspace() {
         <div id="inquiryTicketHead" class="smart-chat-conversation-head"><div><strong>Select a ticket</strong><small>Only authorized staff in this school can access ticket messages.</small></div><span class="smart-chat-verified-pill">School isolated</span></div>
         <div id="inquiryMessageStream" class="chat-stream smart-chat-direct-stream"><div class="chat-empty"><div class="chat-empty-icon">🎫</div><div class="chat-empty-title">Inquiry Tickets</div><div class="chat-empty-sub">Create or select a staff ticket.</div></div></div>
         <form class="chat-composer smart-chat-direct-composer" onsubmit="return _sendInquiryFromComposer(event)">
-          <textarea id="inquiryChatInput" placeholder="Select a ticket..." rows="1" disabled></textarea>
+          <textarea id="inquiryChatInput" placeholder=${t('chat.tickets.select')} rows="1" disabled></textarea>
           <button type="submit" class="chat-send-btn" id="inquirySendBtn" disabled>${_chatIcon('send')}</button>
         </form>
       </section>
@@ -524,7 +524,7 @@ async function _openInquiryTicket(id){
     }
   }
   if(s)s.innerHTML=(r.messages||[]).map(m=>`<div class="chat-bubble-row"><div class="chat-bubble"><strong>${esc(m.sender_teacher_name)}</strong><div>${esc(m.body).replace(/\n/g,'<br>')}</div><small>${esc(m.created_at||'')}</small></div></div>`).join('')||'<div class="chat-empty-sub">No messages.</div>';
-  if(input){input.disabled=r.ticket.status==='CLOSED';input.placeholder=input.disabled?'Ticket closed':'Write a reply...';}
+  if(input){input.disabled=r.ticket.status==='CLOSED';input.placeholder=input.disabled?'Ticket closed':${t('chat.tickets.replyPlaceholder')};}
   if(btn)btn.disabled=input?.disabled||!_inquiryTicketId;
   if(window.API?.markInquiryRead){
     try{
@@ -535,7 +535,7 @@ async function _openInquiryTicket(id){
     }catch(e){ /* read state is best-effort; authorization remains server-side */ }
   }
 }
-window._clearInquirySelection=function(){_inquiryTicketId=null;_inquiryCurrentTicket=null;const shell=document.querySelector('.smart-chat-inquiry-shell');if(shell)shell.classList.remove('has-selection');const h=document.getElementById('inquiryTicketHead');if(h)h.innerHTML='<div><strong>Select a ticket</strong><small>Only authorized staff in this school can access ticket messages.</small></div><span class="smart-chat-verified-pill">School isolated</span>';const s=document.getElementById('inquiryMessageStream');if(s)s.innerHTML='<div class="chat-empty"><div class="chat-empty-icon">🎫</div><div class="chat-empty-title">Select a ticket</div><div class="chat-empty-sub">Create or select a staff ticket.</div></div>';const i=document.getElementById('inquiryChatInput');if(i){i.disabled=true;i.placeholder='Select a ticket...';}const b=document.getElementById('inquirySendBtn');if(b)b.disabled=true;_renderInquiryTicketList();};
+window._clearInquirySelection=function(){_inquiryTicketId=null;_inquiryCurrentTicket=null;const shell=document.querySelector('.smart-chat-inquiry-shell');if(shell)shell.classList.remove('has-selection');const h=document.getElementById('inquiryTicketHead');if(h)h.innerHTML='<div><strong>Select a ticket</strong><small>Only authorized staff in this school can access ticket messages.</small></div><span class="smart-chat-verified-pill">School isolated</span>';const s=document.getElementById('inquiryMessageStream');if(s)s.innerHTML='<div class="chat-empty"><div class="chat-empty-icon">🎫</div><div class="chat-empty-title">Select a ticket</div><div class="chat-empty-sub">Create or select a staff ticket.</div></div>';const i=document.getElementById('inquiryChatInput');if(i){i.disabled=true;i.placeholder=${t('chat.tickets.select')};}const b=document.getElementById('inquirySendBtn');if(b)b.disabled=true;_renderInquiryTicketList();};
 
 async function _updateInquiryTicket(){
   if(!window.APP?.is_admin||!_inquiryTicketId)return;
@@ -584,7 +584,7 @@ window._toggleAnnouncementComposer=function(force=null){
   if(btn){
     btn.setAttribute('aria-expanded',String(_announcementComposerOpen));
     btn.textContent=_announcementComposerOpen?'×':'+';
-    btn.title=_announcementComposerOpen?'Close official message form':'New official message';
+    btn.title=_announcementComposerOpen?'Close official message form':${t('chat.official.new')};
   }
   if(_announcementComposerOpen){
     requestAnimationFrame(()=>document.getElementById('adminMsgBody')?.focus());
@@ -595,7 +595,7 @@ function _renderAnnouncementWorkspace(){
   return _chatChannelBack('School Chat') + composer +
     '<div class="smart-chat-direct-shell smart-chat-announcement-shell'+(_announcementId?' has-selection':'')+'">'+
     '<aside class="smart-chat-direct-list"><div class="smart-chat-direct-list-head"><div><div class="smart-chat-kicker">OFFICIAL</div><strong>Announcements</strong></div><div class="smart-chat-list-actions">'+
-    (window.APP?.is_admin ? '<button type="button" class="smart-chat-add-btn" id="announcementComposerToggle" onclick="_toggleAnnouncementComposer()" aria-expanded="false" aria-controls="announcementComposer" title="New official message">+</button>' : '')+
+    (window.APP?.is_admin ? '<button type="button" class="smart-chat-add-btn" id="announcementComposerToggle" onclick="_toggleAnnouncementComposer()" aria-expanded="false" aria-controls="announcementComposer" title=${t('chat.official.new')}>+</button>' : '')+
     '<button type="button" class="smart-chat-refresh-btn" onclick="_loadAnnouncementWorkspace()" title="Refresh">↻</button></div></div>'+
     '<div id="announcementList" class="smart-chat-conversation-list"></div></aside>'+
     '<section class="smart-chat-direct-conversation"><div id="announcementHead" class="smart-chat-conversation-head"><div><strong>Official Announcements</strong><small>School-authorized notices for your staff account.</small></div><span class="smart-chat-verified-pill">Verified</span></div><div id="announcementStream" class="chat-stream"><div class="chat-empty"><div class="chat-empty-icon">📢</div><div class="chat-empty-title">Official Announcements</div><div class="chat-empty-sub">Loading…</div></div></div></section></div>';
@@ -607,7 +607,7 @@ async function _loadAnnouncementWorkspace(autoOpen=true){
     if(!list||!stream)return;
     window._chatAnnouncements=rows;
     if(!rows.length){_announcementId=null;list.innerHTML='<div class="smart-chat-list-empty-card"><div class="icon">📢</div><strong>No official announcements</strong><small>New verified notices will appear here.</small></div>';stream.innerHTML='<div class="chat-empty"><div class="chat-empty-icon">📢</div><div class="chat-empty-title">No announcements</div><div class="chat-empty-sub">Official school notices will appear here.</div></div>';return;}
-    list.innerHTML=rows.map(a=>'<button class="smart-chat-channel-card '+(Number(a.id)===Number(_announcementId)?'active':'')+'" onclick="_openAnnouncement('+Number(a.id)+')"><span class="smart-chat-channel-icon">📢</span><span><strong>'+esc(a.message_type||'Official notice')+'</strong><small>'+esc(a.created_at||'')+'</small></span><b>'+(!a.read_at?'•':'›')+'</b></button>').join('');
+    list.innerHTML=rows.map(a=>'<button class="smart-chat-channel-card '+(Number(a.id)===Number(_announcementId)?'active':'')+'" onclick="_openAnnouncement('+Number(a.id)+')"><span class="smart-chat-channel-icon">📢</span><span><strong>'+esc(a.message_type||${t('chat.official.notice')})+'</strong><small>'+esc(a.created_at||'')+'</small></span><b>'+(!a.read_at?'•':'›')+'</b></button>').join('');
     if(autoOpen && !_announcementId) await _openAnnouncement(Number(rows[0].id));
    }catch(e){const list=document.getElementById('announcementList');if(list)list.innerHTML='<div class="chat-error"><div>📢</div><div>Unable to load announcements.</div><button type="button" class="btn-secondary" onclick="_loadAnnouncementWorkspace(false)">Retry</button></div>';}
 }
@@ -618,7 +618,7 @@ window._openAnnouncement=async function(id){
   const shell=document.querySelector('.smart-chat-announcement-shell');if(shell)shell.classList.add('has-selection');
   const head=document.getElementById('announcementHead');
   if(head)head.innerHTML='<div class="smart-chat-direct-peer"><button type="button" class="smart-chat-mobile-back" onclick="_clearAnnouncementSelection()" aria-label="Back to announcements">‹</button><div><strong>Official '+esc(a.message_type||'Announcement')+'</strong><small>'+esc(a.created_at||'')+'</small></div></div><span class="smart-chat-verified-pill">Verified</span>';
-  stream.innerHTML='<article class="smart-chat-official-preview"><div class="smart-chat-preview-label">SYSTEM-GENERATED OFFICIAL MESSAGE</div><div class="smart-chat-preview-header">'+esc(a.message_type||'Official Announcement')+'</div><div class="smart-chat-preview-meta">'+esc(a.created_at||'')+' · '+(!a.read_at?'Unread':'Read')+'</div><div class="smart-chat-preview-reason"><strong>Reason</strong><span>'+esc(a.reason||'Official school communication')+'</span></div><div class="smart-chat-preview-body">'+esc(a.body||'').replace(/\n/g,'<br>')+'</div></article>';
+  stream.innerHTML='<article class="smart-chat-official-preview"><div class="smart-chat-preview-label">SYSTEM-GENERATED OFFICIAL MESSAGE</div><div class="smart-chat-preview-header">'+esc(a.message_type||'Official Announcement')+'</div><div class="smart-chat-preview-meta">'+esc(a.created_at||'')+' · '+(!a.read_at?'Unread':'Read')+'</div><div class="smart-chat-preview-reason"><strong>Reason</strong><span>'+esc(a.reason||${t('chat.official.reasonDefault')})+'</span></div><div class="smart-chat-preview-body">'+esc(a.body||'').replace(/\n/g,'<br>')+'</div></article>';
   try{if(API.markStaffAnnouncementRead)await API.markStaffAnnouncementRead(id);a.read_at=a.read_at||new Date().toISOString();}catch(e){}
 };
 window._clearAnnouncementSelection=function(){
@@ -634,7 +634,7 @@ function _renderDirectWorkspace() {
     <div class="smart-chat-direct-shell${_directConversationId ? ' has-selection' : ''}">
       <aside class="smart-chat-direct-list">
         <div class="smart-chat-direct-list-head"><div><div class="smart-chat-kicker">PRIVATE</div><strong>Direct messages</strong></div><button type="button" onclick="_loadDirectWorkspace()" title="Refresh">↻</button></div>
-        <label class="smart-chat-direct-search"><span>⌕</span><input id="directStaffSearch" placeholder="Find a teacher..." oninput="_renderDirectDirectory()"></label>
+        <label class="smart-chat-direct-search"><span>⌕</span><input id="directStaffSearch" placeholder=${t('chat.direct.findTeacher')} oninput="_renderDirectDirectory()"></label>
         <div id="directConversationList" class="smart-chat-conversation-list"></div>
         <div class="smart-chat-directory-title">Start a new conversation</div>
         <div id="directStaffDirectory" class="smart-chat-directory"></div>
@@ -643,7 +643,7 @@ function _renderDirectWorkspace() {
         <div id="directConversationHead" class="smart-chat-conversation-head"><div><strong>Select a teacher</strong><small>Only registered active staff in your school are shown.</small></div><span class="smart-chat-verified-pill">Verified staff only</span></div>
         <div id="directMessageStream" class="chat-stream smart-chat-direct-stream"><div class="chat-empty"><div class="chat-empty-icon">👤</div><div class="chat-empty-title">Choose a teacher</div><div class="chat-empty-sub">Start a private 1-on-1 conversation.</div></div></div>
         <form class="chat-composer smart-chat-direct-composer" onsubmit="return sendDirectChat(event)">
-          <textarea id="directChatInput" placeholder="Select a teacher to start messaging..." rows="1" disabled oninput="_autoGrowChatInput(this)" onkeydown="_directKeydown(event)"></textarea>
+          <textarea id="directChatInput" placeholder=${t('chat.direct.selectTeacher')} rows="1" disabled oninput="_autoGrowChatInput(this)" onkeydown="_directKeydown(event)"></textarea>
           <button type="submit" class="chat-send-btn" id="directChatSendBtn" disabled><svg viewBox="0 0 24 24" aria-hidden="true"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg></button>
         </form>
       </section>
@@ -675,7 +675,7 @@ function _renderDirectConversationList() {
   root.innerHTML=_directConversations.map(c=>`
     <button class="smart-chat-direct-item ${Number(c.conversation_id)===Number(_directConversationId)?'active':''}" onclick="openDirectChat('${esc(c.teacher_id)}')">
       <span class="smart-chat-direct-avatar">${esc((c.teacher_name||'?')[0])}</span>
-      <span><strong>${esc(c.teacher_name)}</strong><small>${esc(c.last_message||'No messages yet')}</small></span>
+      <span><strong>${esc(c.teacher_name)}</strong><small>${esc(c.last_message||${t('chat.messages.empty')})}</small></span>
       ${Number(c.unread_count)>0?`<b class="smart-chat-unread">${esc(c.unread_count)}</b>`:'<i></i>'}
     </button>`).join('');
 }
@@ -695,13 +695,13 @@ function _renderDirectDirectory() {
 window.openDirectChat=async function(teacherId){
   try{
     const result=await API.openDirectConversation(teacherId);
-    if(!result?.ok)throw new Error(result?.error||'Unable to open conversation');
+    if(!result?.ok)throw new Error(result?.error||${t('chat.conversation.openFailed')});
     _directConversationId=Number(result.conversation_id);
     _directPeer=result.peer||_directStaff.find(t=>t.teacher_id===teacherId)||null;
     _setDirectMobileView(true);
     _renderDirectConversationList();_renderDirectHeader();_setDirectComposer(true);
     await _loadDirectMessages();
-  }catch(e){showToast('Unable to open this staff conversation.');}
+  }catch(e){showToast(${t('chat.conversation.openFailedDetail')});}
 };
 
 function _renderDirectHeader(){
@@ -719,7 +719,7 @@ function _setDirectMobileView(selected) {
 
 function _setDirectComposer(enabled){
   const input=document.getElementById('directChatInput'),btn=document.getElementById('directChatSendBtn');
-  if(input){input.disabled=!enabled;input.placeholder=enabled?'Write a private message...':'Select a teacher to start messaging...';}
+  if(input){input.disabled=!enabled;input.placeholder=enabled?${t('chat.direct.placeholder')}:${t('chat.direct.selectTeacher')};}
   if(btn)btn.disabled=!enabled;
 }
 
