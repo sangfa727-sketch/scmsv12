@@ -468,6 +468,7 @@ test('Grade Staff Chat is session, tenant, assignment, RLS, and read-state bound
     assert.match(block, /tca\\.school_id=v_school_id/);
     assert.match(block, /tca\\.teacher_id=v_teacher_id/);
     assert.match(block, /tca\\.is_active/);
+    assert.match(block, /t\.status='active'/);
   }
   const open = migration.slice(migration.indexOf('function public.rpc_chat_grade_open'), migration.indexOf('function public.rpc_chat_grade_send'));
   const send = migration.slice(migration.indexOf('function public.rpc_chat_grade_send'), migration.indexOf('function public.rpc_chat_grade_mark_read'));
