@@ -627,8 +627,8 @@ window._openAnnouncement=async function(id){
   _announcementId=Number(id);
   const shell=document.querySelector('.smart-chat-announcement-shell');if(shell)shell.classList.add('has-selection');
   const head=document.getElementById('announcementHead');
-  if(head)head.innerHTML='<div class="smart-chat-direct-peer"><button type="button" class="smart-chat-mobile-back" onclick="_clearAnnouncementSelection()" aria-label="${t('chat.backToAnnouncements')}">‹</button><div><strong>Official '+esc(a.message_type||'Announcement')+'</strong><small>'+esc(a.created_at||'')+'</small></div></div><span class="smart-chat-verified-pill">Verified</span>';
-  stream.innerHTML='<article class="smart-chat-official-preview"><div class="smart-chat-preview-label">SYSTEM-GENERATED OFFICIAL MESSAGE</div><div class="smart-chat-preview-header">'+esc(a.message_type||t('chat.officialAnnouncement'))+'</div><div class="smart-chat-preview-meta">'+esc(a.created_at||'')+' · '+(!a.read_at?t('chat.unread'):t('chat.read'))+'</div><div class="smart-chat-preview-reason"><strong>${t('chat.reason')}</strong><span>'+esc(a.reason||t('chat.officialCommunication'))+'</span></div><div class="smart-chat-preview-body">'+esc(a.body||'').replace(/\n/g,'<br>')+'</div></article>';
+   if(head)head.innerHTML=`<div class="smart-chat-direct-peer"><button type="button" class="smart-chat-mobile-back" onclick="_clearAnnouncementSelection()" aria-label="${t('chat.backToAnnouncements')}">‹</button><div><strong>${t('chat.officialPrefix')} ${esc(a.message_type||t('chat.announcement'))}</strong><small>${esc(a.created_at||'')}</small></div></div><span class="smart-chat-verified-pill">${t('chat.verified')}</span>`;
+   stream.innerHTML=`<article class="smart-chat-official-preview"><div class="smart-chat-preview-label">${t('chat.systemGeneratedOfficialMessage')}</div><div class="smart-chat-preview-header">${esc(a.message_type||t('chat.officialAnnouncement'))}</div><div class="smart-chat-preview-meta">${esc(a.created_at||'')} · ${(!a.read_at?t('chat.unread'):t('chat.read'))}</div><div class="smart-chat-preview-reason"><strong>${t('chat.reason')}</strong><span>${esc(a.reason||t('chat.officialCommunication'))}</span></div><div class="smart-chat-preview-body">${esc(a.body||'').replace(/\n/g,'<br>')}</div></article>`;
   try{if(API.markStaffAnnouncementRead)await API.markStaffAnnouncementRead(id);a.read_at=a.read_at||new Date().toISOString();}catch(e){}
 };
 window._clearAnnouncementSelection=function(){
@@ -650,7 +650,7 @@ function _renderDirectWorkspace() {
         <div id="directStaffDirectory" class="smart-chat-directory"></div>
       </aside>
       <section class="smart-chat-direct-conversation">
-        <div id="directConversationHead" class="smart-chat-conversation-head"><div><strong>Select a teacher</strong><small>Only registered active staff in your school are shown.</small></div><span class="smart-chat-verified-pill">${t('chat.verifiedStaffOnly')}</span></div>
+        <div id="directConversationHead" class="smart-chat-conversation-head"><div><strong>${t('chat.selectTeacher')}</strong><small>${t('chat.activeStaffOnly')}</small></div><span class="smart-chat-verified-pill">${t('chat.verifiedStaffOnly')}</span></div>
         <div id="directMessageStream" class="chat-stream smart-chat-direct-stream"><div class="chat-empty"><div class="chat-empty-icon">👤</div><div class="chat-empty-title">Choose a teacher</div><div class="chat-empty-sub">Start a private 1-on-1 conversation.</div></div></div>
         <form class="chat-composer smart-chat-direct-composer" onsubmit="return sendDirectChat(event)">
           <textarea id="directChatInput" placeholder=${t('chat.startDirect')} rows="1" disabled oninput="_autoGrowChatInput(this)" onkeydown="_directKeydown(event)"></textarea>
@@ -741,7 +741,7 @@ async function _loadDirectMessages(){
     const rows=await API.getDirectMessages(_directConversationId,50);
     const stream=document.getElementById('directMessageStream');
     if(!stream)return;
-    if(!rows.length)stream.innerHTML=`<div class="chat-empty"><div class="chat-empty-icon">💬</div><div class="chat-empty-title">${t('chat.newConversation')}</div><div class="chat-empty-sub">Send the first private message.</div></div>`;
+    if(!rows.length)stream.innerHTML=`<div class="chat-empty"><div class="chat-empty-icon">💬</div><div class="chat-empty-title">${t('chat.newConversation')}</div><div class="chat-empty-sub">${t('chat.sendFirstPrivate')}</div></div>`;
     else _renderDirectMessages(rows);
     _renderDirectHeader();_setDirectComposer(true);await API.markDirectRead(_directConversationId);
   }catch(e){
