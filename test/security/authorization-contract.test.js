@@ -368,6 +368,7 @@ test('Official Staff Announcements use a server-authorized recipient snapshot an
   assert.match(migration, /communication\.send/);
   assert.match(migration, /school_id,v_sess\.school_id/);
   assert.match(migration, /recipient_count/);
+  assert.match(migration, /'all_staff'/);
   assert.match(migration, /no_verified_recipients/);
   assert.match(migration, /official_announcement\.create/);
   assert.match(migration, /audit_log/);
@@ -386,6 +387,7 @@ test('Official Staff Announcements UI and API are connected to the guarded serve
   assert.match(api, /markStaffAnnouncementRead/);
   assert.match(api, /rpc_chat_announcement_mark_read/);
   assert.match(chat, /sendOfficialAnnouncement/);
+  assert.match(chat, /value="all_staff">All Staff/);
   assert.match(chat, /API\.createStaffAnnouncement/);
   assert.match(chat, /Reason and message body are required/);
   assert.match(chat, /No verified recipients/);
