@@ -46,7 +46,7 @@ const SIDEBAR_PERMISSION = Object.freeze({
   admissions: 'admissions.view',
   library: 'library.view',
   transport: 'transport.view',
-  leave: 'leave.view',
+  leave: 'leave.view',\n  insights: 'students.view',
 });
 
 function _sidebarCanAccess(pageId) {
