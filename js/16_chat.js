@@ -245,7 +245,7 @@ window._refreshAdminComposerPreview = function() {
   const s=document.createElement('style');
   s.id='smart-chat-ux-patch';
   s.textContent=`
-    .smart-chat-hero{position:relative}
+    .smart-chat-hero{position:relative}\n    .smart-chat-channel-back-row{display:flex;align-items:center;margin:0 0 8px}\n    .smart-chat-channel-back{display:inline-flex;align-items:center;gap:5px;min-height:32px;padding:0 10px;border:1px solid var(--border);border-radius:9px;background:var(--bg2);color:var(--text2);font-size:11px;font-weight:700;cursor:pointer}\n    .smart-chat-channel-back:hover{background:var(--surface2);color:var(--text)}
     .smart-chat-nav-back{
       display:inline-flex;align-items:center;justify-content:center;gap:6px;
       min-height:34px;padding:0 10px;border:1px solid var(--border);
@@ -445,7 +445,7 @@ function _renderChatMode() {
 
 
 function _renderInquiryWorkspace() {
-  return `
+  return _chatChannelBack('School Chat') + `
     <div class="smart-chat-direct-shell smart-chat-inquiry-shell${_inquiryTicketId ? " has-selection" : ""}">
       <aside class="smart-chat-direct-list">
         <div class="smart-chat-direct-list-head"><div><div class="smart-chat-kicker">INQUIRY</div><strong>Inquiry Tickets</strong></div><button type="button" onclick="_loadInquiryTickets()" title="Refresh">↻</button></div>
@@ -543,9 +543,11 @@ async function _submitInquiryDraft(e){
   return false;
 }
 function _renderAnnouncementWorkspace(){
-  return '<div class="smart-chat-direct-shell smart-chat-announcement-shell'+(_announcementId?' has-selection':'')+'">'+
+  return _chatChannelBack('School Chat') +
+    '<div class="smart-chat-direct-shell smart-chat-announcement-shell'+(_announcementId?' has-selection':'')+'">'+
     '<aside class="smart-chat-direct-list"><div class="smart-chat-direct-list-head"><div><div class="smart-chat-kicker">OFFICIAL</div><strong>Announcements</strong></div><button type="button" onclick="_loadAnnouncementWorkspace()" title="Refresh">↻</button></div><div id="announcementList" class="smart-chat-conversation-list"></div></aside>'+
-    '<section class="smart-chat-direct-conversation"><div id="announcementHead" class="smart-chat-conversation-head"><div><strong>Official Announcements</strong><small>School-authorized notices for your staff account.</small></div><span class="smart-chat-verified-pill">Verified</span></div><div id="announcementStream" class="chat-stream"><div class="chat-empty"><div class="chat-empty-icon">📢</div><div class="chat-empty-title">Official Announcements</div><div class="chat-empty-sub">Loading…</div></div></div></section></div>';
+    '<section class="smart-chat-direct-conversation"><div id="announcementHead" class="smart-chat-conversation-head"><div><strong>Official Announcements</strong><small>School-authorized notices for your staff account.</small></div><span class="smart-chat-verified-pill">Verified</span></div><div id="announcementStream" class="chat-stream"><div class="chat-empty"><div class="chat-empty-icon">📢</div><div class="chat-empty-title">Official Announcements</div><div class="chat-empty-sub">Loading…</div></div></div></section></div>' +
+    (window.APP?.is_admin ? _renderAdminComposer() : '');
 }
 async function _loadAnnouncementWorkspace(autoOpen=true){
   try{
@@ -577,7 +579,7 @@ window._clearAnnouncementSelection=function(){
   if(stream)stream.innerHTML='<div class="chat-empty"><div class="chat-empty-icon">📢</div><div class="chat-empty-title">Select an announcement</div><div class="chat-empty-sub">Choose an official notice from the list.</div></div>';
 };
 function _renderDirectWorkspace() {
-  return `
+  return _chatChannelBack('School Chat') + `
     <div class="smart-chat-direct-shell${_directConversationId ? ' has-selection' : ''}">
       <aside class="smart-chat-direct-list">
         <div class="smart-chat-direct-list-head"><div><div class="smart-chat-kicker">PRIVATE</div><strong>Direct messages</strong></div><button type="button" onclick="_loadDirectWorkspace()" title="Refresh">↻</button></div>
@@ -718,6 +720,12 @@ window.sendDirectChat=async function(ev){
 };
 
 window._directKeydown=function(ev){if(ev.key==='Enter'&&!ev.shiftKey){ev.preventDefault();sendDirectChat(ev);}};
+
+window._showSchoolChatChannels = function() { _chatChannel='staff'; _renderChatMode(); };
+
+function _chatChannelBack(label='School Chat') {
+  return `<div class="smart-chat-channel-back-row"><button type="button" class="smart-chat-channel-back" onclick="_showSchoolChatChannels()" aria-label="Back to School Chat">‹ <span>${esc(label)}</span></button></div>`;
+}
 
 window.switchChatChannel = function(channel) {
   _chatChannel = channel;
