@@ -927,4 +927,3 @@ $function$;
 
 revoke all on function public.rpc_chat_grade_list(text) from public, anon, authenticated;
 grant execute on function public.rpc_chat_grade_list(text) to anon, authenticated;
-\n
