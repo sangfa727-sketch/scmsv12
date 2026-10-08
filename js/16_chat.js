@@ -116,7 +116,7 @@ function _renderAdminComposer() {
         </label>
       </div>
 
-      <label class="smart-chat-body-field">Body
+      <label class="smart-chat-body-field">${t("chat.messageBody")}
         <textarea id="adminMsgBody" rows="3" placeholder="${t('chat.writeOfficialMessage')}" oninput="_refreshAdminComposerPreview()"></textarea>
       </label>
 
@@ -232,7 +232,7 @@ window._refreshAdminComposerPreview = function() {
   const title = document.getElementById('adminMsgRoutingTitle');
   const names = document.getElementById('adminMsgRoutingNames');
   if (status) status.className = 'smart-chat-routing-status ' + (validRecipient ? 'verified' : 'blocked');
-  if (title) title.textContent = validRecipient ? (recipientType === 'teacher' ? t('chat.oneVerifiedRecipient') : recipients.length + ' verified recipient(s)') : t('chat.noVerifiedRecipient');
+  if (title) title.textContent = validRecipient ? (recipientType === 'teacher' ? t('chat.oneVerifiedRecipient') : recipients.length + ' ' + t('chat.verifiedRecipients')) : t('chat.noVerifiedRecipient');
   if (names) names.textContent = validRecipient ? (recipientType === 'teacher' ? selectedTeacher.teacher_name : recipients.map(t => t.teacher_name).join(', ')) : t('chat.noVerifiedSameSchoolRecipient');
   const sendBtn = document.getElementById('adminMsgSendBtn');
   if (sendBtn) sendBtn.disabled = !window.APP?.is_admin || !reason || reason === '—' || !body || body === '—' || !validRecipient;
