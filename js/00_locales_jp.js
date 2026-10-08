@@ -145,6 +145,18 @@
     'branding.readImageFailed':'画像を読み込めませんでした','branding.processImageFailed':'画像を処理できませんでした','branding.failed':'失敗しました','branding.saveFailed':'保存に失敗しました',
     'tm.editTeacherLabel':'教師を編集','tm.editTeacherSubtitle':'教師IDカードと教師ログインに使用する教師名とログイン名を更新します。','tm.teacherId':'教師ID','tm.loginName':'ログイン名','tm.teacherName':'教師名','tm.email':'メール','tm.role':'権限','tm.roleTeacher':'教師','tm.roleAdmin':'管理者','tm.roleSuperAdmin':'スーパー管理者','tm.saving':'保存中…','tm.cancel':'キャンセル','tm.teacherIdCardLabel':'教師ID','tm.loginNameLabel':'ログイン名','tm.teacherLoginQr':'教師ログインQRコード','tm.qrUnavailable':'QRコードを利用できません',
     'subject.exists':'この科目はすでに存在します。','subject.addFailed':'科目を追加できませんでした。','picker.noMatch':'「{query}」に一致する生徒が見つかりません。','teacher.updateRequired':'ユーザー名と教師名は必須です。','teacher.qrUnavailable':'QRコードを利用できません','password.hide':'パスワードを非表示','password.show':'パスワードを表示','password.newLabel':'新しいパスワード','password.newPlaceholder':'6文字以上','password.reset':'パスワードを再設定'
+
+    'chat.sendFailed':'送信に失敗しました',
+    'chat.department.refresh':'部署を更新',
+    'chat.department.select':'部署を選択...',
+    'chat.department.placeholder':'部署メッセージを入力...',
+    'chat.grade.refresh':'学年を更新',
+    'chat.grade.placeholder':'学年メッセージを入力...',
+    'chat.groups.refresh':'グループを更新',
+    'chat.groups.placeholder':'メッセージを入力…',
+    'chat.groups.createFailed':'作成に失敗しました',
+    'chat.direct.placeholder':'個別メッセージを入力...',
+    'chat.direct.findTeacher':'教師を検索...',
   });
   window.I18N_JP = Object.assign({}, base, overrides);
 })();
