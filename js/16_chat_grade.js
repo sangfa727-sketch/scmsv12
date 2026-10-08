@@ -23,7 +23,7 @@ function _renderGradeList(){
   const b=document.getElementById('gradeList');if(!b)return;
   b.innerHTML=_gradeRows.length?_gradeRows.map(g=>{
     const safe=String(g.grade_name||'').replace(/\\/g,'\\\\').replace(/'/g,"\\'");
-    return '<button data-testid="grade-row-'+esc(g.grade_name)+'" class="smart-chat-channel-card '+(g.grade_name===_gradeName?'active':'')+'" onclick="_openGradeChat(\\''+esc(safe)+'\\')"><span class="smart-chat-channel-icon">🎓</span><span><strong>'+esc(g.grade_name)+'</strong><small>'+(Number(g.unread_count)>0?esc(g.unread_count)+' unread':'Staff conversation')+'</small></span><b>›</b></button>';
+    return `<button data-testid="grade-row-${esc(g.grade_name)}" class="smart-chat-channel-card ${g.grade_name===_gradeName?'active':''}" onclick="_openGradeChat('${esc(safe)}')"><span class="smart-chat-channel-icon">🎓</span><span><strong>${esc(g.grade_name)}</strong><small>${Number(g.unread_count)>0?esc(g.unread_count)+' unread':'Staff conversation'}</small></span><b>›</b></button>`;
   }).join(''):'<div class="chat-empty-sub">No grade assignment has been found for this staff account.</div>';
 }
 async function _openGradeChat(name,silent=false){
