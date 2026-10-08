@@ -15,6 +15,15 @@ Object.assign(API, {
       }
     },
   
+  async getChatRecipientPreview(recipientType = 'all_staff', target = null) {
+      const res = await _webRpc('rpc_chat_recipient_preview', {
+        p_session_token: _webSessionToken(),
+        p_recipient_type: recipientType,
+        p_target: target,
+      });
+      return Array.isArray(res.rows) ? res.rows : [];
+    },
+
   async sendChatMessage(channel, text) {
       // school/teacher identity comes from the session on the server
       return _webRpc('rpc_send_chat_message', {
