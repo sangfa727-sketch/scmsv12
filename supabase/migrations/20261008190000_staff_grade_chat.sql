@@ -34,7 +34,7 @@ declare v_teacher_id text; v_school_id text;
 begin
   select s.teacher_id,s.school_id into v_teacher_id,v_school_id
   from public.app_web_sessions s join public.teachers t on t.teacher_id=s.teacher_id and t.school_id=s.school_id
-  where s.session_token=p_session_token and s.expires_at>now() and lower(coalesce(t.status,'active'))='active' limit 1;
+  where s.session_token=p_session_token and s.expires_at>now() and t.status='active' limit 1;
   if v_teacher_id is null then raise exception 'invalid_session'; end if;
   return jsonb_build_object('ok',true,'rows',coalesce((
     select jsonb_agg(jsonb_build_object('grade_name',x.grade_name,'unread_count',x.unread_count) order by x.grade_name)
@@ -47,7 +47,7 @@ begin
         from public.teacher_class_assignments tca
         join public.teachers t on t.teacher_id=tca.teacher_id and t.school_id=tca.school_id
         where tca.school_id=v_school_id and tca.teacher_id=v_teacher_id and tca.is_active is true
-          and lower(coalesce(t.status,'active'))='active' and nullif(trim(tca.class_name),'') is not null
+          and t.status='active' and nullif(trim(tca.class_name),'') is not null
       ) q
       left join public.staff_grade_read_state rs on rs.school_id=v_school_id and rs.teacher_id=v_teacher_id
         and lower(trim(rs.grade_name))=lower(trim(q.grade_name))
@@ -61,7 +61,7 @@ declare v_teacher_id text; v_school_id text; v_grade text;
 begin
   select s.teacher_id,s.school_id into v_teacher_id,v_school_id
   from public.app_web_sessions s join public.teachers t on t.teacher_id=s.teacher_id and t.school_id=s.school_id
-  where s.session_token=p_session_token and s.expires_at>now() and lower(coalesce(t.status,'active'))='active' limit 1;
+  where s.session_token=p_session_token and s.expires_at>now() and t.status='active' limit 1;
   if v_teacher_id is null then raise exception 'invalid_session'; end if;
   select min(trim(tca.class_name)) into v_grade from public.teacher_class_assignments tca
   where tca.school_id=v_school_id and tca.teacher_id=v_teacher_id and tca.is_active is true
@@ -85,7 +85,7 @@ declare v_teacher_id text; v_school_id text; v_grade text; v_id bigint;
 begin
   select s.teacher_id,s.school_id into v_teacher_id,v_school_id
   from public.app_web_sessions s join public.teachers t on t.teacher_id=s.teacher_id and t.school_id=s.school_id
-  where s.session_token=p_session_token and s.expires_at>now() and lower(coalesce(t.status,'active'))='active' limit 1;
+  where s.session_token=p_session_token and s.expires_at>now() and t.status='active' limit 1;
   if v_teacher_id is null then raise exception 'invalid_session'; end if;
   if nullif(trim(p_body),'') is null or char_length(trim(p_body))>4000 then raise exception 'invalid_message'; end if;
   select min(trim(tca.class_name)) into v_grade from public.teacher_class_assignments tca
@@ -103,7 +103,7 @@ declare v_teacher_id text; v_school_id text; v_grade text;
 begin
   select s.teacher_id,s.school_id into v_teacher_id,v_school_id
   from public.app_web_sessions s join public.teachers t on t.teacher_id=s.teacher_id and t.school_id=s.school_id
-  where s.session_token=p_session_token and s.expires_at>now() and lower(coalesce(t.status,'active'))='active' limit 1;
+  where s.session_token=p_session_token and s.expires_at>now() and t.status='active' limit 1;
   if v_teacher_id is null then raise exception 'invalid_session'; end if;
   select min(trim(tca.class_name)) into v_grade from public.teacher_class_assignments tca
   where tca.school_id=v_school_id and tca.teacher_id=v_teacher_id and tca.is_active is true
