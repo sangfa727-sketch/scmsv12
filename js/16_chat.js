@@ -225,8 +225,8 @@ function _renderChatMode() {
         </div>
         <div class="chat-stream" id="chatStream">${skeletonCards(2)}</div>
         <form class="chat-composer" id="chatComposer" onsubmit="return sendChat(event)">
-          <textarea id="chatInput" placeholder="${esc(t('chat.ph'))}" rows="1" oninput="_autoGrowChatInput(this)" onkeydown="_chatKeydown(event)"></textarea>
-          <button type="submit" class="chat-send-btn" id="chatSendBtn">${_chatIcon('send')}</button>
+          <textarea id="chatInput" placeholder="${_chatChannel === 'staff' ? esc(t('chat.ph')) : 'Channel backend is not connected yet'}" rows="1" ${_chatChannel === 'staff' ? '' : 'disabled'} oninput="_autoGrowChatInput(this)" onkeydown="_chatKeydown(event)"></textarea>
+          <button type="submit" class="chat-send-btn" id="chatSendBtn" ${_chatChannel === 'staff' ? '' : 'disabled'}>${_chatChannel === 'staff' ? _chatIcon('send') : 'Preview'}</button>
         </form>
       </section>
     </div>
@@ -238,9 +238,6 @@ function _renderChatMode() {
 window.switchChatChannel = function(channel) {
   _chatChannel = channel;
   if (_chatMode !== 'school') return;
-  document.querySelectorAll('.smart-chat-channel-card').forEach(b =>
-    b.classList.toggle('active', b.querySelector('strong')?.textContent && b.onclick)
-  );
   _renderChatMode();
 };
 
@@ -302,6 +299,10 @@ window.sendChat = async function(ev) {
   ev?.preventDefault?.();
   const input=document.getElementById('chatInput'), btn=document.getElementById('chatSendBtn');
   const text=input?.value.trim();
+  if (_chatChannel !== 'staff') {
+    showToast('This channel is preview-only until its verified server route is connected.');
+    return false;
+  }
   if (!text || !btn) return false;
   btn.disabled=true; input.disabled=true;
   const optimistic={text,teacher_id:window.APP.teacher_id,teacher_name:window.APP.teacher_name,channel:_chatChannel,school_id:window.APP.school_id,created_at:new Date().toISOString(),pending:true};
