@@ -10,6 +10,7 @@ let _chatChannel = 'staff';
 let _chatPollTimer = null;
 let _chatScrollLock = false;
 let _chatMode = 'school';
+let _adminGradeRecipients = [];
 
 function _chatIcon(name) {
   const icons = {
@@ -35,8 +36,11 @@ function _verifiedStaffList() {
 }
 
 function _gradeRecipientPreview(grade) {
-  // Important: never manufacture a teacher name. Until a server-side
-  // directory endpoint exists, only already-verified bootstrap staff may appear.
+  // Server-authorized recipients are preferred. Bootstrap data is only a
+  // temporary preview fallback; it must never be treated as authorization.
+  if (String(grade).toLowerCase() === 'grade 5' && Array.isArray(_adminGradeRecipients)) {
+    return _adminGradeRecipients;
+  }
   const staff = _verifiedStaffList();
   return staff.filter(t => {
     const classes = String(t.classes || '');
@@ -106,6 +110,19 @@ function _renderAdminComposer() {
         </button>
       </div>
     </section>`;
+}
+
+async function _loadAdminRecipientPreview(grade = 'Grade 5') {
+  try {
+    if (!window.API?.getChatRecipientPreview || !window.APP?.is_admin) return;
+    const rows = await API.getChatRecipientPreview('grade', grade);
+    _adminGradeRecipients = Array.isArray(rows) ? rows : [];
+    _refreshAdminComposerPreview();
+  } catch (e) {
+    // Fail closed: no server proof means zero verified recipients.
+    _adminGradeRecipients = [];
+    _refreshAdminComposerPreview();
+  }
 }
 
 window._refreshAdminComposerPreview = function() {
@@ -232,7 +249,10 @@ function _renderChatMode() {
     </div>
     ${_renderAdminComposer()}`;
   _loadChatMessages();
-  setTimeout(_refreshAdminComposerPreview, 0);
+  setTimeout(() => {
+    _refreshAdminComposerPreview();
+    if (window.APP?.is_admin) _loadAdminRecipientPreview(document.getElementById('adminMsgGrade')?.value || 'Grade 5');
+  }, 0);
 }
 
 window.switchChatChannel = function(channel) {
