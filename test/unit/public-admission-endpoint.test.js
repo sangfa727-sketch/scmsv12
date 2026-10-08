@@ -40,6 +40,21 @@ test('admission endpoint resolves school from trusted hostname and inserts only 
   assert.equal(inserted[0].sourceHost, 'school-a.scmsv12.com');
 });
 
+test('admission endpoint rejects missing rate-limit identity', async () => {
+  const deps = setup();
+  const result = await handleAdmissionRequest({
+    ...deps,
+    hostname: 'school-a.scmsv12.com',
+    body: {
+      studentName: 'Student', guardianName: 'Guardian', phone: '09123456789',
+      grade: 'Grade 5', idempotencyKey: 'admission-key-555555'
+    },
+    insertApplication: async () => {}
+  });
+  assert.equal(result.status, 503);
+  assert.deepEqual(result.body, { ok: false, error: 'admission_backend_unavailable' });
+});
+
 test('admission endpoint does not leak insert backend errors', async () => {
   const deps = setup();
   const result = await handleAdmissionRequest({
