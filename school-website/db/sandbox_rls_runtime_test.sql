@@ -1,15 +1,9 @@
 -- Sandbox-only RLS verification contract.
--- This file is intentionally executable against a disposable PostgreSQL database,
--- never against SCMS production. It verifies the exact row-isolation invariants
--- required before a production migration is approved.
+-- Execute only against a disposable PostgreSQL database, never SCMS production.
+-- This harness verifies actual PostgreSQL RLS behavior, tenant isolation, and
+-- published-only visibility using a transaction that always rolls back.
 
 begin;
-
-create temp table website_sites (
-  site_key text primary key,
-  school_id text not null,
-  active boolean not null default true
-);
 
 create temp table website_pages (
   page_id integer generated always as identity primary key,
@@ -20,59 +14,64 @@ create temp table website_pages (
   unique (school_id, slug)
 );
 
-insert into website_sites(site_key, school_id) values
-  ('school-a', 'school-a'),
-  ('school-b', 'school-b');
-
 insert into website_pages(school_id, slug, publication_status) values
   ('school-a', 'home', 'published'),
   ('school-a', 'about-draft', 'draft'),
   ('school-a', 'review-page', 'review'),
   ('school-b', 'home', 'published');
 
--- Expected public query invariant:
--- only the resolved school and published rows may be returned.
-create temp table expected_school_a as
-select school_id, slug
-from website_pages
-where school_id = 'school-a'
-  and publication_status = 'published';
+alter table website_pages enable row level security;
+alter table website_pages force row level security;
+
+create policy public_published_same_school
+on website_pages
+for select
+using (
+  school_id = current_setting('app.school_id', true)
+  and publication_status = 'published'
+);
 
 do $$
 declare
   actual_count integer;
-  expected_count integer;
 begin
+  perform set_config('app.school_id', 'school-a', true);
+
   select count(*) into actual_count
-  from website_pages
-  where school_id = 'school-a'
-    and publication_status = 'published';
+  from website_pages;
 
-  select count(*) into expected_count from expected_school_a;
-
-  if actual_count <> expected_count or actual_count <> 1 then
-    raise exception 'School A published-only invariant failed';
+  if actual_count <> 1 then
+    raise exception 'School A public RLS expected 1 row, got %', actual_count;
   end if;
 
   if exists (
     select 1 from website_pages
     where school_id <> 'school-a'
-      and publication_status = 'published'
   ) then
-    -- Cross-school rows exist in the fixture, but must never be selected
-    -- by the School A query above.
-    null;
+    raise exception 'Cross-school row leaked through RLS';
   end if;
 
   if exists (
     select 1 from website_pages
-    where school_id = 'school-a'
-      and publication_status <> 'published'
-    and exists (
-      select 1 from expected_school_a e where e.slug = website_pages.slug
-    )
+    where publication_status <> 'published'
   ) then
-    raise exception 'Draft/review row leaked into public result';
+    raise exception 'Draft/review row leaked through RLS';
+  end if;
+
+  perform set_config('app.school_id', 'school-b', true);
+
+  select count(*) into actual_count
+  from website_pages;
+
+  if actual_count <> 1 then
+    raise exception 'School B public RLS expected 1 row, got %', actual_count;
+  end if;
+
+  if exists (
+    select 1 from website_pages
+    where school_id <> 'school-b'
+  ) then
+    raise exception 'School A row leaked into School B result';
   end if;
 end $$;
 
