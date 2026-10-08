@@ -484,9 +484,11 @@ window.goToPage = function(pageId) {
     window.clearDashboardContext?.();
   }
 
-  // Stop chat polling if leaving chat
-  if (currentPage === 'chat' && pageId !== 'chat' && typeof stopChatPolling === 'function') {
-    stopChatPolling();
+  // Leaving Chat must always restore the global SCMS chrome, regardless of
+  // whether the user used the Chat Exit control or another navigation path.
+  if (currentPage === 'chat' && pageId !== 'chat') {
+    if (typeof stopChatPolling === 'function') stopChatPolling();
+    if (typeof _exitChatWorkspace === 'function') _exitChatWorkspace();
   }
 
   // Close the native sidebar immediately after selection so navigation feels
