@@ -246,6 +246,19 @@ window._refreshAdminComposerPreview = function() {
   s.id='smart-chat-ux-patch';
   s.textContent=`
     .smart-chat-hero{position:relative}\n    /* Chat workspace: temporarily replaces the global SCMS chrome while active. */\n    html.scms-chat-workspace #appHeader,\n    html.scms-chat-workspace #sidebar,\n    html.scms-chat-workspace #sidebarBackdrop,\n    html.scms-chat-workspace #tabBar,\n    html.scms-chat-workspace #fab{display:none !important}\n    html.scms-chat-workspace #pages{padding-top:0 !important}\n    html.scms-chat-workspace #page-chat{height:100dvh !important;min-height:100dvh !important;margin:0 !important;padding:0 !important}\n    html.scms-chat-workspace #page-chat .smart-chat-shell{min-height:100dvh;box-sizing:border-box}\n    .smart-chat-channel-back-row{display:flex;align-items:center;margin:0 0 8px}\n    .smart-chat-channel-back{display:inline-flex;align-items:center;gap:5px;min-height:32px;padding:0 10px;border:1px solid var(--border);border-radius:9px;background:var(--bg2);color:var(--text2);font-size:11px;font-weight:700;cursor:pointer}\n    .smart-chat-channel-back:hover{background:var(--surface2);color:var(--text)}
+    .smart-chat-list-actions{display:flex;align-items:center;gap:5px}
+    .smart-chat-list-actions>button{width:30px;height:30px;border:1px solid var(--border);border-radius:9px;background:var(--bg2);color:var(--text2);font-weight:800;cursor:pointer;display:inline-flex;align-items:center;justify-content:center}
+    .smart-chat-list-actions>button:hover{background:var(--surface2);color:var(--text)}
+    .smart-chat-add-btn{font-size:20px;line-height:1}
+    .smart-chat-refresh-btn{font-size:15px}
+    .smart-chat-composer-drawer{display:none;margin-top:10px}
+    .smart-chat-composer-drawer.is-open{display:block}
+    .smart-chat-composer-drawer .smart-chat-admin-card{margin:0}
+    .smart-chat-conversation-list{min-height:0}
+    .smart-chat-list-empty-card{margin:8px 0;padding:16px 12px;border:1px dashed var(--border);border-radius:12px;background:var(--bg2);text-align:center}
+    .smart-chat-list-empty-card .icon{font-size:20px;margin-bottom:5px}
+    .smart-chat-list-empty-card strong{display:block;font-size:12px}
+    .smart-chat-list-empty-card small{display:block;margin-top:4px;color:var(--text2);line-height:1.45}
     .smart-chat-nav-back{
       display:inline-flex;align-items:center;justify-content:center;gap:6px;
       min-height:34px;padding:0 10px;border:1px solid var(--border);
@@ -280,7 +293,9 @@ window._refreshAdminComposerPreview = function() {
       .smart-chat-conversation-head{padding:9px 10px}
       .smart-chat-verified-pill{font-size:9px}
       .smart-chat-ai-card,.smart-chat-admin-card{border-radius:12px}
+      .smart-chat-composer-drawer{margin-top:8px}
       .smart-chat-ai-composer{position:sticky;bottom:0}
+      .smart-chat-composer-drawer .smart-chat-admin-card{max-height:calc(100dvh - 150px);overflow:auto}
     }
     @media(max-width:380px){
       .smart-chat-nav-back span{display:none}
@@ -559,12 +574,31 @@ async function _submitInquiryDraft(e){
   else showToast('Ticket could not be created.');
   return false;
 }
+let _announcementComposerOpen=false;
+window._toggleAnnouncementComposer=function(force=null){
+  if(!window.APP?.is_admin)return;
+  _announcementComposerOpen=force===null?!_announcementComposerOpen:!!force;
+  const card=document.getElementById('announcementComposer');
+  const btn=document.getElementById('announcementComposerToggle');
+  if(card)card.classList.toggle('is-open',_announcementComposerOpen);
+  if(btn){
+    btn.setAttribute('aria-expanded',String(_announcementComposerOpen));
+    btn.textContent=_announcementComposerOpen?'×':'+';
+    btn.title=_announcementComposerOpen?'Close official message form':'New official message';
+  }
+  if(_announcementComposerOpen){
+    requestAnimationFrame(()=>document.getElementById('adminMsgBody')?.focus());
+  }
+};
 function _renderAnnouncementWorkspace(){
   return _chatChannelBack('School Chat') +
     '<div class="smart-chat-direct-shell smart-chat-announcement-shell'+(_announcementId?' has-selection':'')+'">'+
-    '<aside class="smart-chat-direct-list"><div class="smart-chat-direct-list-head"><div><div class="smart-chat-kicker">OFFICIAL</div><strong>Announcements</strong></div><button type="button" onclick="_loadAnnouncementWorkspace()" title="Refresh">↻</button></div><div id="announcementList" class="smart-chat-conversation-list"></div></aside>'+
+    '<aside class="smart-chat-direct-list"><div class="smart-chat-direct-list-head"><div><div class="smart-chat-kicker">OFFICIAL</div><strong>Announcements</strong></div><div class="smart-chat-list-actions">'+
+    (window.APP?.is_admin ? '<button type="button" class="smart-chat-add-btn" id="announcementComposerToggle" onclick="_toggleAnnouncementComposer()" aria-expanded="false" title="New official message">+</button>' : '')+
+    '<button type="button" class="smart-chat-refresh-btn" onclick="_loadAnnouncementWorkspace()" title="Refresh">↻</button></div></div>'+
+    '<div id="announcementList" class="smart-chat-conversation-list"></div></aside>'+
     '<section class="smart-chat-direct-conversation"><div id="announcementHead" class="smart-chat-conversation-head"><div><strong>Official Announcements</strong><small>School-authorized notices for your staff account.</small></div><span class="smart-chat-verified-pill">Verified</span></div><div id="announcementStream" class="chat-stream"><div class="chat-empty"><div class="chat-empty-icon">📢</div><div class="chat-empty-title">Official Announcements</div><div class="chat-empty-sub">Loading…</div></div></div></section></div>' +
-    (window.APP?.is_admin ? _renderAdminComposer() : '');
+    (window.APP?.is_admin ? '<div id="announcementComposer" class="smart-chat-composer-drawer">'+_renderAdminComposer()+'</div>' : '');
 }
 async function _loadAnnouncementWorkspace(autoOpen=true){
   try{
