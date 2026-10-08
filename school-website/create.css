@@ -43,3 +43,9 @@ dialog,
 .editor-dialog textarea[aria-invalid="true"]{border-color:#b42318;box-shadow:0 0 0 3px rgba(180,35,24,.12)}
 .editor-dialog .field-hint{min-height:1.25em}
 .editor-dialog textarea::placeholder{color:#89949d}
+
+
+/* Section management controls: compact, discoverable, keyboard-safe. */
+.section-controls{position:absolute;left:16px;top:16px;display:flex;align-items:center;gap:4px;z-index:3;opacity:.72}.section-controls>span{font-size:.68rem;font-weight:800;color:var(--muted);margin-right:3px}.section-controls button{min-width:38px;min-height:38px;border:1px solid var(--line);border-radius:9px;background:rgba(255,255,255,.94);color:#52616d;font-size:.72rem;font-weight:800}.section-controls button:hover:not(:disabled){border-color:#7892a7;background:#f4f8fb}.section-controls button:disabled{opacity:.38;cursor:not-allowed}.section-controls button:focus-visible{outline:0;box-shadow:0 0 0 3px #e8f0f5}.site-block:hover .section-controls{opacity:1}.site-block[hidden]{display:none!important}
+@media(max-width:620px){.section-controls{left:10px;right:10px;top:9px;overflow-x:auto;opacity:1}.section-controls>span{flex:0 0 auto}.section-controls button{min-width:40px}.site-block{padding-top:72px}}
+
