@@ -48,3 +48,15 @@ dialog,
 /* Section management controls: compact, discoverable, keyboard-safe. */
 .section-controls{position:absolute;left:16px;top:16px;display:flex;align-items:center;gap:4px;z-index:3;opacity:.72}.section-controls>span{font-size:.68rem;font-weight:800;color:var(--muted);margin-right:3px}.section-controls button{min-width:38px;min-height:38px;border:1px solid var(--line);border-radius:9px;background:rgba(255,255,255,.94);color:#52616d;font-size:.72rem;font-weight:800}.section-controls button:hover:not(:disabled){border-color:#7892a7;background:#f4f8fb}.section-controls button:disabled{opacity:.38;cursor:not-allowed}.section-controls button:focus-visible{outline:0;box-shadow:0 0 0 3px #e8f0f5}.site-block:hover .section-controls{opacity:1}.site-block[hidden]{display:none!important}
 @media(max-width:620px){.section-controls{left:10px;right:10px;top:9px;overflow-x:auto;opacity:1}.section-controls>span{flex:0 0 auto}.section-controls button{min-width:40px}.site-block{padding-top:72px}}
+
+
+/* Section management controls */
+.section-controls{position:absolute;left:18px;top:18px;display:flex;align-items:center;gap:5px;opacity:0;z-index:3;padding:4px;border:1px solid var(--line);border-radius:11px;background:rgba(255,255,255,.94);box-shadow:0 6px 18px rgba(20,31,40,.08)}
+.site-block:hover .section-controls,.section-controls:focus-within{opacity:1}
+.section-controls span{font-size:.62rem;font-weight:850;text-transform:uppercase;letter-spacing:.08em;color:var(--muted);padding:0 5px}
+.section-controls button{min-width:36px;min-height:36px;padding:6px 8px;border:1px solid var(--line);border-radius:8px;background:#fff;color:#52616d;font-size:.68rem;font-weight:800}
+.section-controls button:hover:not(:disabled){border-color:#9aafbf;background:#f4f8fb}
+.section-controls button:disabled{opacity:.42;cursor:not-allowed}
+.site-block[hidden]{display:none}
+@media(max-width:1000px){.section-controls{opacity:1;left:12px;top:12px}}
+@media(max-width:620px){.section-controls{right:12px;left:12px;overflow-x:auto}.section-controls span{display:none}.section-controls button{flex:0 0 auto}}
