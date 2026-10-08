@@ -1518,4 +1518,8 @@ window.I18N_MY = {
   'chat.newConversation': "စကားပြောမှုအသစ်",
   'chat.writePrivate': "သီးသန့်စာရေးပါ...",
   'chat.noMessages': "စာမရှိသေးပါ။",
+
+  'chat.gradeAccess': 'ဤဝန်ထမ်းအကောင့်အတွက် လက်ရှိအသုံးပြုနိုင်သော အတန်းတာဝန်ပေးအပ်မှု မရှိသေးပါ။',
+  'chat.gradePrefix': 'အတန်း: '
+  ,'chat.individualPrefix': 'တစ်ဦးချင်း: '
 };
