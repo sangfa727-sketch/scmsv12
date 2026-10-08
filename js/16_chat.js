@@ -413,13 +413,13 @@ function _renderChatMode() {
 
 function _renderAnnouncementWorkspace() {
   return `
-    <div class="smart-chat-direct-shell smart-chat-inquiry-shell">
+    <div class="smart-chat-direct-shell smart-chat-announcement-shell${_staffAnnouncementId ? " has-selection" : ""}">
       <aside class="smart-chat-direct-list">
         <div class="smart-chat-direct-list-head"><div><div class="smart-chat-kicker">OFFICIAL</div><strong>Announcements</strong></div><button type="button" onclick="_loadStaffAnnouncements()" title="Refresh">↻</button></div>
         <div class="smart-chat-directory-title">Official school notices delivered only to verified active staff.</div>
         <div id="staffAnnouncementList" class="smart-chat-conversation-list"></div>
       </aside>
-      <section class="smart-chat-direct-conversation" style="display:flex">
+      <section class="smart-chat-direct-conversation">
         <div id="staffAnnouncementHead" class="smart-chat-conversation-head"><div><strong>Select an announcement</strong><small>Official messages include a system header and reason.</small></div><span class="smart-chat-verified-pill">School isolated</span></div>
         <div id="staffAnnouncementStream" class="chat-stream"><div class="chat-empty"><div class="chat-empty-icon">📢</div><div class="chat-empty-title">Official Announcements</div><div class="chat-empty-sub">Select a notice to read it.</div></div></div>
       </section>
@@ -440,22 +440,24 @@ async function _loadStaffAnnouncements(){
 }
 window._openStaffAnnouncement=async function(id){
   _staffAnnouncementId=id;const a=_staffAnnouncements.find(x=>String(x.id)===String(id));if(!a)return;
-  const h=document.getElementById('staffAnnouncementHead'),s=document.getElementById('staffAnnouncementStream');if(h)h.innerHTML=`<div><strong>${esc(a.message_type==='task'?'Official Staff Task':a.message_type==='notice'?'Staff Notice':'Official Announcement')}</strong><small>${esc(a.recipient_type)} · ${esc(a.created_at||'')}</small></div><span class="smart-chat-verified-pill">Verified recipient</span>`;
+  const h=document.getElementById('staffAnnouncementHead'),s=document.getElementById('staffAnnouncementStream');const shell=document.querySelector('.smart-chat-announcement-shell');if(shell)shell.classList.add('has-selection');if(h)h.innerHTML=`<div class="smart-chat-direct-peer"><button type="button" class="smart-chat-mobile-back" onclick="_clearStaffAnnouncementSelection()" aria-label="Back to announcements">‹</button><div><strong>${esc(a.message_type==='task'?'Official Staff Task':a.message_type==='notice'?'Staff Notice':'Official Announcement')}</strong><small>${esc(a.recipient_type)} · ${esc(a.created_at||'')}</small></div><span class="smart-chat-verified-pill">Verified recipient</span>`;
   if(s)s.innerHTML=`<div class="smart-chat-official-preview"><div class="smart-chat-preview-label">SYSTEM-GENERATED HEADER</div><div class="smart-chat-preview-header">${esc(a.message_type==='task'?'Official Staff Task':a.message_type==='notice'?'Staff Notice':'Official Announcements Channel')}</div><div class="smart-chat-preview-reason"><strong>Reason</strong><span>${esc(a.reason||'')}</span></div><div class="smart-chat-preview-body">${esc(a.body||'').replace(/\n/g,'<br>')}</div></div>`;
   if(!a.read_at){try{const r=await API.markStaffAnnouncementRead(a.id);if(r?.ok)a.read_at=new Date().toISOString();}catch(e){}}
   _renderStaffAnnouncementList();
 };
 
+window._clearStaffAnnouncementSelection=function(){_staffAnnouncementId=null;const shell=document.querySelector('.smart-chat-announcement-shell');if(shell)shell.classList.remove('has-selection');const h=document.getElementById('staffAnnouncementHead');if(h)h.innerHTML='<div><strong>Select an announcement</strong><small>Official messages include a system header and reason.</small></div><span class="smart-chat-verified-pill">School isolated</span>';const s=document.getElementById('staffAnnouncementStream');if(s)s.innerHTML='<div class="chat-empty"><div class="chat-empty-icon">📢</div><div class="chat-empty-title">Select a notice</div><div class="chat-empty-sub">Choose an official announcement from the list.</div></div>';_renderStaffAnnouncementList();};
+
 function _renderInquiryWorkspace() {
   return `
-    <div class="smart-chat-direct-shell smart-chat-inquiry-shell">
+    <div class="smart-chat-direct-shell smart-chat-inquiry-shell${_inquiryTicketId ? " has-selection" : ""}">
       <aside class="smart-chat-direct-list">
         <div class="smart-chat-direct-list-head"><div><div class="smart-chat-kicker">INQUIRY</div><strong>Inquiry Tickets</strong></div><button type="button" onclick="_loadInquiryTickets()" title="Refresh">↻</button></div>
         <div class="smart-chat-directory-title">Staff-only student / parent issue tracking</div>
         <div id="inquiryTicketList" class="smart-chat-conversation-list"></div>
         <button type="button" class="btn-secondary" onclick="_newInquiryTicket()">＋ New ticket</button>
       </aside>
-      <section class="smart-chat-direct-conversation" style="display:flex">
+      <section class="smart-chat-direct-conversation">
         <div id="inquiryTicketHead" class="smart-chat-conversation-head"><div><strong>Select a ticket</strong><small>Only authorized staff in this school can access ticket messages.</small></div><span class="smart-chat-verified-pill">School isolated</span></div>
         <div id="inquiryMessageStream" class="chat-stream smart-chat-direct-stream"><div class="chat-empty"><div class="chat-empty-icon">🎫</div><div class="chat-empty-title">Inquiry Tickets</div><div class="chat-empty-sub">Create or select a staff ticket.</div></div></div>
         <form class="chat-composer smart-chat-direct-composer" onsubmit="return _sendInquiryFromComposer(event)">
@@ -479,11 +481,11 @@ async function _loadInquiryTickets(){
   }catch(e){const box=document.getElementById('inquiryTicketList');if(box)box.innerHTML='<div class="chat-error">Unable to load tickets.</div>';}
 }
 async function _openInquiryTicket(id){
-  _inquiryTicketId=Number(id); const r=await API.openInquiryTicket(_inquiryTicketId); if(!r?.ok)return;
+  _inquiryTicketId=Number(id); const shell=document.querySelector('.smart-chat-inquiry-shell');if(shell)shell.classList.add('has-selection'); const r=await API.openInquiryTicket(_inquiryTicketId); if(!r?.ok)return;
   const h=document.getElementById('inquiryTicketHead'), s=document.getElementById('inquiryMessageStream'), input=document.getElementById('inquiryChatInput'), btn=document.getElementById('inquirySendBtn');
   _inquiryCurrentTicket=r.ticket;
   const adminControls=window.APP?.is_admin?'<div class="smart-chat-inquiry-admin"><label>Status <select id="inquiryStatusSelect" onchange="_updateInquiryTicket()"><option>OPEN</option><option>ASSIGNED</option><option>IN_PROGRESS</option><option>WAITING</option><option>RESOLVED</option><option>CLOSED</option></select></label><label>Assignee <select id="inquiryAssigneeSelect" onchange="_updateInquiryTicket()"><option value="">Unassigned</option></select></label></div>':'';
-  if(h)h.innerHTML=`<div><strong>${esc(r.ticket.subject)}</strong><small>${esc(r.ticket.status)} · ${esc(r.ticket.priority)}${r.ticket.student_id?' · Student '+esc(r.ticket.student_id):''}</small></div><span class="smart-chat-verified-pill">Authorized</span>${adminControls}`;
+  if(h)h.innerHTML=`<div class="smart-chat-direct-peer"><button type="button" class="smart-chat-mobile-back" onclick="_clearInquirySelection()" aria-label="Back to inquiry tickets">‹</button><div><strong>${esc(r.ticket.subject)}</strong><small>${esc(r.ticket.status)} · ${esc(r.ticket.priority)}${r.ticket.student_id?' · Student '+esc(r.ticket.student_id):''}</small></div><span class="smart-chat-verified-pill">Authorized</span>${adminControls}`;
   if(window.APP?.is_admin){
     const ss=document.getElementById('inquiryStatusSelect'), aa=document.getElementById('inquiryAssigneeSelect');
     if(ss)ss.value=r.ticket.status;
@@ -505,6 +507,8 @@ async function _openInquiryTicket(id){
     }catch(e){ /* read state is best-effort; authorization remains server-side */ }
   }
 }
+window._clearInquirySelection=function(){_inquiryTicketId=null;_inquiryCurrentTicket=null;const shell=document.querySelector('.smart-chat-inquiry-shell');if(shell)shell.classList.remove('has-selection');const h=document.getElementById('inquiryTicketHead');if(h)h.innerHTML='<div><strong>Select a ticket</strong><small>Only authorized staff in this school can access ticket messages.</small></div><span class="smart-chat-verified-pill">School isolated</span>';const s=document.getElementById('inquiryMessageStream');if(s)s.innerHTML='<div class="chat-empty"><div class="chat-empty-icon">🎫</div><div class="chat-empty-title">Select a ticket</div><div class="chat-empty-sub">Create or select a staff ticket.</div></div>';const i=document.getElementById('inquiryChatInput');if(i){i.disabled=true;i.placeholder='Select a ticket...';}const b=document.getElementById('inquirySendBtn');if(b)b.disabled=true;_renderInquiryTicketList();};
+
 async function _updateInquiryTicket(){
   if(!window.APP?.is_admin||!_inquiryTicketId)return;
   const status=document.getElementById('inquiryStatusSelect')?.value||null;
