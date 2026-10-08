@@ -35,11 +35,11 @@ async function handleAdmissionRequest({
     return { status: 400, body: { ok: false, error: 'invalid_request' } };
   }
 
-  if (!rateLimiter || typeof rateLimiter.allow !== 'function') {
+  if (!rateLimiter || typeof rateLimiter.allow !== 'function' || typeof identity !== 'string' || !identity.trim()) {
     return { status: 503, body: { ok: false, error: 'admission_backend_unavailable' } };
   }
 
-  if (!rateLimiter.allow(identity || 'unknown')) {
+  if (!rateLimiter.allow(identity.trim())) {
     return { status: 429, body: { ok: false, error: 'rate_limited' } };
   }
 
