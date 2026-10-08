@@ -80,7 +80,7 @@ function _renderAdminComposer() {
       <div class="smart-chat-form-grid">
         <label>Recipient type
           <select id="adminMsgRecipientType" onchange="_loadAdminRecipientPreview()">
-            <option value="all_staff">${t('chat.allStaff')}</option>
+            <option value="all_staff">t('chat.allStaff')</option>
             <option value="grade" selected>Grade</option>
             <option value="teacher">Individual teacher</option>
           </select>
@@ -719,7 +719,7 @@ function _setDirectMobileView(selected) {
 
 function _setDirectComposer(enabled){
   const input=document.getElementById('directChatInput'),btn=document.getElementById('directChatSendBtn');
-  if(input){input.disabled=!enabled;input.placeholder=enabled?${t('chat.writePrivate')}:${t('chat.startDirect')};}
+  if(input){input.disabled=!enabled;input.placeholder=enabled?t('chat.writePrivate'):t('chat.startDirect');}
   if(btn)btn.disabled=!enabled;
 }
 
