@@ -46,7 +46,7 @@ begin
         select distinct trim(tca.class_name) grade_name
         from public.teacher_class_assignments tca
         join public.teachers t on t.teacher_id=tca.teacher_id and t.school_id=tca.school_id
-        where tca.school_id=v_school_id and tca.teacher_id=v_teacher_id and coalesce(tca.is_active,true)
+        where tca.school_id=v_school_id and tca.teacher_id=v_teacher_id and tca.is_active is true
           and lower(coalesce(t.status,'active'))='active' and nullif(trim(tca.class_name),'') is not null
       ) q
       left join public.staff_grade_read_state rs on rs.school_id=v_school_id and rs.teacher_id=v_teacher_id
@@ -64,7 +64,7 @@ begin
   where s.session_token=p_session_token and s.expires_at>now() and lower(coalesce(t.status,'active'))='active' limit 1;
   if v_teacher_id is null then raise exception 'invalid_session'; end if;
   select min(trim(tca.class_name)) into v_grade from public.teacher_class_assignments tca
-  where tca.school_id=v_school_id and tca.teacher_id=v_teacher_id and coalesce(tca.is_active,true)
+  where tca.school_id=v_school_id and tca.teacher_id=v_teacher_id and tca.is_active is true
     and lower(trim(tca.class_name))=lower(trim(p_grade_name));
   if v_grade is null then raise exception 'unauthorized_grade'; end if;
   return jsonb_build_object('ok',true,'grade_name',v_grade,'rows',coalesce((
@@ -89,7 +89,7 @@ begin
   if v_teacher_id is null then raise exception 'invalid_session'; end if;
   if nullif(trim(p_body),'') is null or char_length(trim(p_body))>4000 then raise exception 'invalid_message'; end if;
   select min(trim(tca.class_name)) into v_grade from public.teacher_class_assignments tca
-  where tca.school_id=v_school_id and tca.teacher_id=v_teacher_id and coalesce(tca.is_active,true)
+  where tca.school_id=v_school_id and tca.teacher_id=v_teacher_id and tca.is_active is true
     and lower(trim(tca.class_name))=lower(trim(p_grade_name));
   if v_grade is null then raise exception 'unauthorized_grade'; end if;
   insert into public.staff_grade_messages(school_id,grade_name,sender_teacher_id,body)
@@ -106,7 +106,7 @@ begin
   where s.session_token=p_session_token and s.expires_at>now() and lower(coalesce(t.status,'active'))='active' limit 1;
   if v_teacher_id is null then raise exception 'invalid_session'; end if;
   select min(trim(tca.class_name)) into v_grade from public.teacher_class_assignments tca
-  where tca.school_id=v_school_id and tca.teacher_id=v_teacher_id and coalesce(tca.is_active,true)
+  where tca.school_id=v_school_id and tca.teacher_id=v_teacher_id and tca.is_active is true
     and lower(trim(tca.class_name))=lower(trim(p_grade_name));
   if v_grade is null then raise exception 'unauthorized_grade'; end if;
   insert into public.staff_grade_read_state(school_id,teacher_id,grade_name,last_read_at) values(v_school_id,v_teacher_id,v_grade,now())
