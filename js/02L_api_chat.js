@@ -98,6 +98,20 @@ Object.assign(API, {
       });
     },
 
+    async createInquiryTicket(subject, body, studentId = null, priority = 'NORMAL') {
+      return _webRpc('rpc_chat_inquiry_create', { p_session_token: _webSessionToken(), p_subject: subject, p_body: body, p_student_id: studentId, p_priority: priority });
+    },
+    async getInquiryTickets(status = null, limit = 50) {
+      const res = await _webRpc('rpc_chat_inquiry_list', { p_session_token: _webSessionToken(), p_status: status, p_limit: Number(limit) || 50 });
+      return Array.isArray(res.rows) ? res.rows : [];
+    },
+    async openInquiryTicket(ticketId) {
+      return _webRpc('rpc_chat_inquiry_open', { p_session_token: _webSessionToken(), p_ticket_id: Number(ticketId) });
+    },
+    async sendInquiryMessage(ticketId, body) {
+      return _webRpc('rpc_chat_inquiry_send', { p_session_token: _webSessionToken(), p_ticket_id: Number(ticketId), p_body: body });
+    },
+
     // ─── REFRESH ALL ─────────────────────────────────────────────────────────
 });
 window.API = API;
