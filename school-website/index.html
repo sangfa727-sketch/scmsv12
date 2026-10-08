@@ -1,0 +1,36 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta name="referrer" content="strict-origin-when-cross-origin">
+  <title>School Website — SCMS</title>
+  <link rel="stylesheet" href="./styles.css">
+</head>
+<body>
+  <header class="site-header">
+    <div><span class="eyebrow">SCMS SCHOOL WEBSITE</span><h1 id="schoolName">School</h1></div>
+    <nav aria-label="Primary">
+      <a href="#about">About</a><a href="#programs">Programs</a><a href="#news">News</a>
+      <a href="#admissions">Admissions</a><a href="./admission.html">Apply</a><a href="#contact">Contact</a>
+    </nav>
+  </header>
+  <main>
+    <section class="hero">
+      <p class="eyebrow">WELCOME</p>
+      <h2 id="heroTitle">A public school website powered by SCMS.</h2>
+      <p id="heroText">Published school information will appear here. Private SCMS records are never rendered by this site.</p>
+    </section>
+    <section id="about" class="card"><h2>About</h2><p id="aboutText">School profile content will be published from the Website workspace.</p></section>
+    <section id="programs" class="card"><h2>Programs</h2><div id="programList" class="grid"></div></section>
+    <section id="news" class="card"><h2>News & Events</h2><div id="newsList" class="grid"></div></section>
+    <section id="admissions" class="card">
+      <h2>Admissions</h2><p id="admissionsText">Admissions information will be published by the school.</p>
+      <p><a href="./admission.html">Start an admission application →</a></p>
+    </section>
+    <section id="contact" class="card contact"><h2>Contact</h2><p id="contactText">School contact information will appear after publication.</p></section>
+  </main>
+  <footer><span>Powered by SCMS v12</span></footer>
+  <script src="./app.js"></script>
+</body>
+</html>
