@@ -339,6 +339,12 @@ function _renderChatMode() {
     return;
   }
 
+  if (_chatChannel === 'tickets') {
+    root.innerHTML = _renderInquiryWorkspace();
+    _loadInquiryTickets();
+    return;
+  }
+
   root.innerHTML = `
     <div class="smart-chat-school-grid">
       <aside class="smart-chat-channel-list">
@@ -371,6 +377,102 @@ function _renderChatMode() {
 }
 
 
+function _renderInquiryWorkspace() {
+  return `
+    <div class="smart-chat-direct-shell smart-chat-inquiry-shell">
+      <aside class="smart-chat-direct-list">
+        <div class="smart-chat-direct-list-head"><div><div class="smart-chat-kicker">INQUIRY</div><strong>Inquiry Tickets</strong></div><button type="button" onclick="_loadInquiryTickets()" title="Refresh">↻</button></div>
+        <div class="smart-chat-directory-title">Staff-only student / parent issue tracking</div>
+        <div id="inquiryTicketList" class="smart-chat-conversation-list"></div>
+        <button type="button" class="btn-secondary" onclick="_newInquiryTicket()">＋ New ticket</button>
+      </aside>
+      <section class="smart-chat-direct-conversation" style="display:flex">
+        <div id="inquiryTicketHead" class="smart-chat-conversation-head"><div><strong>Select a ticket</strong><small>Only authorized staff in this school can access ticket messages.</small></div><span class="smart-chat-verified-pill">School isolated</span></div>
+        <div id="inquiryMessageStream" class="chat-stream smart-chat-direct-stream"><div class="chat-empty"><div class="chat-empty-icon">🎫</div><div class="chat-empty-title">Inquiry Tickets</div><div class="chat-empty-sub">Create or select a staff ticket.</div></div></div>
+        <form class="chat-composer smart-chat-direct-composer" onsubmit="return _sendInquiryFromComposer(event)">
+          <textarea id="inquiryChatInput" placeholder="Select a ticket..." rows="1" disabled></textarea>
+          <button type="submit" class="chat-send-btn" id="inquirySendBtn" disabled>${_chatIcon('send')}</button>
+        </form>
+      </section>
+    </div>`;
+}
+
+let _inquiryTickets=[], _inquiryTicketId=null, _inquiryCurrentTicket=null, _inquiryDraft=null;
+function _renderInquiryTicketList(){
+  const box=document.getElementById('inquiryTicketList'); if(!box)return;
+  box.innerHTML=_inquiryTickets.length?_inquiryTickets.map(t=>`<button class="smart-chat-channel-card ${Number(t.id)===Number(_inquiryTicketId)?'active':''}" onclick="_openInquiryTicket(${Number(t.id)})"><span class="smart-chat-channel-icon">🎫</span><span><strong>${esc(t.subject)}</strong><small>${esc(t.status)} · ${esc(t.priority)}</small></span>${Number(t.unread_count)>0?`<b class="smart-chat-unread" title="Unread messages">${esc(t.unread_count)}</b>`:'<b>›</b>'}</button>`).join(''):'<div class="chat-empty-sub">No tickets yet.</div>';
+}
+async function _loadInquiryTickets(){
+  try{
+    _inquiryTickets=await API.getInquiryTickets();
+    _renderInquiryTicketList();
+    if(_inquiryTicketId) await _openInquiryTicket(_inquiryTicketId);
+  }catch(e){const box=document.getElementById('inquiryTicketList');if(box)box.innerHTML='<div class="chat-error">Unable to load tickets.</div>';}
+}
+async function _openInquiryTicket(id){
+  _inquiryTicketId=Number(id); const r=await API.openInquiryTicket(_inquiryTicketId); if(!r?.ok)return;
+  const h=document.getElementById('inquiryTicketHead'), s=document.getElementById('inquiryMessageStream'), input=document.getElementById('inquiryChatInput'), btn=document.getElementById('inquirySendBtn');
+  _inquiryCurrentTicket=r.ticket;
+  const adminControls=window.APP?.is_admin?'<div class="smart-chat-inquiry-admin"><label>Status <select id="inquiryStatusSelect" onchange="_updateInquiryTicket()"><option>OPEN</option><option>ASSIGNED</option><option>IN_PROGRESS</option><option>WAITING</option><option>RESOLVED</option><option>CLOSED</option></select></label><label>Assignee <select id="inquiryAssigneeSelect" onchange="_updateInquiryTicket()"><option value="">Unassigned</option></select></label></div>':'';
+  if(h)h.innerHTML=`<div><strong>${esc(r.ticket.subject)}</strong><small>${esc(r.ticket.status)} · ${esc(r.ticket.priority)}${r.ticket.student_id?' · Student '+esc(r.ticket.student_id):''}</small></div><span class="smart-chat-verified-pill">Authorized</span>${adminControls}`;
+  if(window.APP?.is_admin){
+    const ss=document.getElementById('inquiryStatusSelect'), aa=document.getElementById('inquiryAssigneeSelect');
+    if(ss)ss.value=r.ticket.status;
+    if(aa){
+      const staff=_verifiedStaffList();
+      aa.innerHTML='<option value="">Unassigned</option>'+staff.map(t=>`<option value="${esc(t.teacher_id)}">${esc(t.teacher_name||t.name||t.teacher_id)}</option>`).join('');
+      if(r.ticket.assigned_teacher_id)aa.value=r.ticket.assigned_teacher_id;
+    }
+  }
+  if(s)s.innerHTML=(r.messages||[]).map(m=>`<div class="chat-bubble-row"><div class="chat-bubble"><strong>${esc(m.sender_teacher_name)}</strong><div>${esc(m.body).replace(/\n/g,'<br>')}</div><small>${esc(m.created_at||'')}</small></div></div>`).join('')||'<div class="chat-empty-sub">No messages.</div>';
+  if(input){input.disabled=r.ticket.status==='CLOSED';input.placeholder=input.disabled?'Ticket closed':'Write a reply...';}
+  if(btn)btn.disabled=input?.disabled||!_inquiryTicketId;
+  if(window.API?.markInquiryRead){
+    try{
+      await API.markInquiryRead(_inquiryTicketId);
+      const item=_inquiryTickets.find(t=>Number(t.id)===Number(_inquiryTicketId));
+      if(item) item.unread_count=0;
+      _renderInquiryTicketList();
+    }catch(e){ /* read state is best-effort; authorization remains server-side */ }
+  }
+}
+async function _updateInquiryTicket(){
+  if(!window.APP?.is_admin||!_inquiryTicketId)return;
+  const status=document.getElementById('inquiryStatusSelect')?.value||null;
+  const assignee=document.getElementById('inquiryAssigneeSelect')?.value||null;
+  const r=await API.updateInquiryTicket(_inquiryTicketId,status,assignee||null);
+  if(r?.ok){await _loadInquiryTickets();await _openInquiryTicket(_inquiryTicketId);}else showToast('Ticket update could not be applied.');
+}
+async function _sendInquiryFromComposer(e){
+  e?.preventDefault(); const input=document.getElementById('inquiryChatInput'); if(!_inquiryTicketId||!input?.value.trim())return false;
+  const r=await API.sendInquiryMessage(_inquiryTicketId,input.value.trim()); if(r?.ok){input.value='';await _openInquiryTicket(_inquiryTicketId);await _loadInquiryTickets();} else showToast('Message could not be sent.'); return false;
+}
+function _closeInquiryDraft(){_inquiryDraft=null;_renderInquiryDraft();}
+function _renderInquiryDraft(){
+  const root=document.getElementById('inquiryTicketList'); if(!root)return;
+  if(!_inquiryDraft){root.innerHTML=_inquiryTickets.length?_inquiryTickets.map(t=>`<button class="smart-chat-channel-card ${Number(t.id)===Number(_inquiryTicketId)?'active':''}" onclick="_openInquiryTicket(${Number(t.id)})"><span class="smart-chat-channel-icon">🎫</span><span><strong>${esc(t.subject)}</strong><small>${esc(t.status)} · ${esc(t.priority)}${t.student_id?' · '+esc(t.student_id):''}</small></span><b>›</b></button>`).join(''):'<div class="chat-empty-sub">No tickets yet.</div>';return;}
+  root.innerHTML=`
+    <form class="smart-chat-inquiry-form" onsubmit="return _submitInquiryDraft(event)">
+      <label>Subject<input id="inquiryDraftSubject" maxlength="160" required placeholder="What needs attention?"></label>
+      <label>Priority<select id="inquiryDraftPriority"><option>NORMAL</option><option>LOW</option><option>HIGH</option><option>URGENT</option></select></label>
+      <label>Student ID <span class="smart-chat-field-note">optional · same school only</span><input id="inquiryDraftStudent" maxlength="80" placeholder="Student ID"></label>
+      <label>Details<textarea id="inquiryDraftBody" maxlength="4000" rows="5" required placeholder="Describe the issue clearly..."></textarea></label>
+      <div class="smart-chat-inquiry-form-actions"><button type="button" class="btn-secondary" onclick="_closeInquiryDraft()">Cancel</button><button type="submit" class="btn-primary">Create ticket</button></div>
+    </form>`;
+}
+async function _newInquiryTicket(){_inquiryDraft=true;_renderInquiryDraft();}
+async function _submitInquiryDraft(e){
+  e?.preventDefault();
+  const subject=document.getElementById('inquiryDraftSubject')?.value.trim();
+  const body=document.getElementById('inquiryDraftBody')?.value.trim();
+  const priority=document.getElementById('inquiryDraftPriority')?.value||'NORMAL';
+  const studentId=document.getElementById('inquiryDraftStudent')?.value.trim()||null;
+  if(!subject||!body)return false;
+  const r=await API.createInquiryTicket(subject,body,studentId,priority);
+  if(r?.ok){_inquiryDraft=null;_inquiryTicketId=Number(r.ticket.id);await _loadInquiryTickets();}
+  else showToast('Ticket could not be created.');
+  return false;
+}
 function _renderDirectWorkspace() {
   return `
     <div class="smart-chat-direct-shell${_directConversationId ? ' has-selection' : ''}">

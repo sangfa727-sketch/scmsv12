@@ -394,3 +394,31 @@ test('Official Staff Announcements UI and API are connected to the guarded serve
   assert.match(chat, /Department — coming next/);
   assert.match(chat, /teacher — coming next/);
 });
+
+
+test('Staff Inquiry Tickets use session, tenant and membership-bound server contracts', () => {
+  const migration = read('supabase/migrations/20261008190000_staff_inquiry_tickets.sql');
+  for (const fn of ['rpc_chat_inquiry_list','rpc_chat_inquiry_open','rpc_chat_inquiry_send','rpc_chat_inquiry_create']) {
+    assert.match(migration, new RegExp('function public\\\\.' + fn));
+  }
+  for (const marker of ['p_session_token text','expires_at>now\\(\\)','t\\.status=\'active\'','t\\.school_id=s\\.school_id','ticket_forbidden','ticket_closed','student_forbidden','invalid_session']) {
+    assert.match(migration, new RegExp(marker));
+  }
+  assert.match(migration, /staff_inquiry_tickets/);
+  assert.match(migration, /staff_inquiry_ticket_members/);
+  assert.match(migration, /staff_inquiry_ticket_messages/);
+  assert.match(migration, /school_id=v\.school_id/);
+  assert.match(migration, /revoke all on function public\.rpc_chat_inquiry_send/);
+  assert.match(migration, /grant execute on function public\.rpc_chat_inquiry_send/);
+});
+
+
+test('Staff Inquiry Ticket assignment/status is admin-bound and school-scoped', () => {
+  const migration = read('supabase/migrations/20261008200000_staff_inquiry_assignment_status.sql');
+  assert.match(migration, /function public\\.rpc_chat_inquiry_update/);
+  assert.match(migration, /v\.role not in \('admin','super_admin'\)/);
+  assert.match(migration, /assignee_forbidden/);
+  assert.match(migration, /school_id=v\.school_id/);
+  assert.match(migration, /member_role='ASSIGNEE'/);
+  assert.match(migration, /grant execute on function public\.rpc_chat_inquiry_update/);
+});
