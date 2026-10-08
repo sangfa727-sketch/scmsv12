@@ -530,7 +530,8 @@ window.goToPage = function(pageId) {
     if (pageId === 'parents' && typeof renderComms === 'function') return renderComms();
     if (pageId === 'incidents' && typeof renderIncidents === 'function') return renderIncidents();
     if (pageId === 'timetable' && typeof renderTimetable === 'function') return renderTimetable();
-    if (pageId === 'summary' && typeof renderSummary === 'function') return renderSummary();\n    if (pageId === 'insights' && typeof renderInsights === 'function') return renderInsights();
+    if (pageId === 'summary' && typeof renderSummary === 'function') return renderSummary();
+    if (pageId === 'insights' && typeof renderInsights === 'function') return renderInsights();
   };
   const loadAndRender = async () => {
     try {
