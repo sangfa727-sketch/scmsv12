@@ -12,7 +12,7 @@ function setup() {
     ]),
     rootDomain: 'scmsv12.com',
     replayGuard: createReplayGuard({ ttlMs: 60000, maxEntries: 100 }),
-    rateLimiter: createRateLimiter({ windowMs: 60000, maxRequests: 2 })
+    rateLimiter: createRateLimiter({ windowMs: 60000, maxRequests: 3 })
   };
 }
 
