@@ -46,6 +46,7 @@ function _gradeRecipientPreview(grade) {
   if (String(grade).toLowerCase() === 'grade 5' && Array.isArray(_adminGradeRecipients)) {
     return _adminGradeRecipients;
   }
+  if (Array.isArray(_adminGradeRecipients) && _adminGradeRecipients.length) return [];
   const staff = _verifiedStaffList();
   return staff.filter(t => {
     const classes = String(t.classes || '');
@@ -150,6 +151,59 @@ window._refreshAdminComposerPreview = function() {
   `;
 };
 
+
+(function _installSmartChatUxPatch(){
+  if (document.getElementById('smart-chat-ux-patch')) return;
+  const s=document.createElement('style');
+  s.id='smart-chat-ux-patch';
+  s.textContent=`
+    .smart-chat-hero{position:relative}
+    .smart-chat-nav-back{
+      display:inline-flex;align-items:center;justify-content:center;gap:6px;
+      min-height:34px;padding:0 10px;border:1px solid var(--border);
+      border-radius:9px;background:var(--bg2);color:var(--text2);
+      font-size:11px;font-weight:700;flex:0 0 auto;
+    }
+    .smart-chat-nav-back:hover{background:var(--surface2);color:var(--text)}
+    .smart-chat-nav-back span{font-size:11px}
+    @media(max-width:760px){
+      .smart-chat-shell{padding:10px 8px calc(var(--tab-h,56px) + 20px)}
+      .smart-chat-hero{gap:8px;align-items:flex-start}
+      .smart-chat-hero>div:first-of-type{min-width:0;flex:1}
+      .smart-chat-hero .page-title{font-size:21px}
+      .smart-chat-hero .page-subtitle{font-size:11px;line-height:1.4}
+      .smart-chat-nav-back{order:-1;min-width:62px;height:34px}
+      .smart-chat-mode-switch{position:sticky;top:0;z-index:5}
+      .smart-chat-channel-list{scroll-snap-type:x proximity;overscroll-behavior-x:contain}
+      .smart-chat-channel-card{min-width:138px;scroll-snap-align:start}
+      .smart-chat-conversation{min-height:calc(100dvh - 210px)}
+      .smart-chat-conversation .chat-stream{max-height:none;min-height:0;flex:1}
+      .chat-composer{padding-bottom:max(8px,env(safe-area-inset-bottom))}
+      .smart-chat-direct-shell{position:relative;display:block;min-height:calc(100dvh - 205px)}
+      .smart-chat-direct-list{min-height:0;max-height:none;height:calc(100dvh - 205px);overflow:hidden}
+      .smart-chat-direct-conversation{display:none;min-height:calc(100dvh - 205px);height:calc(100dvh - 205px)}
+      .smart-chat-direct-shell.has-selection .smart-chat-direct-list{display:none}
+      .smart-chat-direct-shell.has-selection .smart-chat-direct-conversation{display:flex}
+      .smart-chat-direct-conversation .chat-stream{max-height:none;min-height:0;flex:1;overflow-y:auto}
+      .smart-chat-direct-composer{position:sticky;bottom:0}
+      .smart-chat-mobile-back{width:34px;height:34px;flex:0 0 34px}
+      .smart-chat-direct-peer{gap:7px}
+      .smart-chat-direct-peer>div:last-child{max-width:calc(100vw - 150px)}
+      .smart-chat-conversation-head{padding:9px 10px}
+      .smart-chat-verified-pill{font-size:9px}
+      .smart-chat-ai-card,.smart-chat-admin-card{border-radius:12px}
+      .smart-chat-ai-composer{position:sticky;bottom:0}
+    }
+    @media(max-width:380px){
+      .smart-chat-nav-back span{display:none}
+      .smart-chat-nav-back{min-width:36px;padding:0 8px}
+      .smart-chat-hero .page-title{font-size:20px}
+      .smart-chat-channel-card{min-width:128px}
+    }
+  `;
+  document.head.appendChild(s);
+})();
+
 function renderChat() {
   const page = document.getElementById('page-chat');
   if (!page) return;
@@ -157,6 +211,7 @@ function renderChat() {
   page.innerHTML = `
     <div class="smart-chat-shell">
       <div class="smart-chat-hero">
+        <button type="button" class="smart-chat-nav-back" onclick="_chatBackToMenu()" aria-label="Back to menu">☰ <span>Menu</span></button>
         <div>
           <div class="page-eyebrow">COMMUNICATION CENTER</div>
           <h1 class="page-title">Smart <em>Chat</em></h1>
@@ -182,6 +237,23 @@ function renderChat() {
 
   _renderChatMode();
 }
+
+window._chatBackToMenu = function() {
+  try {
+    if (typeof closeSidebar === 'function') closeSidebar();
+    if (typeof isTWA === 'function' && !isTWA() && typeof openSidebar === 'function') {
+      openSidebar();
+      return;
+    }
+    if (typeof goToPage === 'function') {
+      goToPage('dashboard');
+      return;
+    }
+    if (window.APP) window.APP.currentPage = 'dashboard';
+  } catch (e) {
+    console.warn('[chat] menu navigation failed', e);
+  }
+};
 
 window.switchChatMode = function(mode) {
   _chatMode = mode === 'ai' ? 'ai' : 'school';
@@ -271,7 +343,7 @@ function _renderChatMode() {
 
 function _renderDirectWorkspace() {
   return `
-    <div class="smart-chat-direct-shell">
+    <div class="smart-chat-direct-shell${_directConversationId ? ' has-selection' : ''}">
       <aside class="smart-chat-direct-list">
         <div class="smart-chat-direct-list-head"><div><div class="smart-chat-kicker">PRIVATE</div><strong>Direct messages</strong></div><button type="button" onclick="_loadDirectWorkspace()" title="Refresh">↻</button></div>
         <label class="smart-chat-direct-search"><span>⌕</span><input id="directStaffSearch" placeholder="Find a teacher..." oninput="_renderDirectDirectory()"></label>
@@ -338,6 +410,7 @@ window.openDirectChat=async function(teacherId){
     if(!result?.ok)throw new Error(result?.error||'Unable to open conversation');
     _directConversationId=Number(result.conversation_id);
     _directPeer=result.peer||_directStaff.find(t=>t.teacher_id===teacherId)||null;
+    _setDirectMobileView(true);
     _renderDirectConversationList();_renderDirectHeader();_setDirectComposer(true);
     await _loadDirectMessages();
   }catch(e){showToast('Unable to open this staff conversation.');}
@@ -351,13 +424,18 @@ function _renderDirectHeader(){
     <span class="smart-chat-verified-pill">Private</span>`;
 }
 
+function _setDirectMobileView(selected) {
+  const shell = document.querySelector('.smart-chat-direct-shell');
+  if (shell) shell.classList.toggle('has-selection', !!selected);
+}
+
 function _setDirectComposer(enabled){
   const input=document.getElementById('directChatInput'),btn=document.getElementById('directChatSendBtn');
   if(input){input.disabled=!enabled;input.placeholder=enabled?'Write a private message...':'Select a teacher to start messaging...';}
   if(btn)btn.disabled=!enabled;
 }
 
-window._clearDirectSelection=function(){_directConversationId=null;_directPeer=null;_renderChatMode();};
+window._clearDirectSelection=function(){_directConversationId=null;_directPeer=null;_setDirectMobileView(false);_renderChatMode();};
 
 async function _loadDirectMessages(){
   if(!_directConversationId)return;
