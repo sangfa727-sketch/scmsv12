@@ -12,6 +12,8 @@ let _directPollBusy = false;
 let _chatScrollLock = false;
 let _chatMode = 'school';
 let _adminGradeRecipients = [];
+let _adminTeacherRecipients = [];
+let _announcementId = null;
 let _directConversationId = null;
 let _directPeer = null;
 let _directStaff = [];
@@ -55,132 +57,155 @@ function _gradeRecipientPreview(grade) {
   });
 }
 
+function _adminRecipientRows(type,target) {
+  if (type === 'all_staff') return _verifiedStaffList();
+  if (type === 'teacher') return _adminTeacherRecipients;
+  return _adminGradeRecipients;
+}
+
 function _renderAdminComposer() {
   if (!window.APP?.is_admin) return '';
-  const recipients = _gradeRecipientPreview('Grade 5');
   return `
-    <section class="smart-chat-admin-card" aria-label="Admin message composer preview">
+    <section class="smart-chat-admin-card" aria-label="Admin official message composer">
       <div class="smart-chat-section-head">
         <div>
           <div class="smart-chat-kicker">ADMIN TOOLS</div>
           <h2>Official message</h2>
-          <p>Recipient routing is verified server-side before sending.</p>
+          <p>Official messages require a reason and are routed only to server-verified active staff.</p>
         </div>
-        <span class="smart-chat-preview-badge">OFFICIAL SEND</span>
+        <span class="smart-chat-preview-badge">SERVER VERIFIED</span>
       </div>
-
       <div class="smart-chat-form-grid">
         <label>Recipient type
-          <select id="adminMsgRecipientType" onchange="_refreshAdminComposerPreview()">
+          <select id="adminMsgRecipientType" onchange="_loadAdminRecipientPreview()">
             <option value="all_staff">All Staff</option>
             <option value="grade" selected>Grade</option>
-            <option value="department" disabled>Department — coming next</option>
-            <option value="teacher" disabled>Individual teacher — coming next</option>
+            <option value="teacher">Individual teacher</option>
           </select>
         </label>
-        <label>Grade
-          <select id="adminMsgGrade" onchange="_refreshAdminComposerPreview()">
+        <label id="adminMsgGradeWrap">Grade
+          <select id="adminMsgGrade" onchange="_loadAdminRecipientPreview('grade',this.value)">
             <option value="Grade 5" selected>Grade 5</option>
+          </select>
+        </label>
+        <label id="adminMsgTeacherWrap" style="display:none">Teacher
+          <select id="adminMsgTeacher" onchange="_refreshAdminComposerPreview()">
+            <option value="">Select a teacher</option>
           </select>
         </label>
         <label>Message type
           <select id="adminMsgType" onchange="_refreshAdminComposerPreview()">
-            <option value="announcement" selected>Announcement</option>
+            <option value="announcement">Announcement</option>
             <option value="task">Official task</option>
             <option value="notice">Staff notice</option>
           </select>
         </label>
         <label>Reason
-          <input id="adminMsgReason" value="အတန်းတာဝန်နှင့် သက်ဆိုင်သော အသိပေးချက်"
-                 oninput="_refreshAdminComposerPreview()">
+          <input id="adminMsgReason" value="Official school communication" oninput="_refreshAdminComposerPreview()">
         </label>
       </div>
-
       <label class="smart-chat-body-field">Body
-        <textarea id="adminMsgBody" rows="3" placeholder="ရေးသားရန်..." oninput="_refreshAdminComposerPreview()"></textarea>
+        <textarea id="adminMsgBody" rows="3" placeholder="Write the official message..." oninput="_refreshAdminComposerPreview()"></textarea>
       </label>
-
-      <div class="smart-chat-routing-status ${recipients.length ? 'verified' : 'blocked'}" id="adminMsgRoutingStatus">
+      <div class="smart-chat-routing-status blocked" id="adminMsgRoutingStatus">
         <span class="smart-chat-status-dot"></span>
-        <div>
-          <strong>${recipients.length ? recipients.length + ' verified recipient(s)' : 'No verified Grade 5 recipient'}</strong>
-          <small>${recipients.length ? recipients.map(t => esc(t.teacher_name)).join(', ') : 'System will not invent or display a teacher who is not registered and active in this school.'}</small>
-        </div>
+        <div><strong id="adminMsgRoutingTitle">Checking verified recipients…</strong><small id="adminMsgRoutingNames"></small></div>
       </div>
-
       <div class="smart-chat-official-preview" id="adminMsgPreview"></div>
-
       <div class="smart-chat-form-actions">
-        <button type="button" class="btn-secondary" onclick="_refreshAdminComposerPreview()">Refresh preview</button>
-        <button type="button" class="smart-chat-send-disabled" id="adminMsgSendBtn" onclick="sendOfficialAnnouncement()" disabled>
-          ${_chatIcon('send')} Send official message
-        </button>
+        <button type="button" class="btn-secondary" onclick="_loadAdminRecipientPreview()">Refresh recipients</button>
+        <button type="button" class="smart-chat-send-disabled" id="adminMsgSendBtn" onclick="sendOfficialAnnouncement()" disabled>${_chatIcon('send')} Send official message</button>
       </div>
     </section>`;
 }
 
-async function _loadAdminRecipientPreview(grade = 'Grade 5') {
+async function _loadAdminRecipientPreview(type = null, target = null) {
   try {
     if (!window.API?.getChatRecipientPreview || !window.APP?.is_admin) return;
-    const rows = await API.getChatRecipientPreview('grade', grade);
-    _adminGradeRecipients = Array.isArray(rows) ? rows : [];
+    const selectedType = type || document.getElementById('adminMsgRecipientType')?.value || 'grade';
+    if (selectedType === 'grade' && window.API?.getChatGradeTargets) {
+      try {
+        const grades = await API.getChatGradeTargets();
+        const select = document.getElementById('adminMsgGrade');
+        if (select && grades.length) {
+          const current = target || select.value || grades[0];
+          select.innerHTML = grades.map(g => `<option value="${esc(g)}">${esc(g)}</option>`).join('');
+          select.value = grades.includes(current) ? current : grades[0];
+        }
+      } catch (_) {}
+    }
+    const grade = target || document.getElementById('adminMsgGrade')?.value || 'Grade 5';
+    const teacherId = document.getElementById('adminMsgTeacher')?.value || null;
+    const previewTarget = selectedType === 'all_staff' ? null : selectedType === 'teacher' ? teacherId : grade;
+    const rows = await API.getChatRecipientPreview(selectedType, previewTarget);
+    if (selectedType === 'teacher') {
+      _adminTeacherRecipients = Array.isArray(rows) ? rows : [];
+      const select = document.getElementById('adminMsgTeacher');
+      if (select) {
+        const current = select.value;
+        select.innerHTML = '<option value="">Select a teacher</option>' + _adminTeacherRecipients.map(t => `<option value="${esc(t.teacher_id)}">${esc(t.teacher_name)} · ${esc(t.role || 'Teacher')}</option>`).join('');
+        if (_adminTeacherRecipients.some(t => t.teacher_id === current)) select.value = current;
+      }
+    } else {
+      _adminGradeRecipients = Array.isArray(rows) ? rows : [];
+    }
     _refreshAdminComposerPreview();
   } catch (e) {
-    // Fail closed: no server proof means zero verified recipients.
-    _adminGradeRecipients = [];
+    if ((type || document.getElementById('adminMsgRecipientType')?.value) === 'teacher') _adminTeacherRecipients = [];
+    else _adminGradeRecipients = [];
     _refreshAdminComposerPreview();
   }
 }
 
 window.sendOfficialAnnouncement = async function() {
   if (!window.APP?.is_admin || !window.API?.createStaffAnnouncement) return false;
-  const recipientType=document.getElementById('adminMsgRecipientType')?.value || 'grade';
-  const target=recipientType==='all_staff' ? null : (document.getElementById('adminMsgGrade')?.value || null);
-  const messageType=document.getElementById('adminMsgType')?.value || 'announcement';
-  const reason=document.getElementById('adminMsgReason')?.value.trim() || '';
-  const body=document.getElementById('adminMsgBody')?.value.trim() || '';
-  const btn=document.getElementById('adminMsgSendBtn');
-  const recipients=recipientType==='all_staff' ? _verifiedStaffList() : _gradeRecipientPreview(target);
-  if(!recipients.length){showToast('No verified recipients. Message was not sent.');return false;}
-  if(!reason || !body){showToast('Reason and message body are required.');return false;}
-  if(btn) btn.disabled=true;
-  try{
+  const recipientType = document.getElementById('adminMsgRecipientType')?.value || 'grade';
+  const grade = document.getElementById('adminMsgGrade')?.value || null;
+  const teacherId = document.getElementById('adminMsgTeacher')?.value || null;
+  const target = recipientType === 'all_staff' ? null : recipientType === 'teacher' ? teacherId : grade;
+  const messageType = document.getElementById('adminMsgType')?.value || 'announcement';
+  const reason = document.getElementById('adminMsgReason')?.value.trim() || '';
+  const body = document.getElementById('adminMsgBody')?.value.trim() || '';
+  const btn = document.getElementById('adminMsgSendBtn');
+  const recipients = _adminRecipientRows(recipientType,target);
+  if (!recipients.length || (recipientType === 'teacher' && !teacherId)) { showToast('No verified recipient. Message was not sent.'); return false; }
+  if (!reason || !body) { showToast('Reason and message body are required.'); return false; }
+  if (btn) btn.disabled=true;
+  try {
     const result=await API.createStaffAnnouncement(recipientType,target,messageType,reason,body);
     if(!result?.ok) throw new Error(result?.error||'Send failed');
     if(btn) btn.innerHTML='✓ Sent';
     showToast('Official message sent to '+result.recipient_count+' verified staff.');
     document.getElementById('adminMsgBody').value='';
-    setTimeout(()=>{ if(btn){btn.innerHTML=_chatIcon('send')+' Send official message'; btn.disabled=false;} _refreshAdminComposerPreview(); },900);
-  }catch(e){
-    showToast('Official message could not be sent.');
-    if(btn) btn.disabled=false;
-  }
+    setTimeout(()=>{if(btn){btn.innerHTML=_chatIcon('send')+' Send official message';btn.disabled=false;}_refreshAdminComposerPreview();},900);
+  } catch(e) { showToast('Official message could not be sent.'); if(btn)btn.disabled=false; }
   return false;
 };
 
-window._refreshAdminComposerPreview = function() {
-  const box = document.getElementById('adminMsgPreview');
-  if (!box) return;
-  const recipientType = document.getElementById('adminMsgRecipientType')?.value || 'grade';
-  const grade = document.getElementById('adminMsgGrade')?.value || 'Grade 5';
-  const type = document.getElementById('adminMsgType')?.value || 'announcement';
-  const reason = document.getElementById('adminMsgReason')?.value.trim() || '—';
-  const body = document.getElementById('adminMsgBody')?.value.trim() || '—';
-  const recipients = recipientType === 'all_staff' ? _verifiedStaffList() : _gradeRecipientPreview(grade);
-  const sendBtn = document.getElementById('adminMsgSendBtn');
-  if (sendBtn) sendBtn.disabled = !window.APP?.is_admin || !reason || reason === '—' || !body || body === '—' || !recipients.length;
-  const header = type === 'announcement'
-    ? 'Official Announcements Channel'
-    : type === 'task' ? 'Official Staff Task' : 'Staff Notice';
-  box.innerHTML = `
-    <div class="smart-chat-preview-label">SYSTEM-GENERATED HEADER</div>
-    <div class="smart-chat-preview-header">${esc(header)}</div>
-    <div class="smart-chat-preview-meta">${esc(recipientType === 'all_staff' ? 'All Staff' : 'Grade: ' + grade)} · Verified recipients: ${recipients.length}</div>
-    <div class="smart-chat-preview-reason"><strong>Reason</strong><span>${esc(reason)}</span></div>
-    <div class="smart-chat-preview-body">${esc(body).replace(/\n/g, '<br>')}</div>
-  `;
+window._refreshAdminComposerPreview=function(){
+  const box=document.getElementById('adminMsgPreview');if(!box)return;
+  const recipientType=document.getElementById('adminMsgRecipientType')?.value||'grade';
+  const grade=document.getElementById('adminMsgGrade')?.value||'Grade 5';
+  const teacherId=document.getElementById('adminMsgTeacher')?.value||'';
+  const type=document.getElementById('adminMsgType')?.value||'announcement';
+  const reason=document.getElementById('adminMsgReason')?.value.trim()||'—';
+  const body=document.getElementById('adminMsgBody')?.value.trim()||'—';
+  const recipients=recipientType==='all_staff'?_verifiedStaffList():_adminRecipientRows(recipientType,recipientType==='teacher'?teacherId:grade);
+  const selectedTeacher=recipientType==='teacher'?_adminTeacherRecipients.find(t=>t.teacher_id===teacherId):null;
+  const gradeWrap=document.getElementById('adminMsgGradeWrap'),teacherWrap=document.getElementById('adminMsgTeacherWrap');
+  if(gradeWrap)gradeWrap.style.display=recipientType==='grade'?'':'none';
+  if(teacherWrap)teacherWrap.style.display=recipientType==='teacher'?'':'none';
+  const validRecipient=recipientType==='teacher'?!!selectedTeacher:recipients.length>0;
+  const status=document.getElementById('adminMsgRoutingStatus'),title=document.getElementById('adminMsgRoutingTitle'),names=document.getElementById('adminMsgRoutingNames');
+  if(status)status.className='smart-chat-routing-status '+(validRecipient?'verified':'blocked');
+  if(title)title.textContent=validRecipient?(recipientType==='teacher'?'1 verified recipient':recipients.length+' verified recipient(s)'):'No verified recipient';
+  if(names)names.textContent=validRecipient?(recipientType==='teacher'?selectedTeacher.teacher_name:recipients.map(t=>t.teacher_name).join(', ')):'Server authorization did not return an active same-school recipient.';
+  const sendBtn=document.getElementById('adminMsgSendBtn');
+  if(sendBtn)sendBtn.disabled=!window.APP?.is_admin||!reason||reason==='—'||!body||body==='—'||!validRecipient;
+  const header=type==='announcement'?'Official Announcements Channel':type==='task'?'Official Staff Task':'Staff Notice';
+  const targetLabel=recipientType==='all_staff'?'All Staff':recipientType==='grade'?'Grade: '+grade:'Individual: '+(selectedTeacher?.teacher_name||'Select teacher');
+  box.innerHTML=`<div class="smart-chat-preview-label">SYSTEM-GENERATED HEADER</div><div class="smart-chat-preview-header">${esc(header)}</div><div class="smart-chat-preview-meta">${esc(targetLabel)} · Verified recipients: ${validRecipient?(recipientType==='teacher'?1:recipients.length):0}</div><div class="smart-chat-preview-reason"><strong>Reason</strong><span>${esc(reason)}</span></div><div class="smart-chat-preview-body">${esc(body).replace(/\\n/g,'<br>')}</div>`;
 };
-
 
 (function _installSmartChatUxPatch(){
   if (document.getElementById('smart-chat-ux-patch')) return;
@@ -380,7 +405,7 @@ function _renderChatMode() {
   _loadChatMessages();
   setTimeout(() => {
     _refreshAdminComposerPreview();
-    if (window.APP?.is_admin) _loadAdminRecipientPreview(document.getElementById('adminMsgGrade')?.value || 'Grade 5');
+    if (window.APP?.is_admin) _loadAdminRecipientPreview('grade', document.getElementById('adminMsgGrade')?.value || 'Grade 5');
   }, 0);
 }
 
