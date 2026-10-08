@@ -487,3 +487,34 @@ test('Official announcement workspace reads only through guarded announcement AP
   assert.match(workspace, /Official Announcements/);
 });
 // Grade Chat hardening regression coverage.
+
+
+test('Official individual staff announcements are server-verified and reason-bound', () => {
+  const migration = read('supabase/migrations/20261008193000_staff_official_teacher_routing.sql');
+  const chat = read('js/16_chat.js');
+  assert.match(migration, /recipient_type in \\('all_staff','grade','teacher'\\)/);
+  assert.match(migration, /rpc_chat_grade_targets/);
+  assert.match(migration, /v_sess\.role not in \\('admin','super_admin'\\)/);
+  assert.match(migration, /t\.teacher_id=v_target/);
+  assert.match(migration, /t\.school_id=v_sess\.school_id/);
+  assert.match(migration, /t\.status='active'/);
+  assert.match(migration, /invalid_recipient/);
+  assert.match(migration, /official_announcement\.create/);
+  assert.match(chat, /Individual teacher/);
+  assert.match(chat, /createStaffAnnouncement/);
+  assert.match(chat, /Reason and message body are required/);
+  assert.match(chat, /adminMsgTeacher/);
+});
+
+test('School Chat mobile workspaces have explicit selection/back contracts', () => {
+  const grade = read('js/16_chat_grade.js');
+  const groups = read('js/16_chat_groups.js');
+  const chat = read('js/16_chat.js');
+  assert.match(grade, /Back to grades/);
+  assert.match(grade, /_setGradeMobileView/);
+  assert.match(groups, /Back to groups/);
+  assert.match(groups, /_loadChatGroups\(false\)/);
+  assert.match(chat, /Back to announcements/);
+  assert.match(chat, /Back to inquiry tickets/);
+  assert.match(chat, /has-selection/);
+});
