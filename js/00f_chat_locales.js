@@ -85,6 +85,18 @@
   };
   Object.keys(localizedUi).forEach(code=>Object.assign(chat[code],localizedUi[code]));
 
+
+  const micro={
+    en:{'chat.privateLabel':'PRIVATE','chat.noActiveTeacher':'No active teacher found.','chat.ticketCreateFailed':'Ticket could not be created.','chat.studentLabel':'Student','chat.details':'Details'},
+    my:{'chat.privateLabel':'ကိုယ်ပိုင်','chat.noActiveTeacher':'လက်ရှိဆရာ/ဆရာမ မတွေ့ပါ။','chat.ticketCreateFailed':'လက်မှတ် ဖန်တီး၍မရပါ။','chat.studentLabel':'ကျောင်းသား','chat.details':'အသေးစိတ်'},
+    th:{'chat.privateLabel':'ส่วนตัว','chat.noActiveTeacher':'ไม่พบครูที่ใช้งานอยู่','chat.ticketCreateFailed':'ไม่สามารถสร้างตั๋วได้','chat.studentLabel':'นักเรียน','chat.details':'รายละเอียด'},
+    jp:{'chat.privateLabel':'非公開','chat.noActiveTeacher':'有効な教員が見つかりません','chat.ticketCreateFailed':'チケットを作成できませんでした','chat.studentLabel':'生徒','chat.details':'詳細'},
+    ms:{'chat.privateLabel':'PERIBADI','chat.noActiveTeacher':'Tiada guru aktif ditemui.','chat.ticketCreateFailed':'Tiket tidak dapat dicipta.','chat.studentLabel':'Murid','chat.details':'Butiran'},
+    km:{'chat.privateLabel':'ឯកជន','chat.noActiveTeacher':'រកមិនឃើញគ្រូសកម្មទេ។','chat.ticketCreateFailed':'មិនអាចបង្កើតសំបុត្របានទេ។','chat.studentLabel':'សិស្ស','chat.details':'ព័ត៌មានលម្អិត'},
+    zh:{'chat.privateLabel':'私密','chat.noActiveTeacher':'未找到活跃教师。','chat.ticketCreateFailed':'无法创建工单。','chat.studentLabel':'学生','chat.details':'详情'}
+  };
+  Object.keys(micro).forEach(code=>Object.assign(chat[code],micro[code]));
+
   const maps={en:'I18N_EN',my:'I18N_MY',th:'I18N_TH',jp:'I18N_JP',ms:'I18N_MS',km:'I18N_KM',zh:'I18N_ZH'};
   Object.keys(maps).forEach(code=>{ window[maps[code]]=Object.assign({},window[maps[code]]||{},code==='en'?en:code==='my'?my:chat[code]); });
 })();
