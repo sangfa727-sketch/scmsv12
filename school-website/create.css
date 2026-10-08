@@ -36,3 +36,9 @@ dialog,
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after { scroll-behavior: auto !important; animation-duration: .01ms !important; animation-iteration-count: 1 !important; transition-duration: .01ms !important; }
 }
+
+
+/* Guided form feedback */
+.editor-dialog textarea[aria-invalid="true"]{border-color:#b42318;box-shadow:0 0 0 3px rgba(180,35,24,.12)}
+.editor-dialog .field-hint{min-height:1.25em}
+.editor-dialog textarea::placeholder{color:#89949d}
