@@ -632,3 +632,28 @@ test('public content schema is tenant-scoped and publication-gated', () => {
   assert.match(schema, /trusted hostname\/custom-domain mapping/i);
   assert.match(schema, /never accept publication_status from the public client/i);
 });
+
+
+test('public content guard permits only published rows for the resolved school', () => {
+  const guard = require('../../school-website/server/public-content-guard.js');
+  const rows = [
+    { school_id: 'school-a', publication_status: 'published', slug: 'home' },
+    { school_id: 'school-a', publication_status: 'draft', slug: 'draft-page' },
+    { school_id: 'school-a', publication_status: 'review', slug: 'review-page' },
+    { school_id: 'school-b', publication_status: 'published', slug: 'other-school' }
+  ];
+  assert.deepEqual(guard.selectPublishedForSchool(rows, 'school-a'), [
+    { school_id: 'school-a', publication_status: 'published', slug: 'home' }
+  ]);
+  assert.deepEqual(guard.selectPublishedForSchool(rows, 'school-b'), [
+    { school_id: 'school-b', publication_status: 'published', slug: 'other-school' }
+  ]);
+  assert.throws(
+    () => guard.assertPublicContentRequest({ schoolId: 'school-a', requestedSchoolId: 'school-b' }),
+    /cross-school public content request rejected/
+  );
+  assert.throws(
+    () => guard.assertPublicContentRequest({}),
+    /public school tenant is required/
+  );
+});
