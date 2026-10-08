@@ -420,7 +420,7 @@ function _renderDirectHeader(){
   const root=document.getElementById('directConversationHead');
   if(!root||!_directPeer)return;
   root.innerHTML=`
-    <div class="smart-chat-direct-peer"><button class="smart-chat-mobile-back" onclick="_clearDirectSelection"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m15 18-6-6 6-6"/></svg></button><span class="smart-chat-direct-avatar large">${esc((_directPeer.teacher_name||'?')[0])}</span><div><strong>${esc(_directPeer.teacher_name)}</strong><small>${esc(_directPeer.role||'Teacher')} · Private 1-on-1</small></div></div>
+    <div class="smart-chat-direct-peer"><button class="smart-chat-mobile-back" onclick="_clearDirectSelection()"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m15 18-6-6 6-6"/></svg></button><span class="smart-chat-direct-avatar large">${esc((_directPeer.teacher_name||'?')[0])}</span><div><strong>${esc(_directPeer.teacher_name)}</strong><small>${esc(_directPeer.role||'Teacher')} · Private 1-on-1</small></div></div>
     <span class="smart-chat-verified-pill">Private</span>`;
 }
 
