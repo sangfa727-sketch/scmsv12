@@ -1,0 +1,20 @@
+:root {
+  --ws-font-sans: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  --ws-space-1: 4px; --ws-space-2: 8px; --ws-space-3: 12px; --ws-space-4: 16px;
+  --ws-space-5: 20px; --ws-space-6: 24px; --ws-space-8: 32px; --ws-space-10: 40px;
+  --ws-space-12: 48px; --ws-radius-sm: 8px; --ws-radius-md: 12px; --ws-radius-lg: 16px; --ws-radius-xl: 20px;
+  --ws-border: 1px solid rgba(15, 23, 42, .10); --ws-shadow-sm: 0 1px 3px rgba(15,23,42,.08);
+  --ws-shadow-md: 0 10px 30px rgba(15,23,42,.10); --ws-focus: 0 0 0 3px rgba(37,99,235,.22);
+}
+.ws-studio { font-family: var(--ws-font-sans); color: #0f172a; }
+.ws-studio :where(button,input,textarea,select) { font: inherit; }
+.ws-studio :where(button,a,input,textarea,select):focus-visible { outline: none; box-shadow: var(--ws-focus); }
+.ws-studio .ws-button { min-height: 44px; border: 0; border-radius: var(--ws-radius-md); padding: 0 var(--ws-space-5); font-weight: 650; cursor: pointer; transition: transform 140ms ease, box-shadow 140ms ease, background-color 140ms ease; }
+.ws-studio .ws-button:hover { transform: translateY(-1px); }
+.ws-studio .ws-button:active { transform: translateY(0); }
+.ws-studio .ws-button:disabled { cursor: not-allowed; opacity: .55; transform: none; }
+.ws-studio .ws-button-primary { background: #0f172a; color: #fff; box-shadow: var(--ws-shadow-sm); }
+.ws-studio .ws-button-secondary { background: #fff; color: #0f172a; border: var(--ws-border); }
+.ws-studio .ws-card { border: var(--ws-border); border-radius: var(--ws-radius-lg); background: #fff; box-shadow: var(--ws-shadow-sm); }
+.ws-studio .ws-muted { color: #64748b; }
+@media (prefers-reduced-motion: reduce) { .ws-studio *, .ws-studio *::before, .ws-studio *::after { scroll-behavior:auto!important; transition-duration:.01ms!important; animation-duration:.01ms!important; animation-iteration-count:1!important; } }
