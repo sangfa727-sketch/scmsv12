@@ -158,3 +158,84 @@ test.describe('Department Chat mobile navigation', () => {
     await expect(page.locator('#departmentList')).toBeVisible();
   });
 });
+
+
+test.describe('Grade Staff Chat (authenticated staging)', () => {
+  test('opens an authorized grade conversation from Department & Grade', async ({ page }) => {
+    test.skip(process.env.SCMS_REQUIRE_STAGING !== '1', 'Grade Chat E2E requires the staging/manual E2E run');
+    await page.goto(BASE_URL);
+    await page.getByTestId('login-teacher-id').fill(TEACHER_ID);
+    await page.getByTestId('login-password').fill(TEACHER_PW);
+    await page.getByTestId('login-submit').click();
+    await expect(page.getByTestId('sidebar')).toBeVisible();
+
+    await page.getByTestId('nav-chat').click();
+    await page.getByTestId('chat-channel-departments').click();
+    await page.getByRole('button', { name: 'Grade' }).click();
+    await expect(page.locator('#gradeList')).toBeVisible();
+    const row = page.locator('[data-testid^="grade-row-"]').first();
+    await expect(row).toBeVisible();
+    await row.click();
+    await expect(page.locator('#gradeMessageStream')).toBeVisible();
+    await expect(page.locator('#gradeChatInput')).toBeEnabled();
+  });
+});
+
+test.describe('Grade Staff Chat authorization isolation (two-account staging)', () => {
+  test('a non-assigned staff member cannot see the authorized grade', async ({ browser }) => {
+    const teacher2 = process.env.SCMS_TEST_TEACHER_2;
+    const pw2 = process.env.SCMS_TEST_PW_2;
+    const gradeName = process.env.SCMS_TEST_GRADE_NAME;
+    test.skip(
+      process.env.SCMS_REQUIRE_STAGING !== '1' || !teacher2 || !pw2 || !gradeName,
+      'Requires manual staging E2E plus a second staff account and an explicitly configured grade name'
+    );
+
+    const authorized = await browser.newContext();
+    const page1 = await authorized.newPage();
+    await page1.goto(BASE_URL);
+    await page1.getByTestId('login-teacher-id').fill(TEACHER_ID);
+    await page1.getByTestId('login-password').fill(TEACHER_PW);
+    await page1.getByTestId('login-submit').click();
+    await expect(page1.getByTestId('sidebar')).toBeVisible();
+    await page1.getByTestId('nav-chat').click();
+    await page1.getByTestId('chat-channel-departments').click();
+    await page1.getByRole('button', { name: 'Grade' }).click();
+    await expect(page1.locator('[data-testid^="grade-row-"]')).toContainText(gradeName);
+
+    const nonMember = await browser.newContext();
+    const page2 = await nonMember.newPage();
+    await page2.goto(BASE_URL);
+    await page2.getByTestId('login-teacher-id').fill(teacher2);
+    await page2.getByTestId('login-password').fill(pw2);
+    await page2.getByTestId('login-submit').click();
+    await expect(page2.getByTestId('sidebar')).toBeVisible();
+    await page2.getByTestId('nav-chat').click();
+    await page2.getByTestId('chat-channel-departments').click();
+    await page2.getByRole('button', { name: 'Grade' }).click();
+    await expect(page2.locator('[data-testid^="grade-row-"]')).not.toContainText(gradeName);
+
+    await authorized.close();
+    await nonMember.close();
+  });
+});
+
+test.describe('Grade Staff Chat mobile navigation', () => {
+  test('returns from a selected grade to the grade list', async ({ page }) => {
+    test.skip(process.env.SCMS_REQUIRE_STAGING !== '1', 'Grade Chat mobile E2E requires the staging/manual E2E run');
+    await page.setViewportSize({ width: 390, height: 844 });
+    await page.goto(BASE_URL);
+    await page.getByTestId('login-teacher-id').fill(TEACHER_ID);
+    await page.getByTestId('login-password').fill(TEACHER_PW);
+    await page.getByTestId('login-submit').click();
+    await page.getByTestId('nav-chat').click();
+    await page.getByTestId('chat-channel-departments').click();
+    await page.getByRole('button', { name: 'Grade' }).click();
+    const row = page.locator('[data-testid^="grade-row-"]').first();
+    await expect(row).toBeVisible();
+    await row.click();
+    await expect(page.locator('#gradeChatInput')).toBeEnabled();
+    await page.getByRole('button', { name: 'Back to grades' }).click();
+    await expect(page.locator('#gradeList')).toBeVisible();
+  });
+});
