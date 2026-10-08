@@ -449,3 +449,26 @@ test('Department Chat is session, tenant, membership, and read-state bound', () 
   assert.match(chat, /setInterval/);
   assert.match(chat, /API\\.markDepartmentRead/);
 });
+
+
+test('Grade Staff Chat is session, tenant, assignment, RLS, and read-state bound', () => {
+  const migration=read('supabase/migrations/20261008190000_staff_grade_chat.sql');
+  const api=read('js/02L_api_chat.js');
+  const grade=read('js/16_chat_grade.js');
+  for(const table of ['staff_grade_messages','staff_grade_read_state']) assert.match(migration,new RegExp('create table if not exists public\\\\.'+table));
+  for(const fn of ['rpc_chat_grade_list','rpc_chat_grade_open','rpc_chat_grade_send','rpc_chat_grade_mark_read']){
+    assert.match(migration,new RegExp('function public\\\\.'+fn));
+    assert.match(migration,new RegExp(fn+'[\\\\s\\\\S]{0,7000}p_session_token text'));
+    assert.match(migration,new RegExp(fn+'[\\\\s\\\\S]{0,7000}expires_at>now\\\\(\\\\)'));
+    assert.match(migration,new RegExp(fn+'[\\\\s\\\\S]{0,9000}teacher_class_assignments'));
+  }
+  assert.match(migration,/alter table public\\.staff_grade_messages enable row level security/);
+  assert.match(migration,/alter table public\\.staff_grade_messages force row level security/);
+  assert.match(migration,/revoke all on public\\.staff_grade_messages from anon, authenticated/);
+  assert.match(migration,/unauthorized_grade/);
+  assert.match(migration,/last_read_at/);
+  for(const fn of ['getGradeChats','openGradeChat','sendGradeMessage','markGradeRead']) assert.match(api,new RegExp(fn));
+  assert.match(grade,/setInterval/);
+  assert.match(grade,/_clearGradeSelection/);
+  assert.match(grade,/Back to grades/);
+});
