@@ -741,7 +741,7 @@ async function _loadDirectMessages(){
     const rows=await API.getDirectMessages(_directConversationId,50);
     const stream=document.getElementById('directMessageStream');
     if(!stream)return;
-    if(!rows.length)stream.innerHTML='<div class="chat-empty"><div class="chat-empty-icon">💬</div><div class="chat-empty-title">${t('chat.newConversation')}</div><div class="chat-empty-sub">Send the first private message.</div></div>';
+    if(!rows.length)stream.innerHTML=`<div class="chat-empty"><div class="chat-empty-icon">💬</div><div class="chat-empty-title">${t('chat.newConversation')}</div><div class="chat-empty-sub">Send the first private message.</div></div>`;
     else _renderDirectMessages(rows);
     _renderDirectHeader();_setDirectComposer(true);await API.markDirectRead(_directConversationId);
   }catch(e){
