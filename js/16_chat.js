@@ -681,7 +681,7 @@ async function _loadDirectWorkspace() {
 function _renderDirectConversationList() {
   const root=document.getElementById('directConversationList');
   if(!root)return;
-  if(!_directConversations.length){root.innerHTML='<div class="smart-chat-list-empty">${t('chat.noConversations')}</div>';return;}
+  if(!_directConversations.length){root.innerHTML=`<div class="smart-chat-list-empty">${t('chat.noConversations')}</div>`;return;}
   root.innerHTML=_directConversations.map(c=>`
     <button class="smart-chat-direct-item ${Number(c.conversation_id)===Number(_directConversationId)?'active':''}" onclick="openDirectChat('${esc(c.teacher_id)}')">
       <span class="smart-chat-direct-avatar">${esc((c.teacher_name||'?')[0])}</span>
