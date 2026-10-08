@@ -657,3 +657,15 @@ test('public content guard permits only published rows for the resolved school',
     /public school tenant is required/
   );
 });
+
+
+test('sandbox runtime SQL harness verifies published-only and tenant-isolated public results', () => {
+  const sql = read('school-website/db/sandbox_rls_runtime_test.sql');
+  assert.match(sql, /begin;/i);
+  assert.match(sql, /rollback;/i);
+  assert.match(sql, /school-a/);
+  assert.match(sql, /school-b/);
+  assert.match(sql, /publication_status = 'published'/i);
+  assert.match(sql, /raise exception 'School A published-only invariant failed'/i);
+  assert.match(sql, /Draft\/review row leaked into public result/i);
+});
