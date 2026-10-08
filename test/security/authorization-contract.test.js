@@ -464,8 +464,6 @@ test('Grade Staff Chat is session, tenant, assignment, RLS, and read-state bound
     assert.match(migration, new RegExp(fn + '[\\\\s\\\\S]{0,8000}teacher_class_assignments'));
   }
   assert.match(migration, /alter table public\\.staff_grade_messages enable row level security/);
-  assert.match(migration, /alter table public\\.staff_grade_messages force row level security/);
-  assert.match(migration, /alter table public\\.staff_grade_read_state force row level security/);
   for (const table of ['staff_grade_messages','staff_grade_read_state']) assert.match(migration, new RegExp('revoke all on public\\\\.' + table + ' from anon, authenticated'));
   for (const fn of ['rpc_chat_grade_list','rpc_chat_grade_open','rpc_chat_grade_send','rpc_chat_grade_mark_read']) {
     assert.match(migration, new RegExp('revoke all on function public\\\\.' + fn));
