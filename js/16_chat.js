@@ -397,7 +397,7 @@ function _renderInquiryWorkspace() {
     </div>`;
 }
 
-let _inquiryTickets=[], _inquiryTicketId=null, _inquiryCurrentTicket=null;
+let _inquiryTickets=[], _inquiryTicketId=null, _inquiryCurrentTicket=null, _inquiryDraft=null;
 async function _loadInquiryTickets(){
   try{
     _inquiryTickets=await API.getInquiryTickets();
@@ -436,10 +436,31 @@ async function _sendInquiryFromComposer(e){
   e?.preventDefault(); const input=document.getElementById('inquiryChatInput'); if(!_inquiryTicketId||!input?.value.trim())return false;
   const r=await API.sendInquiryMessage(_inquiryTicketId,input.value.trim()); if(r?.ok){input.value='';await _openInquiryTicket(_inquiryTicketId);await _loadInquiryTickets();} else showToast('Message could not be sent.'); return false;
 }
-async function _newInquiryTicket(){
-  const subject=prompt('Ticket subject'); if(!subject?.trim())return; const body=prompt('Describe the issue'); if(!body?.trim())return;
-  const priority=prompt('Priority: LOW, NORMAL, HIGH, URGENT','NORMAL')||'NORMAL';
-  const r=await API.createInquiryTicket(subject.trim(),body.trim(),null,priority.trim().toUpperCase()); if(r?.ok){_inquiryTicketId=r.ticket.id;await _loadInquiryTickets();}else showToast('Ticket could not be created.');
+function _closeInquiryDraft(){_inquiryDraft=null;_renderInquiryDraft();}
+function _renderInquiryDraft(){
+  const root=document.getElementById('inquiryTicketList'); if(!root)return;
+  if(!_inquiryDraft){root.innerHTML=_inquiryTickets.length?_inquiryTickets.map(t=>`<button class="smart-chat-channel-card ${Number(t.id)===Number(_inquiryTicketId)?'active':''}" onclick="_openInquiryTicket(${Number(t.id)})"><span class="smart-chat-channel-icon">🎫</span><span><strong>${esc(t.subject)}</strong><small>${esc(t.status)} · ${esc(t.priority)}${t.student_id?' · '+esc(t.student_id):''}</small></span><b>›</b></button>`).join(''):'<div class="chat-empty-sub">No tickets yet.</div>';return;}
+  root.innerHTML=`
+    <form class="smart-chat-inquiry-form" onsubmit="return _submitInquiryDraft(event)">
+      <label>Subject<input id="inquiryDraftSubject" maxlength="160" required placeholder="What needs attention?"></label>
+      <label>Priority<select id="inquiryDraftPriority"><option>NORMAL</option><option>LOW</option><option>HIGH</option><option>URGENT</option></select></label>
+      <label>Student ID <span class="smart-chat-field-note">optional · same school only</span><input id="inquiryDraftStudent" maxlength="80" placeholder="Student ID"></label>
+      <label>Details<textarea id="inquiryDraftBody" maxlength="4000" rows="5" required placeholder="Describe the issue clearly..."></textarea></label>
+      <div class="smart-chat-inquiry-form-actions"><button type="button" class="btn-secondary" onclick="_closeInquiryDraft()">Cancel</button><button type="submit" class="btn-primary">Create ticket</button></div>
+    </form>`;
+}
+async function _newInquiryTicket(){_inquiryDraft=true;_renderInquiryDraft();}
+async function _submitInquiryDraft(e){
+  e?.preventDefault();
+  const subject=document.getElementById('inquiryDraftSubject')?.value.trim();
+  const body=document.getElementById('inquiryDraftBody')?.value.trim();
+  const priority=document.getElementById('inquiryDraftPriority')?.value||'NORMAL';
+  const studentId=document.getElementById('inquiryDraftStudent')?.value.trim()||null;
+  if(!subject||!body)return false;
+  const r=await API.createInquiryTicket(subject,body,studentId,priority);
+  if(r?.ok){_inquiryDraft=null;_inquiryTicketId=Number(r.ticket.id);await _loadInquiryTickets();}
+  else showToast('Ticket could not be created.');
+  return false;
 }
 function _renderDirectWorkspace() {
   return `
