@@ -1,0 +1,117 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta name="referrer" content="strict-origin-when-cross-origin">
+  <title>Create Your School Website — SCMS</title>
+  <link rel="stylesheet" href="./create.css">
+</head>
+<body>
+  <header class="builder-header">
+    <div class="brand">
+      <span class="brand-mark">S</span>
+      <div><strong>Create your school website</strong><span>SCMS Website Studio</span></div>
+    </div>
+    <div class="header-actions">
+      <span id="saveState" class="save-state">Draft</span>
+      <button id="previewToggle" class="button secondary" type="button" aria-expanded="false">Preview</button>
+      <button id="publishButton" class="button primary" type="button">Publish</button>
+    </div>
+  </header>
+
+  <main class="builder">
+    <section class="workspace" aria-label="Website editor">
+      <div class="workspace-top">
+        <div>
+          <p class="eyebrow">YOUR WEBSITE</p>
+          <h1>Build it as you see it.</h1>
+          <p class="muted">Click any soft placeholder to add your school's content. You do not need to know web design.</p>
+        </div>
+        <button id="addSectionTop" class="button secondary" type="button">＋ Add section</button>
+      </div>
+
+      <div id="pageCanvas" class="page-canvas" aria-label="Website page editor">
+        <section class="site-block hero-block" data-block="hero">
+          <button class="block-edit" type="button" data-edit="hero">Edit</button>
+          <div class="hero-inner">
+            <button class="editable media-placeholder" data-field="logo" type="button">＋ Add your school logo</button>
+            <button class="editable editable-title" data-field="schoolName" type="button">Click here to add your school name</button>
+            <button class="editable editable-subtitle" data-field="tagline" type="button">Click here to add a short welcome message</button>
+            <div class="hero-actions"><span>Admissions</span><span>Contact school</span></div>
+          </div>
+        </section>
+
+        <section class="site-block" data-block="about">
+          <button class="block-edit" type="button" data-edit="about">Edit</button>
+          <span class="section-kicker">ABOUT OUR SCHOOL</span>
+          <button class="editable section-title" data-field="aboutTitle" type="button">Click here to add your school introduction</button>
+          <button class="editable body-placeholder" data-field="aboutText" type="button">Tell families what makes your school special. A short, clear introduction works best.</button>
+        </section>
+
+        <section class="site-block" data-block="programs">
+          <button class="block-edit" type="button" data-edit="programs">Edit</button>
+          <div class="section-heading"><div><span class="section-kicker">PROGRAMS</span><h2>Learning for every stage</h2></div><button class="text-button" data-add-item="programs" type="button">＋ Add program</button></div>
+          <div id="programItems" class="item-grid"><button class="add-card" data-add-item="programs" type="button">＋<span>Add your first program</span></button></div>
+        </section>
+
+        <section class="site-block" data-block="facilities">
+          <button class="block-edit" type="button" data-edit="facilities">Edit</button>
+          <div class="section-heading"><div><span class="section-kicker">SCHOOL LIFE</span><h2>Facilities & activities</h2></div><button class="text-button" data-add-item="facilities" type="button">＋ Add facility</button></div>
+          <div id="facilityItems" class="item-grid"><button class="add-card" data-add-item="facilities" type="button">＋<span>Show families your school</span></button></div>
+        </section>
+
+        <section class="site-block" data-block="news">
+          <button class="block-edit" type="button" data-edit="news">Edit</button>
+          <div class="section-heading"><div><span class="section-kicker">NEWS & EVENTS</span><h2>What's happening</h2></div><button class="text-button" data-add-item="news" type="button">＋ Add news</button></div>
+          <div id="newsItems" class="item-grid"><button class="add-card" data-add-item="news" type="button">＋<span>Add your first news item</span></button></div>
+        </section>
+
+        <section class="site-block contact-block" data-block="contact">
+          <button class="block-edit" type="button" data-edit="contact">Edit</button>
+          <span class="section-kicker">CONTACT</span>
+          <button class="editable section-title" data-field="contactTitle" type="button">Click here to add your contact details</button>
+          <button class="editable body-placeholder" data-field="contactText" type="button">Phone · Email · Address · Location</button>
+        </section>
+      </div>
+
+      <button id="addSectionBottom" class="add-section" type="button">＋ Add another section</button>
+    </section>
+
+    <aside id="previewPanel" class="preview-panel" aria-label="Website preview">
+      <div class="preview-top"><strong>Live preview</strong><button id="closePreview" class="icon-button" type="button" aria-label="Close preview">×</button></div>
+      <div class="preview-device">
+        <div class="preview-browser"><span></span><span></span><span></span></div>
+        <div id="previewCanvas" class="preview-page"></div>
+      </div>
+    </aside>
+  </main>
+
+  <dialog id="editorDialog">
+    <form method="dialog" class="editor-dialog">
+      <div class="dialog-top"><div><span class="section-kicker">QUICK EDIT</span><h2 id="dialogTitle">Add content</h2></div><button value="cancel" class="icon-button" aria-label="Close">×</button></div>
+      <label id="dialogLabel" for="dialogInput">Content</label>
+      <textarea id="dialogInput" rows="5" maxlength="2000"></textarea>
+      <p id="dialogHint" class="field-hint">Keep it short and clear. You can edit this anytime.</p>
+      <div class="dialog-actions"><button value="cancel" class="button secondary">Cancel</button><button id="dialogSave" value="default" class="button primary">Save</button></div>
+    </form>
+  </dialog>
+
+  <dialog id="sectionDialog">
+    <div class="editor-dialog">
+      <div class="dialog-top"><div><span class="section-kicker">ADD TO WEBSITE</span><h2>What would you like to add?</h2></div><button id="closeSectionDialog" class="icon-button" type="button">×</button></div>
+      <div class="section-options">
+        <button data-section="programs" type="button"><b>📚</b><span>Programs</span><small>Courses and learning</small></button>
+        <button data-section="facilities" type="button"><b>🏫</b><span>Facilities</span><small>Campus and school life</small></button>
+        <button data-section="news" type="button"><b>📰</b><span>News & events</span><small>Keep families informed</small></button>
+        <button data-section="gallery" type="button"><b>🖼</b><span>Gallery</span><small>Photos and memories</small></button>
+        <button data-section="admissions" type="button"><b>🎓</b><span>Admissions</span><small>How to apply</small></button>
+        <button data-section="contact" type="button"><b>📍</b><span>Contact & location</span><small>Help families reach you</small></button>
+      </div>
+    </div>
+  </dialog>
+
+  <div id="toast" class="toast" role="status" aria-live="polite"></div>
+  <script src="./create.js"></script>
+</body>
+</html>
