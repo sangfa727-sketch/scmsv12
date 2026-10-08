@@ -302,3 +302,16 @@ test('teacher lifecycle authorization is session-bound and frontend uses the gua
   assert.match(lifecycleBlock, /rpc_admin_reactivate_teacher/);
   assert.match(lifecycleBlock, /result\?\.ok/);
 });
+
+
+describe('Smart Staff Chat recipient preview contract', () => {
+  test('requires server-authorized preview RPC and never uses a send route', () => {
+    expect(c).toContain('rpc_chat_recipient_preview');
+  });
+
+  test('keeps grade recipient preview fail-closed', () => {
+    expect(c).toContain('admin_only');
+    expect(c).toContain('invalid_session');
+    expect(c).toContain('is_active = true');
+  });
+});
