@@ -12,6 +12,11 @@ const {
  * The caller supplies the trusted site registry, shared replay/rate-limit
  * guards, and an insert function. No Supabase client or service-role secret
  * is created here, keeping this module safe for sandbox contract testing.
+ *
+ * Production requirements:
+ * - rateLimiter must be shared/infrastructure-backed, not process-local
+ * - replay/idempotency must be atomically enforced by persistent storage
+ * - insertApplication must execute the isolated admission transaction only
  */
 async function handleAdmissionRequest({
   hostname,
@@ -30,7 +35,11 @@ async function handleAdmissionRequest({
     return { status: 400, body: { ok: false, error: 'invalid_request' } };
   }
 
-  if (!rateLimiter || !rateLimiter.allow(identity || 'unknown')) {
+  if (!rateLimiter || typeof rateLimiter.allow !== 'function') {
+    return { status: 503, body: { ok: false, error: 'admission_backend_unavailable' } };
+  }
+
+  if (!rateLimiter.allow(identity || 'unknown')) {
     return { status: 429, body: { ok: false, error: 'rate_limited' } };
   }
 
@@ -39,7 +48,11 @@ async function handleAdmissionRequest({
     return { status: 400, body: { ok: false, error: validation.error } };
   }
 
-  if (!replayGuard || !replayGuard.claim(site.schoolId + ':' + validation.value.idempotencyKey)) {
+  if (!replayGuard || typeof replayGuard.claim !== 'function') {
+    return { status: 503, body: { ok: false, error: 'admission_backend_unavailable' } };
+  }
+
+  if (!replayGuard.claim(site.schoolId + ':' + validation.value.idempotencyKey)) {
     return { status: 409, body: { ok: false, error: 'duplicate_request' } };
   }
 
@@ -47,11 +60,15 @@ async function handleAdmissionRequest({
     return { status: 503, body: { ok: false, error: 'admission_backend_unavailable' } };
   }
 
-  await insertApplication({
-    schoolId: site.schoolId,
-    sourceHost: hostname,
-    ...validation.value
-  });
+  try {
+    await insertApplication({
+      schoolId: site.schoolId,
+      sourceHost: hostname,
+      ...validation.value
+    });
+  } catch {
+    return { status: 503, body: { ok: false, error: 'admission_backend_unavailable' } };
+  }
 
   return { status: 201, body: { ok: true } };
 }
