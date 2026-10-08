@@ -137,7 +137,7 @@ async function _loadAdminRecipientPreview(type = null, target = null) {
         const select = document.getElementById('adminMsgGrade');
         if (select && grades.length) {
           const current = target || select.value || grades[0];
-          select.innerHTML = grades.map(g => \`<option value="${esc(g)}">${esc(g)}</option>\`).join('');
+          select.innerHTML = grades.map(g => `<option value="${esc(g)}">${esc(g)}</option>`).join('');
           select.value = grades.includes(current) ? current : grades[0];
         }
       } catch (_) {}
