@@ -210,7 +210,7 @@ function _renderChatMode() {
           <div><span class="smart-chat-kicker">SCHEDULE</span><strong>AI can prepare, check and organize school tasks.</strong></div>
           <span class="smart-chat-schedule-chip">Preview flow</span>
         </div>
-        <div class="smart-chat-ai-note">AI Operations will use the existing authorization/confirmation layer before any real system action is executed.</div>
+        <div class="smart-chat-ai-note"><strong>UI shell only</strong><br>AI Universe Layer execution is intentionally not connected yet. When it is ready, this same interface will connect to the authorized AI action flow.</div>
         <div class="smart-chat-ai-composer">
           <input id="aiChatInput" placeholder="Ask about schedule, students, attendance..." onkeydown="if(event.key==='Enter')_aiPrompt(this.value)">
           <button onclick="_aiPrompt(document.getElementById('aiChatInput')?.value)">${_chatIcon('send')}</button>
