@@ -31,6 +31,8 @@
   'chat.newConversation': "新しい会話",
   'chat.writePrivate': "プライベートメッセージを入力…",
   'chat.noMessages': "メッセージはまだありません",
+
+    'chat.gradeAccess':'このスタッフアカウントには有効な学年の割り当てがありません。','chat.gradePrefix':'学年: ','chat.individualPrefix':'個別: ', 
 };
   Object.assign(overrides, {
     'hw.tapAdd':'＋をタップして宿題を追加','hw.due':'提出期限','hw.addTitle':'宿題を追加','hw.subject':'科目','hw.addSubject':'科目を追加','hw.class':'クラス','hw.type':'種類','hw.description':'説明','hw.descPh':'宿題の説明…','hw.lbPage':'LBページ','hw.wbPage':'WBページ','hw.pagePh1':'例: 24','hw.pagePh2':'例: 25','hw.dueDate':'提出期限','hw.saved':'✓ 宿題を保存しました','hw.editTitle':'宿題を編集','hw.updated':'✓ 更新しました','hw.confirmTitle':'この宿題を削除しますか？','hw.confirmBody':'この宿題を削除してもよろしいですか？',
