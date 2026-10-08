@@ -310,7 +310,7 @@ function renderChat() {
   page.innerHTML = `
     <div class="smart-chat-shell">
       <div class="smart-chat-hero">
-        <button type="button" class="smart-chat-nav-back" onclick="_chatBackToMenu()" aria-label="Back to menu">☰ <span>Menu</span></button>
+        <button type="button" class="smart-chat-nav-back" onclick="_chatBackToMenu()" aria-label="Exit Chat">‹ <span>Exit Chat</span></button>
         <div>
           <div class="page-eyebrow">COMMUNICATION CENTER</div>
           <h1 class="page-title">Smart <em>Chat</em></h1>
