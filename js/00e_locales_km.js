@@ -1475,4 +1475,14 @@ window.I18N_KM = {
   "chat.gradeAccess": "មិនមានការចាត់តាំងថ្នាក់ដែលសកម្មសម្រាប់គណនីបុគ្គលិកនេះទេ។",
   "chat.gradePrefix": "ថ្នាក់: ",
   "chat.individualPrefix": "បុគ្គល: "
+  "chat.department.refresh": "ផ្ទុកនាយកដ្ឋានឡើងវិញ",
+  "chat.department.select": "ជ្រើសរើសនាយកដ្ឋាន...",
+  "chat.department.placeholder": "សរសេរសារទៅនាយកដ្ឋាន...",
+  "chat.grade.refresh": "ផ្ទុកថ្នាក់ឡើងវិញ",
+  "chat.grade.placeholder": "សរសេរសារទៅក្រុមថ្នាក់...",
+  "chat.groups.refresh": "ផ្ទុកក្រុមឡើងវិញ",
+  "chat.groups.placeholder": "សរសេរសារ…",
+  "chat.groups.createFailed": "បង្កើតមិនបានសម្រេច",
+  "chat.direct.placeholder": "សរសេរសារឯកជន...",
+  "chat.direct.findTeacher": "ស្វែងរកគ្រូ...",
 };
