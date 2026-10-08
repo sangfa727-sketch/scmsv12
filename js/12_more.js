@@ -178,7 +178,7 @@ const MODULE_ITEMS = [
   { id: 'summary',    icon: '📊' },
 ];
 // label follows the current language
-MODULE_ITEMS.forEach(m => Object.defineProperty(m, 'label', { get: () => t('module.' + m.id) }));
+MODULE_ITEMS.forEach(m => Object.defineProperty(m, 'label', { get: () => m.id === 'insights' ? ({en:'Class Insights',my:'အတန်းအလိုက် အနှစ်ချုပ်',th:'ภาพรวมชั้นเรียน',jp:'クラス・インサイト',ms:'Class Insights',km:'ព័ត៌មានថ្នាក់រៀន',zh:'班级洞察'}[window.I18N?.current] || 'Class Insights') : t('module.' + m.id) }));
 
 /** Module ids shown in the sidebar (default: all until the user saves a choice). */
 window.getSidebarModuleIds = function () {

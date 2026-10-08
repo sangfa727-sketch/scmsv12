@@ -69,6 +69,7 @@
       incidents: ['students', 'incidents'],
       timetable: ['students', 'timetable'],
       summary: ['monthlySummary'],
+      insights: ['students', 'monthlySummary'],
     };
     const names = pages[pageId];
     if (!names) return;

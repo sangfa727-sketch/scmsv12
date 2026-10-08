@@ -435,6 +435,7 @@ const PAGE_PERMISSION = Object.freeze({
   library: 'library.view',
   transport: 'transport.view',
   leave: 'leave.view',
+  insights: 'students.view',
 });
 
 function _pageAccessAllowed(pageId) {
@@ -530,6 +531,7 @@ window.goToPage = function(pageId) {
     if (pageId === 'incidents' && typeof renderIncidents === 'function') return renderIncidents();
     if (pageId === 'timetable' && typeof renderTimetable === 'function') return renderTimetable();
     if (pageId === 'summary' && typeof renderSummary === 'function') return renderSummary();
+    if (pageId === 'insights' && typeof renderInsights === 'function') return renderInsights();
   };
   const loadAndRender = async () => {
     try {
@@ -592,6 +594,7 @@ if (!window._i18nPageRefreshBound) {
       incidents: window.renderIncidents,
       timetable: window.renderTimetable,
       summary: window.renderSummary,
+      insights: window.renderInsights,
       grades: window.renderGrades,
       billing: window.renderBilling,
       admissions: window.renderAdmissions,
