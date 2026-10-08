@@ -354,3 +354,35 @@ test('Direct messaging is tenant- and membership-bound server-side', () => {
   assert.match(send, /r\.conversation_id=p_conversation_id/);
   assert.match(send, /r\.school_id=v_sess\.school_id/);
 });
+
+test('Smart Staff Chat navigation and mobile direct-chat controls remain wired', () => {
+  const chat = read('js/16_chat.js');
+  assert.match(chat, /onclick="_chatBackToMenu\(\)"/);
+  assert.match(chat, /window\._chatBackToMenu\s*=s*function/);
+  assert.match(chat, /goToPage\('dashboard'\)/);
+  assert.match(chat, /smart-chat-direct-shell\$\{_directConversationId \? ' has-selection' : ''\}/);
+  assert.match(chat, /onclick="_clearDirectSelection\(\)"/);
+  assert.match(chat, /_setDirectMobileView\(true\)/);
+  assert.match(chat, /_setDirectMobileView\(false\)/);
+});
+
+test('Legacy generic chat RPCs fail closed outside the supported staff channel', () => {
+  const migration = read('supabase/migrations/20261008093000_lock_legacy_chat_channels.sql');
+  const api = read('js/02L_api_chat.js');
+  for (const fn of ['rpc_get_chat_messages','rpc_send_chat_message']) {
+    const idx = migration.indexOf('function public.' + fn);
+    assert.ok(idx >= 0, fn + ' missing');
+    const block = migration.slice(idx, idx + 7000);
+    assert.match(block, /p_session_token text/);
+    assert.match(block, /expires_at > now\(\)/);
+    assert.match(block, /t\.status = 'active'/);
+    assert.match(block, /t\.school_id = s\.school_id/);
+    assert.match(block, /p_channel <> 'staff'/);
+    assert.match(block, /unsupported_channel/);
+  }
+  assert.match(migration, /school_id = v_sess\.school_id/);
+  assert.match(migration, /channel = 'staff'/);
+  assert.match(api, /rpc_get_chat_messages/);
+  assert.match(api, /rpc_send_chat_message/);
+});
+
