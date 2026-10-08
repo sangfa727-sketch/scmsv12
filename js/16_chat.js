@@ -208,7 +208,7 @@ window._refreshAdminComposerPreview = function() {
   const box = document.getElementById('adminMsgPreview');
   if (!box) return;
   const recipientType = document.getElementById('adminMsgRecipientType')?.value || 'grade';
-  const grade = document.getElementById('adminMsgGrade')?.value || 'Grade 5';
+  const grade = document.getElementById('adminMsgGrade')?.value || '';
   const teacherId = document.getElementById('adminMsgTeacher')?.value || '';
   const type = document.getElementById('adminMsgType')?.value || 'announcement';
   const reason = document.getElementById('adminMsgReason')?.value.trim() || '—';
@@ -229,7 +229,7 @@ window._refreshAdminComposerPreview = function() {
   const sendBtn = document.getElementById('adminMsgSendBtn');
   if (sendBtn) sendBtn.disabled = !window.APP?.is_admin || !reason || reason === '—' || !body || body === '—' || !validRecipient;
   const header = type === 'announcement' ? 'Official Announcements Channel' : type === 'task' ? 'Official Staff Task' : 'Staff Notice';
-  const targetLabel = recipientType === 'all_staff' ? ${t('chat.allStaff')} : recipientType === 'grade' ? 'Grade: ' + grade : 'Individual: ' + (selectedTeacher?.teacher_name || 'Select teacher');
+  const targetLabel = recipientType === 'all_staff' ? t('chat.allStaff') : recipientType === 'grade' ? t('chat.gradePrefix') + grade : t('chat.individualPrefix') + (selectedTeacher?.teacher_name || t('chat.selectTeacher'));
   box.innerHTML = `
     <div class="smart-chat-preview-label">SYSTEM-GENERATED HEADER</div>
     <div class="smart-chat-preview-header">${esc(header)}</div>
@@ -634,7 +634,7 @@ function _renderDirectWorkspace() {
     <div class="smart-chat-direct-shell${_directConversationId ? ' has-selection' : ''}">
       <aside class="smart-chat-direct-list">
         <div class="smart-chat-direct-list-head"><div><div class="smart-chat-kicker">PRIVATE</div><strong>Direct messages</strong></div><button type="button" onclick="_loadDirectWorkspace()" title="Refresh">↻</button></div>
-        <label class="smart-chat-direct-search"><span>⌕</span><input id="directStaffSearch" placeholder=${t('chat.findTeacher')} oninput="_renderDirectDirectory()"></label>
+        <label class="smart-chat-direct-search"><span>⌕</span><input id="directStaffSearch" placeholder="${t('chat.findTeacher')}" oninput="_renderDirectDirectory()"></label>
         <div id="directConversationList" class="smart-chat-conversation-list"></div>
         <div class="smart-chat-directory-title">Start a new conversation</div>
         <div id="directStaffDirectory" class="smart-chat-directory"></div>
