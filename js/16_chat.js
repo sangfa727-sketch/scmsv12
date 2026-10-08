@@ -627,7 +627,7 @@ async function _loadAnnouncementWorkspace(autoOpen=true){
     if(!rows.length){_announcementId=null;list.innerHTML=`<div class="smart-chat-list-empty-card"><div class="icon">📢</div><strong>${t('chat.noOfficialAnnouncements')}</strong><small>${t('chat.newVerifiedNotices')}</small></div>`;stream.innerHTML=`<div class="chat-empty"><div class="chat-empty-icon">📢</div><div class="chat-empty-title">${t('chat.noOfficialAnnouncements')}</div><div class="chat-empty-sub">${t('chat.newVerifiedNotices')}</div></div>`;return;}
     list.innerHTML=rows.map(a=>'<button class="smart-chat-channel-card '+(Number(a.id)===Number(_announcementId)?'active':'')+'" onclick="_openAnnouncement('+Number(a.id)+')"><span class="smart-chat-channel-icon">📢</span><span><strong>'+esc(a.message_type||'Official notice')+'</strong><small>'+esc(a.created_at||'')+'</small></span><b>'+(!a.read_at?'•':'›')+'</b></button>').join('');
     if(autoOpen && !_announcementId) await _openAnnouncement(Number(rows[0].id));
-   }catch(e){const list=document.getElementById('announcementList');if(list)list.innerHTML='<div class="chat-error"><div>📢</div><div>${t('chat.loadAnnouncementsFailed')}</div><button type="button" class="btn-secondary" onclick="_loadAnnouncementWorkspace(false)">Retry</button></div>';}
+   }catch(e){const list=document.getElementById('announcementList');if(list)list.innerHTML=`<div class="chat-error"><div>📢</div><div>${t('chat.loadAnnouncementsFailed')}</div><button type="button" class="btn-secondary" onclick="_loadAnnouncementWorkspace(false)">${t('chat.retry')}</button></div>`;}
 }
 window._openAnnouncement=async function(id){
   const a=(window._chatAnnouncements||[]).find(x=>Number(x.id)===Number(id));
