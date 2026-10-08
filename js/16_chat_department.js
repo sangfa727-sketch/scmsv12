@@ -2,6 +2,7 @@
 'use strict';
 let _departmentRows=[],_departmentId=null,_departmentMessages=[],_departmentPollTimer=null;
 function _renderDepartmentWorkspace(){return `
+<div class="smart-chat-list-title">Department & Grade <span style="float:right"><button type="button" class="btn-pill-action" disabled>Department</button> <button type="button" class="btn-pill-action" onclick="_showGradeWorkspace()">Grade</button></span></div>
 <div class="smart-chat-direct-shell smart-chat-department-shell${_departmentId ? " has-selection" : ""}">
 <aside class="smart-chat-direct-list"><div class="smart-chat-direct-list-head"><div><div class="smart-chat-kicker">DEPARTMENT CHAT</div><strong>Departments</strong></div><button type="button" onclick="_loadDepartmentWorkspace()">↻</button></div>
 <div class="smart-chat-directory-title">Only explicitly assigned active staff can enter a department.</div><div id="departmentList" class="smart-chat-conversation-list"></div></aside>
