@@ -1521,7 +1521,7 @@ window.I18N_MY = {
 
   'chat.gradeAccess': 'ဤဝန်ထမ်းအကောင့်အတွက် လက်ရှိအသုံးပြုနိုင်သော အတန်းတာဝန်ပေးအပ်မှု မရှိသေးပါ။',
   'chat.gradePrefix': 'အတန်း: '
-  ,'chat.individualPrefix': 'တစ်ဦးချင်း: '
+  ,'chat.individualPrefix': 'တစ်ဦးချင်း: ',
   'chat.department.refresh': 'ဌာနများ ပြန်လည်ရယူရန်',
   'chat.department.select': 'ဌာနတစ်ခု ရွေးပါ...',
   'chat.department.placeholder': 'ဌာနအတွင်း မက်ဆေ့ချ် ရေးပါ...',
