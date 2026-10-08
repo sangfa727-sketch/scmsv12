@@ -341,6 +341,7 @@ function _renderChatMode() {
 
   if (_chatChannel === 'departments' && typeof _renderDepartmentWorkspace === 'function') { root.innerHTML = _renderDepartmentWorkspace(); _loadDepartmentWorkspace(); return; }
 
+  if (_chatChannel === 'announcements') { root.innerHTML = _renderAnnouncementWorkspace(); _loadStaffAnnouncements(); return; }
   if (_chatChannel === 'tickets') {
     root.innerHTML = _renderInquiryWorkspace();
     _loadInquiryTickets();
@@ -383,6 +384,42 @@ function _renderChatMode() {
   }, 0);
 }
 
+
+
+function _renderAnnouncementWorkspace() {
+  return `
+    <div class="smart-chat-direct-shell smart-chat-inquiry-shell">
+      <aside class="smart-chat-direct-list">
+        <div class="smart-chat-direct-list-head"><div><div class="smart-chat-kicker">OFFICIAL</div><strong>Announcements</strong></div><button type="button" onclick="_loadStaffAnnouncements()" title="Refresh">↻</button></div>
+        <div class="smart-chat-directory-title">Official school notices delivered only to verified active staff.</div>
+        <div id="staffAnnouncementList" class="smart-chat-conversation-list"></div>
+      </aside>
+      <section class="smart-chat-direct-conversation" style="display:flex">
+        <div id="staffAnnouncementHead" class="smart-chat-conversation-head"><div><strong>Select an announcement</strong><small>Official messages include a system header and reason.</small></div><span class="smart-chat-verified-pill">School isolated</span></div>
+        <div id="staffAnnouncementStream" class="chat-stream"><div class="chat-empty"><div class="chat-empty-icon">📢</div><div class="chat-empty-title">Official Announcements</div><div class="chat-empty-sub">Select a notice to read it.</div></div></div>
+      </section>
+    </div>${window.APP?.is_admin ? _renderAdminComposer() : ''}`;
+}
+let _staffAnnouncements=[],_staffAnnouncementId=null;
+function _renderStaffAnnouncementList(){
+  const box=document.getElementById('staffAnnouncementList'); if(!box)return;
+  box.innerHTML=_staffAnnouncements.length?_staffAnnouncements.map(a=>`
+    <button class="smart-chat-channel-card ${a.id===_staffAnnouncementId?'active':''}" onclick="_openStaffAnnouncement('${esc(a.id)}')">
+      <span class="smart-chat-channel-icon">📢</span>
+      <span><strong>${esc(a.message_type||'announcement')}</strong><small>${esc(a.recipient_type||'')} · ${esc(a.created_at||'')}</small></span>
+      <b>${a.read_at?'':'•'}</b>
+    </button>`).join(''):'<div class="chat-empty-sub">No official announcements yet.</div>';
+}
+async function _loadStaffAnnouncements(){
+  try{_staffAnnouncements=await API.getStaffAnnouncements(50);_renderStaffAnnouncementList();if(_staffAnnouncementId)await _openStaffAnnouncement(_staffAnnouncementId);}catch(e){const b=document.getElementById('staffAnnouncementList');if(b)b.innerHTML='<div class="chat-error">Unable to load announcements.</div>';}
+}
+window._openStaffAnnouncement=async function(id){
+  _staffAnnouncementId=id;const a=_staffAnnouncements.find(x=>String(x.id)===String(id));if(!a)return;
+  const h=document.getElementById('staffAnnouncementHead'),s=document.getElementById('staffAnnouncementStream');if(h)h.innerHTML=`<div><strong>${esc(a.message_type==='task'?'Official Staff Task':a.message_type==='notice'?'Staff Notice':'Official Announcement')}</strong><small>${esc(a.recipient_type)} · ${esc(a.created_at||'')}</small></div><span class="smart-chat-verified-pill">Verified recipient</span>`;
+  if(s)s.innerHTML=`<div class="smart-chat-official-preview"><div class="smart-chat-preview-label">SYSTEM-GENERATED HEADER</div><div class="smart-chat-preview-header">${esc(a.message_type==='task'?'Official Staff Task':a.message_type==='notice'?'Staff Notice':'Official Announcements Channel')}</div><div class="smart-chat-preview-reason"><strong>Reason</strong><span>${esc(a.reason||'')}</span></div><div class="smart-chat-preview-body">${esc(a.body||'').replace(/\n/g,'<br>')}</div></div>`;
+  if(!a.read_at){try{const r=await API.markStaffAnnouncementRead(a.id);if(r?.ok)a.read_at=new Date().toISOString();}catch(e){}}
+  _renderStaffAnnouncementList();
+};
 
 function _renderInquiryWorkspace() {
   return `
