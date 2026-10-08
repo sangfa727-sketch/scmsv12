@@ -573,7 +573,14 @@ async function _sendInquiryFromComposer(e){
 function _closeInquiryDraft(){_inquiryDraft=null;_renderInquiryDraft();}
 function _renderInquiryDraft(){
   const root=document.getElementById('inquiryTicketList'); if(!root)return;
-  if(!_inquiryDraft){root.innerHTML=_inquiryTickets.length?_inquiryTickets.map(t=>`<button class="smart-chat-channel-card ${Number(t.id)===Number(_inquiryTicketId)?'active':''}" onclick="_openInquiryTicket(${Number(t.id)})"><span class="smart-chat-channel-icon">🎫</span><span><strong>${esc(t.subject)}</strong><small>${esc(t.status)} · ${esc(t.priority)}${t.student_id?' · '+esc(t.student_id):''}</small></span><b>›</b></button>`).join(''):'<div class="chat-empty-sub">${t('chat.noTicketsYet')}</div>';return;}
+  if(!_inquiryDraft){
+    const noTickets=t('chat.noTicketsYet');
+    root.innerHTML=_inquiryTickets.length?_inquiryTickets.map(item=>{
+      const student=item.student_id?' · '+esc(item.student_id):'';
+      return `<button class="smart-chat-channel-card ${Number(item.id)===Number(_inquiryTicketId)?'active':''}" onclick="_openInquiryTicket(${Number(item.id)})"><span class="smart-chat-channel-icon">🎫</span><span><strong>${esc(item.subject)}</strong><small>${esc(item.status)} · ${esc(item.priority)}${student}</small></span><b>›</b></button>`;
+    }).join(''):'<div class="chat-empty-sub">'+noTickets+'</div>';
+    return;
+  }
   root.innerHTML=`
     <form class="smart-chat-inquiry-form" onsubmit="return _submitInquiryDraft(event)">
       <label>${t('chat.subject')}<input id="inquiryDraftSubject" maxlength="160" required placeholder="${t('chat.whatNeedsAttention')}"></label>
