@@ -1442,4 +1442,16 @@ window.I18N_KM = {
   "settings.theme": "រូបរាង",
   "settings.themeLight": "☀️ ភ្លឺ",
   "settings.themeDark": "🌙 ងងឹត",
+
+  "chat.sendFailed": "ការផ្ញើមិនបានសម្រេច",
+  "chat.department.refresh": "ផ្ទុកនាយកដ្ឋានឡើងវិញ",
+  "chat.department.select": "ជ្រើសរើសនាយកដ្ឋាន...",
+  "chat.department.placeholder": "សរសេរសារទៅនាយកដ្ឋាន...",
+  "chat.grade.refresh": "ផ្ទុកថ្នាក់ឡើងវិញ",
+  "chat.grade.placeholder": "សរសេរសារទៅក្រុមថ្នាក់...",
+  "chat.groups.refresh": "ផ្ទុកក្រុមឡើងវិញ",
+  "chat.groups.placeholder": "សរសេរសារ…",
+  "chat.groups.createFailed": "បង្កើតមិនបានសម្រេច",
+  "chat.direct.placeholder": "សរសេរសារឯកជន...",
+  "chat.direct.findTeacher": "ស្វែងរកគ្រូ...",
 };
