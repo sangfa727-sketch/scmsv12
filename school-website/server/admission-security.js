@@ -27,4 +27,43 @@ function validateAdmissionInput(input) {
 
 function isHoneypotTriggered(value) { return typeof value === 'string' && value.trim().length > 0; }
 
-module.exports = { LIMITS, validateAdmissionInput, isHoneypotTriggered };
+function createReplayGuard({ ttlMs = 10 * 60 * 1000, maxEntries = 10000, now = () => Date.now() } = {}) {
+  const seen = new Map();
+  return {
+    claim(key) {
+      const current = now();
+      for (const [storedKey, expiresAt] of seen) {
+        if (expiresAt <= current) seen.delete(storedKey);
+      }
+      if (seen.has(key)) return false;
+      if (seen.size >= maxEntries) return false;
+      seen.set(key, current + ttlMs);
+      return true;
+    }
+  };
+}
+
+function createRateLimiter({ windowMs = 60 * 1000, maxRequests = 10, now = () => Date.now() } = {}) {
+  const buckets = new Map();
+  return {
+    allow(identity) {
+      const current = now();
+      const bucket = buckets.get(identity);
+      if (!bucket || bucket.resetAt <= current) {
+        buckets.set(identity, { count: 1, resetAt: current + windowMs });
+        return true;
+      }
+      if (bucket.count >= maxRequests) return false;
+      bucket.count += 1;
+      return true;
+    }
+  };
+}
+
+module.exports = {
+  LIMITS,
+  validateAdmissionInput,
+  isHoneypotTriggered,
+  createReplayGuard,
+  createRateLimiter
+};
