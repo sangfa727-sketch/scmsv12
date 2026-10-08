@@ -245,7 +245,7 @@ window._refreshAdminComposerPreview = function() {
   const s=document.createElement('style');
   s.id='smart-chat-ux-patch';
   s.textContent=`
-    .smart-chat-hero{position:relative}
+    .smart-chat-hero{position:relative}\n    .smart-chat-channel-back-row{display:flex;align-items:center;margin:0 0 8px}\n    .smart-chat-channel-back{display:inline-flex;align-items:center;gap:5px;min-height:32px;padding:0 10px;border:1px solid var(--border);border-radius:9px;background:var(--bg2);color:var(--text2);font-size:11px;font-weight:700;cursor:pointer}\n    .smart-chat-channel-back:hover{background:var(--surface2);color:var(--text)}
     .smart-chat-nav-back{
       display:inline-flex;align-items:center;justify-content:center;gap:6px;
       min-height:34px;padding:0 10px;border:1px solid var(--border);
