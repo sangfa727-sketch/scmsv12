@@ -350,4 +350,7 @@ test('Direct messaging is tenant- and membership-bound server-side', () => {
   const send = migration.slice(migration.indexOf('function public.rpc_chat_direct_send'), migration.indexOf('function public.rpc_chat_direct_mark_read'));
   assert.match(send, /not exists\(select 1 from public\.staff_direct_members/);
   assert.match(send, /school_id=v_sess\.school_id/);
+  assert.match(send, /invalid_reply_target/);
+  assert.match(send, /r\.conversation_id=p_conversation_id/);
+  assert.match(send, /r\.school_id=v_sess\.school_id/);
 });
