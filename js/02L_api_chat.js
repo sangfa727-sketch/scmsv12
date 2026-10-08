@@ -111,6 +111,9 @@ Object.assign(API, {
     async sendInquiryMessage(ticketId, body) {
       return _webRpc('rpc_chat_inquiry_send', { p_session_token: _webSessionToken(), p_ticket_id: Number(ticketId), p_body: body });
     },
+    async updateInquiryTicket(ticketId, status = null, assignedTeacherId = null) {
+      return _webRpc('rpc_chat_inquiry_update', { p_session_token: _webSessionToken(), p_ticket_id: Number(ticketId), p_status: status, p_assigned_teacher_id: assignedTeacherId || null });
+    },
 
     // ─── REFRESH ALL ─────────────────────────────────────────────────────────
 });
