@@ -11,7 +11,7 @@ function _renderGradeList(){
  b.innerHTML=_gradeRows.length?_gradeRows.map(g=>{
    const safe=String(g.grade_name||'').replace(/\\/g,'\\\\').replace(/'/g,"\\'");
    return '<button data-testid="grade-row-'+esc(g.grade_name)+'" class="smart-chat-channel-card '+(g.grade_name===_gradeName?'active':'')+'" onclick="_openGradeChat(\''+esc(safe)+'\')"><span class="smart-chat-channel-icon">🎓</span><span><strong>'+esc(g.grade_name)+'</strong><small>'+(Number(g.unread_count)>0?esc(g.unread_count)+' unread':'Staff conversation')+'</small></span><b>›</b></button>';
- }).join(''):'<div class="smart-chat-list-empty-card"><div class="icon">🎓</div><strong>${t('chat.noGradeAccess')}</strong><small>${t('chat.gradeAccess')}</small></div>';
+ }).join(''):`<div class="smart-chat-list-empty-card"><div class="icon">🎓</div><strong>${t('chat.noGradeAccess')}</strong><small>${t('chat.gradeAccess')}</small></div>`;
 }
 async function _openGradeChat(name,silent=false){
  _gradeName=String(name||'').trim();_setGradeMobileView(true);const root=document.getElementById('gradeConversation');if(!root||!_gradeName)return;
