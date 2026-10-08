@@ -330,7 +330,7 @@ function _renderChatMode() {
     { id:'direct', name:'1-on-1 Direct Messages', icon:'👤', sub:'Private staff-to-staff chat' },
     { id:'events', name:'Project / Event Groups', icon:'🗂️', sub:'Temporary work groups' }
   ];
-  const visible = channels.filter(c => c.id === 'staff' || c.id === 'direct' || window.APP?.is_admin);
+  const visible = channels;
   if (!visible.some(c => c.id === _chatChannel)) _chatChannel = 'staff';
 
   if (_chatChannel === 'direct') {
@@ -338,6 +338,8 @@ function _renderChatMode() {
     _loadDirectWorkspace();
     return;
   }
+
+  if (_chatChannel === 'announcements') { root.innerHTML = _renderAnnouncementWorkspace(); _loadAnnouncementWorkspace(); return; }
 
   if (_chatChannel === 'departments' && typeof _renderDepartmentWorkspace === 'function') { root.innerHTML = _renderDepartmentWorkspace(); _loadDepartmentWorkspace(); return; }
 
@@ -479,6 +481,28 @@ async function _submitInquiryDraft(e){
   if(r?.ok){_inquiryDraft=null;_inquiryTicketId=Number(r.ticket.id);await _loadInquiryTickets();}
   else showToast('Ticket could not be created.');
   return false;
+}
+function _renderAnnouncementWorkspace(){
+  return '<div class="smart-chat-direct-shell smart-chat-announcement-shell">'+
+    '<aside class="smart-chat-direct-list"><div class="smart-chat-direct-list-head"><div><div class="smart-chat-kicker">OFFICIAL</div><strong>Announcements</strong></div><button type="button" onclick="_loadAnnouncementWorkspace()" title="Refresh">↻</button></div><div id="announcementList" class="smart-chat-conversation-list"></div></aside>'+
+    '<section class="smart-chat-direct-conversation"><div id="announcementHead" class="smart-chat-conversation-head"><div><strong>Official Announcements</strong><small>School-authorized notices for your staff account.</small></div><span class="smart-chat-verified-pill">Verified</span></div><div id="announcementStream" class="chat-stream"><div class="chat-empty"><div class="chat-empty-icon">📢</div><div class="chat-empty-title">Official Announcements</div><div class="chat-empty-sub">Loading…</div></div></div></section></div>';
+}
+async function _loadAnnouncementWorkspace(){
+  try{
+    const rows=await API.getStaffAnnouncements(50);
+    const list=document.getElementById('announcementList'),stream=document.getElementById('announcementStream');
+    if(!list||!stream)return;
+    if(!rows.length){list.innerHTML='<div class="chat-empty-sub">No official announcements yet.</div>';stream.innerHTML='<div class="chat-empty"><div class="chat-empty-icon">📢</div><div class="chat-empty-title">No announcements</div><div class="chat-empty-sub">Official school notices will appear here.</div></div>';return;}
+    list.innerHTML=rows.map((a,i)=>'<button class="smart-chat-channel-card '+(i===0?'active':'')+'" onclick="_openAnnouncement('+Number(a.id)+')"><span class="smart-chat-channel-icon">📢</span><span><strong>'+esc(a.message_type||'Official notice')+'</strong><small>'+esc(a.created_at||'')+'</small></span><b>'+(!a.read_at?'•':'›')+'</b></button>').join('');
+    window._chatAnnouncements=rows;
+    _openAnnouncement(Number(rows[0].id));
+  }catch(e){const list=document.getElementById('announcementList');if(list)list.innerHTML='<div class="chat-error">Unable to load announcements.</div>';}
+}
+window._openAnnouncement=async function(id){
+  const a=(window._chatAnnouncements||[]).find(x=>Number(x.id)===Number(id));
+  const stream=document.getElementById('announcementStream');if(!a||!stream)return;
+  stream.innerHTML='<article class="smart-chat-official-preview"><div class="smart-chat-preview-label">SYSTEM-GENERATED OFFICIAL MESSAGE</div><div class="smart-chat-preview-header">'+esc(a.message_type||'Official Announcement')+'</div><div class="smart-chat-preview-meta">'+esc(a.created_at||'')+' · '+(!a.read_at?'Unread':'Read')+'</div><div class="smart-chat-preview-reason"><strong>Reason</strong><span>'+esc(a.reason||'Official school communication')+'</span></div><div class="smart-chat-preview-body">'+esc(a.body||'').replace(/\n/g,'<br>')+'</div></article>';
+  try{if(API.markStaffAnnouncementRead)await API.markStaffAnnouncementRead(id);}catch(e){}
 }
 function _renderDirectWorkspace() {
   return `
