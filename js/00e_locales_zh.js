@@ -1458,4 +1458,18 @@ window.I18N_ZH = {
   'chat.gradeAccess': '此员工账户暂无可用的有效年级分配。',
   'chat.gradePrefix': '年级：'
   ,'chat.individualPrefix': '个人：'
+  ,'chat.workspace.department': '部门'
+  ,'chat.workspace.grade': '年级'
+  ,'chat.workspace.groups': '群组'
+  ,'chat.workspace.tickets': '咨询工单'
+  ,'chat.refresh': '刷新'
+  ,'chat.selectDepartment': '选择部门'
+  ,'chat.selectTeacher': '选择教师'
+  ,'chat.selectTicket': '选择工单'
+  ,'chat.noGradeAccess': '暂无年级访问权限'
+  ,'chat.noDepartmentAccess': '暂无部门访问权限'
+  ,'chat.noGroups': '暂无群组'
+  ,'chat.startGrade': '开始年级会话'
+  ,'chat.staffOnlyGrade': '仅限该年级工作人员'
+  ,'chat.departmentAccess': '管理员必须先将您分配到有效部门，之后该部门才会显示。'
 };
