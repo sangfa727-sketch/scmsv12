@@ -345,6 +345,11 @@ function _renderChatMode() {
     return;
   }
 
+  if (_chatChannel === 'events' && typeof _renderGroupWorkspace === 'function') {
+    _renderGroupWorkspace();
+    return;
+  }
+
   root.innerHTML = `
     <div class="smart-chat-school-grid">
       <aside class="smart-chat-channel-list">
