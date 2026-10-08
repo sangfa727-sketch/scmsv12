@@ -16,7 +16,7 @@ test('template-first website studio stays outside private SCMS data',()=>{
 test('school admin fills guided fields instead of designing a blank website',()=>{
  const html=read('school-website/create.html'),js=read('school-website/create.js');
  for(const field of ['schoolName','tagline','aboutTitle','aboutText','contactTitle','contactText']) assert.match(html,new RegExp('data-field="'+field+'"'));
- assert.match(html,/template-option/);assert.match(html,/Change template/);assert.match(js,/templateMeta/);assert.match(js,/applyTemplate/);assert.match(js,/state\.template/);
+ assert.match(html,/template-option/);assert.match(html,/Change template/);assert.match(js,/templateMeta/);assert.match(js,/applyTemplate/);assert.match(js,/state\.template/);assert.match(js,/preview\.dataset\.template/);assert.match(read("school-website/create.css"),/body\[data-template="classic"\]/);assert.match(read("school-website/create.css"),/body\[data-template="premium"\]/);
  assert.match(js,/fieldProgress/);assert.match(js,/updateProgress/);
 });
 test('optional sections remain progressive and safe',()=>{
