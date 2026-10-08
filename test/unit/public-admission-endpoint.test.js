@@ -40,6 +40,26 @@ test('admission endpoint resolves school from trusted hostname and inserts only 
   assert.equal(inserted[0].sourceHost, 'school-a.scmsv12.com');
 });
 
+test('admission endpoint does not leak insert backend errors', async () => {
+  const deps = setup();
+  const result = await handleAdmissionRequest({
+    ...deps,
+    hostname: 'school-a.scmsv12.com',
+    identity: 'user:error',
+    body: {
+      studentName: 'Student',
+      guardianName: 'Guardian',
+      phone: '09123456789',
+      grade: 'Grade 5',
+      idempotencyKey: 'admission-key-444444'
+    },
+    insertApplication: async () => { throw new Error('secret database details'); }
+  });
+
+  assert.equal(result.status, 503);
+  assert.deepEqual(result.body, { ok: false, error: 'admission_backend_unavailable' });
+});
+
 test('admission endpoint rejects unknown or cross-school client selection', async () => {
   const deps = setup();
   let inserted = 0;
