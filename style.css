@@ -8965,3 +8965,57 @@ html[lang="zh"] textarea {
   .smart-chat-direct-conversation{min-height:54dvh}
   .smart-chat-mobile-back{display:flex;align-items:center;justify-content:center}
 }
+
+
+/* Staff Chat UX hardening — keep the communication workspace compact and usable
+   on touch devices without changing chat data/authorization behavior. */
+html.scms-chat-workspace,
+html.scms-chat-workspace body{overflow:hidden}
+html.scms-chat-workspace #pages{overflow:auto}
+.smart-chat-channel-card:focus-visible,
+.smart-chat-nav-back:focus-visible,
+.smart-chat-mode-switch button:focus-visible,
+.smart-chat-direct-item:focus-visible,
+.smart-chat-directory-item:focus-visible,
+.chat-send-btn:focus-visible,
+.smart-chat-mobile-back:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+.smart-chat-channel-card,
+.smart-chat-direct-item,
+.smart-chat-directory-item{transition:background .16s ease,transform .16s ease}
+.smart-chat-channel-card:active,
+.smart-chat-direct-item:active,
+.smart-chat-directory-item:active{transform:scale(.995)}
+.smart-chat-conversation-head{position:relative;z-index:2;background:var(--surface)}
+.smart-chat-direct-conversation .chat-stream,
+.smart-chat-conversation .chat-stream{overscroll-behavior:contain;-webkit-overflow-scrolling:touch}
+.chat-composer{background:var(--surface)}
+.chat-composer textarea{max-height:120px;line-height:1.4}
+.smart-chat-admin-card{scroll-margin-top:12px}
+@media(max-width:760px){
+  html.scms-chat-workspace #pages{height:100dvh}
+  html.scms-chat-workspace #page-chat{overflow:hidden}
+  html.scms-chat-workspace #page-chat .smart-chat-shell{
+    height:100dvh;min-height:100dvh;overflow:auto;
+    padding:10px 8px 12px;
+  }
+  .smart-chat-hero{margin-bottom:10px}
+  .smart-chat-mode-switch{margin-bottom:8px}
+  .smart-chat-school-grid{gap:8px}
+  .smart-chat-channel-list{scrollbar-width:none}
+  .smart-chat-channel-list::-webkit-scrollbar{display:none}
+  .smart-chat-channel-card{min-width:144px}
+  .smart-chat-conversation{min-height:calc(100dvh - 185px)}
+  .smart-chat-conversation .chat-stream{min-height:0;max-height:none}
+  .smart-chat-direct-shell{height:calc(100dvh - 185px);min-height:0}
+  .smart-chat-direct-list{height:100%;max-height:none;min-height:0}
+  .smart-chat-direct-conversation{height:100%;min-height:0}
+  .smart-chat-direct-shell.has-selection .smart-chat-direct-conversation{height:100%}
+  .smart-chat-direct-composer{flex:0 0 auto}
+  .smart-chat-ai-card{min-height:calc(100dvh - 175px);box-sizing:border-box}
+  .smart-chat-quick-grid button{min-height:70px}
+  .smart-chat-form-grid{grid-template-columns:1fr}
+}
+@media(max-width:380px){
+  .smart-chat-channel-card{min-width:132px}
+  .smart-chat-hero .page-title{font-size:19px}
+}
