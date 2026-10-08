@@ -130,7 +130,7 @@ function _renderAdminComposer() {
       <div class="smart-chat-form-actions">
         <button type="button" class="btn-secondary" onclick="_loadAdminRecipientPreview()">${t('chat.refreshRecipients')}</button>
         <button type="button" class="smart-chat-send-disabled" id="adminMsgSendBtn" onclick="sendOfficialAnnouncement()" disabled>
-          ${_chatIcon('send')} ${t('chat.sendOfficialMessage')}
+          ${t('chat.sendOfficialMessage')}
         </button>
       </div>
     </section>`;
@@ -144,12 +144,17 @@ async function _loadAdminRecipientPreview(type = null, target = null) {
       try {
         const grades = await API.getChatGradeTargets();
         const select = document.getElementById('adminMsgGrade');
-        if (select && grades.length) {
-          const current = target || select.value || grades[0];
-          select.innerHTML = grades.map(g => `<option value="${esc(g)}">${esc(g)}</option>`).join('');
-          select.value = grades.includes(current) ? current : grades[0];
+        if (select) {
+          const current = target || select.value || grades[0] || '';
+          select.innerHTML = grades.length
+            ? grades.map(g => `<option value="${esc(g)}">${esc(g)}</option>`).join('')
+            : `<option value="" selected>${t('chat.noGradesAvailable')}</option>`;
+          select.value = grades.includes(current) ? current : (grades[0] || '');
         }
-      } catch (_) {}
+      } catch (_) {
+        const select = document.getElementById('adminMsgGrade');
+        if (select) select.innerHTML = `<option value="" selected>${t('chat.noGradesAvailable')}</option>`;
+      }
     }
     const grade = target || document.getElementById('adminMsgGrade')?.value || null;
     const rows = await API.getChatRecipientPreview(selectedType, selectedType === 'all_staff' ? null : (selectedType === 'teacher' ? (document.getElementById('adminMsgTeacher')?.value || null) : grade));
@@ -260,6 +265,8 @@ window._refreshAdminComposerPreview = function() {
     .smart-chat-add-btn{font-size:20px;line-height:1}
     .smart-chat-refresh-btn{font-size:15px}
     .smart-chat-composer-drawer{display:none;margin-top:10px}
+    #adminMsgSendBtn{white-space:nowrap;min-width:max-content;padding-inline:12px;font-size:11px}
+    @media(max-width:760px){#adminMsgSendBtn{font-size:10px;padding-inline:10px}}
     .smart-chat-composer-drawer.is-open{display:block}
     .smart-chat-composer-drawer .smart-chat-admin-card{margin:0}
     .smart-chat-conversation-list{min-height:0}
