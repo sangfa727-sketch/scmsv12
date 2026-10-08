@@ -345,7 +345,7 @@ function renderChat() {
         <button type="button" class="smart-chat-nav-back" onclick="_chatBackToMenu()" aria-label="${t('chat.exitChat')}">‹ <span>${t('chat.exitChat')}</span></button>
         <div>
           <div class="page-eyebrow">${t('chat.communicationCenter')}</div>
-          <h1 class="page-title">Smart <em>Chat</em></h1>
+          <h1 class="page-title">${t('chat.schoolChat')}</h1>
           <p class="page-subtitle">${t('chat.schoolCommunicationDesc')}</p>
         </div>
         <div class="smart-chat-identity">
@@ -567,7 +567,7 @@ async function _updateInquiryTicket(){
 }
 async function _sendInquiryFromComposer(e){
   e?.preventDefault(); const input=document.getElementById('inquiryChatInput'); if(!_inquiryTicketId||!input?.value.trim())return false;
-  const r=await API.sendInquiryMessage(_inquiryTicketId,input.value.trim()); if(r?.ok){input.value='';await _openInquiryTicket(_inquiryTicketId);await _loadInquiryTickets();} else showToast('Message could not be sent.'); return false;
+  const r=await API.sendInquiryMessage(_inquiryTicketId,input.value.trim()); if(r?.ok){input.value='';await _openInquiryTicket(_inquiryTicketId);await _loadInquiryTickets();} else showToast(t('chat.messageSendFailed')); return false;
 }
 function _closeInquiryDraft(){_inquiryDraft=null;_renderInquiryDraft();}
 function _renderInquiryDraft(){
