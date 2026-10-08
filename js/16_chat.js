@@ -189,7 +189,7 @@ window.sendOfficialAnnouncement = async function() {
   if (btn) btn.disabled = true;
   try {
     const result = await API.createStaffAnnouncement(recipientType, target, messageType, reason, body);
-    if (!result?.ok) throw new Error(result?.error || '${t('chat.sendFailed')}');
+    if (!result?.ok) throw new Error(result?.error || 'Send failed');
     if (btn) btn.innerHTML = '✓ Sent';
     showToast('Official message sent to ' + result.recipient_count + ' verified staff.');
     document.getElementById('adminMsgBody').value = '';
@@ -411,7 +411,7 @@ function _renderChatMode() {
     { id:'staff', name:'All Staff', icon:'👥', sub:'General staff conversation' },
     { id:'announcements', name:'Official Announcements', icon:'📢', sub:'System-generated official notices' },
     { id:'departments', name:'Department & Grade', icon:'📚', sub:'Class / department channels' },
-    { id:'tickets', name:'${t('chat.workspace.tickets')}', icon:'🎫', sub:'Student / parent conversations' },
+    { id:'tickets', name:'Inquiry Tickets', icon:'🎫', sub:'Student / parent conversations' },
     { id:'direct', name:'1-on-1 Direct Messages', icon:'👤', sub:'Private staff-to-staff chat' },
     { id:'events', name:'Project / Event Groups', icon:'🗂️', sub:'Temporary work groups' }
   ];
@@ -480,7 +480,7 @@ function _renderInquiryWorkspace() {
   return _chatChannelBack('School Chat') + `
     <div class="smart-chat-direct-shell smart-chat-inquiry-shell${_inquiryTicketId ? " has-selection" : ""}">
       <aside class="smart-chat-direct-list">
-        <div class="smart-chat-direct-list-head"><div><div class="smart-chat-kicker">INQUIRY</div><strong>Inquiry Tickets</strong></div><button type="button" onclick="_loadInquiryTickets()" title="${t('chat.refresh')}">↻</button></div>
+        <div class="smart-chat-direct-list-head"><div><div class="smart-chat-kicker">INQUIRY</div><strong>Inquiry Tickets</strong></div><button type="button" onclick="_loadInquiryTickets()" title="Refresh">↻</button></div>
         <div class="smart-chat-directory-title">Staff-only student / parent issue tracking</div>
         <div id="inquiryTicketList" class="smart-chat-conversation-list"></div>
         <button type="button" class="btn-secondary" onclick="_newInquiryTicket()">＋ New ticket</button>
@@ -489,7 +489,7 @@ function _renderInquiryWorkspace() {
         <div id="inquiryTicketHead" class="smart-chat-conversation-head"><div><strong>Select a ticket</strong><small>Only authorized staff in this school can access ticket messages.</small></div><span class="smart-chat-verified-pill">School isolated</span></div>
         <div id="inquiryMessageStream" class="chat-stream smart-chat-direct-stream"><div class="chat-empty"><div class="chat-empty-icon">🎫</div><div class="chat-empty-title">Inquiry Tickets</div><div class="chat-empty-sub">Create or select a staff ticket.</div></div></div>
         <form class="chat-composer smart-chat-direct-composer" onsubmit="return _sendInquiryFromComposer(event)">
-          <textarea id="inquiryChatInput" placeholder="${t('chat.selectTicket')}..." rows="1" disabled></textarea>
+          <textarea id="inquiryChatInput" placeholder="Select a ticket..." rows="1" disabled></textarea>
           <button type="submit" class="chat-send-btn" id="inquirySendBtn" disabled>${_chatIcon('send')}</button>
         </form>
       </section>
@@ -535,7 +535,7 @@ async function _openInquiryTicket(id){
     }catch(e){ /* read state is best-effort; authorization remains server-side */ }
   }
 }
-window._clearInquirySelection=function(){_inquiryTicketId=null;_inquiryCurrentTicket=null;const shell=document.querySelector('.smart-chat-inquiry-shell');if(shell)shell.classList.remove('has-selection');const h=document.getElementById('inquiryTicketHead');if(h)h.innerHTML='<div><strong>Select a ticket</strong><small>Only authorized staff in this school can access ticket messages.</small></div><span class="smart-chat-verified-pill">School isolated</span>';const s=document.getElementById('inquiryMessageStream');if(s)s.innerHTML='<div class="chat-empty"><div class="chat-empty-icon">🎫</div><div class="chat-empty-title">Select a ticket</div><div class="chat-empty-sub">Create or select a staff ticket.</div></div>';const i=document.getElementById('inquiryChatInput');if(i){i.disabled=true;i.placeholder='${t('chat.selectTicket')}...';}const b=document.getElementById('inquirySendBtn');if(b)b.disabled=true;_renderInquiryTicketList();};
+window._clearInquirySelection=function(){_inquiryTicketId=null;_inquiryCurrentTicket=null;const shell=document.querySelector('.smart-chat-inquiry-shell');if(shell)shell.classList.remove('has-selection');const h=document.getElementById('inquiryTicketHead');if(h)h.innerHTML='<div><strong>Select a ticket</strong><small>Only authorized staff in this school can access ticket messages.</small></div><span class="smart-chat-verified-pill">School isolated</span>';const s=document.getElementById('inquiryMessageStream');if(s)s.innerHTML='<div class="chat-empty"><div class="chat-empty-icon">🎫</div><div class="chat-empty-title">Select a ticket</div><div class="chat-empty-sub">Create or select a staff ticket.</div></div>';const i=document.getElementById('inquiryChatInput');if(i){i.disabled=true;i.placeholder='Select a ticket...';}const b=document.getElementById('inquirySendBtn');if(b)b.disabled=true;_renderInquiryTicketList();};
 
 async function _updateInquiryTicket(){
   if(!window.APP?.is_admin||!_inquiryTicketId)return;
@@ -596,7 +596,7 @@ function _renderAnnouncementWorkspace(){
     '<div class="smart-chat-direct-shell smart-chat-announcement-shell'+(_announcementId?' has-selection':'')+'">'+
     '<aside class="smart-chat-direct-list"><div class="smart-chat-direct-list-head"><div><div class="smart-chat-kicker">OFFICIAL</div><strong>Announcements</strong></div><div class="smart-chat-list-actions">'+
     (window.APP?.is_admin ? '<button type="button" class="smart-chat-add-btn" id="announcementComposerToggle" onclick="_toggleAnnouncementComposer()" aria-expanded="false" aria-controls="announcementComposer" title="New official message">+</button>' : '')+
-    '<button type="button" class="smart-chat-refresh-btn" onclick="_loadAnnouncementWorkspace()" title="${t('chat.refresh')}">↻</button></div></div>'+
+    '<button type="button" class="smart-chat-refresh-btn" onclick="_loadAnnouncementWorkspace()" title="Refresh">↻</button></div></div>'+
     '<div id="announcementList" class="smart-chat-conversation-list"></div></aside>'+
     '<section class="smart-chat-direct-conversation"><div id="announcementHead" class="smart-chat-conversation-head"><div><strong>Official Announcements</strong><small>School-authorized notices for your staff account.</small></div><span class="smart-chat-verified-pill">Verified</span></div><div id="announcementStream" class="chat-stream"><div class="chat-empty"><div class="chat-empty-icon">📢</div><div class="chat-empty-title">Official Announcements</div><div class="chat-empty-sub">Loading…</div></div></div></section></div>';
 }
@@ -633,8 +633,8 @@ function _renderDirectWorkspace() {
   return _chatChannelBack('School Chat') + `
     <div class="smart-chat-direct-shell${_directConversationId ? ' has-selection' : ''}">
       <aside class="smart-chat-direct-list">
-        <div class="smart-chat-direct-list-head"><div><div class="smart-chat-kicker">PRIVATE</div><strong>Direct messages</strong></div><button type="button" onclick="_loadDirectWorkspace()" title="${t('chat.refresh')}">↻</button></div>
-        <label class="smart-chat-direct-search"><span>⌕</span><input id="directStaffSearch" placeholder="${t('chat.selectTeacher')}..." oninput="_renderDirectDirectory()"></label>
+        <div class="smart-chat-direct-list-head"><div><div class="smart-chat-kicker">PRIVATE</div><strong>Direct messages</strong></div><button type="button" onclick="_loadDirectWorkspace()" title="Refresh">↻</button></div>
+        <label class="smart-chat-direct-search"><span>⌕</span><input id="directStaffSearch" placeholder="Find a teacher..." oninput="_renderDirectDirectory()"></label>
         <div id="directConversationList" class="smart-chat-conversation-list"></div>
         <div class="smart-chat-directory-title">Start a new conversation</div>
         <div id="directStaffDirectory" class="smart-chat-directory"></div>
@@ -675,7 +675,7 @@ function _renderDirectConversationList() {
   root.innerHTML=_directConversations.map(c=>`
     <button class="smart-chat-direct-item ${Number(c.conversation_id)===Number(_directConversationId)?'active':''}" onclick="openDirectChat('${esc(c.teacher_id)}')">
       <span class="smart-chat-direct-avatar">${esc((c.teacher_name||'?')[0])}</span>
-      <span><strong>${esc(c.teacher_name)}</strong><small>${esc(c.last_message||'${t('chat.emptyTitle')}')}</small></span>
+      <span><strong>${esc(c.teacher_name)}</strong><small>${esc(c.last_message||'No messages yet')}</small></span>
       ${Number(c.unread_count)>0?`<b class="smart-chat-unread">${esc(c.unread_count)}</b>`:'<i></i>'}
     </button>`).join('');
 }
@@ -763,7 +763,7 @@ window.sendDirectChat=async function(ev){
   btn.disabled=true;input.disabled=true;
   try{
     const result=await API.sendDirectMessage(_directConversationId,value);
-    if(!result?.ok)throw new Error(result?.error||'${t('chat.sendFailed')}');
+    if(!result?.ok)throw new Error(result?.error||'Send failed');
     input.value='';input.style.height='auto';await _loadDirectWorkspace();await _loadDirectMessages();
   }catch(e){showToast('Message could not be sent.');}
   finally{btn.disabled=false;input.disabled=false;input.focus();}
@@ -858,7 +858,7 @@ window.sendChat = async function(ev) {
       delete optimistic.pending;
       if(result.message){const idx=window.APP.chatMessages.indexOf(optimistic);if(idx>=0)window.APP.chatMessages[idx]=result.message;}
       _renderChatStream(window.APP.chatMessages); setTimeout(_loadChatMessages,1200);
-    } else throw new Error((result&&(result.error||result.message))||'${t('chat.sendFailed')}');
+    } else throw new Error((result&&(result.error||result.message))||'Send failed');
   } catch(e) {
     optimistic.failed=true; delete optimistic.pending; _renderChatStream(window.APP.chatMessages); showToast(t('chat.sendFailed'));
   } finally { btn.disabled=false; input.disabled=false; input.focus(); }
