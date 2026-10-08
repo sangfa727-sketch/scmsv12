@@ -302,3 +302,55 @@ test('teacher lifecycle authorization is session-bound and frontend uses the gua
   assert.match(lifecycleBlock, /rpc_admin_reactivate_teacher/);
   assert.match(lifecycleBlock, /result\?\.ok/);
 });
+
+
+test('Smart Staff Chat uses server-authorized direct messaging contracts', () => {
+  const api = read('js/02L_api_chat.js');
+  const chat = read('js/16_chat.js');
+  const migration = read('supabase/migrations/20261008110000_staff_direct_messaging.sql');
+
+  for (const fn of [
+    'rpc_chat_staff_directory',
+    'rpc_chat_direct_open',
+    'rpc_chat_direct_conversations',
+    'rpc_chat_direct_messages',
+    'rpc_chat_direct_send',
+    'rpc_chat_direct_mark_read',
+  ]) {
+    assert.match(migration, new RegExp('function public\\.' + fn));
+  }
+
+  for (const fn of [
+    'getDirectStaffDirectory',
+    'getDirectConversations',
+    'openDirectConversation',
+    'getDirectMessages',
+    'sendDirectMessage',
+    'markDirectRead',
+  ]) assert.match(api, new RegExp(fn));
+
+  assert.match(chat, /1-on-1 Direct Messages/);
+  assert.match(chat, /openDirectChat/);
+  assert.match(chat, /sendDirectChat/);
+  assert.match(chat, /API\.sendDirectMessage/);
+  assert.match(chat, /Only registered active staff in your school are shown/);
+});
+
+test('Direct messaging is tenant- and membership-bound server-side', () => {
+  const migration = read('supabase/migrations/20261008110000_staff_direct_messaging.sql');
+  for (const fn of ['rpc_chat_staff_directory','rpc_chat_direct_open','rpc_chat_direct_conversations','rpc_chat_direct_messages','rpc_chat_direct_send','rpc_chat_direct_mark_read']) {
+    const idx = migration.indexOf('function public.' + fn);
+    assert.ok(idx >= 0, fn + ' missing');
+    const block = migration.slice(idx, idx + 9000);
+    assert.match(block, /p_session_token text/);
+    assert.match(block, /expires_at>now\(\)/);
+    assert.match(block, /t\.status='active'/);
+    assert.match(block, /t\.school_id=s\.school_id/);
+  }
+  const send = migration.slice(migration.indexOf('function public.rpc_chat_direct_send'), migration.indexOf('function public.rpc_chat_direct_mark_read'));
+  assert.match(send, /not exists\(select 1 from public\.staff_direct_members/);
+  assert.match(send, /school_id=v_sess\.school_id/);
+  assert.match(send, /invalid_reply_target/);
+  assert.match(send, /r\.conversation_id=p_conversation_id/);
+  assert.match(send, /r\.school_id=v_sess\.school_id/);
+});
