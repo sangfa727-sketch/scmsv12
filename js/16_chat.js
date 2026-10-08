@@ -517,7 +517,11 @@ function _renderInquiryWorkspace() {
 let _inquiryTickets=[], _inquiryTicketId=null, _inquiryCurrentTicket=null, _inquiryDraft=null;
 function _renderInquiryTicketList(){
   const box=document.getElementById('inquiryTicketList'); if(!box)return;
-  box.innerHTML=_inquiryTickets.length?_inquiryTickets.map(item=>`<button class="smart-chat-channel-card ${Number(item.id)===Number(_inquiryTicketId)?'active':''}" onclick="_openInquiryTicket(${Number(item.id)})"><span class="smart-chat-channel-icon">🎫</span><span><strong>${esc(item.subject)}</strong><small>${esc(item.status)} · ${esc(item.priority)}</small></span>${Number(item.unread_count)>0?'<b class="smart-chat-unread" title="'+t('chat.unreadMessages')+'">'+esc(item.unread_count)+'</b>':'<b>›</b>'}</button>`).join(''):'<div class="smart-chat-list-empty-card"><div class="icon">🎫</div><strong>${t('chat.noInquiryTickets')}</strong><small>${t('chat.createTicketHint')}</small></div>';
+  const unreadTitle=t('chat.unreadMessages');
+  box.innerHTML=_inquiryTickets.length?_inquiryTickets.map(item=>{
+    const unread=Number(item.unread_count)>0?'<b class="smart-chat-unread" title="'+unreadTitle+'">'+esc(item.unread_count)+'</b>':'<b>›</b>';
+    return `<button class="smart-chat-channel-card ${Number(item.id)===Number(_inquiryTicketId)?'active':''}" onclick="_openInquiryTicket(${Number(item.id)})"><span class="smart-chat-channel-icon">🎫</span><span><strong>${esc(item.subject)}</strong><small>${esc(item.status)} · ${esc(item.priority)}</small></span>${unread}</button>`;
+  }).join(''):'<div class="smart-chat-list-empty-card"><div class="icon">🎫</div><strong>'+t('chat.noInquiryTickets')+'</strong><small>'+t('chat.createTicketHint')+'</small></div>';
 }
 async function _loadInquiryTickets(){
   try{
