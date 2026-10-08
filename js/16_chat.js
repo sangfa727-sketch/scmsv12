@@ -131,8 +131,19 @@ async function _loadAdminRecipientPreview(type = null, target = null) {
   try {
     if (!window.API?.getChatRecipientPreview || !window.APP?.is_admin) return;
     const selectedType = type || document.getElementById('adminMsgRecipientType')?.value || 'grade';
+    if (selectedType === 'grade' && window.API?.getChatGradeTargets) {
+      try {
+        const grades = await API.getChatGradeTargets();
+        const select = document.getElementById('adminMsgGrade');
+        if (select && grades.length) {
+          const current = target || select.value || grades[0];
+          select.innerHTML = grades.map(g => \`<option value="${esc(g)}">${esc(g)}</option>\`).join('');
+          select.value = grades.includes(current) ? current : grades[0];
+        }
+      } catch (_) {}
+    }
     const grade = target || document.getElementById('adminMsgGrade')?.value || 'Grade 5';
-    const rows = await API.getChatRecipientPreview(selectedType, selectedType === 'all_staff' ? null : grade);
+    const rows = await API.getChatRecipientPreview(selectedType, selectedType === 'all_staff' ? null : (selectedType === 'teacher' ? (document.getElementById('adminMsgTeacher')?.value || null) : grade));
     if (selectedType === 'teacher') {
       _adminTeacherRecipients = Array.isArray(rows) ? rows : [];
       const select = document.getElementById('adminMsgTeacher');
