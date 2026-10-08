@@ -1487,4 +1487,17 @@ window.I18N_EN = {
   'settings.theme': 'Theme',
   'settings.themeLight': '☀️ Light',
   'settings.themeDark': '🌙 Dark',
+
+  // ── Chat: localized controls ──
+  'chat.sendFailed': 'Send failed',
+  'chat.department.refresh': 'Refresh departments',
+  'chat.department.select': 'Select a department...',
+  'chat.department.placeholder': 'Write a department message...',
+  'chat.grade.refresh': 'Refresh grades',
+  'chat.grade.placeholder': 'Write a grade message...',
+  'chat.groups.refresh': 'Refresh groups',
+  'chat.groups.placeholder': 'Write a message…',
+  'chat.groups.createFailed': 'Create failed',
+  'chat.direct.placeholder': 'Write a private message...',
+  'chat.direct.findTeacher': 'Find a teacher...',
 };
