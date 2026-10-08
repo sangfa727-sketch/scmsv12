@@ -574,7 +574,7 @@ test('public school website stays outside the private SCMS data boundary', () =>
   const website = read('school-website/README.md');
   const contract = read('school-website/WEBSITE_CONTENT_CONTRACT.md');
   const app = read('school-website/app.js');
-  assert.match(website, /private SCMS/i);
+  assert.match(website, /private management core/i);
   assert.match(contract, /MUST NOT read or expose/);
   for (const forbidden of ['students','attendance','billing','health records','staff chat']) {
     assert.match(contract, new RegExp(forbidden, 'i'));
@@ -593,7 +593,7 @@ test('public admission remains an isolated intake contract and never writes Stud
   assert.match(schema, /website_admission_applications/);
   assert.match(schema, /enable row level security/);
   assert.match(schema, /NO anon SELECT\/UPDATE\/DELETE policy/);
-  assert.match(contract, /application.*intake/i);
+  assert.match(contract, /isolated admission application store/i);
   assert.match(contract, /school_id/);
   assert.match(contract, /trusted hostname/i);
 });
