@@ -15,7 +15,24 @@
     'page.dashboard.eyebrow':'概要','page.dashboard.title':'今日の<em>ダッシュボード</em>','page.students.title':'私の<em>生徒</em>','page.attend.title':'<em>出欠</em>','page.hw.title':'<em>宿題</em>','page.grades.title':'<em>成績</em>','page.billing.title':'<em>請求</em>','page.admissions.title':'<em>入学受付</em>','page.library.title':'<em>図書館</em>','page.transport.title':'<em>送迎</em>','page.incidents.title':'<em>インシデント</em>','page.timetable.title':'<em>時間割</em>','page.summary.title':'月間<em>サマリー</em>','page.more.title':'その他の<em>機能</em>',
     'tab.students':'生徒','tab.attend':'出欠','tab.daily':'日次','tab.hw':'宿題','tab.chat':'チャット','tab.more':'その他',
     'att.clearMarks':'記録をクリア','att.history':'履歴','att.historyTitle':'履歴とレポート','att.codes':'コード'
-  };
+  
+  "chat.allStaff": "全スタッフ",
+  "chat.staffGeneral": "スタッフ全体の会話",
+  "chat.officialAnnouncements": "公式お知らせ",
+  "chat.officialNotices": "システム公式通知",
+  "chat.departmentGrade": "部署と学年",
+  "chat.classDepartmentChannels": "クラス / 部署チャンネル",
+  "chat.directMessages": "1対1ダイレクトメッセージ",
+  "chat.privateStaffChat": "スタッフ間のプライベートチャット",
+  "chat.temporaryWorkGroups": "一時作業グループ",
+  "chat.verifiedStaffOnly": "確認済みスタッフのみ",
+  "chat.findTeacher": "教員を検索…",
+  "chat.startDirect": "メッセージを開始する教員を選択…",
+  "chat.noConversations": "会話はまだありません",
+  "chat.newConversation": "新しい会話",
+  "chat.writePrivate": "プライベートメッセージを入力…",
+  "chat.noMessages": "メッセージはまだありません",
+};
   Object.assign(overrides, {
     'hw.tapAdd':'＋をタップして宿題を追加','hw.due':'提出期限','hw.addTitle':'宿題を追加','hw.subject':'科目','hw.addSubject':'科目を追加','hw.class':'クラス','hw.type':'種類','hw.description':'説明','hw.descPh':'宿題の説明…','hw.lbPage':'LBページ','hw.wbPage':'WBページ','hw.pagePh1':'例: 24','hw.pagePh2':'例: 25','hw.dueDate':'提出期限','hw.saved':'✓ 宿題を保存しました','hw.editTitle':'宿題を編集','hw.updated':'✓ 更新しました','hw.confirmTitle':'この宿題を削除しますか？','hw.confirmBody':'この宿題を削除してもよろしいですか？',
     'comms.none':'メッセージはまだありません','comms.noneSub':'ここから保護者にメッセージを送信できます','comms.broadcast':'一斉連絡','comms.purpose':'目的','comms.confirmTitle':'送信を確認','comms.sendTitle':'メッセージを送信','comms.sendTo':'送信先','comms.wholeClass':'クラス全体','comms.individual':'個別','comms.class':'クラス','comms.student':'生徒','comms.chooseStudent':'生徒を選択','comms.message':'メッセージ','comms.msgPh':'メッセージを入力…','comms.send':'送信','comms.pickerTitle':'送信先を選択','comms.msgRequired':'メッセージを入力してください','comms.pickStudentFirst':'先に生徒を選択してください','comms.sending':'送信中…','comms.sent':'✓ 送信しました',
