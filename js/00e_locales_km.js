@@ -1480,4 +1480,20 @@ window.I18N_KM = {
   'chat.gradeAccess': 'មិនមានការចាត់តាំងថ្នាក់ដែលសកម្មសម្រាប់គណនីបុគ្គលិកនេះទេ។',
   'chat.gradePrefix': 'ថ្នាក់: '
   ,'chat.individualPrefix': 'បុគ្គល: '
+
+  // Staff Chat workspace localization additions
+  "chat.workspace.department": "នាយកដ្ឋាន",
+  "chat.workspace.grade": "ថ្នាក់",
+  "chat.workspace.groups": "ក្រុមគម្រោង / ព្រឹត្តិការណ៍",
+  "chat.workspace.tickets": "សំបុត្រសំណួរ",
+  "chat.refresh": "ផ្ទុកឡើងវិញ",
+  "chat.selectDepartment": "ជ្រើសរើសនាយកដ្ឋាន",
+  "chat.selectTeacher": "ជ្រើសរើសគ្រូ",
+  "chat.selectTicket": "ជ្រើសរើសសំបុត្រ",
+  "chat.noGradeAccess": "មិនមានសិទ្ធិចូលថ្នាក់ទេ",
+  "chat.noDepartmentAccess": "មិនមានសិទ្ធិចូលនាយកដ្ឋានទេ",
+  "chat.noGroups": "មិនទាន់មានក្រុមទេ",
+  "chat.startGrade": "ចាប់ផ្តើមការសន្ទនាតាមថ្នាក់។",
+  "chat.staffOnlyGrade": "ការសន្ទនាតាមថ្នាក់សម្រាប់បុគ្គលិកតែប៉ុណ្ណោះ",
+  "chat.departmentAccess": "អ្នកគ្រប់គ្រងត្រូវចាត់តាំងអ្នកទៅនាយកដ្ឋានសកម្មជាមុនសិន។",
 };
