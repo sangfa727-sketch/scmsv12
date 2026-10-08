@@ -15,7 +15,24 @@
     'page.dashboard.eyebrow':'ภาพรวม','page.dashboard.title':'<em>แดชบอร์ด</em> วันนี้','page.students.title':'<em>นักเรียน</em>ของฉัน','page.attend.title':'<em>การเข้าเรียน</em>','page.hw.title':'<em>การบ้าน</em>','page.grades.title':'<em>ผลการเรียน</em>','page.billing.title':'<em>การเรียกเก็บเงิน</em>','page.admissions.title':'<em>การรับสมัคร</em>','page.library.title':'<em>ห้องสมุด</em>','page.transport.title':'<em>การเดินทาง</em>','page.incidents.title':'<em>เหตุการณ์</em>','page.timetable.title':'<em>ตารางเรียน</em>','page.summary.title':'<em>สรุปรายเดือน</em>','page.more.title':'<em>ฟีเจอร์เพิ่มเติม</em>',
     'tab.students':'นักเรียน','tab.attend':'เข้าเรียน','tab.daily':'รายวัน','tab.hw':'การบ้าน','tab.chat':'แชต','tab.more':'เพิ่มเติม',
     'att.clearMarks':'ล้างเครื่องหมาย','att.history':'ประวัติ','att.historyTitle':'ประวัติและรายงาน','att.codes':'รหัส'
-  };
+  
+  "chat.allStaff": "บุคลากรทั้งหมด",
+  "chat.staffGeneral": "การสนทนาทั่วไปของบุคลากร",
+  "chat.officialAnnouncements": "ประกาศทางการ",
+  "chat.officialNotices": "ประกาศทางการจากระบบ",
+  "chat.departmentGrade": "แผนกและระดับชั้น",
+  "chat.classDepartmentChannels": "ช่องชั้นเรียน / แผนก",
+  "chat.directMessages": "ข้อความตรง 1 ต่อ 1",
+  "chat.privateStaffChat": "แชตส่วนตัวระหว่างบุคลากร",
+  "chat.temporaryWorkGroups": "กลุ่มงานชั่วคราว",
+  "chat.verifiedStaffOnly": "เฉพาะบุคลากรที่ยืนยันแล้ว",
+  "chat.findTeacher": "ค้นหาครู...",
+  "chat.startDirect": "เลือกครูเพื่อเริ่มส่งข้อความ...",
+  "chat.noConversations": "ยังไม่มีการสนทนา",
+  "chat.newConversation": "การสนทนาใหม่",
+  "chat.writePrivate": "เขียนข้อความส่วนตัว...",
+  "chat.noMessages": "ยังไม่มีข้อความ",
+};
   Object.assign(overrides, {
     'hw.tapAdd':'แตะ + เพื่อเพิ่มการบ้าน','hw.due':'กำหนดส่ง','hw.addTitle':'เพิ่มการบ้าน','hw.subject':'วิชา','hw.addSubject':'เพิ่มวิชา','hw.class':'ชั้นเรียน','hw.type':'ประเภท','hw.description':'รายละเอียด','hw.descPh':'รายละเอียดการบ้าน…','hw.lbPage':'หน้า LB','hw.wbPage':'หน้า WB','hw.pagePh1':'เช่น 24','hw.pagePh2':'เช่น 25','hw.dueDate':'วันครบกำหนด','hw.saved':'✓ บันทึกการบ้านแล้ว','hw.editTitle':'แก้ไขการบ้าน','hw.updated':'✓ อัปเดตแล้ว','hw.confirmTitle':'ลบการบ้านนี้?','hw.confirmBody':'คุณแน่ใจหรือไม่ว่าต้องการลบการบ้านนี้?',
     'comms.none':'ยังไม่มีข้อความ','comms.noneSub':'ส่งข้อความถึงผู้ปกครองจากที่นี่','comms.broadcast':'ประกาศ','comms.purpose':'วัตถุประสงค์','comms.confirmTitle':'ยืนยันการส่ง','comms.sendTitle':'ส่งข้อความ','comms.sendTo':'ส่งถึง','comms.wholeClass':'ทั้งชั้น','comms.individual':'รายบุคคล','comms.class':'ชั้นเรียน','comms.student':'นักเรียน','comms.chooseStudent':'เลือกนักเรียน','comms.message':'ข้อความ','comms.msgPh':'พิมพ์ข้อความ…','comms.send':'ส่ง','comms.pickerTitle':'เลือกผู้รับ','comms.msgRequired':'กรุณาใส่ข้อความ','comms.pickStudentFirst':'กรุณาเลือกนักเรียนก่อน','comms.sending':'กำลังส่ง…','comms.sent':'✓ ส่งแล้ว',
