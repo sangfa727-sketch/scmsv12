@@ -25,7 +25,9 @@ create index if not exists idx_staff_grade_read_state_teacher
   on public.staff_grade_read_state (school_id, teacher_id, grade_name);
 
 alter table public.staff_grade_messages enable row level security;
+alter table public.staff_grade_messages force row level security;
 alter table public.staff_grade_read_state enable row level security;
+alter table public.staff_grade_read_state force row level security;
 revoke all on public.staff_grade_messages from anon, authenticated;
 revoke all on public.staff_grade_read_state from anon, authenticated;
 
