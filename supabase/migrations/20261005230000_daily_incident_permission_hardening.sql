@@ -1,11 +1,11 @@
 -- SCMS v12 — Daily Reports / Incidents authorization hardening
-insert into public.permission_definitions(permission_key,category,scope_type,is_active)
+insert into public.permission_definitions(permission_key,category,description,scope_type,is_sensitive,is_active)
 values
- ('daily_report.view','daily','class',true),
- ('incident.view','incident','class',true),
- ('incident.create','incident','class',true),
- ('incident.edit','incident','class',true),
- ('incident.delete','incident','class',true)
+ ('daily_report.view','daily','View daily reports for assigned classes','class',false,true),
+ ('incident.view','incident','View incidents for assigned classes','class',false,true),
+ ('incident.create','incident','Create incidents for assigned classes','class',false,true),
+ ('incident.edit','incident','Edit incidents for assigned classes','class',false,true),
+ ('incident.delete','incident','Delete incidents for assigned classes','class',false,true)
 on conflict(permission_key) do update set scope_type=excluded.scope_type,is_active=true;
 
 insert into public.role_permissions(role,permission_key,allowed)
