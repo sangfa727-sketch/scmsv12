@@ -138,3 +138,23 @@ test.describe('Department Chat authorization isolation (two-account staging)', (
     await nonMember.close();
   });
 });
+
+
+test.describe('Department Chat mobile navigation', () => {
+  test('returns from a selected department to the department list', async ({ page }) => {
+    test.skip(process.env.SCMS_REQUIRE_STAGING !== '1', 'Department Chat mobile E2E requires the staging/manual E2E run');
+    await page.setViewportSize({ width: 390, height: 844 });
+    await page.goto(BASE_URL);
+    await page.getByTestId('login-teacher-id').fill(TEACHER_ID);
+    await page.getByTestId('login-password').fill(TEACHER_PW);
+    await page.getByTestId('login-submit').click();
+    await page.getByTestId('nav-chat').click();
+    await page.getByTestId('chat-channel-departments').click();
+    const row = page.locator('[data-testid^="department-row-"]').first();
+    await expect(row).toBeVisible();
+    await row.click();
+    await expect(page.locator('#departmentChatInput')).toBeEnabled();
+    await page.getByRole('button', { name: 'Back to departments' }).click();
+    await expect(page.locator('#departmentList')).toBeVisible();
+  });
+});
