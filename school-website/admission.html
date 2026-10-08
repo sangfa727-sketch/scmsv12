@@ -1,0 +1,43 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta name="referrer" content="strict-origin-when-cross-origin">
+  <title>Admission Application — SCMS School Website</title>
+  <link rel="stylesheet" href="./styles.css">
+  <link rel="stylesheet" href="./admission.css">
+</head>
+<body>
+  <header class="site-header">
+    <div><span class="eyebrow">SCMS SCHOOL WEBSITE</span><h1 id="schoolName">School</h1></div>
+    <nav aria-label="Primary"><a href="./index.html">Home</a><a href="./index.html#admissions">Admissions</a></nav>
+  </header>
+  <main>
+    <section class="hero compact">
+      <p class="eyebrow">ADMISSION APPLICATION</p><h2>Apply to this school</h2>
+      <p>Submit an admission enquiry without creating a student record. The school will review the application first.</p>
+    </section>
+    <section class="card">
+      <form id="admissionForm" novalidate>
+        <div class="form-grid">
+          <label>Student name <input name="student_name" required maxlength="160" autocomplete="name"></label>
+          <label>Date of birth <input name="date_of_birth" type="date"></label>
+          <label>Applying grade/class <input name="applying_grade" required maxlength="80"></label>
+          <label>Parent/guardian name <input name="guardian_name" required maxlength="160"></label>
+          <label>Phone <input name="guardian_phone" required maxlength="40" autocomplete="tel"></label>
+          <label>Email <input name="guardian_email" type="email" maxlength="254" autocomplete="email"></label>
+          <label>Previous school <input name="previous_school" maxlength="200"></label>
+          <label>Preferred contact method <select name="preferred_contact"><option value="phone">Phone</option><option value="email">Email</option></select></label>
+        </div>
+        <label>Message / additional information <textarea name="message" maxlength="4000" rows="5"></textarea></label>
+        <input class="hp" name="website" tabindex="-1" autocomplete="off" aria-hidden="true">
+        <button type="submit">Submit admission application</button>
+        <p id="formStatus" class="form-status" role="status" aria-live="polite"></p>
+      </form>
+    </section>
+  </main>
+  <footer><span>Powered by SCMS v12</span></footer>
+  <script src="./admission.js"></script>
+</body>
+</html>
