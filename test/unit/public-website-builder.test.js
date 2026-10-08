@@ -29,3 +29,11 @@ test('mobile preview remains on-demand and source compiles',()=>{
  const html=read('school-website/create.html'),css=read('school-website/create.css'),js=read('school-website/create.js');
  assert.match(html,/id="previewToggle"/);assert.match(css,/@media\(max-width:1000px\)/);assert.match(css,/\.preview-panel\.open/);new Function(js);
 });
+
+
+test('section navigation exposes stable anchors and keyboard-safe interaction',()=>{
+ const html=read('school-website/create.html'),css=read('school-website/create.css'),js=read('school-website/create.js');
+ for(const section of ['hero','about','programs','facilities','news','contact']) assert.match(html,new RegExp('id="'+section+'"'));
+ assert.match(html,/aria-label="Page sections"/); assert.match(html,/href="#hero"/); assert.match(html,/href="#contact"/);
+ assert.match(css,/\.section-nav a:focus-visible/); assert.match(css,/\.section-nav a\.active/); assert.match(js,/IntersectionObserver/); assert.match(js,/initSectionNavigation/);
+});
