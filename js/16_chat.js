@@ -60,19 +60,9 @@ function _verifiedStaffList() {
   );
 }
 
-function _gradeRecipientPreview(grade) {
-  // Server-authorized recipients are preferred. Bootstrap data is only a
-  // temporary preview fallback; it must never be treated as authorization.
-  if (String(grade).toLowerCase() === 'grade 5' && Array.isArray(_adminGradeRecipients)) {
-    return _adminGradeRecipients;
-  }
-  if (Array.isArray(_adminGradeRecipients) && _adminGradeRecipients.length) return [];
-  const staff = _verifiedStaffList();
-  return staff.filter(t => {
-    const classes = String(t.classes || '');
-    const assigned = Array.isArray(t.classes) ? t.classes : classes.split(/[,|]/).map(x => x.trim()).filter(Boolean);
-    return assigned.some(x => x.toLowerCase() === String(grade).toLowerCase());
-  });
+function _gradeRecipientPreview() {
+  // Recipient preview must come only from the server-authorized result.
+  return Array.isArray(_adminGradeRecipients) ? _adminGradeRecipients : [];
 }
 
 function _adminRecipientRows(type,target) {
