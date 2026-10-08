@@ -87,7 +87,7 @@ function _renderAdminComposer() {
         </label>
         <label id="adminMsgGradeWrap">Grade
           <select id="adminMsgGrade" onchange="_loadAdminRecipientPreview('grade',this.value)">
-            <option value="Grade 5" selected>Loading available grades…</option>
+            <option value="" selected>Loading available grades…</option>
           </select>
         </label>
         <label id="adminMsgTeacherWrap" style="display:none">Teacher
@@ -137,7 +137,7 @@ async function _loadAdminRecipientPreview(type = null, target = null) {
         const grades = await API.getChatGradeTargets();
         const select = document.getElementById('adminMsgGrade');
         if (select && grades.length) {
-          const current = target || (select.value && select.value !== 'Grade 5' ? select.value : null) || grades[0];
+          const current = target || select.value || grades[0];
           select.innerHTML = grades.map(g => `<option value="${esc(g)}">${esc(g)}</option>`).join('');
           select.value = grades.includes(current) ? current : grades[0];
         }
@@ -306,7 +306,6 @@ function renderChat() {
   const page = document.getElementById('page-chat');
   if (!page) return;
   _enterChatWorkspace();
-  if (!page) return;
 
   page.innerHTML = `
     <div class="smart-chat-shell">
