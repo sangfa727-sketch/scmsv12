@@ -462,6 +462,8 @@ test('Grade Staff Chat is session, tenant, assignment, RLS, and read-state bound
     assert.match(migration, new RegExp(fn + '[\\\\s\\\\S]{0,5000}expires_at>now\\\\(\\\\)'));
     assert.match(migration, new RegExp(fn + '[\\\\s\\\\S]{0,7000}school_id=v_school_id'));
     assert.match(migration, new RegExp(fn + '[\\\\s\\\\S]{0,8000}teacher_class_assignments'));
+    assert.match(migration, new RegExp(fn + '[\\\\s\\\\S]{0,5000}t\\\\.status=\\'active\\''));
+    assert.match(migration, new RegExp(fn + '[\\\\s\\\\S]{0,8000}tca\\\\.is_active is true'));
   }
   assert.match(migration, /alter table public\\.staff_grade_messages enable row level security/);
   for (const table of ['staff_grade_messages','staff_grade_read_state']) assert.match(migration, new RegExp('revoke all on public\\\\.' + table + ' from anon, authenticated'));
