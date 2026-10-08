@@ -394,3 +394,30 @@ test('Official Staff Announcements UI and API are connected to the guarded serve
   assert.match(chat, /Department — coming next/);
   assert.match(chat, /teacher — coming next/);
 });
+
+
+test('Grade channels use assignment-bound server authorization', () => {
+  const api = read('js/02L_api_chat.js');
+  const ui = read('js/16_chat_grade.js');
+  const migration = read('supabase/migrations/20261008170000_staff_grade_channels.sql');
+  for (const fn of ['rpc_chat_grade_list','rpc_chat_grade_send','rpc_chat_grade_mark_read']) {
+    assert.match(migration, new RegExp('function public\\\\.' + fn));
+  }
+  assert.match(migration, /p_session_token text/);
+  assert.match(migration, /expires_at>now\\(\\)/);
+  assert.match(migration, /t\.status='active'/);
+  assert.match(migration, /t\.school_id=s\.school_id/);
+  assert.match(migration, /teacher_class_assignments/);
+  assert.match(migration, /a\.is_active=true/);
+  assert.match(migration, /lower\(a\.class_name\)=lower\(v_grade\)/);
+  assert.match(migration, /not_assigned/);
+  assert.match(migration, /invalid_reply_target/);
+  assert.match(migration, /revoke all on function public\.rpc_chat_grade_send/);
+  assert.match(migration, /grant execute on function public\.rpc_chat_grade_send/);
+  assert.match(api, /getGradeMessages/);
+  assert.match(api, /sendGradeMessage/);
+  assert.match(api, /markGradeRead/);
+  assert.match(ui, /Department &amp; Grade/);
+  assert.match(ui, /API\.sendGradeMessage/);
+  assert.match(ui, /Server authorized/);
+});
