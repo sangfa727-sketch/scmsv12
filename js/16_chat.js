@@ -77,7 +77,7 @@ function _renderAdminComposer() {
   if (!window.APP?.is_admin) return '';
   const recipients = _adminGradeRecipients;
   return `
-    <section class="smart-chat-admin-card" aria-label="Admin official message composer">
+    <section class="smart-chat-admin-card" aria-label="${t('chat.adminComposer')}">
       <div class="smart-chat-section-head">
         <div>
           <div class="smart-chat-kicker">ADMIN TOOLS</div>
@@ -113,13 +113,13 @@ function _renderAdminComposer() {
           </select>
         </label>
         <label>Reason
-          <input id="adminMsgReason" value="Official school communication"
+          <input id="adminMsgReason" value="${t('chat.officialCommunication')}"
                  oninput="_refreshAdminComposerPreview()">
         </label>
       </div>
 
       <label class="smart-chat-body-field">Body
-        <textarea id="adminMsgBody" rows="3" placeholder="Write the official message..." oninput="_refreshAdminComposerPreview()"></textarea>
+        <textarea id="adminMsgBody" rows="3" placeholder="${t('chat.writeOfficialMessage')}" oninput="_refreshAdminComposerPreview()"></textarea>
       </label>
 
       <div class="smart-chat-routing-status blocked" id="adminMsgRoutingStatus">
@@ -161,7 +161,7 @@ async function _loadAdminRecipientPreview(type = null, target = null) {
       if (select) {
         const current = select.value;
         select.innerHTML = '<option value="">Select a teacher</option>' +
-          _adminTeacherRecipients.map(t => `<option value="${esc(t.teacher_id)}">${esc(t.teacher_name)} · ${esc(t.role || 'Teacher')}</option>`).join('');
+          _adminTeacherRecipients.map(t => `<option value="${esc(t.teacher_id)}">${esc(t.teacher_name)} · ${esc(t.role || t('chat.teacher'))}</option>`).join('');
         if (_adminTeacherRecipients.some(t => t.teacher_id === current)) select.value = current;
       }
     } else if (selectedType === 'grade') {
@@ -199,7 +199,7 @@ window.sendOfficialAnnouncement = async function() {
   if (btn) btn.disabled = true;
   try {
     const result = await API.createStaffAnnouncement(recipientType, target, messageType, reason, body);
-    if (!result?.ok) throw new Error(result?.error || 'Send failed');
+    if (!result?.ok) throw new Error(result?.error || t('chat.sendFailed'));
     if (btn) btn.innerHTML = '✓ Sent';
     showToast('Official message sent to ' + result.recipient_count + ' verified staff.');
     document.getElementById('adminMsgBody').value = '';
@@ -234,17 +234,17 @@ window._refreshAdminComposerPreview = function() {
   const title = document.getElementById('adminMsgRoutingTitle');
   const names = document.getElementById('adminMsgRoutingNames');
   if (status) status.className = 'smart-chat-routing-status ' + (validRecipient ? 'verified' : 'blocked');
-  if (title) title.textContent = validRecipient ? (recipientType === 'teacher' ? '1 verified recipient' : recipients.length + ' verified recipient(s)') : 'No verified recipient';
-  if (names) names.textContent = validRecipient ? (recipientType === 'teacher' ? selectedTeacher.teacher_name : recipients.map(t => t.teacher_name).join(', ')) : 'Server authorization did not return an active same-school recipient.';
+  if (title) title.textContent = validRecipient ? (recipientType === 'teacher' ? t('chat.oneVerifiedRecipient') : recipients.length + ' verified recipient(s)') : t('chat.noVerifiedRecipient');
+  if (names) names.textContent = validRecipient ? (recipientType === 'teacher' ? selectedTeacher.teacher_name : recipients.map(t => t.teacher_name).join(', ')) : t('chat.noVerifiedSameSchoolRecipient');
   const sendBtn = document.getElementById('adminMsgSendBtn');
   if (sendBtn) sendBtn.disabled = !window.APP?.is_admin || !reason || reason === '—' || !body || body === '—' || !validRecipient;
-  const header = type === 'announcement' ? 'Official Announcements Channel' : type === 'task' ? 'Official Staff Task' : 'Staff Notice';
+  const header = type === 'announcement' ? t('chat.officialAnnouncements') : type === 'task' ? t('chat.officialStaffTask') : t('chat.staffNotice');
   const targetLabel = recipientType === 'all_staff' ? t('chat.allStaff') : recipientType === 'grade' ? t('chat.gradePrefix') + grade : t('chat.individualPrefix') + (selectedTeacher?.teacher_name || t('chat.selectTeacher'));
   box.innerHTML = `
     <div class="smart-chat-preview-label">SYSTEM-GENERATED HEADER</div>
     <div class="smart-chat-preview-header">${esc(header)}</div>
     <div class="smart-chat-preview-meta">${esc(targetLabel)} · Verified recipients: ${validRecipient ? (recipientType === 'teacher' ? 1 : recipients.length) : 0}</div>
-    <div class="smart-chat-preview-reason"><strong>Reason</strong><span>${esc(reason)}</span></div>
+    <div class="smart-chat-preview-reason"><strong>${t('chat.reason')}</strong><span>${esc(reason)}</span></div>
     <div class="smart-chat-preview-body">${esc(body).replace(/\\n/g, '<br>')}</div>
   `;
 };
@@ -335,7 +335,7 @@ function renderChat() {
   page.innerHTML = `
     <div class="smart-chat-shell">
       <div class="smart-chat-hero">
-        <button type="button" class="smart-chat-nav-back" onclick="_chatBackToMenu()" aria-label="Exit Chat">‹ <span>Exit Chat</span></button>
+        <button type="button" class="smart-chat-nav-back" onclick="_chatBackToMenu()" aria-label="${t('chat.exitChat')}">‹ <span>${t('chat.exitChat')}</span></button>
         <div>
           <div class="page-eyebrow">COMMUNICATION CENTER</div>
           <h1 class="page-title">Smart <em>Chat</em></h1>
@@ -410,7 +410,7 @@ function _renderChatMode() {
         </div>
         <div class="smart-chat-ai-note"><strong>UI shell only</strong><br>AI Universe Layer execution is intentionally not connected yet. When it is ready, this same interface will connect to the authorized AI action flow.</div>
         <div class="smart-chat-ai-composer">
-          <input id="aiChatInput" placeholder="Ask about schedule, students, attendance..." onkeydown="if(event.key==='Enter')_aiPrompt(this.value)">
+          <input id="aiChatInput" placeholder="${t('chat.aiPlaceholder')}" onkeydown="if(event.key==='Enter')_aiPrompt(this.value)">
           <button onclick="_aiPrompt(document.getElementById('aiChatInput')?.value)">${_chatIcon('send')}</button>
         </div>
       </section>`;
@@ -467,7 +467,7 @@ function _renderChatMode() {
       </aside>
       <section class="smart-chat-conversation">
         <div class="smart-chat-conversation-head">
-          <div><strong>${esc(channels.find(c=>c.id===_chatChannel)?.name || 'School Chat')}</strong><small>${esc(channels.find(c=>c.id===_chatChannel)?.sub || '')}</small></div>
+          <div><strong>${esc(channels.find(c=>c.id===_chatChannel)?.name || t('chat.schoolChat'))}</strong><small>${esc(channels.find(c=>c.id===_chatChannel)?.sub || '')}</small></div>
           <span class="smart-chat-verified-pill">${t('chat.verifiedStaffOnly')}</span>
         </div>
         <div class="chat-stream" id="chatStream">${skeletonCards(2)}</div>
@@ -487,7 +487,7 @@ function _renderChatMode() {
 
 
 function _renderInquiryWorkspace() {
-  return _chatChannelBack('School Chat') + `
+  return _chatChannelBack(t('chat.schoolChat')) + `
     <div class="smart-chat-direct-shell smart-chat-inquiry-shell${_inquiryTicketId ? " has-selection" : ""}">
       <aside class="smart-chat-direct-list">
         <div class="smart-chat-direct-list-head"><div><div class="smart-chat-kicker">INQUIRY</div><strong>${t('chat.workspace.tickets')}</strong></div><button type="button" onclick="_loadInquiryTickets()" title="Refresh">↻</button></div>
@@ -499,7 +499,7 @@ function _renderInquiryWorkspace() {
         <div id="inquiryTicketHead" class="smart-chat-conversation-head"><div><strong>Select a ticket</strong><small>Only authorized staff in this school can access ticket messages.</small></div><span class="smart-chat-verified-pill">School isolated</span></div>
         <div id="inquiryMessageStream" class="chat-stream smart-chat-direct-stream"><div class="chat-empty"><div class="chat-empty-icon">🎫</div><div class="chat-empty-title">${t('chat.workspace.tickets')}</div><div class="chat-empty-sub">Create or select a staff ticket.</div></div></div>
         <form class="chat-composer smart-chat-direct-composer" onsubmit="return _sendInquiryFromComposer(event)">
-          <textarea id="inquiryChatInput" placeholder="Select a ticket..." rows="1" disabled></textarea>
+          <textarea id="inquiryChatInput" placeholder="${t('chat.selectTicketDots')}" rows="1" disabled></textarea>
           <button type="submit" class="chat-send-btn" id="inquirySendBtn" disabled>${_chatIcon('send')}</button>
         </form>
       </section>
@@ -509,7 +509,7 @@ function _renderInquiryWorkspace() {
 let _inquiryTickets=[], _inquiryTicketId=null, _inquiryCurrentTicket=null, _inquiryDraft=null;
 function _renderInquiryTicketList(){
   const box=document.getElementById('inquiryTicketList'); if(!box)return;
-  box.innerHTML=_inquiryTickets.length?_inquiryTickets.map(t=>`<button class="smart-chat-channel-card ${Number(t.id)===Number(_inquiryTicketId)?'active':''}" onclick="_openInquiryTicket(${Number(t.id)})"><span class="smart-chat-channel-icon">🎫</span><span><strong>${esc(t.subject)}</strong><small>${esc(t.status)} · ${esc(t.priority)}</small></span>${Number(t.unread_count)>0?`<b class="smart-chat-unread" title="Unread messages">${esc(t.unread_count)}</b>`:'<b>›</b>'}</button>`).join(''):'<div class="smart-chat-list-empty-card"><div class="icon">🎫</div><strong>No inquiry tickets</strong><small>Create a ticket when a staff issue needs attention.</small></div>';
+  box.innerHTML=_inquiryTickets.length?_inquiryTickets.map(t=>`<button class="smart-chat-channel-card ${Number(t.id)===Number(_inquiryTicketId)?'active':''}" onclick="_openInquiryTicket(${Number(t.id)})"><span class="smart-chat-channel-icon">🎫</span><span><strong>${esc(t.subject)}</strong><small>${esc(t.status)} · ${esc(t.priority)}</small></span>${Number(t.unread_count)>0?`<b class="smart-chat-unread" title="${t('chat.unreadMessages')}">${esc(t.unread_count)}</b>`:'<b>›</b>'}</button>`).join(''):'<div class="smart-chat-list-empty-card"><div class="icon">🎫</div><strong>No inquiry tickets</strong><small>Create a ticket when a staff issue needs attention.</small></div>';
 }
 async function _loadInquiryTickets(){
   try{
@@ -523,7 +523,7 @@ async function _openInquiryTicket(id){
   const h=document.getElementById('inquiryTicketHead'), s=document.getElementById('inquiryMessageStream'), input=document.getElementById('inquiryChatInput'), btn=document.getElementById('inquirySendBtn');
   _inquiryCurrentTicket=r.ticket;
   const adminControls=window.APP?.is_admin?'<div class="smart-chat-inquiry-admin"><label>Status <select id="inquiryStatusSelect" onchange="_updateInquiryTicket()"><option>OPEN</option><option>ASSIGNED</option><option>IN_PROGRESS</option><option>WAITING</option><option>RESOLVED</option><option>CLOSED</option></select></label><label>Assignee <select id="inquiryAssigneeSelect" onchange="_updateInquiryTicket()"><option value="">Unassigned</option></select></label></div>':'';
-  if(h)h.innerHTML=`<div class="smart-chat-direct-peer"><button type="button" class="smart-chat-mobile-back" onclick="_clearInquirySelection()" aria-label="Back to inquiry tickets">‹</button><div><strong>${esc(r.ticket.subject)}</strong><small>${esc(r.ticket.status)} · ${esc(r.ticket.priority)}${r.ticket.student_id?' · Student '+esc(r.ticket.student_id):''}</small></div><span class="smart-chat-verified-pill">Authorized</span>${adminControls}`;
+  if(h)h.innerHTML=`<div class="smart-chat-direct-peer"><button type="button" class="smart-chat-mobile-back" onclick="_clearInquirySelection()" aria-label="${t('chat.backToInquiryTickets')}">‹</button><div><strong>${esc(r.ticket.subject)}</strong><small>${esc(r.ticket.status)} · ${esc(r.ticket.priority)}${r.ticket.student_id?' · Student '+esc(r.ticket.student_id):''}</small></div><span class="smart-chat-verified-pill">${t('chat.authorized')}</span>${adminControls}`;
   if(window.APP?.is_admin){
     const ss=document.getElementById('inquiryStatusSelect'), aa=document.getElementById('inquiryAssigneeSelect');
     if(ss)ss.value=r.ticket.status;
@@ -534,7 +534,7 @@ async function _openInquiryTicket(id){
     }
   }
   if(s)s.innerHTML=(r.messages||[]).map(m=>`<div class="chat-bubble-row"><div class="chat-bubble"><strong>${esc(m.sender_teacher_name)}</strong><div>${esc(m.body).replace(/\n/g,'<br>')}</div><small>${esc(m.created_at||'')}</small></div></div>`).join('')||`<div class="chat-empty-sub">${t('chat.noMessages')}</div>`;
-  if(input){input.disabled=r.ticket.status==='CLOSED';input.placeholder=input.disabled?'Ticket closed':'Write a reply...';}
+  if(input){input.disabled=r.ticket.status==='CLOSED';input.placeholder=input.disabled?t('chat.ticketClosed'):t('chat.writeReply');}
   if(btn)btn.disabled=input?.disabled||!_inquiryTicketId;
   if(window.API?.markInquiryRead){
     try{
@@ -545,7 +545,7 @@ async function _openInquiryTicket(id){
     }catch(e){ /* read state is best-effort; authorization remains server-side */ }
   }
 }
-window._clearInquirySelection=function(){_inquiryTicketId=null;_inquiryCurrentTicket=null;const shell=document.querySelector('.smart-chat-inquiry-shell');if(shell)shell.classList.remove('has-selection');const h=document.getElementById('inquiryTicketHead');if(h)h.innerHTML='<div><strong>Select a ticket</strong><small>Only authorized staff in this school can access ticket messages.</small></div><span class="smart-chat-verified-pill">School isolated</span>';const s=document.getElementById('inquiryMessageStream');if(s)s.innerHTML='<div class="chat-empty"><div class="chat-empty-icon">🎫</div><div class="chat-empty-title">Select a ticket</div><div class="chat-empty-sub">Create or select a staff ticket.</div></div>';const i=document.getElementById('inquiryChatInput');if(i){i.disabled=true;i.placeholder='Select a ticket...';}const b=document.getElementById('inquirySendBtn');if(b)b.disabled=true;_renderInquiryTicketList();};
+window._clearInquirySelection=function(){_inquiryTicketId=null;_inquiryCurrentTicket=null;const shell=document.querySelector('.smart-chat-inquiry-shell');if(shell)shell.classList.remove('has-selection');const h=document.getElementById('inquiryTicketHead');if(h)h.innerHTML=`<div><strong>${t('chat.selectTicket')}</strong><small>${t('chat.authorizedTicketAccess')}</small></div><span class="smart-chat-verified-pill">${t('chat.schoolIsolated')}</span>`;const s=document.getElementById('inquiryMessageStream');if(s)s.innerHTML=`<div class="chat-empty"><div class="chat-empty-icon">🎫</div><div class="chat-empty-title">${t('chat.selectTicket')}</div><div class="chat-empty-sub">${t('chat.createOrSelectTicket')}</div></div>`;const i=document.getElementById('inquiryChatInput');if(i){i.disabled=true;i.placeholder='Select a ticket...';}const b=document.getElementById('inquirySendBtn');if(b)b.disabled=true;_renderInquiryTicketList();};
 
 async function _updateInquiryTicket(){
   if(!window.APP?.is_admin||!_inquiryTicketId)return;
@@ -564,10 +564,10 @@ function _renderInquiryDraft(){
   if(!_inquiryDraft){root.innerHTML=_inquiryTickets.length?_inquiryTickets.map(t=>`<button class="smart-chat-channel-card ${Number(t.id)===Number(_inquiryTicketId)?'active':''}" onclick="_openInquiryTicket(${Number(t.id)})"><span class="smart-chat-channel-icon">🎫</span><span><strong>${esc(t.subject)}</strong><small>${esc(t.status)} · ${esc(t.priority)}${t.student_id?' · '+esc(t.student_id):''}</small></span><b>›</b></button>`).join(''):'<div class="chat-empty-sub">No tickets yet.</div>';return;}
   root.innerHTML=`
     <form class="smart-chat-inquiry-form" onsubmit="return _submitInquiryDraft(event)">
-      <label>Subject<input id="inquiryDraftSubject" maxlength="160" required placeholder="What needs attention?"></label>
+      <label>${t('chat.subject')}<input id="inquiryDraftSubject" maxlength="160" required placeholder="${t('chat.whatNeedsAttention')}"></label>
       <label>Priority<select id="inquiryDraftPriority"><option>NORMAL</option><option>LOW</option><option>HIGH</option><option>URGENT</option></select></label>
-      <label>Student ID <span class="smart-chat-field-note">optional · same school only</span><input id="inquiryDraftStudent" maxlength="80" placeholder="Student ID"></label>
-      <label>Details<textarea id="inquiryDraftBody" maxlength="4000" rows="5" required placeholder="Describe the issue clearly..."></textarea></label>
+      <label>${t('chat.studentId')} <span class="smart-chat-field-note">${t('chat.optionalSameSchool')}</span><input id="inquiryDraftStudent" maxlength="80" placeholder="${t('chat.studentId')}"></label>
+      <label>Details<textarea id="inquiryDraftBody" maxlength="4000" rows="5" required placeholder="${t('chat.describeIssue')}"></textarea></label>
       <div class="smart-chat-inquiry-form-actions"><button type="button" class="btn-secondary" onclick="_closeInquiryDraft()">Cancel</button><button type="submit" class="btn-primary">Create ticket</button></div>
     </form>`;
 }
@@ -602,10 +602,10 @@ window._toggleAnnouncementComposer=function(force=null){
 };
 function _renderAnnouncementWorkspace(){
   const composer=window.APP?.is_admin ? '<div id="announcementComposer" class="smart-chat-composer-drawer">'+_renderAdminComposer()+'</div>' : '';
-  return _chatChannelBack('School Chat') + composer +
+  return _chatChannelBack(t('chat.schoolChat')) + composer +
     '<div class="smart-chat-direct-shell smart-chat-announcement-shell'+(_announcementId?' has-selection':'')+'">'+
     '<aside class="smart-chat-direct-list"><div class="smart-chat-direct-list-head"><div><div class="smart-chat-kicker">OFFICIAL</div><strong>Announcements</strong></div><div class="smart-chat-list-actions">'+
-    (window.APP?.is_admin ? '<button type="button" class="smart-chat-add-btn" id="announcementComposerToggle" onclick="_toggleAnnouncementComposer()" aria-expanded="false" aria-controls="announcementComposer" title="New official message">+</button>' : '')+
+    (window.APP?.is_admin ? '<button type="button" class="smart-chat-add-btn" id="announcementComposerToggle" onclick="_toggleAnnouncementComposer()" aria-expanded="false" aria-controls="announcementComposer" title="${t('chat.newOfficialMessage')}">+</button>' : '')+
     '<button type="button" class="smart-chat-refresh-btn" onclick="_loadAnnouncementWorkspace()" title="Refresh">↻</button></div></div>'+
     '<div id="announcementList" class="smart-chat-conversation-list"></div></aside>'+
     `<section class="smart-chat-direct-conversation"><div id="announcementHead" class="smart-chat-conversation-head"><div><strong>${t('chat.officialAnnouncements')}</strong><small>School-authorized notices for your staff account.</small></div><span class="smart-chat-verified-pill">Verified</span></div><div id="announcementStream" class="chat-stream"><div class="chat-empty"><div class="chat-empty-icon">📢</div><div class="chat-empty-title">${t('chat.officialAnnouncements')}</div><div class="chat-empty-sub">Loading…</div></div></div></section></div>`;
@@ -627,8 +627,8 @@ window._openAnnouncement=async function(id){
   _announcementId=Number(id);
   const shell=document.querySelector('.smart-chat-announcement-shell');if(shell)shell.classList.add('has-selection');
   const head=document.getElementById('announcementHead');
-  if(head)head.innerHTML='<div class="smart-chat-direct-peer"><button type="button" class="smart-chat-mobile-back" onclick="_clearAnnouncementSelection()" aria-label="Back to announcements">‹</button><div><strong>Official '+esc(a.message_type||'Announcement')+'</strong><small>'+esc(a.created_at||'')+'</small></div></div><span class="smart-chat-verified-pill">Verified</span>';
-  stream.innerHTML='<article class="smart-chat-official-preview"><div class="smart-chat-preview-label">SYSTEM-GENERATED OFFICIAL MESSAGE</div><div class="smart-chat-preview-header">'+esc(a.message_type||'Official Announcement')+'</div><div class="smart-chat-preview-meta">'+esc(a.created_at||'')+' · '+(!a.read_at?'Unread':'Read')+'</div><div class="smart-chat-preview-reason"><strong>Reason</strong><span>'+esc(a.reason||'Official school communication')+'</span></div><div class="smart-chat-preview-body">'+esc(a.body||'').replace(/\n/g,'<br>')+'</div></article>';
+  if(head)head.innerHTML='<div class="smart-chat-direct-peer"><button type="button" class="smart-chat-mobile-back" onclick="_clearAnnouncementSelection()" aria-label="${t('chat.backToAnnouncements')}">‹</button><div><strong>Official '+esc(a.message_type||'Announcement')+'</strong><small>'+esc(a.created_at||'')+'</small></div></div><span class="smart-chat-verified-pill">Verified</span>';
+  stream.innerHTML='<article class="smart-chat-official-preview"><div class="smart-chat-preview-label">SYSTEM-GENERATED OFFICIAL MESSAGE</div><div class="smart-chat-preview-header">'+esc(a.message_type||t('chat.officialAnnouncement'))+'</div><div class="smart-chat-preview-meta">'+esc(a.created_at||'')+' · '+(!a.read_at?t('chat.unread'):t('chat.read'))+'</div><div class="smart-chat-preview-reason"><strong>${t('chat.reason')}</strong><span>'+esc(a.reason||t('chat.officialCommunication'))+'</span></div><div class="smart-chat-preview-body">'+esc(a.body||'').replace(/\n/g,'<br>')+'</div></article>';
   try{if(API.markStaffAnnouncementRead)await API.markStaffAnnouncementRead(id);a.read_at=a.read_at||new Date().toISOString();}catch(e){}
 };
 window._clearAnnouncementSelection=function(){
@@ -640,7 +640,7 @@ window._clearAnnouncementSelection=function(){
   if(stream)stream.innerHTML='<div class="chat-empty"><div class="chat-empty-icon">📢</div><div class="chat-empty-title">Select an announcement</div><div class="chat-empty-sub">Choose an official notice from the list.</div></div>';
 };
 function _renderDirectWorkspace() {
-  return _chatChannelBack('School Chat') + `
+  return _chatChannelBack(t('chat.schoolChat')) + `
     <div class="smart-chat-direct-shell${_directConversationId ? ' has-selection' : ''}">
       <aside class="smart-chat-direct-list">
         <div class="smart-chat-direct-list-head"><div><div class="smart-chat-kicker">PRIVATE</div><strong>Direct messages</strong></div><button type="button" onclick="_loadDirectWorkspace()" title="Refresh">↻</button></div>
@@ -685,7 +685,7 @@ function _renderDirectConversationList() {
   root.innerHTML=_directConversations.map(c=>`
     <button class="smart-chat-direct-item ${Number(c.conversation_id)===Number(_directConversationId)?'active':''}" onclick="openDirectChat('${esc(c.teacher_id)}')">
       <span class="smart-chat-direct-avatar">${esc((c.teacher_name||'?')[0])}</span>
-      <span><strong>${esc(c.teacher_name)}</strong><small>${esc(c.last_message||'No messages yet')}</small></span>
+      <span><strong>${esc(c.teacher_name)}</strong><small>${esc(c.last_message||t('chat.noMessages'))}</small></span>
       ${Number(c.unread_count)>0?`<b class="smart-chat-unread">${esc(c.unread_count)}</b>`:'<i></i>'}
     </button>`).join('');
 }
@@ -698,14 +698,14 @@ function _renderDirectDirectory() {
   root.innerHTML=rows.length?rows.map(t=>`
     <button class="smart-chat-directory-item" onclick="openDirectChat('${esc(t.teacher_id)}')">
       <span class="smart-chat-direct-avatar">${esc((t.teacher_name||'?')[0])}</span>
-      <span><strong>${esc(t.teacher_name)}</strong><small>${esc(t.role||'Teacher')}</small></span><b>›</b>
+      <span><strong>${esc(t.teacher_name)}</strong><small>${esc(t.role||t('chat.teacher'))}</small></span><b>›</b>
     </button>`).join(''):'<div class="smart-chat-list-empty">No active teacher found.</div>';
 }
 
 window.openDirectChat=async function(teacherId){
   try{
     const result=await API.openDirectConversation(teacherId);
-    if(!result?.ok)throw new Error(result?.error||'Unable to open conversation');
+    if(!result?.ok)throw new Error(result?.error||t('chat.unableOpenConversation'));
     _directConversationId=Number(result.conversation_id);
     _directPeer=result.peer||_directStaff.find(t=>t.teacher_id===teacherId)||null;
     _setDirectMobileView(true);
@@ -718,7 +718,7 @@ function _renderDirectHeader(){
   const root=document.getElementById('directConversationHead');
   if(!root||!_directPeer)return;
   root.innerHTML=`
-    <div class="smart-chat-direct-peer"><button class="smart-chat-mobile-back" onclick="_clearDirectSelection()"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m15 18-6-6 6-6"/></svg></button><span class="smart-chat-direct-avatar large">${esc((_directPeer.teacher_name||'?')[0])}</span><div><strong>${esc(_directPeer.teacher_name)}</strong><small>${esc(_directPeer.role||'Teacher')} · Private 1-on-1</small></div></div>
+    <div class="smart-chat-direct-peer"><button class="smart-chat-mobile-back" onclick="_clearDirectSelection()"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m15 18-6-6 6-6"/></svg></button><span class="smart-chat-direct-avatar large">${esc((_directPeer.teacher_name||'?')[0])}</span><div><strong>${esc(_directPeer.teacher_name)}</strong><small>${esc(_directPeer.role||t('chat.teacher'))} · Private 1-on-1</small></div></div>
     <span class="smart-chat-verified-pill">Private</span>`;
 }
 
@@ -773,7 +773,7 @@ window.sendDirectChat=async function(ev){
   btn.disabled=true;input.disabled=true;
   try{
     const result=await API.sendDirectMessage(_directConversationId,value);
-    if(!result?.ok)throw new Error(result?.error||'Send failed');
+    if(!result?.ok)throw new Error(result?.error||t('chat.sendFailed'));
     input.value='';input.style.height='auto';await _loadDirectWorkspace();await _loadDirectMessages();
   }catch(e){showToast('Message could not be sent.');}
   finally{btn.disabled=false;input.disabled=false;input.focus();}
@@ -868,7 +868,7 @@ window.sendChat = async function(ev) {
       delete optimistic.pending;
       if(result.message){const idx=window.APP.chatMessages.indexOf(optimistic);if(idx>=0)window.APP.chatMessages[idx]=result.message;}
       _renderChatStream(window.APP.chatMessages); setTimeout(_loadChatMessages,1200);
-    } else throw new Error((result&&(result.error||result.message))||'Send failed');
+    } else throw new Error((result&&(result.error||result.message))||t('chat.sendFailed'));
   } catch(e) {
     optimistic.failed=true; delete optimistic.pending; _renderChatStream(window.APP.chatMessages); showToast(t('chat.sendFailed'));
   } finally { btn.disabled=false; input.disabled=false; input.focus(); }
