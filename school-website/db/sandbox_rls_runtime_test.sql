@@ -36,7 +36,7 @@ create role website_public_test;
 grant select on website_pages to website_public_test;
 set role website_public_test;
 
-do $
+do $$
 declare
   actual_count integer;
 begin
@@ -78,7 +78,7 @@ begin
   ) then
     raise exception 'School A row leaked into School B result';
   end if;
-end $;
+end $$;
 
 reset role;
 rollback;
