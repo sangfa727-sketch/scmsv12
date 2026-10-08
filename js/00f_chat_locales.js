@@ -109,6 +109,17 @@
   };
   Object.keys(uiFix).forEach(code=>Object.assign(chat[code],uiFix[code]));
 
+  const auditFix={
+    en:{'chat.officialNotice':'Official notice','chat.unknownStaff':'Unknown staff'},
+    my:{'chat.officialNotice':'တရားဝင် အသိပေးချက်','chat.unknownStaff':'မသိရသေးသော ဝန်ထမ်း'},
+    th:{'chat.officialNotice':'ประกาศอย่างเป็นทางการ','chat.unknownStaff':'ไม่ทราบชื่อพนักงาน'},
+    jp:{'chat.officialNotice':'公式通知','chat.unknownStaff':'不明なスタッフ'},
+    ms:{'chat.officialNotice':'Notis rasmi','chat.unknownStaff':'Staf tidak dikenali'},
+    km:{'chat.officialNotice':'សេចក្តីជូនដំណឹងផ្លូវការ','chat.unknownStaff':'បុគ្គលិកមិនស្គាល់'},
+    zh:{'chat.officialNotice':'官方通知','chat.unknownStaff':'未知员工'}
+  };
+  Object.keys(auditFix).forEach(code=>Object.assign(chat[code],auditFix[code]));
+
   const maps={en:'I18N_EN',my:'I18N_MY',th:'I18N_TH',jp:'I18N_JP',ms:'I18N_MS',km:'I18N_KM',zh:'I18N_ZH'};
   Object.keys(maps).forEach(code=>{ window[maps[code]]=Object.assign({},window[maps[code]]||{},code==='en'?en:code==='my'?my:chat[code]); });
 })();
