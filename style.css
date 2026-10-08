@@ -8965,3 +8965,8 @@ html[lang="zh"] textarea {
   .smart-chat-direct-conversation{min-height:54dvh}
   .smart-chat-mobile-back{display:flex;align-items:center;justify-content:center}
 }
+
+@media(max-width:760px){
+  .smart-chat-department-shell.is-mobile-detail .smart-chat-direct-list{display:none}
+  .smart-chat-department-shell.is-mobile-detail .smart-chat-direct-conversation{display:flex;min-height:calc(100dvh - 180px)}
+}
