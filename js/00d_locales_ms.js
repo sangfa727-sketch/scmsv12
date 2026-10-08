@@ -1475,4 +1475,14 @@ window.I18N_MS = {
   "chat.gradeAccess": "Tiada tugasan gred aktif tersedia untuk akaun staf ini.",
   "chat.gradePrefix": "Gred: ",
   "chat.individualPrefix": "Individu: "
+  "chat.department.refresh": "Muat semula jabatan",
+  "chat.department.select": "Pilih jabatan...",
+  "chat.department.placeholder": "Tulis mesej jabatan...",
+  "chat.grade.refresh": "Muat semula gred",
+  "chat.grade.placeholder": "Tulis mesej gred...",
+  "chat.groups.refresh": "Muat semula kumpulan",
+  "chat.groups.placeholder": "Tulis mesej…",
+  "chat.groups.createFailed": "Gagal mencipta",
+  "chat.direct.placeholder": "Tulis mesej peribadi...",
+  "chat.direct.findTeacher": "Cari guru...",
 };
