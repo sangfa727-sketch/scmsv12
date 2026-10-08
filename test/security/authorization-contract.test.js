@@ -449,3 +449,14 @@ test('Department Chat is session, tenant, membership, and read-state bound', () 
   assert.match(chat, /setInterval/);
   assert.match(chat, /API\\.markDepartmentRead/);
 });
+
+
+test('department chat mobile navigation is single-pane and reset-safe', () => {
+  const source = read('js/16_chat_department.js');
+  const css = read('style.css');
+  assert.match(source, /_closeDepartmentMobileView/);
+  assert.match(source, /smart-chat-mobile-back/);
+  assert.match(source, /is-mobile-detail/);
+  assert.match(source, /departmentChatInput/);
+  assert.match(css, /smart-chat-department-shell\.is-mobile-detail/);
+});
