@@ -568,3 +568,152 @@ test('teacher permission Allow/Deny persistence targets the expression-based uni
   assert.ok(migration.includes('teacher.permission_set'));
   assert.ok(!migration.includes('on conflict(school_id,teacher_id,p_permission_key'));
 });
+
+
+test('public school website stays outside the private SCMS data boundary', () => {
+  const website = read('school-website/README.md');
+  const contract = read('school-website/WEBSITE_CONTENT_CONTRACT.md');
+  const app = read('school-website/app.js');
+  assert.match(website, /private management core/i);
+  assert.match(contract, /MUST NOT read or expose/);
+  for (const forbidden of ['students','attendance','billing','health records','staff chat']) {
+    assert.match(contract, new RegExp(forbidden, 'i'));
+  }
+  assert.doesNotMatch(app, /supabase|service_role|students|attendance|billing|health/i);
+  assert.match(app, /window\.location\.hostname/);
+});
+
+test('public admission remains an isolated intake contract and never writes Student Core directly', () => {
+  const form = read('school-website/admission.js');
+  const schema = read('school-website/db/website_admission_schema.sql');
+  const contract = read('school-website/PUBLIC_ADMISSION_CONTRACT.md');
+  assert.match(form, /event\.preventDefault\(\)/);
+  assert.match(form, /no private SCMS write/i);
+  assert.doesNotMatch(form, /supabase|service_role|students|admissions/);
+  assert.match(schema, /website_admission_applications/);
+  assert.match(schema, /enable row level security/);
+  assert.match(schema, /NO anon SELECT\/UPDATE\/DELETE policy/);
+  assert.match(contract, /isolated admission application store/i);
+  assert.match(contract, /school_id/);
+  assert.match(contract, /trusted hostname/i);
+});
+
+
+test('public website hostname resolution is server-side and rejects unsafe tenant selection', () => {
+  const resolver = require('../../school-website/server/hostname-resolver.js');
+  const sites = new Map([
+    ['school-a', { schoolId: 'school-a', active: true }],
+    ['school-b', { schoolId: 'school-b', active: true }],
+    ['school-off', { schoolId: 'school-off', active: false }]
+  ]);
+
+  assert.deepEqual(
+    resolver.resolveSchoolFromHost('school-a.scmsv12.com', sites, 'scmsv12.com'),
+    { schoolId: 'school-a', siteKey: 'school-a' }
+  );
+  assert.equal(resolver.resolveSchoolFromHost('school-off.scmsv12.com', sites, 'scmsv12.com'), null);
+  assert.equal(resolver.resolveSchoolFromHost('unknown.scmsv12.com', sites, 'scmsv12.com'), null);
+  assert.equal(resolver.resolveSchoolFromHost('www.scmsv12.com', sites, 'scmsv12.com'), null);
+  assert.equal(resolver.resolveSchoolFromHost('school-b.scmsv12.com.evil.test', sites, 'scmsv12.com'), null);
+  assert.equal(resolver.resolveSchoolFromHost('school-b.scmsv12.com', sites, 'scmsv12.com', 'school-a'), null);
+});
+
+
+test('public content schema is tenant-scoped and publication-gated', () => {
+  const schema = read('school-website/db/website_content_schema.sql');
+  assert.match(schema, /website_sites/);
+  assert.match(schema, /website_pages/);
+  assert.match(schema, /school_id text not null/);
+  assert.match(schema, /publication_status text not null/);
+  assert.match(schema, /published/);
+  assert.match(schema, /alter table public\.website_sites enable row level security/i);
+  assert.match(schema, /alter table public\.website_pages enable row level security/i);
+  assert.match(schema, /Public access is intentionally not granted/i);
+  assert.match(schema, /trusted hostname\/custom-domain mapping/i);
+  assert.match(schema, /never accept publication_status from the public client/i);
+});
+
+
+test('public content guard permits only published rows for the resolved school', () => {
+  const guard = require('../../school-website/server/public-content-guard.js');
+  const rows = [
+    { school_id: 'school-a', publication_status: 'published', slug: 'home' },
+    { school_id: 'school-a', publication_status: 'draft', slug: 'draft-page' },
+    { school_id: 'school-a', publication_status: 'review', slug: 'review-page' },
+    { school_id: 'school-b', publication_status: 'published', slug: 'other-school' }
+  ];
+  assert.deepEqual(guard.selectPublishedForSchool(rows, 'school-a'), [
+    { school_id: 'school-a', publication_status: 'published', slug: 'home' }
+  ]);
+  assert.deepEqual(guard.selectPublishedForSchool(rows, 'school-b'), [
+    { school_id: 'school-b', publication_status: 'published', slug: 'other-school' }
+  ]);
+  assert.throws(
+    () => guard.assertPublicContentRequest({ schoolId: 'school-a', requestedSchoolId: 'school-b' }),
+    /cross-school public content request rejected/
+  );
+  assert.throws(
+    () => guard.assertPublicContentRequest({}),
+    /public school tenant is required/
+  );
+});
+
+
+test('sandbox runtime SQL harness verifies published-only and tenant-isolated public results', () => {
+  const sql = read('school-website/db/sandbox_rls_runtime_test.sql');
+  assert.match(sql, /begin;/i);
+  assert.match(sql, /rollback;/i);
+  assert.match(sql, /school-a/);
+  assert.match(sql, /school-b/);
+  assert.match(sql, /publication_status = 'published'/i);
+  assert.match(sql, /create policy public_published_same_school/i);
+  assert.match(sql, /force row level security/i);
+});
+
+
+test('sandbox RLS harness uses actual PostgreSQL row-level security and FORCE RLS', () => {
+  const sql = read('school-website/db/sandbox_rls_runtime_test.sql');
+  assert.match(sql, /enable row level security/i);
+  assert.match(sql, /force row level security/i);
+  assert.match(sql, /create policy public_published_same_school/i);
+  assert.match(sql, /current_setting\('app\.school_id'/i);
+  assert.match(sql, /publication_status = 'published'/i);
+  assert.match(sql, /school-a/);
+  assert.match(sql, /school-b/);
+  assert.match(sql, /rollback;/i);
+});
+
+
+test('public admission replay and rate-limit guards fail closed', () => {
+  const security = require('../../school-website/server/admission-security.js');
+  let now = 1000;
+  const replay = security.createReplayGuard({ ttlMs: 100, maxEntries: 2, now: () => now });
+  assert.equal(replay.claim('k1'), true);
+  assert.equal(replay.claim('k1'), false);
+  now = 1101;
+  assert.equal(replay.claim('k1'), true);
+  assert.equal(replay.claim('k2'), true);
+  assert.equal(replay.claim('k3'), false);
+
+  now = 2000;
+  const rate = security.createRateLimiter({ windowMs: 100, maxRequests: 2, now: () => now });
+  assert.equal(rate.allow('school-a:ip-1'), true);
+  assert.equal(rate.allow('school-a:ip-1'), true);
+  assert.equal(rate.allow('school-a:ip-1'), false);
+  assert.equal(rate.allow('school-b:ip-1'), true);
+  now = 2101;
+  assert.equal(rate.allow('school-a:ip-1'), true);
+});
+
+test('public admission backend boundary validates bounded input and idempotency keys', () => {
+  const security = require('../../school-website/server/admission-security.js');
+  assert.equal(security.isHoneypotTriggered('bot'), true);
+  assert.equal(security.isHoneypotTriggered(''), false);
+  assert.equal(security.validateAdmissionInput(null).ok, false);
+  assert.equal(security.validateAdmissionInput({ studentName:'A', guardianName:'B', phone:'1', grade:'G' }).error, 'required_field_missing');
+  const result = security.validateAdmissionInput({ studentName:'A', guardianName:'B', phone:'1', grade:'G', email:'parent@example.com', note:'hello', idempotencyKey:'admission-key-123456' });
+  assert.equal(result.ok, true);
+  assert.equal(result.value.email, 'parent@example.com');
+  assert.equal(security.validateAdmissionInput({ studentName:'A', guardianName:'B', phone:'1', grade:'G', email:'bad', idempotencyKey:'admission-key-123456' }).error, 'invalid_email');
+  assert.equal(security.validateAdmissionInput({ studentName:'A', guardianName:'B', phone:'1', grade:'G', idempotencyKey:'short' }).error, 'invalid_idempotency_key');
+});
