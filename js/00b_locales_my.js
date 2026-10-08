@@ -1487,4 +1487,17 @@ window.I18N_MY = {
   'password.newLabel': 'Password အသစ်',
   'password.newPlaceholder': 'အနည်းဆုံး ၆ လုံး',
   'password.reset': 'Password ပြန်သတ်မှတ်မည်',
+
+  // ── Chat: localized controls ──
+  'chat.sendFailed': 'ပို့၍ မအောင်မြင်ပါ',
+  'chat.department.refresh': 'ဌာနများ ပြန်လည်ရယူရန်',
+  'chat.department.select': 'ဌာနတစ်ခု ရွေးပါ...',
+  'chat.department.placeholder': 'ဌာနအတွင်း မက်ဆေ့ချ် ရေးပါ...',
+  'chat.grade.refresh': 'အတန်းများ ပြန်လည်ရယူရန်',
+  'chat.grade.placeholder': 'အတန်းအတွင်း မက်ဆေ့ချ် ရေးပါ...',
+  'chat.groups.refresh': 'အဖွဲ့များ ပြန်လည်ရယူရန်',
+  'chat.groups.placeholder': 'မက်ဆေ့ချ် ရေးပါ…',
+  'chat.groups.createFailed': 'ဖန်တီး၍ မအောင်မြင်ပါ',
+  'chat.direct.placeholder': 'သီးသန့် မက်ဆေ့ချ် ရေးပါ...',
+  'chat.direct.findTeacher': 'ဆရာ/ဆရာမ ရှာပါ...',
 };
