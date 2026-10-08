@@ -12,6 +12,23 @@
   'chat.startGrade': 'Mulakan perbualan gred.',
   'chat.staffOnlyGrade': 'Perbualan gred untuk staf sahaja',
   'chat.departmentAccess': 'Pentadbir mesti memberikan anda jabatan aktif terlebih dahulu.',
+window.I18N_MS = {
+  'chat.workspace.department': 'Jabatan',
+  'chat.workspace.grade': 'Gred',
+  'chat.workspace.groups': 'Kumpulan Projek / Acara',
+  'chat.workspace.tickets': 'Tiket Pertanyaan',
+  'chat.refresh': 'Muat semula',
+  'chat.selectDepartment': 'Pilih jabatan',
+  'chat.selectTeacher': 'Pilih guru',
+  'chat.selectTicket': 'Pilih tiket',
+  'chat.noGradeAccess': 'Tiada akses gred lagi',
+  'chat.noDepartmentAccess': 'Tiada akses jabatan lagi',
+  'chat.noGroups': 'Tiada kumpulan lagi',
+  'chat.startGrade': 'Mulakan perbualan gred.',
+  'chat.staffOnlyGrade': 'Perbualan gred untuk staf sahaja',
+  'chat.departmentAccess': 'Pentadbir mesti memberikan anda jabatan aktif terlebih dahulu.',
+};
+
 // Locale dictionary aligned to the current English key order. New keys without translations fall back to English.
 window.I18N_MS = {
   "app.title": "SCMS — Pengurusan Kelas Sekolah",
