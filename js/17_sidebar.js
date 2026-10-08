@@ -30,7 +30,7 @@ const SIDEBAR_ITEMS = [
   { id: 'incidents', icon: '⚡', key: 'module.incidents',  hideInTWA: false },
   { id: 'leave',     icon: '🌴', key: 'sb.leave',       hideInTWA: false },
   { id: 'timetable', icon: '📅', key: 'module.timetable',  hideInTWA: false },
-  { id: 'summary',   icon: '📊', key: 'module.summary', hideInTWA: false },
+  { id: 'summary',   icon: '📊', key: 'module.summary', hideInTWA: false },\n  { id: 'insights',  icon: '✨', key: 'module.summary', hideInTWA: false },
   // Items below are NATIVE-ONLY — hidden inside Telegram
   { id: 'chat',      icon: '🗨️', key: 'sb.chat', hideInTWA: true  },
 ];
