@@ -203,6 +203,49 @@ begin
   return jsonb_build_object('ok',true,'announcement_id',v_id,'recipient_count',v_count);
 end $$;
 
+create or replace function public.rpc_chat_grade_targets(p_session_token text)
+returns jsonb
+language plpgsql
+security definer
+set search_path to 'public','pg_temp'
+as $function$
+declare
+  v_sess record;
+  v_rows jsonb;
+begin
+  select s.school_id, s.teacher_id, s.role
+    into v_sess
+    from public.app_web_sessions s
+    join public.teachers t on t.teacher_id=s.teacher_id
+   where s.session_token=p_session_token
+     and s.expires_at>now()
+     and t.status='active'
+     and s.school_id=t.school_id
+     and s.role=t.role
+   limit 1;
+
+  if v_sess is null then return jsonb_build_object('ok',false,'error','invalid_session'); end if;
+  if v_sess.role not in ('admin','super_admin') then return jsonb_build_object('ok',false,'error','admin_only'); end if;
+
+  select coalesce(jsonb_agg(x.grade_name order by x.grade_name),'[]'::jsonb)
+    into v_rows
+    from (
+      select distinct trim(a.class_name) grade_name
+        from public.teacher_class_assignments a
+        join public.teachers t on t.teacher_id=a.teacher_id and t.school_id=a.school_id
+       where a.school_id=v_sess.school_id
+         and a.is_active=true
+         and t.status='active'
+         and nullif(trim(a.class_name),'') is not null
+    ) x;
+
+  return jsonb_build_object('ok',true,'rows',v_rows);
+end;
+$function$;
+
+revoke execute on function public.rpc_chat_grade_targets(text) from public;
+grant execute on function public.rpc_chat_grade_targets(text) to anon,authenticated;
+
 revoke execute on function public.rpc_chat_recipient_preview(text,text,text) from public;
 grant execute on function public.rpc_chat_recipient_preview(text,text,text) to anon,authenticated;
 
