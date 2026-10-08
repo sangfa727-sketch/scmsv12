@@ -634,7 +634,7 @@ function _renderDirectWorkspace() {
     <div class="smart-chat-direct-shell${_directConversationId ? ' has-selection' : ''}">
       <aside class="smart-chat-direct-list">
         <div class="smart-chat-direct-list-head"><div><div class="smart-chat-kicker">PRIVATE</div><strong>Direct messages</strong></div><button type="button" onclick="_loadDirectWorkspace()" title="Refresh">↻</button></div>
-        <label class="smart-chat-direct-search"><span>⌕</span><input id="directStaffSearch" placeholder="Find a teacher..." oninput="_renderDirectDirectory()"></label>
+        <label class="smart-chat-direct-search"><span>⌕</span><input id="directStaffSearch" placeholder="${t('chat.direct.findTeacher')}" oninput="_renderDirectDirectory()"></label>
         <div id="directConversationList" class="smart-chat-conversation-list"></div>
         <div class="smart-chat-directory-title">Start a new conversation</div>
         <div id="directStaffDirectory" class="smart-chat-directory"></div>
