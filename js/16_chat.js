@@ -207,7 +207,7 @@ window.sendOfficialAnnouncement = async function() {
     showToast(t('chat.officialMessageSent', {count: result.recipient_count}));
     document.getElementById('adminMsgBody').value = '';
     setTimeout(() => {
-      if (btn) { btn.innerHTML = _chatIcon('send') + ' ' + t('chat.sendOfficialMessage'); btn.disabled = false; }
+      if (btn) { btn.innerHTML = t('chat.sendOfficialMessage'); btn.disabled = false; }
       _refreshAdminComposerPreview();
     }, 900);
   } catch (e) {
@@ -268,8 +268,6 @@ window._refreshAdminComposerPreview = function() {
     #adminMsgSendBtn{white-space:nowrap;min-width:max-content;padding-inline:12px;font-size:11px}
     .smart-chat-department-shell:not(.has-selection){grid-template-columns:1fr}
     .smart-chat-department-shell:not(.has-selection) .smart-chat-direct-conversation{display:none !important}
-    @media(max-width:760px){#adminMsgSendBtn{font-size:10px;padding-inline:10px}}
-    #adminMsgSendBtn{white-space:nowrap;min-width:max-content;padding-inline:12px;font-size:11px}
     @media(max-width:760px){#adminMsgSendBtn{font-size:10px;padding-inline:10px}}
     .smart-chat-composer-drawer.is-open{display:block}
     .smart-chat-composer-drawer .smart-chat-admin-card{margin:0}
