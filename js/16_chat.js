@@ -533,7 +533,7 @@ async function _openInquiryTicket(id){
       if(r.ticket.assigned_teacher_id)aa.value=r.ticket.assigned_teacher_id;
     }
   }
-  if(s)s.innerHTML=(r.messages||[]).map(m=>`<div class="chat-bubble-row"><div class="chat-bubble"><strong>${esc(m.sender_teacher_name)}</strong><div>${esc(m.body).replace(/\n/g,'<br>')}</div><small>${esc(m.created_at||'')}</small></div></div>`).join('')||'<div class="chat-empty-sub">${t('chat.noMessages')}</div>';
+  if(s)s.innerHTML=(r.messages||[]).map(m=>`<div class="chat-bubble-row"><div class="chat-bubble"><strong>${esc(m.sender_teacher_name)}</strong><div>${esc(m.body).replace(/\n/g,'<br>')}</div><small>${esc(m.created_at||'')}</small></div></div>`).join('')||`<div class="chat-empty-sub">${t('chat.noMessages')}</div>`;
   if(input){input.disabled=r.ticket.status==='CLOSED';input.placeholder=input.disabled?'Ticket closed':'Write a reply...';}
   if(btn)btn.disabled=input?.disabled||!_inquiryTicketId;
   if(window.API?.markInquiryRead){
