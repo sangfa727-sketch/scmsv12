@@ -1477,4 +1477,8 @@ window.I18N_MS = {
   'chat.newConversation': "Perbualan baharu",
   'chat.writePrivate': "Tulis mesej peribadi...",
   'chat.noMessages': "Tiada mesej lagi",
+
+  'chat.gradeAccess': 'Tiada tugasan gred aktif tersedia untuk akaun staf ini.',
+  'chat.gradePrefix': 'Gred: '
+  ,'chat.individualPrefix': 'Individu: '
 };
