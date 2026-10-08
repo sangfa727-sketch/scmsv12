@@ -23,6 +23,30 @@ jobs:
       - name: Run frontend syntax and regression tests
         run: npm test
 
+  website-rls:
+    name: Public website RLS runtime test
+    runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: postgres:16
+        env:
+          POSTGRES_USER: scms_test
+          POSTGRES_PASSWORD: scms_test
+          POSTGRES_DB: scms_test
+        options: >-
+          --health-cmd "pg_isready -U scms_test -d scms_test"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 10
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install PostgreSQL client
+        run: sudo apt-get update && sudo apt-get install -y postgresql-client
+      - name: Run public website RLS runtime harness
+        env:
+          PGPASSWORD: scms_test
+        run: psql -h localhost -U scms_test -d scms_test -v ON_ERROR_STOP=1 -f school-website/db/sandbox_rls_runtime_test.sql
+
   e2e:
     name: Playwright (scheduled/manual only)
     runs-on: ubuntu-latest
