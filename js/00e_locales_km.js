@@ -1474,7 +1474,7 @@ window.I18N_KM = {
   "chat.noMessages": "មិនទាន់មានសារ",
   "chat.gradeAccess": "មិនមានការចាត់តាំងថ្នាក់ដែលសកម្មសម្រាប់គណនីបុគ្គលិកនេះទេ។",
   "chat.gradePrefix": "ថ្នាក់: ",
-  "chat.individualPrefix": "បុគ្គល: "
+  "chat.individualPrefix": "បុគ្គល: ",
   "chat.department.refresh": "ផ្ទុកនាយកដ្ឋានឡើងវិញ",
   "chat.department.select": "ជ្រើសរើសនាយកដ្ឋាន...",
   "chat.department.placeholder": "សរសេរសារទៅនាយកដ្ឋាន...",
