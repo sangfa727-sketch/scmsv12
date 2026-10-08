@@ -597,3 +597,23 @@ test('public admission remains an isolated intake contract and never writes Stud
   assert.match(contract, /school_id/);
   assert.match(contract, /trusted hostname/i);
 });
+
+
+test('public website hostname resolution is server-side and rejects unsafe tenant selection', () => {
+  const resolver = require('../../school-website/server/hostname-resolver.js');
+  const sites = new Map([
+    ['school-a', { schoolId: 'school-a', active: true }],
+    ['school-b', { schoolId: 'school-b', active: true }],
+    ['school-off', { schoolId: 'school-off', active: false }]
+  ]);
+
+  assert.deepEqual(
+    resolver.resolveSchoolFromHost('school-a.scmsv12.com', sites, 'scmsv12.com'),
+    { schoolId: 'school-a', siteKey: 'school-a' }
+  );
+  assert.equal(resolver.resolveSchoolFromHost('school-off.scmsv12.com', sites, 'scmsv12.com'), null);
+  assert.equal(resolver.resolveSchoolFromHost('unknown.scmsv12.com', sites, 'scmsv12.com'), null);
+  assert.equal(resolver.resolveSchoolFromHost('www.scmsv12.com', sites, 'scmsv12.com'), null);
+  assert.equal(resolver.resolveSchoolFromHost('school-b.scmsv12.com.evil.test', sites, 'scmsv12.com'), null);
+  assert.equal(resolver.resolveSchoolFromHost('school-b.scmsv12.com', sites, 'scmsv12.com', 'school-a'), null);
+});
