@@ -7,15 +7,23 @@ function _renderGroupWorkspace(){
 }
 async function _loadChatGroups(){
  try{_chatGroups=await API.getChatGroups();const box=document.getElementById('chatGroupList');if(box)box.innerHTML=_chatGroups.length?_chatGroups.map(g=>`<button class="smart-chat-channel-card ${Number(g.id)===Number(_chatGroupId)?'active':''}" onclick="_openChatGroup(${Number(g.id)})"><span class="smart-chat-channel-icon">${g.group_type==='EVENT'?'📅':'📁'}</span><span><strong>${esc(g.name)}</strong><small>${esc(g.group_type)} · ${esc(g.status)}${Number(g.unread_count)>0?' · '+esc(g.unread_count)+' unread':''}</small></span><b>›</b></button>`).join(''):'<div class="chat-empty-sub">No groups yet.</div>';if(_chatGroupId)await _openChatGroup(_chatGroupId);}catch(e){const box=document.getElementById('chatGroupList');if(box)box.innerHTML='<div class="chat-error">Unable to load groups.</div>';}}
-window._newChatGroup=function(){
+window._newChatGroup=async function(){
  const name=prompt('Group name');if(!name?.trim())return;
  const type=(prompt('Type: PROJECT or EVENT','PROJECT')||'PROJECT').toUpperCase();
  if(!['PROJECT','EVENT'].includes(type)){showToast('Invalid group type.');return;}
  const desc=prompt('Description (optional)')||'';
- _createChatGroup(name.trim(),desc,type);
+ let staff=[];try{staff=await API.getDirectStaffDirectory();}catch(e){staff=[];}
+ const choices=Array.isArray(staff)?staff.filter(x=>x?.teacher_id&&x.teacher_id!==window.APP?.teacher_id&&x.status!=='inactive'):[];
+ const roster=choices.map(x=>`${x.teacher_id} — ${x.teacher_name||'Staff'}`).join('\n');
+ const rawMembers=choices.length?prompt(`Add members by teacher ID, comma-separated.\n\n${roster}`,''):'';
+ const memberIds=(rawMembers||'').split(',').map(x=>x.trim()).filter(Boolean);
+ const startsRaw=prompt('Start date/time (optional, ISO format e.g. 2026-10-10T09:00)')||'';
+ const endsRaw=prompt('End date/time (optional, ISO format e.g. 2026-10-10T17:00)')||'';
+ const startsAt=startsRaw.trim()||null,endsAt=endsRaw.trim()||null;
+ _createChatGroup(name.trim(),desc,type,startsAt,endsAt,memberIds);
 };
-async function _createChatGroup(name,desc,type){
- try{const r=await API.createChatGroup(name,desc,type,null,null,[]);if(!r?.ok)throw new Error(r?.error||'Create failed');_chatGroupId=Number(r.group_id);await _loadChatGroups();}catch(e){showToast('Group could not be created.');}}
+async function _createChatGroup(name,desc,type,startsAt=null,endsAt=null,memberIds=[]){
+ try{const r=await API.createChatGroup(name,desc,type,startsAt,endsAt,memberIds);if(!r?.ok)throw new Error(r?.error||'Create failed');_chatGroupId=Number(r.group_id);await _loadChatGroups();}catch(e){showToast('Group could not be created.');}}
 window._openChatGroup=async function(id){
  _chatGroupId=Number(id);const root=document.getElementById('chatGroupConversation');if(!root)return;
  root.innerHTML='<div class="chat-stream" id="chatGroupStream"><div class="chat-empty-sub">Loading…</div></div>';
