@@ -1454,4 +1454,8 @@ window.I18N_ZH = {
   'chat.newConversation': "新会话",
   'chat.writePrivate': "撰写私信...",
   'chat.noMessages': "暂无消息",
+
+  'chat.gradeAccess': '此员工账户暂无可用的有效年级分配。',
+  'chat.gradePrefix': '年级：'
+  ,'chat.individualPrefix': '个人：'
 };
