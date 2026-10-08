@@ -11,6 +11,10 @@ let _chatPollTimer = null;
 let _chatScrollLock = false;
 let _chatMode = 'school';
 let _adminGradeRecipients = [];
+let _directConversationId = null;
+let _directPeer = null;
+let _directStaff = [];
+let _directConversations = [];
 
 function _chatIcon(name) {
   const icons = {
@@ -223,7 +227,15 @@ function _renderChatMode() {
     { id:'direct', name:'1-on-1 Direct Messages', icon:'👤', sub:'Private staff-to-staff chat' },
     { id:'events', name:'Project / Event Groups', icon:'🗂️', sub:'Temporary work groups' }
   ];
-  const visible = channels.filter(c => c.id === 'staff' || window.APP?.is_admin || c.id === 'direct');
+  const visible = channels.filter(c => c.id === 'staff' || c.id === 'direct' || window.APP?.is_admin);
+  if (!visible.some(c => c.id === _chatChannel)) _chatChannel = 'staff';
+
+  if (_chatChannel === 'direct') {
+    root.innerHTML = _renderDirectWorkspace();
+    _loadDirectWorkspace();
+    return;
+  }
+
   root.innerHTML = `
     <div class="smart-chat-school-grid">
       <aside class="smart-chat-channel-list">
@@ -254,6 +266,144 @@ function _renderChatMode() {
     if (window.APP?.is_admin) _loadAdminRecipientPreview(document.getElementById('adminMsgGrade')?.value || 'Grade 5');
   }, 0);
 }
+
+
+function _renderDirectWorkspace() {
+  return `
+    <div class="smart-chat-direct-shell">
+      <aside class="smart-chat-direct-list">
+        <div class="smart-chat-direct-list-head"><div><div class="smart-chat-kicker">PRIVATE</div><strong>Direct messages</strong></div><button type="button" onclick="_loadDirectWorkspace()" title="Refresh">↻</button></div>
+        <label class="smart-chat-direct-search"><span>⌕</span><input id="directStaffSearch" placeholder="Find a teacher..." oninput="_renderDirectDirectory()"></label>
+        <div id="directConversationList" class="smart-chat-conversation-list"></div>
+        <div class="smart-chat-directory-title">Start a new conversation</div>
+        <div id="directStaffDirectory" class="smart-chat-directory"></div>
+      </aside>
+      <section class="smart-chat-direct-conversation">
+        <div id="directConversationHead" class="smart-chat-conversation-head"><div><strong>Select a teacher</strong><small>Only registered active staff in your school are shown.</small></div><span class="smart-chat-verified-pill">Verified staff only</span></div>
+        <div id="directMessageStream" class="chat-stream smart-chat-direct-stream"><div class="chat-empty"><div class="chat-empty-icon">👤</div><div class="chat-empty-title">Choose a teacher</div><div class="chat-empty-sub">Start a private 1-on-1 conversation.</div></div></div>
+        <form class="chat-composer smart-chat-direct-composer" onsubmit="return sendDirectChat(event)">
+          <textarea id="directChatInput" placeholder="Select a teacher to start messaging..." rows="1" disabled oninput="_autoGrowChatInput(this)" onkeydown="_directKeydown(event)"></textarea>
+          <button type="submit" class="chat-send-btn" id="directChatSendBtn" disabled><svg viewBox="0 0 24 24" aria-hidden="true"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg></button>
+        </form>
+      </section>
+    </div>`;
+}
+
+async function _loadDirectWorkspace() {
+  try {
+    const [staff, conversations] = await Promise.all([API.getDirectStaffDirectory(), API.getDirectConversations()]);
+    _directStaff = Array.isArray(staff) ? staff : [];
+    _directConversations = Array.isArray(conversations) ? conversations : [];
+    _renderDirectDirectory(); _renderDirectConversationList();
+    if (_directConversationId) {
+      const current = _directConversations.find(c => Number(c.conversation_id) === Number(_directConversationId));
+      if (current) _directPeer = current;
+      await _loadDirectMessages();
+    }
+  } catch (e) {
+    _directStaff=[]; _directConversations=[]; _renderDirectDirectory(); _renderDirectConversationList();
+    const stream=document.getElementById('directMessageStream');
+    if(stream) stream.innerHTML='<div class="chat-error"><div>💬</div><div>Unable to load direct messages.</div><button class="btn-secondary" onclick="_loadDirectWorkspace()">Retry</button></div>';
+  }
+}
+
+function _renderDirectConversationList() {
+  const root=document.getElementById('directConversationList');
+  if(!root)return;
+  if(!_directConversations.length){root.innerHTML='<div class="smart-chat-list-empty">No conversations yet.</div>';return;}
+  root.innerHTML=_directConversations.map(c=>`
+    <button class="smart-chat-direct-item ${Number(c.conversation_id)===Number(_directConversationId)?'active':''}" onclick="openDirectChat('${esc(c.teacher_id)}')">
+      <span class="smart-chat-direct-avatar">${esc((c.teacher_name||'?')[0])}</span>
+      <span><strong>${esc(c.teacher_name)}</strong><small>${esc(c.last_message||'No messages yet')}</small></span>
+      ${Number(c.unread_count)>0?`<b class="smart-chat-unread">${esc(c.unread_count)}</b>`:'<i></i>'}
+    </button>`).join('');
+}
+
+function _renderDirectDirectory() {
+  const root=document.getElementById('directStaffDirectory');
+  if(!root)return;
+  const q=String(document.getElementById('directStaffSearch')?.value||'').trim().toLowerCase();
+  const rows=_directStaff.filter(t=>!q||String(t.teacher_name).toLowerCase().includes(q)||String(t.role||'').toLowerCase().includes(q));
+  root.innerHTML=rows.length?rows.map(t=>`
+    <button class="smart-chat-directory-item" onclick="openDirectChat('${esc(t.teacher_id)}')">
+      <span class="smart-chat-direct-avatar">${esc((t.teacher_name||'?')[0])}</span>
+      <span><strong>${esc(t.teacher_name)}</strong><small>${esc(t.role||'Teacher')}</small></span><b>›</b>
+    </button>`).join(''):'<div class="smart-chat-list-empty">No active teacher found.</div>';
+}
+
+window.openDirectChat=async function(teacherId){
+  try{
+    const result=await API.openDirectConversation(teacherId);
+    if(!result?.ok)throw new Error(result?.error||'Unable to open conversation');
+    _directConversationId=Number(result.conversation_id);
+    _directPeer=result.peer||_directStaff.find(t=>t.teacher_id===teacherId)||null;
+    _renderDirectConversationList();_renderDirectHeader();_setDirectComposer(true);
+    await _loadDirectMessages();
+  }catch(e){showToast('Unable to open this staff conversation.');}
+};
+
+function _renderDirectHeader(){
+  const root=document.getElementById('directConversationHead');
+  if(!root||!_directPeer)return;
+  root.innerHTML=`
+    <div class="smart-chat-direct-peer"><button class="smart-chat-mobile-back" onclick="_clearDirectSelection"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m15 18-6-6 6-6"/></svg></button><span class="smart-chat-direct-avatar large">${esc((_directPeer.teacher_name||'?')[0])}</span><div><strong>${esc(_directPeer.teacher_name)}</strong><small>${esc(_directPeer.role||'Teacher')} · Private 1-on-1</small></div></div>
+    <span class="smart-chat-verified-pill">Private</span>`;
+}
+
+function _setDirectComposer(enabled){
+  const input=document.getElementById('directChatInput'),btn=document.getElementById('directChatSendBtn');
+  if(input){input.disabled=!enabled;input.placeholder=enabled?'Write a private message...':'Select a teacher to start messaging...';}
+  if(btn)btn.disabled=!enabled;
+}
+
+window._clearDirectSelection=function(){_directConversationId=null;_directPeer=null;_renderChatMode();};
+
+async function _loadDirectMessages(){
+  if(!_directConversationId)return;
+  try{
+    const rows=await API.getDirectMessages(_directConversationId,50);
+    const stream=document.getElementById('directMessageStream');
+    if(!stream)return;
+    if(!rows.length)stream.innerHTML='<div class="chat-empty"><div class="chat-empty-icon">💬</div><div class="chat-empty-title">New conversation</div><div class="chat-empty-sub">Send the first private message.</div></div>';
+    else _renderDirectMessages(rows);
+    _renderDirectHeader();_setDirectComposer(true);await API.markDirectRead(_directConversationId);
+  }catch(e){
+    const stream=document.getElementById('directMessageStream');
+    if(stream)stream.innerHTML='<div class="chat-error"><div>💬</div><div>Unable to load conversation.</div><button class="btn-secondary" onclick="_loadDirectMessages()">Retry</button></div>';
+  }
+}
+
+function _renderDirectMessages(messages){
+  const stream=document.getElementById('directMessageStream');
+  if(!stream)return;
+  const grouped={};
+  messages.forEach(m=>{const day=(m.created_at||'').slice(0,10)||'unknown';(grouped[day]??=[]).push(m);});
+  const myId=window.APP?.teacher_id;
+  stream.innerHTML=Object.keys(grouped).sort().map(day=>`
+    <div class="chat-day-sep"><span>${esc(_humanDay(day))}</span></div>
+    ${grouped[day].map(m=>{
+      const mine=m.sender_teacher_id===myId;
+      const time=m.created_at?new Date(m.created_at).toLocaleTimeString([],{hour:'2-digit',minute:'2-digit'}):'';
+      return `<div class="chat-bubble-row ${mine?'mine':'theirs'}"><div class="chat-bubble"><div class="chat-bubble-text">${esc(m.text||'')}</div><div class="chat-bubble-time">${esc(time)}</div></div></div>`;
+    }).join('')}`).join('');
+  if(!_chatScrollLock)requestAnimationFrame(()=>{stream.scrollTop=stream.scrollHeight;});
+}
+
+window.sendDirectChat=async function(ev){
+  ev?.preventDefault?.();
+  const input=document.getElementById('directChatInput'),btn=document.getElementById('directChatSendBtn'),value=input?.value.trim();
+  if(!_directConversationId||!value||!btn)return false;
+  btn.disabled=true;input.disabled=true;
+  try{
+    const result=await API.sendDirectMessage(_directConversationId,value);
+    if(!result?.ok)throw new Error(result?.error||'Send failed');
+    input.value='';input.style.height='auto';await _loadDirectWorkspace();await _loadDirectMessages();
+  }catch(e){showToast('Message could not be sent.');}
+  finally{btn.disabled=false;input.disabled=false;input.focus();}
+  return false;
+};
+
+window._directKeydown=function(ev){if(ev.key==='Enter'&&!ev.shiftKey){ev.preventDefault();sendDirectChat(ev);}};
 
 window.switchChatChannel = function(channel) {
   _chatChannel = channel;
