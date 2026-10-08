@@ -22,7 +22,9 @@ function _insightsText(k) {
 function _ie(v){ return typeof esc === 'function' ? esc(v) : String(v == null ? '' : v); }
 function _stats(r){
   const ss = (r && r.subjects || []).filter(function(s){return s && s.pct != null;});
-  return {subjects:ss,strong:ss.filter(function(s){return Number(s.pct)>=80;}).sort(function(a,b){return Number(b.pct)-Number(a.pct);}),attention:ss.filter(function(s){return Number(s.pct)<60;}).sort(function(a,b){return Number(a.pct)-Number(b.pct);})};
+  const strong=ss.filter(function(s){const l=String(s.letter||'').trim().toUpperCase();return l.charAt(0)==='A'||l.charAt(0)==='B';}).sort(function(a,b){return Number(b.pct)-Number(a.pct);});
+  const attention=ss.filter(function(s){const l=String(s.letter||'').trim().toUpperCase();return l.charAt(0)==='D'||l.charAt(0)==='F';}).sort(function(a,b){return Number(a.pct)-Number(b.pct);});
+  return {subjects:ss,strong:strong,attention:attention};
 }
 function _reportMap(){
   const m=new Map();
