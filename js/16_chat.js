@@ -398,11 +398,14 @@ function _renderInquiryWorkspace() {
 }
 
 let _inquiryTickets=[], _inquiryTicketId=null, _inquiryCurrentTicket=null, _inquiryDraft=null;
+function _renderInquiryTicketList(){
+  const box=document.getElementById('inquiryTicketList'); if(!box)return;
+  box.innerHTML=_inquiryTickets.length?_inquiryTickets.map(t=>`<button class="smart-chat-channel-card ${Number(t.id)===Number(_inquiryTicketId)?'active':''}" onclick="_openInquiryTicket(${Number(t.id)})"><span class="smart-chat-channel-icon">🎫</span><span><strong>${esc(t.subject)}</strong><small>${esc(t.status)} · ${esc(t.priority)}</small></span>${Number(t.unread_count)>0?`<b class="smart-chat-unread" title="Unread messages">${esc(t.unread_count)}</b>`:'<b>›</b>'}</button>`).join(''):'<div class="chat-empty-sub">No tickets yet.</div>';
+}
 async function _loadInquiryTickets(){
   try{
     _inquiryTickets=await API.getInquiryTickets();
-    const box=document.getElementById('inquiryTicketList'); if(!box)return;
-    box.innerHTML=_inquiryTickets.length?_inquiryTickets.map(t=>`<button class="smart-chat-channel-card ${Number(t.id)===Number(_inquiryTicketId)?'active':''}" onclick="_openInquiryTicket(${Number(t.id)})"><span class="smart-chat-channel-icon">🎫</span><span><strong>${esc(t.subject)}</strong><small>${esc(t.status)} · ${esc(t.priority)}</small></span><b>›</b></button>`).join(''):'<div class="chat-empty-sub">No tickets yet.</div>';
+    _renderInquiryTicketList();
     if(_inquiryTicketId) await _openInquiryTicket(_inquiryTicketId);
   }catch(e){const box=document.getElementById('inquiryTicketList');if(box)box.innerHTML='<div class="chat-error">Unable to load tickets.</div>';}
 }
@@ -424,6 +427,14 @@ async function _openInquiryTicket(id){
   if(s)s.innerHTML=(r.messages||[]).map(m=>`<div class="chat-bubble-row"><div class="chat-bubble"><strong>${esc(m.sender_teacher_name)}</strong><div>${esc(m.body).replace(/\n/g,'<br>')}</div><small>${esc(m.created_at||'')}</small></div></div>`).join('')||'<div class="chat-empty-sub">No messages.</div>';
   if(input){input.disabled=r.ticket.status==='CLOSED';input.placeholder=input.disabled?'Ticket closed':'Write a reply...';}
   if(btn)btn.disabled=input?.disabled||!_inquiryTicketId;
+  if(window.API?.markInquiryRead){
+    try{
+      await API.markInquiryRead(_inquiryTicketId);
+      const item=_inquiryTickets.find(t=>Number(t.id)===Number(_inquiryTicketId));
+      if(item) item.unread_count=0;
+      _renderInquiryTicketList();
+    }catch(e){ /* read state is best-effort; authorization remains server-side */ }
+  }
 }
 async function _updateInquiryTicket(){
   if(!window.APP?.is_admin||!_inquiryTicketId)return;
