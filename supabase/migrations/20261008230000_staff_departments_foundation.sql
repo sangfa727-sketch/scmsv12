@@ -202,4 +202,4 @@ revoke all on function public.rpc_chat_department_admin_set_members(text,bigint,
 
 grant execute on function public.rpc_chat_department_list(text) to anon,authenticated;
 grant execute on function public.rpc_chat_department_admin_upsert(text,text,text,boolean) to anon,authenticated;
-grant execute on function public.rpc_department_admin_set_members(text,bigint,text[]) to anon,authenticated;
+grant execute on function public.rpc_chat_department_admin_set_members(text,bigint,text[]) to anon,authenticated;
