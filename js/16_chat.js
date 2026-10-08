@@ -130,7 +130,7 @@ function _renderAdminComposer() {
       <div class="smart-chat-form-actions">
         <button type="button" class="btn-secondary" onclick="_loadAdminRecipientPreview()">${t('chat.refreshRecipients')}</button>
         <button type="button" class="smart-chat-send-disabled" id="adminMsgSendBtn" onclick="sendOfficialAnnouncement()" disabled>
-          ${_chatIcon('send')} ${t('chat.sendOfficialMessage')}
+          ${t('chat.sendOfficialMessage')}
         </button>
       </div>
     </section>`;
@@ -144,12 +144,17 @@ async function _loadAdminRecipientPreview(type = null, target = null) {
       try {
         const grades = await API.getChatGradeTargets();
         const select = document.getElementById('adminMsgGrade');
-        if (select && grades.length) {
-          const current = target || select.value || grades[0];
-          select.innerHTML = grades.map(g => `<option value="${esc(g)}">${esc(g)}</option>`).join('');
-          select.value = grades.includes(current) ? current : grades[0];
+        if (select) {
+          const current = target || select.value || grades[0] || '';
+          select.innerHTML = grades.length
+            ? grades.map(g => `<option value="${esc(g)}">${esc(g)}</option>`).join('')
+            : `<option value="" selected>${t('chat.noGradesAvailable')}</option>`;
+          select.value = grades.includes(current) ? current : (grades[0] || '');
         }
-      } catch (_) {}
+      } catch (_) {
+        const select = document.getElementById('adminMsgGrade');
+        if (select) select.innerHTML = `<option value="" selected>${t('chat.noGradesAvailable')}</option>`;
+      }
     }
     const grade = target || document.getElementById('adminMsgGrade')?.value || null;
     const rows = await API.getChatRecipientPreview(selectedType, selectedType === 'all_staff' ? null : (selectedType === 'teacher' ? (document.getElementById('adminMsgTeacher')?.value || null) : grade));
@@ -202,7 +207,7 @@ window.sendOfficialAnnouncement = async function() {
     showToast(t('chat.officialMessageSent', {count: result.recipient_count}));
     document.getElementById('adminMsgBody').value = '';
     setTimeout(() => {
-      if (btn) { btn.innerHTML = _chatIcon('send') + ' ' + t('chat.sendOfficialMessage'); btn.disabled = false; }
+      if (btn) { btn.innerHTML = t('chat.sendOfficialMessage'); btn.disabled = false; }
       _refreshAdminComposerPreview();
     }, 900);
   } catch (e) {
@@ -260,6 +265,10 @@ window._refreshAdminComposerPreview = function() {
     .smart-chat-add-btn{font-size:20px;line-height:1}
     .smart-chat-refresh-btn{font-size:15px}
     .smart-chat-composer-drawer{display:none;margin-top:10px}
+    #adminMsgSendBtn{white-space:nowrap;min-width:max-content;padding-inline:12px;font-size:11px}
+    .smart-chat-department-shell:not(.has-selection){grid-template-columns:1fr}
+    .smart-chat-department-shell:not(.has-selection) .smart-chat-direct-conversation{display:none !important}
+    @media(max-width:760px){#adminMsgSendBtn{font-size:10px;padding-inline:10px}}
     .smart-chat-composer-drawer.is-open{display:block}
     .smart-chat-composer-drawer .smart-chat-admin-card{margin:0}
     .smart-chat-conversation-list{min-height:0}
@@ -336,7 +345,7 @@ function renderChat() {
         <button type="button" class="smart-chat-nav-back" onclick="_chatBackToMenu()" aria-label="${t('chat.exitChat')}">‹ <span>${t('chat.exitChat')}</span></button>
         <div>
           <div class="page-eyebrow">${t('chat.communicationCenter')}</div>
-          <h1 class="page-title">Smart <em>Chat</em></h1>
+          <h1 class="page-title">${t('chat.schoolChat')}</h1>
           <p class="page-subtitle">${t('chat.schoolCommunicationDesc')}</p>
         </div>
         <div class="smart-chat-identity">
@@ -558,7 +567,7 @@ async function _updateInquiryTicket(){
 }
 async function _sendInquiryFromComposer(e){
   e?.preventDefault(); const input=document.getElementById('inquiryChatInput'); if(!_inquiryTicketId||!input?.value.trim())return false;
-  const r=await API.sendInquiryMessage(_inquiryTicketId,input.value.trim()); if(r?.ok){input.value='';await _openInquiryTicket(_inquiryTicketId);await _loadInquiryTickets();} else showToast('Message could not be sent.'); return false;
+  const r=await API.sendInquiryMessage(_inquiryTicketId,input.value.trim()); if(r?.ok){input.value='';await _openInquiryTicket(_inquiryTicketId);await _loadInquiryTickets();} else showToast(t('chat.messageSendFailed')); return false;
 }
 function _closeInquiryDraft(){_inquiryDraft=null;_renderInquiryDraft();}
 function _renderInquiryDraft(){
@@ -626,7 +635,7 @@ async function _loadAnnouncementWorkspace(autoOpen=true){
     if(!list||!stream)return;
     window._chatAnnouncements=rows;
     if(!rows.length){_announcementId=null;list.innerHTML=`<div class="smart-chat-list-empty-card"><div class="icon">📢</div><strong>${t('chat.noOfficialAnnouncements')}</strong><small>${t('chat.newVerifiedNotices')}</small></div>`;stream.innerHTML=`<div class="chat-empty"><div class="chat-empty-icon">📢</div><div class="chat-empty-title">${t('chat.noOfficialAnnouncements')}</div><div class="chat-empty-sub">${t('chat.newVerifiedNotices')}</div></div>`;return;}
-    list.innerHTML=rows.map(a=>'<button class="smart-chat-channel-card '+(Number(a.id)===Number(_announcementId)?'active':'')+'" onclick="_openAnnouncement('+Number(a.id)+')"><span class="smart-chat-channel-icon">📢</span><span><strong>'+esc(a.message_type||'Official notice')+'</strong><small>'+esc(a.created_at||'')+'</small></span><b>'+(!a.read_at?'•':'›')+'</b></button>').join('');
+    list.innerHTML=rows.map(a=>'<button class="smart-chat-channel-card '+(Number(a.id)===Number(_announcementId)?'active':'')+'" onclick="_openAnnouncement('+Number(a.id)+')"><span class="smart-chat-channel-icon">📢</span><span><strong>'+esc(a.message_type||t('chat.officialNotice'))+'</strong><small>'+esc(a.created_at||'')+'</small></span><b>'+(!a.read_at?'•':'›')+'</b></button>').join('');
     if(autoOpen && !_announcementId) await _openAnnouncement(Number(rows[0].id));
    }catch(e){const list=document.getElementById('announcementList');if(list)list.innerHTML=`<div class="chat-error"><div>📢</div><div>${t('chat.loadAnnouncementsFailed')}</div><button type="button" class="btn-secondary" onclick="_loadAnnouncementWorkspace(false)">${t('chat.retry')}</button></div>`;}
 }
@@ -834,7 +843,7 @@ function _renderChatStream(messages) {
       const mine = m.teacher_id === myId;
       const when = m.created_at || m.sent_at;
       const time = when ? new Date(when).toLocaleTimeString([], {hour:'2-digit',minute:'2-digit'}) : '';
-      const author = m.teacher_name || 'Unknown';
+      const author = m.teacher_name || t('chat.unknownStaff');
       return `<div class="chat-bubble-row ${mine?'mine':'theirs'}${m.failed?' failed':''}${m.pending?' pending':''}">
         ${mine?'':`<div class="chat-bubble-avatar">${esc((author||'?')[0])}</div>`}
         <div class="chat-bubble">
