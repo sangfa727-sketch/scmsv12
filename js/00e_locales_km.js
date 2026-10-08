@@ -1479,7 +1479,7 @@ window.I18N_KM = {
 
   'chat.gradeAccess': 'មិនមានការចាត់តាំងថ្នាក់ដែលសកម្មសម្រាប់គណនីបុគ្គលិកនេះទេ។',
   'chat.gradePrefix': 'ថ្នាក់: '
-  ,'chat.individualPrefix': 'បុគ្គល: '
+  ,'chat.individualPrefix': 'បុគ្គល: ',
 
   // Staff Chat workspace localization additions
   "chat.workspace.department": "នាយកដ្ឋាន",
