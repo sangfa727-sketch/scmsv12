@@ -418,12 +418,12 @@ function _renderChatMode() {
   }
 
   const channels = [
-    { id:'staff', name:${t('chat.allStaff')}, icon:'👥', sub:${t('chat.staffGeneral')} },
-    { id:'announcements', name:${t('chat.officialAnnouncements')}, icon:'📢', sub:${t('chat.officialNotices')} },
-    { id:'departments', name:${t('chat.departmentGrade')}, icon:'📚', sub:${t('chat.classDepartmentChannels')} },
-    { id:'tickets', name:${t('chat.workspace.tickets')}, icon:'🎫', sub:'Student / parent conversations' },
-    { id:'direct', name:${t('chat.directMessages')}, icon:'👤', sub:${t('chat.privateStaffChat')} },
-    { id:'events', name:${t('chat.workspace.groups')}, icon:'🗂️', sub:${t('chat.temporaryWorkGroups')} }
+    { id:'staff', name:t('chat.allStaff'), icon:'👥', sub:t('chat.staffGeneral') },
+    { id:'announcements', name:t('chat.officialAnnouncements'), icon:'📢', sub:t('chat.officialNotices') },
+    { id:'departments', name:t('chat.departmentGrade'), icon:'📚', sub:t('chat.classDepartmentChannels') },
+    { id:'tickets', name:${t('chat.workspace.tickets')}, icon:'🎫', sub:t('chat.studentParentConversations') },
+    { id:'direct', name:t('chat.directMessages'), icon:'👤', sub:t('chat.privateStaffChat') },
+    { id:'events', name:t('chat.workspace.groups'), icon:'🗂️', sub:t('chat.temporaryWorkGroups') }
   ];
   const visible = channels;
   if (!visible.some(c => c.id === _chatChannel)) _chatChannel = 'staff';
