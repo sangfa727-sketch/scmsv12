@@ -617,3 +617,18 @@ test('public website hostname resolution is server-side and rejects unsafe tenan
   assert.equal(resolver.resolveSchoolFromHost('school-b.scmsv12.com.evil.test', sites, 'scmsv12.com'), null);
   assert.equal(resolver.resolveSchoolFromHost('school-b.scmsv12.com', sites, 'scmsv12.com', 'school-a'), null);
 });
+
+
+test('public content schema is tenant-scoped and publication-gated', () => {
+  const schema = read('school-website/db/website_content_schema.sql');
+  assert.match(schema, /website_sites/);
+  assert.match(schema, /website_pages/);
+  assert.match(schema, /school_id text not null/);
+  assert.match(schema, /publication_status text not null/);
+  assert.match(schema, /published/);
+  assert.match(schema, /alter table public\.website_sites enable row level security/i);
+  assert.match(schema, /alter table public\.website_pages enable row level security/i);
+  assert.match(schema, /Public access is intentionally not granted/i);
+  assert.match(schema, /trusted hostname\/custom-domain mapping/i);
+  assert.match(schema, /never accept publication_status from the public client/i);
+});
