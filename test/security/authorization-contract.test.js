@@ -374,3 +374,21 @@ test('Official Staff Announcements use a server-authorized recipient snapshot an
   assert.match(migration, /revoke all on function public\.rpc_chat_announcement_create/);
   assert.match(migration, /grant execute on function public\.rpc_chat_announcement_create/);
 });
+
+
+test('Official Staff Announcements UI and API are connected to the guarded server route', () => {
+  const api = read('js/02L_api_chat.js');
+  const chat = read('js/16_chat.js');
+  assert.match(api, /createStaffAnnouncement/);
+  assert.match(api, /rpc_chat_announcement_create/);
+  assert.match(api, /getStaffAnnouncements/);
+  assert.match(api, /rpc_chat_announcement_list/);
+  assert.match(api, /markStaffAnnouncementRead/);
+  assert.match(api, /rpc_chat_announcement_mark_read/);
+  assert.match(chat, /sendOfficialAnnouncement/);
+  assert.match(chat, /API\.createStaffAnnouncement/);
+  assert.match(chat, /Reason and message body are required/);
+  assert.match(chat, /No verified recipients/);
+  assert.match(chat, /Department — coming next/);
+  assert.match(chat, /teacher — coming next/);
+});
