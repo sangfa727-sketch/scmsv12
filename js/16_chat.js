@@ -509,7 +509,7 @@ function _renderInquiryWorkspace() {
 let _inquiryTickets=[], _inquiryTicketId=null, _inquiryCurrentTicket=null, _inquiryDraft=null;
 function _renderInquiryTicketList(){
   const box=document.getElementById('inquiryTicketList'); if(!box)return;
-  box.innerHTML=_inquiryTickets.length?_inquiryTickets.map(t=>`<button class="smart-chat-channel-card ${Number(t.id)===Number(_inquiryTicketId)?'active':''}" onclick="_openInquiryTicket(${Number(t.id)})"><span class="smart-chat-channel-icon">🎫</span><span><strong>${esc(t.subject)}</strong><small>${esc(t.status)} · ${esc(t.priority)}</small></span>${Number(t.unread_count)>0?`<b class="smart-chat-unread" title="${t('chat.unreadMessages')}">${esc(t.unread_count)}</b>`:'<b>›</b>'}</button>`).join(''):'<div class="smart-chat-list-empty-card"><div class="icon">🎫</div><strong>No inquiry tickets</strong><small>Create a ticket when a staff issue needs attention.</small></div>';
+  box.innerHTML=_inquiryTickets.length?_inquiryTickets.map(item=>`<button class="smart-chat-channel-card ${Number(item.id)===Number(_inquiryTicketId)?'active':''}" onclick="_openInquiryTicket(${Number(t.id)})"><span class="smart-chat-channel-icon">🎫</span><span><strong>${esc(item.subject)}</strong><small>${esc(item.status)} · ${esc(item.priority)}</small></span>${Number(item.unread_count)>0?`<b class="smart-chat-unread" title="${t('chat.unreadMessages')}">${esc(item.unread_count)}</b>`:'<b>›</b>'}</button>`).join(''):'<div class="smart-chat-list-empty-card"><div class="icon">🎫</div><strong>No inquiry tickets</strong><small>Create a ticket when a staff issue needs attention.</small></div>';
 }
 async function _loadInquiryTickets(){
   try{
@@ -605,7 +605,7 @@ function _renderAnnouncementWorkspace(){
   return _chatChannelBack(t('chat.schoolChat')) + composer +
     '<div class="smart-chat-direct-shell smart-chat-announcement-shell'+(_announcementId?' has-selection':'')+'">'+
     '<aside class="smart-chat-direct-list"><div class="smart-chat-direct-list-head"><div><div class="smart-chat-kicker">OFFICIAL</div><strong>Announcements</strong></div><div class="smart-chat-list-actions">'+
-    (window.APP?.is_admin ? '<button type="button" class="smart-chat-add-btn" id="announcementComposerToggle" onclick="_toggleAnnouncementComposer()" aria-expanded="false" aria-controls="announcementComposer" title="${t('chat.newOfficialMessage')}">+</button>' : '')+
+    (window.APP?.is_admin ? `<button type="button" class="smart-chat-add-btn" id="announcementComposerToggle" onclick="_toggleAnnouncementComposer()" aria-expanded="false" aria-controls="announcementComposer" title="${t('chat.newOfficialMessage')}">+</button>` : '')+
     '<button type="button" class="smart-chat-refresh-btn" onclick="_loadAnnouncementWorkspace()" title="Refresh">↻</button></div></div>'+
     '<div id="announcementList" class="smart-chat-conversation-list"></div></aside>'+
     `<section class="smart-chat-direct-conversation"><div id="announcementHead" class="smart-chat-conversation-head"><div><strong>${t('chat.officialAnnouncements')}</strong><small>School-authorized notices for your staff account.</small></div><span class="smart-chat-verified-pill">Verified</span></div><div id="announcementStream" class="chat-stream"><div class="chat-empty"><div class="chat-empty-icon">📢</div><div class="chat-empty-title">${t('chat.officialAnnouncements')}</div><div class="chat-empty-sub">Loading…</div></div></div></section></div>`;
