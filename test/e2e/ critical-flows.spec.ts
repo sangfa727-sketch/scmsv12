@@ -100,3 +100,41 @@ test.describe('Department Chat (authenticated staging)', () => {
     await expect(page.locator('#departmentChatInput')).toBeEnabled();
   });
 });
+
+
+test.describe('Department Chat authorization isolation (two-account staging)', () => {
+  test('an authorized staff member sees the target department while a non-member does not', async ({ browser }) => {
+    const teacher2 = process.env.SCMS_TEST_TEACHER_2;
+    const pw2 = process.env.SCMS_TEST_PW_2;
+    const departmentId = process.env.SCMS_TEST_DEPARTMENT_ID;
+    test.skip(
+      process.env.SCMS_REQUIRE_STAGING !== '1' || !teacher2 || !pw2 || !departmentId,
+      'Requires manual staging E2E plus a second staff account and an explicitly configured department ID'
+    );
+
+    const authorized = await browser.newContext();
+    const page1 = await authorized.newPage();
+    await page1.goto(BASE_URL);
+    await page1.getByTestId('login-teacher-id').fill(TEACHER_ID);
+    await page1.getByTestId('login-password').fill(TEACHER_PW);
+    await page1.getByTestId('login-submit').click();
+    await expect(page1.getByTestId('sidebar')).toBeVisible();
+    await page1.getByTestId('nav-chat').click();
+    await page1.getByTestId('chat-channel-departments').click();
+    await expect(page1.locator(`[data-testid="department-row-${departmentId}"]`)).toBeVisible();
+
+    const nonMember = await browser.newContext();
+    const page2 = await nonMember.newPage();
+    await page2.goto(BASE_URL);
+    await page2.getByTestId('login-teacher-id').fill(teacher2);
+    await page2.getByTestId('login-password').fill(pw2);
+    await page2.getByTestId('login-submit').click();
+    await expect(page2.getByTestId('sidebar')).toBeVisible();
+    await page2.getByTestId('nav-chat').click();
+    await page2.getByTestId('chat-channel-departments').click();
+    await expect(page2.locator(`[data-testid="department-row-${departmentId}"]`)).toHaveCount(0);
+
+    await authorized.close();
+    await nonMember.close();
+  });
+});
