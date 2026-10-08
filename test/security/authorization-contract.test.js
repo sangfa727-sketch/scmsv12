@@ -411,3 +411,14 @@ test('Staff Inquiry Tickets use session, tenant and membership-bound server cont
   assert.match(migration, /revoke all on function public\.rpc_chat_inquiry_send/);
   assert.match(migration, /grant execute on function public\.rpc_chat_inquiry_send/);
 });
+
+
+test('Staff Inquiry Ticket assignment/status is admin-bound and school-scoped', () => {
+  const migration = read('supabase/migrations/20261008200000_staff_inquiry_assignment_status.sql');
+  assert.match(migration, /function public\\.rpc_chat_inquiry_update/);
+  assert.match(migration, /v\.role not in \('admin','super_admin'\)/);
+  assert.match(migration, /assignee_forbidden/);
+  assert.match(migration, /school_id=v\.school_id/);
+  assert.match(migration, /member_role='ASSIGNEE'/);
+  assert.match(migration, /grant execute on function public\.rpc_chat_inquiry_update/);
+});
