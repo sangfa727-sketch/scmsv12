@@ -854,3 +854,77 @@ $function$;
 revoke all on function public.rpc_chat_grade_mark_read(text,text) from public, anon, authenticated;
 grant execute on function public.rpc_chat_grade_mark_read(text,text) to anon, authenticated;
 
+
+
+-- Grade Chat navigation must also use canonical student.grade values.
+create or replace function public.rpc_chat_grade_list(
+  p_session_token text
+) returns jsonb
+language plpgsql
+security definer
+set search_path = public, pg_temp
+as $function$
+declare
+  v_sess record;
+  v_rows jsonb;
+begin
+  select s.school_id,s.teacher_id,s.role
+    into v_sess
+    from public.app_web_sessions s
+    join public.teachers t
+      on t.teacher_id=s.teacher_id
+     and t.school_id=s.school_id
+     and t.role=s.role
+   where s.session_token=p_session_token
+     and s.expires_at>now()
+     and t.status='active'
+   limit 1;
+
+  if v_sess is null then
+    return jsonb_build_object('ok',false,'error','invalid_session');
+  end if;
+
+  select coalesce(jsonb_agg(x.obj order by lower(x.grade_name)),'[]'::jsonb)
+    into v_rows
+    from (
+      select distinct
+        nullif(btrim(s.grade),'') as grade_name,
+        jsonb_build_object(
+          'grade_name',nullif(btrim(s.grade),''),
+          'unread_count',coalesce((
+            select count(*)
+              from public.staff_grade_messages m
+             where m.school_id=v_sess.school_id
+               and lower(btrim(m.grade_name))=lower(btrim(s.grade))
+               and m.sender_teacher_id<>v_sess.teacher_id
+               and m.created_at>coalesce(rs.last_read_at,'epoch'::timestamptz)
+          ),0)
+        ) as obj
+      from public.students s
+      left join public.staff_grade_read_state rs
+        on rs.school_id=v_sess.school_id
+       and rs.teacher_id=v_sess.teacher_id
+       and lower(btrim(rs.grade_name))=lower(btrim(s.grade))
+      where s.school_id=v_sess.school_id
+        and s.status='Active'
+        and nullif(btrim(s.grade),'') is not null
+        and (
+          lower(coalesce(v_sess.role,'')) in ('admin','super_admin')
+          or exists (
+            select 1
+              from public.teacher_class_assignments a
+             where a.school_id=v_sess.school_id
+               and a.teacher_id=v_sess.teacher_id
+               and a.is_active=true
+               and lower(btrim(a.class_name))=lower(btrim(s.class))
+          )
+        )
+    ) x;
+
+  return jsonb_build_object('ok',true,'rows',v_rows);
+end;
+$function$;
+
+revoke all on function public.rpc_chat_grade_list(text) from public, anon, authenticated;
+grant execute on function public.rpc_chat_grade_list(text) to anon, authenticated;
+\n
