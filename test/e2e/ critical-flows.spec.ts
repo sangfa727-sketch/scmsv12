@@ -63,3 +63,19 @@ test.describe('Parent Portal (regression: QR scan silently failing to reach Supa
     await expect(page.getByTestId('google-signin-button')).toBeVisible();
   });
 });
+
+
+test.describe('Staff Chat entry (authenticated shell)', () => {
+  test('opens the Chat workspace from the authenticated navigation', async ({ page }) => {
+    await page.goto(BASE_URL);
+    await page.getByTestId('login-teacher-id').fill(TEACHER_ID);
+    await page.getByTestId('login-password').fill(TEACHER_PW);
+    await page.getByTestId('login-submit').click();
+
+    await expect(page.getByTestId('sidebar')).toBeVisible();
+    await page.getByTestId('nav-chat').click();
+    await expect(page.locator('#page-chat')).toBeVisible();
+    await expect(page.locator('#chatRoot')).toBeVisible();
+    await expect(page.locator('#chatRoot')).toContainText('COMMUNICATION CENTER');
+  });
+});
