@@ -454,9 +454,9 @@ test('Department Chat is session, tenant, membership, and read-state bound', () 
 test('Official individual staff announcements are server-verified and reason-bound', () => {
   const migration = read('supabase/migrations/20261008193000_staff_official_teacher_routing.sql');
   const chat = read('js/16_chat.js');
-  assert.match(migration, /recipient_type in \\('all_staff','grade','teacher'\\)/);
+  assert.ok(migration.includes("recipient_type in ('all_staff','grade','teacher')"));
   assert.match(migration, /rpc_chat_grade_targets/);
-  assert.match(migration, /v_sess\.role not in \\('admin','super_admin'\\)/);
+  assert.ok(migration.includes("v_sess.role not in ('admin','super_admin')"));
   assert.match(migration, /t\.teacher_id=v_target/);
   assert.match(migration, /t\.school_id=v_sess\.school_id/);
   assert.match(migration, /t\.status='active'/);
