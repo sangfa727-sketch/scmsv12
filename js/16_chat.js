@@ -120,7 +120,7 @@ function _renderAdminComposer() {
             <option value="notice">${t('chat.staffNotice')}</option>
           </select>
         </label>
-        <label>Reason
+        <label>${t('chat.reason')}
           <input id="adminMsgReason" value="${t('chat.officialCommunication')}"
                  oninput="_refreshAdminComposerPreview()">
         </label>
@@ -351,7 +351,7 @@ function renderChat() {
         </div>
         <div class="smart-chat-identity">
           <span class="smart-chat-avatar">${esc((window.APP?.teacher_name || '?')[0])}</span>
-          <span>${esc(window.APP?.teacher_name || 'Staff')}</span>
+          <span>${esc(window.APP?.teacher_name || t('chat.staff'))}</span>
         </div>
       </div>
 
@@ -707,7 +707,7 @@ function _renderDirectDirectory() {
     <button class="smart-chat-directory-item" onclick="openDirectChat('${esc(staffRow.teacher_id)}')">
       <span class="smart-chat-direct-avatar">${esc((staffRow.teacher_name||'?')[0])}</span>
       <span><strong>${esc(staffRow.teacher_name)}</strong><small>${esc(staffRow.role||t('chat.teacher'))}</small></span><b>›</b>
-    </button>`).join(''):'<div class="smart-chat-list-empty">No active teacher found.</div>';
+    </button>`).join('') :`<div class="smart-chat-list-empty">${t('chat.noActiveTeacher')}</div>`;
 }
 
 window.openDirectChat=async function(teacherId){
