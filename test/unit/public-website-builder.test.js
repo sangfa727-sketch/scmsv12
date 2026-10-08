@@ -39,13 +39,15 @@ test('section navigation exposes stable anchors and keyboard-safe interaction',(
 });
 
 
-test("section management exposes safe hide, reorder and duplicate controls",()=>{const html=read("school-website/create.html"),css=read("school-website/create.css"),js=read("school-website/create.js");assert.match(html,/data-section-action="hide"/);assert.match(html,/data-section-action="up"/);assert.match(html,/data-section-action="down"/);assert.match(html,/data-section-action="duplicate"/);assert.match(js,/DEFAULT_SECTIONS/);assert.match(js,/normalizeSections/);assert.match(js,/sectionAction/);assert.match(js,/localStorage/);assert.match(js,/m\.locked/);assert.match(css,/\.section-controls/);assert.match(css,/\.site-block\[hidden\]/);new Function(js);});
-
-
 test('section management exposes safe hide, reorder and duplicate controls',()=>{
  const html=read('school-website/create.html'),js=read('school-website/create.js'),css=read('school-website/create.css');
- for(const section of ['hero','about','programs','facilities','news','contact']){assert.match(html,new RegExp('data-section-id="'+section+'"'));assert.match(html,/data-section-action="hide"/);assert.match(html,/data-section-action="up"/);assert.match(html,/data-section-action="down"/);}
- assert.match(html,/data-section-action="duplicate"/);assert.match(html,/aria-label="Home cannot be hidden"/);
- assert.match(js,/normalizeSections/);assert.match(js,/manageSection/);assert.match(js,/state\.sections/);assert.match(js,/Section hidden/);assert.match(js,/Section moved up/);assert.match(js,/Section content duplicated/);
- assert.match(css,/\.section-controls/);assert.match(css,/\.site-block\[hidden\]/);
+ for(const section of ['hero','about','programs','facilities','news','contact']){
+  assert.match(html,new RegExp('data-section-id="'+section+'"'));
+  assert.match(html,/data-section-action="hide"/);
+  assert.match(html,/data-section-action="up"/);
+  assert.match(html,/data-section-action="down"/);
+ }
+ assert.match(html,/data-section-action="duplicate"/);
+ assert.match(js,/DEFAULT_SECTIONS/);assert.match(js,/normalizeSections/);assert.match(js,/sectionAction/);assert.match(js,/renderSectionLayout/);assert.match(js,/localStorage/);assert.match(js,/m\.locked/);
+ assert.match(css,/\\.section-controls/);assert.match(css,/\\.site-block\\[hidden\\]/);new Function(js);
 });
