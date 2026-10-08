@@ -684,6 +684,27 @@ test('sandbox RLS harness uses actual PostgreSQL row-level security and FORCE RL
 });
 
 
+test('public admission replay and rate-limit guards fail closed', () => {
+  const security = require('../../school-website/server/admission-security.js');
+  let now = 1000;
+  const replay = security.createReplayGuard({ ttlMs: 100, maxEntries: 2, now: () => now });
+  assert.equal(replay.claim('k1'), true);
+  assert.equal(replay.claim('k1'), false);
+  now = 1101;
+  assert.equal(replay.claim('k1'), true);
+  assert.equal(replay.claim('k2'), true);
+  assert.equal(replay.claim('k3'), false);
+
+  now = 2000;
+  const rate = security.createRateLimiter({ windowMs: 100, maxRequests: 2, now: () => now });
+  assert.equal(rate.allow('school-a:ip-1'), true);
+  assert.equal(rate.allow('school-a:ip-1'), true);
+  assert.equal(rate.allow('school-a:ip-1'), false);
+  assert.equal(rate.allow('school-b:ip-1'), true);
+  now = 2101;
+  assert.equal(rate.allow('school-a:ip-1'), true);
+});
+
 test('public admission backend boundary validates bounded input and idempotency keys', () => {
   const security = require('../../school-website/server/admission-security.js');
   assert.equal(security.isHoneypotTriggered('bot'), true);
