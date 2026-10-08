@@ -145,6 +145,18 @@
     'branding.readImageFailed':'ไม่สามารถอ่านรูปภาพได้','branding.processImageFailed':'ไม่สามารถประมวลผลรูปภาพได้','branding.failed':'ดำเนินการไม่สำเร็จ','branding.saveFailed':'บันทึกไม่สำเร็จ',
     'tm.editTeacherLabel':'แก้ไขครู','tm.editTeacherSubtitle':'อัปเดตชื่อครูและ Login Name ที่ใช้สำหรับบัตรครูและการเข้าสู่ระบบ','tm.teacherId':'รหัสครู','tm.loginName':'ชื่อเข้าสู่ระบบ','tm.teacherName':'ชื่อครู','tm.email':'อีเมล','tm.role':'บทบาท','tm.roleTeacher':'ครู','tm.roleAdmin':'ผู้ดูแลระบบ','tm.roleSuperAdmin':'ผู้ดูแลระบบสูงสุด','tm.saving':'กำลังบันทึก…','tm.cancel':'ยกเลิก','tm.teacherIdCardLabel':'รหัสครู','tm.loginNameLabel':'ชื่อเข้าสู่ระบบ','tm.teacherLoginQr':'QR สำหรับเข้าสู่ระบบครู','tm.qrUnavailable':'ไม่สามารถใช้ QR ได้',
     'subject.exists':'มีวิชานี้อยู่แล้ว','subject.addFailed':'เพิ่มวิชาไม่สำเร็จ','picker.noMatch':'ไม่พบนักเรียนที่ตรงกับ “{query}”','teacher.updateRequired':'ต้องกรอกชื่อผู้ใช้และชื่อครู','teacher.qrUnavailable':'ไม่สามารถใช้ QR ได้','password.hide':'ซ่อนรหัสผ่าน','password.show':'แสดงรหัสผ่าน','password.newLabel':'รหัสผ่านใหม่','password.newPlaceholder':'อย่างน้อย 6 ตัวอักษร','password.reset':'ตั้งรหัสผ่านใหม่'
+
+    'chat.sendFailed':'ส่งไม่สำเร็จ',
+    'chat.department.refresh':'รีเฟรชแผนก',
+    'chat.department.select':'เลือกแผนก...',
+    'chat.department.placeholder':'เขียนข้อความถึงแผนก...',
+    'chat.grade.refresh':'รีเฟรชเกรด',
+    'chat.grade.placeholder':'เขียนข้อความถึงกลุ่มเกรด...',
+    'chat.groups.refresh':'รีเฟรชกลุ่ม',
+    'chat.groups.placeholder':'เขียนข้อความ…',
+    'chat.groups.createFailed':'สร้างไม่สำเร็จ',
+    'chat.direct.placeholder':'เขียนข้อความส่วนตัว...',
+    'chat.direct.findTeacher':'ค้นหาครู...',
   });
   window.I18N_TH = Object.assign({}, base, overrides);
 })();
