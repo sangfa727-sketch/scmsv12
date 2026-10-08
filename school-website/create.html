@@ -23,8 +23,9 @@
         <div><span class="section-kicker">2 · ADD YOUR INFORMATION</span><strong>Just fill in the fields you know.</strong><small>You can leave anything empty and come back later.</small></div>
         <div class="field-progress" id="fieldProgress">0 of 6 completed</div>
       </section>
+      <nav class="section-nav" aria-label="Page sections"><span class="section-nav-label">Jump to</span><div class="section-nav-links"><a href="#hero">Home</a><a href="#about">About</a><a href="#programs">Programs</a><a href="#facilities">Facilities</a><a href="#news">News</a><a href="#contact">Contact</a></div></nav>
       <div class="page-canvas" id="pageCanvas" aria-label="Website page editor">
-        <section class="site-block hero-block" data-block="hero">
+        <section id="hero" class="site-block hero-block" data-block="hero">
           <button class="block-edit" type="button" data-edit="hero">Edit</button>
           <div class="hero-inner">
             <button class="editable media-placeholder" data-field="logo" type="button">＋ Add your school logo</button>
@@ -33,24 +34,24 @@
             <div class="hero-actions"><span>Admissions</span><span>Contact school</span></div>
           </div>
         </section>
-        <section class="site-block" data-block="about">
+        <section id="about" class="site-block" data-block="about">
           <button class="block-edit" type="button" data-edit="about">Edit</button><span class="section-kicker">ABOUT OUR SCHOOL</span>
           <button class="editable section-title" data-field="aboutTitle" type="button">Click here to add your school introduction</button>
           <button class="editable body-placeholder" data-field="aboutText" type="button">Tell families what makes your school special. A short, clear introduction works best.</button>
         </section>
-        <section class="site-block" data-block="programs"><button class="block-edit" type="button" data-edit="programs">Edit</button>
+        <section id="programs" class="site-block" data-block="programs"><button class="block-edit" type="button" data-edit="programs">Edit</button>
           <div class="section-heading"><div><span class="section-kicker">PROGRAMS</span><h2>Learning for every stage</h2></div><button class="text-button" data-add-item="programs" type="button">＋ Add program</button></div>
           <div id="programItems" class="item-grid"><button class="add-card" data-add-item="programs" type="button">＋<span>Add your first program</span></button></div>
         </section>
-        <section class="site-block" data-block="facilities"><button class="block-edit" type="button" data-edit="facilities">Edit</button>
+        <section id="facilities" class="site-block" data-block="facilities"><button class="block-edit" type="button" data-edit="facilities">Edit</button>
           <div class="section-heading"><div><span class="section-kicker">SCHOOL LIFE</span><h2>Facilities & activities</h2></div><button class="text-button" data-add-item="facilities" type="button">＋ Add facility</button></div>
           <div id="facilityItems" class="item-grid"><button class="add-card" data-add-item="facilities" type="button">＋<span>Show families your school</span></button></div>
         </section>
-        <section class="site-block" data-block="news"><button class="block-edit" type="button" data-edit="news">Edit</button>
+        <section id="news" class="site-block" data-block="news"><button class="block-edit" type="button" data-edit="news">Edit</button>
           <div class="section-heading"><div><span class="section-kicker">NEWS & EVENTS</span><h2>What's happening</h2></div><button class="text-button" data-add-item="news" type="button">＋ Add news</button></div>
           <div id="newsItems" class="item-grid"><button class="add-card" data-add-item="news" type="button">＋<span>Add your first news item</span></button></div>
         </section>
-        <section class="site-block contact-block" data-block="contact"><button class="block-edit" type="button" data-edit="contact">Edit</button><span class="section-kicker">CONTACT</span>
+        <section id="contact" class="site-block contact-block" data-block="contact"><button class="block-edit" type="button" data-edit="contact">Edit</button><span class="section-kicker">CONTACT</span>
           <button class="editable section-title" data-field="contactTitle" type="button">Click here to add your contact details</button>
           <button class="editable body-placeholder" data-field="contactText" type="button">Phone · Email · Address · Location</button>
         </section>
