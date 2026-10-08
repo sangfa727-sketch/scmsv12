@@ -31,6 +31,8 @@
   'chat.newConversation': "การสนทนาใหม่",
   'chat.writePrivate': "เขียนข้อความส่วนตัว...",
   'chat.noMessages': "ยังไม่มีข้อความ",
+
+    'chat.gradeAccess':'ยังไม่มีการมอบหมายระดับชั้นที่ใช้งานอยู่สำหรับบัญชีบุคลากรนี้','chat.gradePrefix':'ระดับชั้น: ','chat.individualPrefix':'รายบุคคล: ', 
 };
   Object.assign(overrides, {
     'hw.tapAdd':'แตะ + เพื่อเพิ่มการบ้าน','hw.due':'กำหนดส่ง','hw.addTitle':'เพิ่มการบ้าน','hw.subject':'วิชา','hw.addSubject':'เพิ่มวิชา','hw.class':'ชั้นเรียน','hw.type':'ประเภท','hw.description':'รายละเอียด','hw.descPh':'รายละเอียดการบ้าน…','hw.lbPage':'หน้า LB','hw.wbPage':'หน้า WB','hw.pagePh1':'เช่น 24','hw.pagePh2':'เช่น 25','hw.dueDate':'วันครบกำหนด','hw.saved':'✓ บันทึกการบ้านแล้ว','hw.editTitle':'แก้ไขการบ้าน','hw.updated':'✓ อัปเดตแล้ว','hw.confirmTitle':'ลบการบ้านนี้?','hw.confirmBody':'คุณแน่ใจหรือไม่ว่าต้องการลบการบ้านนี้?',
