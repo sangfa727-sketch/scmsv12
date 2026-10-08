@@ -1474,7 +1474,7 @@ window.I18N_ZH = {
   "chat.noMessages": "暂无消息",
   "chat.gradeAccess": "此员工账户暂无可用的有效年级分配。",
   "chat.gradePrefix": "年级：",
-  "chat.individualPrefix": "个人："
+  "chat.individualPrefix": "个人：",
   "chat.department.refresh": "刷新部门",
   "chat.department.select": "选择部门...",
   "chat.department.placeholder": "输入部门消息...",
