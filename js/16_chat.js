@@ -8,6 +8,7 @@
 
 let _chatChannel = 'staff';
 let _chatPollTimer = null;
+let _directPollBusy = false;
 let _chatScrollLock = false;
 let _chatMode = 'school';
 let _adminGradeRecipients = [];
@@ -500,7 +501,26 @@ window._aiPrompt = function(value) {
   showToast('AI preview: ' + v);
 };
 
-window.startChatPolling=function(){if(_chatPollTimer)return;_chatPollTimer=setInterval(()=>{if(window.APP.currentPage==='chat')_loadChatMessages();},8000);};
-window.stopChatPolling=function(){if(_chatPollTimer){clearInterval(_chatPollTimer);_chatPollTimer=null;}};
+window.startChatPolling=function(){
+  if(_chatPollTimer)return;
+  _chatPollTimer=setInterval(async ()=>{
+    if(window.APP?.currentPage!=='chat')return;
+    if(_chatMode==='school' && _chatChannel==='direct'){
+      if(_directPollBusy)return;
+      _directPollBusy=true;
+      try{
+        await _loadDirectWorkspace();
+      }finally{
+        _directPollBusy=false;
+      }
+    }else if(_chatMode==='school'){
+      _loadChatMessages();
+    }
+  },5000);
+};
+window.stopChatPolling=function(){
+  if(_chatPollTimer){clearInterval(_chatPollTimer);_chatPollTimer=null;}
+  _directPollBusy=false;
+};
 window._autoGrowChatInput=function(el){el.style.height='auto';el.style.height=Math.min(el.scrollHeight,100)+'px';};
 window._chatKeydown=function(ev){if(ev.key==='Enter'&&!ev.shiftKey){ev.preventDefault();sendChat(ev);}};
