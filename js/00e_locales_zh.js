@@ -1438,4 +1438,16 @@ window.I18N_ZH = {
   "settings.theme": "主题",
   "settings.themeLight": "☀️ 浅色",
   "settings.themeDark": "🌙 深色",
+
+  "chat.sendFailed": "发送失败",
+  "chat.department.refresh": "刷新部门",
+  "chat.department.select": "选择部门...",
+  "chat.department.placeholder": "输入部门消息...",
+  "chat.grade.refresh": "刷新年级",
+  "chat.grade.placeholder": "输入年级消息...",
+  "chat.groups.refresh": "刷新群组",
+  "chat.groups.placeholder": "输入消息…",
+  "chat.groups.createFailed": "创建失败",
+  "chat.direct.placeholder": "输入私信...",
+  "chat.direct.findTeacher": "查找教师...",
 };
