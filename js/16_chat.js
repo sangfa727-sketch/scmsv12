@@ -784,8 +784,8 @@ window._directKeydown=function(ev){if(ev.key==='Enter'&&!ev.shiftKey){ev.prevent
 
 window._showSchoolChatChannels = function() { _chatChannel='staff'; _renderChatMode(); };
 
-function _chatChannelBack(label='School Chat') {
-  return `<div class="smart-chat-channel-back-row"><button type="button" class="smart-chat-channel-back" onclick="_showSchoolChatChannels()" aria-label="Back to School Chat">‹ <span>${esc(label)}</span></button></div>`;
+function _chatChannelBack(label=t('chat.schoolChat')) {
+  return `<div class="smart-chat-channel-back-row"><button type="button" class="smart-chat-channel-back" onclick="_showSchoolChatChannels()" aria-label="${t('chat.backToSchoolChat')}">‹ <span>${esc(label)}</span></button></div>`;
 }
 
 window.switchChatChannel = function(channel) {
