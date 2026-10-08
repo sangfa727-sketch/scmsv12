@@ -37,14 +37,19 @@ function _shell(){
     '<div id="insightsMetrics" class="insights-metrics"></div><div class="insights-section-head"><div><h2>'+_ie(_insightsText('title'))+'</h2><span>'+_ie(_insightsText('note'))+'</span></div></div><div id="insightsList" class="insights-list"></div></section>';
 }
 async function _loadReport(){
+  _insightsReportCard={students:[]};
   try{
     _insightsTerms=await API.getTerms();
-    if(!_insightsTerms.length){_insightsReportCard={students:[]};return;}
-    if(!_insightsTermId||!_insightsTerms.some(function(t){return Number(t.id)===Number(_insightsTermId);})){_insightsTermId=(_insightsTerms.find(function(t){return t.is_current;})||_insightsTerms[0]).id;}
-    _insightsReportCard=await API.getReportCard(_insightsTermId,_insightsClass==='All'?null:_insightsClass);
+    if(!_insightsTerms.length)return;
+    if(!_insightsTermId||!_insightsTerms.some(function(t){return Number(t.id)===Number(_insightsTermId);}))_insightsTermId=(_insightsTerms.find(function(t){return t.is_current;})||_insightsTerms[0]).id;
+    const students=(window.APP&&window.APP.students||[]).filter(function(s){return s.status==='Active';});
+    const classes=_insightsClass==='All'?[...new Set(students.map(function(s){return s.class;}).filter(Boolean))]:[_insightsClass];
+    const results=await Promise.all(classes.map(function(cls){return API.getReportCard(_insightsTermId,cls).catch(function(){return {ok:false,students:[]};});}));
+    const merged=[];results.forEach(function(r){if(r&&Array.isArray(r.students))merged.push.apply(merged,r.students);});
+    _insightsReportCard={students:merged};
   }catch(e){_insightsReportCard={students:[]};}
 }
-async function renderInsights(opts){
+function renderInsights(opts){
   opts=opts||{}; const root=document.getElementById('page-insights'); if(!root)return;
   root.innerHTML=_shell();
   const list=root.querySelector('#insightsList'); if(list)list.innerHTML=typeof skeletonCards==='function'?skeletonCards(3):'';
