@@ -504,7 +504,7 @@ function _renderInquiryWorkspace() {
         <button type="button" class="btn-secondary" onclick="_newInquiryTicket()">＋ ${t('chat.newTicket')}</button>
       </aside>
       <section class="smart-chat-direct-conversation">
-        <div id="inquiryTicketHead" class="smart-chat-conversation-head"><div><strong>${t('chat.selectTicket')}</strong><small>${t('chat.authorizedTicketAccess')}</small></div><span class="smart-chat-verified-pill">School isolated</span></div>
+        <div id="inquiryTicketHead" class="smart-chat-conversation-head"><div><strong>${t('chat.selectTicket')}</strong><small>${t('chat.authorizedTicketAccess')}</small></div><span class="smart-chat-verified-pill">${t('chat.schoolIsolated')}</span></div>
         <div id="inquiryMessageStream" class="chat-stream smart-chat-direct-stream"><div class="chat-empty"><div class="chat-empty-icon">🎫</div><div class="chat-empty-title">${t('chat.workspace.tickets')}</div><div class="chat-empty-sub">${t('chat.createOrSelectTicket')}</div></div></div>
         <form class="chat-composer smart-chat-direct-composer" onsubmit="return _sendInquiryFromComposer(event)">
           <textarea id="inquiryChatInput" placeholder="${t('chat.selectTicketDots')}" rows="1" disabled></textarea>
@@ -616,7 +616,7 @@ function _renderAnnouncementWorkspace(){
     (window.APP?.is_admin ? `<button type="button" class="smart-chat-add-btn" id="announcementComposerToggle" onclick="_toggleAnnouncementComposer()" aria-expanded="false" aria-controls="announcementComposer" title="${t('chat.newOfficialMessage')}">+</button>` : '')+
     `<button type="button" class="smart-chat-refresh-btn" onclick="_loadAnnouncementWorkspace()" title="${t('chat.refresh')}">↻</button></div></div>`+
     '<div id="announcementList" class="smart-chat-conversation-list"></div></aside>'+
-    `<section class="smart-chat-direct-conversation"><div id="announcementHead" class="smart-chat-conversation-head"><div><strong>${t('chat.officialAnnouncements')}</strong><small>${t('chat.schoolAuthorizedNotices')}</small></div><span class="smart-chat-verified-pill">Verified</span></div><div id="announcementStream" class="chat-stream"><div class="chat-empty"><div class="chat-empty-icon">📢</div><div class="chat-empty-title">${t('chat.officialAnnouncements')}</div><div class="chat-empty-sub">${t('chat.loading')}</div></div></div></section></div>`;
+    `<section class="smart-chat-direct-conversation"><div id="announcementHead" class="smart-chat-conversation-head"><div><strong>${t('chat.officialAnnouncements')}</strong><small>${t('chat.schoolAuthorizedNotices')}</small></div><span class="smart-chat-verified-pill">${t('chat.verified')}</span></div><div id="announcementStream" class="chat-stream"><div class="chat-empty"><div class="chat-empty-icon">📢</div><div class="chat-empty-title">${t('chat.officialAnnouncements')}</div><div class="chat-empty-sub">${t('chat.loading')}</div></div></div></section></div>`;
 }
 async function _loadAnnouncementWorkspace(autoOpen=true){
   try{
