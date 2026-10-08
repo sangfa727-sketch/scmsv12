@@ -37,3 +37,6 @@ test('section navigation exposes stable anchors and keyboard-safe interaction',(
  assert.match(html,/aria-label="Page sections"/); assert.match(html,/href="#hero"/); assert.match(html,/href="#contact"/);
  assert.match(css,/\.section-nav a:focus-visible/); assert.match(css,/\.section-nav a\.active/); assert.match(js,/IntersectionObserver/); assert.match(js,/initSectionNavigation/);
 });
+
+
+test("section management exposes safe hide, reorder and duplicate controls",()=>{const html=read("school-website/create.html"),css=read("school-website/create.css"),js=read("school-website/create.js");assert.match(html,/data-section-action="hide"/);assert.match(html,/data-section-action="up"/);assert.match(html,/data-section-action="down"/);assert.match(html,/data-section-action="duplicate"/);assert.match(js,/DEFAULT_SECTIONS/);assert.match(js,/normalizeSections/);assert.match(js,/sectionAction/);assert.match(js,/localStorage/);assert.match(js,/m\.locked/);assert.match(css,/\.section-controls/);assert.match(css,/\.site-block\[hidden\]/);new Function(js);});
