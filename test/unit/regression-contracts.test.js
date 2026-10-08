@@ -682,3 +682,17 @@ test('sandbox RLS harness uses actual PostgreSQL row-level security and FORCE RL
   assert.match(sql, /school-b/);
   assert.match(sql, /rollback;/i);
 });
+
+
+test('public admission backend boundary validates bounded input and idempotency keys', () => {
+  const security = require('../../school-website/server/admission-security.js');
+  assert.equal(security.isHoneypotTriggered('bot'), true);
+  assert.equal(security.isHoneypotTriggered(''), false);
+  assert.equal(security.validateAdmissionInput(null).ok, false);
+  assert.equal(security.validateAdmissionInput({ studentName:'A', guardianName:'B', phone:'1', grade:'G' }).error, 'required_field_missing');
+  const result = security.validateAdmissionInput({ studentName:'A', guardianName:'B', phone:'1', grade:'G', email:'parent@example.com', note:'hello', idempotencyKey:'admission-key-123456' });
+  assert.equal(result.ok, true);
+  assert.equal(result.value.email, 'parent@example.com');
+  assert.equal(security.validateAdmissionInput({ studentName:'A', guardianName:'B', phone:'1', grade:'G', email:'bad', idempotencyKey:'admission-key-123456' }).error, 'invalid_email');
+  assert.equal(security.validateAdmissionInput({ studentName:'A', guardianName:'B', phone:'1', grade:'G', idempotencyKey:'short' }).error, 'invalid_idempotency_key');
+});
