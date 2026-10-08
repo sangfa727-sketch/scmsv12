@@ -266,6 +266,10 @@ window._refreshAdminComposerPreview = function() {
     .smart-chat-refresh-btn{font-size:15px}
     .smart-chat-composer-drawer{display:none;margin-top:10px}
     #adminMsgSendBtn{white-space:nowrap;min-width:max-content;padding-inline:12px;font-size:11px}
+    .smart-chat-department-shell:not(.has-selection){grid-template-columns:1fr}
+    .smart-chat-department-shell:not(.has-selection) .smart-chat-direct-conversation{display:none !important}
+    @media(max-width:760px){#adminMsgSendBtn{font-size:10px;padding-inline:10px}}
+    #adminMsgSendBtn{white-space:nowrap;min-width:max-content;padding-inline:12px;font-size:11px}
     @media(max-width:760px){#adminMsgSendBtn{font-size:10px;padding-inline:10px}}
     .smart-chat-composer-drawer.is-open{display:block}
     .smart-chat-composer-drawer .smart-chat-admin-card{margin:0}
@@ -633,7 +637,7 @@ async function _loadAnnouncementWorkspace(autoOpen=true){
     if(!list||!stream)return;
     window._chatAnnouncements=rows;
     if(!rows.length){_announcementId=null;list.innerHTML=`<div class="smart-chat-list-empty-card"><div class="icon">📢</div><strong>${t('chat.noOfficialAnnouncements')}</strong><small>${t('chat.newVerifiedNotices')}</small></div>`;stream.innerHTML=`<div class="chat-empty"><div class="chat-empty-icon">📢</div><div class="chat-empty-title">${t('chat.noOfficialAnnouncements')}</div><div class="chat-empty-sub">${t('chat.newVerifiedNotices')}</div></div>`;return;}
-    list.innerHTML=rows.map(a=>'<button class="smart-chat-channel-card '+(Number(a.id)===Number(_announcementId)?'active':'')+'" onclick="_openAnnouncement('+Number(a.id)+')"><span class="smart-chat-channel-icon">📢</span><span><strong>'+esc(a.message_type||'Official notice')+'</strong><small>'+esc(a.created_at||'')+'</small></span><b>'+(!a.read_at?'•':'›')+'</b></button>').join('');
+    list.innerHTML=rows.map(a=>'<button class="smart-chat-channel-card '+(Number(a.id)===Number(_announcementId)?'active':'')+'" onclick="_openAnnouncement('+Number(a.id)+')"><span class="smart-chat-channel-icon">📢</span><span><strong>'+esc(a.message_type||t('chat.officialNotice'))+'</strong><small>'+esc(a.created_at||'')+'</small></span><b>'+(!a.read_at?'•':'›')+'</b></button>').join('');
     if(autoOpen && !_announcementId) await _openAnnouncement(Number(rows[0].id));
    }catch(e){const list=document.getElementById('announcementList');if(list)list.innerHTML=`<div class="chat-error"><div>📢</div><div>${t('chat.loadAnnouncementsFailed')}</div><button type="button" class="btn-secondary" onclick="_loadAnnouncementWorkspace(false)">${t('chat.retry')}</button></div>`;}
 }
@@ -841,7 +845,7 @@ function _renderChatStream(messages) {
       const mine = m.teacher_id === myId;
       const when = m.created_at || m.sent_at;
       const time = when ? new Date(when).toLocaleTimeString([], {hour:'2-digit',minute:'2-digit'}) : '';
-      const author = m.teacher_name || 'Unknown';
+      const author = m.teacher_name || t('chat.unknownStaff');
       return `<div class="chat-bubble-row ${mine?'mine':'theirs'}${m.failed?' failed':''}${m.pending?' pending':''}">
         ${mine?'':`<div class="chat-bubble-avatar">${esc((author||'?')[0])}</div>`}
         <div class="chat-bubble">
