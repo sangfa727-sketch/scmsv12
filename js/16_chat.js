@@ -445,7 +445,7 @@ function _renderChatMode() {
 
 
 function _renderInquiryWorkspace() {
-  return `
+  return _chatChannelBack('School Chat') + `
     <div class="smart-chat-direct-shell smart-chat-inquiry-shell${_inquiryTicketId ? " has-selection" : ""}">
       <aside class="smart-chat-direct-list">
         <div class="smart-chat-direct-list-head"><div><div class="smart-chat-kicker">INQUIRY</div><strong>Inquiry Tickets</strong></div><button type="button" onclick="_loadInquiryTickets()" title="Refresh">↻</button></div>
@@ -579,7 +579,7 @@ window._clearAnnouncementSelection=function(){
   if(stream)stream.innerHTML='<div class="chat-empty"><div class="chat-empty-icon">📢</div><div class="chat-empty-title">Select an announcement</div><div class="chat-empty-sub">Choose an official notice from the list.</div></div>';
 };
 function _renderDirectWorkspace() {
-  return `
+  return _chatChannelBack('School Chat') + `
     <div class="smart-chat-direct-shell${_directConversationId ? ' has-selection' : ''}">
       <aside class="smart-chat-direct-list">
         <div class="smart-chat-direct-list-head"><div><div class="smart-chat-kicker">PRIVATE</div><strong>Direct messages</strong></div><button type="button" onclick="_loadDirectWorkspace()" title="Refresh">↻</button></div>
@@ -721,7 +721,9 @@ window.sendDirectChat=async function(ev){
 
 window._directKeydown=function(ev){if(ev.key==='Enter'&&!ev.shiftKey){ev.preventDefault();sendDirectChat(ev);}};
 
-window._showSchoolChatChannels = function() { _chatChannel='staff'; _renderChatMode(); };\n\nfunction _chatChannelBack(label='School Chat') {\n  return `<div class="smart-chat-channel-back-row"><button type="button" class="smart-chat-channel-back" onclick="_showSchoolChatChannels()" aria-label="Back to School Chat">‹ <span>${esc(label)}</span></button></div>`;\n}\n\nwindow.switchChatChannel = function(channel) {
+window._showSchoolChatChannels = function() { _chatChannel='staff'; _renderChatMode(); };
+
+function _chatChannelBack(label='School Chat') {\n  return `<div class="smart-chat-channel-back-row"><button type="button" class="smart-chat-channel-back" onclick="_showSchoolChatChannels()" aria-label="Back to School Chat">‹ <span>${esc(label)}</span></button></div>`;\n}\n\nwindow.switchChatChannel = function(channel) {
   _chatChannel = channel;
   if (_chatMode !== 'school') return;
   _renderChatMode();
