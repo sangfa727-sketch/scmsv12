@@ -97,6 +97,18 @@
   };
   Object.keys(micro).forEach(code=>Object.assign(chat[code],micro[code]));
 
+
+  const uiFix={
+    en:{'chat.noGradesAvailable':'No grades available','chat.newDepartment':'New department','chat.closeDepartment':'Close department form','chat.departmentCode':'Department code','chat.departmentName':'Department name','chat.createDepartment':'Create department','chat.departmentCreated':'Department created','chat.departmentCreateFailed':'Department could not be created.','chat.departmentNameRequired':'Department name is required.','chat.departmentCodeRequired':'Department code is required.'},
+    my:{'chat.noGradesAvailable':'အတန်း မရှိသေးပါ','chat.newDepartment':'ဌာနအသစ်','chat.closeDepartment':'ဌာနဖောင် ပိတ်ရန်','chat.departmentCode':'ဌာနကုဒ်','chat.departmentName':'ဌာနအမည်','chat.createDepartment':'ဌာနဖန်တီးရန်','chat.departmentCreated':'ဌာန ဖန်တီးပြီးပါပြီ','chat.departmentCreateFailed':'ဌာန ဖန်တီး၍မရပါ။','chat.departmentNameRequired':'ဌာနအမည် လိုအပ်ပါသည်။','chat.departmentCodeRequired':'ဌာနကုဒ် လိုအပ်ပါသည်။'},
+    th:{'chat.noGradesAvailable':'ไม่มีเกรดที่พร้อมใช้งาน','chat.newDepartment':'แผนกใหม่','chat.closeDepartment':'ปิดแบบฟอร์มแผนก','chat.departmentCode':'รหัสแผนก','chat.departmentName':'ชื่อแผนก','chat.createDepartment':'สร้างแผนก','chat.departmentCreated':'สร้างแผนกแล้ว','chat.departmentCreateFailed':'ไม่สามารถสร้างแผนกได้','chat.departmentNameRequired':'ต้องระบุชื่อแผนก','chat.departmentCodeRequired':'ต้องระบุรหัสแผนก'},
+    jp:{'chat.noGradesAvailable':'利用可能な学年はありません','chat.newDepartment':'新しい部署','chat.closeDepartment':'部署フォームを閉じる','chat.departmentCode':'部署コード','chat.departmentName':'部署名','chat.createDepartment':'部署を作成','chat.departmentCreated':'部署を作成しました','chat.departmentCreateFailed':'部署を作成できませんでした','chat.departmentNameRequired':'部署名は必須です','chat.departmentCodeRequired':'部署コードは必須です'},
+    ms:{'chat.noGradesAvailable':'Tiada tahun tersedia','chat.newDepartment':'Jabatan baharu','chat.closeDepartment':'Tutup borang jabatan','chat.departmentCode':'Kod jabatan','chat.departmentName':'Nama jabatan','chat.createDepartment':'Cipta jabatan','chat.departmentCreated':'Jabatan berjaya dicipta','chat.departmentCreateFailed':'Jabatan tidak dapat dicipta.','chat.departmentNameRequired':'Nama jabatan diperlukan.','chat.departmentCodeRequired':'Kod jabatan diperlukan.'},
+    km:{'chat.noGradesAvailable':'គ្មានថ្នាក់ដែលអាចប្រើបាន','chat.newDepartment':'នាយកដ្ឋានថ្មី','chat.closeDepartment':'បិទទម្រង់នាយកដ្ឋាន','chat.departmentCode':'កូដនាយកដ្ឋាន','chat.departmentName':'ឈ្មោះនាយកដ្ឋាន','chat.createDepartment':'បង្កើតនាយកដ្ឋាន','chat.departmentCreated':'បានបង្កើតនាយកដ្ឋាន','chat.departmentCreateFailed':'មិនអាចបង្កើតនាយកដ្ឋានបានទេ។','chat.departmentNameRequired':'ត្រូវការឈ្មោះនាយកដ្ឋាន។','chat.departmentCodeRequired':'ត្រូវការកូដនាយកដ្ឋាន។'},
+    zh:{'chat.noGradesAvailable':'暂无可用年级','chat.newDepartment':'新部门','chat.closeDepartment':'关闭部门表单','chat.departmentCode':'部门代码','chat.departmentName':'部门名称','chat.createDepartment':'创建部门','chat.departmentCreated':'部门已创建','chat.departmentCreateFailed':'无法创建部门','chat.departmentNameRequired':'部门名称为必填项','chat.departmentCodeRequired':'部门代码为必填项'}
+  };
+  Object.keys(uiFix).forEach(code=>Object.assign(chat[code],uiFix[code]));
+
   const maps={en:'I18N_EN',my:'I18N_MY',th:'I18N_TH',jp:'I18N_JP',ms:'I18N_MS',km:'I18N_KM',zh:'I18N_ZH'};
   Object.keys(maps).forEach(code=>{ window[maps[code]]=Object.assign({},window[maps[code]]||{},code==='en'?en:code==='my'?my:chat[code]); });
 })();
