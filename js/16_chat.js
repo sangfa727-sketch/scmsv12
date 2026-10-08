@@ -168,7 +168,7 @@ async function _loadAdminRecipientPreview(type = null, target = null) {
       const select = document.getElementById('adminMsgTeacher');
       if (select) {
         const current = select.value;
-        select.innerHTML = '<option value="">${t('chat.selectTeacher')}</option>' +
+        select.innerHTML = `<option value="">${t('chat.selectTeacher')}</option>` +
           _adminTeacherRecipients.map(staffRow => `<option value="${esc(staffRow.teacher_id)}">${esc(staffRow.teacher_name)} · ${esc(staffRow.role || t('chat.teacher'))}</option>`).join('');
         if (_adminTeacherRecipients.some(t => t.teacher_id === current)) select.value = current;
       }
@@ -524,20 +524,20 @@ async function _loadInquiryTickets(){
     _inquiryTickets=await API.getInquiryTickets();
     _renderInquiryTicketList();
     if(_inquiryTicketId) await _openInquiryTicket(_inquiryTicketId);
-   }catch(e){const box=document.getElementById('inquiryTicketList');if(box)box.innerHTML='<div class="chat-error"><div>🎫</div><div>${t('chat.loadTicketsFailed')}</div><button type="button" class="btn-secondary" onclick="_loadInquiryTickets()">Retry</button></div>';}
+   }catch(e){const box=document.getElementById('inquiryTicketList');if(box)box.innerHTML=`<div class="chat-error"><div>🎫</div><div>${t('chat.loadTicketsFailed')}</div><button type="button" class="btn-secondary" onclick="_loadInquiryTickets()">${t('chat.retry')}</button></div>`;}
 }
 async function _openInquiryTicket(id){
   _inquiryTicketId=Number(id); const shell=document.querySelector('.smart-chat-inquiry-shell');if(shell)shell.classList.add('has-selection'); const r=await API.openInquiryTicket(_inquiryTicketId); if(!r?.ok)return;
   const h=document.getElementById('inquiryTicketHead'), s=document.getElementById('inquiryMessageStream'), input=document.getElementById('inquiryChatInput'), btn=document.getElementById('inquirySendBtn');
   _inquiryCurrentTicket=r.ticket;
-  const adminControls=window.APP?.is_admin?'<div class="smart-chat-inquiry-admin"><label>${t('chat.status')} <select id="inquiryStatusSelect" onchange="_updateInquiryTicket()"><option>${t('chat.statusOpen')}</option><option>${t('chat.statusAssigned')}</option><option>${t('chat.statusInProgress')}</option><option>${t('chat.statusWaiting')}</option><option>${t('chat.statusResolved')}</option><option>${t('chat.statusClosed')}</option></select></label><label>${t('chat.assignee')} <select id="inquiryAssigneeSelect" onchange="_updateInquiryTicket()"><option value="">${t('chat.unassigned')}</option></select></label></div>':'';
+  const adminControls=window.APP?.is_admin?`<div class="smart-chat-inquiry-admin"><label>${t('chat.status')} <select id="inquiryStatusSelect" onchange="_updateInquiryTicket()"><option value="OPEN">${t('chat.statusOpen')}</option><option value="ASSIGNED">${t('chat.statusAssigned')}</option><option value="IN_PROGRESS">${t('chat.statusInProgress')}</option><option value="WAITING">${t('chat.statusWaiting')}</option><option value="RESOLVED">${t('chat.statusResolved')}</option><option value="CLOSED">${t('chat.statusClosed')}</option></select></label><label>${t('chat.assignee')} <select id="inquiryAssigneeSelect" onchange="_updateInquiryTicket()"><option value="">${t('chat.unassigned')}</option></select></label></div>`:'';
   if(h)h.innerHTML=`<div class="smart-chat-direct-peer"><button type="button" class="smart-chat-mobile-back" onclick="_clearInquirySelection()" aria-label="${t('chat.backToInquiryTickets')}">‹</button><div><strong>${esc(r.ticket.subject)}</strong><small>${esc(r.ticket.status)} · ${esc(r.ticket.priority)}${r.ticket.student_id?' · Student '+esc(r.ticket.student_id):''}</small></div><span class="smart-chat-verified-pill">${t('chat.authorized')}</span>${adminControls}`;
   if(window.APP?.is_admin){
     const ss=document.getElementById('inquiryStatusSelect'), aa=document.getElementById('inquiryAssigneeSelect');
     if(ss)ss.value=r.ticket.status;
     if(aa){
       const staff=_verifiedStaffList();
-      aa.innerHTML='<option value="">${t('chat.unassigned')}</option>'+staff.map(t=>`<option value="${esc(t.teacher_id)}">${esc(t.teacher_name||t.name||t.teacher_id)}</option>`).join('');
+      aa.innerHTML=`<option value="">${t('chat.unassigned')}</option>`+staff.map(t=>`<option value="${esc(t.teacher_id)}">${esc(t.teacher_name||t.name||t.teacher_id)}</option>`).join('');
       if(r.ticket.assigned_teacher_id)aa.value=r.ticket.assigned_teacher_id;
     }
   }
@@ -553,7 +553,7 @@ async function _openInquiryTicket(id){
     }catch(e){ /* read state is best-effort; authorization remains server-side */ }
   }
 }
-window._clearInquirySelection=function(){_inquiryTicketId=null;_inquiryCurrentTicket=null;const shell=document.querySelector('.smart-chat-inquiry-shell');if(shell)shell.classList.remove('has-selection');const h=document.getElementById('inquiryTicketHead');if(h)h.innerHTML=`<div><strong>${t('chat.selectTicket')}</strong><small>${t('chat.authorizedTicketAccess')}</small></div><span class="smart-chat-verified-pill">${t('chat.schoolIsolated')}</span>`;const s=document.getElementById('inquiryMessageStream');if(s)s.innerHTML=`<div class="chat-empty"><div class="chat-empty-icon">🎫</div><div class="chat-empty-title">${t('chat.selectTicket')}</div><div class="chat-empty-sub">${t('chat.createOrSelectTicket')}</div></div>`;const i=document.getElementById('inquiryChatInput');if(i){i.disabled=true;i.placeholder='Select a ticket...';}const b=document.getElementById('inquirySendBtn');if(b)b.disabled=true;_renderInquiryTicketList();};
+window._clearInquirySelection=function(){_inquiryTicketId=null;_inquiryCurrentTicket=null;const shell=document.querySelector('.smart-chat-inquiry-shell');if(shell)shell.classList.remove('has-selection');const h=document.getElementById('inquiryTicketHead');if(h)h.innerHTML=`<div><strong>${t('chat.selectTicket')}</strong><small>${t('chat.authorizedTicketAccess')}</small></div><span class="smart-chat-verified-pill">${t('chat.schoolIsolated')}</span>`;const s=document.getElementById('inquiryMessageStream');if(s)s.innerHTML=`<div class="chat-empty"><div class="chat-empty-icon">🎫</div><div class="chat-empty-title">${t('chat.selectTicket')}</div><div class="chat-empty-sub">${t('chat.createOrSelectTicket')}</div></div>`;const i=document.getElementById('inquiryChatInput');if(i){i.disabled=true;i.placeholder=t('chat.selectTicketDots');}const b=document.getElementById('inquirySendBtn');if(b)b.disabled=true;_renderInquiryTicketList();};
 
 async function _updateInquiryTicket(){
   if(!window.APP?.is_admin||!_inquiryTicketId)return;
@@ -589,7 +589,7 @@ async function _submitInquiryDraft(e){
   if(!subject||!body)return false;
   const r=await API.createInquiryTicket(subject,body,studentId,priority);
   if(r?.ok){_inquiryDraft=null;_inquiryTicketId=Number(r.ticket.id);await _loadInquiryTickets();}
-  else showToast('Ticket could not be created.');
+  else showToast(t('chat.ticketCreateFailed'));
   return false;
 }
 let _announcementComposerOpen=false;
@@ -602,19 +602,19 @@ window._toggleAnnouncementComposer=function(force=null){
   if(btn){
     btn.setAttribute('aria-expanded',String(_announcementComposerOpen));
     btn.textContent=_announcementComposerOpen?'×':'+';
-    btn.title=_announcementComposerOpen?'Close official message form':'New official message';
+    btn.title=_announcementComposerOpen?t('chat.closeOfficialMessage'):t('chat.newOfficialMessage');
   }
   if(_announcementComposerOpen){
     requestAnimationFrame(()=>document.getElementById('adminMsgBody')?.focus());
   }
 };
 function _renderAnnouncementWorkspace(){
-  const composer=window.APP?.is_admin ? '<div id="announcementComposer" class="smart-chat-composer-drawer">'+_renderAdminComposer()+'</div>' : '';
+  const composer=window.APP?.is_admin ? `<div id="announcementComposer" class="smart-chat-composer-drawer">${_renderAdminComposer()}</div>` : '';
   return _chatChannelBack(t('chat.schoolChat')) + composer +
     '<div class="smart-chat-direct-shell smart-chat-announcement-shell'+(_announcementId?' has-selection':'')+'">'+
-    '<aside class="smart-chat-direct-list"><div class="smart-chat-direct-list-head"><div><div class="smart-chat-kicker">${t('chat.official')}</div><strong>${t('chat.announcements')}</strong></div><div class="smart-chat-list-actions">'+
+    `<aside class="smart-chat-direct-list"><div class="smart-chat-direct-list-head"><div><div class="smart-chat-kicker">${t('chat.official')}</div><strong>${t('chat.announcements')}</strong></div><div class="smart-chat-list-actions">`+
     (window.APP?.is_admin ? `<button type="button" class="smart-chat-add-btn" id="announcementComposerToggle" onclick="_toggleAnnouncementComposer()" aria-expanded="false" aria-controls="announcementComposer" title="${t('chat.newOfficialMessage')}">+</button>` : '')+
-    '<button type="button" class="smart-chat-refresh-btn" onclick="_loadAnnouncementWorkspace()" title="${t('chat.refresh')}">↻</button></div></div>'+
+    `<button type="button" class="smart-chat-refresh-btn" onclick="_loadAnnouncementWorkspace()" title="${t('chat.refresh')}">↻</button></div></div>`+
     '<div id="announcementList" class="smart-chat-conversation-list"></div></aside>'+
     `<section class="smart-chat-direct-conversation"><div id="announcementHead" class="smart-chat-conversation-head"><div><strong>${t('chat.officialAnnouncements')}</strong><small>${t('chat.schoolAuthorizedNotices')}</small></div><span class="smart-chat-verified-pill">Verified</span></div><div id="announcementStream" class="chat-stream"><div class="chat-empty"><div class="chat-empty-icon">📢</div><div class="chat-empty-title">${t('chat.officialAnnouncements')}</div><div class="chat-empty-sub">${t('chat.loading')}</div></div></div></section></div>`;
 }
@@ -624,7 +624,7 @@ async function _loadAnnouncementWorkspace(autoOpen=true){
     const list=document.getElementById('announcementList'),stream=document.getElementById('announcementStream');
     if(!list||!stream)return;
     window._chatAnnouncements=rows;
-    if(!rows.length){_announcementId=null;list.innerHTML='<div class="smart-chat-list-empty-card"><div class="icon">📢</div><strong>${t('chat.noOfficialAnnouncements')}</strong><small>${t('chat.newVerifiedNotices')}</small></div>';stream.innerHTML='<div class="chat-empty"><div class="chat-empty-icon">📢</div><div class="chat-empty-title">No announcements</div><div class="chat-empty-sub">Official school notices will appear here.</div></div>';return;}
+    if(!rows.length){_announcementId=null;list.innerHTML=`<div class="smart-chat-list-empty-card"><div class="icon">📢</div><strong>${t('chat.noOfficialAnnouncements')}</strong><small>${t('chat.newVerifiedNotices')}</small></div>`;stream.innerHTML=`<div class="chat-empty"><div class="chat-empty-icon">📢</div><div class="chat-empty-title">${t('chat.noOfficialAnnouncements')}</div><div class="chat-empty-sub">${t('chat.newVerifiedNotices')}</div></div>`;return;}
     list.innerHTML=rows.map(a=>'<button class="smart-chat-channel-card '+(Number(a.id)===Number(_announcementId)?'active':'')+'" onclick="_openAnnouncement('+Number(a.id)+')"><span class="smart-chat-channel-icon">📢</span><span><strong>'+esc(a.message_type||'Official notice')+'</strong><small>'+esc(a.created_at||'')+'</small></span><b>'+(!a.read_at?'•':'›')+'</b></button>').join('');
     if(autoOpen && !_announcementId) await _openAnnouncement(Number(rows[0].id));
    }catch(e){const list=document.getElementById('announcementList');if(list)list.innerHTML='<div class="chat-error"><div>📢</div><div>${t('chat.loadAnnouncementsFailed')}</div><button type="button" class="btn-secondary" onclick="_loadAnnouncementWorkspace(false)">Retry</button></div>';}
@@ -643,15 +643,15 @@ window._clearAnnouncementSelection=function(){
   _announcementId=null;
   const shell=document.querySelector('.smart-chat-announcement-shell');if(shell)shell.classList.remove('has-selection');
   const head=document.getElementById('announcementHead');
-  if(head)head.innerHTML=`<div><strong>${t('chat.officialAnnouncements')}</strong><small>${t('chat.selectAnnouncementToRead')}</small></div><span class="smart-chat-verified-pill">Verified</span>`;
+  if(head)head.innerHTML=`<div><strong>${t('chat.officialAnnouncements')}</strong><small>${t('chat.selectAnnouncementToRead')}</small></div><span class="smart-chat-verified-pill">${t('chat.verified')}</span>`;
   const stream=document.getElementById('announcementStream');
-  if(stream)stream.innerHTML='<div class="chat-empty"><div class="chat-empty-icon">📢</div><div class="chat-empty-title">${t('chat.selectAnnouncement')}</div><div class="chat-empty-sub">${t('chat.chooseOfficialNotice')}</div></div>';
+  if(stream)stream.innerHTML=`<div class="chat-empty"><div class="chat-empty-icon">📢</div><div class="chat-empty-title">${t('chat.selectAnnouncement')}</div><div class="chat-empty-sub">${t('chat.chooseOfficialNotice')}</div></div>`;
 };
 function _renderDirectWorkspace() {
   return _chatChannelBack(t('chat.schoolChat')) + `
     <div class="smart-chat-direct-shell${_directConversationId ? ' has-selection' : ''}">
       <aside class="smart-chat-direct-list">
-        <div class="smart-chat-direct-list-head"><div><div class="smart-chat-kicker">PRIVATE</div><strong>${t('chat.directMessages')}</strong></div><button type="button" onclick="_loadDirectWorkspace()" title="${t('chat.refresh')}">↻</button></div>
+        <div class="smart-chat-direct-list-head"><div><div class="smart-chat-kicker">${t('chat.privateLabel')}</div><strong>${t('chat.directMessages')}</strong></div><button type="button" onclick="_loadDirectWorkspace()" title="${t('chat.refresh')}">↻</button></div>
         <label class="smart-chat-direct-search"><span>⌕</span><input id="directStaffSearch" placeholder="${t('chat.findTeacher')}" oninput="_renderDirectDirectory()"></label>
         <div id="directConversationList" class="smart-chat-conversation-list"></div>
         <div class="smart-chat-directory-title">${t('chat.startNewConversation')}</div>
@@ -682,7 +682,7 @@ async function _loadDirectWorkspace() {
   } catch (e) {
     _directStaff=[]; _directConversations=[]; _renderDirectDirectory(); _renderDirectConversationList();
     const stream=document.getElementById('directMessageStream');
-    if(stream) stream.innerHTML='<div class="chat-error"><div>💬</div><div>${t('chat.unableLoadDirect')}</div><button class="btn-secondary" onclick="_loadDirectWorkspace()">Retry</button></div>';
+    if(stream) stream.innerHTML=`<div class="chat-error"><div>💬</div><div>${t('chat.unableLoadDirect')}</div><button class="btn-secondary" onclick="_loadDirectWorkspace()">${t('chat.retry')}</button></div>`;
   }
 }
 
@@ -719,7 +719,7 @@ window.openDirectChat=async function(teacherId){
     _setDirectMobileView(true);
     _renderDirectConversationList();_renderDirectHeader();_setDirectComposer(true);
     await _loadDirectMessages();
-  }catch(e){showToast('Unable to open this staff conversation.');}
+  }catch(e){showToast(t('chat.unableOpenConversation'));}
 };
 
 function _renderDirectHeader(){
@@ -754,7 +754,7 @@ async function _loadDirectMessages(){
     _renderDirectHeader();_setDirectComposer(true);await API.markDirectRead(_directConversationId);
   }catch(e){
     const stream=document.getElementById('directMessageStream');
-    if(stream)stream.innerHTML='<div class="chat-error"><div>💬</div><div>${t('chat.unableLoadConversation')}</div><button class="btn-secondary" onclick="_loadDirectMessages()">Retry</button></div>';
+    if(stream)stream.innerHTML=`<div class="chat-error"><div>💬</div><div>${t('chat.unableLoadConversation')}</div><button class="btn-secondary" onclick="_loadDirectMessages()">${t('chat.retry')}</button></div>`;
   }
 }
 
@@ -783,7 +783,7 @@ window.sendDirectChat=async function(ev){
     const result=await API.sendDirectMessage(_directConversationId,value);
     if(!result?.ok)throw new Error(result?.error||t('chat.sendFailed'));
     input.value='';input.style.height='auto';await _loadDirectWorkspace();await _loadDirectMessages();
-  }catch(e){showToast('Message could not be sent.');}
+  }catch(e){showToast(t('chat.sendFailed'));}
   finally{btn.disabled=false;input.disabled=false;input.focus();}
   return false;
 };
