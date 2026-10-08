@@ -493,7 +493,7 @@ async function _loadAnnouncementWorkspace(){
     const list=document.getElementById('announcementList'),stream=document.getElementById('announcementStream');
     if(!list||!stream)return;
     if(!rows.length){list.innerHTML='<div class="chat-empty-sub">No official announcements yet.</div>';stream.innerHTML='<div class="chat-empty"><div class="chat-empty-icon">📢</div><div class="chat-empty-title">No announcements</div><div class="chat-empty-sub">Official school notices will appear here.</div></div>';return;}
-    list.innerHTML=rows.map((a,i)=>'<button class="smart-chat-channel-card '+(i===0?'active':'')+'" onclick="_openAnnouncement('+Number(a.id)+')"><span class="smart-chat-channel-icon">📢</span><span><strong>'+esc(a.message_type||'Official notice')+'</strong><small>'+esc(a.created_at||'')+'</small></span><b>'+(Number(a.unread_count||0)>0?esc(a.unread_count):'›')+'</b></button>').join('');
+    list.innerHTML=rows.map((a,i)=>'<button class="smart-chat-channel-card '+(i===0?'active':'')+'" onclick="_openAnnouncement('+Number(a.id)+')"><span class="smart-chat-channel-icon">📢</span><span><strong>'+esc(a.message_type||'Official notice')+'</strong><small>'+esc(a.created_at||'')+'</small></span><b>'+(!a.read_at?'•':'›')+'</b></button>').join('');
     window._chatAnnouncements=rows;
     _openAnnouncement(Number(rows[0].id));
   }catch(e){const list=document.getElementById('announcementList');if(list)list.innerHTML='<div class="chat-error">Unable to load announcements.</div>';}
@@ -501,7 +501,7 @@ async function _loadAnnouncementWorkspace(){
 window._openAnnouncement=async function(id){
   const a=(window._chatAnnouncements||[]).find(x=>Number(x.id)===Number(id));
   const stream=document.getElementById('announcementStream');if(!a||!stream)return;
-  stream.innerHTML='<article class="smart-chat-official-preview"><div class="smart-chat-preview-label">SYSTEM-GENERATED OFFICIAL MESSAGE</div><div class="smart-chat-preview-header">'+esc(a.message_type||'Official Announcement')+'</div><div class="smart-chat-preview-meta">'+esc(a.created_at||'')+' · '+(Number(a.unread_count||0)>0?'Unread':'Read')+'</div><div class="smart-chat-preview-reason"><strong>Reason</strong><span>'+esc(a.reason||'Official school communication')+'</span></div><div class="smart-chat-preview-body">'+esc(a.body||'').replace(/\n/g,'<br>')+'</div></article>';
+  stream.innerHTML='<article class="smart-chat-official-preview"><div class="smart-chat-preview-label">SYSTEM-GENERATED OFFICIAL MESSAGE</div><div class="smart-chat-preview-header">'+esc(a.message_type||'Official Announcement')+'</div><div class="smart-chat-preview-meta">'+esc(a.created_at||'')+' · '+(!a.read_at?'Unread':'Read')+'</div><div class="smart-chat-preview-reason"><strong>Reason</strong><span>'+esc(a.reason||'Official school communication')+'</span></div><div class="smart-chat-preview-body">'+esc(a.body||'').replace(/\n/g,'<br>')+'</div></article>';
   try{if(API.markStaffAnnouncementRead)await API.markStaffAnnouncementRead(id);}catch(e){}
 }
 function _renderDirectWorkspace() {
