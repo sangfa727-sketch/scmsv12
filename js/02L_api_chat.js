@@ -78,6 +78,26 @@ Object.assign(API, {
       });
     },
   
+  async createStaffAnnouncement(recipientType, target, messageType, reason, body) {
+      return _webRpc('rpc_chat_announcement_create', {
+        p_session_token: _webSessionToken(), p_recipient_type: recipientType,
+        p_target: target, p_message_type: messageType, p_reason: reason, p_body: body,
+      });
+    },
+
+  async getStaffAnnouncements(limit = 50) {
+      const res = await _webRpc('rpc_chat_announcement_list', {
+        p_session_token: _webSessionToken(), p_limit: Number(limit) || 50,
+      });
+      return Array.isArray(res.rows) ? res.rows : [];
+    },
+
+  async markStaffAnnouncementRead(announcementId) {
+      return _webRpc('rpc_chat_announcement_mark_read', {
+        p_session_token: _webSessionToken(), p_announcement_id: announcementId,
+      });
+    },
+
     // ─── REFRESH ALL ─────────────────────────────────────────────────────────
 });
 window.API = API;
