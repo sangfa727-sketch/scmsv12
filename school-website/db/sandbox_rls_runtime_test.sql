@@ -23,6 +23,11 @@ insert into website_pages(school_id, slug, publication_status) values
 alter table website_pages enable row level security;
 alter table website_pages force row level security;
 
+-- RLS is bypassed by table owners/superusers, so execute the read assertions as a separate non-owner role.
+create role website_public_test;
+grant select on website_pages to website_public_test;
+set role website_public_test;
+
 create policy public_published_same_school
 on website_pages
 for select
@@ -73,6 +78,7 @@ begin
   ) then
     raise exception 'School A row leaked into School B result';
   end if;
-end $$;
+end $;
 
+reset role;
 rollback;
