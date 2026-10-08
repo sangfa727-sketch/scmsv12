@@ -1474,7 +1474,7 @@ window.I18N_MS = {
   "chat.noMessages": "Tiada mesej lagi",
   "chat.gradeAccess": "Tiada tugasan gred aktif tersedia untuk akaun staf ini.",
   "chat.gradePrefix": "Gred: ",
-  "chat.individualPrefix": "Individu: "
+  "chat.individualPrefix": "Individu: ",
   "chat.department.refresh": "Muat semula jabatan",
   "chat.department.select": "Pilih jabatan...",
   "chat.department.placeholder": "Tulis mesej jabatan...",
