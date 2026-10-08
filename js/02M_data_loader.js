@@ -68,7 +68,8 @@
       parents: ['students', 'parentComms'],
       incidents: ['students', 'incidents'],
       timetable: ['students', 'timetable'],
-      summary: ['monthlySummary'],\n      insights: ['students', 'monthlySummary'],
+      summary: ['monthlySummary'],
+      insights: ['students', 'monthlySummary'],
     };
     const names = pages[pageId];
     if (!names) return;
