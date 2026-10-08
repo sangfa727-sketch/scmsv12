@@ -116,7 +116,7 @@ function _renderAdminComposer() {
         </label>
       </div>
 
-      <label class="smart-chat-body-field">${t("chat.officialMessage")}
+      <label class="smart-chat-body-field">${t("chat.messageBody")}
         <textarea id="adminMsgBody" rows="3" placeholder="${t('chat.writeOfficialMessage')}" oninput="_refreshAdminComposerPreview()"></textarea>
       </label>
 
