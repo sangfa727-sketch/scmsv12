@@ -14,7 +14,7 @@ function _renderGradeList(){
  }).join(''):'<div class="chat-empty-sub">No grade assignment has been found for this staff account.</div>';
 }
 async function _openGradeChat(name,silent=false){
- _gradeName=String(name||'').trim();const root=document.getElementById('gradeConversation');if(!root||!_gradeName)return;
+ _gradeName=String(name||'').trim();_setGradeMobileView(true);const root=document.getElementById('gradeConversation');if(!root||!_gradeName)return;
  try{
   const r=await API.openGradeChat(_gradeName);if(!r?.ok)throw new Error(r?.error||'Unauthorized');
   const msgs=Array.isArray(r.rows)?r.rows:[];
