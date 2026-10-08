@@ -5,38 +5,27 @@ const path=require('node:path');
 const ROOT=path.resolve(__dirname,'..','..');
 const read=f=>fs.readFileSync(path.join(ROOT,f),'utf8');
 
-test('visual school website builder keeps the editor client-only and outside private data',()=>{
-  const html=read('school-website/create.html');
-  const js=read('school-website/create.js');
-  assert.match(html,/Create your school website/i);
-  assert.match(html,/Live preview/i);
-  assert.match(html,/Add section/i);
-  assert.match(js,/localStorage/);
-  assert.doesNotMatch(js,/supabase|service_role|students|attendance|billing|health/i);
+test('template-first website studio stays outside private SCMS data',()=>{
+ const html=read('school-website/create.html'),js=read('school-website/create.js');
+ assert.match(html,/Start with a professional template/i);
+ assert.match(html,/data-template="modern"/);
+ assert.match(html,/Add your information/i);
+ assert.match(js,/localStorage/);
+ assert.doesNotMatch(js,/supabase|service_role|students|attendance|billing|health/i);
 });
-
-test('visual builder exposes progressive-disclosure content blocks',()=>{
-  const html=read('school-website/create.html');
-  for(const field of ['schoolName','tagline','aboutTitle','aboutText','contactTitle','contactText']) assert.match(html,new RegExp('data-field="'+field+'"'));
-  for(const section of ['programs','facilities','news','gallery','admissions','contact']) assert.match(html,new RegExp('data-section="'+section+'"'));
-  assert.match(html,/data-add-item="programs"/);
-  assert.match(html,/data-add-item="facilities"/);
-  assert.match(html,/data-add-item="news"/);
+test('school admin fills guided fields instead of designing a blank website',()=>{
+ const html=read('school-website/create.html'),js=read('school-website/create.js');
+ for(const field of ['schoolName','tagline','aboutTitle','aboutText','contactTitle','contactText']) assert.match(html,new RegExp('data-field="'+field+'"'));
+ assert.match(html,/template-option/);assert.match(html,/Change template/);
+ assert.match(js,/fieldProgress/);assert.match(js,/updateProgress/);
 });
-
-test('visual builder supports mobile on-demand preview and publish safety boundary',()=>{
-  const html=read('school-website/create.html');
-  const css=read('school-website/create.css');
-  const js=read('school-website/create.js');
-  assert.match(html,/id="previewToggle"/);
-  assert.match(html,/id="closePreview"/);
-  assert.match(css,/@media\(max-width:1000px\)/);
-  assert.match(css,/\.preview-panel\.open/);
-  assert.match(js,/Preview only/);
-  assert.doesNotMatch(js,/insertApplication|supabase\.from|\.insert\(/i);
+test('optional sections remain progressive and safe',()=>{
+ const html=read('school-website/create.html'),js=read('school-website/create.js');
+ for(const section of ['programs','facilities','news','gallery','admissions','contact']) assert.match(html,new RegExp('data-section="'+section+'"'));
+ assert.doesNotMatch(js,/insertApplication|supabase\.from|\.insert\(/i);
+ assert.match(js,/Preview only/);
 });
-
-test('visual builder source passes JavaScript syntax compilation',()=>{
-  const js=read('school-website/create.js');
-  new Function(js);
+test('mobile preview remains on-demand and source compiles',()=>{
+ const html=read('school-website/create.html'),css=read('school-website/create.css'),js=read('school-website/create.js');
+ assert.match(html,/id="previewToggle"/);assert.match(css,/@media\(max-width:1000px\)/);assert.match(css,/\.preview-panel\.open/);new Function(js);
 });
