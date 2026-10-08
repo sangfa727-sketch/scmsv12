@@ -90,7 +90,7 @@ function _renderAdminComposer() {
       <div class="smart-chat-form-grid">
         <label>Recipient type
           <select id="adminMsgRecipientType" onchange="_loadAdminRecipientPreview()">
-            <option value="all_staff">t('chat.allStaff')</option>
+            <option value="all_staff">${t('chat.allStaff')}</option>
             <option value="grade" selected>Grade</option>
             <option value="teacher">Individual teacher</option>
           </select>
@@ -161,7 +161,7 @@ async function _loadAdminRecipientPreview(type = null, target = null) {
       if (select) {
         const current = select.value;
         select.innerHTML = '<option value="">Select a teacher</option>' +
-          _adminTeacherRecipients.map(t => `<option value="${esc(t.teacher_id)}">${esc(t.teacher_name)} · ${esc(t.role || t('chat.teacher'))}</option>`).join('');
+          _adminTeacherRecipients.map(staffRow => `<option value="${esc(staffRow.teacher_id)}">${esc(staffRow.teacher_name)} · ${esc(staffRow.role || t('chat.teacher'))}</option>`).join('');
         if (_adminTeacherRecipients.some(t => t.teacher_id === current)) select.value = current;
       }
     } else if (selectedType === 'grade') {
@@ -337,9 +337,9 @@ function renderChat() {
       <div class="smart-chat-hero">
         <button type="button" class="smart-chat-nav-back" onclick="_chatBackToMenu()" aria-label="${t('chat.exitChat')}">‹ <span>${t('chat.exitChat')}</span></button>
         <div>
-          <div class="page-eyebrow">COMMUNICATION CENTER</div>
+          <div class="page-eyebrow">${t('chat.communicationCenter')}</div>
           <h1 class="page-title">Smart <em>Chat</em></h1>
-          <p class="page-subtitle">School communication and AI operations — kept separate, one tap away.</p>
+          <p class="page-subtitle">${t('chat.schoolCommunicationDesc')}</p>
         </div>
         <div class="smart-chat-identity">
           <span class="smart-chat-avatar">${esc((window.APP?.teacher_name || '?')[0])}</span>
@@ -457,7 +457,7 @@ function _renderChatMode() {
   root.innerHTML = `
     <div class="smart-chat-school-grid">
       <aside class="smart-chat-channel-list">
-        <div class="smart-chat-list-title">School Chat</div>
+        <div class="smart-chat-list-title">${t('chat.schoolChat')}</div>
         ${visible.map(c => `
           <button data-testid="chat-channel-${c.id}" class="smart-chat-channel-card ${c.id === _chatChannel ? 'active' : ''}" onclick="switchChatChannel('${esc(c.id)}')">
             <span class="smart-chat-channel-icon">${c.icon}</span>
@@ -491,7 +491,7 @@ function _renderInquiryWorkspace() {
     <div class="smart-chat-direct-shell smart-chat-inquiry-shell${_inquiryTicketId ? " has-selection" : ""}">
       <aside class="smart-chat-direct-list">
         <div class="smart-chat-direct-list-head"><div><div class="smart-chat-kicker">INQUIRY</div><strong>${t('chat.workspace.tickets')}</strong></div><button type="button" onclick="_loadInquiryTickets()" title="Refresh">↻</button></div>
-        <div class="smart-chat-directory-title">Staff-only student / parent issue tracking</div>
+        <div class="smart-chat-directory-title">${t('chat.inquiryDescription')}</div>
         <div id="inquiryTicketList" class="smart-chat-conversation-list"></div>
         <button type="button" class="btn-secondary" onclick="_newInquiryTicket()">＋ New ticket</button>
       </aside>
@@ -646,14 +646,14 @@ function _renderDirectWorkspace() {
         <div class="smart-chat-direct-list-head"><div><div class="smart-chat-kicker">PRIVATE</div><strong>Direct messages</strong></div><button type="button" onclick="_loadDirectWorkspace()" title="Refresh">↻</button></div>
         <label class="smart-chat-direct-search"><span>⌕</span><input id="directStaffSearch" placeholder="${t('chat.findTeacher')}" oninput="_renderDirectDirectory()"></label>
         <div id="directConversationList" class="smart-chat-conversation-list"></div>
-        <div class="smart-chat-directory-title">Start a new conversation</div>
+        <div class="smart-chat-directory-title">${t('chat.startNewConversation')}</div>
         <div id="directStaffDirectory" class="smart-chat-directory"></div>
       </aside>
       <section class="smart-chat-direct-conversation">
         <div id="directConversationHead" class="smart-chat-conversation-head"><div><strong>${t('chat.selectTeacher')}</strong><small>${t('chat.activeStaffOnly')}</small></div><span class="smart-chat-verified-pill">${t('chat.verifiedStaffOnly')}</span></div>
         <div id="directMessageStream" class="chat-stream smart-chat-direct-stream"><div class="chat-empty"><div class="chat-empty-icon">👤</div><div class="chat-empty-title">Choose a teacher</div><div class="chat-empty-sub">Start a private 1-on-1 conversation.</div></div></div>
         <form class="chat-composer smart-chat-direct-composer" onsubmit="return sendDirectChat(event)">
-          <textarea id="directChatInput" placeholder=${t('chat.startDirect')} rows="1" disabled oninput="_autoGrowChatInput(this)" onkeydown="_directKeydown(event)"></textarea>
+          <textarea id="directChatInput" placeholder="${t('chat.startDirect')}" rows="1" disabled oninput="_autoGrowChatInput(this)" onkeydown="_directKeydown(event)"></textarea>
           <button type="submit" class="chat-send-btn" id="directChatSendBtn" disabled><svg viewBox="0 0 24 24" aria-hidden="true"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg></button>
         </form>
       </section>
@@ -695,9 +695,9 @@ function _renderDirectDirectory() {
   if(!root)return;
   const q=String(document.getElementById('directStaffSearch')?.value||'').trim().toLowerCase();
   const rows=_directStaff.filter(t=>!q||String(t.teacher_name).toLowerCase().includes(q)||String(t.role||'').toLowerCase().includes(q));
-  root.innerHTML=rows.length?rows.map(t=>`
-    <button class="smart-chat-directory-item" onclick="openDirectChat('${esc(t.teacher_id)}')">
-      <span class="smart-chat-direct-avatar">${esc((t.teacher_name||'?')[0])}</span>
+  root.innerHTML=rows.length?rows.map(staffRow=>`
+    <button class="smart-chat-directory-item" onclick="openDirectChat('${esc(staffRow.teacher_id)}')">
+      <span class="smart-chat-direct-avatar">${esc((staffRow.teacher_name||'?')[0])}</span>
       <span><strong>${esc(t.teacher_name)}</strong><small>${esc(t.role||t('chat.teacher'))}</small></span><b>›</b>
     </button>`).join(''):'<div class="smart-chat-list-empty">No active teacher found.</div>';
 }
@@ -831,7 +831,7 @@ function _renderChatStream(messages) {
         <div class="chat-bubble">
           ${mine?'':`<div class="chat-bubble-author">${esc(author)}</div>`}
           <div class="chat-bubble-text">${esc(m.text||'')}</div>
-          <div class="chat-bubble-time">${esc(time)}${m.pending?' · …':''}${m.failed?' · failed':''}</div>
+          <div class="chat-bubble-time">${esc(time)}${m.pending?' · '+t('chat.pending'):''}${m.failed?' · '+t('chat.failed'):''}</div>
         </div>
       </div>`;
     }).join('')}`).join('');
@@ -842,9 +842,9 @@ function _humanDay(iso) {
   if (!iso || iso === 'unknown') return '';
   const today = new Date().toISOString().slice(0,10);
   const yest = new Date(Date.now()-86400000).toISOString().slice(0,10);
-  if (iso === today) return 'Today';
-  if (iso === yest) return 'Yesterday';
-  try { return new Date(iso).toLocaleDateString('en-US',{weekday:'long',day:'numeric',month:'short'}); }
+  if (iso === today) return t('chat.today');
+  if (iso === yest) return t('chat.yesterday');
+  try { return new Date(iso).toLocaleDateString(I18N.dateLocale(),{weekday:'long',day:'numeric',month:'short'}); }
   catch { return iso; }
 }
 
@@ -853,7 +853,7 @@ window.sendChat = async function(ev) {
   const input=document.getElementById('chatInput'), btn=document.getElementById('chatSendBtn');
   const text=input?.value.trim();
   if (_chatChannel !== 'staff') {
-    showToast('This channel is preview-only until its verified server route is connected.');
+    showToast(t('chat.channelPreviewOnly'));
     return false;
   }
   if (!text || !btn) return false;
@@ -880,7 +880,7 @@ window._aiPrompt = function(value) {
   const v=String(value||'').trim();
   if(!v) return;
   if(input) input.value='';
-  showToast('AI preview: ' + v);
+  showToast(t('chat.aiPreview') + ': ' + v);
 };
 
 window.startChatPolling=function(){
