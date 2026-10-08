@@ -87,7 +87,7 @@ function _renderAdminComposer() {
         </label>
         <label id="adminMsgGradeWrap">Grade
           <select id="adminMsgGrade" onchange="_loadAdminRecipientPreview('grade',this.value)">
-            <option value="Grade 5" selected>Grade 5</option>
+            <option value="Grade 5" selected>Loading available grades…</option>
           </select>
         </label>
         <label id="adminMsgTeacherWrap" style="display:none">Teacher
@@ -137,13 +137,13 @@ async function _loadAdminRecipientPreview(type = null, target = null) {
         const grades = await API.getChatGradeTargets();
         const select = document.getElementById('adminMsgGrade');
         if (select && grades.length) {
-          const current = target || select.value || grades[0];
+          const current = target || (select.value && select.value !== 'Grade 5' ? select.value : null) || grades[0];
           select.innerHTML = grades.map(g => `<option value="${esc(g)}">${esc(g)}</option>`).join('');
           select.value = grades.includes(current) ? current : grades[0];
         }
       } catch (_) {}
     }
-    const grade = target || document.getElementById('adminMsgGrade')?.value || 'Grade 5';
+    const grade = target || document.getElementById('adminMsgGrade')?.value || null;
     const rows = await API.getChatRecipientPreview(selectedType, selectedType === 'all_staff' ? null : (selectedType === 'teacher' ? (document.getElementById('adminMsgTeacher')?.value || null) : grade));
     if (selectedType === 'teacher') {
       _adminTeacherRecipients = Array.isArray(rows) ? rows : [];
@@ -303,8 +303,9 @@ function _exitChatWorkspace() {
 }
 
 function renderChat() {
-  _enterChatWorkspace();
   const page = document.getElementById('page-chat');
+  if (!page) return;
+  _enterChatWorkspace();
   if (!page) return;
 
   page.innerHTML = `
@@ -409,7 +410,12 @@ function _renderChatMode() {
     return;
   }
 
-  if (_chatChannel === 'announcements') { root.innerHTML = _renderAnnouncementWorkspace(); _loadAnnouncementWorkspace(); return; }
+  if (_chatChannel === 'announcements') {
+    root.innerHTML = _renderAnnouncementWorkspace();
+    _loadAnnouncementWorkspace();
+    if (window.APP?.is_admin) setTimeout(() => _loadAdminRecipientPreview(), 0);
+    return;
+  }
 
   if (_chatChannel === 'departments' && typeof _renderDepartmentWorkspace === 'function') { root.innerHTML = _renderDepartmentWorkspace(); _loadDepartmentWorkspace(); return; }
 
@@ -451,7 +457,7 @@ function _renderChatMode() {
   _loadChatMessages();
   setTimeout(() => {
     _refreshAdminComposerPreview();
-    if (window.APP?.is_admin) _loadAdminRecipientPreview('grade', document.getElementById('adminMsgGrade')?.value || 'Grade 5');
+    if (window.APP?.is_admin) _loadAdminRecipientPreview();
   }, 0);
 }
 
