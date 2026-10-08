@@ -31,6 +31,9 @@ jobs:
       SCMS_STAGING_URL: ${{ secrets.SCMS_STAGING_URL }}
       SCMS_TEST_TEACHER: ${{ secrets.SCMS_TEST_TEACHER }}
       SCMS_TEST_PW: ${{ secrets.SCMS_TEST_PW }}
+      SCMS_TEST_TEACHER_2: ${{ secrets.SCMS_TEST_TEACHER_2 }}
+      SCMS_TEST_PW_2: ${{ secrets.SCMS_TEST_PW_2 }}
+      SCMS_TEST_DEPARTMENT_ID: ${{ secrets.SCMS_TEST_DEPARTMENT_ID }}
       SCMS_TEST_QR_TOKEN: ${{ secrets.SCMS_TEST_QR_TOKEN }}
     steps:
       - name: Verify staging credentials are configured
@@ -65,6 +68,9 @@ jobs:
           SCMS_URL: ${{ secrets.SCMS_STAGING_URL }}
           SCMS_TEST_TEACHER: ${{ secrets.SCMS_TEST_TEACHER }}
           SCMS_TEST_PW: ${{ secrets.SCMS_TEST_PW }}
+          SCMS_TEST_TEACHER_2: ${{ secrets.SCMS_TEST_TEACHER_2 }}
+          SCMS_TEST_PW_2: ${{ secrets.SCMS_TEST_PW_2 }}
+          SCMS_TEST_DEPARTMENT_ID: ${{ secrets.SCMS_TEST_DEPARTMENT_ID }}
           SCMS_TEST_QR_TOKEN: ${{ secrets.SCMS_TEST_QR_TOKEN }}
           SCMS_REQUIRE_STAGING: '1'
         run: npx playwright test
