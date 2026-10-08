@@ -20,7 +20,7 @@ function validateAdmissionInput(input) {
     idempotencyKey: text(input.idempotencyKey, LIMITS.idempotencyKey)
   };
   if (!value.studentName || !value.guardianName || !value.phone || !value.grade || !value.idempotencyKey) return { ok: false, error: 'required_field_missing' };
-  if (value.email && !/^([^\\s@]+)@([^\\s@]+)\\.([^\\s@]+)$/.test(value.email)) return { ok: false, error: 'invalid_email' };
+  if (value.email && !/^([^\s@]+)@([^\s@]+)\.([^\s@]+)$/.test(value.email)) return { ok: false, error: 'invalid_email' };
   if (!/^[A-Za-z0-9._:-]{16,128}$/.test(value.idempotencyKey)) return { ok: false, error: 'invalid_idempotency_key' };
   return { ok: true, value };
 }
