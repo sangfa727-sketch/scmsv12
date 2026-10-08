@@ -72,9 +72,10 @@ function _renderAdminComposer() {
       <div class="smart-chat-form-grid">
         <label>Recipient type
           <select id="adminMsgRecipientType" onchange="_refreshAdminComposerPreview()">
+            <option value="all_staff">All Staff</option>
             <option value="grade" selected>Grade</option>
-            <option value="department">Department</option>
-            <option value="teacher">Individual teacher</option>
+            <option value="department" disabled>Department — coming next</option>
+            <option value="teacher" disabled>Individual teacher — coming next</option>
           </select>
         </label>
         <label>Grade
@@ -111,8 +112,8 @@ function _renderAdminComposer() {
 
       <div class="smart-chat-form-actions">
         <button type="button" class="btn-secondary" onclick="_refreshAdminComposerPreview()">Refresh preview</button>
-        <button type="button" class="smart-chat-send-disabled" disabled title="Prototype only — sending is intentionally disabled">
-          ${_chatIcon('send')} Send disabled
+        <button type="button" class="smart-chat-send-disabled" id="adminMsgSendBtn" onclick="sendOfficialAnnouncement()" disabled>
+          ${_chatIcon('send')} Send official message
         </button>
       </div>
     </section>`;
@@ -131,21 +132,50 @@ async function _loadAdminRecipientPreview(grade = 'Grade 5') {
   }
 }
 
+window.sendOfficialAnnouncement = async function() {
+  if (!window.APP?.is_admin || !window.API?.createStaffAnnouncement) return false;
+  const recipientType=document.getElementById('adminMsgRecipientType')?.value || 'grade';
+  const target=recipientType==='all_staff' ? null : (document.getElementById('adminMsgGrade')?.value || null);
+  const messageType=document.getElementById('adminMsgType')?.value || 'announcement';
+  const reason=document.getElementById('adminMsgReason')?.value.trim() || '';
+  const body=document.getElementById('adminMsgBody')?.value.trim() || '';
+  const btn=document.getElementById('adminMsgSendBtn');
+  const recipients=recipientType==='all_staff' ? _verifiedStaffList() : _gradeRecipientPreview(target);
+  if(!recipients.length){showToast('No verified recipients. Message was not sent.');return false;}
+  if(!reason || !body){showToast('Reason and message body are required.');return false;}
+  if(btn) btn.disabled=true;
+  try{
+    const result=await API.createStaffAnnouncement(recipientType,target,messageType,reason,body);
+    if(!result?.ok) throw new Error(result?.error||'Send failed');
+    if(btn) btn.innerHTML='✓ Sent';
+    showToast('Official message sent to '+result.recipient_count+' verified staff.');
+    document.getElementById('adminMsgBody').value='';
+    setTimeout(()=>{ if(btn){btn.innerHTML=_chatIcon('send')+' Send official message'; btn.disabled=false;} _refreshAdminComposerPreview(); },900);
+  }catch(e){
+    showToast('Official message could not be sent.');
+    if(btn) btn.disabled=false;
+  }
+  return false;
+};
+
 window._refreshAdminComposerPreview = function() {
   const box = document.getElementById('adminMsgPreview');
   if (!box) return;
+  const recipientType = document.getElementById('adminMsgRecipientType')?.value || 'grade';
   const grade = document.getElementById('adminMsgGrade')?.value || 'Grade 5';
   const type = document.getElementById('adminMsgType')?.value || 'announcement';
   const reason = document.getElementById('adminMsgReason')?.value.trim() || '—';
   const body = document.getElementById('adminMsgBody')?.value.trim() || '—';
-  const recipients = _gradeRecipientPreview(grade);
+  const recipients = recipientType === 'all_staff' ? _verifiedStaffList() : _gradeRecipientPreview(grade);
+  const sendBtn = document.getElementById('adminMsgSendBtn');
+  if (sendBtn) sendBtn.disabled = !window.APP?.is_admin || !reason || reason === '—' || !body || body === '—' || !recipients.length;
   const header = type === 'announcement'
     ? 'Official Announcements Channel'
     : type === 'task' ? 'Official Staff Task' : 'Staff Notice';
   box.innerHTML = `
     <div class="smart-chat-preview-label">SYSTEM-GENERATED HEADER</div>
     <div class="smart-chat-preview-header">${esc(header)}</div>
-    <div class="smart-chat-preview-meta">Grade: ${esc(grade)} · Verified recipients: ${recipients.length}</div>
+    <div class="smart-chat-preview-meta">${esc(recipientType === 'all_staff' ? 'All Staff' : 'Grade: ' + grade)} · Verified recipients: ${recipients.length}</div>
     <div class="smart-chat-preview-reason"><strong>Reason</strong><span>${esc(reason)}</span></div>
     <div class="smart-chat-preview-body">${esc(body).replace(/\n/g, '<br>')}</div>
   `;

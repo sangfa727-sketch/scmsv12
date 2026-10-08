@@ -354,3 +354,43 @@ test('Direct messaging is tenant- and membership-bound server-side', () => {
   assert.match(send, /r\.conversation_id=p_conversation_id/);
   assert.match(send, /r\.school_id=v_sess\.school_id/);
 });
+
+
+test('Official Staff Announcements use a server-authorized recipient snapshot and audit contract', () => {
+  const migration = read('supabase/migrations/20261008130000_official_announcements.sql');
+  for (const table of ['staff_announcements','staff_announcement_recipients']) assert.match(migration, new RegExp('create table if not exists public\\\\.' + table));
+  for (const fn of ['rpc_chat_announcement_create','rpc_chat_announcement_list','rpc_chat_announcement_mark_read']) {
+    assert.match(migration, new RegExp('function public\\\\.' + fn));
+  }
+  assert.match(migration, /expires_at>now\\(\\)/);
+  assert.match(migration, /t\\.status='active'/);
+  assert.match(migration, /t\\.school_id=s\\.school_id/);
+  assert.match(migration, /communication\.send/);
+  assert.match(migration, /school_id,v_sess\.school_id/);
+  assert.match(migration, /recipient_count/);
+  assert.match(migration, /'all_staff'/);
+  assert.match(migration, /no_verified_recipients/);
+  assert.match(migration, /official_announcement\.create/);
+  assert.match(migration, /audit_log/);
+  assert.match(migration, /revoke all on function public\.rpc_chat_announcement_create/);
+  assert.match(migration, /grant execute on function public\.rpc_chat_announcement_create/);
+});
+
+
+test('Official Staff Announcements UI and API are connected to the guarded server route', () => {
+  const api = read('js/02L_api_chat.js');
+  const chat = read('js/16_chat.js');
+  assert.match(api, /createStaffAnnouncement/);
+  assert.match(api, /rpc_chat_announcement_create/);
+  assert.match(api, /getStaffAnnouncements/);
+  assert.match(api, /rpc_chat_announcement_list/);
+  assert.match(api, /markStaffAnnouncementRead/);
+  assert.match(api, /rpc_chat_announcement_mark_read/);
+  assert.match(chat, /sendOfficialAnnouncement/);
+  assert.match(chat, /value="all_staff">All Staff/);
+  assert.match(chat, /API\.createStaffAnnouncement/);
+  assert.match(chat, /Reason and message body are required/);
+  assert.match(chat, /No verified recipients/);
+  assert.match(chat, /Department — coming next/);
+  assert.match(chat, /teacher — coming next/);
+});
