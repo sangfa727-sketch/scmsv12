@@ -815,27 +815,27 @@ function _renderAnnouncementList(rows){
     const excerpt=_announcementExcerpt(a.body);
     const date=_formatAnnouncementDate(a.created_at);
     const unread=!a.read_at;
-    const summary=excerpt||_announcementExcerpt(a.reason)||t('chat.officialCommunication');
-    const accessible=[t('chat.officialPrefix'),type,summary,date,unread?t('chat.unread'):t('chat.read')].filter(Boolean).join(', ');
+    const summary=excerpt||_announcementExcerpt(a.reason)||t('chat.officialNotices');
+    const accessible=[t('chat.officialAnnouncements'),type,summary,date].filter(Boolean).join(', ');
     const selected=id===String(_announcementId||'');
     return '<button type="button" class="smart-chat-channel-card smart-chat-announcement-card '+(selected?'active':'')+'" aria-label="'+esc(accessible)+'" aria-current="'+(selected?'true':'false')+'" onclick="_openAnnouncement(\''+id+'\')">'+
       '<span class="smart-chat-channel-icon" aria-hidden="true">📢</span>'+
       '<span class="smart-chat-channel-copy"><strong>'+esc(type)+'</strong>'+
       '<small class="smart-chat-announcement-excerpt">'+esc(summary)+'</small>'+
       '<small class="smart-chat-announcement-date">'+esc(date)+'</small></span>'+
-      (unread?'<span class="smart-chat-announcement-unread" aria-label="'+esc(t('chat.unread'))+'">•</span>':'<span class="smart-chat-channel-chevron" aria-hidden="true">›</span>')+
+      (unread?'<span class="smart-chat-announcement-unread" aria-hidden="true">•</span>':'<span class="smart-chat-channel-chevron" aria-hidden="true">›</span>')+
       '</button>';
   }).join('');
 }
 function _renderAnnouncementWorkspace(){
   const composer=window.APP?.is_admin ? `<div id="announcementComposer" class="smart-chat-composer-drawer">${_renderAdminComposer()}</div>` : '';
-  return _chatChannelBack(t('chat.schoolChat')) + composer +
+  return _chatChannelBack(t('chat.officialAnnouncements')) + composer +
     '<div class="smart-chat-direct-shell smart-chat-announcement-shell'+(_announcementId?' has-selection':'')+'">'+
-    `<aside class="smart-chat-direct-list"><div class="smart-chat-direct-list-head"><div><div class="smart-chat-kicker">${t('chat.official')}</div><strong>${t('chat.announcements')}</strong></div><div class="smart-chat-list-actions">`+
-    (window.APP?.is_admin ? `<button type="button" class="smart-chat-add-btn" id="announcementComposerToggle" onclick="_toggleAnnouncementComposer()" aria-expanded="false" aria-controls="announcementComposer" title="${t('chat.newOfficialMessage')}">+</button>` : '')+
+    `<aside class="smart-chat-direct-list"><div class="smart-chat-direct-list-head"><div><div class="smart-chat-kicker">${t('chat.officialAnnouncements')}</div><strong>${t('chat.officialAnnouncements')}</strong></div><div class="smart-chat-list-actions">`+
+    (window.APP?.is_admin ? `<button type="button" class="smart-chat-add-btn" id="announcementComposerToggle" onclick="_toggleAnnouncementComposer()" aria-expanded="false" aria-controls="announcementComposer" title="${t('chat.officialAnnouncements')}">+</button>` : '')+
     `<button type="button" class="smart-chat-refresh-btn" onclick="_loadAnnouncementWorkspace()" aria-label="${t('chat.refresh')}" title="${t('chat.refresh')}">↻</button></div></div>`+
-    '<div id="announcementList" class="smart-chat-conversation-list" aria-label="'+esc(t('chat.announcements'))+'"></div></aside>'+
-    `<section class="smart-chat-direct-conversation"><div id="announcementHead" class="smart-chat-conversation-head"><div><strong>${t('chat.officialAnnouncements')}</strong><small>${t('chat.schoolAuthorizedNotices')}</small></div><span class="smart-chat-verified-pill">${t('chat.verified')}</span></div><div id="announcementStream" class="chat-stream" aria-live="polite"><div class="chat-empty"><div class="chat-empty-icon">📢</div><div class="chat-empty-title">${t('chat.officialAnnouncements')}</div><div class="chat-empty-sub">${t('chat.loading')}</div></div></div></section></div>`;
+    '<div id="announcementList" class="smart-chat-conversation-list" aria-label="'+esc(t('chat.officialAnnouncements'))+'"></div></aside>'+
+    `<section class="smart-chat-direct-conversation"><div id="announcementHead" class="smart-chat-conversation-head"><div><strong>${t('chat.officialAnnouncements')}</strong><small>${t('chat.officialNotices')}</small></div><span class="smart-chat-verified-pill">${t('chat.verifiedStaffOnly')}</span></div><div id="announcementStream" class="chat-stream" aria-live="polite"><div class="chat-empty"><div class="chat-empty-icon">📢</div><div class="chat-empty-title">${t('chat.officialAnnouncements')}</div><div class="chat-empty-sub">${t('chat.loading')}</div></div></div></section></div>`;
 }
 async function _loadAnnouncementWorkspace(autoOpen=true){
   try{
@@ -843,10 +843,10 @@ async function _loadAnnouncementWorkspace(autoOpen=true){
     const list=document.getElementById('announcementList'),stream=document.getElementById('announcementStream');
     if(!list||!stream)return;
     window._chatAnnouncements=rows;
-    if(!rows.length){_announcementId=null;list.innerHTML=`<div class="smart-chat-list-empty-card"><div class="icon">📢</div><strong>${t('chat.noOfficialAnnouncements')}</strong><small>${t('chat.newVerifiedNotices')}</small></div>`;stream.innerHTML=`<div class="chat-empty"><div class="chat-empty-icon">📢</div><div class="chat-empty-title">${t('chat.noOfficialAnnouncements')}</div><div class="chat-empty-sub">${t('chat.newVerifiedNotices')}</div></div>`;return;}
+    if(!rows.length){_announcementId=null;list.innerHTML=`<div class="smart-chat-list-empty-card"><div class="icon">📢</div><strong>${t('chat.emptyTitle')}</strong><small>${t('chat.emptySub')}</small></div>`;stream.innerHTML=`<div class="chat-empty"><div class="chat-empty-icon">📢</div><div class="chat-empty-title">${t('chat.emptyTitle')}</div><div class="chat-empty-sub">${t('chat.emptySub')}</div></div>`;return;}
     _renderAnnouncementList(rows);
     if(autoOpen && !_announcementId) await _openAnnouncement(String(rows[0].id));
-   }catch(e){const list=document.getElementById('announcementList');if(list)list.innerHTML=`<div class="chat-error"><div>📢</div><div>${t('chat.loadAnnouncementsFailed')}</div><button type="button" class="btn-secondary" onclick="_loadAnnouncementWorkspace(false)">${t('chat.retry')}</button></div>`;}
+   }catch(e){const list=document.getElementById('announcementList');if(list)list.innerHTML=`<div class="chat-error"><div>📢</div><div>${t('chat.loadFailed')}</div><button type="button" class="btn-secondary" onclick="_loadAnnouncementWorkspace(false)">${t('chat.retry')}</button></div>`;}
 }
 window._openAnnouncement=async function(id){
   const a=(window._chatAnnouncements||[]).find(x=>String(x.id)===String(id));
@@ -855,15 +855,15 @@ window._openAnnouncement=async function(id){
   const shell=document.querySelector('.smart-chat-announcement-shell');if(shell)shell.classList.add('has-selection');
   _renderAnnouncementList(window._chatAnnouncements||[]);
   const head=document.getElementById('announcementHead');
-  if(head)head.innerHTML=`<div class="smart-chat-direct-peer"><button type="button" class="smart-chat-mobile-back" onclick="_clearAnnouncementSelection()" aria-label="${t('chat.backToAnnouncements')}">‹</button><div><strong>${esc(a.message_type||t('chat.announcement'))}</strong><small>${esc(_formatAnnouncementDate(a.created_at))}</small></div></div><span class="smart-chat-verified-pill">${t('chat.verified')}</span>`;
-  stream.innerHTML=`<article class="smart-chat-official-preview smart-chat-announcement-detail"><div class="smart-chat-preview-label">${t('chat.systemGeneratedOfficialMessage')}</div><h2 class="smart-chat-preview-header">${esc(a.message_type||t('chat.officialAnnouncement'))}</h2><div class="smart-chat-preview-meta">${esc(_formatAnnouncementDate(a.created_at))} · ${(!a.read_at?t('chat.unread'):t('chat.read'))}</div><div class="smart-chat-preview-reason"><strong>${t('chat.reason')}</strong><span>${esc(a.reason||t('chat.officialCommunication'))}</span></div><div class="smart-chat-preview-body">${esc(a.body||'').replace(/\n/g,'<br>')}</div></article>`;
+  if(head)head.innerHTML=`<div class="smart-chat-direct-peer"><button type="button" class="smart-chat-mobile-back" onclick="_clearAnnouncementSelection()" aria-label="${t('chat.officialAnnouncements')}">‹</button><div><strong>${esc(a.message_type||t('chat.officialAnnouncements'))}</strong><small>${esc(_formatAnnouncementDate(a.created_at))}</small></div></div><span class="smart-chat-verified-pill">${t('chat.verifiedStaffOnly')}</span>`;
+  stream.innerHTML=`<article class="smart-chat-official-preview smart-chat-announcement-detail"><div class="smart-chat-preview-label">${t('chat.officialNotices')}</div><h2 class="smart-chat-preview-header">${esc(a.message_type||t('chat.officialAnnouncements'))}</h2><div class="smart-chat-preview-meta">${esc(_formatAnnouncementDate(a.created_at))} · ${(!a.read_at?t('chat.unread'):t('chat.read'))}</div><div class="smart-chat-preview-reason"><strong>${''}</strong><span>${esc(a.reason||t('chat.officialNotices'))}</span></div><div class="smart-chat-preview-body">${esc(a.body||'').replace(/\n/g,'<br>')}</div></article>`;
   try{
     if(API.markStaffAnnouncementRead){
       const result=await API.markStaffAnnouncementRead(id);
       if(result?.ok!==true)throw new Error(result?.error||'announcement_read_failed');
       a.read_at=a.read_at||new Date().toISOString();
       const meta=stream.querySelector('.smart-chat-preview-meta');
-      if(meta)meta.textContent=_formatAnnouncementDate(a.created_at)+' · '+t('chat.read');
+      if(meta)meta.textContent=_formatAnnouncementDate(a.created_at)+';
       _renderAnnouncementList(window._chatAnnouncements||[]);
     }
   }catch(e){
@@ -874,9 +874,9 @@ window._clearAnnouncementSelection=function(){
   _announcementId=null;
   const shell=document.querySelector('.smart-chat-announcement-shell');if(shell)shell.classList.remove('has-selection');
   const head=document.getElementById('announcementHead');
-  if(head)head.innerHTML=`<div><strong>${t('chat.officialAnnouncements')}</strong><small>${t('chat.selectAnnouncementToRead')}</small></div><span class="smart-chat-verified-pill">${t('chat.verified')}</span>`;
+  if(head)head.innerHTML=`<div><strong>${t('chat.officialAnnouncements')}</strong><small>${t('chat.officialNotices')}</small></div><span class="smart-chat-verified-pill">${t('chat.verifiedStaffOnly')}</span>`;
   const stream=document.getElementById('announcementStream');
-  if(stream)stream.innerHTML=`<div class="chat-empty"><div class="chat-empty-icon">📢</div><div class="chat-empty-title">${t('chat.selectAnnouncement')}</div><div class="chat-empty-sub">${t('chat.chooseOfficialNotice')}</div></div>`;
+  if(stream)stream.innerHTML=`<div class="chat-empty"><div class="chat-empty-icon">📢</div><div class="chat-empty-title">${t('chat.emptyTitle')}</div><div class="chat-empty-sub">${t('chat.emptySub')}</div></div>`;
   _renderAnnouncementList(window._chatAnnouncements||[]);
 };
 function _renderDirectWorkspace() {
