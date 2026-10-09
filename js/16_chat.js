@@ -863,7 +863,7 @@ window._openAnnouncement=async function(id){
       if(result?.ok!==true)throw new Error(result?.error||'announcement_read_failed');
       a.read_at=a.read_at||new Date().toISOString();
       const meta=stream.querySelector('.smart-chat-preview-meta');
-      if(meta)meta.textContent=_formatAnnouncementDate(a.created_at)+';
+      if(meta)meta.textContent=_formatAnnouncementDate(a.created_at);
       _renderAnnouncementList(window._chatAnnouncements||[]);
     }
   }catch(e){
