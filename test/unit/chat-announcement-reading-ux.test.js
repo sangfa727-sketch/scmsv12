@@ -68,7 +68,8 @@ test('staff chat mobile navigation allows vertical page scrolling and prioritize
   assert.ok(!source.slice(modeStart, modeEnd).includes('${_renderAdminComposer()}'), 'admin official-message composer must not be appended below the All Staff conversation');
   assert.ok(styles.includes('overscroll-behavior-x:contain;touch-action:pan-x pan-y;scroll-snap-type:x proximity'), 'final mobile rail override must preserve vertical gestures');
 });
-\n
+
+
 test('staff chat uses a coherent social-first responsive visual system', () => {
   const styles = fs.readFileSync(path.resolve(__dirname, '../../style.css'), 'utf8');
   assert.ok(styles.includes('Smart Chat social-first redesign: consistent hierarchy'), 'include the unified social-first chat redesign');
