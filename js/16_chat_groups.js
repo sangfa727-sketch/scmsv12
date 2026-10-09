@@ -42,12 +42,12 @@ window._newChatGroup=async function(){
    const startsAt=String(fd.get('groupStartsAt')||'').trim()||null,endsAt=String(fd.get('groupEndsAt')||'').trim()||null;
    if(startsAt&&endsAt&&new Date(endsAt)<new Date(startsAt)){showToast(t('chat.invalidGroupType'));return;}
    const submit=form.querySelector('#chatGroupCreateSubmit');if(submit){submit.disabled=true;submit.textContent=t('chat.loading');}
-   await _createChatGroup(name,desc,type,startsAt,endsAt,memberIds);
-   close();
+   const created=await _createChatGroup(name,desc,type,startsAt,endsAt,memberIds);
+   if(created)close();else if(submit){submit.disabled=false;submit.textContent=t('chat.newGroup');}
  });
 };
 async function _createChatGroup(name,desc,type,startsAt=null,endsAt=null,memberIds=[]){
- try{const r=await API.createChatGroup(name,desc,type,startsAt,endsAt,memberIds);if(!r?.ok)throw new Error(r?.error||t('chat.createFailed'));_chatGroupId=Number(r.group_id);await _loadChatGroups();}catch(e){showToast(t('chat.groupCreateFailed'));}}
+ try{const r=await API.createChatGroup(name,desc,type,startsAt,endsAt,memberIds);if(!r?.ok)throw new Error(r?.error||t('chat.createFailed'));_chatGroupId=Number(r.group_id);await _loadChatGroups();return true;}catch(e){showToast(t('chat.groupCreateFailed'));return false;}}
 window._openChatGroup=async function(id){
  _chatGroupId=Number(id);const root=document.getElementById('chatGroupConversation');if(!root)return;
  root.innerHTML=`<div class="chat-stream" id="chatGroupStream"><div class="chat-empty-sub">${t('chat.loading')}</div></div>`;
