@@ -210,3 +210,51 @@ test('Sensitive teacher mutations keep super_admin target guards on the server',
   assert.match(migration, /a\.admin_role <> 'super_admin' and teacher_row\.role='super_admin'/);
   assert.match(migration, /v_admin\.admin_role <> 'super_admin' and v_target_role='super_admin'/);
 });
+
+test('Teacher password reset fails closed and validates the new PIN before calling RPC', () => {
+  const source = read('js/15_settings.js');
+  const reset = block(source, 'window.resetTeacherPassword = function(teacherId, teacherName)', 'window.openMyAccessSettings');
+  assert.match(reset, /if \(!window\.APP\?\.is_admin\)/);
+  assert.match(reset, /typeof window\.showPasswordPrompt !== 'function'/);
+  assert.match(reset, /if \(newPw\.length < 6\)/);
+  assert.match(reset, /if \(!sess \|\| !sess\.session_token\)/);
+  assert.match(reset, /_webRpc\('rpc_admin_reset_teacher_password'/);
+  assert.match(reset, /p_teacher_id:\s+teacherId/);
+  assert.match(reset, /p_new_password:\s+newPw/);
+  assert.match(reset, /if \(!result \|\| !result\.ok\)/);
+});
+
+test('Teacher ID card creation is admin/session guarded and hides the card until data is ready', () => {
+  const source = read('js/15_settings.js');
+  const card = block(source, 'window.openTeacherCardModal = async function(teacherId, teacherName, teacherLoginName)', 'window.resetTeacherPassword');
+  assert.match(card, /if \(!window\.APP\?\.is_admin\)/);
+  assert.match(card, /teacher-card-preparing/);
+  assert.match(card, /visibility:hidden/);
+  assert.match(card, /if \(!sess\?\.session_token\) throw new Error\('session_expired'\)/);
+  assert.match(card, /_webRpc\('rpc_admin_create_teacher_card'/);
+  assert.match(card, /p_teacher_id: teacherId/);
+  assert.match(card, /if \(!result\?\.ok\) throw new Error/);
+  assert.match(card, /encodeURIComponent\(result\.token\)/);
+  assert.match(card, /teacher-id-card/);
+  assert.match(card, /catch \(e\)/);
+});
+
+test('Teacher create/edit forms carry the selected role to the server and invalidate stale list cache', () => {
+  const source = read('js/15_settings.js');
+  const editModal = block(source, 'window.openTeacherEditModal = async function(teacherId)', 'window.saveTeacherEdit');
+  assert.match(editModal, /_teacherRoleOptions\(teacher\.role \|\| 'teacher'\)/);
+  assert.match(editModal, /id="editTRole"/);
+
+  const edit = block(source, 'window.saveTeacherEdit = async function(teacherId)', 'window.doCreateTeacher');
+  assert.match(edit, /const role = document\.getElementById\('editTRole'\)\?\.value/);
+  assert.match(edit, /p_role: role/);
+  assert.match(edit, /rpc_admin_update_teacher_profile/);
+  assert.match(edit, /_invalidateTeacherManagerCache\(\)/);
+
+  const create = block(source, 'window.doCreateTeacher = async function()', 'window.openTeacherCardModal');
+  assert.match(create, /const role\s*=\s*document\.getElementById\('newTRole'\)\?\.value/);
+  assert.match(create, /p_role:\s+role/);
+  assert.match(create, /rpc_admin_create_teacher_v2/);
+  assert.match(create, /_invalidateTeacherManagerCache\(\)/);
+  assert.match(create, /setTimeout\(\(\) => openTeacherCardModal\(id, name, login\), 280\)/);
+});
