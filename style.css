@@ -357,8 +357,9 @@ html[lang="km"] .tab-label {
   white-space: nowrap;
 }
 .chip.active {
-  background: var(--text);
-  color: var(--bg);
+  background: var(--surface2);
+  color: var(--text);
+  border: 1px solid var(--border2);
 }
 .chip-empty { font-size: 13px; color: var(--muted); padding: 6px 0; }
 
