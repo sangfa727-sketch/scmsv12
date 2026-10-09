@@ -121,7 +121,7 @@
   Object.keys(auditFix).forEach(code=>Object.assign(chat[code],auditFix[code]));
 
   // Burmese copy for the official-announcement composer; prevents raw i18n keys in Myanmar locale.
-  Object.assign(chat.my, {
+  Object.assign(my, {
     'chat.reason':'အကြောင်းပြချက်',
     'chat.officialCommunication':'ကျောင်း၏ တရားဝင်ဆက်သွယ်ရေး',
     'chat.writeOfficialMessage':'တရားဝင်မက်ဆေ့ချ် ရေးပါ…',
