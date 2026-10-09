@@ -138,10 +138,11 @@ function _renderAdminComposer() {
 }
 
 async function _loadAdminRecipientPreview(type = null, target = null) {
+  let requestId = 0;
   try {
     if (!window.API?.getChatRecipientPreview || !window.APP?.is_admin) return;
     const selectedType = type || document.getElementById('adminMsgRecipientType')?.value || 'grade';
-    const requestId = ++_adminRecipientRequestId;
+    requestId = ++_adminRecipientRequestId;
     if (selectedType === 'teacher') _adminTeacherRecipients = [];
     else _adminGradeRecipients = [];
     _refreshAdminComposerPreview();
@@ -181,7 +182,7 @@ async function _loadAdminRecipientPreview(type = null, target = null) {
     }
     _refreshAdminComposerPreview();
   } catch (e) {
-    if (typeof requestId !== 'undefined' && requestId !== _adminRecipientRequestId) return;
+    if (requestId && requestId !== _adminRecipientRequestId) return;
     if ((type || document.getElementById('adminMsgRecipientType')?.value) === 'teacher') _adminTeacherRecipients = [];
     else _adminGradeRecipients = [];
     _refreshAdminComposerPreview();
