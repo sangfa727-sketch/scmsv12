@@ -51,3 +51,14 @@ test('section management exposes safe hide, reorder and duplicate controls',()=>
  assert.match(js,/DEFAULT_SECTIONS/);assert.match(js,/normalizeSections/);assert.match(js,/sectionAction/);assert.match(js,/renderSectionLayout/);assert.match(js,/localStorage/);assert.match(js,/m\.locked/);
  assert.match(css,/\.section-controls/);assert.match(css,/\.site-block\[hidden\]/);new Function(js);
 });
+
+
+test('School Website navigation supports owner/admin defaults and delegated website.manage permission',()=>{
+ const sidebar=read('js/17_sidebar.js');
+ assert.match(sidebar,/id: 'website'/);
+ assert.match(sidebar,/school-website\/create\.html/);
+ assert.match(sidebar,/ownerOrAdmin/);
+ assert.match(sidebar,/school_owner/);
+ assert.match(sidebar,/website\.manage/);
+ assert.match(sidebar,/School Website/);
+});
