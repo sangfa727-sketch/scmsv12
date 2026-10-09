@@ -31,7 +31,9 @@ async function mountAdmin(page) {
       subjects: [{ id: 10, subject_name: 'Mathematics', subject_code: 'MATH' }],
       permissions: [
         { permission_key: 'students.view', category: 'Students', scope_type: 'global', description: 'View students' },
-        { permission_key: 'students.edit', category: 'Students', scope_type: 'class', description: 'Edit students' }
+        { permission_key: 'students.edit', category: 'Students', scope_type: 'class', description: 'Edit students' },
+        { permission_key: 'attendance.view', category: 'Attendance', scope_type: 'subject', description: 'View attendance' },
+        { permission_key: 'grades.edit', category: 'Academics', scope_type: 'class_subject', description: 'Edit grades' }
       ],
       role_permissions: [{ role: 'teacher', permission_key: 'students.view', allowed: true }]
     };
@@ -169,4 +171,75 @@ test('Teacher lifecycle cancels safely when confirmation is declined', async ({ 
   await page.evaluate(() => { window.confirm = () => false; });
   await page.evaluate(() => window.setTeacherLifecycle('teacher-2', 'deactivate'));
   expect(await rpcCalls(page, 'rpc_admin_deactivate_teacher')).toHaveLength(0);
+});
+
+
+test('Manage Access validates class, subject, and class-subject scopes before writing overrides', async ({ page }) => {
+  await mountAdmin(page);
+  await page.evaluate(() => window.openTeacherAccess('teacher-2', 'Other Teacher'));
+  await expect(page.locator('.teacher-access-sheet')).toBeVisible();
+
+  const classRow = page.locator('.teacher-access-perm-row[data-permission="students.edit"][data-scope="class"]');
+  await classRow.locator('.teacher-access-perm-state').selectOption('allow');
+  await expect.poll(async () => (await rpcCalls(page, 'rpc_manage_teacher_access')).filter(
+    (call) => call.payload.p_action === 'permission_set'
+  ).length).toBe(0);
+  await classRow.locator('.teacher-access-class').selectOption('Grade 1');
+  await classRow.locator('.teacher-access-perm-state').selectOption('allow');
+  await expect.poll(async () => (await rpcCalls(page, 'rpc_manage_teacher_access')).filter(
+    (call) => call.payload.p_action === 'permission_set'
+  ).length).toBe(1);
+  let saved = (await rpcCalls(page, 'rpc_manage_teacher_access')).find((call) => call.payload.p_action === 'permission_set');
+  expect(saved.payload.p_permission_key).toBe('students.edit');
+  expect(saved.payload.p_scope_type).toBe('class');
+  expect(saved.payload.p_class_name).toBe('Grade 1');
+  expect(saved.payload.p_subject_id).toBeNull();
+
+  const subjectRow = page.locator('.teacher-access-perm-row[data-permission="attendance.view"][data-scope="subject"]');
+  await subjectRow.locator('.teacher-access-perm-state').selectOption('deny');
+  await expect.poll(async () => (await rpcCalls(page, 'rpc_manage_teacher_access')).filter(
+    (call) => call.payload.p_action === 'permission_set'
+  ).length).toBe(1);
+  await subjectRow.locator('.teacher-access-subject').selectOption('10');
+  await subjectRow.locator('.teacher-access-perm-state').selectOption('deny');
+  await expect.poll(async () => (await rpcCalls(page, 'rpc_manage_teacher_access')).filter(
+    (call) => call.payload.p_action === 'permission_set'
+  ).length).toBe(2);
+  saved = (await rpcCalls(page, 'rpc_manage_teacher_access')).filter((call) => call.payload.p_action === 'permission_set')[1];
+  expect(saved.payload.p_permission_key).toBe('attendance.view');
+  expect(saved.payload.p_scope_type).toBe('subject');
+  expect(saved.payload.p_class_name).toBeNull();
+  expect(saved.payload.p_subject_id).toBe(10);
+  
+  const combinedRow = page.locator('.teacher-access-perm-row[data-permission="grades.edit"][data-scope="class_subject"]');
+  await combinedRow.locator('.teacher-access-perm-state').selectOption('allow');
+  await expect.poll(async () => (await rpcCalls(page, 'rpc_manage_teacher_access')).filter(
+    (call) => call.payload.p_action === 'permission_set'
+  ).length).toBe(2);
+  await combinedRow.locator('.teacher-access-class').selectOption('Grade 2');
+  await combinedRow.locator('.teacher-access-subject').selectOption('10');
+  await combinedRow.locator('.teacher-access-perm-state').selectOption('allow');
+  await expect.poll(async () => (await rpcCalls(page, 'rpc_manage_teacher_access')).filter(
+    (call) => call.payload.p_action === 'permission_set'
+  ).length).toBe(3);
+  saved = (await rpcCalls(page, 'rpc_manage_teacher_access')).filter((call) => call.payload.p_action === 'permission_set')[2];
+  expect(saved.payload.p_permission_key).toBe('grades.edit');
+  expect(saved.payload.p_scope_type).toBe('class_subject');
+  expect(saved.payload.p_class_name).toBe('Grade 2');
+  expect(saved.payload.p_subject_id).toBe(10);
+});
+
+test('Manage Access refuses RPC calls when the admin session token is missing', async ({ page }) => {
+  await mountAdmin(page);
+  await page.evaluate(() => {
+    window.getWebSession = () => null;
+    window.APP.webSession = null;
+  });
+  await page.evaluate(async () => {
+    try {
+      await window.openTeacherAccess('teacher-2', 'Other Teacher');
+    } catch (_) {}
+  });
+  expect(await rpcCalls(page, 'rpc_manage_teacher_access')).toHaveLength(0);
+  await expect(page.locator('.teacher-access-sheet')).toHaveCount(0);
 });
