@@ -451,6 +451,49 @@ window.switchChatMode = function(mode) {
   _renderChatMode();
 };
 
+function _chatUnreadCount(channel) {
+  let rows = [];
+  if (channel === 'direct' && typeof _directConversations !== 'undefined') rows = _directConversations;
+  if (channel === 'tickets' && typeof _inquiryTickets !== 'undefined') rows = _inquiryTickets;
+  if (channel === 'events' && typeof _chatGroups !== 'undefined') rows = _chatGroups;
+  if (channel === 'announcements') rows = Array.isArray(window._chatAnnouncements) ? window._chatAnnouncements : [];
+  if (channel === 'announcements') return rows.filter(item => !item?.read_at).length;
+  return rows.reduce((total, item) => total + Math.max(0, Number(item?.unread_count) || 0), 0);
+}
+
+function _renderChatChannelUnreadBadges() {
+  if (_chatMode !== 'school' || _chatChannel !== 'staff') return;
+  for (const channel of ['direct', 'tickets', 'events', 'announcements']) {
+    const badge = document.querySelector('[data-chat-unread-for="' + channel + '"]');
+    if (!badge) continue;
+    const count = _chatUnreadCount(channel);
+    badge.classList.toggle('has-unread', count > 0);
+    badge.textContent = count > 0 ? (count > 99 ? '99+' : String(count)) : '›';
+    if (count > 0) badge.setAttribute('aria-label', t('chat.unreadMessages') + ': ' + count);
+    else badge.removeAttribute('aria-label');
+  }
+}
+
+async function _refreshChatChannelUnreadCounts() {
+  if (_chatMode !== 'school' || _chatChannel !== 'staff' || !window.API) return;
+  const requests = [
+    ['direct', 'getDirectConversations'],
+    ['tickets', 'getInquiryTickets'],
+    ['announcements', 'getStaffAnnouncements'],
+    ['events', 'getChatGroups']
+  ];
+  await Promise.allSettled(requests.map(async ([channel, method]) => {
+    if (typeof API[method] !== 'function') return;
+    const rows = channel === 'announcements' ? await API[method](50) : await API[method]();
+    if (!Array.isArray(rows)) return;
+    if (channel === 'direct') _directConversations = rows;
+    else if (channel === 'tickets') _inquiryTickets = rows;
+    else if (channel === 'announcements') window._chatAnnouncements = rows;
+    else if (channel === 'events' && typeof _chatGroups !== 'undefined') _chatGroups = rows;
+  }));
+  _renderChatChannelUnreadBadges();
+}
+
 function _renderChatMode() {
   const root = document.getElementById('smartChatModeBody');
   if (!root) return;
@@ -480,12 +523,13 @@ function _renderChatMode() {
     return;
   }
 
+  // Put the highest-frequency staff workflows first; All Staff remains the default.
   const channels = [
     { id:'staff', name:t('chat.allStaff'), icon:'👥', sub:t('chat.staffGeneral') },
-    { id:'announcements', name:t('chat.officialAnnouncements'), icon:'📢', sub:t('chat.officialNotices') },
-    { id:'departments', name:t('chat.departmentGrade'), icon:'📚', sub:t('chat.classDepartmentChannels') },
-    { id:'tickets', name:t('chat.workspace.tickets'), icon:'🎫', sub:t('chat.studentParentConversations') },
     { id:'direct', name:t('chat.directMessages'), icon:'👤', sub:t('chat.privateStaffChat') },
+    { id:'departments', name:t('chat.departmentGrade'), icon:'📚', sub:t('chat.classDepartmentChannels') },
+    { id:'announcements', name:t('chat.officialAnnouncements'), icon:'📢', sub:t('chat.officialNotices') },
+    { id:'tickets', name:t('chat.workspace.tickets'), icon:'🎫', sub:t('chat.studentParentConversations') },
     { id:'events', name:t('chat.workspace.groups'), icon:'🗂️', sub:t('chat.temporaryWorkGroups') }
   ];
   const visible = channels;
@@ -522,10 +566,10 @@ function _renderChatMode() {
       <aside class="smart-chat-channel-list">
         <div class="smart-chat-list-title">${t('chat.schoolChat')}</div>
         ${visible.map(c => `
-          <button data-testid="chat-channel-${c.id}" class="smart-chat-channel-card ${c.id === _chatChannel ? 'active' : ''}" onclick="switchChatChannel('${esc(c.id)}')">
+          <button data-testid="chat-channel-${c.id}" class="smart-chat-channel-card ${c.id === _chatChannel ? 'active' : ''}" aria-current="${c.id === _chatChannel ? 'page' : 'false'}" onclick="switchChatChannel('${esc(c.id)}')">
             <span class="smart-chat-channel-icon">${c.icon}</span>
             <span><strong>${esc(c.name)}</strong><small>${esc(c.sub)}</small></span>
-            <b>›</b>
+            <b class="smart-chat-channel-trailing" data-chat-unread-for="${c.id}">›</b>
           </button>`).join('')}
       </aside>
       <section class="smart-chat-conversation">
@@ -542,6 +586,7 @@ function _renderChatMode() {
     </div>
     ${_renderAdminComposer()}`;
   _loadChatMessages();
+  _refreshChatChannelUnreadCounts();
   setTimeout(() => {
     _refreshAdminComposerPreview();
     if (window.APP?.is_admin) _loadAdminRecipientPreview();
