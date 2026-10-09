@@ -476,6 +476,7 @@ window.switchChatMode = function(mode) {
   _chatTypeMenuOpen = false;
   _renderChatQuickNav();
   _renderChatMode();
+  if (_chatMode === 'school') _refreshChatChannelUnreadCounts();
   const menu = document.getElementById('scChatTypeMenu');
   if (menu) {
     menu.hidden = true;
@@ -490,7 +491,6 @@ window.switchChatMode = function(mode) {
   document.querySelectorAll('.sc-chat-mode-pill,.sc-chat-top-action').forEach(b => b.setAttribute('aria-expanded','false'));
   const pill = document.querySelector('.sc-chat-mode-pill');
   if (pill) pill.innerHTML = (_chatMode === 'school' ? _chatIcon('users') + esc(t('chat.schoolChat')) : _chatIcon('bot') + esc(t('chat.aiAssistant'))) + '<span aria-hidden="true">⌄</span>';
-  if (_chatMode === 'school') _refreshChatChannelUnreadCounts();
 };
 window._toggleChatTypeMenu = function() {
   _chatTypeMenuOpen = !_chatTypeMenuOpen;
