@@ -458,9 +458,10 @@ window.switchChatMode = function(mode) {
 function _chatQuickNavChannels() {
   return [
     { id:'staff', name:t('chat.allStaff'), icon:'👥' },
+    // Official notices are a high-priority school-wide workflow, not a buried secondary channel.
+    { id:'announcements', name:t('chat.officialAnnouncements'), icon:'📢' },
     { id:'direct', name:t('chat.directMessages'), icon:'👤' },
     { id:'departments', name:t('chat.departmentGrade'), icon:'📚' },
-    { id:'announcements', name:t('chat.officialAnnouncements'), icon:'📢' },
     { id:'tickets', name:t('chat.workspace.tickets'), icon:'🎫' },
     { id:'events', name:t('chat.workspace.groups'), icon:'🗂️' }
   ];
