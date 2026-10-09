@@ -12,8 +12,8 @@ This is the canonical coverage ledger for automated and manual verification. A t
 
 ## Latest CI evidence
 
-- Workflow: [SCMS tests run #2131](https://github.com/sangfa727-sketch/scmsv12/actions/runs/37983854094)
-- Result: Frontend syntax/regression + dependency audit **PASS**; Playwright local smoke **PASS**; Public Website RLS runtime harness **PASS**; staging E2E **SKIPPED**.
+- Workflow: [SCMS tests run #2133](https://github.com/sangfa727-sketch/scmsv12/actions/runs/37984104216)
+- Result: Frontend syntax/regression + dependency audit **PASS**; Playwright local smoke **PASS**; Public Website RLS runtime harness **PASS**; staging E2E **SKIPPED** (scheduled/manual job not run for this PR event).
 - Playwright coverage: homepage HTTP response/body and presence of 13 core page-shell elements only.
 - This run does not prove module interactions, authenticated workflows, database persistence across the full app, role/tenant isolation, or production readiness.
 
