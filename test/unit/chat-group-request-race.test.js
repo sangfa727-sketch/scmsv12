@@ -153,7 +153,7 @@ test('ticket form labels and priority options are localized instead of exposing 
 
 test('global toast colors use theme surfaces instead of inverted text/background colors', () => {
   const css = fs.readFileSync(path.resolve(__dirname, '../../style.css'), 'utf8');
-  const start = css.indexOf('.toast {');
+  const start = css.indexOf('.toast {\n  position: fixed;');
   const end = css.indexOf('}', start);
   const toast = css.slice(start, end);
   assert.ok(toast.includes('background: var(--surface2);'));
