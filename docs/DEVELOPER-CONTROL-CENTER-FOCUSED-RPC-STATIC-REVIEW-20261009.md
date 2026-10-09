@@ -88,3 +88,34 @@ A direct `has_table_privilege` check confirmed that both `anon` and `authenticat
 - Public website RLS runtime harness: **success**.
 - Playwright: **skipped** by scheduled/manual-only workflow policy; browser-level behavior remains unverified.
 - PR #228 remains open and unmerged. No live grants, schema, Production Core, or production deployment changed.
+
+
+## Deployed parent Google login function — verified source review (2026-10-09)
+
+The live Supabase Edge Function inventory identifies `parent-google-login` as ACTIVE (version 2). Its deployed source was retrieved read-only and reviewed.
+
+**Positive controls observed in deployed source:**
+- Requires POST and validates JSON, `id_token`, `qr_token`, and configured `GOOGLE_CLIENT_ID`.
+- Calls Google's `oauth2.googleapis.com/tokeninfo` endpoint with the ID token.
+- Rejects non-success verification responses, audience mismatch, issuer mismatch, and unverified email.
+- Checks expiry when `claims.exp` is present.
+- Derives `p_google_email` from the returned token claims, rather than trusting an email supplied separately by the browser.
+- Calls `rpc_parent_google_login` using the service-role key only in the Edge Function; the browser source does not receive that key.
+
+**Remaining hardening / verification:**
+1. Expiry is checked only conditionally (`if (claims.exp && ...)`); make the claim mandatory and reject missing, non-numeric, or expired `exp` values. Verify required identity claims such as a non-empty email as well.
+2. Add request throttling/abuse controls for this public unauthenticated login endpoint; `verify_jwt=false` is configured, so the function must enforce its own public endpoint contract.
+3. Consider narrowing `Access-Control-Allow-Origin: *` to known portal origins where operationally practical. CORS is not authentication and does not prevent non-browser callers.
+4. Add sandbox tests for invalid/expired/missing-exp/wrong-audience/wrong-issuer/unverified-email tokens, QR mismatch, inactive student, throttling, and no token/secret leakage.
+5. Confirm Google's tokeninfo response contract and required claims against the configured client ID before changing deployed code.
+
+**Disposition:** The critical caller-controlled-email concern is mitigated by the deployed source's tokeninfo call and claim-derived email, subject to the validation caveats above. No exploit was attempted. This is a static source review; no live function was changed or deployed.
+
+## CI confirmation for documentation commit
+
+- Latest reviewed commit: `022e1d81906a46e3716ac2cb757ac61db8ca5cbc`.
+- Workflow run [#1966](https://github.com/sangfa727-sketch/scmsv12/actions/runs/37900226657) completed successfully.
+- Frontend syntax + regression tests: **success**.
+- Public website RLS runtime harness: **success**.
+- Playwright: **skipped** by workflow policy.
+- PR #228 remains open and unmerged; no production grants, schema, function, or deployment were changed.
