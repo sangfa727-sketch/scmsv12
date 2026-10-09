@@ -86,6 +86,12 @@ test('chat type menu and channel actions persist, validate, and re-render select
   assert.match(core, /window\._chatBackToMenu\s*=\s*function\(\)[\s\S]*?_exitChatWorkspace\(\)/);
 });
 
+test('mobile sidebar control stays on Chat while desktop navigation remains unchanged', () => {
+  assert.match(core, /const isMobileWorkspace = typeof window\.matchMedia === 'function'[\s\S]*?window\.matchMedia\('\(max-width: 760px\)'\)\.matches/);
+  assert.match(core, /if \(isMobileWorkspace\) \{[\s\S]*?if \(typeof openSidebar === 'function'\) openSidebar\(\);\s*return;/);
+  assert.match(core, /Keep the existing desktop navigation behavior unchanged\.[\s\S]*?typeof isTWA === 'function' && !isTWA\(\) && typeof openSidebar === 'function'/);
+});
+
 test('all message-send paths validate input and provide failure handling', () => {
   const sendContracts = [
     [core, 'sendChat', 'API.sendChatMessage', 'chat.sendFailed'],
