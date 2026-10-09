@@ -100,7 +100,7 @@ jobs:
             echo "- Commit: $GITHUB_SHA"
             echo "- Ref: $GITHUB_REF"
             echo "- Job result: ${{ job.status }}"
-            echo '- Scope: homepage HTTP response and non-empty body only; not full module coverage.'
+            echo '- Scope: homepage HTTP response and core module page-shell presence only; module behavior, backend integration, and security remain untested.'
           } >> "$GITHUB_STEP_SUMMARY"
       - name: Upload Playwright evidence
         if: always()
