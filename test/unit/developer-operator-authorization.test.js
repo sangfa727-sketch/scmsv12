@@ -109,7 +109,8 @@ test('denies approval bound to a different action, resource, or school scope', (
   assert.equal(authorizeDeveloperAction(approvedContext({ targetId: 'school-b' }), highRiskRequest()).reason, 'approval_binding_mismatch');
   assert.equal(authorizeDeveloperAction(approvedContext({ targetSchoolId: 'school-b' }), highRiskRequest()).reason, 'approval_binding_mismatch');
   assert.equal(authorizeDeveloperAction(approvedContext({ targetId: 'school-b', targetSchoolId: 'school-b' }, {
-    operator: { ...context().operator, scope: { type: 'platform' } }
+    operator: { ...context().operator, scope: { type: 'platform' } },
+    approvalApprover: { userId: 'operator-2', status: 'active', capabilities: ['approve:schools.delete'], scope: { type: 'platform' } }
   }), highRiskRequest({ targetId: 'school-b', targetSchoolId: 'school-b' })).allowed, true);
 });
 
