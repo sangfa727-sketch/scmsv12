@@ -9283,3 +9283,25 @@ html.scms-chat-workspace #pages{overflow:auto}
     border-radius:14px;
   }
 }
+
+
+/* Group chat nests the stream and composer inside its conversation wrapper.
+   Keep that wrapper as a vertical, shrinkable mobile flex container. */
+@media (max-width:760px) {
+  #page-chat #chatGroupConversation > .smart-chat-conversation-head {
+    display:flex;
+    flex:1 1 auto;
+    flex-direction:column;
+    align-items:stretch;
+    justify-content:flex-start;
+    min-height:0;
+    height:100%;
+    padding:0;
+    overflow:hidden;
+  }
+  #page-chat #chatGroupConversation > .smart-chat-conversation-head > .smart-chat-direct-peer {
+    flex:0 0 auto;
+    padding:10px 11px;
+    border-bottom:1px solid var(--border);
+  }
+}
