@@ -96,6 +96,14 @@ test('website studio uses querySelectorAll for every DOM collection loop',()=>{
 });
 
 
+test('School Website Studio loads deployment environment guard before backend config',()=>{
+ const html=read('school-website/create.html');
+ assert.ok(html.indexOf('../js/00_env.js') >= 0, 'environment guard must be loaded');
+ assert.ok(html.indexOf('../js/00_env.js') < html.indexOf('../js/01_config.js'), 'environment guard must run before config');
+ const env=read('js/00_env.js');
+ assert.match(env,/localhost.*127\\.0\\.0\\.1.*::1/);
+});
+
 test('School Website Studio fails closed until the server verifies an active authorized school session',()=>{
  const html=read('school-website/create.html'),migration=read('supabase/migrations/20261010120000_school_website_server_authorization.sql');
  assert.match(html,/auth-pending/); assert.match(html,/access-denied \\.builder/); assert.match(html,/AbortController/); assert.match(html,/scms_web_session/); assert.match(html,/rpc_school_website_authorize/); assert.match(html,/result\.authorized !== true/); assert.match(html,/editor\.src = '\.\/create\.js'/);
