@@ -21,7 +21,14 @@ async function signInAndOpenChat(
   await expect(page.locator('#sidebar')).toBeVisible();
   await page.getByTestId('nav-chat').click();
   await expect(page.locator('#page-chat')).toBeVisible();
-  await expect(page.locator('.sc-chat-topbar')).toBeVisible();
+  const isMobile = await page.evaluate(() => window.matchMedia('(max-width: 760px)').matches);
+  if (isMobile) {
+    await expect(page.locator('.sc-chat-topbar')).toBeVisible();
+  } else {
+    await expect(page.locator('.sc-chat-topbar')).toBeHidden();
+    await expect(page.locator('.smart-chat-hero')).toBeVisible();
+    await expect(page.locator('.smart-chat-mode-switch')).toBeVisible();
+  }
 }
 
 test.describe('Staff Chat full-screen browser regression', () => {
@@ -82,13 +89,25 @@ test.describe('Staff Chat full-screen browser regression', () => {
     expect(metrics.workspaceClientHeight).toBeGreaterThan(0);
   });
 
-  test('exit control returns to the previous app workspace without leaving a duplicate chat header', async ({ page }) => {
+  test('mobile sidebar control restores the original app chrome and opens the existing sidebar', async ({ page }) => {
+    await page.setViewportSize({ width: 390, height: 844 });
     await signInAndOpenChat(page);
     await page.locator('.sc-chat-topbar .sc-chat-top-action').first().click();
 
     await expect(page.locator('.sc-chat-topbar')).toBeHidden();
-    await expect(page.locator('#page-chat')).toBeHidden();
+    await expect(page.locator('#page-chat')).toBeVisible();
+    await expect(page.locator('#appHeader')).toBeVisible();
     await expect(page.locator('#sidebar')).toBeVisible();
+  });
+
+  test('desktop keeps the original SCMS navigation and Chat header instead of mobile fullscreen chrome', async ({ page }) => {
+    await page.setViewportSize({ width: 1280, height: 900 });
+    await signInAndOpenChat(page);
+
+    await expect(page.locator('#appHeader')).toBeVisible();
+    await expect(page.locator('.smart-chat-hero')).toBeVisible();
+    await expect(page.locator('.smart-chat-mode-switch')).toBeVisible();
+    await expect(page.locator('.sc-chat-topbar')).toBeHidden();
   });
 
   test('chat channel entry points remain present for core staff modules', async ({ page }) => {
