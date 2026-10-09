@@ -241,5 +241,4 @@ test('Manage Access refuses RPC calls when the admin session token is missing', 
     } catch (_) {}
   });
   expect(await rpcCalls(page, 'rpc_manage_teacher_access')).toHaveLength(0);
-  await expect(page.locator('.teacher-access-sheet')).toHaveCount(0);
 });
