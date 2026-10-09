@@ -112,7 +112,6 @@ jobs:
             test-results/
           if-no-files-found: ignore
           retention-days: 14
-          retention-days: 14
 
   playwright-staging:
     name: Playwright staging E2E (scheduled/manual)
@@ -166,3 +165,4 @@ jobs:
             playwright-report/
             test-results/
           if-no-files-found: ignore
+          retention-days: 14
