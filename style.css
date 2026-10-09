@@ -9098,3 +9098,17 @@ html.scms-chat-workspace #pages{overflow:auto}
     padding-bottom:calc(8px + env(safe-area-inset-bottom));
   }
 }
+
+
+/* Inquiry Tickets — make ticket creation, assignment controls, and replies usable. */
+.smart-chat-inquiry-form{display:grid;gap:12px;padding:14px;margin:10px 0;border:1px solid var(--border-color,rgba(128,128,128,.24));border-radius:14px;background:var(--card-bg,rgba(128,128,128,.06))}
+.smart-chat-inquiry-form label,.smart-chat-inquiry-admin label{display:grid;gap:6px;min-width:0;font-size:13px;font-weight:600}
+.smart-chat-inquiry-form input,.smart-chat-inquiry-form select,.smart-chat-inquiry-form textarea,.smart-chat-inquiry-admin select{box-sizing:border-box;width:100%;min-width:0;min-height:42px;padding:10px 12px;border:1px solid var(--border-color,rgba(128,128,128,.3));border-radius:10px;background:var(--input-bg,transparent);color:inherit;font:inherit}
+.smart-chat-inquiry-form textarea{min-height:112px;resize:vertical;line-height:1.5}
+.smart-chat-field-note{font-size:12px;font-weight:400;opacity:.72}
+.smart-chat-inquiry-form-actions{display:flex;justify-content:flex-end;gap:8px;flex-wrap:wrap}
+.smart-chat-inquiry-form-actions button{min-height:42px}
+.smart-chat-inquiry-shell .smart-chat-conversation-head{flex-wrap:wrap;align-items:flex-start}
+.smart-chat-inquiry-admin{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px;flex:1 1 100%;width:100%;margin-top:8px}
+.smart-chat-inquiry-shell .smart-chat-direct-composer textarea{min-width:0}
+@media(max-width:760px){.smart-chat-inquiry-form{padding:12px;margin:8px 0}.smart-chat-inquiry-form-actions{display:grid;grid-template-columns:1fr 1fr}.smart-chat-inquiry-form-actions button{width:100%}.smart-chat-inquiry-admin{grid-template-columns:1fr}.smart-chat-inquiry-shell.has-selection .smart-chat-direct-conversation{height:calc(100dvh - 170px);min-height:0}}
