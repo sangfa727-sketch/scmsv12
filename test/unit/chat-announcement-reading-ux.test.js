@@ -23,3 +23,28 @@ test('official announcements expose a readable preview and full detail view', ()
   assert.ok(styles.includes('line-height:1.85'), 'provide comfortable line spacing for long announcements');
   assert.ok(styles.includes('@media(max-width:760px)'), 'provide mobile-specific reading layout');
 });
+
+
+test('announcement reading uses only keys available in every supported locale', () => {
+  const source = fs.readFileSync(path.resolve(__dirname, '../../js/16_chat.js'), 'utf8');
+  const start = source.indexOf('function _announcementExcerpt');
+  const end = source.indexOf('function _renderDirectWorkspace()', start);
+  assert.ok(start >= 0 && end > start, 'find the announcement workspace block');
+  const block = source.slice(start, end);
+  const keys = [...new Set([...block.matchAll(/t\\('chat\\.([^']+)'/g)].map(match => match[1]))];
+  const localeFiles = [
+    '../../js/00a_locales_en.js',
+    '../../js/00b_locales_my.js',
+    '../../js/00_locales_jp.js',
+    '../../js/00_locales_thai.js',
+    '../../js/00d_locales_ms.js',
+    '../../js/00e_locales_km.js',
+    '../../js/00e_locales_zh.js',
+  ];
+  for (const localeFile of localeFiles) {
+    const locale = fs.readFileSync(path.resolve(__dirname, localeFile), 'utf8');
+    for (const key of keys) {
+      assert.match(locale, new RegExp("['\\\"]chat\\." + key + "['\\\"]\\\\s*:"), localeFile + ' is missing chat.' + key);
+    }
+  }
+});
