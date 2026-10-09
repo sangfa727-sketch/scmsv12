@@ -37,6 +37,7 @@ function loadGroupChat(api) {
     _chatChannelBack: () => '',
     _chatIcon: () => '',
     _autoGrowChatInput() {},
+    _setChatGroupMobileView() {},
     skeletonCards: () => 'loading',
     showToast() {},
     console,
