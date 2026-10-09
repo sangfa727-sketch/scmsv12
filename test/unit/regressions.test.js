@@ -498,8 +498,8 @@ test('teacher QR login requires a short-lived one-time challenge', () => {
 });
 
 test('official announcement stays disabled while recipient verification is pending and explains missing grade assignments', () => {
-  const chat = fs.readFileSync(path.join(root, 'js/16_chat.js'), 'utf8');
-  const locales = fs.readFileSync(path.join(root, 'js/00f_chat_locales.js'), 'utf8');
+  const chat = read('js/16_chat.js');
+  const locales = read('js/00f_chat_locales.js');
   assert.match(chat, /_adminRecipientLoading = true/);
   assert.match(chat, /sendBtn\.disabled = _adminRecipientLoading \|\|/);
   assert.match(chat, /t\('chat\.gradeRecipientsMissing'\)/);
