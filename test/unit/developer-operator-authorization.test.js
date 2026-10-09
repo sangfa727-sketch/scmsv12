@@ -109,6 +109,12 @@ test('requires the exact resource ID for high-risk approved actions', () => {
   assert.equal(authorizeDeveloperAction(approvedContext(), withoutTargetId).reason, 'target_required');
 });
 
+test('fails closed when approval consumption state is missing', () => {
+  const malformed = approval();
+  delete malformed.consumedAt;
+  assert.equal(authorizeDeveloperAction(context({ approval: malformed }), highRiskRequest()).reason, 'approval_state_invalid');
+});
+
 test('denies self-approved, replayed, or expired approvals', () => {
   assert.equal(authorizeDeveloperAction(approvedContext({ approvedBy: 'operator-1' }), highRiskRequest()).reason, 'independent_approval_required');
   assert.equal(authorizeDeveloperAction(approvedContext({ consumedAt: '2026-10-09T06:59:00Z' }), highRiskRequest()).reason, 'approval_already_consumed');
