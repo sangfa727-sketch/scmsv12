@@ -5,6 +5,10 @@ const assert = require('node:assert/strict');
 const { authorizeDeveloperAction } = require('../../school-website/server/developer-operator-authorization');
 
 const NOW = Date.parse('2026-10-09T07:00:00.000Z');
+const ACTION_POLICIES = Object.freeze({
+  'schools.read': Object.freeze({ targetRequired: true, requiresApproval: false }),
+  'schools.delete': Object.freeze({ targetRequired: true, requiresApproval: true })
+});
 
 function context(overrides = {}) {
   return {
@@ -17,6 +21,7 @@ function context(overrides = {}) {
       capabilities: ['schools.read', 'schools.delete'],
       scope: { type: 'schools', schoolIds: ['school-a'] }
     },
+    actionPolicies: ACTION_POLICIES,
     ...overrides
   };
 }
@@ -59,8 +64,8 @@ test('denies unprovisioned, disabled, and identity-mismatched operators', () => 
   assert.equal(authorizeDeveloperAction(context({ operator: { ...context().operator, userId: 'operator-2' } }), request()).reason, 'active_operator_required');
 });
 
-test('denies actions absent from the explicit capability list', () => {
-  assert.equal(authorizeDeveloperAction(context(), request({ action: 'billing.refund' })).reason, 'capability_denied');
+test('denies actions absent from the server-owned policy registry', () => {
+  assert.equal(authorizeDeveloperAction(context(), request({ action: 'billing.refund' })).reason, 'action_policy_missing');
 });
 
 test('denies cross-tenant targets for school-scoped operators', () => {
@@ -72,22 +77,26 @@ test('platform-scoped operators may target another school only with the explicit
   assert.equal(authorizeDeveloperAction(c, request({ targetSchoolId: 'school-b' })).allowed, true);
 });
 
-test('denies high-risk actions when approval is missing or not approved', () => {
-  assert.equal(authorizeDeveloperAction(context(), request({ action: 'schools.delete', requiresApproval: true })).reason, 'approval_required');
-  assert.equal(authorizeDeveloperAction(context(), request({ action: 'schools.delete', requiresApproval: true, approval: approval({ status: 'pending' }) })).reason, 'approval_not_approved');
+test('server-owned policy requires approval for high-risk actions even if request flags say otherwise', () => {
+  assert.equal(authorizeDeveloperAction(context(), request({ action: 'schools.delete', requiresApproval: false })).reason, 'approval_required');
+  assert.equal(authorizeDeveloperAction(context(), request({ action: 'schools.delete', approval: approval({ status: 'pending' }) })).reason, 'approval_not_approved');
 });
 
 test('denies approval bound to a different action or target', () => {
-  assert.equal(authorizeDeveloperAction(context(), request({ action: 'schools.delete', requiresApproval: true, approval: approval({ action: 'billing.refund' }) })).reason, 'approval_binding_mismatch');
-  assert.equal(authorizeDeveloperAction(context(), request({ action: 'schools.delete', targetSchoolId: 'school-b', requiresApproval: true, approval: approval() })).reason, 'cross_tenant_denied');
+  assert.equal(authorizeDeveloperAction(context(), request({ action: 'schools.delete', approval: approval({ action: 'billing.refund' }) })).reason, 'approval_binding_mismatch');
+  assert.equal(authorizeDeveloperAction(context(), request({ action: 'schools.delete', targetSchoolId: 'school-b', approval: approval() })).reason, 'cross_tenant_denied');
 });
 
 test('denies self-approved, replayed, or expired approvals', () => {
-  assert.equal(authorizeDeveloperAction(context(), request({ action: 'schools.delete', requiresApproval: true, approval: approval({ approvedBy: 'operator-1' }) })).reason, 'independent_approval_required');
-  assert.equal(authorizeDeveloperAction(context(), request({ action: 'schools.delete', requiresApproval: true, approval: approval({ consumedAt: '2026-10-09T06:59:00Z' }) })).reason, 'approval_already_consumed');
-  assert.equal(authorizeDeveloperAction(context(), request({ action: 'schools.delete', requiresApproval: true, approval: approval({ expiresAt: '2026-10-09T06:59:00Z' }) })).reason, 'approval_expired');
+  assert.equal(authorizeDeveloperAction(context(), request({ action: 'schools.delete', approval: approval({ approvedBy: 'operator-1' }) })).reason, 'independent_approval_required');
+  assert.equal(authorizeDeveloperAction(context(), request({ action: 'schools.delete', approval: approval({ consumedAt: '2026-10-09T06:59:00Z' }) })).reason, 'approval_already_consumed');
+  assert.equal(authorizeDeveloperAction(context(), request({ action: 'schools.delete', approval: approval({ expiresAt: '2026-10-09T06:59:00Z' }) })).reason, 'approval_expired');
 });
 
-test('does not authorize a request with missing target when the policy requires one', () => {
-  assert.equal(authorizeDeveloperAction(context(), { action: 'schools.read', targetRequired: true }).reason, 'target_required');
+test('school-scoped operators cannot omit a target or weaken the server-owned target requirement', () => {
+  assert.equal(authorizeDeveloperAction(context(), { action: 'schools.read', targetRequired: false }).reason, 'target_required');
+});
+
+test('denies malformed action policy context by default', () => {
+  assert.equal(authorizeDeveloperAction(context({ actionPolicies: null }), request()).reason, 'action_policy_missing');
 });
