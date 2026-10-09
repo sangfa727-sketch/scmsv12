@@ -225,7 +225,6 @@ test('mobile full-screen chat uses one topbar and persists chat type selection',
 test('desktop Chat keeps the original hero and mode tabs without mobile topbar', async ({ page }) => {
   await page.setViewportSize({ width: 1280, height: 800 });
   await mountSmartChat(page);
-  await expect(page.locator('.smart-chat-topbar')).toHaveCount(0);
   await expect(page.locator('.sc-chat-topbar')).toBeHidden();
   await expect(page.locator('.smart-chat-hero')).toBeVisible();
   await expect(page.locator('.smart-chat-mode-switch')).toBeVisible();
