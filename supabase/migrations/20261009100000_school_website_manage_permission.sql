@@ -22,4 +22,5 @@ values ('owner', 'website.manage', true),
        ('school_owner', 'website.manage', true),
        ('admin', 'website.manage', true),
        ('super_admin', 'website.manage', true)
-on conflict (role, permission_key) do update set allowed = excluded.allowed;
+-- Preserve any explicit role-level deny if this migration is reapplied.
+on conflict (role, permission_key) do nothing;
