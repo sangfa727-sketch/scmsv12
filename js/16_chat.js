@@ -322,7 +322,7 @@ window._refreshAdminComposerPreview = function() {
     html.scms-chat-workspace #page-chat .smart-chat-shell{height:100dvh;min-height:100dvh;display:flex;flex-direction:column;gap:0;padding:0;overflow:hidden}
     html.scms-chat-workspace #page-chat .sc-chat-topbar{position:relative;z-index:30;display:grid;grid-template-columns:44px minmax(0,1fr) 44px;align-items:center;gap:10px;flex:0 0 auto;padding:calc(8px + env(safe-area-inset-top)) 12px 10px;border-bottom:1px solid var(--border);background:color-mix(in srgb,var(--surface) 94%,var(--sc-chat-accent));}
     html.scms-chat-workspace #page-chat .sc-chat-top-action{width:42px;height:42px;display:grid;place-items:center;border:1px solid var(--border);border-radius:50%;background:var(--bg2);color:var(--text);transition:transform .18s ease,background .18s ease,box-shadow .18s ease}
-    html.scms-chat-workspace #page-chat .sc-chat-top-action:active{transform:scale(.92)}
+    html.scms-chat-workspace #page-chat .sc-chat-top-action:active{transform:scale(.92)}\n    html.scms-chat-workspace #page-chat .sc-chat-mode-pill svg,html.scms-chat-workspace #page-chat .sc-chat-type-option svg{width:18px;height:18px;flex:0 0 18px;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
     html.scms-chat-workspace #page-chat .sc-chat-mode-pill{justify-self:center;display:flex;align-items:center;gap:8px;max-width:100%;min-width:0;min-height:42px;padding:0 16px;border:1px solid var(--border);border-radius:999px;background:var(--surface);color:var(--text);font-weight:750;box-shadow:0 3px 12px rgba(20,30,55,.06);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;transition:background .2s ease,border-color .2s ease,transform .2s ease}
     html.scms-chat-workspace #page-chat .sc-chat-mode-pill:active{transform:scale(.97)}
     html.scms-chat-workspace #page-chat .sc-chat-type-menu{position:absolute;top:calc(100% + 8px);right:12px;width:min(260px,calc(100vw - 24px));padding:7px;border:1px solid var(--border);border-radius:17px;background:var(--surface);box-shadow:0 18px 48px rgba(0,0,0,.22);transform-origin:top right;animation:scChatMenuIn .18s cubic-bezier(.2,.8,.2,1) both}
@@ -477,7 +477,16 @@ window.switchChatMode = function(mode) {
   _renderChatQuickNav();
   _renderChatMode();
   const menu = document.getElementById('scChatTypeMenu');
-  if (menu) menu.hidden = true;
+  if (menu) {
+    menu.hidden = true;
+    menu.querySelectorAll('.sc-chat-type-option').forEach((option, index) => {
+      const active = (_chatMode === 'school' && index === 0) || (_chatMode === 'ai' && index === 1);
+      option.classList.toggle('active', active);
+      option.setAttribute('aria-checked', String(active));
+      const check = option.querySelector('.sc-chat-selected-check');
+      if (check) check.hidden = !active;
+    });
+  }
   document.querySelectorAll('.sc-chat-mode-pill,.sc-chat-top-action').forEach(b => b.setAttribute('aria-expanded','false'));
   const pill = document.querySelector('.sc-chat-mode-pill');
   if (pill) pill.innerHTML = (_chatMode === 'school' ? _chatIcon('users') + esc(t('chat.schoolChat')) : _chatIcon('bot') + esc(t('chat.aiAssistant'))) + '<span aria-hidden="true">⌄</span>';
