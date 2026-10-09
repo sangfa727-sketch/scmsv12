@@ -89,7 +89,7 @@ jobs:
       - name: Run local Playwright smoke test
         env:
           SCMS_URL: http://127.0.0.1:5173
-        run: npx playwright test test/e2e/ci-smoke.spec.js
+        run: npx playwright test test/e2e/ci-smoke.spec.js test/e2e/staff-chat-functions.spec.js
       - name: Write CI summary
         if: always()
         shell: bash
@@ -100,7 +100,7 @@ jobs:
             echo "- Commit: $GITHUB_SHA"
             echo "- Ref: $GITHUB_REF"
             echo "- Job result: ${{ job.status }}"
-            echo '- Scope: homepage HTTP response and core module page-shell presence only; module behavior, backend integration, and security remain untested.'
+            echo '- Scope: homepage/page-shell smoke plus mocked Staff Smart Chat UI function flows; real backend integration, authorization, and security remain untested.'
           } >> "$GITHUB_STEP_SUMMARY"
       - name: Upload Playwright evidence
         if: always()
