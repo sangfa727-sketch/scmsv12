@@ -36,6 +36,7 @@ function approval(overrides = {}) {
     status: 'approved',
     action: 'schools.delete',
     targetId: 'school-a',
+    targetSchoolId: 'school-a',
     requestedBy: 'operator-1',
     approvedBy: 'operator-2',
     expiresAt: '2026-10-09T07:30:00.000Z',
@@ -94,9 +95,13 @@ test('requires a server-loaded approval record for high-risk actions', () => {
   assert.equal(authorizeDeveloperAction(approvedContext(), highRiskRequest({ approvalId: 'different-id' })).reason, 'approval_required');
 });
 
-test('denies approval bound to a different action or target', () => {
+test('denies approval bound to a different action, resource, or school scope', () => {
   assert.equal(authorizeDeveloperAction(approvedContext({ action: 'billing.refund' }), highRiskRequest()).reason, 'approval_binding_mismatch');
-  assert.equal(authorizeDeveloperAction(approvedContext(), highRiskRequest({ targetSchoolId: 'school-b' })).reason, 'cross_tenant_denied');
+  assert.equal(authorizeDeveloperAction(approvedContext({ targetId: 'school-b' }), highRiskRequest()).reason, 'approval_binding_mismatch');
+  assert.equal(authorizeDeveloperAction(approvedContext({ targetSchoolId: 'school-b' }), highRiskRequest()).reason, 'cross_tenant_denied');
+  assert.equal(authorizeDeveloperAction(approvedContext({ targetSchoolId: 'school-b' }, {
+    operator: { ...context().operator, scope: { type: 'platform' } }
+  }), highRiskRequest({ targetSchoolId: 'school-b' })).allowed, true);
 });
 
 test('denies self-approved, replayed, or expired approvals', () => {
