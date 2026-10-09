@@ -16,6 +16,8 @@ async function mountSmartChat(page) {
     window.APP.teacher_name = 'Test Teacher';
     window.APP.school_id = 'school-1';
     window.APP.is_admin = false;
+    document.querySelectorAll('.page').forEach(el => el.classList.remove('active'));
+    document.getElementById('page-chat')?.classList.add('active');
     window.__chatTestCalls = [];
 
     const record = (name, ...args) => {
