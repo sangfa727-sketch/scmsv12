@@ -51,3 +51,45 @@ test('section management exposes safe hide, reorder and duplicate controls',()=>
  assert.match(js,/DEFAULT_SECTIONS/);assert.match(js,/normalizeSections/);assert.match(js,/sectionAction/);assert.match(js,/renderSectionLayout/);assert.match(js,/localStorage/);assert.match(js,/m\.locked/);
  assert.match(css,/\.section-controls/);assert.match(css,/\.site-block\[hidden\]/);new Function(js);
 });
+
+
+test('School Website navigation supports owner/admin defaults and delegated website.manage permission',()=>{
+ const sidebar=read('js/17_sidebar.js');
+ assert.match(sidebar,/id: 'website'/);
+ assert.match(sidebar,/school-website\/create\.html/);
+ assert.match(sidebar,/ownerOrAdmin/);
+ assert.match(sidebar,/school_owner/);
+ assert.match(sidebar,/website\.manage/);
+ assert.match(sidebar,/School Website/);
+});
+
+
+test('School Website is discoverable from More on Telegram/mobile and desktop app layouts',()=>{
+ const more=read('js/12_more.js');
+ assert.match(more,/canManageWebsite/);
+ assert.match(more,/school_owner/);
+ assert.match(more,/website\.manage/);
+ assert.match(more,/more-tile-website/);
+ assert.match(more,/school-website\/create\.html/);
+ assert.match(more,/School Website/);
+});
+
+test('website.manage is a global sensitive permission with admin defaults only',()=>{
+ const migration=read('supabase/migrations/20261009100000_school_website_manage_permission.sql');
+ assert.match(migration,/'website\.manage'/);
+ assert.match(migration,/'global'/);
+ assert.match(migration,/'admin',\s*'website\.manage',\s*true/);
+ assert.match(migration,/'super_admin',\s*'website\.manage',\s*true/);
+ assert.doesNotMatch(migration,/values\s*\(\s*'teacher',\s*'website\.manage',\s*true/i);
+ const rpc=read('supabase/migrations/20260929075000_teacher_access_management_rpc.sql');
+ assert.match(rpc,/p_action='permission_set'/);
+ assert.match(rpc,/public\.teacher_permissions/);
+});
+
+test('website studio uses querySelectorAll for every DOM collection loop',()=>{
+ const js=read('school-website/create.js');
+ assert.doesNotMatch(js,/(?<!\$)\$\([^)]*\)\.forEach/);
+ assert.match(js,/\$\$\("\[data-field\]"\)\.forEach/);
+ assert.match(js,/\$\$\("\.template-option"\)\.forEach/);
+ new Function(js);
+});
