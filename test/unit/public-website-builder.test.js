@@ -64,6 +64,16 @@ test('School Website navigation supports owner/admin defaults and delegated webs
 });
 
 
+test('School Website is discoverable from More on Telegram/mobile and desktop app layouts',()=>{
+ const more=read('js/12_more.js');
+ assert.match(more,/canManageWebsite/);
+ assert.match(more,/school_owner/);
+ assert.match(more,/website\.manage/);
+ assert.match(more,/more-tile-website/);
+ assert.match(more,/school-website\/create\.html/);
+ assert.match(more,/School Website/);
+});
+
 test('website.manage is a global sensitive permission with admin defaults only',()=>{
  const migration=read('supabase/migrations/20261009100000_school_website_manage_permission.sql');
  assert.match(migration,/'website\.manage'/);
