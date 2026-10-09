@@ -384,9 +384,6 @@ async function initApp() {
   }
 }
 
-// Auto-run once on script load
-initApp();
-
 // Exposed so 00_landing.js can re-run boot after Telegram login completes
 window.bootAfterLogin = function () {
   // Reset error/boot UI back to spinner state
@@ -1096,3 +1093,7 @@ window.emptyState = function(icon, title, subtitle = '') {
     </div>
   `;
 };
+
+// Run only after the entire module has initialized its lexical constants (including FAB_PAGES).
+// Calling initApp earlier triggers a temporal-dead-zone ReferenceError during the first page render.
+initApp();
