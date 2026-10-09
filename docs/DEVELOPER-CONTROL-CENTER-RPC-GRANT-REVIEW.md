@@ -7,10 +7,12 @@
 ## 1. Current PR / CI
 
 - PR #228 is open and unmerged.
-- Latest head: `25082e7bf83f006c98b0a80ea126fbf0192017dc`.
-- SCMS tests workflow run `37893637331` completed with conclusion `success`.
-- The run's workflow policy skips Playwright, so browser-level behavior is not proven by that run.
-- CI success covers the repository's configured checks only; it does not approve the design or prove DCC security.
+- Latest inspected head: `406c996ae1e323c547298147770361894efa32e2`.
+- Latest SCMS tests workflow run: [#1961](https://github.com/sangfa727-sketch/scmsv12/actions/runs/37898800303), conclusion **success**.
+- Frontend syntax/regression tests and public website RLS runtime harness both passed.
+- Playwright was skipped by the workflow's scheduled/manual-only policy; browser-level behavior is not proven by this run.
+- CI success covers the configured checks only; it does not approve the design or prove DCC security.
+- PR merge remains a separate explicit approval gate.
 
 ## 2. Grant review — important distinction
 
