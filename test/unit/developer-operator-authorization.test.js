@@ -32,6 +32,7 @@ function request(overrides = {}) {
 
 function approval(overrides = {}) {
   return {
+    id: 'approval-1',
     status: 'approved',
     action: 'schools.delete',
     targetId: 'school-a',
@@ -41,6 +42,14 @@ function approval(overrides = {}) {
     consumedAt: null,
     ...overrides
   };
+}
+
+function highRiskRequest(overrides = {}) {
+  return request({ action: 'schools.delete', approvalId: 'approval-1', ...overrides });
+}
+
+function approvedContext(approvalOverrides = {}, contextOverrides = {}) {
+  return context({ approval: approval(approvalOverrides), ...contextOverrides });
 }
 
 test('allows a verified active operator with an explicit capability and in-scope target', () => {
@@ -66,6 +75,7 @@ test('denies unprovisioned, disabled, and identity-mismatched operators', () => 
 
 test('denies actions absent from the server-owned policy registry', () => {
   assert.equal(authorizeDeveloperAction(context(), request({ action: 'billing.refund' })).reason, 'action_policy_missing');
+  assert.equal(authorizeDeveloperAction(context(), request({ action: 'toString' })).reason, 'action_policy_missing');
 });
 
 test('denies cross-tenant targets for school-scoped operators', () => {
@@ -77,20 +87,22 @@ test('platform-scoped operators may target another school only with the explicit
   assert.equal(authorizeDeveloperAction(c, request({ targetSchoolId: 'school-b' })).allowed, true);
 });
 
-test('server-owned policy requires approval for high-risk actions even if request flags say otherwise', () => {
-  assert.equal(authorizeDeveloperAction(context(), request({ action: 'schools.delete', requiresApproval: false })).reason, 'approval_required');
-  assert.equal(authorizeDeveloperAction(context(), request({ action: 'schools.delete', approval: approval({ status: 'pending' }) })).reason, 'approval_not_approved');
+test('requires a server-loaded approval record for high-risk actions', () => {
+  assert.equal(authorizeDeveloperAction(context(), highRiskRequest()).reason, 'approval_required');
+  assert.equal(authorizeDeveloperAction(context(), highRiskRequest({ approval: approval() })).reason, 'approval_required');
+  assert.equal(authorizeDeveloperAction(approvedContext({ status: 'pending' }), highRiskRequest()).reason, 'approval_not_approved');
+  assert.equal(authorizeDeveloperAction(approvedContext(), highRiskRequest({ approvalId: 'different-id' })).reason, 'approval_required');
 });
 
 test('denies approval bound to a different action or target', () => {
-  assert.equal(authorizeDeveloperAction(context(), request({ action: 'schools.delete', approval: approval({ action: 'billing.refund' }) })).reason, 'approval_binding_mismatch');
-  assert.equal(authorizeDeveloperAction(context(), request({ action: 'schools.delete', targetSchoolId: 'school-b', approval: approval() })).reason, 'cross_tenant_denied');
+  assert.equal(authorizeDeveloperAction(approvedContext({ action: 'billing.refund' }), highRiskRequest()).reason, 'approval_binding_mismatch');
+  assert.equal(authorizeDeveloperAction(approvedContext(), highRiskRequest({ targetSchoolId: 'school-b' })).reason, 'cross_tenant_denied');
 });
 
 test('denies self-approved, replayed, or expired approvals', () => {
-  assert.equal(authorizeDeveloperAction(context(), request({ action: 'schools.delete', approval: approval({ approvedBy: 'operator-1' }) })).reason, 'independent_approval_required');
-  assert.equal(authorizeDeveloperAction(context(), request({ action: 'schools.delete', approval: approval({ consumedAt: '2026-10-09T06:59:00Z' }) })).reason, 'approval_already_consumed');
-  assert.equal(authorizeDeveloperAction(context(), request({ action: 'schools.delete', approval: approval({ expiresAt: '2026-10-09T06:59:00Z' }) })).reason, 'approval_expired');
+  assert.equal(authorizeDeveloperAction(approvedContext({ approvedBy: 'operator-1' }), highRiskRequest()).reason, 'independent_approval_required');
+  assert.equal(authorizeDeveloperAction(approvedContext({ consumedAt: '2026-10-09T06:59:00Z' }), highRiskRequest()).reason, 'approval_already_consumed');
+  assert.equal(authorizeDeveloperAction(approvedContext({ expiresAt: '2026-10-09T06:59:00Z' }), highRiskRequest()).reason, 'approval_expired');
 });
 
 test('school-scoped operators cannot omit a target or weaken the server-owned target requirement', () => {
