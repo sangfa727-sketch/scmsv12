@@ -74,12 +74,13 @@ test('School Website is discoverable from More on Telegram/mobile and desktop ap
  assert.match(more,/School Website/);
 });
 
-test('website.manage is a global sensitive permission with admin defaults only',()=>{
+test('website.manage is global and granted only to explicit owner/admin role aliases by default',()=>{
  const migration=read('supabase/migrations/20261009100000_school_website_manage_permission.sql');
  assert.match(migration,/'website\.manage'/);
  assert.match(migration,/'global'/);
- assert.match(migration,/'admin',\s*'website\.manage',\s*true/);
- assert.match(migration,/'super_admin',\s*'website\.manage',\s*true/);
+ for (const role of ['owner','school_owner','admin','super_admin']) {
+  assert.match(migration,new RegExp("'"+role+"',\\s*'website\\.manage',\\s*true"));
+ }
  assert.doesNotMatch(migration,/values\s*\(\s*'teacher',\s*'website\.manage',\s*true/i);
  const rpc=read('supabase/migrations/20260929075000_teacher_access_management_rpc.sql');
  assert.match(rpc,/p_action='permission_set'/);
