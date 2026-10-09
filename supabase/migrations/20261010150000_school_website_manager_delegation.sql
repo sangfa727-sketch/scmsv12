@@ -58,8 +58,11 @@ begin
       (school_id, teacher_id, permission_key, allowed, scope_type, class_name, subject_id)
     values
       (v_actor.school_id, v_target.teacher_id, 'website.manage', true, 'global', null, null)
-    on conflict (school_id, teacher_id, permission_key, scope_type, class_name, subject_id)
-    do update set allowed = true, updated_at = now();
+    on conflict (
+      teacher_id, permission_key, scope_type,
+      (coalesce(class_name, ''::text)),
+      (coalesce(subject_id, 0::bigint))
+    ) do update set allowed = true, updated_at = now();
   else
     delete from public.teacher_permissions
      where school_id = v_actor.school_id
