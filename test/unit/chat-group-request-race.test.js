@@ -143,6 +143,30 @@ test('chat channel rail prioritizes daily conversations and shows only data-back
   assert.match(css, /\.smart-chat-channel-trailing\.has-unread\s*\{/);
 });
 
+test('staff chat keeps one-tap channel switching visible across school workspaces', () => {
+  const js = fs.readFileSync(path.resolve(__dirname, '../../js/16_chat.js'), 'utf8');
+  const css = fs.readFileSync(path.resolve(__dirname, '../../style.css'), 'utf8');
+  assert.match(js, /id="smartChatQuickNav" class="smart-chat-quick-nav"/);
+  assert.match(js, /function _chatQuickNavChannels\(\)/);
+  assert.match(js, /function _renderChatQuickNav\(\)/);
+  assert.match(js, /data-chat-quick-channel=/);
+  assert.match(js, /window\.switchChatChannel = function\(channel\)[\s\S]*?_renderChatQuickNav\(\);[\s\S]*?_renderChatMode\(\);/);
+  assert.match(js, /nav\.hidden = _chatMode !== 'school'/);
+  assert.match(css, /#page-chat \.smart-chat-quick-nav-track\{display:flex/);
+  assert.match(css, /#page-chat \.smart-chat-quick-channel\.active\{/);
+  assert.match(css, /#page-chat \.smart-chat-school-grid\{grid-template-columns:minmax\(0,1fr\)\}/);
+  assert.match(css, /#page-chat \.smart-chat-school-grid>\.smart-chat-channel-list\{display:none\}/);
+});
+
+test('ticket form keeps labels and optional notes visually grouped', () => {
+  const js = fs.readFileSync(path.resolve(__dirname, '../../js/16_chat.js'), 'utf8');
+  const css = fs.readFileSync(path.resolve(__dirname, '../../style.css'), 'utf8');
+  assert.match(js, /<span class="smart-chat-field-label">\$\{t\('chat\.subject'\)\}<\/span><input id="inquiryDraftSubject"/);
+  assert.match(js, /<span class="smart-chat-field-label">\$\{t\('chat\.studentId'\)\} <small class="smart-chat-field-note">/);
+  assert.match(css, /\.smart-chat-inquiry-form \.smart-chat-field-label\{display:block/);
+  assert.match(css, /\.smart-chat-inquiry-form \.smart-chat-field-note\{display:inline/);
+});
+
 test('group send accessible label is translated for every supported chat locale', () => {
   const locales = fs.readFileSync(path.resolve(__dirname, '../../js/00f_chat_locales.js'), 'utf8');
   const section = locales.match(/const groupSendAccessibleLocaleFix = \{([\s\S]*?)\n  \};/);
