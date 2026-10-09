@@ -11,6 +11,7 @@ const REQUIRED_KEYS = [
   'chat.schoolChat',
   'chat.oneVerifiedRecipient',
   'chat.staffNotice',
+  'chat.groupMembersPrompt',
 ];
 
 function loadChatLocales() {
@@ -52,6 +53,19 @@ test('School Chat labels do not silently fall back to English in non-English loc
         code + ' locale must translate ' + key + ' instead of copying English'
       );
     }
+  }
+});
+
+test('group member picker instruction is explicitly translated in all seven locales', () => {
+  const locales = loadChatLocales();
+  const values = LANGUAGES.map(code => locales[code]['chat.groupMembersPrompt']);
+
+  assert.equal(new Set(values).size, LANGUAGES.length,
+    'each supported language should have its own group member picker instruction');
+  for (const value of values) {
+    assert.match(value, /./, 'group member picker instruction must not be empty');
+    assert.doesNotMatch(value, /comma-separated|កော်မာဖြင့် ခွဲ/, 
+      'group member picker must not instruct users to type a comma-separated ID list');
   }
 });
 
