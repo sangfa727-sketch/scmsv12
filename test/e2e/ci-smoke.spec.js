@@ -41,7 +41,9 @@ test('SCMS navigation activates the selected module page', async ({ page }) => {
     window.APP.platform = 'native';
     window.APP.is_admin = true;
     window.APP.currentPage = 'dashboard';
+    document.documentElement.setAttribute('data-platform', 'native');
     window.renderSidebar();
+    window.openSidebar();
   });
 
   const studentsNav = page.locator('#sidebar .sidebar-item[data-page="students"]');
