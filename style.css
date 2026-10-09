@@ -9044,7 +9044,7 @@ html.scms-chat-workspace #pages{overflow:auto}
   .smart-chat-hero{margin-bottom:10px}
   .smart-chat-mode-switch{margin-bottom:8px}
   .smart-chat-school-grid{gap:8px}
-  .smart-chat-channel-list{display:flex;flex-wrap:nowrap;width:100%;min-width:0;max-width:100%;box-sizing:border-box;overflow-x:auto;overflow-y:hidden;scrollbar-width:none;-webkit-overflow-scrolling:touch;overscroll-behavior-x:contain;touch-action:pan-x;scroll-snap-type:x proximity}
+  .smart-chat-channel-list{display:flex;flex-wrap:nowrap;width:100%;min-width:0;max-width:100%;box-sizing:border-box;overflow-x:auto;overflow-y:hidden;scrollbar-width:none;-webkit-overflow-scrolling:touch;overscroll-behavior-x:contain;touch-action:pan-x pan-y;scroll-snap-type:x proximity}
   .smart-chat-channel-list::-webkit-scrollbar{display:none}
   .smart-chat-channel-card{width:144px;flex:0 0 144px;min-width:144px;touch-action:pan-x pan-y;scroll-snap-align:start}
   .smart-chat-conversation{min-height:calc(100dvh - 185px)}
