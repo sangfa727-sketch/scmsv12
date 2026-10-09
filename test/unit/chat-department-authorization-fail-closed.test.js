@@ -8,5 +8,6 @@ test('department chat clears selected conversation and stale messages after auth
   assert.ok(source.includes('API.openDepartmentChat(nextId).catch(()=>null)'), 'handle rejected authorization requests fail closed');
   assert.ok(source.includes('_departmentId=null;_departmentMessages=[]'), 'clear selected department and cached messages');
   assert.ok(source.includes("t('chat.selectDepartmentBelong')"), 'replace stale conversation with neutral empty state');
+  assert.ok(source.includes("h.innerHTML='<div class=\"smart-chat-direct-peer\"><div><strong>'+t('chat.selectDepartmentBelong')"), 'clear the stale department header');
   assert.ok(source.includes("showToast(t('chat.departmentUnauthorized'))"), 'explain denied access to the user');
 });
