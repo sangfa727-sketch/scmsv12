@@ -160,3 +160,36 @@ Do not add a separate session table unless the selected identity architecture pr
 - Confirm identity-provider schema, current migration baseline, rollback method and CI migration tests before creating a sandbox migration.
 
 `staillasbi@gmail.com` must not receive `platform_owner` until email ownership is verified, MFA is enforced, the permission matrix is reviewed and negative tests pass. Production migration, deployment and PR merge remain separate approval gates.
+
+
+## 12. Authorization test matrix — required before any migration
+
+These are required test cases to implement and execute in an isolated sandbox; listing them here is not evidence that they have passed.
+
+| Actor / condition | Attempt | Expected result |
+|---|---|---|
+| Anonymous | Read operator list or invoke any DCC action | Deny; no sensitive metadata returned |
+| Parent / teacher / school admin | Call DCC endpoint directly, bypassing UI | Deny unless an explicitly reviewed capability is granted (default: none) |
+| Authenticated but unprovisioned identity | Open DCC or call endpoint | Deny |
+| Disabled operator | Reuse a previously valid session | Deny on the next server-side authorization check |
+| Active operator without capability | Invoke action outside assigned role | Deny and record redacted audit outcome |
+| Operator targeting another tenant | Read or mutate cross-tenant resource | Deny; do not disclose target existence where inappropriate |
+| Expired or revoked session | Invoke action | Deny |
+| High-risk action without approval | Execute action | Deny before mutation |
+| Expired, consumed, or mismatched approval | Replay or alter action/target/request ID | Deny; approval is single-use and bound to exact intent |
+| Prohibited self-approval | Approve own sensitive action | Deny |
+| Public signup | Attempt to acquire an operator role | Deny; role grants require an authorized server-side process |
+| Audit tampering | Update/delete audit records using app credentials | Deny |
+| Secret-bearing request | Include token/password in reason or metadata | Redact or reject; never persist raw secret |
+
+### Execution evidence required
+
+For each case record: test ID, migration/commit SHA, actor fixture, request, expected result, actual result, relevant sanitized logs, and pass/fail. Run both positive and negative cases. Do not use real student/parent data. Any unexplained allow, tenant-boundary failure, or audit gap blocks the migration. Re-run existing login, attendance, billing and chat regressions. Playwright being skipped is not a substitute for these tests.
+
+### Release gate
+
+1. Review the exact migration and rollback procedure.
+2. Apply only to an isolated sandbox first.
+3. Execute the full matrix and existing-core regressions.
+4. Review grants/RLS and confirm no browser-visible privileged table access.
+5. Obtain explicit approval before production deployment and a separate explicit approval before merging if required by the repository workflow.
