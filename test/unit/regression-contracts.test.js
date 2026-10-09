@@ -751,7 +751,10 @@ test('official message recipient modes keep independent verified previews', () =
   assert.match(locales, /'chat\.staffNotice':'Staff notice'/);
   assert.match(locales, /const fallbackKeys=Object\.keys\(extra\.en\)/);
   assert.match(style, /touch-action:pan-x/);
-  assert.match(style, /flex:0 0 auto;min-width:144px/);
-  assert.match(html, /style\.css\?v=20261009d/);
-  assert.match(html, /js\/16_chat\.js\?v=20261009e/);
+  assert.match(style, /min-width:0;max-width:100%/);
+  assert.match(style, /flex:0 0 144px;min-width:144px/);
+  assert.match(chat, /smart-chat-send-ready/);
+  assert.match(chat, /adminMsgSendHint/);
+  assert.match(html, /style\.css\?v=20261009e/);
+  assert.match(html, /js\/16_chat\.js\?v=20261009f/);
 });
