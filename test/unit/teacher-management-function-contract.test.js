@@ -30,7 +30,7 @@ test('Manage Teachers list has loading, empty, error, and escaped teacher-row st
   assert.match(manager, /aria-busy="true"/);
   assert.match(manager, /_renderTeacherList\(rows\)/);
   assert.match(manager, /tm\.loadFailed/);
-  const render = block(source, 'function _renderTeacherList(teachers)', 'function _teacherLifecycleCopy');
+  const render = block(source, 'function _renderTeacherList(teachers)', 'window.openCreateTeacherModal');
   assert.match(render, /if \(!teachers\.length\)/);
   for (const field of ['teacher.teacher_id', 'teacher.teacher_name', 'teacher.email', 'teacher.role']) {
     assert.ok(render.includes(field), 'list should render ' + field);
@@ -50,7 +50,8 @@ test('Create and edit teacher forms validate required fields and restore save co
   assert.match(create, /if \(!id \|\| !login \|\| !name \|\| !email \|\| !pw\)/);
   assert.match(create, /pw\.length < 6/);
   assert.match(create, /btn\.disabled = true/);
-  assert.match(create, /finally/);
+  assert.match(create, /btn\.disabled = false/);
+  assert.match(create, /btn\.textContent = t\('ct\.create'\)/);
   assert.match(create, /_invalidateTeacherManagerCache\(\)/);
 
   const edit = block(source, 'window.saveTeacherEdit = async function(teacherId)', 'window.doCreateTeacher');
