@@ -318,38 +318,42 @@ window._refreshAdminComposerPreview = function() {
   const s=document.createElement('style');
   s.id='smart-chat-ux-patch';
   s.textContent=`
-    /* Premium full-screen chat chrome: compact controls, shared transitions, and safe-area support. */
-    html.scms-chat-workspace #page-chat .smart-chat-shell{height:100dvh;min-height:100dvh;display:flex;flex-direction:column;gap:0;padding:0;overflow:hidden}
-    html.scms-chat-workspace #page-chat .sc-chat-topbar{position:relative;z-index:30;display:grid;grid-template-columns:44px minmax(0,1fr) 44px;align-items:center;gap:10px;flex:0 0 auto;padding:calc(8px + env(safe-area-inset-top)) 12px 10px;border-bottom:1px solid var(--border);background:color-mix(in srgb,var(--surface) 94%,var(--sc-chat-accent));}
-    html.scms-chat-workspace #page-chat .sc-chat-top-action{width:42px;height:42px;display:grid;place-items:center;border:1px solid var(--border);border-radius:50%;background:var(--bg2);color:var(--text);transition:transform .18s ease,background .18s ease,box-shadow .18s ease}
-    html.scms-chat-workspace #page-chat .sc-chat-top-action:active{transform:scale(.92)}
-    html.scms-chat-workspace #page-chat .sc-chat-mode-pill svg,html.scms-chat-workspace #page-chat .sc-chat-type-option svg{width:18px;height:18px;flex:0 0 18px;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
-    html.scms-chat-workspace #page-chat .sc-chat-mode-pill{justify-self:center;display:flex;align-items:center;gap:8px;max-width:100%;min-width:0;min-height:42px;padding:0 16px;border:1px solid var(--border);border-radius:999px;background:var(--surface);color:var(--text);font-weight:750;box-shadow:0 3px 12px rgba(20,30,55,.06);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;transition:background .2s ease,border-color .2s ease,transform .2s ease}
-    html.scms-chat-workspace #page-chat .sc-chat-mode-pill:active{transform:scale(.97)}
-    html.scms-chat-workspace #page-chat .sc-chat-type-menu{position:absolute;top:calc(100% + 8px);right:12px;width:min(260px,calc(100vw - 24px));padding:7px;border:1px solid var(--border);border-radius:17px;background:var(--surface);box-shadow:0 18px 48px rgba(0,0,0,.22);transform-origin:top right;animation:scChatMenuIn .18s cubic-bezier(.2,.8,.2,1) both}
-    html.scms-chat-workspace #page-chat .sc-chat-type-menu[hidden]{display:none}
-    html.scms-chat-workspace #page-chat .sc-chat-type-option{display:flex;align-items:center;gap:12px;width:100%;min-height:52px;padding:9px 12px;border-radius:12px;text-align:left;color:var(--text);transition:background .16s ease,transform .16s ease}
-    html.scms-chat-workspace #page-chat .sc-chat-type-option:active{transform:scale(.985)}
-    html.scms-chat-workspace #page-chat .sc-chat-type-option.active{background:color-mix(in srgb,var(--sc-chat-accent) 12%,var(--surface));}
-    html.scms-chat-workspace #page-chat .sc-chat-type-option .sc-chat-type-copy{display:flex;flex-direction:column;gap:2px;min-width:0;flex:1}
-    html.scms-chat-workspace #page-chat .sc-chat-type-option small{font-size:11px;color:var(--muted)}
-    html.scms-chat-workspace #page-chat .sc-chat-workspace-content{flex:1 1 auto;min-height:0;overflow-y:auto;overflow-x:hidden;-webkit-overflow-scrolling:touch;touch-action:pan-y;padding:0 0 max(8px,env(safe-area-inset-bottom))}
-    html.scms-chat-workspace #page-chat .smart-chat-hero{display:none}
-    html.scms-chat-workspace #page-chat .smart-chat-mode-switch{display:none!important}
-    html.scms-chat-workspace #page-chat .smart-chat-shell #smartChatQuickNav{flex:0 0 auto;padding-inline:12px}
-    html.scms-chat-workspace #page-chat .smart-chat-shell #smartChatModeBody{min-height:0}
+    /* Desktop keeps the existing SCMS shell; the full-screen workspace is mobile-only. */
+    .sc-chat-topbar{display:none}
+    .sc-chat-workspace-content{display:contents}
+    @media(max-width:760px){
+      html.scms-chat-workspace #page-chat .smart-chat-shell{height:100dvh;min-height:100dvh;display:flex;flex-direction:column;gap:0;padding:0;overflow:hidden}
+      html.scms-chat-workspace #page-chat .sc-chat-topbar{position:relative;z-index:30;display:grid;grid-template-columns:44px minmax(0,1fr) 44px;align-items:center;gap:10px;flex:0 0 auto;padding:calc(8px + env(safe-area-inset-top)) 12px 10px;border-bottom:1px solid var(--border);background:color-mix(in srgb,var(--surface) 94%,var(--sc-chat-accent))}
+      html.scms-chat-workspace #page-chat .sc-chat-top-action{width:42px;height:42px;display:grid;place-items:center;border:1px solid var(--border);border-radius:50%;background:var(--bg2);color:var(--text);transition:transform .18s ease,background .18s ease,box-shadow .18s ease}
+      html.scms-chat-workspace #page-chat .sc-chat-top-action:active{transform:scale(.92)}
+      html.scms-chat-workspace #page-chat .sc-chat-mode-pill svg,html.scms-chat-workspace #page-chat .sc-chat-type-option svg{width:18px;height:18px;flex:0 0 18px;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
+      html.scms-chat-workspace #page-chat .sc-chat-mode-pill{justify-self:center;display:flex;align-items:center;gap:8px;max-width:100%;min-width:0;min-height:42px;padding:0 16px;border:1px solid var(--border);border-radius:999px;background:var(--surface);color:var(--text);font-weight:750;box-shadow:0 3px 12px rgba(20,30,55,.06);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;transition:background .2s ease,border-color .2s ease,transform .2s ease}
+      html.scms-chat-workspace #page-chat .sc-chat-mode-pill:active{transform:scale(.97)}
+      html.scms-chat-workspace #page-chat .sc-chat-type-menu{position:absolute;top:calc(100% + 8px);right:12px;width:min(260px,calc(100vw - 24px));padding:7px;border:1px solid var(--border);border-radius:17px;background:var(--surface);box-shadow:0 18px 48px rgba(0,0,0,.22);transform-origin:top right;animation:scChatMenuIn .18s cubic-bezier(.2,.8,.2,1) both}
+      html.scms-chat-workspace #page-chat .sc-chat-type-menu[hidden]{display:none}
+      html.scms-chat-workspace #page-chat .sc-chat-type-option{display:flex;align-items:center;gap:12px;width:100%;min-height:52px;padding:9px 12px;border-radius:12px;text-align:left;color:var(--text);transition:background .16s ease,transform .16s ease}
+      html.scms-chat-workspace #page-chat .sc-chat-type-option:active{transform:scale(.985)}
+      html.scms-chat-workspace #page-chat .sc-chat-type-option.active{background:color-mix(in srgb,var(--sc-chat-accent) 12%,var(--surface))}
+      html.scms-chat-workspace #page-chat .sc-chat-type-option .sc-chat-type-copy{display:flex;flex-direction:column;gap:2px;min-width:0;flex:1}
+      html.scms-chat-workspace #page-chat .sc-chat-type-option small{font-size:11px;color:var(--muted)}
+      html.scms-chat-workspace #page-chat .sc-chat-workspace-content{display:flex;flex:1 1 auto;flex-direction:column;min-height:0;overflow-y:auto;overflow-x:hidden;-webkit-overflow-scrolling:touch;touch-action:pan-y;padding:0 0 max(8px,env(safe-area-inset-bottom))}
+      html.scms-chat-workspace #page-chat .smart-chat-hero{display:none!important}
+      html.scms-chat-workspace #page-chat .smart-chat-mode-switch{display:none!important}
+      html.scms-chat-workspace #page-chat .smart-chat-shell #smartChatQuickNav{flex:0 0 auto;padding-inline:12px}
+      html.scms-chat-workspace #page-chat .smart-chat-shell #smartChatModeBody{min-height:0}
+      html.scms-chat-workspace #appHeader,html.scms-chat-workspace #sidebar,html.scms-chat-workspace #sidebarBackdrop,html.scms-chat-workspace #tabBar,html.scms-chat-workspace #fab{display:none!important}
+      html.scms-chat-workspace #pages{padding-top:0!important}
+      html.scms-chat-workspace #page-chat{height:100dvh!important;min-height:100dvh!important;margin:0!important;padding:0!important}
+      html.scms-chat-workspace #page-chat .smart-chat-shell{min-height:100dvh;box-sizing:border-box}
+      html.scms-chat-workspace #page-chat .smart-chat-school-grid>.smart-chat-channel-list{display:none!important}
+      html.scms-chat-workspace #page-chat .smart-chat-conversation{min-height:0}
+      html.scms-chat-workspace #page-chat .smart-chat-conversation .chat-stream{max-height:none;min-height:0;overflow:visible;touch-action:pan-y}
+    }
     @keyframes scChatMenuIn{from{opacity:0;transform:translateY(-5px) scale(.97)}to{opacity:1;transform:translateY(0) scale(1)}}
     @media(prefers-reduced-motion:reduce){html.scms-chat-workspace #page-chat *,html.scms-chat-workspace #page-chat *::before,html.scms-chat-workspace #page-chat *::after{animation-duration:.01ms!important;transition-duration:.01ms!important}}
-    @media(max-width:760px){html.scms-chat-workspace #page-chat .smart-chat-school-grid>.smart-chat-channel-list{display:none!important}html.scms-chat-workspace #page-chat .smart-chat-conversation{min-height:0}html.scms-chat-workspace #page-chat .smart-chat-conversation .chat-stream{max-height:none;min-height:0;overflow:visible;touch-action:pan-y}}
-    /* Chat workspace: temporarily replaces the global SCMS chrome while active. */
-    html.scms-chat-workspace #appHeader,
-    html.scms-chat-workspace #sidebar,
-    html.scms-chat-workspace #sidebarBackdrop,
-    html.scms-chat-workspace #tabBar,
-    html.scms-chat-workspace #fab{display:none !important}
-    html.scms-chat-workspace #pages{padding-top:0 !important}
-    html.scms-chat-workspace #page-chat{height:100dvh !important;min-height:100dvh !important;margin:0 !important;padding:0 !important}
-    html.scms-chat-workspace #page-chat .smart-chat-shell{min-height:100dvh;box-sizing:border-box}
+    .smart-chat-channel-back-row{display:flex;align-items:center;margin:0 0 8px}
+    .smart-chat-channel-back{display:inline-flex;align-items:center;gap:5px;min-height:32px;padding:0 10px;border:1px solid var(--border);border-radius:9px;background:var(--bg2);color:var(--text2);font-size:11px;font-weight:700;cursor:pointer}
+    .smart-chat-channel-back:hover{background:var(--surface2);color:var(--text)}
     .smart-chat-channel-back-row{display:flex;align-items:center;margin:0 0 8px}
     .smart-chat-channel-back{display:inline-flex;align-items:center;gap:5px;min-height:32px;padding:0 10px;border:1px solid var(--border);border-radius:9px;background:var(--bg2);color:var(--text2);font-size:11px;font-weight:700;cursor:pointer}
     .smart-chat-channel-back:hover{background:var(--surface2);color:var(--text)}
@@ -435,6 +439,22 @@ function renderChat() {
 
   page.innerHTML = `
     <div class="smart-chat-shell">
+      <div class="smart-chat-hero">
+        <button type="button" class="smart-chat-nav-back" onclick="_chatBackToMenu()" aria-label="${t('chat.exitChat')}">‹ <span>${t('chat.exitChat')}</span></button>
+        <div>
+          <div class="page-eyebrow">${t('chat.communicationCenter')}</div>
+          <h1 class="page-title">${t('chat.schoolChat')}</h1>
+          <p class="page-subtitle">${t('chat.schoolCommunicationDesc')}</p>
+        </div>
+        <div class="smart-chat-identity">
+          <span class="smart-chat-avatar">${esc((window.APP?.teacher_name || '?')[0])}</span>
+          <span>${esc(window.APP?.teacher_name || t('chat.staff'))}</span>
+        </div>
+      </div>
+      <div class="smart-chat-mode-switch" role="tablist">
+        <button class="${_chatMode === 'school' ? 'active' : ''}" onclick="switchChatMode('school')" role="tab">${_chatIcon('users')} ${t('chat.schoolChat')}</button>
+        <button class="${_chatMode === 'ai' ? 'active' : ''}" onclick="switchChatMode('ai')" role="tab">${_chatIcon('bot')} ${t('chat.aiAssistant')}</button>
+      </div>
       <header class="sc-chat-topbar" aria-label="${esc(t('chat.communicationCenter'))}">
         <button type="button" class="sc-chat-top-action" onclick="_chatBackToMenu()" aria-label="${esc(t('chat.exitChat'))}" title="${esc(t('chat.exitChat'))}">
           <svg viewBox="0 0 24 24" width="21" height="21" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M4 6h16M4 12h16M4 18h16"/></svg>
@@ -487,6 +507,9 @@ window.switchChatMode = function(mode) {
   _chatMode = mode === 'ai' ? 'ai' : 'school';
   try { localStorage.setItem('scms_chat_mode', _chatMode); } catch (_) {}
   _chatTypeMenuOpen = false;
+  document.querySelectorAll('.smart-chat-mode-switch button').forEach((button, index) => {
+    button.classList.toggle('active', (_chatMode === 'school' && index === 0) || (_chatMode === 'ai' && index === 1));
+  });
   _renderChatQuickNav();
   _renderChatMode();
   if (_chatMode === 'school') _refreshChatChannelUnreadCounts();
