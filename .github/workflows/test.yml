@@ -76,7 +76,7 @@ jobs:
         run: npx playwright install --with-deps chromium
       - name: Start SCMS locally
         run: |
-          npm run serve -- --host 127.0.0.1 > /tmp/scms-serve.log 2>&1 &
+          npm run serve > /tmp/scms-serve.log 2>&1 &
           echo $! > /tmp/scms-serve.pid
           for i in {1..30}; do
             if curl --fail --silent http://127.0.0.1:5173/ > /dev/null; then
