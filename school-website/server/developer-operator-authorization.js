@@ -6,7 +6,9 @@
  * This pure policy helper is neither an HTTP endpoint nor an identity verifier.
  * A trusted server adapter must verify the provider session and load identity,
  * session, operator, action policies, and any approval record from server-owned
- * sources. Never build that context from request JSON or client claims.
+ * sources. It must also resolve the actual target resource to its authoritative
+ * school/tenant before constructing this context. Never build it from request
+ * JSON or client claims.
  *
  * Approval consumption and audit persistence must be atomic in the repository
  * adapter. This helper does not mutate persistent state and is not sufficient
@@ -64,13 +66,17 @@ function authorizeDeveloperAction(context, request) {
 
   if (policy.requiresApproval === true) {
     // Approval record must be fetched by a trusted adapter using approvalId.
+    // It must bind both the exact resource and its authoritative school scope.
     // Never trust a record/object submitted by the caller.
     const approval = context.approval;
     if (!approval || typeof approval !== 'object' ||
         typeof request.approvalId !== 'string' || !request.approvalId ||
         approval.id !== request.approvalId) return deny('approval_required');
     if (approval.status !== 'approved') return deny('approval_not_approved');
-    if (approval.action !== request.action || approval.targetId !== (request.targetId ?? request.targetSchoolId ?? null)) {
+    const targetId = request.targetId ?? request.targetSchoolId ?? null;
+    if (approval.action !== request.action ||
+        approval.targetId !== targetId ||
+        (request.targetSchoolId !== undefined && approval.targetSchoolId !== request.targetSchoolId)) {
       return deny('approval_binding_mismatch');
     }
     if (approval.requestedBy !== identity.userId || typeof approval.approvedBy !== 'string' ||
