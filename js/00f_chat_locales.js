@@ -197,6 +197,19 @@
     Object.assign(chat[code], groupMemberPickerLocaleFix[code])
   );
 
+  // Accessible label for the icon-only group message send control.
+  const groupSendAccessibleLocaleFix = {
+    en: { 'chat.sendMessageLabel': 'Send message' },
+    my: { 'chat.sendMessageLabel': 'မက်ဆေ့ချ် ပို့ရန်' },
+    th: { 'chat.sendMessageLabel': 'ส่งข้อความ' },
+    jp: { 'chat.sendMessageLabel': 'メッセージを送信' },
+    ms: { 'chat.sendMessageLabel': 'Hantar mesej' },
+    km: { 'chat.sendMessageLabel': 'ផ្ញើសារ' },
+    zh: { 'chat.sendMessageLabel': '发送消息' }
+  };
+  Object.keys(groupSendAccessibleLocaleFix).forEach(code =>
+    Object.assign(chat[code], groupSendAccessibleLocaleFix[code])
+  );
   const maps={en:'I18N_EN',my:'I18N_MY',th:'I18N_TH',jp:'I18N_JP',ms:'I18N_MS',km:'I18N_KM',zh:'I18N_ZH'};
   Object.keys(maps).forEach(code=>{ window[maps[code]]=Object.assign({},window[maps[code]]||{},code==='en'?en:code==='my'?my:chat[code]); });
 })();
