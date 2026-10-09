@@ -110,3 +110,13 @@ test('group chat refresh and composer controls expose accessible names', () => {
   assert.match(source, /<textarea id="chatGroupInput"[^>]*aria-label="\$\{t\('chat\.writeMessage'\)\}"/);
   assert.match(source, /<button class="chat-send-btn" type="submit" aria-label="\$\{t\('chat\.sendMessageLabel'\)\}">/);
 });
+
+test('group chat mobile layout keeps the nested conversation wrapper shrinkable', () => {
+  const css = fs.readFileSync(path.resolve(__dirname, '../../style.css'), 'utf8');
+  const groupMobileRule = css.match(/@media\s*\(max-width:\s*760px\)\s*\{\s*#page-chat\s+#chatGroupConversation\s*>\s*\.smart-chat-conversation-head\s*\{([^}]*)\}/);
+  assert.ok(groupMobileRule, 'group wrapper override must be scoped to the mobile breakpoint');
+  assert.match(groupMobileRule[1], /display\s*:\s*flex/);
+  assert.match(groupMobileRule[1], /flex-direction\s*:\s*column/);
+  assert.match(groupMobileRule[1], /min-height\s*:\s*0/);
+  assert.match(groupMobileRule[1], /overflow\s*:\s*hidden/);
+});
