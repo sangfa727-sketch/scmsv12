@@ -4,6 +4,7 @@ var API = window.API || {};
 Object.assign(API, {
   async getChatMessages(channel = 'staff', limit = 50) { try { const res = await _webRpc('rpc_get_chat_messages', {p_session_token:_webSessionToken(),p_channel:channel,p_limit:Number(limit)||50}); return Array.isArray(res.rows)?res.rows:[]; } catch(err){ console.warn('[chat] read failed',err); return []; } },
   async getChatRecipientPreview(recipientType='all_staff',target=null){ const res = await _webRpc('rpc_chat_recipient_preview',{p_session_token:_webSessionToken(),p_recipient_type:recipientType,p_target:target}); return Array.isArray(res.rows)?res.rows:[]; },
+  async getChatGradeTargets(){ const res = await _webRpc('rpc_chat_admin_grade_targets',{p_session_token:_webSessionToken()}); if(res?.ok!==true) throw new Error(res?.error||'grade_targets_unavailable'); return Array.isArray(res.rows)?res.rows.filter(x=>typeof x==='string'&&x.trim()):[]; },
   async sendChatMessage(channel,text){ return _webRpc('rpc_send_chat_message',{p_session_token:_webSessionToken(),p_channel:channel,p_text:text}); },
   async getDirectStaffDirectory(){ const res = await _webRpc('rpc_chat_staff_directory',{p_session_token:_webSessionToken()}); return Array.isArray(res.rows)?res.rows:[]; },
   async getDirectConversations(){ const res = await _webRpc('rpc_chat_direct_conversations',{p_session_token:_webSessionToken()}); return Array.isArray(res.rows)?res.rows:[]; },
