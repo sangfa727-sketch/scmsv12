@@ -9019,3 +9019,32 @@ html.scms-chat-workspace #pages{overflow:auto}
   .smart-chat-channel-card{min-width:132px}
   .smart-chat-hero .page-title{font-size:19px}
 }
+
+
+/* School Chat: in-app project/event group creation dialog */
+.smart-chat-group-modal-overlay{position:fixed;inset:0;z-index:10050;display:flex;align-items:center;justify-content:center;padding:16px;background:rgba(8,12,22,.66);backdrop-filter:blur(5px);-webkit-backdrop-filter:blur(5px)}
+.smart-chat-group-modal{width:min(100%,560px);max-height:calc(100dvh - 32px);overflow-y:auto;overscroll-behavior:contain;background:var(--surface);color:var(--text);border:1px solid var(--border);border-radius:20px;box-shadow:0 24px 80px rgba(0,0,0,.34);padding:20px}
+.smart-chat-group-modal-head{display:flex;align-items:flex-start;justify-content:space-between;gap:14px;margin-bottom:18px}
+.smart-chat-group-modal-head h2{margin:4px 0 6px;font-size:20px;line-height:1.25}
+.smart-chat-group-modal-head p{margin:0;color:var(--muted);font-size:13px;line-height:1.45}
+.smart-chat-group-modal-close{flex:0 0 36px;width:36px;height:36px;border:1px solid var(--border);border-radius:11px;background:var(--bg2);color:var(--text);font-size:24px;line-height:1}
+.smart-chat-group-form{display:flex;flex-direction:column;gap:14px}
+.smart-chat-group-form>label,.smart-chat-group-date-grid>label{display:flex;flex-direction:column;gap:7px;min-width:0;color:var(--text2);font-size:13px;font-weight:650}
+.smart-chat-group-form input:not([type=checkbox]),.smart-chat-group-form select,.smart-chat-group-form textarea{width:100%;min-width:0;box-sizing:border-box;border:1px solid var(--border);border-radius:11px;background:var(--bg2);color:var(--text);padding:11px 12px;font:inherit;font-weight:400}
+.smart-chat-group-form textarea{resize:vertical;min-height:76px}
+.smart-chat-group-form input:focus,.smart-chat-group-form select:focus,.smart-chat-group-form textarea:focus{outline:2px solid color-mix(in srgb,var(--accent) 35%,transparent);border-color:var(--accent)}
+.smart-chat-group-member-field{min-width:0;margin:0;padding:12px;border:1px solid var(--border);border-radius:13px}
+.smart-chat-group-member-field legend{padding:0 5px;color:var(--text2);font-size:13px;font-weight:650}
+.smart-chat-group-member-list{display:flex;flex-direction:column;gap:2px;max-height:180px;overflow-y:auto;overscroll-behavior:contain}
+.smart-chat-group-member{display:flex;align-items:center;gap:10px;padding:9px 7px;border-radius:9px;cursor:pointer}
+.smart-chat-group-member:hover{background:var(--bg2)}
+.smart-chat-group-member input{width:17px;height:17px;flex:0 0 auto;accent-color:var(--accent)}
+.smart-chat-group-member span{display:flex;flex-direction:column;gap:2px;min-width:0}
+.smart-chat-group-member strong{font-size:13px;font-weight:600;color:var(--text)}
+.smart-chat-group-member small{font-size:11px;color:var(--muted);overflow-wrap:anywhere}
+.smart-chat-group-no-members{margin:8px;color:var(--muted);font-size:13px}
+.smart-chat-group-date-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}
+.smart-chat-group-form-actions{display:flex;justify-content:flex-end;gap:9px;padding-top:4px}
+.smart-chat-group-form-actions button{min-height:42px;padding:0 16px;border-radius:11px}
+.smart-chat-group-form-actions button:disabled{opacity:.6;cursor:wait}
+@media(max-width:600px){.smart-chat-group-modal-overlay{align-items:flex-end;padding:8px}.smart-chat-group-modal{width:100%;max-height:calc(100dvh - 16px);padding:16px;border-radius:20px 20px 14px 14px}.smart-chat-group-date-grid{grid-template-columns:minmax(0,1fr)}.smart-chat-group-form-actions{position:sticky;bottom:-16px;margin:0 -16px -16px;padding:12px 16px calc(12px + env(safe-area-inset-bottom,0px));background:var(--surface);border-top:1px solid var(--border)}.smart-chat-group-form-actions button{flex:1}}
