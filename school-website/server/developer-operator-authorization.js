@@ -73,7 +73,10 @@ function authorizeDeveloperAction(context, request) {
         typeof request.approvalId !== 'string' || !request.approvalId ||
         approval.id !== request.approvalId) return deny('approval_required');
     if (approval.status !== 'approved') return deny('approval_not_approved');
-    const targetId = request.targetId ?? request.targetSchoolId ?? null;
+    // High-risk approvals must name the exact resource; a school ID is not a
+    // safe substitute for a resource ID when the action targets a child object.
+    if (typeof request.targetId !== 'string' || !request.targetId.trim()) return deny('target_required');
+    const targetId = request.targetId;
     if (approval.action !== request.action ||
         approval.targetId !== targetId ||
         (request.targetSchoolId !== undefined && approval.targetSchoolId !== request.targetSchoolId)) {
