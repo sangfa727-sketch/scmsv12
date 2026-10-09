@@ -94,4 +94,40 @@ test.describe('Staff Chat full-screen browser regression', () => {
       await expect(page.locator('[data-chat-quick-channel="' + channelId + '"]')).toBeAttached();
     }
   });
+
+  
+  test('AI Chat clearly identifies its disconnected shell and does not imply live AI execution', async ({ page }) => {
+    await page.setViewportSize({ width: 390, height: 844 });
+    await signInAndOpenChat(page);
+    await page.locator('.sc-chat-mode-pill').click();
+    await page.locator('#scChatTypeMenu [role="menuitemradio"]').nth(1).click();
+
+    await expect(page.locator('.smart-chat-ai-card')).toBeVisible();
+    await expect(page.locator('.smart-chat-ai-note')).toBeVisible();
+    await expect(page.locator('.smart-chat-ai-note')).toContainText(/shell|not connected|မချိတ်ဆက်/i);
+    await expect(page.locator('#aiChatInput')).toBeVisible();
+  });
+
+  test('Direct, Announcements, and Inquiry channels render their own workspace and return to School Chat', async ({ page }) => {
+    await page.setViewportSize({ width: 390, height: 844 });
+    await signInAndOpenChat(page);
+
+    await page.locator('[data-chat-quick-channel="direct"]').click();
+    await expect(page.locator('.smart-chat-direct-shell')).toBeVisible();
+    await expect(page.locator('#directStaffSearch')).toBeVisible();
+    await page.locator('.smart-chat-channel-back').click();
+    await expect(page.locator('[data-chat-quick-channel="staff"]')).toBeVisible();
+
+    await page.locator('[data-chat-quick-channel="announcements"]').click();
+    await expect(page.locator('.smart-chat-announcement-shell')).toBeVisible();
+    await expect(page.locator('#announcementList')).toBeVisible();
+    await page.locator('.smart-chat-channel-back').click();
+    await expect(page.locator('[data-chat-quick-channel="staff"]')).toBeVisible();
+
+    await page.locator('[data-chat-quick-channel="tickets"]').click();
+    await expect(page.locator('.smart-chat-inquiry-shell')).toBeVisible();
+    await expect(page.locator('#inquiryTicketList')).toBeVisible();
+    await page.locator('.smart-chat-channel-back').click();
+    await expect(page.locator('[data-chat-quick-channel="staff"]')).toBeVisible();
+  });
 });
