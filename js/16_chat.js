@@ -202,6 +202,23 @@ async function _loadAdminRecipientPreview(type = null, target = null) {
   }
 }
 
+function _showChatSuccessFeedback(message) {
+  if (!message) return;
+  const previous = document.querySelector('.smart-chat-feedback');
+  if (previous) previous.remove();
+  const feedback = document.createElement('div');
+  feedback.className = 'smart-chat-feedback smart-chat-feedback-success';
+  feedback.setAttribute('role', 'status');
+  feedback.setAttribute('aria-live', 'polite');
+  feedback.textContent = String(message);
+  (document.getElementById('page-chat') || document.body).appendChild(feedback);
+  requestAnimationFrame(() => feedback.classList.add('show'));
+  window.setTimeout(() => {
+    feedback.classList.remove('show');
+    window.setTimeout(() => feedback.remove(), 220);
+  }, 3200);
+}
+
 window.sendOfficialAnnouncement = async function() {
   if (!window.APP?.is_admin || !window.API?.createStaffAnnouncement) return false;
   const recipientType = document.getElementById('adminMsgRecipientType')?.value || 'grade';
@@ -226,7 +243,7 @@ window.sendOfficialAnnouncement = async function() {
     const result = await API.createStaffAnnouncement(recipientType, target, messageType, reason, body);
     if (!result?.ok) throw new Error(result?.error || t('chat.sendFailed'));
     if (btn) btn.innerHTML = '✓ ' + t('chat.sent');
-    showToast(t('chat.officialMessageSent', {count: result.recipient_count}));
+    _showChatSuccessFeedback(t('chat.officialMessageSent', {count: result.recipient_count}));
     document.getElementById('adminMsgBody').value = '';
     setTimeout(() => {
       if (btn) { btn.innerHTML = t('chat.sendOfficialMessage'); btn.disabled = false; }
@@ -402,10 +419,12 @@ function renderChat() {
         </button>
       </div>
 
+      <nav id="smartChatQuickNav" class="smart-chat-quick-nav" aria-label="${esc(t('chat.schoolChat'))}"></nav>
       <div id="smartChatModeBody"></div>
     </div>`;
 
   _renderChatMode();
+  if (_chatMode === 'school') _refreshChatChannelUnreadCounts();
 }
 
 window._chatBackToMenu = function() {
@@ -431,12 +450,106 @@ window.switchChatMode = function(mode) {
   document.querySelectorAll('.smart-chat-mode-switch button').forEach((b, i) =>
     b.classList.toggle('active', (_chatMode === 'school' && i === 0) || (_chatMode === 'ai' && i === 1))
   );
+  _renderChatQuickNav();
   _renderChatMode();
+  if (_chatMode === 'school') _refreshChatChannelUnreadCounts();
 };
+
+function _chatQuickNavChannels() {
+  return [
+    { id:'staff', name:t('chat.allStaff'), icon:'👥' },
+    { id:'direct', name:t('chat.directMessages'), icon:'👤' },
+    { id:'departments', name:t('chat.departmentGrade'), icon:'📚' },
+    { id:'announcements', name:t('chat.officialAnnouncements'), icon:'📢' },
+    { id:'tickets', name:t('chat.workspace.tickets'), icon:'🎫' },
+    { id:'events', name:t('chat.workspace.groups'), icon:'🗂️' }
+  ];
+}
+
+function _renderChatQuickNav() {
+  const nav = document.getElementById('smartChatQuickNav');
+  if (!nav) return;
+  nav.hidden = _chatMode !== 'school';
+  nav.setAttribute('aria-label', t('chat.schoolChat'));
+  nav.innerHTML = '<div class="smart-chat-quick-nav-track" role="group">' +
+    _chatQuickNavChannels().map(c => {
+      const count = _chatUnreadCount(c.id);
+      const active = c.id === _chatChannel;
+      const countLabel = count > 0 ? ' aria-label="' + esc(t('chat.unreadMessages')) + ': ' + count + '"' : ' aria-hidden="true"';
+      return '<button type="button" class="smart-chat-quick-channel' + (active ? ' active' : '') + '" data-chat-quick-channel="' + c.id + '" aria-pressed="' + (active ? 'true' : 'false') + '" onclick="switchChatChannel(\'' + c.id + '\')">' +
+        '<span class="smart-chat-quick-channel-icon" aria-hidden="true">' + c.icon + '</span>' +
+        '<span class="smart-chat-quick-channel-name">' + esc(c.name) + '</span>' +
+        '<span class="smart-chat-quick-channel-count' + (count > 0 ? ' has-unread' : '') + '"' + countLabel + '>' + (count > 0 ? (count > 99 ? '99+' : count) : '') + '</span>' +
+      '</button>';
+    }).join('') + '</div>';
+}
+
+function _chatUnreadCount(channel) {
+  let rows = [];
+  if (channel === 'direct' && typeof _directConversations !== 'undefined') rows = _directConversations;
+  if (channel === 'tickets' && typeof _inquiryTickets !== 'undefined') rows = _inquiryTickets;
+  if (channel === 'events' && typeof _chatGroups !== 'undefined') rows = _chatGroups;
+  if (channel === 'announcements') rows = Array.isArray(window._chatAnnouncements) ? window._chatAnnouncements : [];
+  if (channel === 'announcements') return rows.filter(item => !item?.read_at).length;
+  return rows.reduce((total, item) => total + Math.max(0, Number(item?.unread_count) || 0), 0);
+}
+
+function _renderChatChannelUnreadBadges() {
+  if (_chatMode !== 'school') return;
+  for (const channel of ['direct', 'tickets', 'events', 'announcements']) {
+    const badges = document.querySelectorAll('[data-chat-unread-for="' + channel + '"]');
+    const count = _chatUnreadCount(channel);
+    badges.forEach(badge => {
+      badge.classList.toggle('has-unread', count > 0);
+      badge.textContent = count > 0 ? (count > 99 ? '99+' : String(count)) : (badge.classList.contains('smart-chat-channel-trailing') ? '›' : '');
+      if (count > 0) {
+        badge.setAttribute('aria-hidden', 'false');
+        badge.setAttribute('aria-label', t('chat.unreadMessages') + ': ' + count);
+      } else {
+        badge.setAttribute('aria-hidden', badge.classList.contains('smart-chat-quick-channel-count') ? 'true' : 'false');
+        badge.removeAttribute('aria-label');
+      }
+    });
+  }
+}
+
+function _renderChatTabUnreadBadge() {
+  const badge = document.getElementById('chatTabUnreadBadge');
+  if (!badge) return;
+  const total = ['direct', 'tickets', 'events', 'announcements']
+    .reduce((sum, channel) => sum + _chatUnreadCount(channel), 0);
+  badge.hidden = total <= 0;
+  badge.textContent = total > 99 ? '99+' : String(total);
+  const nav = document.querySelector('[data-testid="nav-chat"]');
+  if (nav && total > 0) nav.setAttribute('aria-label', t('tab.chat') + ', ' + total + ' ' + t('chat.unreadMessages'));
+  else if (nav) nav.removeAttribute('aria-label');
+}
+
+async function _refreshChatChannelUnreadCounts() {
+  if (_chatMode !== 'school' || !window.API) return;
+  const requests = [
+    ['direct', 'getDirectConversations'],
+    ['tickets', 'getInquiryTickets'],
+    ['announcements', 'getStaffAnnouncements'],
+    ['events', 'getChatGroups']
+  ];
+  await Promise.allSettled(requests.map(async ([channel, method]) => {
+    if (typeof API[method] !== 'function') return;
+    const rows = channel === 'announcements' ? await API[method](50) : await API[method]();
+    if (!Array.isArray(rows)) return;
+    if (channel === 'direct') _directConversations = rows;
+    else if (channel === 'tickets') _inquiryTickets = rows;
+    else if (channel === 'announcements') window._chatAnnouncements = rows;
+    else if (channel === 'events' && typeof _chatGroups !== 'undefined') _chatGroups = rows;
+  }));
+  _renderChatChannelUnreadBadges();
+  _renderChatTabUnreadBadge();
+}
 
 function _renderChatMode() {
   const root = document.getElementById('smartChatModeBody');
   if (!root) return;
+  _renderChatQuickNav();
   if (_chatMode === 'ai') {
     root.innerHTML = `
       <section class="smart-chat-ai-card">
@@ -463,14 +576,18 @@ function _renderChatMode() {
     return;
   }
 
-  const channels = [
-    { id:'staff', name:t('chat.allStaff'), icon:'👥', sub:t('chat.staffGeneral') },
-    { id:'announcements', name:t('chat.officialAnnouncements'), icon:'📢', sub:t('chat.officialNotices') },
-    { id:'departments', name:t('chat.departmentGrade'), icon:'📚', sub:t('chat.classDepartmentChannels') },
-    { id:'tickets', name:t('chat.workspace.tickets'), icon:'🎫', sub:t('chat.studentParentConversations') },
-    { id:'direct', name:t('chat.directMessages'), icon:'👤', sub:t('chat.privateStaffChat') },
-    { id:'events', name:t('chat.workspace.groups'), icon:'🗂️', sub:t('chat.temporaryWorkGroups') }
-  ];
+  // Put the highest-frequency staff workflows first; All Staff remains the default.
+  const channels = _chatQuickNavChannels().map(c => ({
+    ...c,
+    sub: ({
+      staff:t('chat.staffGeneral'),
+      direct:t('chat.privateStaffChat'),
+      departments:t('chat.classDepartmentChannels'),
+      announcements:t('chat.officialNotices'),
+      tickets:t('chat.studentParentConversations'),
+      events:t('chat.temporaryWorkGroups')
+    })[c.id]
+  }));
   const visible = channels;
   if (!visible.some(c => c.id === _chatChannel)) _chatChannel = 'staff';
 
@@ -505,10 +622,10 @@ function _renderChatMode() {
       <aside class="smart-chat-channel-list">
         <div class="smart-chat-list-title">${t('chat.schoolChat')}</div>
         ${visible.map(c => `
-          <button data-testid="chat-channel-${c.id}" class="smart-chat-channel-card ${c.id === _chatChannel ? 'active' : ''}" onclick="switchChatChannel('${esc(c.id)}')">
+          <button data-testid="chat-channel-${c.id}" class="smart-chat-channel-card ${c.id === _chatChannel ? 'active' : ''}" aria-current="${c.id === _chatChannel ? 'page' : 'false'}" onclick="switchChatChannel('${esc(c.id)}')">
             <span class="smart-chat-channel-icon">${c.icon}</span>
             <span><strong>${esc(c.name)}</strong><small>${esc(c.sub)}</small></span>
-            <b>›</b>
+            <b class="smart-chat-channel-trailing" data-chat-unread-for="${c.id}">›</b>
           </button>`).join('')}
       </aside>
       <section class="smart-chat-conversation">
@@ -602,7 +719,7 @@ async function _updateInquiryTicket(){
   const status=document.getElementById('inquiryStatusSelect')?.value||null;
   const assignee=document.getElementById('inquiryAssigneeSelect')?.value||null;
   const r=await API.updateInquiryTicket(_inquiryTicketId,status,assignee||null);
-  if(r?.ok){await _loadInquiryTickets();await _openInquiryTicket(_inquiryTicketId);}else showToast('Ticket update could not be applied.');
+  if(r?.ok){await _loadInquiryTickets();await _openInquiryTicket(_inquiryTicketId);}else showToast(t('chat.ticketUpdateFailed'));
 }
 async function _sendInquiryFromComposer(e){
   e?.preventDefault?.();
@@ -636,10 +753,10 @@ function _renderInquiryDraft(){
   }
   root.innerHTML=`
     <form class="smart-chat-inquiry-form" onsubmit="return _submitInquiryDraft(event)">
-      <label>${t('chat.subject')}<input id="inquiryDraftSubject" maxlength="160" required placeholder="${t('chat.whatNeedsAttention')}"></label>
-      <label>${t('chat.priority')}<select id="inquiryDraftPriority"><option>NORMAL</option><option>LOW</option><option>HIGH</option><option>URGENT</option></select></label>
-      <label>${t('chat.studentId')} <span class="smart-chat-field-note">${t('chat.optionalSameSchool')}</span><input id="inquiryDraftStudent" maxlength="80" placeholder="${t('chat.studentId')}"></label>
-      <label>${t('chat.details')}<textarea id="inquiryDraftBody" maxlength="4000" rows="5" required placeholder="${t('chat.describeIssue')}"></textarea></label>
+      <label><span class="smart-chat-field-label">${t('chat.subject')}</span><input id="inquiryDraftSubject" maxlength="160" required placeholder="${t('chat.whatNeedsAttention')}"></label>
+      <label><span class="smart-chat-field-label">${t('chat.priority')}</span><select id="inquiryDraftPriority"><option value="NORMAL">${t('chat.priorityNormal')}</option><option value="LOW">${t('chat.priorityLow')}</option><option value="HIGH">${t('chat.priorityHigh')}</option><option value="URGENT">${t('chat.priorityUrgent')}</option></select></label>
+      <label><span class="smart-chat-field-label">${t('chat.studentId')} <small class="smart-chat-field-note">${t('chat.optionalSameSchool')}</small></span><input id="inquiryDraftStudent" maxlength="80" placeholder="${t('chat.studentId')}"></label>
+      <label><span class="smart-chat-field-label">${t('chat.details')}</span><textarea id="inquiryDraftBody" maxlength="4000" rows="5" required placeholder="${t('chat.describeIssue')}"></textarea></label>
       <div class="smart-chat-inquiry-form-actions"><button type="button" class="btn-secondary" onclick="_closeInquiryDraft()">${t('chat.cancel')}</button><button id="inquiryDraftSubmitBtn" type="submit" class="btn-primary">${t('chat.createTicket')}</button></div>
     </form>`;
 }
@@ -866,9 +983,13 @@ function _chatChannelBack(label=t('chat.schoolChat')) {
 }
 
 window.switchChatChannel = function(channel) {
+  const allowed = _chatQuickNavChannels().some(item => item.id === channel);
+  if (!allowed) return;
   _chatChannel = channel;
-  if (_chatMode !== 'school') return;
+  if (_chatMode !== 'school') _chatMode = 'school';
+  _renderChatQuickNav();
   _renderChatMode();
+  _refreshChatChannelUnreadCounts();
 };
 
 async function _loadChatMessages() {
@@ -962,8 +1083,11 @@ window._aiPrompt = function(value) {
 
 window.startChatPolling=function(){
   if(_chatPollTimer)return;
+  let unreadRefreshTick = 0;
   _chatPollTimer=setInterval(async ()=>{
     if(window.APP?.currentPage!=='chat')return;
+    unreadRefreshTick = (unreadRefreshTick + 1) % 6;
+    if(unreadRefreshTick === 0 && _chatMode === 'school') _refreshChatChannelUnreadCounts();
     if(_chatMode==='school' && _chatChannel==='direct'){
       if(_directPollBusy)return;
       _directPollBusy=true;

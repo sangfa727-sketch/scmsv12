@@ -197,6 +197,247 @@
     Object.assign(chat[code], groupMemberPickerLocaleFix[code])
   );
 
+  // Accessible label for the icon-only group message send control.
+  const groupSendAccessibleLocaleFix = {
+    en: { 'chat.sendMessageLabel': 'Send message' },
+    my: { 'chat.sendMessageLabel': 'မက်ဆေ့ချ် ပို့ရန်' },
+    th: { 'chat.sendMessageLabel': 'ส่งข้อความ' },
+    jp: { 'chat.sendMessageLabel': 'メッセージを送信' },
+    ms: { 'chat.sendMessageLabel': 'Hantar mesej' },
+    km: { 'chat.sendMessageLabel': 'ផ្ញើសារ' },
+    zh: { 'chat.sendMessageLabel': '发送消息' }
+  };
+  Object.keys(groupSendAccessibleLocaleFix).forEach(code =>
+    Object.assign(chat[code], groupSendAccessibleLocaleFix[code])
+  );
+  // Complete ticket-form labels for English and Myanmar. These keys were absent
+  // from the two base chat dictionaries, so t() exposed the raw key names.
+  Object.assign(en, {
+    'chat.subject':'Subject',
+    'chat.studentId':'Student ID',
+    'chat.optionalSameSchool':'Optional · same school only',
+    'chat.whatNeedsAttention':'What needs attention?',
+    'chat.describeIssue':'Describe the issue clearly…'
+  });
+  Object.assign(my, {
+    'chat.subject':'အကြောင်းအရာ',
+    'chat.studentId':'ကျောင်းသား ID',
+    'chat.optionalSameSchool':'မဖြစ်မနေမဟုတ်ပါ · တူညီသောကျောင်းအတွင်းသာ',
+    'chat.whatNeedsAttention':'ဘယ်အကြောင်းအရာကို စစ်ဆေးဆောင်ရွက်ရန် လိုအပ်ပါသလဲ။',
+    'chat.describeIssue':'ပြဿနာကို ရှင်းလင်းစွာ ဖော်ပြပါ…'
+  });
+
+  // Keep priority values stable for the API while localizing their visible labels.
+  const ticketPriorityLocaleFix = {
+    en: {'chat.priorityNormal':'Normal','chat.priorityLow':'Low','chat.priorityHigh':'High','chat.priorityUrgent':'Urgent'},
+    my: {'chat.priorityNormal':'ပုံမှန်','chat.priorityLow':'နိမ့်','chat.priorityHigh':'မြင့်','chat.priorityUrgent':'အရေးပေါ်'},
+    th: {'chat.priorityNormal':'ปกติ','chat.priorityLow':'ต่ำ','chat.priorityHigh':'สูง','chat.priorityUrgent':'เร่งด่วน'},
+    jp: {'chat.priorityNormal':'通常','chat.priorityLow':'低','chat.priorityHigh':'高','chat.priorityUrgent':'緊急'},
+    ms: {'chat.priorityNormal':'Biasa','chat.priorityLow':'Rendah','chat.priorityHigh':'Tinggi','chat.priorityUrgent':'Segera'},
+    km: {'chat.priorityNormal':'ធម្មតា','chat.priorityLow':'ទាប','chat.priorityHigh':'ខ្ពស់','chat.priorityUrgent':'បន្ទាន់'},
+    zh: {'chat.priorityNormal':'普通','chat.priorityLow':'低','chat.priorityHigh':'高','chat.priorityUrgent':'紧急'}
+  };
+  Object.keys(ticketPriorityLocaleFix).forEach(code =>
+    Object.assign(code === 'en' ? en : code === 'my' ? my : chat[code], ticketPriorityLocaleFix[code])
+  );
+
+  // Explicit locale parity for the Official Message and Tickets workspaces.
+  // Keep dynamic UI labels translated instead of falling back to raw chat.* keys.
+  const officialTicketLocaleParityFix = {
+    en: {
+      'chat.officialMessageSent':'Official message sent to {count} verified staff.',
+      'chat.authorizedTicketAccess':'Only authorized staff at this school can access ticket messages.',
+      'chat.backToInquiryTickets':'Back to inquiry tickets',
+      'chat.createOrSelectTicket':'Create or select a staff ticket',
+      'chat.createTicketHint':'Create a ticket when a staff issue needs follow-up.',
+      'chat.noInquiryTickets':'No inquiry tickets',
+      'chat.ticketClosed':'Ticket closed',
+      'chat.ticketUpdateFailed':'Ticket update could not be applied.',
+      'chat.unreadMessages':'Unread messages',
+      'chat.writeReply':'Write a reply…',
+      'chat.backToAnnouncements':'Back to announcements',
+      'chat.closeOfficialMessage':'Close official message form',
+      'chat.newOfficialMessage':'New official message',
+      'chat.officialAnnouncements':'Official announcements',
+      'chat.officialStaffTask':'Official staff task',
+      'chat.read':'Read',
+      'chat.teacher':'Teacher',
+      'chat.adminComposer':'Admin official message composer',
+      'chat.exitChat':'Exit chat',
+      'chat.statusAssigned':'Assigned',
+      'chat.statusClosed':'Closed',
+      'chat.statusInProgress':'In progress',
+      'chat.statusOpen':'Open',
+      'chat.statusResolved':'Resolved',
+      'chat.statusWaiting':'Waiting'
+    },
+    my: {
+      'chat.officialMessageSent':'အတည်ပြုထားသော ဝန်ထမ်း {count} ဦးထံ တရားဝင်မက်ဆေ့ချ် ပို့ပြီးပါပြီ။',
+      'chat.authorizedTicketAccess':'ဤကျောင်းတွင် ခွင့်ပြုချက်ရှိသော ဝန်ထမ်းများသာ လက်မှတ်မက်ဆေ့ချ်များကို ကြည့်ရှုနိုင်သည်။',
+      'chat.backToInquiryTickets':'စုံစမ်းမေးမြန်းမှု လက်မှတ်များသို့ ပြန်ရန်',
+      'chat.createOrSelectTicket':'ဝန်ထမ်းလက်မှတ် အသစ်ဖန်တီးရန် သို့မဟုတ် ရွေးရန်',
+      'chat.createTicketHint':'ဝန်ထမ်းပြဿနာကို ဆက်လက်လိုက်နာဆောင်ရွက်ရန် လက်မှတ်ဖန်တီးပါ။',
+      'chat.noInquiryTickets':'စုံစမ်းမေးမြန်းမှု လက်မှတ် မရှိပါ။',
+      'chat.ticketClosed':'လက်မှတ် ပိတ်ထားသည်',
+      'chat.ticketUpdateFailed':'လက်မှတ်အခြေအနေကို ပြောင်းလဲ၍ မရပါ။',
+      'chat.unreadMessages':'မဖတ်ရသေးသော မက်ဆေ့ချ်များ',
+      'chat.writeReply':'ပြန်စာ ရေးပါ…',
+      'chat.backToAnnouncements':'ကြေညာချက်များသို့ ပြန်ရန်',
+      'chat.closeOfficialMessage':'တရားဝင်စာပုံစံကို ပိတ်ရန်',
+      'chat.newOfficialMessage':'တရားဝင်စာ အသစ်',
+      'chat.officialAnnouncements':'တရားဝင်ကြေညာချက်များ',
+      'chat.officialStaffTask':'ဝန်ထမ်းဆိုင်ရာ တရားဝင်တာဝန်',
+      'chat.read':'ဖတ်ပြီး',
+      'chat.teacher':'ဆရာ/ဆရာမ',
+      'chat.adminComposer':'စီမံခန့်ခွဲသူ၏ တရားဝင်စာရေးသားရန်နေရာ',
+      'chat.exitChat':'စကားပြောခန်းမှ ထွက်ရန်',
+      'chat.statusAssigned':'တာဝန်ပေးထားသည်',
+      'chat.statusClosed':'ပိတ်ပြီး',
+      'chat.statusInProgress':'ဆောင်ရွက်နေသည်',
+      'chat.statusOpen':'ဖွင့်ထားသည်',
+      'chat.statusResolved':'ဖြေရှင်းပြီး',
+      'chat.statusWaiting':'စောင့်ဆိုင်းနေသည်'
+    },
+    th: {
+      'chat.officialMessageSent':'ส่งข้อความทางการถึงบุคลากรที่ยืนยันแล้ว {count} คนเรียบร้อย',
+      'chat.authorizedTicketAccess':'เฉพาะบุคลากรที่ได้รับอนุญาตของโรงเรียนนี้เท่านั้นที่เข้าถึงข้อความในตั๋วได้',
+      'chat.backToInquiryTickets':'กลับไปยังตั๋วสอบถาม',
+      'chat.createOrSelectTicket':'สร้างหรือเลือกตั๋วสำหรับบุคลากร',
+      'chat.createTicketHint':'สร้างตั๋วเมื่อปัญหาของบุคลากรต้องติดตามต่อ',
+      'chat.noInquiryTickets':'ไม่มีตั๋วสอบถาม',
+      'chat.ticketClosed':'ปิดตั๋วแล้ว',
+      'chat.ticketUpdateFailed':'ไม่สามารถอัปเดตตั๋วได้',
+      'chat.unreadMessages':'ข้อความที่ยังไม่ได้อ่าน',
+      'chat.writeReply':'เขียนคำตอบ…',
+      'chat.backToAnnouncements':'กลับไปยังประกาศ',
+      'chat.closeOfficialMessage':'ปิดแบบฟอร์มข้อความทางการ',
+      'chat.newOfficialMessage':'ข้อความทางการใหม่',
+      'chat.officialAnnouncements':'ประกาศอย่างเป็นทางการ',
+      'chat.officialStaffTask':'งานทางการของบุคลากร',
+      'chat.read':'อ่านแล้ว',
+      'chat.teacher':'ครู',
+      'chat.adminComposer':'แบบฟอร์มข้อความทางการของผู้ดูแล',
+      'chat.exitChat':'ออกจากแชท',
+      'chat.statusAssigned':'มอบหมายแล้ว',
+      'chat.statusClosed':'ปิดแล้ว',
+      'chat.statusInProgress':'กำลังดำเนินการ',
+      'chat.statusOpen':'เปิดอยู่',
+      'chat.statusResolved':'แก้ไขแล้ว',
+      'chat.statusWaiting':'รอดำเนินการ'
+    },
+    jp: {
+      'chat.officialMessageSent':'確認済みのスタッフ {count} 人に公式メッセージを送信しました。',
+      'chat.authorizedTicketAccess':'この学校で許可された職員のみチケットのメッセージにアクセスできます。',
+      'chat.backToInquiryTickets':'問い合わせチケットに戻る',
+      'chat.createOrSelectTicket':'職員チケットを作成または選択',
+      'chat.createTicketHint':'職員の問題を継続して対応する場合はチケットを作成します。',
+      'chat.noInquiryTickets':'問い合わせチケットはありません',
+      'chat.ticketClosed':'チケットは終了しました',
+      'chat.ticketUpdateFailed':'チケットを更新できませんでした。',
+      'chat.unreadMessages':'未読メッセージ',
+      'chat.writeReply':'返信を書く…',
+      'chat.backToAnnouncements':'お知らせに戻る',
+      'chat.closeOfficialMessage':'公式メッセージフォームを閉じる',
+      'chat.newOfficialMessage':'新しい公式メッセージ',
+      'chat.officialAnnouncements':'公式お知らせ',
+      'chat.officialStaffTask':'職員向け公式タスク',
+      'chat.read':'既読',
+      'chat.teacher':'先生',
+      'chat.adminComposer':'管理者の公式メッセージ作成欄',
+      'chat.exitChat':'チャットを終了',
+      'chat.statusAssigned':'割り当て済み',
+      'chat.statusClosed':'終了',
+      'chat.statusInProgress':'進行中',
+      'chat.statusOpen':'未対応',
+      'chat.statusResolved':'解決済み',
+      'chat.statusWaiting':'保留中'
+    },
+    ms: {
+      'chat.officialMessageSent':'Mesej rasmi telah dihantar kepada {count} kakitangan yang disahkan.',
+      'chat.authorizedTicketAccess':'Hanya kakitangan yang dibenarkan di sekolah ini boleh mengakses mesej tiket.',
+      'chat.backToInquiryTickets':'Kembali ke tiket pertanyaan',
+      'chat.createOrSelectTicket':'Cipta atau pilih tiket staf',
+      'chat.createTicketHint':'Cipta tiket apabila isu staf memerlukan tindakan susulan.',
+      'chat.noInquiryTickets':'Tiada tiket pertanyaan',
+      'chat.ticketClosed':'Tiket ditutup',
+      'chat.ticketUpdateFailed':'Tiket tidak dapat dikemas kini.',
+      'chat.unreadMessages':'Mesej belum dibaca',
+      'chat.writeReply':'Tulis balasan…',
+      'chat.backToAnnouncements':'Kembali ke pengumuman',
+      'chat.closeOfficialMessage':'Tutup borang mesej rasmi',
+      'chat.newOfficialMessage':'Mesej rasmi baharu',
+      'chat.officialAnnouncements':'Pengumuman rasmi',
+      'chat.officialStaffTask':'Tugasan rasmi staf',
+      'chat.read':'Dibaca',
+      'chat.teacher':'Guru',
+      'chat.adminComposer':'Komposer mesej rasmi pentadbir',
+      'chat.exitChat':'Keluar daripada chat',
+      'chat.statusAssigned':'Ditugaskan',
+      'chat.statusClosed':'Ditutup',
+      'chat.statusInProgress':'Sedang diproses',
+      'chat.statusOpen':'Dibuka',
+      'chat.statusResolved':'Diselesaikan',
+      'chat.statusWaiting':'Menunggu'
+    },
+    km: {
+      'chat.officialMessageSent':'បានផ្ញើសារផ្លូវការទៅបុគ្គលិកដែលបានផ្ទៀងផ្ទាត់ចំនួន {count} នាក់។',
+      'chat.authorizedTicketAccess':'មានតែបុគ្គលិកដែលបានអនុញ្ញាតនៅសាលានេះប៉ុណ្ណោះដែលអាចចូលមើលសារសំបុត្របាន។',
+      'chat.backToInquiryTickets':'ត្រឡប់ទៅសំបុត្រសាកសួរ',
+      'chat.createOrSelectTicket':'បង្កើត ឬជ្រើសរើសសំបុត្របុគ្គលិក',
+      'chat.createTicketHint':'បង្កើតសំបុត្រនៅពេលបញ្ហាបុគ្គលិកត្រូវការតាមដានបន្ត។',
+      'chat.noInquiryTickets':'គ្មានសំបុត្រសាកសួរ',
+      'chat.ticketClosed':'សំបុត្រត្រូវបានបិទ',
+      'chat.ticketUpdateFailed':'មិនអាចធ្វើបច្ចុប្បន្នភាពសំបុត្របានទេ។',
+      'chat.unreadMessages':'សារមិនទាន់អាន',
+      'chat.writeReply':'សរសេរឆ្លើយតប…',
+      'chat.backToAnnouncements':'ត្រឡប់ទៅសេចក្តីប្រកាស',
+      'chat.closeOfficialMessage':'បិទទម្រង់សារផ្លូវការ',
+      'chat.newOfficialMessage':'សារផ្លូវការថ្មី',
+      'chat.officialAnnouncements':'សេចក្តីប្រកាសផ្លូវការ',
+      'chat.officialStaffTask':'កិច្ចការផ្លូវការរបស់បុគ្គលិក',
+      'chat.read':'បានអាន',
+      'chat.teacher':'គ្រូ',
+      'chat.adminComposer':'កន្លែងសរសេរសារផ្លូវការរបស់អ្នកគ្រប់គ្រង',
+      'chat.exitChat':'ចាកចេញពីការជជែក',
+      'chat.statusAssigned':'បានចាត់តាំង',
+      'chat.statusClosed':'បានបិទ',
+      'chat.statusInProgress':'កំពុងដំណើរការ',
+      'chat.statusOpen':'បើក',
+      'chat.statusResolved':'បានដោះស្រាយ',
+      'chat.statusWaiting':'កំពុងរង់ចាំ'
+    },
+    zh: {
+      'chat.officialMessageSent':'已向 {count} 名已验证员工发送官方消息。',
+      'chat.authorizedTicketAccess':'仅本校获授权的教职员工可以查看工单消息。',
+      'chat.backToInquiryTickets':'返回咨询工单',
+      'chat.createOrSelectTicket':'创建或选择员工工单',
+      'chat.createTicketHint':'需要跟进员工问题时，请创建工单。',
+      'chat.noInquiryTickets':'暂无咨询工单',
+      'chat.ticketClosed':'工单已关闭',
+      'chat.ticketUpdateFailed':'无法更新工单。',
+      'chat.unreadMessages':'未读消息',
+      'chat.writeReply':'撰写回复…',
+      'chat.backToAnnouncements':'返回公告',
+      'chat.closeOfficialMessage':'关闭正式消息表单',
+      'chat.newOfficialMessage':'新建正式消息',
+      'chat.officialAnnouncements':'官方公告',
+      'chat.officialStaffTask':'员工正式任务',
+      'chat.read':'已读',
+      'chat.teacher':'教师',
+      'chat.adminComposer':'管理员正式消息编辑区',
+      'chat.exitChat':'退出聊天',
+      'chat.statusAssigned':'已分配',
+      'chat.statusClosed':'已关闭',
+      'chat.statusInProgress':'处理中',
+      'chat.statusOpen':'待处理',
+      'chat.statusResolved':'已解决',
+      'chat.statusWaiting':'等待中'
+    }
+  };
+  Object.keys(officialTicketLocaleParityFix).forEach(code =>
+    Object.assign(code === 'en' ? en : code === 'my' ? my : chat[code], officialTicketLocaleParityFix[code])
+  );
+
   const maps={en:'I18N_EN',my:'I18N_MY',th:'I18N_TH',jp:'I18N_JP',ms:'I18N_MS',km:'I18N_KM',zh:'I18N_ZH'};
   Object.keys(maps).forEach(code=>{ window[maps[code]]=Object.assign({},window[maps[code]]||{},code==='en'?en:code==='my'?my:chat[code]); });
 })();
