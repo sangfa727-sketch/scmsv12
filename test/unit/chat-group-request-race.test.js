@@ -103,3 +103,10 @@ test('group chat ignores a stale authorization failure after a newer group is se
   assert.match(root.innerHTML, /Authorized Group/);
   assert.doesNotMatch(root.innerHTML, /chat-error/);
 });
+
+test('group chat refresh and composer controls expose accessible names', () => {
+  const source = fs.readFileSync(SOURCE, 'utf8');
+  assert.match(source, /class="smart-chat-refresh-btn"[^>]*aria-label="\$\{t\('chat\.refresh'\)\}"/);
+  assert.match(source, /<textarea id="chatGroupInput"[^>]*aria-label="\$\{t\('chat\.writeMessage'\)\}"/);
+  assert.match(source, /<button class="chat-send-btn" type="submit" aria-label="Send message">/);
+});
