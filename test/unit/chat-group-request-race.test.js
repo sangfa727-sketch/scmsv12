@@ -160,3 +160,16 @@ test('global toast colors use theme surfaces instead of inverted text/background
   assert.ok(toast.includes('color: var(--text);'));
   assert.ok(toast.includes('border: 1px solid var(--border2);'));
 });
+
+
+test('official message and ticket labels have explicit translations for every supported locale', () => {
+  const locales = fs.readFileSync(path.resolve(__dirname, '../../js/00f_chat_locales.js'), 'utf8');
+  const section = locales.match(/const officialTicketLocaleParityFix = \\{([\\s\\S]*?)\\n  \\};/);
+  assert.ok(section, 'official/ticket locale parity map must exist');
+  for (const code of ['en', 'my', 'th', 'jp', 'ms', 'km', 'zh']) {
+    assert.match(section[1], new RegExp('^\\s*' + code + ': \\{', 'm'), 'missing locale ' + code);
+    for (const key of ['chat.authorizedTicketAccess', 'chat.backToInquiryTickets', 'chat.noInquiryTickets', 'chat.ticketClosed', 'chat.writeReply', 'chat.newOfficialMessage', 'chat.statusOpen']) {
+      assert.ok(section[1].includes("'" + key + "'"), 'missing locale parity key ' + key);
+    }
+  }
+});
