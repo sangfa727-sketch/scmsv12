@@ -28,7 +28,8 @@ jobs:
     runs-on: ubuntu-latest
     services:
       postgres:
-        image: postgres:16
+        # Public ECR mirror avoids Docker Hub anonymous pull throttling in CI.
+        image: public.ecr.aws/docker/library/postgres:16
         env:
           POSTGRES_USER: scms_test
           POSTGRES_PASSWORD: scms_test
