@@ -39,7 +39,29 @@ The nine client-executable SECURITY DEFINER functions whose argument signatures 
 
 These names indicate login, sign-up, challenge, QR, or session-polling entry points where a conventional `session_token` parameter may not be expected. Their presence is **not itself a vulnerability finding**. Review the function bodies and contracts for password/challenge verification, token entropy and expiry, rate limiting, enumeration resistance, QR scope, and response-field minimization before drawing conclusions.
 
-## 3. What this means
+## 3. Focused login/session heuristic scan (2026-10-09)
+
+A read-only metadata scan checked the nine functions above for common implementation signals. This was a heuristic scan of function definitions, not a complete code audit or exploit test.
+
+| Function | Password/hash-related logic term found | Time/expiry-related term found | Rate-limit/attempt/throttle term found |
+|---|---:|---:|---:|
+| `rpc_app_session_poll` | No | No | No |
+| `rpc_email_login` | Yes | Yes | No |
+| `rpc_email_signup` | Yes | Yes | No |
+| `rpc_parent_google_login` | No | No | No |
+| `rpc_qr_resolve` | No | No | No |
+| `rpc_teacher_card_login_start` | No | Yes | No |
+| `rpc_teacher_login` | Yes | Yes | No |
+| `rpc_teacher_login_by_login_name` | Yes | Yes | No |
+| `rpc_teacher_web_login` | Yes | Yes | No |
+
+Interpretation limits:
+- A keyword match does not prove the logic is correct; a missing keyword does not prove a control is absent (it may be delegated to another function or table).
+- The scan did not execute login attempts, test brute-force resistance, inspect returned sensitive fields, or prove challenge/QR token entropy and one-time use.
+- **Rate limiting is unverified for all nine functions** from this heuristic scan. Verify whether a shared limiter, lockout table, gateway rule, or upstream provider enforces it before any production changes.
+- The live catalog query for `public` and `private` tables matching `developer_%` returned no rows. **Dedicated Developer tables are not present under those names in the live database**; this check does not exclude similarly named objects in other schemas.
+
+## 4. What this means
 
 - A client-executable SECURITY DEFINER function runs with the privileges of its owner, so every exposed function needs a per-function authorization review.
 - Several functions intentionally accept a server-issued web session token and perform role/school checks in the body. Their grants may be part of the existing school application contract.
@@ -47,7 +69,7 @@ These names indicate login, sign-up, challenge, QR, or session-polling entry poi
 - Do not blanket-revoke client grants. Doing so may break school sign-in, bootstrap, billing, chat, attendance, or other production workflows.
 - Do not treat an email address or a school-admin role as proof of platform-operator authority.
 
-## 4. Required next classification
+## 5. Required next classification
 
 For each of the 189 functions, create a signature-level register with:
 1. owner and exact ACL/grantee;
@@ -60,19 +82,19 @@ For each of the 189 functions, create a signature-level register with:
 
 Prioritize account provisioning, password/reset, teacher lifecycle, student/health, billing, exports, chat recipient/department routing, and AI execution RPCs. Record findings before any grant changes.
 
-## 5. Developer Admin provisioning gate
+## 6. Developer Admin provisioning gate
 
 Requested operator: `staillasbi@gmail.com`; intended role: `platform_owner`.
 
 **Not provisioned.** No Supabase Auth user was created, no role was granted, and the supplied sample password was not stored or applied. The safe next step is to establish email ownership through a provider-supported invitation/recovery flow, require MFA, and implement a server-enforced operator boundary that is independent of school-user sessions.
 
-## 6. Release gate
+## 7. Release gate
 
 - No production SQL/DDL/grants were changed.
 - No Developer Login route was added.
 - No school Production Core behavior was changed.
 - No PR merge or deployment was performed.
-- The latest documentation commit has no associated PR-triggered workflow run returned by the current check; therefore its CI status is **not verified yet**. Earlier workflow success does not certify this newer commit.
+- Documentation commit `c2ccb786a1b910e5807e123d337e56834350ccec` had PR workflow run #1935 complete with **success**. A new commit to this document will require its own CI check; this historical green run does not certify future commits.
 - Playwright was skipped by workflow policy; browser-level behavior is not proven.
 
 Continue with evidence-based, read-only classification and sandbox denial tests before implementing or activating platform-owner privileges.
