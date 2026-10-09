@@ -9735,3 +9735,45 @@ html.scms-chat-workspace #pages{overflow:auto}
   #page-chat .smart-chat-admin-card { margin-top:12px; padding:14px; border-radius:16px; }
   #page-chat .smart-chat-admin-card h2 { font-size:17px; }
 }
+
+
+/* Chat UI regression correction: keep one channel navigation and let the page scroll
+   naturally on touch screens. The persistent quick-nav is the sole mobile channel tab. */
+@media (max-width:760px) {
+  html.scms-chat-workspace #pages {
+    height:auto;
+    min-height:0;
+    overflow-x:hidden;
+    overflow-y:auto;
+    touch-action:pan-y;
+    -webkit-overflow-scrolling:touch;
+  }
+  html.scms-chat-workspace #page-chat {
+    height:auto;
+    min-height:0;
+    overflow:visible;
+    touch-action:pan-y;
+  }
+  html.scms-chat-workspace #page-chat .smart-chat-shell {
+    height:auto;
+    min-height:0;
+    overflow:visible;
+    padding:8px 10px max(14px,env(safe-area-inset-bottom));
+    touch-action:pan-y;
+  }
+  #page-chat .smart-chat-school-grid > .smart-chat-channel-list {
+    display:none;
+  }
+  #page-chat .smart-chat-conversation {
+    min-height:0;
+    overflow:visible;
+    touch-action:pan-y;
+  }
+  #page-chat .smart-chat-conversation .chat-stream {
+    max-height:none;
+    min-height:0;
+    overflow:visible;
+    touch-action:pan-y;
+    overscroll-behavior:auto;
+  }
+}
