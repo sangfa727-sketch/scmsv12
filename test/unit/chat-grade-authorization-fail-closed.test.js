@@ -11,4 +11,5 @@ test('grade chat fails closed when a conversation is unauthorized', () => {
   assert.ok(source.includes('_gradeName=null;_setGradeMobileView(false)'), 'clear selected grade on failure');
   assert.ok(source.includes('root.innerHTML=') && source.includes("t('chat.selectGrade')"), 'replace stale messages with neutral empty state');
   assert.ok(source.includes("showToast(t('chat.gradeUnauthorized'))"), 'explain denied access to the user');
+  assert.match(source, /class="smart-chat-refresh-btn"[^>]*aria-label=/, 'grade refresh control must expose an accessible name');
 });
