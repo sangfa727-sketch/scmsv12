@@ -31,7 +31,7 @@ test('announcement reading uses only keys available in every supported locale', 
   const end = source.indexOf('function _renderDirectWorkspace()', start);
   assert.ok(start >= 0 && end > start, 'find the announcement workspace block');
   const block = source.slice(start, end);
-  const keys = [...new Set([...block.matchAll(/t\('chat\.([^']+)'/g)].map(match => match[1]))];
+  const keys = [...new Set(block.split("t('chat.").slice(1).map(part => part.split("'")[0]))];
   const localeFiles = [
     '../../js/00a_locales_en.js',
     '../../js/00b_locales_my.js',
