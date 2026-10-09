@@ -50,11 +50,16 @@ test('critical actions require step-up, confirmation, independent approval, and 
   }
 });
 
-test('registry validator fails closed for duplicate IDs and incomplete critical controls', () => {
+test('registry validator fails closed for duplicate IDs, approval drift, and incomplete critical controls', () => {
   const valid = ACTION_DEFINITIONS[0];
   assert.deepEqual(
     validateDeveloperActionRegistry([valid, valid]),
     { ok: false, error: 'duplicate_action_id' }
+  );
+  const approvalDrift = ACTION_DEFINITIONS[0];
+  assert.deepEqual(
+    validateDeveloperActionRegistry([{ ...approvalDrift, requiresApproval: true }]),
+    { ok: false, error: 'approval_policy_mismatch' }
   );
   const critical = ACTION_DEFINITIONS.find((item) => item.riskTier === 'R3');
   assert.deepEqual(
