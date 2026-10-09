@@ -245,6 +245,7 @@
   // Keep dynamic UI labels translated instead of falling back to raw chat.* keys.
   const officialTicketLocaleParityFix = {
     en: {
+      'chat.officialMessageSent':'Official message sent to {count} verified staff.',
       'chat.authorizedTicketAccess':'Only authorized staff at this school can access ticket messages.',
       'chat.backToInquiryTickets':'Back to inquiry tickets',
       'chat.createOrSelectTicket':'Create or select a staff ticket',
@@ -271,6 +272,7 @@
       'chat.statusWaiting':'Waiting'
     },
     my: {
+      'chat.officialMessageSent':'အတည်ပြုထားသော ဝန်ထမ်း {count} ဦးထံ တရားဝင်မက်ဆေ့ချ် ပို့ပြီးပါပြီ။',
       'chat.authorizedTicketAccess':'ဤကျောင်းတွင် ခွင့်ပြုချက်ရှိသော ဝန်ထမ်းများသာ လက်မှတ်မက်ဆေ့ချ်များကို ကြည့်ရှုနိုင်သည်။',
       'chat.backToInquiryTickets':'စုံစမ်းမေးမြန်းမှု လက်မှတ်များသို့ ပြန်ရန်',
       'chat.createOrSelectTicket':'ဝန်ထမ်းလက်မှတ် အသစ်ဖန်တီးရန် သို့မဟုတ် ရွေးရန်',
@@ -297,6 +299,7 @@
       'chat.statusWaiting':'စောင့်ဆိုင်းနေသည်'
     },
     th: {
+      'chat.officialMessageSent':'ส่งข้อความทางการถึงบุคลากรที่ยืนยันแล้ว {count} คนเรียบร้อย',
       'chat.authorizedTicketAccess':'เฉพาะบุคลากรที่ได้รับอนุญาตของโรงเรียนนี้เท่านั้นที่เข้าถึงข้อความในตั๋วได้',
       'chat.backToInquiryTickets':'กลับไปยังตั๋วสอบถาม',
       'chat.createOrSelectTicket':'สร้างหรือเลือกตั๋วสำหรับบุคลากร',
@@ -323,6 +326,7 @@
       'chat.statusWaiting':'รอดำเนินการ'
     },
     jp: {
+      'chat.officialMessageSent':'確認済みのスタッフ {count} 人に公式メッセージを送信しました。',
       'chat.authorizedTicketAccess':'この学校で許可された職員のみチケットのメッセージにアクセスできます。',
       'chat.backToInquiryTickets':'問い合わせチケットに戻る',
       'chat.createOrSelectTicket':'職員チケットを作成または選択',
@@ -349,6 +353,7 @@
       'chat.statusWaiting':'保留中'
     },
     ms: {
+      'chat.officialMessageSent':'Mesej rasmi telah dihantar kepada {count} kakitangan yang disahkan.',
       'chat.authorizedTicketAccess':'Hanya kakitangan yang dibenarkan di sekolah ini boleh mengakses mesej tiket.',
       'chat.backToInquiryTickets':'Kembali ke tiket pertanyaan',
       'chat.createOrSelectTicket':'Cipta atau pilih tiket staf',
@@ -375,6 +380,7 @@
       'chat.statusWaiting':'Menunggu'
     },
     km: {
+      'chat.officialMessageSent':'បានផ្ញើសារផ្លូវការទៅបុគ្គលិកដែលបានផ្ទៀងផ្ទាត់ចំនួន {count} នាក់។',
       'chat.authorizedTicketAccess':'មានតែបុគ្គលិកដែលបានអនុញ្ញាតនៅសាលានេះប៉ុណ្ណោះដែលអាចចូលមើលសារសំបុត្របាន។',
       'chat.backToInquiryTickets':'ត្រឡប់ទៅសំបុត្រសាកសួរ',
       'chat.createOrSelectTicket':'បង្កើត ឬជ្រើសរើសសំបុត្របុគ្គលិក',
@@ -401,6 +407,7 @@
       'chat.statusWaiting':'កំពុងរង់ចាំ'
     },
     zh: {
+      'chat.officialMessageSent':'已向 {count} 名已验证员工发送官方消息。',
       'chat.authorizedTicketAccess':'仅本校获授权的教职员工可以查看工单消息。',
       'chat.backToInquiryTickets':'返回咨询工单',
       'chat.createOrSelectTicket':'创建或选择员工工单',
