@@ -745,7 +745,8 @@ test('official message recipient modes keep independent verified previews', () =
   const html = read('index.html');
   assert.match(chat, /let _adminAllStaffRecipients = \[\];/);
   assert.match(chat, /if \(type === 'all_staff'\) return _adminAllStaffRecipients;/);
-  assert.match(chat, /selectedType === 'all_staff'\) _adminAllStaffRecipients = Array\.isArray\(rows\) \? rows : \[\];/);
+  assert.ok(chat.includes("selectedType === 'all_staff'"));
+  assert.ok(chat.includes("_adminAllStaffRecipients = Array.isArray(rows) ? rows : [];"));
   assert.match(locales, /'chat\.oneVerifiedRecipient':'One verified recipient'/);
   assert.match(locales, /'chat\.staffNotice':'Staff notice'/);
   assert.match(locales, /const fallbackKeys=Object\.keys\(extra\.en\)/);
