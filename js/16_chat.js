@@ -450,6 +450,7 @@ window.switchChatMode = function(mode) {
     b.classList.toggle('active', (_chatMode === 'school' && i === 0) || (_chatMode === 'ai' && i === 1))
   );
   _renderChatMode();
+  if (_chatMode === 'school') _refreshChatChannelUnreadCounts();
 };
 
 function _chatUnreadCount(channel) {
