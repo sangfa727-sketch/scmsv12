@@ -127,9 +127,9 @@ test('requires an active approver with action-specific authority and matching sc
 });
 
 test('fails closed when approval consumption state is missing', () => {
-  const malformed = approval();
-  delete malformed.consumedAt;
-  assert.equal(authorizeDeveloperAction(context({ approval: malformed }), highRiskRequest()).reason, 'approval_state_invalid');
+  const c = approvedContext();
+  delete c.approval.consumedAt;
+  assert.equal(authorizeDeveloperAction(c, highRiskRequest()).reason, 'approval_state_invalid');
 });
 
 test('denies self-approved, replayed, or expired approvals', () => {
