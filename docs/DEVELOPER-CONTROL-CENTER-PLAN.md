@@ -193,3 +193,18 @@ For each case record: test ID, migration/commit SHA, actor fixture, request, exp
 3. Execute the full matrix and existing-core regressions.
 4. Review grants/RLS and confirm no browser-visible privileged table access.
 5. Obtain explicit approval before production deployment and a separate explicit approval before merging if required by the repository workflow.
+
+## 13. Trusted adapter contract — required for approval enforcement
+
+The current `school-website/server/developer-operator-authorization.js` module is a pure policy helper only. It is not an HTTP endpoint, authentication provider, persistent approval store, or complete enforcement boundary. Passing its unit tests does not make DCC production-ready.
+
+Before an adapter may call the helper, it must:
+
+1. Verify the operator's identity and session using the selected trusted identity provider; load the operator's current status, capabilities, and scope from server-owned records.
+2. Resolve the requested target resource server-side and derive its authoritative school/tenant ID. Never accept `targetSchoolId`, `targetId`, identity, role, capabilities, approval state, or policy as trusted merely because the browser submitted them.
+3. Load the action policy and approval by server-side identifiers. For approval-required actions, load the current approver record independently and pass it as `approvalApprover`; require an active approver, the exact `approve:<action>` capability, and scope covering the authoritative target tenant. Platform-wide approver scope must be an explicit, reviewed grant.
+4. Require the approval to bind the exact action and resource, the authoritative tenant where applicable, the requester, the distinct approver, expiry, and an explicit unconsumed state. Reject missing or malformed state.
+5. Enforce single-use consumption under concurrency. Approval validation, consumption, the protected database mutation, and audit insertion must be in one transaction where they share a database. For external side effects, use a durable reservation/idempotency design and reconcile completion before claiming success; a read-then-write check alone is replay-vulnerable.
+6. Generate append-only audit events server-side and redact credentials, tokens, and sensitive student/parent payloads. Fail closed if authorization, consumption, or required audit persistence fails.
+
+Required adapter tests include concurrent attempts using the same approval (only one may reserve/execute), replay after success, revoked approver/operator, changed approver capability or scope, target/tenant substitution, transaction rollback, idempotency-key reuse with a different intent, and audit-write failure. These tests must run against an isolated backend; pure helper tests alone are insufficient.
