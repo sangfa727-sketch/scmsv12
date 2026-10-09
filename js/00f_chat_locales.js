@@ -210,6 +210,36 @@
   Object.keys(groupSendAccessibleLocaleFix).forEach(code =>
     Object.assign(chat[code], groupSendAccessibleLocaleFix[code])
   );
+  // Complete ticket-form labels for English and Myanmar. These keys were absent
+  // from the two base chat dictionaries, so t() exposed the raw key names.
+  Object.assign(en, {
+    'chat.subject':'Subject',
+    'chat.studentId':'Student ID',
+    'chat.optionalSameSchool':'Optional · same school only',
+    'chat.whatNeedsAttention':'What needs attention?',
+    'chat.describeIssue':'Describe the issue clearly…'
+  });
+  Object.assign(my, {
+    'chat.subject':'အကြောင်းအရာ',
+    'chat.studentId':'ကျောင်းသား ID',
+    'chat.optionalSameSchool':'မဖြစ်မနေမဟုတ်ပါ · တူညီသောကျောင်းအတွင်းသာ',
+    'chat.whatNeedsAttention':'ဘယ်အကြောင်းအရာကို စစ်ဆေးဆောင်ရွက်ရန် လိုအပ်ပါသလဲ။',
+    'chat.describeIssue':'ပြဿနာကို ရှင်းလင်းစွာ ဖော်ပြပါ…'
+  });
+
+  // Keep priority values stable for the API while localizing their visible labels.
+  const ticketPriorityLocaleFix = {
+    en: {'chat.priorityNormal':'Normal','chat.priorityLow':'Low','chat.priorityHigh':'High','chat.priorityUrgent':'Urgent'},
+    my: {'chat.priorityNormal':'ပုံမှန်','chat.priorityLow':'နိမ့်','chat.priorityHigh':'မြင့်','chat.priorityUrgent':'အရေးပေါ်'},
+    th: {'chat.priorityNormal':'ปกติ','chat.priorityLow':'ต่ำ','chat.priorityHigh':'สูง','chat.priorityUrgent':'เร่งด่วน'},
+    jp: {'chat.priorityNormal':'通常','chat.priorityLow':'低','chat.priorityHigh':'高','chat.priorityUrgent':'緊急'},
+    ms: {'chat.priorityNormal':'Biasa','chat.priorityLow':'Rendah','chat.priorityHigh':'Tinggi','chat.priorityUrgent':'Segera'},
+    km: {'chat.priorityNormal':'ធម្មតា','chat.priorityLow':'ទាប','chat.priorityHigh':'ខ្ពស់','chat.priorityUrgent':'បន្ទាន់'},
+    zh: {'chat.priorityNormal':'普通','chat.priorityLow':'低','chat.priorityHigh':'高','chat.priorityUrgent':'紧急'}
+  };
+  Object.keys(ticketPriorityLocaleFix).forEach(code =>
+    Object.assign(code === 'en' ? en : code === 'my' ? my : chat[code], ticketPriorityLocaleFix[code])
+  );
   const maps={en:'I18N_EN',my:'I18N_MY',th:'I18N_TH',jp:'I18N_JP',ms:'I18N_MS',km:'I18N_KM',zh:'I18N_ZH'};
   Object.keys(maps).forEach(code=>{ window[maps[code]]=Object.assign({},window[maps[code]]||{},code==='en'?en:code==='my'?my:chat[code]); });
 })();
