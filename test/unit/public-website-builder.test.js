@@ -77,7 +77,7 @@ test('School Website is available from the native sidebar only to owner/admin or
  assert.match(sidebar,/ownerOrAdmin/);
  assert.match(sidebar,/school_owner/);
  assert.match(sidebar,/website\\.manage/);
- assert.match(sidebar,/school-website\\/create\\.html/);
+ assert.ok(sidebar.includes('school-website/create.html'));
  assert.match(sidebar,/School Website/);
 });
 
