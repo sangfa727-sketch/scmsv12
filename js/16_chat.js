@@ -637,7 +637,7 @@ function _renderInquiryDraft(){
   root.innerHTML=`
     <form class="smart-chat-inquiry-form" onsubmit="return _submitInquiryDraft(event)">
       <label>${t('chat.subject')}<input id="inquiryDraftSubject" maxlength="160" required placeholder="${t('chat.whatNeedsAttention')}"></label>
-      <label>${t('chat.priority')}<select id="inquiryDraftPriority"><option>NORMAL</option><option>LOW</option><option>HIGH</option><option>URGENT</option></select></label>
+      <label>${t('chat.priority')}<select id="inquiryDraftPriority"><option value="NORMAL">${t('chat.priorityNormal')}</option><option value="LOW">${t('chat.priorityLow')}</option><option value="HIGH">${t('chat.priorityHigh')}</option><option value="URGENT">${t('chat.priorityUrgent')}</option></select></label>
       <label>${t('chat.studentId')} <span class="smart-chat-field-note">${t('chat.optionalSameSchool')}</span><input id="inquiryDraftStudent" maxlength="80" placeholder="${t('chat.studentId')}"></label>
       <label>${t('chat.details')}<textarea id="inquiryDraftBody" maxlength="4000" rows="5" required placeholder="${t('chat.describeIssue')}"></textarea></label>
       <div class="smart-chat-inquiry-form-actions"><button type="button" class="btn-secondary" onclick="_closeInquiryDraft()">${t('chat.cancel')}</button><button id="inquiryDraftSubmitBtn" type="submit" class="btn-primary">${t('chat.createTicket')}</button></div>
