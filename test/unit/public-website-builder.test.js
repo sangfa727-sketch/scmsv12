@@ -80,3 +80,9 @@ test('School Website is available from the native sidebar only to owner/admin or
  assert.match(sidebar,/school-website\\/create\\.html/);
  assert.match(sidebar,/School Website/);
 });
+
+test('School Website navigation scripts use fresh cache-busting versions',()=>{
+ const html=read('index.html');
+ assert.match(html,/js\/12_more\.js\?v=20261010a/);
+ assert.match(html,/js\/17_sidebar\.js\?v=20261010a/);
+});
