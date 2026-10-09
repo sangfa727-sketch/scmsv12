@@ -103,3 +103,12 @@ No existing reviewed endpoint establishes the required trusted platform-operator
 Next safe implementation step: define and test a small, server-only operator authorization contract against verified identity claims and explicit capabilities, without wiring it to production data or granting service-role access to the browser. Tests must include anonymous, ordinary authenticated, unprovisioned/disabled operator, insufficient capability, cross-tenant target, expired/revoked session, and invalid/replayed approval cases. Only proceed to a deployable endpoint after the identity source and persistence/atomicity requirements are proven.
 
 This update does not create a DCC endpoint, database object, account, grant, or production deployment.
+
+
+## 8. Sandbox-only authorization contract prototype — 2026-10-09
+
+Added on the PR branch:
+- `school-website/server/developer-operator-authorization.js`: pure server-side policy helper requiring a verified identity from a trusted adapter, an active non-revoked session, an active operator record, an explicit action capability, and an allowed target scope. When requested, it checks approval status, action/target binding, independent approver, expiry, and prior consumption.
+- `test/unit/developer-operator-authorization.test.js`: executable negative-contract tests for anonymous/unverified identities, revoked/expired sessions, missing/disabled/mismatched operators, missing capabilities, cross-tenant targets, missing/pending/mismatched/self-approved/replayed/expired approvals, and required targets.
+
+**Important limitations:** This is not wired to an endpoint, provider session verification, operator persistence, audit storage, or a database. Its input context is trusted only if a future server adapter constructs it after verifying identity and loading server-controlled records. The tests prove the pure policy helper's decisions for supplied contexts; they do not prove that a caller cannot forge those contexts. Approval consumption and audit persistence must be implemented atomically by a trusted repository adapter before any privileged action can ship. No production objects, grants, accounts, or deployments were changed.
