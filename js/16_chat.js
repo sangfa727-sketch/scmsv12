@@ -795,7 +795,7 @@ window._toggleAnnouncementComposer=function(force=null){
   }
 };
 function _announcementExcerpt(value,limit=96){
-  const text=String(value||'').replace(/\\s+/g,' ').trim();
+  const text=String(value||'').replace(/\s+/g,' ').trim();
   if(!text)return '';
   return text.length>limit?text.slice(0,limit-1).trimEnd()+'…':text;
 }
@@ -809,7 +809,7 @@ function _renderAnnouncementList(rows){
   if(!list)return;
   list.innerHTML=rows.map(a=>{
     const id=Number(a.id);
-    const type=String(a.message_type||t('chat.officialNotice'));
+    const type=String(a.message_type||t('chat.officialNotices'));
     const excerpt=_announcementExcerpt(a.body);
     const date=_formatAnnouncementDate(a.created_at);
     const unread=!a.read_at;
