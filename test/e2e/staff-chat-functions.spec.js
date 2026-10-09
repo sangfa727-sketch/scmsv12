@@ -171,7 +171,7 @@ test('Official Announcements loads and marks the selected UUID announcement read
   await mountSmartChat(page);
   await page.evaluate(() => window.switchChatChannel('announcements'));
   await expect.poll(async () => (await calls(page, 'getStaffAnnouncements')).length).toBeGreaterThan(0);
-  await expect(page.locator('#announcementList')).toContainText('School update');
+  await expect(page.locator('#announcementList')).toContainText('Read this announcement');
   await page.evaluate(() => window._openAnnouncement('11111111-1111-4111-8111-111111111111'));
   await expect(page.locator('#announcementStream')).toContainText('Read this announcement');
   await expect.poll(async () => (await calls(page, 'markStaffAnnouncementRead')).length).toBe(1);
