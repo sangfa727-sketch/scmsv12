@@ -137,3 +137,26 @@ test('group send accessible label is translated for every supported chat locale'
     );
   }
 });
+
+test('ticket form labels and priority options are localized instead of exposing keys or raw enum values', () => {
+  const locales = fs.readFileSync(path.resolve(__dirname, '../../js/00f_chat_locales.js'), 'utf8');
+  const chat = fs.readFileSync(path.resolve(__dirname, '../../js/16_chat.js'), 'utf8');
+  for (const key of ['chat.subject', 'chat.studentId', 'chat.optionalSameSchool', 'chat.whatNeedsAttention', 'chat.describeIssue']) {
+    assert.ok(locales.includes("'" + key + "':"), 'missing ticket translation key ' + key);
+  }
+  for (const key of ['chat.priorityNormal', 'chat.priorityLow', 'chat.priorityHigh', 'chat.priorityUrgent']) {
+    assert.ok(locales.includes("'" + key + "':"), 'missing priority translation key ' + key);
+    assert.ok(chat.includes("t('" + key + "')"), 'priority label should use translation key ' + key);
+  }
+  assert.ok(!chat.includes('<option>NORMAL</option><option>LOW</option>'));
+});
+
+test('global toast colors use theme surfaces instead of inverted text/background colors', () => {
+  const css = fs.readFileSync(path.resolve(__dirname, '../../style.css'), 'utf8');
+  const start = css.indexOf('.toast {');
+  const end = css.indexOf('}', start);
+  const toast = css.slice(start, end);
+  assert.ok(toast.includes('background: var(--surface2);'));
+  assert.ok(toast.includes('color: var(--text);'));
+  assert.ok(toast.includes('border: 1px solid var(--border2);'));
+});
