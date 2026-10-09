@@ -1,8 +1,8 @@
 /**
  * SCMS v12 — Smart Staff Chat
  * UX layer: one compact communication center with a hard separation between
- * School Chat and AI Operations. The Admin Composer below is PREVIEW ONLY:
- * it never calls a send API.
+ * School Chat and AI Operations. The official-announcement composer uses
+ * server-verified recipient previews and sends through the authorized RPC.
  */
 'use strict';
 
