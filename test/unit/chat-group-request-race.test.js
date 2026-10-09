@@ -204,6 +204,19 @@ test('official-message feedback stays compact and blends with both active themes
   assert.ok(css.includes('.smart-chat-mode-switch{width:100%;display:grid;grid-template-columns:1fr 1fr}'));
 });
 
+test('Chat navigation exposes an aggregate unread badge using theme-aware styling', () => {
+  const html = fs.readFileSync(path.resolve(__dirname, '../../index.html'), 'utf8');
+  const css = fs.readFileSync(path.resolve(__dirname, '../../style.css'), 'utf8');
+  const chat = fs.readFileSync(path.resolve(__dirname, '../../js/16_chat.js'), 'utf8');
+  assert.ok(html.includes('id="chatTabUnreadBadge"'), 'Chat tab must contain an unread badge');
+  assert.ok(css.includes('.chat-tab-unread-badge'));
+  assert.ok(css.includes('background:var(--accent)'));
+  assert.ok(css.includes('border:2px solid var(--bg)'));
+  assert.ok(chat.includes('function _renderChatTabUnreadBadge()'));
+  assert.ok(chat.includes("t('chat.unreadMessages')"));
+  assert.ok(chat.includes('unreadRefreshTick === 0'));
+});
+
 test('official message and ticket labels have explicit translations for every supported locale', () => {
   const locales = fs.readFileSync(path.resolve(__dirname, '../../js/00f_chat_locales.js'), 'utf8');
   const start = locales.indexOf('const officialTicketLocaleParityFix = {');
