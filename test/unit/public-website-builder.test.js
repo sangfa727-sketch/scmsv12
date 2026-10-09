@@ -75,3 +75,11 @@ test('website.manage is a global sensitive permission with admin defaults only',
  assert.match(rpc,/p_action='permission_set'/);
  assert.match(rpc,/public\.teacher_permissions/);
 });
+
+test('website studio uses querySelectorAll for every DOM collection loop',()=>{
+ const js=read('school-website/create.js');
+ assert.doesNotMatch(js,/(?<!\\$)\\$\\([^)]*\\)\\.forEach/);
+ assert.match(js,/\\$\\$\\("\\[data-field\\]"\\)\\.forEach/);
+ assert.match(js,/\\$\\$\\("\\.template-option"\\)\\.forEach/);
+ new Function(js);
+});
