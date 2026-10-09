@@ -105,3 +105,17 @@ test('School Website Studio fails closed until the server verifies an active aut
 test('website drafts are isolated by the verified school context',()=>{
  const js=read('school-website/create.js'); assert.match(js,/verified school authorization/); assert.match(js,/if\(!window\.SCMS_WEBSITE_CONTEXT\?\.schoolId\)/); assert.match(js,/function draftStorageKey\(\)/); assert.match(js,/SCMS_WEBSITE_CONTEXT\?\.schoolId/); assert.match(js,/scms-website-draft:/); assert.match(js,/localStorage\.setItem\(draftStorageKey\(\)/); assert.match(js,/localStorage\.getItem\(draftStorageKey\(\)/); new Function(js);
 });
+
+test('School Website manager delegation is limited to same-school non-privileged staff and one permission',()=>{
+ const migration=read('supabase/migrations/20261010150000_school_website_manager_delegation.sql');
+ assert.match(migration,/rpc_school_website_set_manager/);
+ assert.match(migration,/v_actor\.role not in \('owner', 'school_owner', 'admin', 'super_admin'\)/);
+ assert.match(migration,/school_id = v_actor\.school_id/);
+ assert.match(migration,/v_target\.status <> 'active'/);
+ assert.match(migration,/v_target\.role in \('owner', 'school_owner', 'admin', 'super_admin'\)/);
+ assert.match(migration,/'website\.manage'/);
+ assert.match(migration,/scope_type = 'global'/);
+ assert.match(migration,/p_allowed is null/);
+ assert.match(migration,/revoke all on function public\.rpc_school_website_set_manager\(text, text, boolean\) from public/i);
+ assert.match(migration,/grant execute on function public\.rpc_school_website_set_manager\(text, text, boolean\) to anon, authenticated/i);
+});
