@@ -9703,8 +9703,8 @@ html.scms-chat-workspace #pages{overflow:auto}
   #page-chat .smart-chat-quick-nav-track::-webkit-scrollbar { display:none; }
   #page-chat .smart-chat-quick-channel { min-height:43px; padding:0 12px; border-radius:13px; font-size:12px; }
   #page-chat .smart-chat-school-grid { grid-template-columns:minmax(0,1fr); gap:10px; }
-  #page-chat .smart-chat-channel-list {
-    flex-direction:row; flex-wrap:nowrap; gap:7px; overflow-x:auto; overflow-y:hidden;
+  #page-chat .smart-chat-school-grid > .smart-chat-channel-list {
+    display:flex; flex-direction:row; flex-wrap:nowrap; gap:7px; overflow-x:auto; overflow-y:hidden;
     padding:8px; border-radius:15px; scrollbar-width:none; -webkit-overflow-scrolling:touch;
     overscroll-behavior-x:contain; touch-action:pan-x pan-y;
   }
