@@ -794,15 +794,45 @@ window._toggleAnnouncementComposer=function(force=null){
     requestAnimationFrame(()=>document.getElementById('adminMsgBody')?.focus());
   }
 };
+function _announcementExcerpt(value,limit=96){
+  const text=String(value||'').replace(/\\s+/g,' ').trim();
+  if(!text)return '';
+  return text.length>limit?text.slice(0,limit-1).trimEnd()+'…':text;
+}
+function _formatAnnouncementDate(value){
+  if(!value)return '';
+  const date=new Date(value);
+  return Number.isNaN(date.getTime())?String(value):date.toLocaleString([], {dateStyle:'medium',timeStyle:'short'});
+}
+function _renderAnnouncementList(rows){
+  const list=document.getElementById('announcementList');
+  if(!list)return;
+  list.innerHTML=rows.map(a=>{
+    const id=Number(a.id);
+    const type=String(a.message_type||t('chat.officialNotice'));
+    const excerpt=_announcementExcerpt(a.body);
+    const date=_formatAnnouncementDate(a.created_at);
+    const unread=!a.read_at;
+    const summary=excerpt||_announcementExcerpt(a.reason)||t('chat.officialCommunication');
+    const accessible=[t('chat.officialPrefix'),type,summary,date,unread?t('chat.unread'):t('chat.read')].filter(Boolean).join(', ');
+    return '<button type="button" class="smart-chat-channel-card smart-chat-announcement-card '+(id===Number(_announcementId)?'active':'')+'" aria-label="'+esc(accessible)+'" aria-current="'+(id===Number(_announcementId)?'true':'false')+'" onclick="_openAnnouncement('+id+')">'+
+      '<span class="smart-chat-channel-icon" aria-hidden="true">📢</span>'+
+      '<span class="smart-chat-channel-copy"><strong>'+esc(type)+'</strong>'+
+      '<small class="smart-chat-announcement-excerpt">'+esc(summary)+'</small>'+
+      '<small class="smart-chat-announcement-date">'+esc(date)+'</small></span>'+
+      (unread?'<span class="smart-chat-announcement-unread" aria-label="'+esc(t('chat.unread'))+'">•</span>':'<span class="smart-chat-channel-chevron" aria-hidden="true">›</span>')+
+      '</button>';
+  }).join('');
+}
 function _renderAnnouncementWorkspace(){
   const composer=window.APP?.is_admin ? `<div id="announcementComposer" class="smart-chat-composer-drawer">${_renderAdminComposer()}</div>` : '';
   return _chatChannelBack(t('chat.schoolChat')) + composer +
     '<div class="smart-chat-direct-shell smart-chat-announcement-shell'+(_announcementId?' has-selection':'')+'">'+
     `<aside class="smart-chat-direct-list"><div class="smart-chat-direct-list-head"><div><div class="smart-chat-kicker">${t('chat.official')}</div><strong>${t('chat.announcements')}</strong></div><div class="smart-chat-list-actions">`+
     (window.APP?.is_admin ? `<button type="button" class="smart-chat-add-btn" id="announcementComposerToggle" onclick="_toggleAnnouncementComposer()" aria-expanded="false" aria-controls="announcementComposer" title="${t('chat.newOfficialMessage')}">+</button>` : '')+
-    `<button type="button" class="smart-chat-refresh-btn" onclick="_loadAnnouncementWorkspace()" title="${t('chat.refresh')}">↻</button></div></div>`+
-    '<div id="announcementList" class="smart-chat-conversation-list"></div></aside>'+
-    `<section class="smart-chat-direct-conversation"><div id="announcementHead" class="smart-chat-conversation-head"><div><strong>${t('chat.officialAnnouncements')}</strong><small>${t('chat.schoolAuthorizedNotices')}</small></div><span class="smart-chat-verified-pill">${t('chat.verified')}</span></div><div id="announcementStream" class="chat-stream"><div class="chat-empty"><div class="chat-empty-icon">📢</div><div class="chat-empty-title">${t('chat.officialAnnouncements')}</div><div class="chat-empty-sub">${t('chat.loading')}</div></div></div></section></div>`;
+    `<button type="button" class="smart-chat-refresh-btn" onclick="_loadAnnouncementWorkspace()" aria-label="${t('chat.refresh')}" title="${t('chat.refresh')}">↻</button></div></div>`+
+    '<div id="announcementList" class="smart-chat-conversation-list" aria-label="'+esc(t('chat.announcements'))+'"></div></aside>'+
+    `<section class="smart-chat-direct-conversation"><div id="announcementHead" class="smart-chat-conversation-head"><div><strong>${t('chat.officialAnnouncements')}</strong><small>${t('chat.schoolAuthorizedNotices')}</small></div><span class="smart-chat-verified-pill">${t('chat.verified')}</span></div><div id="announcementStream" class="chat-stream" aria-live="polite"><div class="chat-empty"><div class="chat-empty-icon">📢</div><div class="chat-empty-title">${t('chat.officialAnnouncements')}</div><div class="chat-empty-sub">${t('chat.loading')}</div></div></div></section></div>`;
 }
 async function _loadAnnouncementWorkspace(autoOpen=true){
   try{
@@ -811,7 +841,7 @@ async function _loadAnnouncementWorkspace(autoOpen=true){
     if(!list||!stream)return;
     window._chatAnnouncements=rows;
     if(!rows.length){_announcementId=null;list.innerHTML=`<div class="smart-chat-list-empty-card"><div class="icon">📢</div><strong>${t('chat.noOfficialAnnouncements')}</strong><small>${t('chat.newVerifiedNotices')}</small></div>`;stream.innerHTML=`<div class="chat-empty"><div class="chat-empty-icon">📢</div><div class="chat-empty-title">${t('chat.noOfficialAnnouncements')}</div><div class="chat-empty-sub">${t('chat.newVerifiedNotices')}</div></div>`;return;}
-    list.innerHTML=rows.map(a=>'<button class="smart-chat-channel-card '+(Number(a.id)===Number(_announcementId)?'active':'')+'" onclick="_openAnnouncement('+Number(a.id)+')"><span class="smart-chat-channel-icon">📢</span><span><strong>'+esc(a.message_type||t('chat.officialNotice'))+'</strong><small>'+esc(a.created_at||'')+'</small></span><b>'+(!a.read_at?'•':'›')+'</b></button>').join('');
+    _renderAnnouncementList(rows);
     if(autoOpen && !_announcementId) await _openAnnouncement(Number(rows[0].id));
    }catch(e){const list=document.getElementById('announcementList');if(list)list.innerHTML=`<div class="chat-error"><div>📢</div><div>${t('chat.loadAnnouncementsFailed')}</div><button type="button" class="btn-secondary" onclick="_loadAnnouncementWorkspace(false)">${t('chat.retry')}</button></div>`;}
 }
@@ -820,10 +850,22 @@ window._openAnnouncement=async function(id){
   const stream=document.getElementById('announcementStream');if(!a||!stream)return;
   _announcementId=Number(id);
   const shell=document.querySelector('.smart-chat-announcement-shell');if(shell)shell.classList.add('has-selection');
+  _renderAnnouncementList(window._chatAnnouncements||[]);
   const head=document.getElementById('announcementHead');
-   if(head)head.innerHTML=`<div class="smart-chat-direct-peer"><button type="button" class="smart-chat-mobile-back" onclick="_clearAnnouncementSelection()" aria-label="${t('chat.backToAnnouncements')}">‹</button><div><strong>${t('chat.officialPrefix')} ${esc(a.message_type||t('chat.announcement'))}</strong><small>${esc(a.created_at||'')}</small></div></div><span class="smart-chat-verified-pill">${t('chat.verified')}</span>`;
-   stream.innerHTML=`<article class="smart-chat-official-preview"><div class="smart-chat-preview-label">${t('chat.systemGeneratedOfficialMessage')}</div><div class="smart-chat-preview-header">${esc(a.message_type||t('chat.officialAnnouncement'))}</div><div class="smart-chat-preview-meta">${esc(a.created_at||'')} · ${(!a.read_at?t('chat.unread'):t('chat.read'))}</div><div class="smart-chat-preview-reason"><strong>${t('chat.reason')}</strong><span>${esc(a.reason||t('chat.officialCommunication'))}</span></div><div class="smart-chat-preview-body">${esc(a.body||'').replace(/\n/g,'<br>')}</div></article>`;
-  try{if(API.markStaffAnnouncementRead)await API.markStaffAnnouncementRead(id);a.read_at=a.read_at||new Date().toISOString();}catch(e){}
+  if(head)head.innerHTML=`<div class="smart-chat-direct-peer"><button type="button" class="smart-chat-mobile-back" onclick="_clearAnnouncementSelection()" aria-label="${t('chat.backToAnnouncements')}">‹</button><div><strong>${esc(a.message_type||t('chat.announcement'))}</strong><small>${esc(_formatAnnouncementDate(a.created_at))}</small></div></div><span class="smart-chat-verified-pill">${t('chat.verified')}</span>`;
+  stream.innerHTML=`<article class="smart-chat-official-preview smart-chat-announcement-detail"><div class="smart-chat-preview-label">${t('chat.systemGeneratedOfficialMessage')}</div><h2 class="smart-chat-preview-header">${esc(a.message_type||t('chat.officialAnnouncement'))}</h2><div class="smart-chat-preview-meta">${esc(_formatAnnouncementDate(a.created_at))} · ${(!a.read_at?t('chat.unread'):t('chat.read'))}</div><div class="smart-chat-preview-reason"><strong>${t('chat.reason')}</strong><span>${esc(a.reason||t('chat.officialCommunication'))}</span></div><div class="smart-chat-preview-body">${esc(a.body||'').replace(/\\n/g,'<br>')}</div></article>`;
+  try{
+    if(API.markStaffAnnouncementRead){
+      const result=await API.markStaffAnnouncementRead(id);
+      if(result?.ok!==true)throw new Error(result?.error||'announcement_read_failed');
+      a.read_at=a.read_at||new Date().toISOString();
+      const meta=stream.querySelector('.smart-chat-preview-meta');
+      if(meta)meta.textContent=_formatAnnouncementDate(a.created_at)+' · '+t('chat.read');
+      _renderAnnouncementList(window._chatAnnouncements||[]);
+    }
+  }catch(e){
+    // Keep the item unread unless the server confirms the read receipt.
+  }
 };
 window._clearAnnouncementSelection=function(){
   _announcementId=null;
@@ -832,6 +874,7 @@ window._clearAnnouncementSelection=function(){
   if(head)head.innerHTML=`<div><strong>${t('chat.officialAnnouncements')}</strong><small>${t('chat.selectAnnouncementToRead')}</small></div><span class="smart-chat-verified-pill">${t('chat.verified')}</span>`;
   const stream=document.getElementById('announcementStream');
   if(stream)stream.innerHTML=`<div class="chat-empty"><div class="chat-empty-icon">📢</div><div class="chat-empty-title">${t('chat.selectAnnouncement')}</div><div class="chat-empty-sub">${t('chat.chooseOfficialNotice')}</div></div>`;
+  _renderAnnouncementList(window._chatAnnouncements||[]);
 };
 function _renderDirectWorkspace() {
   return _chatChannelBack(t('chat.schoolChat')) + `
