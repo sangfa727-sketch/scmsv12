@@ -419,6 +419,7 @@ function renderChat() {
         </button>
       </div>
 
+      <nav id="smartChatQuickNav" class="smart-chat-quick-nav" aria-label="${esc(t('chat.schoolChat'))}"></nav>
       <div id="smartChatModeBody"></div>
     </div>`;
 
@@ -449,9 +450,39 @@ window.switchChatMode = function(mode) {
   document.querySelectorAll('.smart-chat-mode-switch button').forEach((b, i) =>
     b.classList.toggle('active', (_chatMode === 'school' && i === 0) || (_chatMode === 'ai' && i === 1))
   );
+  _renderChatQuickNav();
   _renderChatMode();
   if (_chatMode === 'school') _refreshChatChannelUnreadCounts();
 };
+
+function _chatQuickNavChannels() {
+  return [
+    { id:'staff', name:t('chat.allStaff'), icon:'👥' },
+    { id:'direct', name:t('chat.directMessages'), icon:'👤' },
+    { id:'departments', name:t('chat.departmentGrade'), icon:'📚' },
+    { id:'announcements', name:t('chat.officialAnnouncements'), icon:'📢' },
+    { id:'tickets', name:t('chat.workspace.tickets'), icon:'🎫' },
+    { id:'events', name:t('chat.workspace.groups'), icon:'🗂️' }
+  ];
+}
+
+function _renderChatQuickNav() {
+  const nav = document.getElementById('smartChatQuickNav');
+  if (!nav) return;
+  nav.hidden = _chatMode !== 'school';
+  nav.setAttribute('aria-label', t('chat.schoolChat'));
+  nav.innerHTML = '<div class="smart-chat-quick-nav-track" role="group">' +
+    _chatQuickNavChannels().map(c => {
+      const count = _chatUnreadCount(c.id);
+      const active = c.id === _chatChannel;
+      const countLabel = count > 0 ? ' aria-label="' + esc(t('chat.unreadMessages')) + ': ' + count + '"' : ' aria-hidden="true"';
+      return '<button type="button" class="smart-chat-quick-channel' + (active ? ' active' : '') + '" data-chat-quick-channel="' + c.id + '" aria-pressed="' + (active ? 'true' : 'false') + '" onclick="switchChatChannel(\'' + c.id + '\')">' +
+        '<span class="smart-chat-quick-channel-icon" aria-hidden="true">' + c.icon + '</span>' +
+        '<span class="smart-chat-quick-channel-name">' + esc(c.name) + '</span>' +
+        '<span class="smart-chat-quick-channel-count' + (count > 0 ? ' has-unread' : '') + '"' + countLabel + '>' + (count > 0 ? (count > 99 ? '99+' : count) : '') + '</span>' +
+      '</button>';
+    }).join('') + '</div>';
+}
 
 function _chatUnreadCount(channel) {
   let rows = [];
@@ -466,13 +497,19 @@ function _chatUnreadCount(channel) {
 function _renderChatChannelUnreadBadges() {
   if (_chatMode !== 'school' || _chatChannel !== 'staff') return;
   for (const channel of ['direct', 'tickets', 'events', 'announcements']) {
-    const badge = document.querySelector('[data-chat-unread-for="' + channel + '"]');
-    if (!badge) continue;
+    const badges = document.querySelectorAll('[data-chat-unread-for="' + channel + '"]');
     const count = _chatUnreadCount(channel);
-    badge.classList.toggle('has-unread', count > 0);
-    badge.textContent = count > 0 ? (count > 99 ? '99+' : String(count)) : '›';
-    if (count > 0) badge.setAttribute('aria-label', t('chat.unreadMessages') + ': ' + count);
-    else badge.removeAttribute('aria-label');
+    badges.forEach(badge => {
+      badge.classList.toggle('has-unread', count > 0);
+      badge.textContent = count > 0 ? (count > 99 ? '99+' : String(count)) : (badge.classList.contains('smart-chat-channel-trailing') ? '›' : '');
+      if (count > 0) {
+        badge.setAttribute('aria-hidden', 'false');
+        badge.setAttribute('aria-label', t('chat.unreadMessages') + ': ' + count);
+      } else {
+        badge.setAttribute('aria-hidden', badge.classList.contains('smart-chat-quick-channel-count') ? 'true' : 'false');
+        badge.removeAttribute('aria-label');
+      }
+    });
   }
 }
 
@@ -512,6 +549,7 @@ async function _refreshChatChannelUnreadCounts() {
 function _renderChatMode() {
   const root = document.getElementById('smartChatModeBody');
   if (!root) return;
+  _renderChatQuickNav();
   if (_chatMode === 'ai') {
     root.innerHTML = `
       <section class="smart-chat-ai-card">
@@ -539,14 +577,17 @@ function _renderChatMode() {
   }
 
   // Put the highest-frequency staff workflows first; All Staff remains the default.
-  const channels = [
-    { id:'staff', name:t('chat.allStaff'), icon:'👥', sub:t('chat.staffGeneral') },
-    { id:'direct', name:t('chat.directMessages'), icon:'👤', sub:t('chat.privateStaffChat') },
-    { id:'departments', name:t('chat.departmentGrade'), icon:'📚', sub:t('chat.classDepartmentChannels') },
-    { id:'announcements', name:t('chat.officialAnnouncements'), icon:'📢', sub:t('chat.officialNotices') },
-    { id:'tickets', name:t('chat.workspace.tickets'), icon:'🎫', sub:t('chat.studentParentConversations') },
-    { id:'events', name:t('chat.workspace.groups'), icon:'🗂️', sub:t('chat.temporaryWorkGroups') }
-  ];
+  const channels = _chatQuickNavChannels().map(c => ({
+    ...c,
+    sub: ({
+      staff:t('chat.staffGeneral'),
+      direct:t('chat.privateStaffChat'),
+      departments:t('chat.classDepartmentChannels'),
+      announcements:t('chat.officialNotices'),
+      tickets:t('chat.studentParentConversations'),
+      events:t('chat.temporaryWorkGroups')
+    })[c.id]
+  }));
   const visible = channels;
   if (!visible.some(c => c.id === _chatChannel)) _chatChannel = 'staff';
 
@@ -942,10 +983,13 @@ function _chatChannelBack(label=t('chat.schoolChat')) {
 }
 
 window.switchChatChannel = function(channel) {
+  const allowed = _chatQuickNavChannels().some(item => item.id === channel);
+  if (!allowed) return;
   _chatChannel = channel;
-  if (_chatMode !== 'school') return;
+  if (_chatMode !== 'school') _chatMode = 'school';
+  _renderChatQuickNav();
   _renderChatMode();
-  if (_chatMode === 'school') _refreshChatChannelUnreadCounts();
+  _refreshChatChannelUnreadCounts();
 };
 
 async function _loadChatMessages() {
