@@ -23,6 +23,7 @@ test('DCC action definitions are immutable and every action remains disabled', (
     assert.equal(Object.isFrozen(definition), true, definition.actionId);
     assert.equal(definition.enabled, false, definition.actionId);
     assert.equal(definition.requiredCapability, definition.actionId);
+    assert.equal(definition.requiresApproval, definition.requiresIndependentApproval, definition.actionId);
   }
 });
 
