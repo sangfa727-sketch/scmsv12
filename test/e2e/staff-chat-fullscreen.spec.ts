@@ -130,4 +130,37 @@ test.describe('Staff Chat full-screen browser regression', () => {
     await page.locator('.smart-chat-channel-back').click();
     await expect(page.locator('[data-chat-quick-channel="staff"]')).toBeVisible();
   });
+  test('Direct Chat sends a unique message and reloads it from the server', async ({ page }) => {
+    test.skip(
+      process.env.SCMS_REQUIRE_STAGING !== '1',
+      'Message-send E2E must run against an isolated staging environment'
+    );
+    await page.setViewportSize({ width: 390, height: 844 });
+    await signInAndOpenChat(page);
+    await page.locator('[data-chat-quick-channel="direct"]').click();
+
+    const recipient = page.locator('.smart-chat-directory-item').first();
+    await expect(recipient, 'staging must have at least one active staff recipient').toBeVisible();
+    await recipient.click();
+    const input = page.locator('#directChatInput');
+    const send = page.locator('#directChatSendBtn');
+    await expect(input).toBeEnabled();
+
+    const message = 'SCMS Playwright send-check ' + Date.now();
+    await input.fill(message);
+    await send.click();
+    await expect(page.locator('#directMessageStream')).toContainText(message, { timeout: 15000 });
+
+    // Re-enter the conversation so the assertion is backed by a fresh server read,
+    // not only an optimistic/local UI update.
+    await page.reload();
+    await expect(page.locator('#sidebar')).toBeVisible();
+    await page.getByTestId('nav-chat').click();
+    await expect(page.locator('#page-chat')).toBeVisible();
+    await page.locator('[data-chat-quick-channel="direct"]').click();
+    await expect(page.locator('.smart-chat-direct-item').first()).toBeVisible();
+    await page.locator('.smart-chat-direct-item').first().click();
+    await expect(page.locator('#directMessageStream')).toContainText(message, { timeout: 15000 });
+  });
+
 });
