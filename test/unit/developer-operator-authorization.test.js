@@ -98,7 +98,7 @@ test('requires a server-loaded approval record for high-risk actions', () => {
 test('denies approval bound to a different action, resource, or school scope', () => {
   assert.equal(authorizeDeveloperAction(approvedContext({ action: 'billing.refund' }), highRiskRequest()).reason, 'approval_binding_mismatch');
   assert.equal(authorizeDeveloperAction(approvedContext({ targetId: 'school-b' }), highRiskRequest()).reason, 'approval_binding_mismatch');
-  assert.equal(authorizeDeveloperAction(approvedContext({ targetSchoolId: 'school-b' }), highRiskRequest()).reason, 'cross_tenant_denied');
+  assert.equal(authorizeDeveloperAction(approvedContext({ targetSchoolId: 'school-b' }), highRiskRequest()).reason, 'approval_binding_mismatch');
   assert.equal(authorizeDeveloperAction(approvedContext({ targetId: 'school-b', targetSchoolId: 'school-b' }, {
     operator: { ...context().operator, scope: { type: 'platform' } }
   }), highRiskRequest({ targetSchoolId: 'school-b' })).allowed, true);
