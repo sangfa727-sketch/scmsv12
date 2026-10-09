@@ -6,8 +6,9 @@
  * SECURITY BOUNDARY: This is a pure server-side policy helper, not an HTTP
  * endpoint and not an identity verifier. Call it only after a trusted server
  * adapter has validated the provider session and loaded the operator record
- * from a server-controlled source. Never build this context from request JSON,
- * localStorage, user metadata, URL parameters, or client-supplied role claims.
+ * and action policy from server-controlled sources. Never build this context
+ * from request JSON, localStorage, user metadata, URL parameters, or client
+ * supplied role/policy claims.
  *
  * Approval consumption and audit persistence must be atomic in the eventual
  * repository adapter; this helper intentionally does not mutate state.
@@ -22,7 +23,7 @@ function authorizeDeveloperAction(context, request) {
     return deny('invalid_context');
   }
 
-  const { identity, session, operator } = context;
+  const { identity, session, operator, actionPolicies } = context;
   if (!identity || identity.verified !== true || typeof identity.userId !== 'string' || !identity.userId.trim()) {
     return deny('verified_identity_required');
   }
@@ -38,11 +39,16 @@ function authorizeDeveloperAction(context, request) {
   }
   if (typeof request.action !== 'string' || !request.action.trim()) return deny('action_required');
 
+  // Risk and target requirements are server-owned policy, never request flags.
+  const policy = actionPolicies && actionPolicies[request.action];
+  if (!policy || typeof policy !== 'object') return deny('action_policy_missing');
   const capabilities = Array.isArray(operator.capabilities) ? operator.capabilities : [];
   if (!capabilities.includes(request.action)) return deny('capability_denied');
 
   const scope = operator.scope;
   if (!scope || !['platform', 'schools'].includes(scope.type)) return deny('invalid_operator_scope');
+
+  const targetRequired = policy.targetRequired === true || scope.type === 'schools';
   if (request.targetSchoolId !== undefined) {
     if (typeof request.targetSchoolId !== 'string' || !request.targetSchoolId.trim()) {
       return deny('invalid_target_school');
@@ -50,18 +56,19 @@ function authorizeDeveloperAction(context, request) {
     if (scope.type === 'schools' && (!Array.isArray(scope.schoolIds) || !scope.schoolIds.includes(request.targetSchoolId))) {
       return deny('cross_tenant_denied');
     }
-  } else if (request.targetRequired === true) {
+  } else if (targetRequired) {
     return deny('target_required');
   }
 
-  if (request.requiresApproval === true) {
+  if (policy.requiresApproval === true) {
     const approval = request.approval;
     if (!approval || typeof approval !== 'object') return deny('approval_required');
     if (approval.status !== 'approved') return deny('approval_not_approved');
     if (approval.action !== request.action || approval.targetId !== (request.targetId ?? request.targetSchoolId ?? null)) {
       return deny('approval_binding_mismatch');
     }
-    if (approval.requestedBy !== identity.userId || !approval.approvedBy || approval.approvedBy === approval.requestedBy) {
+    if (approval.requestedBy !== identity.userId || typeof approval.approvedBy !== 'string' ||
+        !approval.approvedBy.trim() || approval.approvedBy === approval.requestedBy) {
       return deny('independent_approval_required');
     }
     if (approval.consumedAt !== null && approval.consumedAt !== undefined) return deny('approval_already_consumed');
