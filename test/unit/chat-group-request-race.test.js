@@ -163,6 +163,15 @@ test('global toast colors use theme surfaces instead of inverted text/background
 });
 
 
+test('official message success feedback uses active theme tokens and avoids the global bright toast', () => {
+  const js = fs.readFileSync(path.resolve(__dirname, '../../js/16_chat.js'), 'utf8');
+  const css = fs.readFileSync(path.resolve(__dirname, '../../style.css'), 'utf8');
+  assert.match(js, /_showChatSuccessFeedback\(t\('chat\.officialMessageSent'/);
+  assert.match(js, /className = 'smart-chat-feedback smart-chat-feedback-success'/);
+  assert.match(css, /#page-chat \.smart-chat-feedback\s*\{[^}]*background:\s*var\(--surface\);[^}]*color:\s*var\(--text\);/);
+  assert.match(css, /#page-chat \.smart-chat-feedback-success\s*\{[^}]*var\(--green\)/);
+});
+
 test('official message and ticket labels have explicit translations for every supported locale', () => {
   const locales = fs.readFileSync(path.resolve(__dirname, '../../js/00f_chat_locales.js'), 'utf8');
   const start = locales.indexOf('const officialTicketLocaleParityFix = {');
@@ -171,7 +180,7 @@ test('official message and ticket labels have explicit translations for every su
   const section = locales.slice(start, end);
   for (const code of ['en', 'my', 'th', 'jp', 'ms', 'km', 'zh']) {
     assert.ok(section.includes('\n    ' + code + ': {'), 'missing locale ' + code);
-    for (const key of ['chat.authorizedTicketAccess', 'chat.backToInquiryTickets', 'chat.noInquiryTickets', 'chat.ticketClosed', 'chat.writeReply', 'chat.newOfficialMessage', 'chat.statusOpen']) {
+    for (const key of ['chat.authorizedTicketAccess', 'chat.backToInquiryTickets', 'chat.noInquiryTickets', 'chat.ticketClosed', 'chat.ticketUpdateFailed', 'chat.writeReply', 'chat.newOfficialMessage', 'chat.statusOpen']) {
       assert.ok(section.includes("'" + key + "'"), 'missing locale parity key ' + key);
     }
   }
