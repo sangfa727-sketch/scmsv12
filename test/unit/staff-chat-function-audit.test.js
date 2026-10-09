@@ -97,7 +97,11 @@ test('all message-send paths validate input and provide failure handling', () =>
     [core, 'sendOfficialAnnouncement', 'API.createStaffAnnouncement', 'chat.officialMessageFailed']
   ];
   for (const [source, name, api, errorKey] of sendContracts) {
-    assert.match(source, new RegExp('(?:function\\s+' + name + '\\s*\\(|(?:window\\.)?' + name + '\\s*=\\s*(?:async\\s*)?function\\b'));
+    const definition = new RegExp(
+      '(?:function\\s+' + name + '\\s*\\(|(?:window\\.)?' + name +
+      '\\s*=\\s*(?:async\\s*)?function\\b)'
+    );
+    assert.match(source, definition);
     assert.ok(source.includes(api), name + ' must call ' + api);
     assert.ok(source.includes(errorKey), name + ' must expose a localized failure state');
   }
