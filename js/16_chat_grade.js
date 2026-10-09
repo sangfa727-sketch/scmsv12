@@ -31,7 +31,8 @@ async function _openGradeChat(name,silent=false){
   requestAnimationFrame(()=>{const s=document.getElementById('gradeMessageStream');if(s)s.scrollTop=s.scrollHeight;});
   await API.markGradeRead(_gradeName);if(!silent)_startGradePolling();_renderGradeList();
  }catch(e){
-  // Fail closed: do not leave a revoked/unauthorized conversation selected or its messages visible.
+  // Fail closed: stop polling and do not leave a revoked/unauthorized conversation selected or visible.
+  if(_gradePollTimer)clearInterval(_gradePollTimer);_gradePollTimer=null;
   _gradeName=null;_setGradeMobileView(false);
   if(root)root.innerHTML=`<div class="chat-empty"><div class="chat-empty-icon">🎓</div><div class="chat-empty-title">${t('chat.selectGrade')}</div><div class="chat-empty-sub">${t('chat.gradeSchoolIsolated')}</div></div>`;
   _renderGradeList();
