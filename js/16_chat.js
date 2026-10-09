@@ -495,7 +495,7 @@ function _chatUnreadCount(channel) {
 }
 
 function _renderChatChannelUnreadBadges() {
-  if (_chatMode !== 'school' || _chatChannel !== 'staff') return;
+  if (_chatMode !== 'school') return;
   for (const channel of ['direct', 'tickets', 'events', 'announcements']) {
     const badges = document.querySelectorAll('[data-chat-unread-for="' + channel + '"]');
     const count = _chatUnreadCount(channel);
@@ -753,10 +753,10 @@ function _renderInquiryDraft(){
   }
   root.innerHTML=`
     <form class="smart-chat-inquiry-form" onsubmit="return _submitInquiryDraft(event)">
-      <label>${t('chat.subject')}<input id="inquiryDraftSubject" maxlength="160" required placeholder="${t('chat.whatNeedsAttention')}"></label>
-      <label>${t('chat.priority')}<select id="inquiryDraftPriority"><option value="NORMAL">${t('chat.priorityNormal')}</option><option value="LOW">${t('chat.priorityLow')}</option><option value="HIGH">${t('chat.priorityHigh')}</option><option value="URGENT">${t('chat.priorityUrgent')}</option></select></label>
-      <label>${t('chat.studentId')} <span class="smart-chat-field-note">${t('chat.optionalSameSchool')}</span><input id="inquiryDraftStudent" maxlength="80" placeholder="${t('chat.studentId')}"></label>
-      <label>${t('chat.details')}<textarea id="inquiryDraftBody" maxlength="4000" rows="5" required placeholder="${t('chat.describeIssue')}"></textarea></label>
+      <label><span class="smart-chat-field-label">${t('chat.subject')}</span><input id="inquiryDraftSubject" maxlength="160" required placeholder="${t('chat.whatNeedsAttention')}"></label>
+      <label><span class="smart-chat-field-label">${t('chat.priority')}</span><select id="inquiryDraftPriority"><option value="NORMAL">${t('chat.priorityNormal')}</option><option value="LOW">${t('chat.priorityLow')}</option><option value="HIGH">${t('chat.priorityHigh')}</option><option value="URGENT">${t('chat.priorityUrgent')}</option></select></label>
+      <label><span class="smart-chat-field-label">${t('chat.studentId')} <small class="smart-chat-field-note">${t('chat.optionalSameSchool')}</small></span><input id="inquiryDraftStudent" maxlength="80" placeholder="${t('chat.studentId')}"></label>
+      <label><span class="smart-chat-field-label">${t('chat.details')}</span><textarea id="inquiryDraftBody" maxlength="4000" rows="5" required placeholder="${t('chat.describeIssue')}"></textarea></label>
       <div class="smart-chat-inquiry-form-actions"><button type="button" class="btn-secondary" onclick="_closeInquiryDraft()">${t('chat.cancel')}</button><button id="inquiryDraftSubmitBtn" type="submit" class="btn-primary">${t('chat.createTicket')}</button></div>
     </form>`;
 }
