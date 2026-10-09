@@ -82,15 +82,16 @@ test('staff chat uses a coherent social-first responsive visual system', () => {
 });
 
 
-test('mobile staff chat keeps one channel navigation and page-level vertical scrolling', () => {
+test('legacy mobile chat fallback does not override the full-screen workspace scroll model', () => {
   const styles = fs.readFileSync(path.resolve(__dirname, '../../style.css'), 'utf8');
   const marker = 'Chat UI regression correction: keep one channel navigation and let the page scroll';
   const start = styles.lastIndexOf(marker);
   assert.ok(start >= 0, 'include the explicit mobile chat regression correction');
   const correction = styles.slice(start);
-  assert.ok(correction.includes('html.scms-chat-workspace #pages'), 'target the actual page scroll container');
+  assert.ok(correction.includes('html:not(.scms-chat-workspace) #pages'), 'scope legacy page scrolling outside the new full-screen workspace');
+  assert.ok(correction.includes('html:not(.scms-chat-workspace) #page-chat .smart-chat-conversation .chat-stream'), 'avoid overriding the full-screen conversation scroll container');
   assert.ok(correction.includes('overflow-y:auto'), 'allow vertical page scrolling');
   assert.ok(correction.includes('touch-action:pan-y'), 'preserve vertical touch gestures over the chat view');
-  assert.ok(correction.includes('#page-chat .smart-chat-school-grid > .smart-chat-channel-list {\n    display:none;'), 'hide the duplicate channel-card rail on mobile');
+  assert.ok(correction.includes('html:not(.scms-chat-workspace) #page-chat .smart-chat-school-grid > .smart-chat-channel-list {\n    display:none;'), 'scope the legacy duplicate-rail fix outside the full-screen workspace');
   assert.ok(correction.includes('.smart-chat-conversation .chat-stream {\n    max-height:none;'), 'avoid trapping vertical gestures inside a short message viewport');
 });
