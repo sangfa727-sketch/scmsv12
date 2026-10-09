@@ -717,3 +717,44 @@ test('public admission backend boundary validates bounded input and idempotency 
   assert.equal(security.validateAdmissionInput({ studentName:'A', guardianName:'B', phone:'1', grade:'G', email:'bad', idempotencyKey:'admission-key-123456' }).error, 'invalid_email');
   assert.equal(security.validateAdmissionInput({ studentName:'A', guardianName:'B', phone:'1', grade:'G', idempotencyKey:'short' }).error, 'invalid_idempotency_key');
 });
+
+
+test('department and grade empty states explain setup prerequisites to admins', () => {
+  const department = read('js/16_chat_department.js');
+  const grade = read('js/16_chat_grade.js');
+  const locales = read('js/00f_chat_locales.js');
+  const html = read('index.html');
+  assert.match(department, /chat\.setupWhy/);
+  assert.match(department, /chat\.setupDepartmentSteps/);
+  assert.match(department, /window\.APP\?\.is_admin/);
+  assert.match(grade, /chat\.setupGradeSteps/);
+  assert.match(grade, /window\.APP\?\.is_admin/);
+  for (const key of ['chat.setupWhy', 'chat.setupDepartmentSteps', 'chat.setupCreateDepartment', 'chat.setupGradeSteps', 'chat.setupGradePath']) {
+    assert.ok(locales.includes(key), `missing localized setup hint key: ${key}`);
+  }
+  assert.match(html, /js\/00f_chat_locales\.js\?v=20261009e/);
+  assert.match(html, /js\/16_chat_department\.js\?v=20261009a/);
+  assert.match(html, /js\/16_chat_grade\.js\?v=20261009a/);
+});
+
+
+test('official message recipient modes keep independent verified previews', () => {
+  const chat = read('js/16_chat.js');
+  const locales = read('js/00f_chat_locales.js');
+  const style = read('style.css');
+  const html = read('index.html');
+  assert.match(chat, /let _adminAllStaffRecipients = \[\];/);
+  assert.match(chat, /if \(type === 'all_staff'\) return _adminAllStaffRecipients;/);
+  assert.ok(chat.includes("selectedType === 'all_staff'"));
+  assert.ok(chat.includes("_adminAllStaffRecipients = Array.isArray(rows) ? rows : [];"));
+  assert.match(locales, /'chat\.oneVerifiedRecipient':'One verified recipient'/);
+  assert.match(locales, /'chat\.staffNotice':'Staff notice'/);
+  assert.match(locales, /const fallbackKeys=Object\.keys\(extra\.en\)/);
+  assert.match(style, /touch-action:pan-x/);
+  assert.match(style, /min-width:0;max-width:100%/);
+  assert.match(style, /flex:0 0 144px;min-width:144px/);
+  assert.match(chat, /smart-chat-send-ready/);
+  assert.match(chat, /adminMsgSendHint/);
+  assert.match(html, /style\.css\?v=20261009e/);
+  assert.match(html, /js\/16_chat\.js\?v=20261009f/);
+});

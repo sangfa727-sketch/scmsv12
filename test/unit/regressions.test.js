@@ -42,7 +42,7 @@ test('teacher ID card foundation stays protected', () => {
   assert.ok(html.includes('qrcodejs/1.0.0'));
   assert.match(html, /29_teacher_access\.js\?v=20261007b/);
   assert.match(html, /15_settings\.js\?v=20261007b/);
-  assert.match(html, /style\.css\?v=20261009c/);
+  assert.match(html, /style\.css\?v=20261009e/);
 });
 
 
@@ -501,13 +501,15 @@ test('official announcement stays disabled while recipient verification is pendi
   const chat = read('js/16_chat.js');
   const locales = read('js/00f_chat_locales.js');
   assert.match(chat, /_adminRecipientLoading = true/);
-  assert.match(chat, /sendBtn\.disabled = _adminRecipientLoading \|\|/);
+  assert.match(chat, /sendBtn\.disabled = !canSend/);
+  assert.match(chat, /sendBtn\.classList\.toggle\('smart-chat-send-ready', canSend\)/);
+  assert.match(chat, /adminMsgSendHint/);
   assert.match(chat, /t\('chat\.gradeRecipientsMissing'\)/);
   assert.match(locales, /chat\.gradeRecipientsMissing/);
 });
 
 test('announcement recipient feedback assets use refreshed cache keys', () => {
   const html = read('index.html');
-  assert.match(html, /js\/00f_chat_locales\.js\?v=20261009d/);
-  assert.match(html, /js\/16_chat\.js\?v=20261009d/);
+  assert.match(html, /js\/00f_chat_locales\.js\?v=20261009e/);
+  assert.match(html, /js\/16_chat\.js\?v=20261009f/);
 });
