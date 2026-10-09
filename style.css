@@ -9019,3 +9019,82 @@ html.scms-chat-workspace #pages{overflow:auto}
   .smart-chat-channel-card{min-width:132px}
   .smart-chat-hero .page-title{font-size:19px}
 }
+
+
+/* School Chat mobile viewport/scroll repair — keep message streams independently scrollable. */
+.smart-chat-direct-shell,
+.smart-chat-group-shell,
+.smart-chat-grade-shell,
+.smart-chat-department-shell{min-width:0}
+.smart-chat-direct-conversation,
+.smart-chat-direct-conversation> .smart-chat-conversation-head{min-width:0}
+.smart-chat-direct-conversation .chat-stream,
+.smart-chat-conversation .chat-stream,
+#gradeConversation .chat-stream,
+#departmentConversation .chat-stream,
+#chatGroupConversation .chat-stream{
+  flex:1 1 auto;
+  min-height:0;
+  overflow-y:auto;
+  overscroll-behavior-y:contain;
+  -webkit-overflow-scrolling:touch;
+  touch-action:pan-y;
+}
+@media(max-width:760px){
+  html.scms-chat-workspace,
+  html.scms-chat-workspace body{height:100%;min-height:100%;overscroll-behavior:none}
+  html.scms-chat-workspace #pages{
+    height:100dvh;
+    min-height:0;
+    overflow-y:auto;
+    overscroll-behavior-y:contain;
+    -webkit-overflow-scrolling:touch;
+  }
+  html.scms-chat-workspace #page-chat{
+    min-height:0;
+    overflow:visible;
+  }
+  html.scms-chat-workspace #page-chat .smart-chat-shell{
+    height:auto;
+    min-height:calc(100dvh - env(safe-area-inset-top) - env(safe-area-inset-bottom));
+    overflow:visible;
+    padding-bottom:calc(16px + env(safe-area-inset-bottom));
+  }
+  .smart-chat-direct-shell,
+  .smart-chat-group-shell,
+  .smart-chat-grade-shell,
+  .smart-chat-department-shell{
+    height:auto;
+    min-height:calc(100dvh - 180px);
+  }
+  .smart-chat-direct-shell.has-selection .smart-chat-direct-list,
+  .smart-chat-group-shell.has-selection .smart-chat-direct-list,
+  .smart-chat-grade-shell.has-selection .smart-chat-direct-list{
+    display:none;
+  }
+  .smart-chat-direct-shell.has-selection .smart-chat-direct-conversation,
+  .smart-chat-group-shell.has-selection .smart-chat-direct-conversation,
+  .smart-chat-grade-shell.has-selection .smart-chat-direct-conversation{
+    display:flex;
+    height:calc(100dvh - 170px);
+    min-height:0;
+    overflow:hidden;
+  }
+  .smart-chat-direct-conversation .chat-stream,
+  .smart-chat-conversation .chat-stream,
+  #gradeConversation .chat-stream,
+  #departmentConversation .chat-stream,
+  #chatGroupConversation .chat-stream{
+    max-height:none;
+    min-height:0;
+    flex:1 1 0;
+    overflow-x:hidden;
+    overflow-y:auto;
+    touch-action:pan-y;
+  }
+  .chat-composer,
+  .smart-chat-direct-composer{
+    flex:0 0 auto;
+    padding-bottom:calc(8px + env(safe-area-inset-bottom));
+  }
+}
