@@ -117,6 +117,15 @@ test('dashboard notifications and keyboard interaction stay protected', () => {
 });
 
 
+test('app bootstrap runs after FAB page registries initialize', () => {
+  const app = read('js/14_app.js');
+  const fabRegistry = app.indexOf('const FAB_PAGES = {');
+  const autoRun = app.lastIndexOf('\ninitApp();');
+  assert.ok(fabRegistry >= 0, 'FAB_PAGES registry must exist');
+  assert.ok(autoRun > fabRegistry, 'initial app bootstrap must run after FAB_PAGES initialization');
+  assert.match(app, /function _updateFabForPage\(pageId\)[\s\S]*?const conf = FAB_PAGES\[pageId\]/);
+});
+
 test('language changes repaint active dynamic UI', () => {
   const app = read('js/14_app.js');
   assert.match(app, /_i18nPageRefreshBound/);
