@@ -186,7 +186,7 @@ test('official message success feedback uses active theme tokens and avoids the 
   const css = fs.readFileSync(path.resolve(__dirname, '../../style.css'), 'utf8');
   assert.match(js, /_showChatSuccessFeedback\(t\('chat\.officialMessageSent'/);
   assert.match(js, /className = 'smart-chat-feedback smart-chat-feedback-success'/);
-  assert.match(css, /#page-chat \.smart-chat-feedback\s*\{[^}]*background:\s*var\(--surface\);[^}]*color:\s*var\(--text\);/);
+  assert.match(css, /#page-chat \.smart-chat-feedback\s*\{[^}]*background:\s*color-mix\(in srgb, var\(--surface\) 94%, var\(--text\)\);[^}]*color:\s*var\(--text\);/);
   assert.match(css, /#page-chat \.smart-chat-feedback-success\s*\{[^}]*var\(--green\)/);
 });
 
