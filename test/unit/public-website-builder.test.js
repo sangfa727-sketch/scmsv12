@@ -99,7 +99,7 @@ test('website studio uses querySelectorAll for every DOM collection loop',()=>{
 test('School Website Studio fails closed until the server verifies an active authorized school session',()=>{
  const html=read('school-website/create.html'),migration=read('supabase/migrations/20261010120000_school_website_server_authorization.sql');
  assert.match(html,/auth-pending/); assert.match(html,/access-denied \\.builder/); assert.match(html,/AbortController/); assert.match(html,/scms_web_session/); assert.match(html,/rpc_school_website_authorize/); assert.match(html,/result\.authorized !== true/); assert.match(html,/editor\.src = '\.\/create\.js'/);
- assert.match(migration,/security definer/i); assert.match(migration,/private\.web_has_permission\(p_session_token, 'website\.manage', null, null\)/); assert.match(migration,/s\.expires_at > now\(\)/); assert.match(migration,/t\.status = 'active'/); assert.match(migration,/revoke all on function public\.rpc_school_website_authorize\(text\) from public/i); assert.match(migration,/grant execute on function public\.rpc_school_website_authorize\(text\) to anon, authenticated/i);
+ assert.match(migration,/security definer/i); assert.match(migration,/private\.web_has_permission\(p_session_token, 'website\.manage', null, null\)/); assert.match(migration,/is distinct from true/i); assert.match(migration,/s\.expires_at > now\(\)/); assert.match(migration,/t\.status = 'active'/); assert.match(migration,/revoke all on function public\.rpc_school_website_authorize\(text\) from public/i); assert.match(migration,/grant execute on function public\.rpc_school_website_authorize\(text\) to anon, authenticated/i);
 });
 
 test('website drafts are isolated by the verified school context',()=>{
