@@ -33,7 +33,7 @@ begin
     return jsonb_build_object('ok', false, 'authorized', false, 'error', 'access_denied');
   end if;
 
-  if not private.web_has_permission(p_session_token, 'website.manage', null, null) then
+  if private.web_has_permission(p_session_token, 'website.manage', null, null) is distinct from true then
     return jsonb_build_object('ok', false, 'authorized', false, 'error', 'access_denied');
   end if;
 
