@@ -102,5 +102,5 @@ test('School Website Studio fails closed until the server verifies an active aut
 });
 
 test('website drafts are isolated by the verified school context',()=>{
- const js=read('school-website/create.js'); assert.match(js,/function draftStorageKey\(\)/); assert.match(js,/SCMS_WEBSITE_CONTEXT\?\.schoolId/); assert.match(js,/scms-website-draft:/); assert.match(js,/localStorage\.setItem\(draftStorageKey\(\)/); assert.match(js,/localStorage\.getItem\(draftStorageKey\(\)/); new Function(js);
+ const js=read('school-website/create.js'); assert.match(js,/verified school authorization/); assert.match(js,/if\(!window\.SCMS_WEBSITE_CONTEXT\?\.schoolId\)/); assert.match(js,/function draftStorageKey\(\)/); assert.match(js,/SCMS_WEBSITE_CONTEXT\?\.schoolId/); assert.match(js,/scms-website-draft:/); assert.match(js,/localStorage\.setItem\(draftStorageKey\(\)/); assert.match(js,/localStorage\.getItem\(draftStorageKey\(\)/); new Function(js);
 });
