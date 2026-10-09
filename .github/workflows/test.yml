@@ -90,15 +90,29 @@ jobs:
         env:
           SCMS_URL: http://127.0.0.1:5173
         run: npx playwright test test/e2e/ci-smoke.spec.js
-      - name: Upload Playwright report on failure
-        if: failure()
+      - name: Write CI summary
+        if: always()
+        shell: bash
+        run: |
+          {
+            echo '## SCMS Playwright CI'
+            echo "- Event: $GITHUB_EVENT_NAME"
+            echo "- Commit: $GITHUB_SHA"
+            echo "- Ref: $GITHUB_REF"
+            echo "- Job result: ${{ job.status }}"
+            echo '- Scope: homepage HTTP response and non-empty body only; not full module coverage.'
+          } >> "$GITHUB_STEP_SUMMARY"
+      - name: Upload Playwright evidence
+        if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: playwright-local-report
+          name: playwright-local-evidence
           path: |
             playwright-report/
             test-results/
           if-no-files-found: ignore
+          retention-days: 14
+          retention-days: 14
 
   playwright-staging:
     name: Playwright staging E2E (scheduled/manual)
@@ -143,11 +157,11 @@ jobs:
           SCMS_TEST_QR_TOKEN: ${{ secrets.SCMS_TEST_QR_TOKEN }}
           SCMS_REQUIRE_STAGING: '1'
         run: npx playwright test
-      - name: Upload Playwright report on failure
-        if: failure()
+      - name: Upload Playwright staging evidence
+        if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: playwright-staging-report
+          name: playwright-staging-evidence
           path: |
             playwright-report/
             test-results/
