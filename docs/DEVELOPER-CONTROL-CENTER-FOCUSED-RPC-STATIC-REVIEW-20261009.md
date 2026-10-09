@@ -68,3 +68,23 @@ A direct `has_table_privilege` check confirmed that both `anon` and `authenticat
 3. Write sandbox-only negative tests for forged parent email, invalid/replayed QR/challenge, signup abuse, expired/revoked sessions, and repeated failed login attempts.
 4. Record proof and limitations per function before proposing any narrowly scoped migration.
 5. Keep production SQL/grants, Production Core, and PR merge unchanged until evidence and explicit approval are in place.
+
+
+## Parent Google login call-path check — 2026-10-09
+
+**New frontend evidence (source review only):**
+- `parent.html` loads Google Identity Services and sends the returned `resp.credential` as `id_token`, together with the QR token, to `/functions/v1/parent-google-login`.
+- The parent portal's normal login path therefore appears designed to send a Google ID token to a server-side Supabase Edge Function, rather than directly sending only a caller-supplied email to `rpc_parent_google_login`.
+- However, this repository branch's `supabase/functions` directory contains only `upload-school-asset`; the `parent-google-login` function source is not present in the checked-in function directory. Its deployed implementation/configuration could not be verified from repository source in this pass.
+- The live RPC signature still accepts `p_google_email`; without reviewing the deployed Edge Function and confirming it validates the Google ID token's signature, issuer, audience/client ID, expiry, and email-verification claim before deriving the email, the identity boundary remains **unverified**. A browser-supplied email must never substitute for validated token claims.
+
+**Disposition:** Do not classify parent impersonation as confirmed, and do not weaken or revoke the RPC yet. Retrieve and review the deployed `parent-google-login` function source/configuration, then add sandbox negative tests for forged/expired/wrong-audience ID tokens, QR-token mismatch, inactive student, and replay. Avoid logging raw ID tokens or QR tokens.
+
+## Latest CI — current PR head
+
+- PR #228 head: `273bfe1bb47db622fd0ed0d4233d8443b497a4bc`.
+- Workflow run [#1965](https://github.com/sangfa727-sketch/scmsv12/actions/runs/37900018941): **success**.
+- Frontend syntax + regression tests: **success**.
+- Public website RLS runtime harness: **success**.
+- Playwright: **skipped** by scheduled/manual-only workflow policy; browser-level behavior remains unverified.
+- PR #228 remains open and unmerged. No live grants, schema, Production Core, or production deployment changed.
