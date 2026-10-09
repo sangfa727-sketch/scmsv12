@@ -62,4 +62,9 @@ test('staff chat mobile navigation allows vertical page scrolling and prioritize
   assert.ok(styles.includes('touch-action:pan-x pan-y;transition:background .16s ease'), 'quick navigation buttons permit vertical page gestures');
   assert.ok(styles.includes('overscroll-behavior-x:contain;touch-action:pan-x pan-y;scroll-snap-type:x proximity'), 'mobile channel strip permits vertical page scrolling while preserving horizontal scrolling');
   assert.ok(styles.includes('min-width:144px;touch-action:pan-x pan-y;scroll-snap-align:start'), 'All Staff channel cards do not trap vertical touch gestures');
+  const modeStart = source.indexOf('function _renderChatMode()');
+  const modeEnd = source.indexOf('function _renderInquiryWorkspace()', modeStart);
+  assert.ok(modeStart >= 0 && modeEnd > modeStart, 'find the staff chat mode renderer');
+  assert.ok(!source.slice(modeStart, modeEnd).includes('${_renderAdminComposer()}'), 'admin official-message composer must not be appended below the All Staff conversation');
+  assert.ok(styles.includes('overscroll-behavior-x:contain;touch-action:pan-x pan-y;scroll-snap-type:x proximity'), 'final mobile rail override must preserve vertical gestures');
 });
