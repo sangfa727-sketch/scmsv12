@@ -7,3 +7,27 @@ test('SCMS homepage serves successfully in CI', async ({ page }) => {
   expect(response.status(), 'homepage should not return an HTTP error').toBeLessThan(400);
   await expect(page.locator('body')).not.toBeEmpty();
 });
+
+test('SCMS core module page shells are present in the app document', async ({ page }) => {
+  await page.goto('/', { waitUntil: 'domcontentloaded' });
+
+  const corePages = [
+    '#page-dashboard',
+    '#page-students',
+    '#page-attend',
+    '#page-daily',
+    '#page-hw',
+    '#page-grades',
+    '#page-billing',
+    '#page-admissions',
+    '#page-library',
+    '#page-transport',
+    '#page-parents',
+    '#page-timetable',
+    '#page-chat',
+  ];
+
+  for (const selector of corePages) {
+    await expect(page.locator(selector), `core page shell ${selector} should exist`).toHaveCount(1);
+  }
+});
