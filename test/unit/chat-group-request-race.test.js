@@ -119,6 +119,10 @@ test('group chat mobile layout keeps the nested conversation wrapper shrinkable'
   assert.match(groupMobileRule[1], /flex-direction\s*:\s*column/);
   assert.match(groupMobileRule[1], /min-height\s*:\s*0/);
   assert.match(groupMobileRule[1], /overflow\s*:\s*hidden/);
+  assert.match(
+    css,
+    /#page-chat \.smart-chat-direct-list-head button,\s*#page-chat \.smart-chat-list-actions>button,\s*#page-chat \.smart-chat-mobile-back\s*\{[^}]*width:\s*44px;[^}]*height:\s*44px;[^}]*min-width:\s*44px;[^}]*min-height:\s*44px;/
+  );
 });
 
 test('group send accessible label is translated for every supported chat locale', () => {
