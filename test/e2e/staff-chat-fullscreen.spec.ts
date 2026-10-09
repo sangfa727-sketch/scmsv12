@@ -141,6 +141,7 @@ test.describe('Staff Chat full-screen browser regression', () => {
 
     const recipient = page.locator('.smart-chat-directory-item').first();
     await expect(recipient, 'staging must have at least one active staff recipient').toBeVisible();
+    const recipientName = (await recipient.locator('strong').innerText()).trim();
     await recipient.click();
     const input = page.locator('#directChatInput');
     const send = page.locator('#directChatSendBtn');
@@ -158,8 +159,9 @@ test.describe('Staff Chat full-screen browser regression', () => {
     await page.getByTestId('nav-chat').click();
     await expect(page.locator('#page-chat')).toBeVisible();
     await page.locator('[data-chat-quick-channel="direct"]').click();
-    await expect(page.locator('.smart-chat-direct-item').first()).toBeVisible();
-    await page.locator('.smart-chat-direct-item').first().click();
+    const conversation = page.locator('.smart-chat-direct-item').filter({ hasText: recipientName });
+    await expect(conversation, 'the recipient conversation should be listed after a fresh server read').toBeVisible();
+    await conversation.click();
     await expect(page.locator('#directMessageStream')).toContainText(message, { timeout: 15000 });
   });
 
