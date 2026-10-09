@@ -808,14 +808,17 @@ function _renderAnnouncementList(rows){
   const list=document.getElementById('announcementList');
   if(!list)return;
   list.innerHTML=rows.map(a=>{
-    const id=Number(a.id);
+    // Announcement IDs are UUIDs from Postgres; never coerce them to Number.
+    const id=String(a.id||'');
+    if(!/^[0-9a-f]{8}-[0-9a-f]{4}-[1-8][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(id))return '';
     const type=String(a.message_type||t('chat.officialNotices'));
     const excerpt=_announcementExcerpt(a.body);
     const date=_formatAnnouncementDate(a.created_at);
     const unread=!a.read_at;
     const summary=excerpt||_announcementExcerpt(a.reason)||t('chat.officialCommunication');
     const accessible=[t('chat.officialPrefix'),type,summary,date,unread?t('chat.unread'):t('chat.read')].filter(Boolean).join(', ');
-    return '<button type="button" class="smart-chat-channel-card smart-chat-announcement-card '+(id===Number(_announcementId)?'active':'')+'" aria-label="'+esc(accessible)+'" aria-current="'+(id===Number(_announcementId)?'true':'false')+'" onclick="_openAnnouncement('+id+')">'+
+    const selected=id===String(_announcementId||'');
+    return '<button type="button" class="smart-chat-channel-card smart-chat-announcement-card '+(selected?'active':'')+'" aria-label="'+esc(accessible)+'" aria-current="'+(selected?'true':'false')+'" onclick="_openAnnouncement(\''+id+'\')">'+
       '<span class="smart-chat-channel-icon" aria-hidden="true">📢</span>'+
       '<span class="smart-chat-channel-copy"><strong>'+esc(type)+'</strong>'+
       '<small class="smart-chat-announcement-excerpt">'+esc(summary)+'</small>'+
@@ -842,13 +845,13 @@ async function _loadAnnouncementWorkspace(autoOpen=true){
     window._chatAnnouncements=rows;
     if(!rows.length){_announcementId=null;list.innerHTML=`<div class="smart-chat-list-empty-card"><div class="icon">📢</div><strong>${t('chat.noOfficialAnnouncements')}</strong><small>${t('chat.newVerifiedNotices')}</small></div>`;stream.innerHTML=`<div class="chat-empty"><div class="chat-empty-icon">📢</div><div class="chat-empty-title">${t('chat.noOfficialAnnouncements')}</div><div class="chat-empty-sub">${t('chat.newVerifiedNotices')}</div></div>`;return;}
     _renderAnnouncementList(rows);
-    if(autoOpen && !_announcementId) await _openAnnouncement(Number(rows[0].id));
+    if(autoOpen && !_announcementId) await _openAnnouncement(String(rows[0].id));
    }catch(e){const list=document.getElementById('announcementList');if(list)list.innerHTML=`<div class="chat-error"><div>📢</div><div>${t('chat.loadAnnouncementsFailed')}</div><button type="button" class="btn-secondary" onclick="_loadAnnouncementWorkspace(false)">${t('chat.retry')}</button></div>`;}
 }
 window._openAnnouncement=async function(id){
-  const a=(window._chatAnnouncements||[]).find(x=>Number(x.id)===Number(id));
+  const a=(window._chatAnnouncements||[]).find(x=>String(x.id)===String(id));
   const stream=document.getElementById('announcementStream');if(!a||!stream)return;
-  _announcementId=Number(id);
+  _announcementId=String(id);
   const shell=document.querySelector('.smart-chat-announcement-shell');if(shell)shell.classList.add('has-selection');
   _renderAnnouncementList(window._chatAnnouncements||[]);
   const head=document.getElementById('announcementHead');
