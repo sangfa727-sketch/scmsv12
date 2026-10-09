@@ -73,6 +73,9 @@ const ACTION_DEFINITIONS = Object.freeze(DEFINITIONS.map((row) => {
     requiresStepUp,
     requiresConfirmation,
     requiresIndependentApproval,
+    // The authorization helper consumes requiresApproval; keep this explicit
+    // alias aligned with independent-approval policy to prevent adapter drift.
+    requiresApproval: requiresIndependentApproval,
     idempotencyRequired: riskTier !== 'R0',
     auditEventType: 'dcc.' + actionId,
     dataBoundary
