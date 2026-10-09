@@ -86,7 +86,8 @@ function authorizeDeveloperAction(context, request) {
         !approval.approvedBy.trim() || approval.approvedBy === approval.requestedBy) {
       return deny('independent_approval_required');
     }
-    if (approval.consumedAt !== null && approval.consumedAt !== undefined) return deny('approval_already_consumed');
+    if (!Object.hasOwn(approval, 'consumedAt') || approval.consumedAt === undefined) return deny('approval_state_invalid');
+    if (approval.consumedAt !== null) return deny('approval_already_consumed');
     const approvalExpiry = Date.parse(approval.expiresAt);
     if (!Number.isFinite(approvalExpiry) || approvalExpiry <= now) return deny('approval_expired');
   }
