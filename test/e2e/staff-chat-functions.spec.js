@@ -71,7 +71,7 @@ async function mountSmartChat(page) {
       },
       createInquiryTicket: async (...args) => {
         record('createInquiryTicket', ...args);
-        return { ok: true, ticket_id: 42 };
+        return { ok: true, ticket: { id: 42 } };
       },
       openInquiryTicket: async (...args) => {
         record('openInquiryTicket', ...args);
@@ -260,4 +260,38 @@ test('Inquiry ticket composer sends a message through the API', async ({ page })
   await expect.poll(async () => (await calls(page, 'sendInquiryMessage')).length).toBe(1);
   expect((await calls(page, 'sendInquiryMessage'))[0].args).toEqual([41, 'Inquiry send functional check']);
   await expect(input).toBeEnabled();
+});
+
+
+test('Inquiry workspace creates a ticket and refreshes the list', async ({ page }) => {
+  await mountSmartChat(page);
+  await page.evaluate(() => window.switchChatChannel('tickets'));
+  await page.getByRole('button', { name: /new ticket/i }).click();
+  await page.locator('#inquiryDraftSubject').fill('Functional test ticket');
+  await page.locator('#inquiryDraftBody').fill('Ticket creation should call the API and refresh the list.');
+  await page.locator('#inquiryDraftPriority').selectOption('NORMAL');
+  await page.locator('#inquiryDraftSubmitBtn').click();
+  await expect.poll(async () => (await calls(page, 'createInquiryTicket')).length).toBe(1);
+  expect((await calls(page, 'createInquiryTicket'))[0].args).toEqual([
+    'Functional test ticket',
+    'Ticket creation should call the API and refresh the list.',
+    null,
+    'NORMAL'
+  ]);
+  await expect(page.locator('#inquiryTicketList')).toContainText('Parent request');
+});
+
+test('Direct Chat composer recovers when the send API rejects the message', async ({ page }) => {
+  await mountSmartChat(page);
+  await page.evaluate(() => {
+    window.API.sendDirectMessage = async () => ({ ok: false, error: 'test_rejected' });
+    window.switchChatChannel('direct');
+  });
+  await page.evaluate(() => window.openDirectChat('teacher-2'));
+  const input = page.locator('#directChatInput');
+  await expect(input).toBeEnabled();
+  await input.fill('Rejected direct message');
+  await page.locator('#directChatSendBtn').click();
+  await expect(input).toBeEnabled();
+  await expect(page.locator('#directChatSendBtn')).toBeEnabled();
 });
