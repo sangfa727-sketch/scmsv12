@@ -49,3 +49,34 @@ test('announcement reading uses only keys available in every supported locale', 
     }
   }
 });
+
+test('staff chat mobile navigation allows vertical page scrolling and prioritizes official announcements', () => {
+  const source = fs.readFileSync(path.resolve(__dirname, '../../js/16_chat.js'), 'utf8');
+  const styles = fs.readFileSync(path.resolve(__dirname, '../../style.css'), 'utf8');
+  const navStart = source.indexOf('function _chatQuickNavChannels()');
+  const navEnd = source.indexOf('function _renderChatQuickNav()', navStart);
+  assert.ok(navStart >= 0 && navEnd > navStart, 'find the persistent chat channel navigation');
+  const nav = source.slice(navStart, navEnd);
+  assert.ok(nav.indexOf("id:'staff'") < nav.indexOf("id:'announcements'"), 'All Staff remains the first channel');
+  assert.ok(nav.indexOf("id:'announcements'") < nav.indexOf("id:'direct'"), 'Official Announcements is promoted near the top');
+  assert.ok(styles.includes('touch-action:pan-x pan-y;transition:background .16s ease'), 'quick navigation buttons permit vertical page gestures');
+  assert.ok(styles.includes('overscroll-behavior-x:contain;touch-action:pan-x pan-y;scroll-snap-type:x proximity'), 'mobile channel strip permits vertical page scrolling while preserving horizontal scrolling');
+  assert.ok(styles.includes('min-width:144px;touch-action:pan-x pan-y;scroll-snap-align:start'), 'All Staff channel cards do not trap vertical touch gestures');
+  const modeStart = source.indexOf('function _renderChatMode()');
+  const modeEnd = source.indexOf('function _renderInquiryWorkspace()', modeStart);
+  assert.ok(modeStart >= 0 && modeEnd > modeStart, 'find the staff chat mode renderer');
+  assert.ok(!source.slice(modeStart, modeEnd).includes('${_renderAdminComposer()}'), 'admin official-message composer must not be appended below the All Staff conversation');
+  assert.ok(styles.includes('overscroll-behavior-x:contain;touch-action:pan-x pan-y;scroll-snap-type:x proximity'), 'final mobile rail override must preserve vertical gestures');
+});
+
+
+test('staff chat uses a coherent social-first responsive visual system', () => {
+  const styles = fs.readFileSync(path.resolve(__dirname, '../../style.css'), 'utf8');
+  assert.ok(styles.includes('Smart Chat social-first redesign: consistent hierarchy'), 'include the unified social-first chat redesign');
+  assert.ok(styles.includes('#page-chat .smart-chat-school-grid {\n  display:grid; grid-template-columns:minmax(245px, .78fr) minmax(0, 1.8fr)'), 'use a conversation-list plus chat-view desktop hierarchy');
+  assert.ok(styles.includes('#page-chat .smart-chat-quick-nav-track {\n  display:flex; gap:8px; width:100%; overflow-x:auto; overflow-y:hidden;'), 'keep chat type navigation in a horizontally swipeable rail');
+  assert.ok(styles.includes('#page-chat .smart-chat-school-grid > .smart-chat-channel-list {\n    display:flex; flex-direction:row; flex-wrap:nowrap; gap:7px; overflow-x:auto; overflow-y:hidden;'), 'render channel cards as a compact mobile swipe rail');
+  assert.ok(styles.includes('#page-chat .smart-chat-school-grid > .smart-chat-channel-list {\n    display:flex; flex-direction:row; flex-wrap:nowrap;'), 'mobile channel rail overrides the higher-specificity desktop-hidden rule');
+  assert.ok(styles.includes('#page-chat .smart-chat-admin-card {\n  margin-top:18px; padding:clamp(16px,2vw,24px);'), 'style admin tools as a distinct, deliberate section');
+  assert.ok(styles.includes('#page-chat .chat-composer textarea,\n#page-chat .smart-chat-direct-composer textarea {\n  min-width:0; min-height:46px;'), 'provide a consistent touch-friendly message composer');
+});

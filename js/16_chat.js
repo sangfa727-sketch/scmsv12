@@ -458,9 +458,10 @@ window.switchChatMode = function(mode) {
 function _chatQuickNavChannels() {
   return [
     { id:'staff', name:t('chat.allStaff'), icon:'👥' },
+    // Official notices are a high-priority school-wide workflow, not a buried secondary channel.
+    { id:'announcements', name:t('chat.officialAnnouncements'), icon:'📢' },
     { id:'direct', name:t('chat.directMessages'), icon:'👤' },
     { id:'departments', name:t('chat.departmentGrade'), icon:'📚' },
-    { id:'announcements', name:t('chat.officialAnnouncements'), icon:'📢' },
     { id:'tickets', name:t('chat.workspace.tickets'), icon:'🎫' },
     { id:'events', name:t('chat.workspace.groups'), icon:'🗂️' }
   ];
@@ -639,8 +640,7 @@ function _renderChatMode() {
           <button type="submit" class="chat-send-btn" id="chatSendBtn" ${_chatChannel === 'staff' ? '' : 'disabled'}>${_chatChannel === 'staff' ? _chatIcon('send') : t('chat.preview')}</button>
         </form>
       </section>
-    </div>
-    ${_renderAdminComposer()}`;
+    </div>`;
   _loadChatMessages();
   setTimeout(() => {
     _refreshAdminComposerPreview();
