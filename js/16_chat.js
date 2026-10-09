@@ -640,8 +640,7 @@ function _renderChatMode() {
           <button type="submit" class="chat-send-btn" id="chatSendBtn" ${_chatChannel === 'staff' ? '' : 'disabled'}>${_chatChannel === 'staff' ? _chatIcon('send') : t('chat.preview')}</button>
         </form>
       </section>
-    </div>
-    ${_renderAdminComposer()}`;
+    </div>`;
   _loadChatMessages();
   setTimeout(() => {
     _refreshAdminComposerPreview();
