@@ -7,7 +7,7 @@
   <title>Create Your School Website — SCMS</title>
   <link rel="stylesheet" href="./create.css">
 </head>
-<body>
+<body class="auth-pending">\n  <style>.auth-pending .builder-header,.auth-pending .builder{visibility:hidden}.website-access-gate{position:fixed;inset:0;z-index:9999;display:grid;place-content:center;gap:12px;padding:24px;background:#f5f6f8;color:#172033;text-align:center;font:500 16px system-ui}.website-access-gate[hidden]{display:none}.website-access-gate p{max-width:440px;margin:0;line-height:1.5}.website-access-gate button{justify-self:center;padding:10px 16px;border:0;border-radius:10px;background:#172033;color:#fff;font:inherit}</style>\n  <section id="accessGate" class="website-access-gate" role="status" aria-live="polite"><strong>Verifying School Website access…</strong><p>Please wait while SCMS checks your signed-in session and school permissions.</p></section>
   <header class="builder-header">
     <div class="brand"><span class="brand-mark">S</span><div><strong>Create your school website</strong><span>SCMS Website Studio</span></div></div>
     <div class="header-actions"><span id="saveState" class="save-state">Draft</span><button id="previewToggle" class="button secondary" type="button" aria-expanded="false">Preview</button><button id="publishButton" class="button primary" type="button">Publish</button></div>
@@ -88,6 +88,46 @@
     </div>
   </div></dialog>
   <div id="toast" class="toast" role="status" aria-live="polite"></div>
-  <script src="./create.js"></script>
+  <script src="../js/01_config.js?v=20261010a"></script>
+  <script>
+  (async function () {
+    const gate = document.getElementById('accessGate');
+    function deny() {
+      document.body.classList.remove('auth-pending');
+      gate.innerHTML = '<strong>School Website access unavailable</strong><p>Sign in with an authorized school account and try again. If access was delegated to you, ask your school administrator to verify it.</p><button type="button" id="backToApp">Return to SCMS</button>';
+      document.getElementById('backToApp').addEventListener('click', function () { window.location.href = '../index.html'; });
+    }
+    try {
+      if (!window.SCMS_CONFIG || window.SCMS_CONFIG.BACKEND_ENABLED === false) return deny();
+      let session = null;
+      try {
+        session = JSON.parse(localStorage.getItem('scms_web_session') || sessionStorage.getItem('scms_web_session') || 'null');
+      } catch (_) { return deny(); }
+      if (!session || typeof session.session_token !== 'string' || !session.session_token.trim()) return deny();
+      const response = await fetch(window.SCMS_CONFIG.SUPABASE_URL + '/rest/v1/rpc/rpc_school_website_authorize', {
+        method: 'POST',
+        headers: {
+          apikey: window.SCMS_CONFIG.SUPABASE_ANON,
+          Authorization: 'Bearer ' + window.SCMS_CONFIG.SUPABASE_ANON,
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({ p_session_token: session.session_token })
+      });
+      if (!response.ok) return deny();
+      const result = await response.json();
+      if (!result || result.ok !== true || result.authorized !== true ||
+          typeof result.school_id !== 'string' || !result.school_id.trim()) return deny();
+      window.SCMS_WEBSITE_CONTEXT = Object.freeze({ schoolId: result.school_id, role: result.role || '' });
+      document.body.classList.remove('auth-pending');
+      gate.hidden = true;
+      const editor = document.createElement('script');
+      editor.src = './create.js';
+      editor.onerror = deny;
+      document.body.appendChild(editor);
+    } catch (_) {
+      deny();
+    }
+  })();
+  </script>
 </body>
 </html>
