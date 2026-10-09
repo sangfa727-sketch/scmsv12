@@ -5,6 +5,8 @@ const path = require('node:path');
 
 test('official announcements expose a readable preview and full detail view', () => {
   const source = fs.readFileSync(path.resolve(__dirname, '../../js/16_chat.js'), 'utf8');
+  const api = fs.readFileSync(path.resolve(__dirname, '../../js/02L_api_chat.js'), 'utf8');
+  assert.ok(api.includes('announcement_list_failed'), 'surface announcement RPC failures instead of showing a false empty state');
   const styles = fs.readFileSync(path.resolve(__dirname, '../../style.css'), 'utf8');
   assert.ok(source.includes('_announcementExcerpt(a.body)'), 'show message content in the announcement list');
   assert.ok(source.includes("replace(/\\s+/g,' ').trim()"), 'collapse newlines and repeated whitespace in list excerpts');
