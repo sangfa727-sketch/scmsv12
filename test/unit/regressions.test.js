@@ -511,5 +511,5 @@ test('official announcement stays disabled while recipient verification is pendi
 test('announcement recipient feedback assets use refreshed cache keys', () => {
   const html = read('index.html');
   assert.match(html, /js\/00f_chat_locales\.js\?v=20261009f/);
-  assert.match(html, /js\/16_chat\.js\?v=20261009f/);
+  assert.match(html, /js\/16_chat\.js\?v=20261010a/);
 });
