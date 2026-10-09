@@ -51,3 +51,21 @@ test('section management exposes safe hide, reorder and duplicate controls',()=>
  assert.match(js,/DEFAULT_SECTIONS/);assert.match(js,/normalizeSections/);assert.match(js,/sectionAction/);assert.match(js,/renderSectionLayout/);assert.match(js,/localStorage/);assert.match(js,/m\.locked/);
  assert.match(css,/\.section-controls/);assert.match(css,/\.site-block\[hidden\]/);new Function(js);
 });
+
+test('School Website is discoverable from More on Telegram/mobile and desktop app layouts',()=>{
+ const more=read('js/12_more.js');
+ assert.match(more,/canManageWebsite/);
+ assert.match(more,/school_owner/);
+ assert.match(more,/website\\.manage/);
+ assert.match(more,/more-tile-website/);
+ assert.match(more,/school-website\\/create\\.html/);
+ assert.match(more,/School Website/);
+});
+test('Website Studio uses collection selectors for multi-element operations',()=>{
+ const js=read('school-website/create.js');
+ assert.doesNotMatch(js,/(?<!\\$)\\$\\([^)]*\\)\\.forEach/);
+ assert.match(js,/\\$\\$\\("\\[data-field\\]"\\)\\.forEach/);
+ assert.match(js,/\\$\\$\\("\\.template-option"\\)\\.forEach/);
+ assert.match(js,/const links=\\$\\$\\("\\.section-nav a"\\)/);
+ new Function(js);
+});
