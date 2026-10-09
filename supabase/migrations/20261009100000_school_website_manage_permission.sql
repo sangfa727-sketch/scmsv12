@@ -1,6 +1,6 @@
 -- SCMS v12 — School Website management permission.
 -- Design/release artifact only: do not apply to production without explicit approval.
--- School admins receive the permission by role; delegated staff can receive a
+-- School owners/admins receive the permission by role; delegated staff can receive a
 -- global teacher_permissions override through rpc_manage_teacher_access.
 -- Public website access remains separate from private SCMS data permissions.
 
@@ -16,8 +16,10 @@ on conflict (permission_key) do update set
   is_active = true,
   display_order = excluded.display_order;
 
--- Explicit default grants for the school-admin roles. Do not grant all roles.
+-- Explicit default grants for supported owner/admin role names. Do not grant all roles.
 insert into public.role_permissions (role, permission_key, allowed)
-values ('admin', 'website.manage', true),
+values ('owner', 'website.manage', true),
+       ('school_owner', 'website.manage', true),
+       ('admin', 'website.manage', true),
        ('super_admin', 'website.manage', true)
 on conflict (role, permission_key) do update set allowed = excluded.allowed;
