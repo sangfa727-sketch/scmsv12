@@ -30,14 +30,12 @@ test('mobile preview remains on-demand and source compiles',()=>{
  assert.match(html,/id="previewToggle"/);assert.match(css,/@media\(max-width:1000px\)/);assert.match(css,/\.preview-panel\.open/);new Function(js);
 });
 
-
 test('section navigation exposes stable anchors and keyboard-safe interaction',()=>{
  const html=read('school-website/create.html'),css=read('school-website/create.css'),js=read('school-website/create.js');
  for(const section of ['hero','about','programs','facilities','news','contact']) assert.match(html,new RegExp('id="'+section+'"'));
  assert.match(html,/aria-label="Page sections"/); assert.match(html,/href="#hero"/); assert.match(html,/href="#contact"/);
  assert.match(css,/\.section-nav a:focus-visible/); assert.match(css,/\.section-nav a\.active/); assert.match(js,/IntersectionObserver/); assert.match(js,/initSectionNavigation/);
 });
-
 
 test('section management exposes safe hide, reorder and duplicate controls',()=>{
  const html=read('school-website/create.html'),js=read('school-website/create.js'),css=read('school-website/create.css');
@@ -50,4 +48,11 @@ test('section management exposes safe hide, reorder and duplicate controls',()=>
  assert.match(html,/data-section-action="duplicate"/);
  assert.match(js,/DEFAULT_SECTIONS/);assert.match(js,/normalizeSections/);assert.match(js,/sectionAction/);assert.match(js,/renderSectionLayout/);assert.match(js,/localStorage/);assert.match(js,/m\.locked/);
  assert.match(css,/\.section-controls/);assert.match(css,/\.site-block\[hidden\]/);new Function(js);
+});
+
+test('logo media management stays client-only and validates safe image inputs',()=>{
+ const html=read('school-website/create.html'),js=read('school-website/create.js'),css=read('school-website/create.css');
+ assert.match(html,/id="logoUpload"/);assert.match(html,/accept="image\/png,image\/jpeg,image\/webp"/);
+ assert.match(js,/openMediaPicker/);assert.match(js,/handleLogoUpload/);assert.match(js,/2\*1024\*1024/);assert.match(js,/png\|jpeg\|webp/);assert.match(js,/readAsDataURL/);
+ assert.doesNotMatch(js,/service_role|supabase\.from|fetch\(/i);assert.match(css,/\.media-placeholder img/);
 });
