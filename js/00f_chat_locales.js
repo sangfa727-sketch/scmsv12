@@ -156,6 +156,17 @@
     'chat.backToAnnouncements':'ကြေညာချက်များသို့ ပြန်ရန်'
   });
 
+  const setupHints = {
+    en: {'chat.setupWhy':'Why is this unavailable?','chat.setupDepartmentSteps':'Create at least one department first, then assign active staff to it. The department chat list will appear when access is available.','chat.setupCreateDepartment':'Create department','chat.setupGradeSteps':'Make sure the school has active students in a grade and active teachers assigned to that grade. Only verified grades are listed.','chat.setupGradePath':'Check Students → Grade/Class and Teachers → Teacher Assignment.'},
+    my: {'chat.setupWhy':'ဘာကြောင့် အသုံးမပြုနိုင်သေးတာလဲ။','chat.setupDepartmentSteps':'ဌာနတစ်ခု အရင်ဖန်တီးပြီး ဝန်ထမ်းများကို ထိုဌာနသို့ သတ်မှတ်ပေးပါ။ ဝင်ခွင့်ရှိသည့်အခါ ဌာနစကားပြောစာရင်း ပေါ်လာပါမည်။','chat.setupCreateDepartment':'ဌာနဖန်တီးရန်','chat.setupGradeSteps':'ကျောင်းတွင် အသုံးပြုနေသော ကျောင်းသားများရှိသည့် အတန်းနှင့် ထိုအတန်းသို့ သတ်မှတ်ထားသော အသုံးပြုနေသည့် ဆရာ/ဆရာမများ ရှိကြောင်း စစ်ဆေးပါ။ အတည်ပြုထားသော အတန်းများသာ ပေါ်ပါမည်။','chat.setupGradePath':'ကျောင်းသားများ → အတန်း/အခန်း နှင့် ဆရာ/ဆရာမများ → Teacher Assignment ကို စစ်ဆေးပါ။'},
+    th: {'chat.setupWhy':'เหตุใดจึงยังใช้งานไม่ได้?','chat.setupDepartmentSteps':'สร้างแผนกอย่างน้อยหนึ่งแผนกก่อน แล้วกำหนดบุคลากรที่ใช้งานอยู่ให้แผนกนั้น','chat.setupCreateDepartment':'สร้างแผนก','chat.setupGradeSteps':'ตรวจสอบว่ามีนักเรียนที่ใช้งานอยู่ในระดับชั้น และมีครูที่ใช้งานอยู่ได้รับมอบหมายให้ระดับชั้นนั้น ระบบจะแสดงเฉพาะระดับชั้นที่ตรวจสอบแล้ว','chat.setupGradePath':'ตรวจสอบ Students → Grade/Class และ Teachers → Teacher Assignment'},
+    jp: {'chat.setupWhy':'利用できない理由','chat.setupDepartmentSteps':'先に部署を作成し、有効な職員をその部署に割り当ててください。アクセス権がある場合に部署チャットが表示されます。','chat.setupCreateDepartment':'部署を作成','chat.setupGradeSteps':'在籍中の生徒がいる学年と、その学年に割り当てられた有効な教師がいることを確認してください。確認済みの学年のみ表示されます。','chat.setupGradePath':'Students → Grade/Class と Teachers → Teacher Assignment を確認してください。'},
+    ms: {'chat.setupWhy':'Mengapa belum tersedia?','chat.setupDepartmentSteps':'Cipta sekurang-kurangnya satu jabatan dahulu, kemudian tetapkan kakitangan aktif kepada jabatan itu.','chat.setupCreateDepartment':'Cipta jabatan','chat.setupGradeSteps':'Pastikan terdapat pelajar aktif dalam gred dan guru aktif yang ditugaskan kepada gred tersebut. Hanya gred yang disahkan dipaparkan.','chat.setupGradePath':'Semak Students → Grade/Class dan Teachers → Teacher Assignment.'},
+    km: {'chat.setupWhy':'ហេតុអ្វីមិនទាន់អាចប្រើបាន?','chat.setupDepartmentSteps':'បង្កើតនាយកដ្ឋានយ៉ាងហោចណាស់មួយសិន ហើយចាត់តាំងបុគ្គលិកសកម្មទៅនាយកដ្ឋាននោះ។','chat.setupCreateDepartment':'បង្កើតនាយកដ្ឋាន','chat.setupGradeSteps':'ពិនិត្យថាមានសិស្សសកម្មក្នុងថ្នាក់ និងគ្រូសកម្មដែលបានចាត់តាំងទៅថ្នាក់នោះ។ បង្ហាញតែថ្នាក់ដែលបានផ្ទៀងផ្ទាត់ប៉ុណ្ណោះ។','chat.setupGradePath':'ពិនិត្យ Students → Grade/Class និង Teachers → Teacher Assignment។'},
+    zh: {'chat.setupWhy':'为什么暂时无法使用？','chat.setupDepartmentSteps':'请先创建至少一个部门，再将在职员工分配到该部门。有访问权限后，部门聊天列表才会显示。','chat.setupCreateDepartment':'创建部门','chat.setupGradeSteps':'请确认该年级有在读学生，并且有已分配到该年级的在职教师。系统只显示已验证的年级。','chat.setupGradePath':'检查 Students → Grade/Class 和 Teachers → Teacher Assignment。'}
+  };
+  Object.keys(setupHints).forEach(code => Object.assign(chat[code], setupHints[code]));
+
   const maps={en:'I18N_EN',my:'I18N_MY',th:'I18N_TH',jp:'I18N_JP',ms:'I18N_MS',km:'I18N_KM',zh:'I18N_ZH'};
   Object.keys(maps).forEach(code=>{ window[maps[code]]=Object.assign({},window[maps[code]]||{},code==='en'?en:code==='my'?my:chat[code]); });
 })();
