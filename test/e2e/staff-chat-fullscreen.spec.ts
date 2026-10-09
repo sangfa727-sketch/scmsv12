@@ -1,0 +1,100 @@
+import { test, expect } from '@playwright/test';
+
+const BASE_URL = process.env.SCMS_URL ?? 'http://localhost:5173';
+const TEACHER_ID = process.env.SCMS_TEST_TEACHER ?? 'change-me';
+const TEACHER_PW = process.env.SCMS_TEST_PW ?? 'change-me';
+
+async function signInAndOpenChat(page: import('@playwright/test').Page) {
+  test.skip(process.env.SCMS_REQUIRE_STAGING !== '1', 'Staff Chat browser tests require configured staging credentials');
+  await page.goto(BASE_URL);
+  await page.getByTestId('login-teacher-id').fill(TEACHER_ID);
+  await page.getByTestId('login-password').fill(TEACHER_PW);
+  await page.getByTestId('login-submit').click();
+  await expect(page.getByTestId('sidebar')).toBeVisible();
+  await page.getByTestId('nav-chat').click();
+  await expect(page.locator('#page-chat')).toBeVisible();
+  await expect(page.locator('.sc-chat-topbar')).toBeVisible();
+}
+
+test.describe('Staff Chat full-screen browser regression', () => {
+  test('topbar renders one active chat type control and no duplicate mobile channel rail', async ({ page }) => {
+    await page.setViewportSize({ width: 390, height: 844 });
+    await signInAndOpenChat(page);
+
+    await expect(page.locator('.sc-chat-mode-pill')).toBeVisible();
+    await expect(page.locator('.sc-chat-top-action')).toHaveCount(2);
+    await expect(page.locator('.smart-chat-channel-list')).toBeHidden();
+    await expect(page.locator('#scChatTypeMenu')).toBeHidden();
+  });
+
+  test('chat type menu opens, selects AI Chat, updates the active pill, and persists after re-entry', async ({ page }) => {
+    await page.setViewportSize({ width: 390, height: 844 });
+    await signInAndOpenChat(page);
+
+    await page.locator('.sc-chat-mode-pill').click();
+    await expect(page.locator('#scChatTypeMenu')).toBeVisible();
+    await expect(page.locator('#scChatTypeMenu [role="menuitemradio"]')).toHaveCount(2);
+
+    await page.locator('#scChatTypeMenu [role="menuitemradio"]').nth(1).click();
+    await expect(page.locator('.sc-chat-mode-pill')).toContainText(/AI Chat|AI Assistant/i);
+    await expect(page.locator('#scChatTypeMenu')).toBeHidden();
+    await expect.poll(() => page.evaluate(() => localStorage.getItem('scms_chat_mode'))).toBe('ai');
+
+    await page.getByTestId('nav-chat').click();
+    await expect(page.locator('.sc-chat-mode-pill')).toContainText(/AI Chat|AI Assistant/i);
+  });
+
+  test('School Chat can be restored through the type menu and keeps a single menu instance', async ({ page }) => {
+    await signInAndOpenChat(page);
+    await page.locator('.sc-chat-mode-pill').click();
+    await page.locator('#scChatTypeMenu [role="menuitemradio"]').first().click();
+
+    await expect(page.locator('.sc-chat-mode-pill')).toContainText(/School Chat/i);
+    await expect.poll(() => page.evaluate(() => localStorage.getItem('scms_chat_mode'))).toBe('school');
+    await expect(page.locator('#scChatTypeMenu')).toHaveCount(1);
+  });
+
+  test('workspace is vertically scrollable and has no horizontal overflow on mobile', async ({ page }) => {
+    await page.setViewportSize({ width: 360, height: 800 });
+    await signInAndOpenChat(page);
+
+    const metrics = await page.evaluate(() => {
+      const workspace = document.querySelector('.sc-chat-workspace-content') as HTMLElement | null;
+      return {
+        viewportWidth: window.innerWidth,
+        documentWidth: document.documentElement.scrollWidth,
+        workspaceOverflowY: workspace ? getComputedStyle(workspace).overflowY : '',
+        workspaceClientHeight: workspace?.clientHeight ?? 0,
+      };
+    });
+    expect(metrics.documentWidth).toBeLessThanOrEqual(metrics.viewportWidth + 1);
+    expect(metrics.workspaceOverflowY).toMatch(/auto|scroll/);
+    expect(metrics.workspaceClientHeight).toBeGreaterThan(0);
+  });
+
+  test('exit control returns to the previous app workspace without leaving a duplicate chat header', async ({ page }) => {
+    await signInAndOpenChat(page);
+    await page.locator('.sc-chat-topbar .sc-chat-top-action').first().click();
+
+    await expect(page.locator('.sc-chat-topbar')).toBeHidden();
+    await expect(page.locator('#page-chat')).toBeHidden();
+    await expect(page.getByTestId('sidebar')).toBeVisible();
+  });
+
+  test('chat channel entry points remain present for core staff modules', async ({ page }) => {
+    await signInAndOpenChat(page);
+    const channelButtons = [
+      'chat-channel-all-staff',
+      'chat-channel-direct',
+      'chat-channel-departments',
+      'chat-channel-grades',
+      'chat-channel-inquiries',
+      'chat-channel-announcements',
+      'chat-channel-groups',
+    ];
+
+    for (const testId of channelButtons) {
+      await expect(page.getByTestId(testId)).toBeAttached();
+    }
+  });
+});
