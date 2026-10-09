@@ -43,8 +43,9 @@ async function _openGradeChat(name,silent=false){
 }
 function _startGradePolling(){if(_gradePollTimer)clearInterval(_gradePollTimer);_gradePollTimer=setInterval(()=>{if(document.getElementById('gradeMessageStream')&&_gradeName)_openGradeChat(_gradeName,true).catch(()=>{});},5000);}
 window._sendGradeFromComposer=async function(ev){ev?.preventDefault?.();const i=document.getElementById('gradeChatInput'),v=i?.value.trim();if(!_gradeName||!v)return false;try{const r=await API.sendGradeMessage(_gradeName,v);if(!r?.ok)throw new Error(r?.error||'Send failed');i.value='';await _openGradeChat(_gradeName);}catch(e){showToast(t('chat.gradeSendFailed'));}return false;};
-window._showGradeWorkspace=function(){_departmentOpenRequest++;_renderGradeWorkspace();};
-window._showDepartmentWorkspace=function(){_gradeOpenRequest++;const r=document.getElementById('smartChatModeBody');if(r){r.innerHTML=_renderDepartmentWorkspace();_loadDepartmentWorkspace();}};
+window._showGradeWorkspace=function(){window._invalidateDepartmentChatOpen?.();_renderGradeWorkspace();};
+window._showDepartmentWorkspace=function(){window._invalidateGradeChatOpen?.();const r=document.getElementById('smartChatModeBody');if(r){r.innerHTML=_renderDepartmentWorkspace();_loadDepartmentWorkspace();}};
+window._invalidateGradeChatOpen=function(){_gradeOpenRequest++;};
 window._renderGradeWorkspace=_renderGradeWorkspace;
 window._setGradeMobileView=function(selected){const shell=document.querySelector('.smart-chat-grade-shell');if(shell)shell.classList.toggle('has-selection',!!selected);};
 window._clearGradeSelection=function(){_gradeOpenRequest++;if(_gradePollTimer)clearInterval(_gradePollTimer);_gradePollTimer=null;_gradeName=null;_setGradeMobileView(false);_renderChatMode();};
