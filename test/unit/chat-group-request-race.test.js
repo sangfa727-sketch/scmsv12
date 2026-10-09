@@ -153,9 +153,10 @@ test('ticket form labels and priority options are localized instead of exposing 
 
 test('global toast colors use theme surfaces instead of inverted text/background colors', () => {
   const css = fs.readFileSync(path.resolve(__dirname, '../../style.css'), 'utf8');
-  const start = css.indexOf('.toast {\n  position: fixed;');
+  const start = css.indexOf('.toast {');
   const end = css.indexOf('}', start);
   const toast = css.slice(start, end);
+  assert.ok(start >= 0, 'global toast rule should exist');
   assert.ok(toast.includes('background: var(--surface2);'));
   assert.ok(toast.includes('color: var(--text);'));
   assert.ok(toast.includes('border: 1px solid var(--border2);'));
@@ -164,12 +165,14 @@ test('global toast colors use theme surfaces instead of inverted text/background
 
 test('official message and ticket labels have explicit translations for every supported locale', () => {
   const locales = fs.readFileSync(path.resolve(__dirname, '../../js/00f_chat_locales.js'), 'utf8');
-  const section = locales.match(/const officialTicketLocaleParityFix = \\{([\\s\\S]*?)\\n  \\};/);
-  assert.ok(section, 'official/ticket locale parity map must exist');
+  const start = locales.indexOf('const officialTicketLocaleParityFix = {');
+  const end = locales.indexOf('\n  };', start);
+  assert.ok(start >= 0 && end > start, 'official/ticket locale parity map must exist');
+  const section = locales.slice(start, end);
   for (const code of ['en', 'my', 'th', 'jp', 'ms', 'km', 'zh']) {
-    assert.match(section[1], new RegExp('^\\s*' + code + ': \\{', 'm'), 'missing locale ' + code);
+    assert.ok(section.includes('\n    ' + code + ': {'), 'missing locale ' + code);
     for (const key of ['chat.authorizedTicketAccess', 'chat.backToInquiryTickets', 'chat.noInquiryTickets', 'chat.ticketClosed', 'chat.writeReply', 'chat.newOfficialMessage', 'chat.statusOpen']) {
-      assert.ok(section[1].includes("'" + key + "'"), 'missing locale parity key ' + key);
+      assert.ok(section.includes("'" + key + "'"), 'missing locale parity key ' + key);
     }
   }
 });
