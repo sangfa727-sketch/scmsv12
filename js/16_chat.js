@@ -443,7 +443,7 @@ function renderChat() {
           ${_chatMode === 'school' ? _chatIcon('users') + esc(t('chat.schoolChat')) : _chatIcon('bot') + esc(t('chat.aiAssistant'))}
           <span aria-hidden="true">⌄</span>
         </button>
-        <button type="button" class="sc-chat-top-action" onclick="_toggleChatTypeMenu()" aria-label="${esc(t('chat.communicationCenter'))} menu" aria-expanded="${_chatTypeMenuOpen ? 'true' : 'false'}">
+        <button type="button" class="sc-chat-top-action" onclick="_toggleChatTypeMenu()" aria-label="${esc(t('chat.communicationCenter'))} menu" aria-haspopup="menu" aria-controls="scChatTypeMenu" aria-expanded="${_chatTypeMenuOpen ? 'true' : 'false'}">
           <svg viewBox="0 0 24 24" width="21" height="21" fill="currentColor" aria-hidden="true"><circle cx="5" cy="12" r="1.8"/><circle cx="12" cy="12" r="1.8"/><circle cx="19" cy="12" r="1.8"/></svg>
         </button>
         <div id="scChatTypeMenu" class="sc-chat-type-menu" role="menu" ${_chatTypeMenuOpen ? '' : 'hidden'}>
@@ -501,7 +501,7 @@ window.switchChatMode = function(mode) {
       if (check) check.hidden = !active;
     });
   }
-  document.querySelectorAll('.sc-chat-mode-pill,.sc-chat-top-action').forEach(b => b.setAttribute('aria-expanded','false'));
+  document.querySelectorAll('.sc-chat-mode-pill,.sc-chat-top-action[aria-haspopup="menu"]').forEach(b => b.setAttribute('aria-expanded','false'));
   const pill = document.querySelector('.sc-chat-mode-pill');
   if (pill) pill.innerHTML = (_chatMode === 'school' ? _chatIcon('users') + esc(t('chat.schoolChat')) : _chatIcon('bot') + esc(t('chat.aiAssistant'))) + '<span aria-hidden="true">⌄</span>';
 };
@@ -509,7 +509,7 @@ window._toggleChatTypeMenu = function() {
   _chatTypeMenuOpen = !_chatTypeMenuOpen;
   const menu = document.getElementById('scChatTypeMenu');
   if (menu) menu.hidden = !_chatTypeMenuOpen;
-  document.querySelectorAll('.sc-chat-mode-pill,.sc-chat-top-action').forEach(b => b.setAttribute('aria-expanded', String(_chatTypeMenuOpen)));
+  document.querySelectorAll('.sc-chat-mode-pill,.sc-chat-top-action[aria-haspopup="menu"]').forEach(b => b.setAttribute('aria-expanded', String(_chatTypeMenuOpen)));
 };
 window._chooseChatType = function(mode) { window.switchChatMode(mode); };
 
