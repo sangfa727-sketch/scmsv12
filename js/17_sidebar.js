@@ -119,7 +119,7 @@ function renderSidebar() {
         return `
         <button type="button" class="sidebar-item ${window.APP.currentPage === it.id ? 'active' : ''}"
           data-page="${esc(it.id)}" aria-current="${window.APP.currentPage === it.id ? 'page' : 'false'}"
-          onclick="${it.id === 'website' ? \"window.location.href='school-website/create.html'\" : `sidebarGo('${esc(it.id)}')`}">
+          onclick="${it.id === 'website' ? "window.location.href=\'school-website/create.html\'" : "sidebarGo(\'" + esc(it.id) + "\')"}">
           <span class="sidebar-icon">${it.icon}</span>
           <span class="sidebar-label">${esc(typeof it.label === 'function' ? it.label() : t(it.key))}</span>
           ${badgeCount ? `<span class="sidebar-badge" aria-label="${badgeCount}">${badgeCount > 99 ? '99+' : badgeCount}</span>` : ''}
