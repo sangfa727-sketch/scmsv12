@@ -132,3 +132,31 @@ Before any merge:
 ## 9. Definition of ready for Phase 1
 
 Phase 0 is complete only when the current auth/session flow, live database permissions and RPC surface, hosting options, role matrix, tenant boundaries, and test strategy have been inspected and written down with evidence. Unknowns must remain blockers, not be assumed safe.
+
+
+## 10. Dedicated DCC database model — proposal only
+
+This section is a design proposal, not a migration. No production tables or privileges have been changed. A read-only check found no table names matching `developer_%` in the `public` or `private` schemas; this does not rule out differently named objects in other schemas.
+
+Proposed core tables, preferably in a schema not exposed through the public API after confirming project conventions:
+
+| Table | Purpose |
+|---|---|
+| `developer_operators` | Maps an existing verified identity to an enabled or disabled platform operator. |
+| `developer_operator_roles` | Records explicit role grants, revocations, grantor, timestamps and reason. |
+| `developer_role_permissions` | Maps each role to individual capability codes and risk levels. |
+| `developer_audit_logs` | Server-generated, append-only action history with actor, target, tenant scope when relevant, reason, request ID, outcome and redacted metadata. |
+| `developer_action_approvals` | Short-lived, single-use approvals bound to an exact high-risk action, target, request ID, expiry and approver. |
+
+Do not add a separate session table unless the selected identity architecture proves it necessary. Never store passwords, password hashes, recovery codes, access tokens, refresh tokens or privileged secrets in these tables.
+
+## 11. Sandbox acceptance gates
+
+- Public signup, anonymous users, parents, teachers, school admins, unprovisioned operators and disabled operators must be denied DCC access.
+- Expired/revoked sessions, insufficient permissions, cross-tenant targets, expired/consumed approvals and prohibited self-approval must be denied.
+- Server-side authorization must derive identity from a verified session and check operator status, capability, target scope and approval on every request. No direct browser CRUD to privileged DCC tables.
+- Audit entries must be server-generated, append-only to application roles and redact secrets and sensitive student/parent data.
+- Re-test existing school login, attendance, billing, chat and core RPC flows after sandbox changes.
+- Confirm identity-provider schema, current migration baseline, rollback method and CI migration tests before creating a sandbox migration.
+
+`staillasbi@gmail.com` must not receive `platform_owner` until email ownership is verified, MFA is enforced, the permission matrix is reviewed and negative tests pass. Production migration, deployment and PR merge remain separate approval gates.
