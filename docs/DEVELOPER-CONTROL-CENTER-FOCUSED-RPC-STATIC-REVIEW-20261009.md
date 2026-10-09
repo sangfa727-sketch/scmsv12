@@ -34,6 +34,27 @@ All nine reviewed functions are owned by `postgres`, are SECURITY DEFINER, have 
 4. No school-session credential should be accepted as proof of a platform operator identity.
 5. Do not expose parent/student data, alter live grants, or create a platform-owner role while the relevant identity boundary remains unproven.
 
+
+## Session / QR / invite table metadata checkpoint (read-only)
+
+Catalog-only checks were run after the initial function review. No table rows or secret/token values were read.
+
+| Table | RLS / client grants observed | Static interpretation / next check |
+|---|---|---|
+| app_sessions | RLS enabled, not FORCE RLS. One policy: INSERT to anon, authenticated only when status='pending' and telegram_id IS NULL. Catalog grants also list client-role UPDATE/DELETE and several non-DML privileges. No SELECT policy was found. | **P1/P2 privilege-surface review.** RLS should block client UPDATE/DELETE absent matching policies, but the grants are broader than the apparent intended pending-session insert flow. In a sandbox, verify effective privileges with role-level tests and then propose a narrow grant migration if frontend dependencies permit. Do not change live grants in this pass. Confirm that token generation is server-side/high-entropy and that an attacker cannot reserve or interfere with another user's pending token. |
+| app_web_sessions, parent_sessions, teacher_card_login_challenges, teacher_invites | RLS enabled, not FORCE RLS; no policies found. Catalog grants observed only for service_role among the checked API roles; no anon/authenticated table grants appeared. | This is a useful direct-table boundary, but SECURITY DEFINER functions can still access these tables. Verify each function's caller authorization and ensure future policies/grants do not unintentionally broaden access. |
+| app_web_sessions | Unique primary key on session_token; index on (teacher_id, expires_at); explicit expires_at column. | Verify every lookup checks expiry and revocation/status consistently, not only index presence. |
+| parent_sessions | Unique primary key on session_token; index on student_id; explicit expires_at column. | Verify expiry and parent/student/school binding at every read path. |
+| teacher_card_login_challenges | Unique challenge_hash, primary key challenge_id, expiry index restricted to unconsumed rows; consumed_at column exists. | Supports uniqueness/expiry lookup but does not by itself prove atomic one-time consumption; preserve and test row locking plus conditional consume. |
+| teacher_invites | Unique primary key on invite_code; index on (school_id, redeemed_at); expiry and redemption columns exist. | Verify expiry, single-use redemption under concurrency, role restrictions, and school binding in the signup function. |
+| app_sessions | Unique primary key on token, index on (token, status); no expires_at column was present in the returned column metadata. | **P1/P2 lifecycle question.** Determine whether expiry/revocation is represented by status or handled elsewhere; ensure linked app sessions cannot remain valid indefinitely. Do not assume absence of expiry from this table alone proves an exploitable session. |
+
+### Metadata limitations
+
+- RLS enabled with no policies plus no client table grants is a useful defense-in-depth signal, not proof that every SECURITY DEFINER RPC is safe.
+- Catalog role grants include some PostgreSQL privileges such as TRIGGER/REFERENCES that are not equivalent to direct row access; validate effective SELECT/INSERT/UPDATE/DELETE access specifically in isolated tests.
+- These were metadata-only SELECT queries. No grants, policies, rows, tokens, or production data were changed or disclosed.
+
 ## Next safe work
 
 1. Trace frontend/API call paths for parent Google login, QR resolution, and signup to determine whether trusted verification exists upstream.
