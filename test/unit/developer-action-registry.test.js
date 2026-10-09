@@ -45,6 +45,7 @@ test('critical actions require step-up, confirmation, independent approval, and 
     assert.equal(definition.requiresStepUp, true, definition.actionId);
     assert.equal(definition.requiresConfirmation, true, definition.actionId);
     assert.equal(definition.requiresIndependentApproval, true, definition.actionId);
+    assert.equal(definition.requiresApproval, true, definition.actionId);
     assert.equal(definition.idempotencyRequired, true, definition.actionId);
   }
 });
