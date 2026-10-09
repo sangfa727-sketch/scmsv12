@@ -40,7 +40,7 @@ window._newChatGroup=async function(){
    if(!['PROJECT','EVENT'].includes(type)){showToast(t('chat.invalidGroupType'));return;}
    const memberIds=Array.from(form.querySelectorAll('input[name="groupMember"]:checked')).map(el=>el.value);
    const startsAt=String(fd.get('groupStartsAt')||'').trim()||null,endsAt=String(fd.get('groupEndsAt')||'').trim()||null;
-   if(startsAt&&endsAt&&new Date(endsAt)<new Date(startsAt)){showToast(t('chat.invalidGroupType'));return;}
+   if(startsAt&&endsAt&&new Date(endsAt)<new Date(startsAt)){showToast(t('chat.groupCreateFailed'));return;}
    const submit=form.querySelector('#chatGroupCreateSubmit');if(submit){submit.disabled=true;submit.textContent=t('chat.loading');}
    const created=await _createChatGroup(name,desc,type,startsAt,endsAt,memberIds);
    if(created)close();else if(submit){submit.disabled=false;submit.textContent=t('chat.newGroup');}
