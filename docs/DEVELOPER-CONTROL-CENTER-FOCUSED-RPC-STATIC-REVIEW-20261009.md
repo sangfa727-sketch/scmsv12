@@ -49,6 +49,12 @@ Catalog-only checks were run after the initial function review. No table rows or
 | teacher_invites | Unique primary key on invite_code; index on (school_id, redeemed_at); expiry and redemption columns exist. | Verify expiry, single-use redemption under concurrency, role restrictions, and school binding in the signup function. |
 | app_sessions | Unique primary key on token, index on (token, status); no expires_at column was present in the returned column metadata. | **P1/P2 lifecycle question.** Determine whether expiry/revocation is represented by status or handled elsewhere; ensure linked app sessions cannot remain valid indefinitely. Do not assume absence of expiry from this table alone proves an exploitable session. |
 
+### Effective privilege check — app_sessions (read-only)
+
+A direct `has_table_privilege` check confirmed that both `anon` and `authenticated` have effective table-level `INSERT`, `UPDATE`, and `DELETE` privileges on `public.app_sessions`, while neither has `SELECT`. RLS is enabled and the only policy found is the constrained pending-session INSERT policy; no UPDATE or DELETE policy was found. Therefore, row-level policy enforcement is expected to block those UPDATE/DELETE operations for API roles, but the broad grants are unnecessary attack surface and create a future-regression hazard if policies change.
+
+**Proposed first hardening candidate (not applied):** in a separate migration after frontend dependency review, revoke `UPDATE` and `DELETE` on `public.app_sessions` from `anon` and `authenticated`, preserve the intended constrained INSERT flow, and add regression tests proving client UPDATE/DELETE are denied while legitimate pending-session creation and trusted service-side linking still work. Run these tests in a disposable branch/sandbox first. No live grant was changed in this review.
+
 ### Metadata limitations
 
 - RLS enabled with no policies plus no client table grants is a useful defense-in-depth signal, not proof that every SECURITY DEFINER RPC is safe.
