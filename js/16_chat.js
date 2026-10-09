@@ -486,20 +486,25 @@ function renderChat() {
 }
 
 window._chatBackToMenu = function() {
+  const isMobileWorkspace = typeof window.matchMedia === 'function'
+    && window.matchMedia('(max-width: 760px)').matches;
   _exitChatWorkspace();
   try {
     if (typeof closeSidebar === 'function') closeSidebar();
-    if (typeof isTWA === 'function' && !isTWA() && typeof openSidebar === 'function') {
+    if (typeof openSidebar === 'function') {
+      // On mobile this is the sidebar control, not a leave-chat/back-to-dashboard action.
+      // Keep the current Chat page and conversation mounted while restoring the original app chrome.
       openSidebar();
       return;
     }
-    if (typeof goToPage === 'function') {
+    // Preserve the legacy desktop fallback when the app shell has no sidebar controller.
+    if (!isMobileWorkspace && typeof goToPage === 'function') {
       goToPage('dashboard');
       return;
     }
-    if (window.APP) window.APP.currentPage = 'dashboard';
+    if (!isMobileWorkspace && window.APP) window.APP.currentPage = 'dashboard';
   } catch (e) {
-    console.warn('[chat] menu navigation failed', e);
+    console.warn('[chat] sidebar control failed', e);
   }
 };
 
