@@ -32,6 +32,7 @@ const SIDEBAR_ITEMS = [
   { id: 'timetable', icon: '📅', key: 'module.timetable',  hideInTWA: false },
   { id: 'summary',   icon: '📊', key: 'module.summary', hideInTWA: false },
   { id: 'insights',  icon: '✨', key: 'module.summary', label: () => ({en:'Class Insights',my:'အတန်းအလိုက် အနှစ်ချုပ်',th:'ภาพรวมชั้นเรียน',jp:'クラス・インサイト',ms:'Class Insights',km:'ព័ត៌មានថ្នាក់រៀន',zh:'班级洞察'}[window.I18N?.current] || 'Class Insights'), hideInTWA: false },
+  { id: 'website', icon: '🌐', key: 'sb.website', label: () => ({en:'School Website',my:'ကျောင်း Website',th:'เว็บไซต์โรงเรียน',jp:'学校ウェブサイト',ms:'Laman Web Sekolah',km:'គេហទំព័រសាលា',zh:'学校网站'}[window.I18N?.current] || 'School Website'), hideInTWA: false },
   // Items below are NATIVE-ONLY — hidden inside Telegram
   { id: 'chat',      icon: '🗨️', key: 'sb.chat', hideInTWA: true  },
 ];
@@ -53,6 +54,11 @@ const SIDEBAR_PERMISSION = Object.freeze({
 
 function _sidebarCanAccess(pageId) {
   const A = window.APP || {};
+  if (pageId === 'website') {
+    const role = String(A.teacher_role || A.role || '').trim().toLowerCase().replace(/[ -]+/g, '_');
+    const ownerOrAdmin = !!A.is_admin || ['owner', 'school_owner', 'admin', 'super_admin', 'principal', 'ht'].includes(role);
+    return ownerOrAdmin || (Array.isArray(A.permissions) && A.permissions.includes('website.manage'));
+  }
   if (A.platform !== 'web' || A.is_admin) return true;
   const permission = SIDEBAR_PERMISSION[pageId];
   if (!permission) return true; // No permission contract exists for this module yet.
@@ -113,7 +119,7 @@ function renderSidebar() {
         return `
         <button type="button" class="sidebar-item ${window.APP.currentPage === it.id ? 'active' : ''}"
           data-page="${esc(it.id)}" aria-current="${window.APP.currentPage === it.id ? 'page' : 'false'}"
-          onclick="sidebarGo('${esc(it.id)}')">
+          onclick="${it.id === 'website' ? "window.location.href='school-website/create.html'" : `sidebarGo('${esc(it.id)}')`}">
           <span class="sidebar-icon">${it.icon}</span>
           <span class="sidebar-label">${esc(typeof it.label === 'function' ? it.label() : t(it.key))}</span>
           ${badgeCount ? `<span class="sidebar-badge" aria-label="${badgeCount}">${badgeCount > 99 ? '99+' : badgeCount}</span>` : ''}
