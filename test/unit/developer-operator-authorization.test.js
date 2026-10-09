@@ -50,7 +50,16 @@ function highRiskRequest(overrides = {}) {
 }
 
 function approvedContext(approvalOverrides = {}, contextOverrides = {}) {
-  return context({ approval: approval(approvalOverrides), ...contextOverrides });
+  return context({
+    approval: approval(approvalOverrides),
+    approvalApprover: {
+      userId: 'operator-2',
+      status: 'active',
+      capabilities: ['approve:schools.delete'],
+      scope: { type: 'schools', schoolIds: ['school-a'] }
+    },
+    ...contextOverrides
+  });
 }
 
 test('allows a verified active operator with an explicit capability and in-scope target', () => {
@@ -107,6 +116,13 @@ test('denies approval bound to a different action, resource, or school scope', (
 test('requires the exact resource ID for high-risk approved actions', () => {
   const { targetId, ...withoutTargetId } = highRiskRequest();
   assert.equal(authorizeDeveloperAction(approvedContext(), withoutTargetId).reason, 'target_required');
+});
+
+test('requires an active approver with action-specific authority and matching scope', () => {
+  assert.equal(authorizeDeveloperAction(context({ approval: approval() }), highRiskRequest()).reason, 'authorized_approver_required');
+  assert.equal(authorizeDeveloperAction(approvedContext({}, { approvalApprover: { userId: 'operator-2', status: 'disabled', capabilities: ['approve:schools.delete'], scope: { type: 'platform' } } }), highRiskRequest()).reason, 'authorized_approver_required');
+  assert.equal(authorizeDeveloperAction(approvedContext({}, { approvalApprover: { userId: 'operator-2', status: 'active', capabilities: ['schools.delete'], scope: { type: 'platform' } } }), highRiskRequest()).reason, 'approver_capability_denied');
+  assert.equal(authorizeDeveloperAction(approvedContext({}, { approvalApprover: { userId: 'operator-2', status: 'active', capabilities: ['approve:schools.delete'], scope: { type: 'schools', schoolIds: ['school-b'] } } }), highRiskRequest()).reason, 'approver_scope_denied');
 });
 
 test('fails closed when approval consumption state is missing', () => {
