@@ -423,6 +423,7 @@ function renderChat() {
     </div>`;
 
   _renderChatMode();
+  if (_chatMode === 'school') _refreshChatChannelUnreadCounts();
 }
 
 window._chatBackToMenu = function() {
@@ -599,7 +600,6 @@ function _renderChatMode() {
     </div>
     ${_renderAdminComposer()}`;
   _loadChatMessages();
-  _refreshChatChannelUnreadCounts();
   setTimeout(() => {
     _refreshAdminComposerPreview();
     if (window.APP?.is_admin) _loadAdminRecipientPreview();
@@ -944,6 +944,7 @@ window.switchChatChannel = function(channel) {
   _chatChannel = channel;
   if (_chatMode !== 'school') return;
   _renderChatMode();
+  if (_chatMode === 'school') _refreshChatChannelUnreadCounts();
 };
 
 async function _loadChatMessages() {
