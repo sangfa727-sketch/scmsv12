@@ -46,7 +46,7 @@ function approval(overrides = {}) {
 }
 
 function highRiskRequest(overrides = {}) {
-  return request({ action: 'schools.delete', approvalId: 'approval-1', ...overrides });
+  return request({ action: 'schools.delete', targetId: 'school-a', approvalId: 'approval-1', ...overrides });
 }
 
 function approvedContext(approvalOverrides = {}, contextOverrides = {}) {
@@ -102,6 +102,11 @@ test('denies approval bound to a different action, resource, or school scope', (
   assert.equal(authorizeDeveloperAction(approvedContext({ targetId: 'school-b', targetSchoolId: 'school-b' }, {
     operator: { ...context().operator, scope: { type: 'platform' } }
   }), highRiskRequest({ targetSchoolId: 'school-b' })).allowed, true);
+});
+
+test('requires the exact resource ID for high-risk approved actions', () => {
+  const { targetId, ...withoutTargetId } = highRiskRequest();
+  assert.equal(authorizeDeveloperAction(approvedContext(), withoutTargetId).reason, 'target_required');
 });
 
 test('denies self-approved, replayed, or expired approvals', () => {
