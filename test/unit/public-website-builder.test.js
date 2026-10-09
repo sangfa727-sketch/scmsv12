@@ -69,3 +69,14 @@ test('Website Studio uses collection selectors for multi-element operations',()=
  assert.match(js,/const links=\$\$\("\.section-nav a"\)/);
  new Function(js);
 });
+
+
+test('School Website is available from the native sidebar only to owner/admin or delegated managers',()=>{
+ const sidebar=read('js/17_sidebar.js');
+ assert.match(sidebar,/id: 'website'/);
+ assert.match(sidebar,/ownerOrAdmin/);
+ assert.match(sidebar,/school_owner/);
+ assert.match(sidebar,/website\\.manage/);
+ assert.match(sidebar,/school-website\\/create\\.html/);
+ assert.match(sidebar,/School Website/);
+});
