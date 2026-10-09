@@ -54,15 +54,35 @@ begin
   end if;
 
   if p_allowed then
-    insert into public.teacher_permissions
-      (school_id, teacher_id, permission_key, allowed, scope_type, class_name, subject_id)
-    values
-      (v_actor.school_id, v_target.teacher_id, 'website.manage', true, 'global', null, null)
-    on conflict (
-      teacher_id, permission_key, scope_type,
-      (coalesce(class_name, ''::text)),
-      (coalesce(subject_id, 0::bigint))
-    ) do update set allowed = true, updated_at = now();
+    update public.teacher_permissions
+       set allowed = true, updated_at = now()
+     where school_id = v_actor.school_id
+       and teacher_id = v_target.teacher_id
+       and permission_key = 'website.manage'
+       and scope_type = 'global'
+       and class_name is null
+       and subject_id is null;
+
+    if not found then
+      -- The existing unique index does not include school_id. Never let a conflict
+      -- update a row that belongs to a different school.
+      if exists (
+        select 1
+          from public.teacher_permissions
+         where teacher_id = v_target.teacher_id
+           and permission_key = 'website.manage'
+           and scope_type = 'global'
+           and coalesce(class_name, ''::text) = ''
+           and coalesce(subject_id, 0::bigint) = 0
+      ) then
+        return jsonb_build_object('ok', false, 'error', 'permission_scope_conflict');
+      end if;
+
+      insert into public.teacher_permissions
+        (school_id, teacher_id, permission_key, allowed, scope_type, class_name, subject_id)
+      values
+        (v_actor.school_id, v_target.teacher_id, 'website.manage', true, 'global', null, null);
+    end if;
   else
     delete from public.teacher_permissions
      where school_id = v_actor.school_id
