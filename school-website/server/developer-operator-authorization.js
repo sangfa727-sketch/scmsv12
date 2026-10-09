@@ -86,6 +86,20 @@ function authorizeDeveloperAction(context, request) {
         !approval.approvedBy.trim() || approval.approvedBy === approval.requestedBy) {
       return deny('independent_approval_required');
     }
+    // A distinct approver is not enough: the trusted adapter must load that
+    // approver's current operator record and the action-specific approval grant.
+    const approver = context.approvalApprover;
+    if (!approver || approver.status !== 'active' || approver.userId !== approval.approvedBy) {
+      return deny('authorized_approver_required');
+    }
+    const approverCapabilities = Array.isArray(approver.capabilities) ? approver.capabilities : [];
+    if (!approverCapabilities.includes(`approve:${request.action}`)) return deny('approver_capability_denied');
+    const approverScope = approver.scope;
+    if (!approverScope || !['platform', 'schools'].includes(approverScope.type)) return deny('approver_scope_invalid');
+    if (request.targetSchoolId !== undefined && approverScope.type === 'schools' &&
+        (!Array.isArray(approverScope.schoolIds) || !approverScope.schoolIds.includes(request.targetSchoolId))) {
+      return deny('approver_scope_denied');
+    }
     if (!Object.hasOwn(approval, 'consumedAt') || approval.consumedAt === undefined) return deny('approval_state_invalid');
     if (approval.consumedAt !== null) return deny('approval_already_consumed');
     const approvalExpiry = Date.parse(approval.expiresAt);
