@@ -172,6 +172,20 @@ test('official message success feedback uses active theme tokens and avoids the 
   assert.match(css, /#page-chat \.smart-chat-feedback-success\s*\{[^}]*var\(--green\)/);
 });
 
+test('official-message feedback stays compact and blends with both active themes', () => {
+  const css = fs.readFileSync(path.resolve(__dirname, '../../style.css'), 'utf8');
+  const start = css.indexOf('#page-chat .smart-chat-feedback {');
+  const end = css.indexOf('\n}', start);
+  assert.ok(start >= 0 && end > start, 'chat feedback rule must exist');
+  const rule = css.slice(start, end);
+  assert.ok(rule.includes('max-width:min(calc(100vw - 32px), 380px)'));
+  assert.ok(rule.includes('overflow-wrap:anywhere'));
+  assert.ok(rule.includes('background:color-mix(in srgb, var(--surface) 94%, var(--text))'));
+  assert.ok(css.includes('background:color-mix(in srgb, var(--green) 8%, var(--surface))'));
+  assert.ok(css.includes('.smart-chat-mode-switch button:focus-visible'));
+  assert.ok(css.includes('.smart-chat-mode-switch{width:100%;display:grid;grid-template-columns:1fr 1fr}'));
+});
+
 test('official message and ticket labels have explicit translations for every supported locale', () => {
   const locales = fs.readFileSync(path.resolve(__dirname, '../../js/00f_chat_locales.js'), 'utf8');
   const start = locales.indexOf('const officialTicketLocaleParityFix = {');
