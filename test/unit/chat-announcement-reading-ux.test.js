@@ -49,3 +49,17 @@ test('announcement reading uses only keys available in every supported locale', 
     }
   }
 });
+
+test('staff chat mobile navigation allows vertical page scrolling and prioritizes official announcements', () => {
+  const source = fs.readFileSync(path.resolve(__dirname, '../../js/16_chat.js'), 'utf8');
+  const styles = fs.readFileSync(path.resolve(__dirname, '../../style.css'), 'utf8');
+  const navStart = source.indexOf('function _chatQuickNavChannels()');
+  const navEnd = source.indexOf('function _renderChatQuickNav()', navStart);
+  assert.ok(navStart >= 0 && navEnd > navStart, 'find the persistent chat channel navigation');
+  const nav = source.slice(navStart, navEnd);
+  assert.ok(nav.indexOf("id:'staff'") < nav.indexOf("id:'announcements'"), 'All Staff remains the first channel');
+  assert.ok(nav.indexOf("id:'announcements'") < nav.indexOf("id:'direct'"), 'Official Announcements is promoted near the top');
+  assert.ok(styles.includes('touch-action:pan-x pan-y;transition:background .16s ease'), 'quick navigation buttons permit vertical page gestures');
+  assert.ok(styles.includes('overscroll-behavior-x:contain;touch-action:pan-x pan-y;scroll-snap-type:x proximity'), 'mobile channel strip permits vertical page scrolling while preserving horizontal scrolling');
+  assert.ok(styles.includes('min-width:144px;touch-action:pan-x pan-y;scroll-snap-align:start'), 'All Staff channel cards do not trap vertical touch gestures');
+});
