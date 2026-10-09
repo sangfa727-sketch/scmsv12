@@ -31,7 +31,7 @@ test('announcement reading uses only keys available in every supported locale', 
   const end = source.indexOf('function _renderDirectWorkspace()', start);
   assert.ok(start >= 0 && end > start, 'find the announcement workspace block');
   const block = source.slice(start, end);
-  const keys = [...new Set([...block.matchAll(/t\\('chat\\.([^']+)'/g)].map(match => match[1]))];
+  const keys = [...new Set([...block.matchAll(/t\('chat\.([^']+)'/g)].map(match => match[1]))];
   const localeFiles = [
     '../../js/00a_locales_en.js',
     '../../js/00b_locales_my.js',
@@ -44,7 +44,8 @@ test('announcement reading uses only keys available in every supported locale', 
   for (const localeFile of localeFiles) {
     const locale = fs.readFileSync(path.resolve(__dirname, localeFile), 'utf8');
     for (const key of keys) {
-      assert.match(locale, new RegExp("['\\\"]chat\\." + key + "['\\\"]\\\\s*:"), localeFile + ' is missing chat.' + key);
+      const found = locale.includes("'chat." + key + "':") || locale.includes('"chat.' + key + '":');
+      assert.ok(found, localeFile + ' is missing chat.' + key);
     }
   }
 });
