@@ -74,3 +74,32 @@ Before adding DCC tables or privileged endpoints, determine:
 - No Developer Login route or link was added.
 - No production account or student data was read or exported.
 - No PR was merged.
+
+
+## 7. Follow-up verification — 2026-10-09
+
+### CI at current inspected branch head
+
+- Commit: `6ae7a3cc693ba8e9db99cb22e0e04bc93ef9b31b`.
+- Workflow run: https://github.com/sangfa727-sketch/scmsv12/actions/runs/37895358472
+- Frontend syntax + regression tests: **success**.
+- Public website RLS runtime test: **success**.
+- Playwright: **skipped** by scheduled/manual-only workflow policy.
+- The new `test/unit/developer-control-center-contract.test.js` is a static design-contract test. It checks that the plan documents required schema names, denial cases, release gates, and secret/browser-CRUD prohibitions. It is not an executable authorization test and does not exercise a live DCC endpoint.
+
+### Server-side boundary review
+
+Reviewed `school-website/server/publish-authorization.js`, `school-website/server/admission-security.js`, and `supabase/functions/upload-school-asset/index.ts` as existing server-side patterns.
+
+- The website publication authorization helper is specifically scoped to website publishing and school IDs; it is not a platform-operator authorization service.
+- Admission security helpers include in-memory replay/rate-limit utilities explicitly documented as sandbox-only; they are not suitable for production operator-session enforcement.
+- The school-asset Edge Function uses a service-role secret server-side and resolves an `app_web_sessions` token with school-user fields. This is a school session boundary, not proof of a platform-operator identity or role.
+- Do **not** reuse teacher/school sessions, publication capability flags, or browser-provided role claims to authorize Developer Control Center operations.
+
+### Phase 1 gate decision
+
+No existing reviewed endpoint establishes the required trusted platform-operator identity, privilege revocation, per-action authorization, and approval binding end-to-end. Therefore implementation of privileged DCC actions remains blocked until that boundary is selected and tested in an isolated sandbox.
+
+Next safe implementation step: define and test a small, server-only operator authorization contract against verified identity claims and explicit capabilities, without wiring it to production data or granting service-role access to the browser. Tests must include anonymous, ordinary authenticated, unprovisioned/disabled operator, insufficient capability, cross-tenant target, expired/revoked session, and invalid/replayed approval cases. Only proceed to a deployable endpoint after the identity source and persistence/atomicity requirements are proven.
+
+This update does not create a DCC endpoint, database object, account, grant, or production deployment.
