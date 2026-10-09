@@ -215,6 +215,7 @@ test('Chat navigation exposes an aggregate unread badge using theme-aware stylin
   assert.ok(chat.includes('function _renderChatTabUnreadBadge()'));
   assert.ok(chat.includes("t('chat.unreadMessages')"));
   assert.ok(chat.includes('unreadRefreshTick === 0'));
+  assert.match(chat, /window\.switchChatMode = function\(mode\)\s*\{[\s\S]*?_renderChatMode\(\);\s*if \(_chatMode === 'school'\) _refreshChatChannelUnreadCounts\(\)/);
   assert.match(chat, /window\.switchChatChannel = function\(channel\)\s*\{[^}]*_refreshChatChannelUnreadCounts\(\)/);
   assert.match(chat, /function renderChat\(\)\s*\{[\s\S]*?_renderChatMode\(\);\s*if \(_chatMode === 'school'\) _refreshChatChannelUnreadCounts\(\)/);
 });
