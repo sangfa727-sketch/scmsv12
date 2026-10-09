@@ -776,8 +776,13 @@ async function _updateInquiryTicket(){
   if(!window.APP?.is_admin||!_inquiryTicketId)return;
   const status=document.getElementById('inquiryStatusSelect')?.value||null;
   const assignee=document.getElementById('inquiryAssigneeSelect')?.value||null;
-  const r=await API.updateInquiryTicket(_inquiryTicketId,status,assignee||null);
-  if(r?.ok){await _loadInquiryTickets();await _openInquiryTicket(_inquiryTicketId);}else showToast(t('chat.ticketUpdateFailed'));
+  try{
+    const r=await API.updateInquiryTicket(_inquiryTicketId,status,assignee||null);
+    if(r?.ok){await _loadInquiryTickets();await _openInquiryTicket(_inquiryTicketId);}
+    else showToast(t('chat.ticketUpdateFailed'));
+  }catch(e){
+    showToast(t('chat.ticketUpdateFailed'));
+  }
 }
 async function _sendInquiryFromComposer(e){
   e?.preventDefault?.();
