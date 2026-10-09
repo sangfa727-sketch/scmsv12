@@ -101,7 +101,7 @@ test('School Website Studio loads deployment environment guard before backend co
  assert.ok(html.indexOf('../js/00_env.js') >= 0, 'environment guard must be loaded');
  assert.ok(html.indexOf('../js/00_env.js') < html.indexOf('../js/01_config.js'), 'environment guard must run before config');
  const env=read('js/00_env.js');
- assert.match(env,/localhost.*127\\.0\\.0\\.1.*::1/);
+ assert.match(env,/localhost.*127\.0\.0\.1.*::1/);
 });
 
 test('School Website Studio fails closed until the server verifies an active authorized school session',()=>{
