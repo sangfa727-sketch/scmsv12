@@ -42,7 +42,7 @@ test('teacher ID card foundation stays protected', () => {
   assert.ok(html.includes('qrcodejs/1.0.0'));
   assert.match(html, /29_teacher_access\.js\?v=20261007b/);
   assert.match(html, /15_settings\.js\?v=20261007b/);
-  assert.match(html, /style\.css\?v=20261001d/);
+  assert.match(html, /style\.css\?v=20261009c/);
 });
 
 
