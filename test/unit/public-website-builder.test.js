@@ -62,3 +62,16 @@ test('School Website navigation supports owner/admin defaults and delegated webs
  assert.match(sidebar,/website\.manage/);
  assert.match(sidebar,/School Website/);
 });
+
+
+test('website.manage is a global sensitive permission with admin defaults only',()=>{
+ const migration=read('supabase/migrations/20261009100000_school_website_manage_permission.sql');
+ assert.match(migration,/'website\.manage'/);
+ assert.match(migration,/'global'/);
+ assert.match(migration,/'admin',\s*'website\.manage',\s*true/);
+ assert.match(migration,/'super_admin',\s*'website\.manage',\s*true/);
+ assert.doesNotMatch(migration,/values\s*\(\s*'teacher',\s*'website\.manage',\s*true/i);
+ const rpc=read('supabase/migrations/20260929075000_teacher_access_management_rpc.sql');
+ assert.match(rpc,/p_action='permission_set'/);
+ assert.match(rpc,/public\.teacher_permissions/);
+});
