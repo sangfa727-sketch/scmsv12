@@ -9405,3 +9405,21 @@ html.scms-chat-workspace #pages{overflow:auto}
     border-bottom:1px solid var(--border);
   }
 }
+
+
+/* Smart Chat: compact, accessible unread priority for Grade conversations. */
+#page-chat .smart-chat-channel-copy { display:flex; flex:1; min-width:0; flex-direction:column; align-items:flex-start; gap:3px; }
+#page-chat .smart-chat-channel-copy strong { max-width:100%; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+#page-chat .smart-chat-channel-copy small { display:flex; align-items:center; gap:7px; min-width:0; color:var(--muted); }
+#page-chat .smart-chat-unread-pill {
+  display:inline-flex; align-items:center; justify-content:center;
+  min-width:21px; height:21px; padding:0 6px; border-radius:999px;
+  background:var(--blue); color:#fff; font-size:11px; line-height:1;
+  font-weight:700; font-variant-numeric:tabular-nums;
+}
+#page-chat .smart-chat-channel-card.active .smart-chat-unread-pill { background:var(--text); color:var(--surface); }
+#page-chat .smart-chat-channel-chevron { color:var(--muted); font-size:19px; font-weight:400; }
+@media (max-width:760px) {
+  #page-chat .smart-chat-channel-copy { gap:4px; }
+  #page-chat .smart-chat-unread-pill { min-width:22px; height:22px; font-size:12px; }
+}
