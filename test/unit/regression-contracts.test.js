@@ -736,3 +736,21 @@ test('department and grade empty states explain setup prerequisites to admins', 
   assert.match(html, /js\/16_chat_department\.js\?v=20261009a/);
   assert.match(html, /js\/16_chat_grade\.js\?v=20261009a/);
 });
+
+
+test('official message recipient modes keep independent verified previews', () => {
+  const chat = read('js/16_chat.js');
+  const locales = read('js/00f_chat_locales.js');
+  const style = read('style.css');
+  const html = read('index.html');
+  assert.match(chat, /let _adminAllStaffRecipients = \[\];/);
+  assert.match(chat, /if \(type === 'all_staff'\) return _adminAllStaffRecipients;/);
+  assert.match(chat, /selectedType === 'all_staff'\) _adminAllStaffRecipients = Array\.isArray\(rows\) \? rows : \[\];/);
+  assert.match(locales, /'chat\.oneVerifiedRecipient':'One verified recipient'/);
+  assert.match(locales, /'chat\.staffNotice':'Staff notice'/);
+  assert.match(locales, /const fallbackKeys=Object\.keys\(extra\.en\)/);
+  assert.match(style, /touch-action:pan-x/);
+  assert.match(style, /flex:0 0 auto;min-width:144px/);
+  assert.match(html, /style\.css\?v=20261009d/);
+  assert.match(html, /js\/16_chat\.js\?v=20261009e/);
+});

@@ -12,6 +12,7 @@ let _directPollBusy = false;
 let _chatScrollLock = false;
 let _chatMode = 'school';
 let _adminGradeRecipients = [];
+let _adminAllStaffRecipients = [];
 let _adminTeacherRecipients = [];
 let _adminRecipientRequestId = 0;
 let _adminRecipientLoading = false;
@@ -68,8 +69,9 @@ function _gradeRecipientPreview() {
 }
 
 function _adminRecipientRows(type,target) {
-  // All recipient previews must come from the server-authorized RPC response.
+  // Each target mode uses only its own server-verified preview; never borrow Grade state.
   if (type === 'teacher') return _adminTeacherRecipients;
+  if (type === 'all_staff') return _adminAllStaffRecipients;
   return _adminGradeRecipients;
 }
 
@@ -146,6 +148,7 @@ async function _loadAdminRecipientPreview(type = null, target = null) {
     requestId = ++_adminRecipientRequestId;
     _adminRecipientLoading = true;
     if (selectedType === 'teacher') _adminTeacherRecipients = [];
+    else if (selectedType === 'all_staff') _adminAllStaffRecipients = [];
     else _adminGradeRecipients = [];
     _refreshAdminComposerPreview();
     if (selectedType === 'grade' && window.API?.getChatGradeTargets) {
@@ -179,13 +182,15 @@ async function _loadAdminRecipientPreview(type = null, target = null) {
       }
     } else if (selectedType === 'grade') {
       _adminGradeRecipients = Array.isArray(rows) ? rows : [];
-    } else {
-      _adminGradeRecipients = Array.isArray(rows) ? rows : [];
+    } else if (selectedType === 'all_staff') {
+      _adminAllStaffRecipients = Array.isArray(rows) ? rows : [];
     }
     _refreshAdminComposerPreview();
   } catch (e) {
     if (requestId && requestId !== _adminRecipientRequestId) return;
-    if ((type || document.getElementById('adminMsgRecipientType')?.value) === 'teacher') _adminTeacherRecipients = [];
+    const failedType = type || document.getElementById('adminMsgRecipientType')?.value || 'grade';
+    if (failedType === 'teacher') _adminTeacherRecipients = [];
+    else if (failedType === 'all_staff') _adminAllStaffRecipients = [];
     else _adminGradeRecipients = [];
     _refreshAdminComposerPreview();
   } finally {
