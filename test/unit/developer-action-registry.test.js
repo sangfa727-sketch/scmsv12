@@ -63,7 +63,7 @@ test('registry validator fails closed for duplicate IDs, approval drift, and inc
   );
   const critical = ACTION_DEFINITIONS.find((item) => item.riskTier === 'R3');
   assert.deepEqual(
-    validateDeveloperActionRegistry([{ ...critical, requiresIndependentApproval: false }]),
+    validateDeveloperActionRegistry([{ ...critical, requiresIndependentApproval: false, requiresApproval: false }]),
     { ok: false, error: 'critical_action_controls_missing' }
   );
 });
