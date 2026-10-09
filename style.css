@@ -9180,10 +9180,10 @@ html.scms-chat-workspace #pages{overflow:auto}
   #page-chat .smart-chat-direct-list-head button,
   #page-chat .smart-chat-list-actions>button,
   #page-chat .smart-chat-mobile-back {
-    width:40px;
-    height:40px;
-    min-width:40px;
-    min-height:40px;
+    width:44px;
+    height:44px;
+    min-width:44px;
+    min-height:44px;
     border-radius:12px;
     touch-action:manipulation;
   }
