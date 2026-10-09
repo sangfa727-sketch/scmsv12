@@ -13,6 +13,7 @@ let _chatScrollLock = false;
 let _chatMode = 'school';
 let _adminGradeRecipients = [];
 let _adminTeacherRecipients = [];
+let _adminRecipientRequestId = 0;
 let _directConversationId = null;
 let _announcementId = null;
 let _directPeer = null;
@@ -66,7 +67,7 @@ function _gradeRecipientPreview() {
 }
 
 function _adminRecipientRows(type,target) {
-  if (type === 'all_staff') return _verifiedStaffList();
+  // All recipient previews must come from the server-authorized RPC response.
   if (type === 'teacher') return _adminTeacherRecipients;
   return _adminGradeRecipients;
 }
@@ -140,9 +141,14 @@ async function _loadAdminRecipientPreview(type = null, target = null) {
   try {
     if (!window.API?.getChatRecipientPreview || !window.APP?.is_admin) return;
     const selectedType = type || document.getElementById('adminMsgRecipientType')?.value || 'grade';
+    const requestId = ++_adminRecipientRequestId;
+    if (selectedType === 'teacher') _adminTeacherRecipients = [];
+    else _adminGradeRecipients = [];
+    _refreshAdminComposerPreview();
     if (selectedType === 'grade' && window.API?.getChatGradeTargets) {
       try {
         const grades = await API.getChatGradeTargets();
+        if (requestId !== _adminRecipientRequestId) return;
         const select = document.getElementById('adminMsgGrade');
         if (select) {
           const current = target || select.value || grades[0] || '';
@@ -158,6 +164,7 @@ async function _loadAdminRecipientPreview(type = null, target = null) {
     }
     const grade = target || document.getElementById('adminMsgGrade')?.value || null;
     const rows = await API.getChatRecipientPreview(selectedType, selectedType === 'all_staff' ? null : (selectedType === 'teacher' ? (document.getElementById('adminMsgTeacher')?.value || null) : grade));
+    if (requestId !== _adminRecipientRequestId) return;
     if (selectedType === 'teacher') {
       _adminTeacherRecipients = Array.isArray(rows) ? rows : [];
       const select = document.getElementById('adminMsgTeacher');
@@ -174,6 +181,7 @@ async function _loadAdminRecipientPreview(type = null, target = null) {
     }
     _refreshAdminComposerPreview();
   } catch (e) {
+    if (typeof requestId !== 'undefined' && requestId !== _adminRecipientRequestId) return;
     if ((type || document.getElementById('adminMsgRecipientType')?.value) === 'teacher') _adminTeacherRecipients = [];
     else _adminGradeRecipients = [];
     _refreshAdminComposerPreview();
@@ -226,7 +234,7 @@ window._refreshAdminComposerPreview = function() {
   const type = document.getElementById('adminMsgType')?.value || 'announcement';
   const reason = document.getElementById('adminMsgReason')?.value.trim() || '—';
   const body = document.getElementById('adminMsgBody')?.value.trim() || '—';
-  const recipients = recipientType === 'all_staff' ? _verifiedStaffList() : _adminRecipientRows(recipientType, recipientType === 'teacher' ? teacherId : grade);
+  const recipients = _adminRecipientRows(recipientType, recipientType === 'teacher' ? teacherId : grade);
   const selectedTeacher = recipientType === 'teacher' ? _adminTeacherRecipients.find(t => t.teacher_id === teacherId) : null;
   const gradeWrap = document.getElementById('adminMsgGradeWrap');
   const teacherWrap = document.getElementById('adminMsgTeacherWrap');
