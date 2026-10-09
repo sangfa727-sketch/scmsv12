@@ -31,7 +31,8 @@ jobs:
     runs-on: ubuntu-latest
     services:
       postgres:
-        image: postgres:16
+        # Use the public ECR mirror to avoid Docker Hub unauthenticated pull-rate limits.
+        image: public.ecr.aws/docker/library/postgres:16
         env:
           POSTGRES_USER: scms_test
           POSTGRES_PASSWORD: scms_test
