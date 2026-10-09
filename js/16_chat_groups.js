@@ -8,22 +8,46 @@ function _renderGroupWorkspace(){
 async function _loadChatGroups(autoOpen=true){
  try{const box=document.getElementById('chatGroupList');if(box)box.innerHTML=skeletonCards(2);_chatGroups=await API.getChatGroups();if(box)box.innerHTML=_chatGroups.length?_chatGroups.map(g=>`<button class="smart-chat-channel-card ${Number(g.id)===Number(_chatGroupId)?'active':''}" onclick="_openChatGroup(${Number(g.id)})"><span class="smart-chat-channel-icon">${g.group_type==='EVENT'?'📅':'📁'}</span><span><strong>${esc(g.name)}</strong><small>${esc(g.group_type)} · ${esc(g.status)}${Number(g.unread_count)>0?' · '+esc(g.unread_count)+' '+t('chat.unread'):''}</small></span><b>›</b></button>`).join(''):`<div class="smart-chat-list-empty-card"><div class="icon">🗂️</div><strong>${t('chat.noGroups')}</strong><small>${t('chat.noGroupsDescription')}</small></div>`;if(autoOpen&&_chatGroupId)await _openChatGroup(_chatGroupId);}catch(e){const box=document.getElementById('chatGroupList');if(box)box.innerHTML=`<div class="chat-error"><div>🗂️</div><div>${t('chat.loadGroupsFailed')}</div><button type="button" class="btn-secondary" onclick="_loadChatGroups(false)">${t('chat.retry')}</button></div>`;}}
 window._newChatGroup=async function(){
- const name=prompt(t('chat.groupNamePrompt'));if(!name?.trim())return;
- const type=(prompt(t('chat.groupTypePrompt'),'PROJECT')||'PROJECT').toUpperCase();
- if(!['PROJECT','EVENT'].includes(type)){showToast(t('chat.invalidGroupType'));return;}
- const desc=prompt(t('chat.groupDescriptionPrompt'))||'';
- let staff=[];try{staff=await API.getDirectStaffDirectory();}catch(e){staff=[];}
- const choices=Array.isArray(staff)?staff.filter(x=>x?.teacher_id&&x.teacher_id!==window.APP?.teacher_id&&x.status!=='inactive'):[];
- const roster=choices.map(x=>`${x.teacher_id} — ${x.teacher_name||t('chat.staff')}`).join('\n');
- const rawMembers=choices.length?prompt(t('chat.groupMembersPrompt')+'\n\n'+roster,''):'';
- const memberIds=(rawMembers||'').split(',').map(x=>x.trim()).filter(Boolean);
- const startsRaw=prompt(t('chat.startDatePrompt'))||'';
- const endsRaw=prompt(t('chat.endDatePrompt'))||'';
- const startsAt=startsRaw.trim()||null,endsAt=endsRaw.trim()||null;
- _createChatGroup(name.trim(),desc,type,startsAt,endsAt,memberIds);
+ const host=document.getElementById('smartChatModeBody');if(!host)return;
+ let staff=[];
+ try{staff=await API.getDirectStaffDirectory();}catch(e){showToast(t('chat.groupCreateFailed'));return;}
+ const choices=Array.isArray(staff)?staff.filter(x=>x?.teacher_id&&String(x.teacher_id)!==String(window.APP?.teacher_id)&&x.status!=='inactive'):[];
+ const overlay=document.createElement('div');
+ overlay.className='smart-chat-group-modal-overlay';
+ overlay.innerHTML=`<section class="smart-chat-group-modal" role="dialog" aria-modal="true" aria-labelledby="chatGroupModalTitle">
+   <header class="smart-chat-group-modal-head"><div><div class="smart-chat-kicker">${t('chat.groupChat')}</div><h2 id="chatGroupModalTitle">${t('chat.newGroup')}</h2><p>${t('chat.newGroupDescription')}</p></div><button type="button" class="smart-chat-group-modal-close" data-close-group-modal aria-label="${t('chat.cancel')}">×</button></header>
+   <form id="chatGroupCreateForm" class="smart-chat-group-form">
+     <label>${t('chat.groupNamePrompt')}<input name="groupName" maxlength="120" required autocomplete="off"></label>
+     <label>${t('chat.groupTypePrompt')}<select name="groupType"><option value="PROJECT">PROJECT</option><option value="EVENT">EVENT</option></select></label>
+     <label>${t('chat.groupDescriptionPrompt')}<textarea name="groupDescription" maxlength="1000" rows="3"></textarea></label>
+     <fieldset class="smart-chat-group-member-field"><legend>${t('chat.groupMembersPrompt')}</legend>
+       <div class="smart-chat-group-member-list">${choices.length?choices.map(x=>`<label class="smart-chat-group-member"><input type="checkbox" name="groupMember" value="${esc(String(x.teacher_id))}"><span><strong>${esc(x.teacher_name||t('chat.staff'))}</strong><small>${esc(String(x.teacher_id))}</small></span></label>`).join(''):`<p class="smart-chat-group-no-members">${t('chat.schoolMembersOnly')}</p>`}</div>
+     </fieldset>
+     <div class="smart-chat-group-date-grid"><label>${t('chat.startDatePrompt')}<input type="datetime-local" name="groupStartsAt"></label><label>${t('chat.endDatePrompt')}<input type="datetime-local" name="groupEndsAt"></label></div>
+     <div class="smart-chat-group-form-actions"><button type="button" class="btn-secondary" data-close-group-modal>${t('chat.cancel')}</button><button type="submit" class="btn-primary" id="chatGroupCreateSubmit">${t('chat.newGroup')}</button></div>
+   </form>
+ </section>`;
+ host.appendChild(overlay);
+ const close=()=>overlay.remove();
+ overlay.querySelectorAll('[data-close-group-modal]').forEach(btn=>btn.addEventListener('click',close));
+ overlay.addEventListener('click',e=>{if(e.target===overlay)close();});
+ overlay.querySelector('input[name="groupName"]')?.focus();
+ const form=overlay.querySelector('#chatGroupCreateForm');
+ form?.addEventListener('submit',async e=>{
+   e.preventDefault();
+   const fd=new FormData(form),name=String(fd.get('groupName')||'').trim(),desc=String(fd.get('groupDescription')||'').trim(),type=String(fd.get('groupType')||'PROJECT').toUpperCase();
+   if(!name)return;
+   if(!['PROJECT','EVENT'].includes(type)){showToast(t('chat.invalidGroupType'));return;}
+   const memberIds=Array.from(form.querySelectorAll('input[name="groupMember"]:checked')).map(el=>el.value);
+   const startsAt=String(fd.get('groupStartsAt')||'').trim()||null,endsAt=String(fd.get('groupEndsAt')||'').trim()||null;
+   if(startsAt&&endsAt&&new Date(endsAt)<new Date(startsAt)){showToast(t('chat.groupCreateFailed'));return;}
+   const submit=form.querySelector('#chatGroupCreateSubmit');if(submit){submit.disabled=true;submit.textContent=t('chat.loading');}
+   const created=await _createChatGroup(name,desc,type,startsAt,endsAt,memberIds);
+   if(created)close();else if(submit){submit.disabled=false;submit.textContent=t('chat.newGroup');}
+ });
 };
 async function _createChatGroup(name,desc,type,startsAt=null,endsAt=null,memberIds=[]){
- try{const r=await API.createChatGroup(name,desc,type,startsAt,endsAt,memberIds);if(!r?.ok)throw new Error(r?.error||t('chat.createFailed'));_chatGroupId=Number(r.group_id);await _loadChatGroups();}catch(e){showToast(t('chat.groupCreateFailed'));}}
+ try{const r=await API.createChatGroup(name,desc,type,startsAt,endsAt,memberIds);if(!r?.ok)throw new Error(r?.error||t('chat.createFailed'));_chatGroupId=Number(r.group_id);await _loadChatGroups();return true;}catch(e){showToast(t('chat.groupCreateFailed'));return false;}}
 window._openChatGroup=async function(id){
  _chatGroupId=Number(id);const root=document.getElementById('chatGroupConversation');if(!root)return;
  root.innerHTML=`<div class="chat-stream" id="chatGroupStream"><div class="chat-empty-sub">${t('chat.loading')}</div></div>`;
