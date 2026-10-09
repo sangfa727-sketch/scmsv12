@@ -146,3 +146,71 @@ test('school-scoped operators cannot omit a target or weaken the server-owned ta
 test('denies malformed action policy context by default', () => {
   assert.equal(authorizeDeveloperAction(context({ actionPolicies: null }), request()).reason, 'action_policy_missing');
 });
+
+
+test('platform owner can control all registered system areas only through explicit server-owned capabilities', () => {
+  const owner = context({
+    identity: { userId: 'platform-owner-1', verified: true },
+    operator: {
+      userId: 'platform-owner-1',
+      status: 'active',
+      role: 'platform_owner',
+      capabilities: ['schools.read', 'schools.delete', 'billing.read', 'billing.refund', 'security.audit.read', 'system.health.read'],
+      scope: { type: 'platform' }
+    }
+  });
+
+  // Platform scope permits cross-school targets, but the action still must exist
+  // in the server-owned registry and be explicitly present in the capability set.
+  assert.equal(authorizeDeveloperAction(owner, request({ targetSchoolId: 'school-z' })).allowed, true);
+  assert.equal(authorizeDeveloperAction(owner, request({ action: 'unknown.root.action', targetSchoolId: 'school-z' })).reason, 'action_policy_missing');
+  assert.equal(authorizeDeveloperAction(context({
+    identity: { userId: 'platform-owner-1', verified: true },
+    operator: { ...owner.operator, capabilities: ['schools.read'] }
+  }), request({ action: 'schools.delete', targetSchoolId: 'school-z', targetId: 'school-z', approvalId: 'missing' })).reason, 'capability_denied');
+});
+
+test('platform owner does not bypass approval, independent approver, or one-time consumption controls', () => {
+  const owner = context({
+    identity: { userId: 'platform-owner-1', verified: true },
+    operator: {
+      userId: 'platform-owner-1',
+      status: 'active',
+      role: 'platform_owner',
+      capabilities: ['schools.read', 'schools.delete'],
+      scope: { type: 'platform' }
+    }
+  });
+  assert.equal(authorizeDeveloperAction(owner, highRiskRequest({ targetSchoolId: 'school-z', targetId: 'school-z' })).reason, 'approval_required');
+
+  const ownerApproved = approvedContext({
+    requestedBy: 'platform-owner-1',
+    targetId: 'school-z',
+    targetSchoolId: 'school-z'
+  }, {
+    identity: { userId: 'platform-owner-1', verified: true },
+    operator: { ...owner.operator, userId: 'platform-owner-1' },
+    approvalApprover: {
+      userId: 'operator-2',
+      status: 'active',
+      capabilities: ['approve:schools.delete'],
+      scope: { type: 'platform' }
+    }
+  });
+  assert.equal(authorizeDeveloperAction(ownerApproved, highRiskRequest({ targetSchoolId: 'school-z', targetId: 'school-z' })).allowed, true);
+  assert.equal(authorizeDeveloperAction(approvedContext({
+    requestedBy: 'platform-owner-1',
+    targetId: 'school-z',
+    targetSchoolId: 'school-z',
+    consumedAt: '2026-10-09T06:59:00Z'
+  }, {
+    identity: { userId: 'platform-owner-1', verified: true },
+    operator: { ...owner.operator, userId: 'platform-owner-1' },
+    approvalApprover: {
+      userId: 'operator-2',
+      status: 'active',
+      capabilities: ['approve:schools.delete'],
+      scope: { type: 'platform' }
+    }
+  }), highRiskRequest({ targetSchoolId: 'school-z', targetId: 'school-z' })).reason, 'approval_already_consumed');
+});
