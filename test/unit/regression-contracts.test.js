@@ -723,13 +723,14 @@ test('department and grade empty states explain setup prerequisites to admins', 
   const department = read('js/16_chat_department.js');
   const grade = read('js/16_chat_grade.js');
   const locales = read('js/00f_chat_locales.js');
+  const html = read('index.html');
   assert.match(department, /chat\.setupWhy/);
   assert.match(department, /chat\.setupDepartmentSteps/);
   assert.match(department, /window\.APP\?\.is_admin/);
   assert.match(grade, /chat\.setupGradeSteps/);
   assert.match(grade, /window\.APP\?\.is_admin/);
   for (const key of ['chat.setupWhy', 'chat.setupDepartmentSteps', 'chat.setupCreateDepartment', 'chat.setupGradeSteps', 'chat.setupGradePath']) {
-    assert.match(locales, new RegExp(key.replaceAll('.', '\\\\.') ));
+    assert.ok(locales.includes(key), `missing localized setup hint key: ${key}`);
   }
   assert.match(html, /js\/00f_chat_locales\.js\?v=20261009e/);
   assert.match(html, /js\/16_chat_department\.js\?v=20261009a/);
