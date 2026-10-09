@@ -717,3 +717,21 @@ test('public admission backend boundary validates bounded input and idempotency 
   assert.equal(security.validateAdmissionInput({ studentName:'A', guardianName:'B', phone:'1', grade:'G', email:'bad', idempotencyKey:'admission-key-123456' }).error, 'invalid_email');
   assert.equal(security.validateAdmissionInput({ studentName:'A', guardianName:'B', phone:'1', grade:'G', idempotencyKey:'short' }).error, 'invalid_idempotency_key');
 });
+
+
+test('department and grade empty states explain setup prerequisites to admins', () => {
+  const department = read('js/16_chat_department.js');
+  const grade = read('js/16_chat_grade.js');
+  const locales = read('js/00f_chat_locales.js');
+  assert.match(department, /chat\.setupWhy/);
+  assert.match(department, /chat\.setupDepartmentSteps/);
+  assert.match(department, /window\.APP\?\.is_admin/);
+  assert.match(grade, /chat\.setupGradeSteps/);
+  assert.match(grade, /window\.APP\?\.is_admin/);
+  for (const key of ['chat.setupWhy', 'chat.setupDepartmentSteps', 'chat.setupCreateDepartment', 'chat.setupGradeSteps', 'chat.setupGradePath']) {
+    assert.match(locales, new RegExp(key.replaceAll('.', '\\\\.') ));
+  }
+  assert.match(html, /js\/00f_chat_locales\.js\?v=20261009e/);
+  assert.match(html, /js\/16_chat_department\.js\?v=20261009a/);
+  assert.match(html, /js\/16_chat_grade\.js\?v=20261009a/);
+});
