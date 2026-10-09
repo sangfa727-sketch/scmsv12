@@ -128,7 +128,7 @@ test('group send accessible label is translated for every supported chat locale'
   for (const code of ['en', 'my', 'th', 'jp', 'ms', 'km', 'zh']) {
     assert.match(
       section[1],
-      new RegExp(code + ':\\s*\\{[^}]*[\\'\\"]chat\\.sendMessageLabel[\\'\\"]\\s*:'),
+      new RegExp(code + ': \\{[^}]*chat\\.sendMessageLabel'),
       `missing chat.sendMessageLabel translation for locale ${code}`
     );
   }
