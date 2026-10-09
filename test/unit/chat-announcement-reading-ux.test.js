@@ -9,6 +9,10 @@ test('official announcements expose a readable preview and full detail view', ()
   assert.ok(api.includes('announcement_list_failed'), 'surface announcement RPC failures instead of showing a false empty state');
   const styles = fs.readFileSync(path.resolve(__dirname, '../../style.css'), 'utf8');
   assert.ok(source.includes('_announcementExcerpt(a.body)'), 'show message content in the announcement list');
+  assert.ok(source.includes('Announcement IDs are UUIDs from Postgres'), 'document UUID identity handling');
+  assert.ok(source.includes("find(x=>String(x.id)===String(id))"), 'open announcements by their UUID string');
+  assert.ok(source.includes("_openAnnouncement(String(rows[0].id))"), 'auto-open using the UUID string');
+  assert.ok(!source.includes('Number(a.id)'), 'never coerce announcement UUIDs to numbers');
   assert.ok(source.includes("replace(/\\s+/g,' ').trim()"), 'collapse newlines and repeated whitespace in list excerpts');
   assert.ok(!source.includes("t('chat.officialNotice')"), 'use a localized key that exists in the chat locale catalog');
   assert.ok(source.includes('smart-chat-announcement-excerpt'), 'render a readable summary for each item');
