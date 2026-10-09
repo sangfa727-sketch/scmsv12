@@ -167,6 +167,21 @@
   };
   Object.keys(setupHints).forEach(code => Object.assign(chat[code], setupHints[code]));
 
+  // Keep these runtime labels explicitly translated in every supported locale.
+  // This avoids English fallbacks when the chat workspace renders dynamically.
+  const verifiedRecipientLocaleFix = {
+    en: {'chat.schoolChat':'School Chat','chat.oneVerifiedRecipient':'One verified recipient'},
+    my: {'chat.schoolChat':'ကျောင်းစကားပြော','chat.oneVerifiedRecipient':'အတည်ပြုထားသော လက်ခံသူတစ်ဦး'},
+    th: {'chat.schoolChat':'แชตโรงเรียน','chat.oneVerifiedRecipient':'ผู้รับที่ยืนยันแล้ว 1 คน'},
+    jp: {'chat.schoolChat':'スクールチャット','chat.oneVerifiedRecipient':'確認済み受信者 1 人'},
+    ms: {'chat.schoolChat':'Sembang Sekolah','chat.oneVerifiedRecipient':'1 penerima disahkan'},
+    km: {'chat.schoolChat':'ការជជែករបស់សាលា','chat.oneVerifiedRecipient':'អ្នកទទួលដែលបានផ្ទៀងផ្ទាត់ ១ នាក់'},
+    zh: {'chat.schoolChat':'学校聊天','chat.oneVerifiedRecipient':'1 位已验证收件人'}
+  };
+  Object.keys(verifiedRecipientLocaleFix).forEach(code =>
+    Object.assign(chat[code], verifiedRecipientLocaleFix[code])
+  );
+
   const maps={en:'I18N_EN',my:'I18N_MY',th:'I18N_TH',jp:'I18N_JP',ms:'I18N_MS',km:'I18N_KM',zh:'I18N_ZH'};
   Object.keys(maps).forEach(code=>{ window[maps[code]]=Object.assign({},window[maps[code]]||{},code==='en'?en:code==='my'?my:chat[code]); });
 })();
