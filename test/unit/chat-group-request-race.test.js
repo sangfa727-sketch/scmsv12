@@ -252,7 +252,7 @@ test('official message and ticket labels have explicit translations for every su
   const section = locales.slice(start, end);
   for (const code of ['en', 'my', 'th', 'jp', 'ms', 'km', 'zh']) {
     assert.ok(section.includes('\n    ' + code + ': {'), 'missing locale ' + code);
-    for (const key of ['chat.authorizedTicketAccess', 'chat.backToInquiryTickets', 'chat.noInquiryTickets', 'chat.ticketClosed', 'chat.ticketUpdateFailed', 'chat.writeReply', 'chat.newOfficialMessage', 'chat.statusOpen']) {
+    for (const key of ['chat.officialMessageSent', 'chat.authorizedTicketAccess', 'chat.backToInquiryTickets', 'chat.noInquiryTickets', 'chat.ticketClosed', 'chat.ticketUpdateFailed', 'chat.writeReply', 'chat.newOfficialMessage', 'chat.statusOpen']) {
       assert.ok(section.includes("'" + key + "'"), 'missing locale parity key ' + key);
     }
   }
