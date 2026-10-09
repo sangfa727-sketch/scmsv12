@@ -56,7 +56,7 @@ function _sidebarCanAccess(pageId) {
   const A = window.APP || {};
   if (pageId === 'website') {
     const role = String(A.teacher_role || A.role || '').trim().toLowerCase().replace(/[ -]+/g, '_');
-    const ownerOrAdmin = !!A.is_admin || ['owner', 'school_owner', 'admin', 'super_admin', 'principal', 'ht'].includes(role);
+    const ownerOrAdmin = ['owner', 'school_owner', 'admin', 'super_admin'].includes(role);
     return ownerOrAdmin || (Array.isArray(A.permissions) && A.permissions.includes('website.manage'));
   }
   if (A.platform !== 'web' || A.is_admin) return true;
