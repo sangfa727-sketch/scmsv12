@@ -220,6 +220,11 @@ test('mobile full-screen chat uses one topbar and persists chat type selection',
   await expect(page.locator('.sc-chat-mode-pill')).toContainText(/AI Assistant|AI Chat/i);
   await expect.poll(() => page.evaluate(() => localStorage.getItem('scms_chat_mode'))).toBe('ai');
   await expect(page.locator('.sc-chat-type-option.active')).toHaveCount(1);
+  await page.locator('.sc-chat-topbar .sc-chat-top-action').first().click();
+  await expect(page.locator('html')).not.toHaveClass(/scms-chat-workspace/);
+  await expect(page.locator('#page-chat')).toBeVisible();
+  await expect(page.locator('#appHeader')).toBeVisible();
+  await expect(page.locator('#sidebar')).toBeVisible();
 });
 
 test('desktop Chat keeps the original hero and mode tabs without mobile topbar', async ({ page }) => {
