@@ -347,6 +347,7 @@ window._refreshAdminComposerPreview = function() {
       html.scms-chat-workspace #page-chat .smart-chat-school-grid>.smart-chat-channel-list{display:none!important}
       html.scms-chat-workspace #page-chat .smart-chat-conversation{min-height:0}
       html.scms-chat-workspace #page-chat .smart-chat-conversation .chat-stream{max-height:none;min-height:0;overflow:visible;touch-action:pan-y}
+      html.scms-chat-workspace #page-chat .smart-chat-conversation .chat-composer{position:sticky;bottom:0;z-index:20;flex:0 0 auto}
     }
     @keyframes scChatMenuIn{from{opacity:0;transform:translateY(-5px) scale(.97)}to{opacity:1;transform:translateY(0) scale(1)}}
     @media(prefers-reduced-motion:reduce){html.scms-chat-workspace #page-chat *,html.scms-chat-workspace #page-chat *::before,html.scms-chat-workspace #page-chat *::after{animation-duration:.01ms!important;transition-duration:.01ms!important}}
