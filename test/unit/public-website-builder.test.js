@@ -56,16 +56,16 @@ test('School Website is discoverable from More on Telegram/mobile and desktop ap
  const more=read('js/12_more.js');
  assert.match(more,/canManageWebsite/);
  assert.match(more,/school_owner/);
- assert.match(more,/website\\.manage/);
+ assert.match(more,/website\.manage/);
  assert.match(more,/more-tile-website/);
- assert.match(more,/school-website\\/create\\.html/);
+ assert.match(more,/school-website\/create\.html/);
  assert.match(more,/School Website/);
 });
 test('Website Studio uses collection selectors for multi-element operations',()=>{
  const js=read('school-website/create.js');
- assert.doesNotMatch(js,/(?<!\\$)\\$\\([^)]*\\)\\.forEach/);
- assert.match(js,/\\$\\$\\("\\[data-field\\]"\\)\\.forEach/);
- assert.match(js,/\\$\\$\\("\\.template-option"\\)\\.forEach/);
- assert.match(js,/const links=\\$\\$\\("\\.section-nav a"\\)/);
+ assert.doesNotMatch(js,/(?<!\$)\$\("[^"]+"\)\.forEach/);
+ assert.match(js,/\$\$\("\[data-field\]"\)\.forEach/);
+ assert.match(js,/\$\$\("\.template-option"\)\.forEach/);
+ assert.match(js,/const links=\$\$\("\.section-nav a"\)/);
  new Function(js);
 });
