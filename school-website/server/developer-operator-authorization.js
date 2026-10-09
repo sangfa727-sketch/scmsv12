@@ -79,7 +79,7 @@ function authorizeDeveloperAction(context, request) {
     const targetId = request.targetId;
     if (approval.action !== request.action ||
         approval.targetId !== targetId ||
-        (request.targetSchoolId !== undefined && approval.targetSchoolId !== request.targetSchoolId)) {
+        approval.targetSchoolId !== (request.targetSchoolId ?? null)) {
       return deny('approval_binding_mismatch');
     }
     if (approval.requestedBy !== identity.userId || typeof approval.approvedBy !== 'string' ||
