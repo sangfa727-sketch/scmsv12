@@ -491,18 +491,22 @@ window._chatBackToMenu = function() {
   _exitChatWorkspace();
   try {
     if (typeof closeSidebar === 'function') closeSidebar();
-    if (typeof openSidebar === 'function') {
+    if (isMobileWorkspace) {
       // On mobile this is the sidebar control, not a leave-chat/back-to-dashboard action.
       // Keep the current Chat page and conversation mounted while restoring the original app chrome.
+      if (typeof openSidebar === 'function') openSidebar();
+      return;
+    }
+    // Keep the existing desktop navigation behavior unchanged.
+    if (typeof isTWA === 'function' && !isTWA() && typeof openSidebar === 'function') {
       openSidebar();
       return;
     }
-    // Preserve the legacy desktop fallback when the app shell has no sidebar controller.
-    if (!isMobileWorkspace && typeof goToPage === 'function') {
+    if (typeof goToPage === 'function') {
       goToPage('dashboard');
       return;
     }
-    if (!isMobileWorkspace && window.APP) window.APP.currentPage = 'dashboard';
+    if (window.APP) window.APP.currentPage = 'dashboard';
   } catch (e) {
     console.warn('[chat] sidebar control failed', e);
   }
