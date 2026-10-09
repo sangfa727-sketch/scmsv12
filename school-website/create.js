@@ -1,5 +1,6 @@
 (function(){
 "use strict";
+if(!window.SCMS_WEBSITE_CONTEXT?.schoolId){console.warn("School Website Studio requires verified school authorization.");return;}
 const DEFAULT_SECTIONS=[{id:"hero",type:"hero",label:"Home",visible:true,locked:true},{id:"about",type:"about",label:"About",visible:true},{id:"programs",type:"programs",label:"Programs",visible:true},{id:"facilities",type:"facilities",label:"Facilities",visible:true},{id:"news",type:"news",label:"News & events",visible:true},{id:"contact",type:"contact",label:"Contact",visible:true}];
 const state={template:"modern",logo:"",schoolName:"",tagline:"",aboutTitle:"",aboutText:"",contactTitle:"",contactText:"",programs:[],facilities:[],news:[],sections:DEFAULT_SECTIONS.map(x=>({...x}))};
 const templateMeta={modern:{label:"Modern School",hero:"Clean, calm and welcoming"},classic:{label:"Classic Academy",hero:"Formal and traditional"},premium:{label:"Premium Campus",hero:"Editorial and sophisticated"}};
