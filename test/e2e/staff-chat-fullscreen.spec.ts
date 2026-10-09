@@ -1,16 +1,20 @@
 import { test, expect } from '@playwright/test';
 
 const BASE_URL = process.env.SCMS_URL ?? 'http://localhost:5173';
-const TEACHER_ID = process.env.SCMS_TEST_TEACHER ?? 'change-me';
-const TEACHER_PW = process.env.SCMS_TEST_PW ?? 'change-me';
+const TEACHER_ID = process.env.SCMS_TEST_TEACHER;
+const TEACHER_PW = process.env.SCMS_TEST_PW;
 
 async function signInAndOpenChat(page: import('@playwright/test').Page) {
-  test.skip(process.env.SCMS_REQUIRE_STAGING !== '1', 'Staff Chat browser tests require configured staging credentials');
+  test.skip(
+    process.env.SCMS_REQUIRE_STAGING !== '1' || !TEACHER_ID || !TEACHER_PW,
+    'Staff Chat browser tests require staging mode plus SCMS_TEST_TEACHER (web-login email) and SCMS_TEST_PW'
+  );
   await page.goto(BASE_URL);
-  await page.getByTestId('login-teacher-id').fill(TEACHER_ID);
-  await page.getByTestId('login-password').fill(TEACHER_PW);
-  await page.getByTestId('login-submit').click();
-  await expect(page.getByTestId('sidebar')).toBeVisible();
+  await page.locator('.landing-btn-secondary').click();
+  await page.locator('#webLoginIdentity').fill(TEACHER_ID!);
+  await page.locator('#webLoginPin').fill(TEACHER_PW!);
+  await page.locator('#webLoginBtn').click();
+  await expect(page.locator('#sidebar')).toBeVisible();
   await page.getByTestId('nav-chat').click();
   await expect(page.locator('#page-chat')).toBeVisible();
   await expect(page.locator('.sc-chat-topbar')).toBeVisible();
@@ -80,7 +84,7 @@ test.describe('Staff Chat full-screen browser regression', () => {
 
     await expect(page.locator('.sc-chat-topbar')).toBeHidden();
     await expect(page.locator('#page-chat')).toBeHidden();
-    await expect(page.getByTestId('sidebar')).toBeVisible();
+    await expect(page.locator('#sidebar')).toBeVisible();
   });
 
   test('chat channel entry points remain present for core staff modules', async ({ page }) => {
