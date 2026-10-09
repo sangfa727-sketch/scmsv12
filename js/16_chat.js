@@ -321,7 +321,6 @@ window._refreshAdminComposerPreview = function() {
     /* Desktop keeps the existing SCMS shell; the full-screen workspace is mobile-only. */
     .sc-chat-topbar{display:none}
     @media(max-width:760px){
-      html.scms-chat-workspace #page-chat .sc-chat-workspace-content{display:contents}
       html.scms-chat-workspace #page-chat .smart-chat-shell{height:100dvh;min-height:100dvh;display:flex;flex-direction:column;gap:0;padding:0;overflow:hidden}
       html.scms-chat-workspace #page-chat .sc-chat-topbar{position:relative;z-index:30;display:grid;grid-template-columns:44px minmax(0,1fr) 44px;align-items:center;gap:10px;flex:0 0 auto;padding:calc(8px + env(safe-area-inset-top)) 12px 10px;border-bottom:1px solid var(--border);background:color-mix(in srgb,var(--surface) 94%,var(--sc-chat-accent))}
       html.scms-chat-workspace #page-chat .sc-chat-top-action{width:42px;height:42px;display:grid;place-items:center;border:1px solid var(--border);border-radius:50%;background:var(--bg2);color:var(--text);transition:transform .18s ease,background .18s ease,box-shadow .18s ease}
