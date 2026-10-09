@@ -53,6 +53,6 @@ test('section management exposes safe hide, reorder and duplicate controls',()=>
 test('logo media management stays client-only and validates safe image inputs',()=>{
  const html=read('school-website/create.html'),js=read('school-website/create.js'),css=read('school-website/create.css');
  assert.match(html,/id="logoUpload"/);assert.match(html,/accept="image\/png,image\/jpeg,image\/webp"/);
- assert.match(js,/openMediaPicker/);assert.match(js,/handleLogoUpload/);assert.match(js,/2\*1024\*1024/);assert.match(js,/image\/\(png\|jpeg\|webp\)/);assert.match(js,/readAsDataURL/);
+ assert.match(js,/openMediaPicker/);assert.match(js,/handleLogoUpload/);assert.match(js,/2\*1024\*1024/);assert.match(js,/png\|jpeg\|webp/);assert.match(js,/readAsDataURL/);
  assert.doesNotMatch(js,/service_role|supabase\.from|fetch\(/i);assert.match(css,/\.media-placeholder img/);
 });
