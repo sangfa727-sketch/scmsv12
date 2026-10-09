@@ -126,7 +126,7 @@ function validateDeveloperActionRegistry(definitions = ACTION_DEFINITIONS) {
     if (!RISK_TIERS.includes(item.riskTier)) return { ok: false, error: 'risk_tier_invalid' };
     if (item.requiredCapability !== item.actionId) return { ok: false, error: 'capability_binding_invalid' };
     for (const field of ['targetRequired', 'requiresStepUp', 'requiresConfirmation',
-      'requiresIndependentApproval', 'idempotencyRequired']) {
+      'requiresIndependentApproval', 'requiresApproval', 'idempotencyRequired']) {
       if (typeof item[field] !== 'boolean') return { ok: false, error: 'control_flag_invalid' };
     }
     if (typeof item.auditEventType !== 'string' || !item.auditEventType.startsWith('dcc.')) {
