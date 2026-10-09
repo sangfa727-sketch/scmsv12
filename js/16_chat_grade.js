@@ -14,9 +14,11 @@ function _renderGradeList(){
  }).join(''):`<div class="smart-chat-list-empty-card"><div class="icon">🎓</div><strong>${t('chat.noGradeAccess')}</strong><small>${t('chat.gradeAccess')}</small>${window.APP?.is_admin?`<details class="scms-setup-hint" style="margin-top:10px;text-align:left"><summary style="cursor:pointer;font-weight:600">! ${t('chat.setupWhy')}</summary><p style="margin:8px 0">${t('chat.setupGradeSteps')}</p><small>${t('chat.setupGradePath')}</small></details>`:''}</div>`;
 }
 async function _openGradeChat(name,silent=false){
- _gradeName=String(name||'').trim();_setGradeMobileView(true);const root=document.getElementById('gradeConversation');if(!root||!_gradeName)return;
+ const requestedGrade=String(name||'').trim();if(!requestedGrade)return;
+ const root=document.getElementById('gradeConversation');if(!root)return;
  try{
-  const r=await API.openGradeChat(_gradeName);if(!r?.ok)throw new Error(r?.error||'Unauthorized');
+  const r=await API.openGradeChat(requestedGrade);if(!r?.ok)throw new Error(r?.error||'Unauthorized');
+  _gradeName=String(r.grade_name||requestedGrade).trim();_setGradeMobileView(true);
   const msgs=Array.isArray(r.rows)?r.rows:[];
   const messageHtml=msgs.length?msgs.map(m=>{
    const mine=m.sender_teacher_id===window.APP?.teacher_id;
@@ -25,10 +27,16 @@ async function _openGradeChat(name,silent=false){
    const time=esc(m.created_at?new Date(m.created_at).toLocaleTimeString([],{hour:'2-digit',minute:'2-digit'}):'');
    return '<div class="chat-bubble-row '+(mine?'mine':'theirs')+'"><div class="chat-bubble">'+(mine?'':avatar)+'<div class="chat-bubble-author">'+author+'</div><div class="chat-bubble-text">'+esc(m.body||'')+'</div><div class="chat-bubble-time">'+time+'</div></div></div>';
   }).join(''):`<div class="chat-empty"><div class="chat-empty-icon">🎓</div><div class="chat-empty-title">${t('chat.emptyTitle')}</div><div class="chat-empty-sub">${t('chat.startGrade')}</div></div>`;
-  root.innerHTML=`<div class="smart-chat-conversation-head"><div class="smart-chat-direct-peer"><button type="button" class="smart-chat-mobile-back" onclick="_clearGradeSelection()" aria-label="${t('chat.backToGrades')}">‹</button><div><strong>${esc(r.grade_name||_gradeName)}</strong><small>${t('chat.staffOnlyGrade')}</small></div></div><span class="smart-chat-verified-pill">${t('chat.schoolIsolated')}</span></div><div class="chat-stream" id="gradeMessageStream">${messageHtml}</div><form class="chat-composer" onsubmit="return _sendGradeFromComposer(event)"><textarea id="gradeChatInput" rows="1" placeholder="${t('chat.writeGradeMessage')}" oninput="_autoGrowChatInput(this)" onkeydown="if(event.key===\'Enter\'&&!event.shiftKey){event.preventDefault();_sendGradeFromComposer(event)}"></textarea><button type="submit" class="chat-send-btn">${_chatIcon('send')}</button></form>`;
+  root.innerHTML=`<div class="smart-chat-conversation-head"><div class="smart-chat-direct-peer"><button type="button" class="smart-chat-mobile-back" onclick="_clearGradeSelection()" aria-label="${t('chat.backToGrades')}">‹</button><div><strong>${esc(r.grade_name||_gradeName)}</strong><small>${t('chat.staffOnlyGrade')}</small></div></div><span class="smart-chat-verified-pill">${t('chat.schoolIsolated')}</span></div><div class="chat-stream" id="gradeMessageStream">${messageHtml}</div><form class="chat-composer" onsubmit="return _sendGradeFromComposer(event)"><textarea id="gradeChatInput" rows="1" placeholder="${t('chat.writeGradeMessage')}" oninput="_autoGrowChatInput(this)" onkeydown="if(event.key===\\'Enter\\'&&!event.shiftKey){event.preventDefault();_sendGradeFromComposer(event)}"></textarea><button type="submit" class="chat-send-btn">${_chatIcon('send')}</button></form>`;
   requestAnimationFrame(()=>{const s=document.getElementById('gradeMessageStream');if(s)s.scrollTop=s.scrollHeight;});
   await API.markGradeRead(_gradeName);if(!silent)_startGradePolling();_renderGradeList();
- }catch(e){if(!silent)showToast(t('chat.gradeUnauthorized'));}
+ }catch(e){
+  // Fail closed: do not leave a revoked/unauthorized conversation selected or its messages visible.
+  _gradeName=null;_setGradeMobileView(false);
+  if(root)root.innerHTML=`<div class="chat-empty"><div class="chat-empty-icon">🎓</div><div class="chat-empty-title">${t('chat.selectGrade')}</div><div class="chat-empty-sub">${t('chat.gradeSchoolIsolated')}</div></div>`;
+  _renderGradeList();
+  if(!silent)showToast(t('chat.gradeUnauthorized'));
+ }
 }
 function _startGradePolling(){if(_gradePollTimer)clearInterval(_gradePollTimer);_gradePollTimer=setInterval(()=>{if(document.getElementById('gradeMessageStream')&&_gradeName)_openGradeChat(_gradeName,true).catch(()=>{});},5000);}
 window._sendGradeFromComposer=async function(ev){ev?.preventDefault?.();const i=document.getElementById('gradeChatInput'),v=i?.value.trim();if(!_gradeName||!v)return false;try{const r=await API.sendGradeMessage(_gradeName,v);if(!r?.ok)throw new Error(r?.error||'Send failed');i.value='';await _openGradeChat(_gradeName);}catch(e){showToast(t('chat.gradeSendFailed'));}return false;};
