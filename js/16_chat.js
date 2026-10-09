@@ -202,6 +202,23 @@ async function _loadAdminRecipientPreview(type = null, target = null) {
   }
 }
 
+function _showChatSuccessFeedback(message) {
+  if (!message) return;
+  const previous = document.querySelector('.smart-chat-feedback');
+  if (previous) previous.remove();
+  const feedback = document.createElement('div');
+  feedback.className = 'smart-chat-feedback smart-chat-feedback-success';
+  feedback.setAttribute('role', 'status');
+  feedback.setAttribute('aria-live', 'polite');
+  feedback.textContent = String(message);
+  document.body.appendChild(feedback);
+  requestAnimationFrame(() => feedback.classList.add('show'));
+  window.setTimeout(() => {
+    feedback.classList.remove('show');
+    window.setTimeout(() => feedback.remove(), 220);
+  }, 3200);
+}
+
 window.sendOfficialAnnouncement = async function() {
   if (!window.APP?.is_admin || !window.API?.createStaffAnnouncement) return false;
   const recipientType = document.getElementById('adminMsgRecipientType')?.value || 'grade';
@@ -226,7 +243,7 @@ window.sendOfficialAnnouncement = async function() {
     const result = await API.createStaffAnnouncement(recipientType, target, messageType, reason, body);
     if (!result?.ok) throw new Error(result?.error || t('chat.sendFailed'));
     if (btn) btn.innerHTML = '✓ ' + t('chat.sent');
-    showToast(t('chat.officialMessageSent', {count: result.recipient_count}));
+    _showChatSuccessFeedback(t('chat.officialMessageSent', {count: result.recipient_count}));
     document.getElementById('adminMsgBody').value = '';
     setTimeout(() => {
       if (btn) { btn.innerHTML = t('chat.sendOfficialMessage'); btn.disabled = false; }
@@ -602,7 +619,7 @@ async function _updateInquiryTicket(){
   const status=document.getElementById('inquiryStatusSelect')?.value||null;
   const assignee=document.getElementById('inquiryAssigneeSelect')?.value||null;
   const r=await API.updateInquiryTicket(_inquiryTicketId,status,assignee||null);
-  if(r?.ok){await _loadInquiryTickets();await _openInquiryTicket(_inquiryTicketId);}else showToast('Ticket update could not be applied.');
+  if(r?.ok){await _loadInquiryTickets();await _openInquiryTicket(_inquiryTicketId);}else showToast(t('chat.ticketUpdateFailed'));
 }
 async function _sendInquiryFromComposer(e){
   e?.preventDefault?.();
