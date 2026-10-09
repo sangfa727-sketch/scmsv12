@@ -9141,3 +9141,145 @@ html.scms-chat-workspace #pages{overflow:auto}
 .smart-chat-inquiry-admin{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px;flex:1 1 100%;width:100%;margin-top:8px}
 .smart-chat-inquiry-shell .smart-chat-direct-composer textarea{min-width:0}
 @media(max-width:760px){.smart-chat-inquiry-form{padding:12px;margin:8px 0}.smart-chat-inquiry-form-actions{display:grid;grid-template-columns:1fr 1fr}.smart-chat-inquiry-form-actions button{width:100%}.smart-chat-inquiry-admin{grid-template-columns:1fr}.smart-chat-inquiry-shell.has-selection .smart-chat-direct-conversation{height:calc(100dvh - 170px);min-height:0}}
+
+
+/* Staff Smart Chat — mobile-first conversation ergonomics.
+   Deliberately scoped to small screens; desktop layout remains unchanged. */
+@media (max-width:760px) {
+  #page-chat .smart-chat-shell {
+    padding:8px 8px max(12px,env(safe-area-inset-bottom));
+  }
+  #page-chat .smart-chat-hero { margin-bottom:10px; }
+  #page-chat .smart-chat-mode-switch { gap:4px; padding:4px; margin-bottom:10px; }
+  #page-chat .smart-chat-mode-switch button {
+    min-height:44px;
+    border-radius:10px;
+    font-size:12px;
+    touch-action:manipulation;
+  }
+  #page-chat .smart-chat-channel-list {
+    gap:5px;
+    padding:7px;
+    -webkit-overflow-scrolling:touch;
+    scrollbar-width:none;
+  }
+  #page-chat .smart-chat-channel-card {
+    min-height:52px;
+    padding:9px 10px;
+    border-radius:12px;
+    touch-action:manipulation;
+  }
+  #page-chat .smart-chat-direct-list,
+  #page-chat .smart-chat-direct-conversation {
+    border-radius:14px;
+    box-shadow:none;
+  }
+  #page-chat .smart-chat-direct-list-head {
+    padding:14px 13px 11px;
+  }
+  #page-chat .smart-chat-direct-list-head button,
+  #page-chat .smart-chat-list-actions>button,
+  #page-chat .smart-chat-mobile-back {
+    width:40px;
+    height:40px;
+    min-width:40px;
+    min-height:40px;
+    border-radius:12px;
+    touch-action:manipulation;
+  }
+  #page-chat .smart-chat-direct-search {
+    min-height:44px;
+    border-radius:12px;
+  }
+  #page-chat .smart-chat-direct-search input {
+    min-height:42px;
+    font-size:16px;
+  }
+  #page-chat .smart-chat-direct-item,
+  #page-chat .smart-chat-directory-item {
+    min-height:64px;
+    padding:10px;
+    gap:11px;
+    border-radius:12px;
+    touch-action:manipulation;
+  }
+  #page-chat .smart-chat-direct-avatar {
+    width:42px;
+    height:42px;
+    flex-basis:42px;
+    border-radius:50%;
+    font-size:13px;
+  }
+  #page-chat .smart-chat-direct-item strong,
+  #page-chat .smart-chat-directory-item strong { font-size:13px; }
+  #page-chat .smart-chat-direct-item small,
+  #page-chat .smart-chat-directory-item small { font-size:11px; }
+  #page-chat .smart-chat-direct-shell.has-selection .smart-chat-direct-list,
+  #page-chat .smart-chat-group-shell.has-selection .smart-chat-direct-list,
+  #page-chat .smart-chat-grade-shell.has-selection .smart-chat-direct-list,
+  #page-chat .smart-chat-department-shell.has-selection .smart-chat-direct-list {
+    display:none;
+  }
+  #page-chat .smart-chat-direct-shell.has-selection .smart-chat-direct-conversation,
+  #page-chat .smart-chat-group-shell.has-selection .smart-chat-direct-conversation,
+  #page-chat .smart-chat-grade-shell.has-selection .smart-chat-direct-conversation,
+  #page-chat .smart-chat-department-shell.has-selection .smart-chat-direct-conversation {
+    display:flex;
+    flex-direction:column;
+    min-height:calc(100dvh - 190px);
+    height:calc(100dvh - 190px);
+    overflow:hidden;
+  }
+  #page-chat .smart-chat-conversation-head {
+    flex:0 0 auto;
+    padding:10px 11px;
+    background:var(--surface);
+  }
+  #page-chat .smart-chat-conversation-head strong { font-size:14px; }
+  #page-chat .smart-chat-conversation-head small { font-size:11px; }
+  #page-chat .smart-chat-direct-conversation .chat-stream,
+  #page-chat #chatGroupConversation .chat-stream,
+  #page-chat #gradeConversation .chat-stream {
+    flex:1 1 auto;
+    min-height:0;
+    max-height:none;
+    overflow-y:auto;
+    overscroll-behavior:contain;
+    padding:12px 10px;
+    scroll-padding-bottom:12px;
+  }
+  #page-chat .chat-bubble {
+    max-width:86%;
+    padding:10px 12px;
+    border-radius:16px;
+    overflow-wrap:anywhere;
+  }
+  #page-chat .chat-bubble-text { line-height:1.45; }
+  #page-chat .chat-composer,
+  #page-chat .smart-chat-direct-composer {
+    flex:0 0 auto;
+    gap:8px;
+    padding:9px 9px max(9px,env(safe-area-inset-bottom));
+    background:var(--surface);
+    border-top:1px solid var(--border);
+  }
+  #page-chat .chat-composer textarea,
+  #page-chat .smart-chat-direct-composer textarea {
+    min-height:44px;
+    max-height:120px;
+    font-size:16px;
+    line-height:1.4;
+    border-radius:14px;
+  }
+  #page-chat .chat-send-btn {
+    min-width:44px;
+    min-height:44px;
+    border-radius:14px;
+    touch-action:manipulation;
+  }
+  #page-chat .smart-chat-list-empty-card,
+  #page-chat .chat-error,
+  #page-chat .chat-empty {
+    border-radius:14px;
+  }
+}
