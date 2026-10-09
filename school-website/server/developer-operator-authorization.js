@@ -3,15 +3,14 @@
 /**
  * Developer Control Center authorization decision contract.
  *
- * SECURITY BOUNDARY: This is a pure server-side policy helper, not an HTTP
- * endpoint and not an identity verifier. Call it only after a trusted server
- * adapter has validated the provider session and loaded the operator record
- * and action policy from server-controlled sources. Never build this context
- * from request JSON, localStorage, user metadata, URL parameters, or client
- * supplied role/policy claims.
+ * This pure policy helper is neither an HTTP endpoint nor an identity verifier.
+ * A trusted server adapter must verify the provider session and load identity,
+ * session, operator, action policies, and any approval record from server-owned
+ * sources. Never build that context from request JSON or client claims.
  *
- * Approval consumption and audit persistence must be atomic in the eventual
- * repository adapter; this helper intentionally does not mutate state.
+ * Approval consumption and audit persistence must be atomic in the repository
+ * adapter. This helper does not mutate persistent state and is not sufficient
+ * on its own to enforce one-time approval use.
  */
 
 function deny(reason) {
@@ -39,9 +38,12 @@ function authorizeDeveloperAction(context, request) {
   }
   if (typeof request.action !== 'string' || !request.action.trim()) return deny('action_required');
 
-  // Risk and target requirements are server-owned policy, never request flags.
-  const policy = actionPolicies && actionPolicies[request.action];
+  // Policy is loaded by the trusted adapter, never supplied by the request.
+  const policy = actionPolicies && Object.hasOwn(actionPolicies, request.action)
+    ? actionPolicies[request.action]
+    : null;
   if (!policy || typeof policy !== 'object') return deny('action_policy_missing');
+
   const capabilities = Array.isArray(operator.capabilities) ? operator.capabilities : [];
   if (!capabilities.includes(request.action)) return deny('capability_denied');
 
@@ -61,8 +63,12 @@ function authorizeDeveloperAction(context, request) {
   }
 
   if (policy.requiresApproval === true) {
-    const approval = request.approval;
-    if (!approval || typeof approval !== 'object') return deny('approval_required');
+    // Approval record must be fetched by a trusted adapter using approvalId.
+    // Never trust a record/object submitted by the caller.
+    const approval = context.approval;
+    if (!approval || typeof approval !== 'object' ||
+        typeof request.approvalId !== 'string' || !request.approvalId ||
+        approval.id !== request.approvalId) return deny('approval_required');
     if (approval.status !== 'approved') return deny('approval_not_approved');
     if (approval.action !== request.action || approval.targetId !== (request.targetId ?? request.targetSchoolId ?? null)) {
       return deny('approval_binding_mismatch');
