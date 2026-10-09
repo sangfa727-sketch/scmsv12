@@ -120,3 +120,14 @@ test('group chat mobile layout keeps the nested conversation wrapper shrinkable'
   assert.match(groupMobileRule[1], /min-height\s*:\s*0/);
   assert.match(groupMobileRule[1], /overflow\s*:\s*hidden/);
 });
+
+test('group send accessible label is translated for every supported chat locale', () => {
+  const locales = fs.readFileSync(path.resolve(__dirname, '../../js/00f_chat_locales.js'), 'utf8');
+  for (const code of ['en', 'my', 'th', 'jp', 'ms', 'km', 'zh']) {
+    assert.match(
+      locales,
+      new RegExp(code + ':\\s*\\{\\s*[\\s\\S]*?[\'\"]chat\\.sendMessageLabel[\'\"]\\s*:'),
+      `missing chat.sendMessageLabel translation for locale ${code}`
+    );
+  }
+});
