@@ -234,3 +234,30 @@ test('desktop Chat keeps the original hero and mode tabs without mobile topbar',
   await expect(page.locator('.smart-chat-hero')).toBeVisible();
   await expect(page.locator('.smart-chat-mode-switch')).toBeVisible();
 });
+
+
+test('Direct Chat composer sends through the API and refreshes the conversation', async ({ page }) => {
+  await mountSmartChat(page);
+  await page.evaluate(() => window.switchChatChannel('direct'));
+  await page.evaluate(() => window.openDirectChat('teacher-2'));
+  const input = page.locator('#directChatInput');
+  await expect(input).toBeEnabled();
+  await input.fill('Direct send functional check');
+  await page.locator('#directChatSendBtn').click();
+  await expect.poll(async () => (await calls(page, 'sendDirectMessage')).length).toBe(1);
+  expect((await calls(page, 'sendDirectMessage'))[0].args).toEqual([21, 'Direct send functional check']);
+  await expect(input).toBeEnabled();
+});
+
+test('Inquiry ticket composer sends a message through the API', async ({ page }) => {
+  await mountSmartChat(page);
+  await page.evaluate(() => window.switchChatChannel('tickets'));
+  await page.evaluate(() => window._openInquiryTicket(41));
+  const input = page.locator('#inquiryChatInput');
+  await expect(input).toBeEnabled();
+  await input.fill('Inquiry send functional check');
+  await page.locator('#inquirySendBtn').click();
+  await expect.poll(async () => (await calls(page, 'sendInquiryMessage')).length).toBe(1);
+  expect((await calls(page, 'sendInquiryMessage'))[0].args).toEqual([41, 'Inquiry send functional check']);
+  await expect(input).toBeEnabled();
+});
