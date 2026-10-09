@@ -124,3 +124,49 @@ test('Manage Access refuses to open for a non-admin session', async ({ page }) =
   await expect(page.locator('.teacher-access-sheet')).toHaveCount(0);
   expect(await rpcCalls(page, 'rpc_manage_teacher_access')).toHaveLength(0);
 });
+
+
+test('Create Teacher validates and sends the selected operational role to the server', async ({ page }) => {
+  await mountAdmin(page);
+  await page.evaluate(() => window.openCreateTeacherModal());
+  await expect(page.locator('#newTId')).toBeVisible();
+  await page.locator('#newTId').fill('teacher-new');
+  await page.locator('#newTLogin').fill('teacher.new');
+  await page.locator('#newTName').fill('New Teacher');
+  await page.locator('#newTEmail').fill('new.teacher@example.test');
+  await page.locator('#newTRole').selectOption('assistant_teacher');
+  await page.locator('#newTPw').fill('valid-pin-123');
+  await page.locator('#newTBtn').click();
+
+  await expect.poll(async () => (await rpcCalls(page, 'rpc_admin_create_teacher_v2')).length).toBe(1);
+  const call = (await rpcCalls(page, 'rpc_admin_create_teacher_v2'))[0];
+  expect(call.payload.p_teacher_id).toBe('teacher-new');
+  expect(call.payload.p_login_name).toBe('teacher.new');
+  expect(call.payload.p_teacher_name).toBe('New Teacher');
+  expect(call.payload.p_email).toBe('new.teacher@example.test');
+  expect(call.payload.p_role).toBe('assistant_teacher');
+});
+
+test('Teacher deactivate/reactivate requires confirmation and sends the correct guarded RPC', async ({ page }) => {
+  await mountAdmin(page);
+  await page.evaluate(() => { window.confirm = () => true; });
+
+  await page.evaluate(() => window.setTeacherLifecycle('teacher-2', 'deactivate'));
+  await expect.poll(async () => (await rpcCalls(page, 'rpc_admin_deactivate_teacher')).length).toBe(1);
+  let call = (await rpcCalls(page, 'rpc_admin_deactivate_teacher'))[0];
+  expect(call.payload.p_teacher_id).toBe('teacher-2');
+  expect(call.payload.p_session_token).toBe('e2e-test-session');
+
+  await page.evaluate(() => window.setTeacherLifecycle('teacher-2', 'reactivate'));
+  await expect.poll(async () => (await rpcCalls(page, 'rpc_admin_reactivate_teacher')).length).toBe(1);
+  call = (await rpcCalls(page, 'rpc_admin_reactivate_teacher'))[0];
+  expect(call.payload.p_teacher_id).toBe('teacher-2');
+  expect(call.payload.p_session_token).toBe('e2e-test-session');
+});
+
+test('Teacher lifecycle cancels safely when confirmation is declined', async ({ page }) => {
+  await mountAdmin(page);
+  await page.evaluate(() => { window.confirm = () => false; });
+  await page.evaluate(() => window.setTeacherLifecycle('teacher-2', 'deactivate'));
+  expect(await rpcCalls(page, 'rpc_admin_deactivate_teacher')).toHaveLength(0);
+});
