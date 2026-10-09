@@ -57,7 +57,7 @@ async function mountSmartChat(page) {
       },
       getStaffAnnouncements: async (...args) => {
         record('getStaffAnnouncements', ...args);
-        return [{ id: 'announcement-uuid-1', message_type: 'notice', reason: 'School update', body: 'Read this announcement', created_at: now }];
+        return [{ id: '11111111-1111-4111-8111-111111111111', message_type: 'notice', reason: 'School update', body: 'Read this announcement', created_at: now }];
       },
       markStaffAnnouncementRead: async (...args) => {
         record('markStaffAnnouncementRead', ...args);
@@ -172,7 +172,7 @@ test('Official Announcements loads and marks the selected UUID announcement read
   await page.evaluate(() => window.switchChatChannel('announcements'));
   await expect.poll(async () => (await calls(page, 'getStaffAnnouncements')).length).toBeGreaterThan(0);
   await expect(page.locator('#announcementList')).toContainText('School update');
-  await page.evaluate(() => window._openAnnouncement('announcement-uuid-1'));
+  await page.evaluate(() => window._openAnnouncement('11111111-1111-4111-8111-111111111111'));
   await expect(page.locator('#announcementStream')).toContainText('Read this announcement');
   await expect.poll(async () => (await calls(page, 'markStaffAnnouncementRead')).length).toBe(1);
 });
