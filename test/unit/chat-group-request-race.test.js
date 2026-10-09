@@ -108,5 +108,5 @@ test('group chat refresh and composer controls expose accessible names', () => {
   const source = fs.readFileSync(SOURCE, 'utf8');
   assert.match(source, /class="smart-chat-refresh-btn"[^>]*aria-label="\$\{t\('chat\.refresh'\)\}"/);
   assert.match(source, /<textarea id="chatGroupInput"[^>]*aria-label="\$\{t\('chat\.writeMessage'\)\}"/);
-  assert.match(source, /<button class="chat-send-btn" type="submit" aria-label="Send message">/);
+  assert.match(source, /<button class="chat-send-btn" type="submit" aria-label="\$\{t\('chat\.sendMessageLabel'\)\}">/);
 });
