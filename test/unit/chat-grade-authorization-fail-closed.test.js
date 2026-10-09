@@ -12,3 +12,12 @@ test('grade chat fails closed when a conversation is unauthorized', () => {
   assert.ok(source.includes('root.innerHTML=') && source.includes("t('chat.selectGrade')"), 'replace stale messages with neutral empty state');
   assert.ok(source.includes("showToast(t('chat.gradeUnauthorized'))"), 'explain denied access to the user');
 });
+
+test('grade chat presents unread counts as a compact accessible priority badge', () => {
+  const source = fs.readFileSync(path.resolve(__dirname, '../../js/16_chat_grade.js'), 'utf8');
+  const styles = fs.readFileSync(path.resolve(__dirname, '../../style.css'), 'utf8');
+  assert.ok(source.includes('smart-chat-unread-pill'), 'render a dedicated unread badge');
+  assert.ok(source.includes("aria-label=\"'+esc(unread+' '+t('chat.unread'))+'\""), 'announce unread count accessibly');
+  assert.ok(styles.includes('#page-chat .smart-chat-unread-pill'), 'style the unread badge in the Chat scope');
+  assert.ok(styles.includes('@media (max-width:760px) {\n  #page-chat .smart-chat-channel-copy'), 'keep the unread badge legible on mobile');
+});
