@@ -59,9 +59,8 @@ jobs:
         run: psql -h 127.0.0.1 -U scms_test -d scms_test -v ON_ERROR_STOP=1 -f school-website/db/sandbox_rls_runtime_test.sql
 
   e2e:
-    name: Playwright (scheduled/manual only)
+    name: Playwright (automatic PR/push + scheduled/manual)
     runs-on: ubuntu-latest
-    if: github.event_name == 'workflow_dispatch' || github.event_name == 'schedule'
     env:
       SCMS_STAGING_URL: ${{ secrets.SCMS_STAGING_URL }}
       SCMS_TEST_TEACHER: ${{ secrets.SCMS_TEST_TEACHER }}
@@ -76,8 +75,8 @@ jobs:
         shell: bash
         run: |
           if [ -z "$SCMS_STAGING_URL" ] || [ -z "$SCMS_TEST_TEACHER" ] || [ -z "$SCMS_TEST_PW" ]; then
-            echo "Staging E2E skipped: required staging secrets are not configured."
-            echo "enabled=false" >> "$GITHUB_OUTPUT"
+            echo "::error::Playwright E2E cannot run: configure SCMS_STAGING_URL, SCMS_TEST_TEACHER, and SCMS_TEST_PW in GitHub Actions secrets."
+            exit 1
           else
             echo "enabled=true" >> "$GITHUB_OUTPUT"
           fi
