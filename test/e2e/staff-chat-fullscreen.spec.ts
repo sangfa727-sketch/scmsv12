@@ -40,6 +40,8 @@ test.describe('Staff Chat full-screen browser regression', () => {
     await expect(page.locator('#scChatTypeMenu')).toBeHidden();
     await expect.poll(() => page.evaluate(() => localStorage.getItem('scms_chat_mode'))).toBe('ai');
 
+    await page.locator('.sc-chat-topbar .sc-chat-top-action').first().click();
+    await expect(page.locator('.sc-chat-topbar')).toBeHidden();
     await page.getByTestId('nav-chat').click();
     await expect(page.locator('.sc-chat-mode-pill')).toContainText(/AI Chat|AI Assistant/i);
   });
@@ -83,18 +85,9 @@ test.describe('Staff Chat full-screen browser regression', () => {
 
   test('chat channel entry points remain present for core staff modules', async ({ page }) => {
     await signInAndOpenChat(page);
-    const channelButtons = [
-      'chat-channel-all-staff',
-      'chat-channel-direct',
-      'chat-channel-departments',
-      'chat-channel-grades',
-      'chat-channel-inquiries',
-      'chat-channel-announcements',
-      'chat-channel-groups',
-    ];
-
-    for (const testId of channelButtons) {
-      await expect(page.getByTestId(testId)).toBeAttached();
+    const channelIds = ['staff', 'announcements', 'direct', 'departments', 'tickets', 'events'];
+    for (const channelId of channelIds) {
+      await expect(page.locator('[data-chat-quick-channel="' + channelId + '"]')).toBeAttached();
     }
   });
 });
