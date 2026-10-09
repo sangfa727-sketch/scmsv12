@@ -474,8 +474,20 @@ function _renderChatChannelUnreadBadges() {
   }
 }
 
+function _renderChatTabUnreadBadge() {
+  const badge = document.getElementById('chatTabUnreadBadge');
+  if (!badge) return;
+  const total = ['direct', 'tickets', 'events', 'announcements']
+    .reduce((sum, channel) => sum + _chatUnreadCount(channel), 0);
+  badge.hidden = total <= 0;
+  badge.textContent = total > 99 ? '99+' : String(total);
+  const nav = document.querySelector('[data-testid="nav-chat"]');
+  if (nav && total > 0) nav.setAttribute('aria-label', t('tab.chat') + ', ' + total + ' ' + t('chat.unreadMessages'));
+  else if (nav) nav.removeAttribute('aria-label');
+}
+
 async function _refreshChatChannelUnreadCounts() {
-  if (_chatMode !== 'school' || _chatChannel !== 'staff' || !window.API) return;
+  if (_chatMode !== 'school' || !window.API) return;
   const requests = [
     ['direct', 'getDirectConversations'],
     ['tickets', 'getInquiryTickets'],
@@ -492,6 +504,7 @@ async function _refreshChatChannelUnreadCounts() {
     else if (channel === 'events' && typeof _chatGroups !== 'undefined') _chatGroups = rows;
   }));
   _renderChatChannelUnreadBadges();
+  _renderChatTabUnreadBadge();
 }
 
 function _renderChatMode() {
@@ -1024,8 +1037,11 @@ window._aiPrompt = function(value) {
 
 window.startChatPolling=function(){
   if(_chatPollTimer)return;
+  let unreadRefreshTick = 0;
   _chatPollTimer=setInterval(async ()=>{
     if(window.APP?.currentPage!=='chat')return;
+    unreadRefreshTick = (unreadRefreshTick + 1) % 6;
+    if(unreadRefreshTick === 0 && _chatMode === 'school') _refreshChatChannelUnreadCounts();
     if(_chatMode==='school' && _chatChannel==='direct'){
       if(_directPollBusy)return;
       _directPollBusy=true;
