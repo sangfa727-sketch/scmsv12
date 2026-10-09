@@ -68,3 +68,13 @@ test('staff chat mobile navigation allows vertical page scrolling and prioritize
   assert.ok(!source.slice(modeStart, modeEnd).includes('${_renderAdminComposer()}'), 'admin official-message composer must not be appended below the All Staff conversation');
   assert.ok(styles.includes('overscroll-behavior-x:contain;touch-action:pan-x pan-y;scroll-snap-type:x proximity'), 'final mobile rail override must preserve vertical gestures');
 });
+\n
+test('staff chat uses a coherent social-first responsive visual system', () => {
+  const styles = fs.readFileSync(path.resolve(__dirname, '../../style.css'), 'utf8');
+  assert.ok(styles.includes('Smart Chat social-first redesign: consistent hierarchy'), 'include the unified social-first chat redesign');
+  assert.ok(styles.includes('#page-chat .smart-chat-school-grid {\n  display:grid; grid-template-columns:minmax(245px, .78fr) minmax(0, 1.8fr)'), 'use a conversation-list plus chat-view desktop hierarchy');
+  assert.ok(styles.includes('#page-chat .smart-chat-quick-nav-track {\n  display:flex; gap:8px; width:100%; overflow-x:auto; overflow-y:hidden;'), 'keep chat type navigation in a horizontally swipeable rail');
+  assert.ok(styles.includes('#page-chat .smart-chat-channel-list {\n    flex-direction:row; flex-wrap:nowrap; gap:7px; overflow-x:auto; overflow-y:hidden;'), 'render channel cards as a compact mobile swipe rail');
+  assert.ok(styles.includes('#page-chat .smart-chat-admin-card {\n  margin-top:18px; padding:clamp(16px,2vw,24px);'), 'style admin tools as a distinct, deliberate section');
+  assert.ok(styles.includes('#page-chat .chat-composer textarea,\n#page-chat .smart-chat-direct-composer textarea {\n  min-width:0; min-height:46px;'), 'provide a consistent touch-friendly message composer');
+});
