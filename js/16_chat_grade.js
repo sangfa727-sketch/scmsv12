@@ -10,7 +10,11 @@ function _renderGradeList(){
  const b=document.getElementById('gradeList');if(!b)return;
  b.innerHTML=_gradeRows.length?_gradeRows.map(g=>{
    const safe=String(g.grade_name||'').replace(/\\/g,'\\\\').replace(/'/g,"\\'");
-   return '<button data-testid="grade-row-'+esc(g.grade_name)+'" class="smart-chat-channel-card '+(g.grade_name===_gradeName?'active':'')+'" onclick="_openGradeChat(\''+esc(safe)+'\')"><span class="smart-chat-channel-icon">🎓</span><span><strong>'+esc(g.grade_name)+'</strong><small>'+(Number(g.unread_count)>0?esc(g.unread_count)+' '+t('chat.unread') : t('chat.staffConversation'))+'</small></span><b>›</b></button>';
+   const unread=Math.max(0,Number(g.unread_count)||0);
+   const detail=unread>0
+     ? '<small>'+t('chat.staffConversation')+' <span class="smart-chat-unread-pill" aria-label="'+esc(unread+' '+t('chat.unread'))+'">'+esc(unread)+'</span></small>'
+     : '<small>'+t('chat.staffConversation')+'</small>';
+   return `<button data-testid="grade-row-${esc(g.grade_name)}" class="smart-chat-channel-card ${g.grade_name===_gradeName?'active':''}" onclick="_openGradeChat('${esc(safe)}')"><span class="smart-chat-channel-icon">🎓</span><span class="smart-chat-channel-copy"><strong>${esc(g.grade_name)}</strong>${detail}</span><b class="smart-chat-channel-chevron" aria-hidden="true">›</b></button>`;
  }).join(''):`<div class="smart-chat-list-empty-card"><div class="icon">🎓</div><strong>${t('chat.noGradeAccess')}</strong><small>${t('chat.gradeAccess')}</small>${window.APP?.is_admin?`<details class="scms-setup-hint" style="margin-top:10px;text-align:left"><summary style="cursor:pointer;font-weight:600">! ${t('chat.setupWhy')}</summary><p style="margin:8px 0">${t('chat.setupGradeSteps')}</p><small>${t('chat.setupGradePath')}</small></details>`:''}</div>`;
 }
 async function _openGradeChat(name,silent=false){
