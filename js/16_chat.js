@@ -211,7 +211,7 @@ function _showChatSuccessFeedback(message) {
   feedback.setAttribute('role', 'status');
   feedback.setAttribute('aria-live', 'polite');
   feedback.textContent = String(message);
-  document.body.appendChild(feedback);
+  (document.getElementById('page-chat') || document.body).appendChild(feedback);
   requestAnimationFrame(() => feedback.classList.add('show'));
   window.setTimeout(() => {
     feedback.classList.remove('show');
