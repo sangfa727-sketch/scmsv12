@@ -211,6 +211,8 @@ test('mobile full-screen chat uses one topbar and persists chat type selection',
   await page.setViewportSize({ width: 390, height: 844 });
   await mountSmartChat(page);
   await expect(page.locator('.sc-chat-topbar')).toBeVisible();
+  await expect(page.locator('#chatComposer')).toBeVisible();
+  await expect.poll(() => page.locator('#chatComposer').evaluate(el => getComputedStyle(el).position)).toBe('sticky');
   await expect(page.locator('.smart-chat-hero')).toBeHidden();
   await expect(page.locator('.smart-chat-mode-switch')).toBeHidden();
   await expect(page.locator('.sc-chat-mode-pill')).toContainText(/School Chat/i);
