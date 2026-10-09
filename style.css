@@ -833,6 +833,29 @@ html[lang="km"] .tab-label {
 }
 .tab-btn.active { color: var(--text); }
 .tab-btn svg { width: 20px; height: 20px; }
+.tab-btn-chat { position:relative; }
+.chat-tab-unread-badge {
+  position:absolute;
+  top:2px;
+  left:calc(50% + 7px);
+  min-width:17px;
+  height:17px;
+  box-sizing:border-box;
+  padding:0 4px;
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+  border:2px solid var(--bg);
+  border-radius:999px;
+  background:var(--accent);
+  color:var(--surface);
+  font-size:9px;
+  line-height:1;
+  font-weight:800;
+  font-variant-numeric:tabular-nums;
+  pointer-events:none;
+}
+.chat-tab-unread-badge[hidden] { display:none; }
 .tab-label { font-size: 10px; font-weight: 600; }
 
 /* ── Modal overlay ─────────────────────────────────────────────── */
