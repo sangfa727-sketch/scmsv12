@@ -137,6 +137,7 @@ function _renderAdminComposer() {
           ${t('chat.sendOfficialMessage')}
         </button>
       </div>
+      <p id="adminMsgSendHint" class="smart-chat-send-hint" role="status" aria-live="polite">${t('chat.checkingRecipients')}</p>
     </section>`;
 }
 
@@ -261,7 +262,24 @@ window._refreshAdminComposerPreview = function() {
   if (title) title.textContent = _adminRecipientLoading ? t('chat.checkingRecipients') : validRecipient ? (recipientType === 'teacher' ? t('chat.oneVerifiedRecipient') : recipients.length + ' ' + t('chat.verifiedRecipients')) : t('chat.noVerifiedRecipient');
   if (names) names.textContent = _adminRecipientLoading ? t('chat.checkingRecipients') : validRecipient ? (recipientType === 'teacher' ? selectedTeacher.teacher_name : recipients.map(t => t.teacher_name).join(', ')) : (recipientType === 'grade' && grade ? t('chat.gradeRecipientsMissing') : t('chat.noVerifiedSameSchoolRecipient'));
   const sendBtn = document.getElementById('adminMsgSendBtn');
-  if (sendBtn) sendBtn.disabled = _adminRecipientLoading || !window.APP?.is_admin || !reason || reason === '—' || !body || body === '—' || !validRecipient;
+  const hasReason = !!reason && reason !== '—';
+  const hasBody = !!body && body !== '—';
+  const canSend = !_adminRecipientLoading && !!window.APP?.is_admin && hasReason && hasBody && validRecipient;
+  if (sendBtn) {
+    sendBtn.disabled = !canSend;
+    sendBtn.classList.toggle('smart-chat-send-ready', canSend);
+    sendBtn.classList.toggle('smart-chat-send-disabled', !canSend);
+  }
+  const sendHint = document.getElementById('adminMsgSendHint');
+  if (sendHint) {
+    const hint = _adminRecipientLoading
+      ? t('chat.checkingRecipients')
+      : !validRecipient
+        ? (recipientType === 'teacher' && !teacherId ? t('chat.selectTeacher') : t('chat.noVerifiedSameSchoolRecipient'))
+        : (!hasReason || !hasBody ? t('chat.reasonBodyRequired') : t('chat.verifiedRecipients'));
+    sendHint.textContent = hint;
+    sendHint.dataset.state = canSend ? 'ready' : 'blocked';
+  }
   const header = type === 'announcement' ? t('chat.officialAnnouncements') : type === 'task' ? t('chat.officialStaffTask') : t('chat.staffNotice');
   const targetLabel = recipientType === 'all_staff' ? t('chat.allStaff') : recipientType === 'grade' ? t('chat.gradePrefix') + grade : t('chat.individualPrefix') + (selectedTeacher?.teacher_name || t('chat.selectTeacher'));
   box.innerHTML = `
