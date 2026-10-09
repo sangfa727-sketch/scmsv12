@@ -64,7 +64,7 @@ test('Manage Teachers renders teacher rows and opens the Edit form', async ({ pa
   await page.evaluate(() => window.openTeacherManager());
   await expect(page.locator('.teacher-manager-sheet')).toBeVisible();
   await expect(page.locator('#teacherList')).toContainText('Other Teacher');
-  await page.getByRole('button', { name: /edit/i }).first().click();
+  await page.locator('.teacher-edit-btn').first().click();
   await expect(page.locator('.teacher-edit-sheet')).toBeVisible();
   await expect(page.locator('#editTName')).toHaveValue('Other Teacher');
 });
