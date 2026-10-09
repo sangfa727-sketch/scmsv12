@@ -8,6 +8,9 @@ on:
   schedule:
     - cron: '0 20 * * *'
 
+permissions:
+  contents: read
+
 jobs:
   frontend:
     name: Frontend syntax + regression tests
@@ -17,6 +20,7 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: 20
+          cache: npm
       - run: npm install --no-audit --no-fund
       - name: Run dependency security audit
         run: npm audit --audit-level=high
@@ -58,8 +62,49 @@ jobs:
           PGPASSWORD: scms_test
         run: psql -h 127.0.0.1 -U scms_test -d scms_test -v ON_ERROR_STOP=1 -f school-website/db/sandbox_rls_runtime_test.sql
 
-  e2e:
-    name: Playwright (automatic PR/push + scheduled/manual)
+  playwright-ci:
+    name: Playwright local smoke test (automatic PR/push)
+    if: github.event_name == 'pull_request' || github.event_name == 'push'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+      - name: Install dependencies
+        run: npm install --no-audit --no-fund
+      - name: Install Chromium
+        run: npx playwright install --with-deps chromium
+      - name: Start SCMS locally
+        run: |
+          npm run serve -- --host 127.0.0.1 > /tmp/scms-serve.log 2>&1 &
+          echo $! > /tmp/scms-serve.pid
+          for i in {1..30}; do
+            if curl --fail --silent http://127.0.0.1:5173/ > /dev/null; then
+              exit 0
+            fi
+            sleep 1
+          done
+          cat /tmp/scms-serve.log
+          exit 1
+      - name: Run local Playwright smoke test
+        env:
+          SCMS_URL: http://127.0.0.1:5173
+        run: npx playwright test test/e2e/ci-smoke.spec.js
+      - name: Upload Playwright report on failure
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: playwright-local-report
+          path: |
+            playwright-report/
+            test-results/
+          if-no-files-found: ignore
+
+  playwright-staging:
+    name: Playwright staging E2E (scheduled/manual)
+    if: github.event_name == 'workflow_dispatch' || github.event_name == 'schedule'
     runs-on: ubuntu-latest
     env:
       SCMS_STAGING_URL: ${{ secrets.SCMS_STAGING_URL }}
@@ -71,33 +116,26 @@ jobs:
       SCMS_TEST_QR_TOKEN: ${{ secrets.SCMS_TEST_QR_TOKEN }}
     steps:
       - name: Verify staging credentials are configured
-        id: staging_gate
         shell: bash
         run: |
           if [ -z "$SCMS_STAGING_URL" ] || [ -z "$SCMS_TEST_TEACHER" ] || [ -z "$SCMS_TEST_PW" ]; then
-            echo "::error::Playwright E2E cannot run: configure SCMS_STAGING_URL, SCMS_TEST_TEACHER, and SCMS_TEST_PW in GitHub Actions secrets."
+            echo "::error::Staging Playwright requires SCMS_STAGING_URL, SCMS_TEST_TEACHER, and SCMS_TEST_PW GitHub Actions secrets."
             exit 1
-          else
-            echo "enabled=true" >> "$GITHUB_OUTPUT"
           fi
       - uses: actions/checkout@v4
-        if: steps.staging_gate.outputs.enabled == 'true'
       - uses: actions/setup-node@v4
-        if: steps.staging_gate.outputs.enabled == 'true'
         with:
           node-version: 20
-      - run: npm install --no-audit --no-fund
-        if: steps.staging_gate.outputs.enabled == 'true'
+          cache: npm
+      - name: Install dependencies
+        run: npm install --no-audit --no-fund
       - name: Run dependency security audit
-        if: steps.staging_gate.outputs.enabled == 'true'
         run: npm audit --audit-level=high
       - name: Run frontend syntax and regression tests
-        if: steps.staging_gate.outputs.enabled == 'true'
         run: npm test
-      - run: npx playwright install --with-deps chromium
-        if: steps.staging_gate.outputs.enabled == 'true'
-      - name: Run e2e smoke tests against staging
-        if: steps.staging_gate.outputs.enabled == 'true'
+      - name: Install Chromium
+        run: npx playwright install --with-deps chromium
+      - name: Run E2E tests against staging
         env:
           SCMS_URL: ${{ secrets.SCMS_STAGING_URL }}
           SCMS_TEST_TEACHER: ${{ secrets.SCMS_TEST_TEACHER }}
@@ -108,8 +146,12 @@ jobs:
           SCMS_TEST_QR_TOKEN: ${{ secrets.SCMS_TEST_QR_TOKEN }}
           SCMS_REQUIRE_STAGING: '1'
         run: npx playwright test
-      - uses: actions/upload-artifact@v4
-        if: failure() && steps.staging_gate.outputs.enabled == 'true'
+      - name: Upload Playwright report on failure
+        if: failure()
+        uses: actions/upload-artifact@v4
         with:
-          name: playwright-report
-          path: playwright-report/
+          name: playwright-staging-report
+          path: |
+            playwright-report/
+            test-results/
+          if-no-files-found: ignore
