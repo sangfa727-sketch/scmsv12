@@ -120,6 +120,21 @@
   };
   Object.keys(auditFix).forEach(code=>Object.assign(chat[code],auditFix[code]));
 
+  // Burmese copy for the official-announcement composer; prevents raw i18n keys in Myanmar locale.
+  Object.assign(chat.my, {
+    'chat.reason':'အကြောင်းပြချက်',
+    'chat.officialCommunication':'ကျောင်း၏ တရားဝင်ဆက်သွယ်ရေး',
+    'chat.writeOfficialMessage':'တရားဝင်မက်ဆေ့ချ် ရေးပါ…',
+    'chat.noVerifiedRecipient':'အတည်ပြုထားသော လက်ခံသူ မရှိပါ',
+    'chat.noVerifiedSameSchoolRecipient':'ဆာဗာအတည်ပြုချက်အရ တူညီသောကျောင်းမှ အသုံးပြုနေသော လက်ခံသူ မတွေ့ပါ။',
+    'chat.systemGeneratedHeader':'စနစ်မှ ဖန်တီးထားသော ခေါင်းစီး',
+    'chat.officialAnnouncement':'တရားဝင်ကြေညာချက်',
+    'chat.officialAnnouncements':'တရားဝင်ကြေညာချက်များ',
+    'chat.newOfficialMessage':'တရားဝင်မက်ဆေ့ချ်အသစ်',
+    'chat.closeOfficialMessage':'တရားဝင်မက်ဆေ့ချ်ဖောင် ပိတ်ရန်',
+    'chat.backToAnnouncements':'ကြေညာချက်များသို့ ပြန်ရန်'
+  });
+
   const maps={en:'I18N_EN',my:'I18N_MY',th:'I18N_TH',jp:'I18N_JP',ms:'I18N_MS',km:'I18N_KM',zh:'I18N_ZH'};
   Object.keys(maps).forEach(code=>{ window[maps[code]]=Object.assign({},window[maps[code]]||{},code==='en'?en:code==='my'?my:chat[code]); });
 })();
