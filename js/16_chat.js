@@ -14,6 +14,7 @@ let _chatMode = 'school';
 let _adminGradeRecipients = [];
 let _adminTeacherRecipients = [];
 let _adminRecipientRequestId = 0;
+let _adminRecipientLoading = false;
 let _directConversationId = null;
 let _announcementId = null;
 let _directPeer = null;
@@ -143,6 +144,7 @@ async function _loadAdminRecipientPreview(type = null, target = null) {
     if (!window.API?.getChatRecipientPreview || !window.APP?.is_admin) return;
     const selectedType = type || document.getElementById('adminMsgRecipientType')?.value || 'grade';
     requestId = ++_adminRecipientRequestId;
+    _adminRecipientLoading = true;
     if (selectedType === 'teacher') _adminTeacherRecipients = [];
     else _adminGradeRecipients = [];
     _refreshAdminComposerPreview();
@@ -186,6 +188,11 @@ async function _loadAdminRecipientPreview(type = null, target = null) {
     if ((type || document.getElementById('adminMsgRecipientType')?.value) === 'teacher') _adminTeacherRecipients = [];
     else _adminGradeRecipients = [];
     _refreshAdminComposerPreview();
+  } finally {
+    if (requestId && requestId === _adminRecipientRequestId) {
+      _adminRecipientLoading = false;
+      _refreshAdminComposerPreview();
+    }
   }
 }
 
@@ -245,11 +252,11 @@ window._refreshAdminComposerPreview = function() {
   const status = document.getElementById('adminMsgRoutingStatus');
   const title = document.getElementById('adminMsgRoutingTitle');
   const names = document.getElementById('adminMsgRoutingNames');
-  if (status) status.className = 'smart-chat-routing-status ' + (validRecipient ? 'verified' : 'blocked');
-  if (title) title.textContent = validRecipient ? (recipientType === 'teacher' ? t('chat.oneVerifiedRecipient') : recipients.length + ' ' + t('chat.verifiedRecipients')) : t('chat.noVerifiedRecipient');
-  if (names) names.textContent = validRecipient ? (recipientType === 'teacher' ? selectedTeacher.teacher_name : recipients.map(t => t.teacher_name).join(', ')) : t('chat.noVerifiedSameSchoolRecipient');
+  if (status) status.className = 'smart-chat-routing-status ' + (validRecipient && !_adminRecipientLoading ? 'verified' : 'blocked');
+  if (title) title.textContent = _adminRecipientLoading ? t('chat.checkingRecipients') : validRecipient ? (recipientType === 'teacher' ? t('chat.oneVerifiedRecipient') : recipients.length + ' ' + t('chat.verifiedRecipients')) : t('chat.noVerifiedRecipient');
+  if (names) names.textContent = _adminRecipientLoading ? t('chat.checkingRecipients') : validRecipient ? (recipientType === 'teacher' ? selectedTeacher.teacher_name : recipients.map(t => t.teacher_name).join(', ')) : (recipientType === 'grade' && grade ? t('chat.gradeRecipientsMissing') : t('chat.noVerifiedSameSchoolRecipient'));
   const sendBtn = document.getElementById('adminMsgSendBtn');
-  if (sendBtn) sendBtn.disabled = !window.APP?.is_admin || !reason || reason === '—' || !body || body === '—' || !validRecipient;
+  if (sendBtn) sendBtn.disabled = _adminRecipientLoading || !window.APP?.is_admin || !reason || reason === '—' || !body || body === '—' || !validRecipient;
   const header = type === 'announcement' ? t('chat.officialAnnouncements') : type === 'task' ? t('chat.officialStaffTask') : t('chat.staffNotice');
   const targetLabel = recipientType === 'all_staff' ? t('chat.allStaff') : recipientType === 'grade' ? t('chat.gradePrefix') + grade : t('chat.individualPrefix') + (selectedTeacher?.teacher_name || t('chat.selectTeacher'));
   box.innerHTML = `
