@@ -435,10 +435,10 @@ function renderChat() {
         </button>
         <div id="scChatTypeMenu" class="sc-chat-type-menu" role="menu" ${_chatTypeMenuOpen ? '' : 'hidden'}>
           <button type="button" class="sc-chat-type-option ${_chatMode === 'school' ? 'active' : ''}" role="menuitemradio" aria-checked="${_chatMode === 'school'}" onclick="_chooseChatType('school')">
-            ${_chatIcon('users')}<span class="sc-chat-type-copy"><strong>${esc(t('chat.schoolChat'))}</strong><small>${esc(t('chat.schoolCommunicationDesc'))}</small></span>${_chatMode === 'school' ? '<span aria-hidden="true">✓</span>' : ''}
+            ${_chatIcon('users')}<span class="sc-chat-type-copy"><strong>${esc(t('chat.schoolChat'))}</strong><small>${esc(t('chat.schoolCommunicationDesc'))}</small></span><span class="sc-chat-selected-check" aria-hidden="true" ${_chatMode === 'school' ? '' : 'hidden'}>✓</span>
           </button>
           <button type="button" class="sc-chat-type-option ${_chatMode === 'ai' ? 'active' : ''}" role="menuitemradio" aria-checked="${_chatMode === 'ai'}" onclick="_chooseChatType('ai')">
-            ${_chatIcon('bot')}<span class="sc-chat-type-copy"><strong>${esc(t('chat.aiAssistant'))}</strong><small>${esc(t('chat.communicationCenter'))}</small></span>${_chatMode === 'ai' ? '<span aria-hidden="true">✓</span>' : ''}
+            ${_chatIcon('bot')}<span class="sc-chat-type-copy"><strong>${esc(t('chat.aiAssistant'))}</strong><small>${esc(t('chat.communicationCenter'))}</small></span><span class="sc-chat-selected-check" aria-hidden="true" ${_chatMode === 'ai' ? '' : 'hidden'}>✓</span>
           </button>
         </div>
       </header>
