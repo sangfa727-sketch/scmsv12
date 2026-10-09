@@ -4,15 +4,19 @@ const BASE_URL = process.env.SCMS_URL ?? 'http://localhost:5173';
 const TEACHER_ID = process.env.SCMS_TEST_TEACHER;
 const TEACHER_PW = process.env.SCMS_TEST_PW;
 
-async function signInAndOpenChat(page: import('@playwright/test').Page) {
+async function signInAndOpenChat(
+  page: import('@playwright/test').Page,
+  teacherId = TEACHER_ID,
+  teacherPw = TEACHER_PW
+) {
   test.skip(
-    process.env.SCMS_REQUIRE_STAGING !== '1' || !TEACHER_ID || !TEACHER_PW,
-    'Staff Chat browser tests require staging mode plus SCMS_TEST_TEACHER (web-login email) and SCMS_TEST_PW'
+    process.env.SCMS_REQUIRE_STAGING !== '1' || !teacherId || !teacherPw,
+    'Staff Chat browser tests require staging mode plus the configured test-account credentials'
   );
   await page.goto(BASE_URL);
   await page.locator('.landing-btn-secondary').click();
-  await page.locator('#webLoginIdentity').fill(TEACHER_ID!);
-  await page.locator('#webLoginPin').fill(TEACHER_PW!);
+  await page.locator('#webLoginIdentity').fill(teacherId!);
+  await page.locator('#webLoginPin').fill(teacherPw!);
   await page.locator('#webLoginBtn').click();
   await expect(page.locator('#sidebar')).toBeVisible();
   await page.getByTestId('nav-chat').click();
@@ -163,6 +167,55 @@ test.describe('Staff Chat full-screen browser regression', () => {
     await expect(conversation, 'the recipient conversation should be listed after a fresh server read').toBeVisible();
     await conversation.click();
     await expect(page.locator('#directMessageStream')).toContainText(message, { timeout: 15000 });
+  });
+
+
+  test('Direct Chat delivers a sent message to a second authenticated staff account', async ({ browser }) => {
+    test.skip(
+      process.env.SCMS_REQUIRE_STAGING !== '1' ||
+      !TEACHER_ID || !TEACHER_PW ||
+      !process.env.SCMS_TEST_TEACHER_2 || !process.env.SCMS_TEST_PW_2,
+      'Recipient-delivery E2E requires two isolated staging staff accounts'
+    );
+
+    const senderContext = await browser.newContext({ viewport: { width: 390, height: 844 } });
+    const receiverContext = await browser.newContext({ viewport: { width: 390, height: 844 } });
+    try {
+      const sender = await senderContext.newPage();
+      const receiver = await receiverContext.newPage();
+      await signInAndOpenChat(sender, TEACHER_ID, TEACHER_PW);
+      await signInAndOpenChat(receiver, process.env.SCMS_TEST_TEACHER_2, process.env.SCMS_TEST_PW_2);
+
+      const senderName = String(await sender.evaluate(() => window.APP?.teacher_name || '')).trim();
+      const receiverName = String(await receiver.evaluate(() => window.APP?.teacher_name || '')).trim();
+      expect(senderName).not.toBe('');
+      expect(receiverName).not.toBe('');
+      expect(senderName).not.toBe(receiverName);
+
+      await sender.locator('[data-chat-quick-channel="direct"]').click();
+      const receiverEntry = sender.locator('.smart-chat-directory-item').filter({ hasText: receiverName });
+      await expect(receiverEntry, 'sender must be authorized to find the second staging staff account').toBeVisible();
+      await receiverEntry.click();
+
+      const message = 'SCMS recipient-delivery check ' + Date.now();
+      await sender.locator('#directChatInput').fill(message);
+      await sender.locator('#directChatSendBtn').click();
+      await expect(sender.locator('#directMessageStream')).toContainText(message, { timeout: 15000 });
+
+      // Receiver must independently fetch the conversation and message after send.
+      await receiver.reload();
+      await expect(receiver.locator('#sidebar')).toBeVisible();
+      await receiver.getByTestId('nav-chat').click();
+      await expect(receiver.locator('#page-chat')).toBeVisible();
+      await receiver.locator('[data-chat-quick-channel="direct"]').click();
+      const senderConversation = receiver.locator('.smart-chat-direct-item').filter({ hasText: senderName });
+      await expect(senderConversation, 'receiver must see the sender conversation after a fresh server read').toBeVisible({ timeout: 15000 });
+      await senderConversation.click();
+      await expect(receiver.locator('#directMessageStream')).toContainText(message, { timeout: 15000 });
+    } finally {
+      await senderContext.close();
+      await receiverContext.close();
+    }
   });
 
 });
