@@ -23,6 +23,11 @@ function renderMore() {
 
   const isAdmin = window.APP.is_admin;
   const showChat = !isTWA();   // chat is hidden inside Telegram
+  const websiteRole = String(window.APP.teacher_role || window.APP.role || '').trim().toLowerCase().replace(/[ -]+/g, '_');
+  const canManageWebsite = !!isAdmin ||
+    ['owner', 'school_owner', 'admin', 'super_admin'].includes(websiteRole) ||
+    (Array.isArray(window.APP.permissions) && window.APP.permissions.includes('website.manage'));
+  const websiteLabel = ({en:'School Website',my:'ကျောင်း Website',th:'เว็บไซต์โรงเรียน',jp:'学校ウェブサイト',ms:'Laman Web Sekolah',km:'គេហទំព័រសាលា',zh:'学校网站'}[window.I18N?.current] || 'School Website');
   const schoolLogo = window.APP.school_logo || (window.APP.config && window.APP.config.school_logo) || '';
   const schoolName = window.APP.school_name || '—';
 
@@ -73,6 +78,11 @@ function renderMore() {
         <span class="more-icon">🗂️</span>
         <span>${t('more.modules')}</span>
       </button>
+      ${canManageWebsite ? `
+      <button type="button" class="more-tile more-tile-website" onclick="window.location.href='school-website/create.html'">
+        <span class="more-icon">🌐</span>
+        <span>${esc(websiteLabel)}</span>
+      </button>` : ''}
       ${showChat ? `
       <button class="more-tile" onclick="goToPage('chat')">
         <span class="more-icon">🗨️</span>
