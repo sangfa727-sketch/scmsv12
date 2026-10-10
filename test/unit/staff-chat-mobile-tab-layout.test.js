@@ -7,10 +7,12 @@ test('Staff Chat channel tabs can be hidden and restored from the three-dot menu
   const source = fs.readFileSync(path.resolve(__dirname, '../../js/16_chat.js'), 'utf8');
   assert.ok(source.includes("localStorage.getItem('scms_chat_visible_types')"), 'restore tab visibility preferences');
   assert.ok(source.includes("localStorage.setItem('scms_chat_visible_types'"), 'persist tab visibility preferences');
-  assert.ok(source.includes("const visible = channels.filter(c => _chatVisibleTypes[c.id] !== false)"), 'only show enabled channel tabs');
+  assert.ok(source.includes("const visible = _isMobileChatLayout() ? channels.filter(c => _chatVisibleTypes[c.id] !== false) : channels"), 'only mobile hides disabled tabs while desktop always shows every tab');
   assert.ok(source.includes("function _chatTypeMenuMarkup()"), 'render a menu of hidden channel types only');
   assert.ok(source.includes("window._hideChatType = function(id)"), 'provide a direct hide action on visible tabs');
-  assert.ok(source.includes("window._showChatType = function(id)"), 'provide a menu action to restore hidden tabs');
+  assert.ok(source.includes("window._showChatType = function(id)"), 'provide a separate plus action to restore hidden tabs');
+  assert.ok(source.includes("window._openHiddenChatType = function(id)"), 'open a hidden chat without automatically enabling its tab');
+  assert.ok(source.includes("if (!_isMobileChatLayout() || !Object.prototype.hasOwnProperty.call(_chatVisibleTypes, id)) return"), 'disable tab visibility controls on desktop');
   assert.ok(source.includes("onclick=\"switchChatMode(_chatMode === 'school' ? 'ai' : 'school')\""), 'switch School Chat and AI directly without the old mode dropdown');
   assert.ok(!source.includes('role="menuitemradio"'), 'the three-dot menu no longer uses the old School/AI radio dropdown');
 });
@@ -31,4 +33,15 @@ test('Direct Messages renders one de-duplicated, scrollable people list', () => 
   assert.ok(source.includes('const existingIds=new Set(_directConversations.map(c=>String(c.teacher_id)))'), 'avoid listing the same teacher twice');
   assert.ok(source.includes('smart-chat-direct-item smart-chat-directory-item'), 'use one consistent, visible row style for existing and new contacts');
   assert.ok(source.includes('smart-chat-direct-people{display:flex;flex:1 1 auto;flex-direction:column'), 'make the unified list independently scrollable');
+});
+
+
+test('desktop Staff Chat tabs are fixed-width and mode switch replaces the profile identity', () => {
+  const source = fs.readFileSync(path.resolve(__dirname, '../../style.css'), 'utf8');
+  const chat = fs.readFileSync(path.resolve(__dirname, '../../js/16_chat.js'), 'utf8');
+  assert.ok(source.includes('@media (min-width:761px)'), 'scope desktop-only tab layout separately');
+  assert.ok(source.includes('.smart-chat-quick-nav-track { display:flex; width:100%; max-width:100%; min-width:0; gap:6px; overflow-x:hidden'), 'prevent horizontal scrolling on desktop tabs');
+  assert.ok(source.includes('.smart-chat-quick-channel-wrap { display:flex; flex:1 1 0; min-width:0'), 'distribute tabs across the available desktop width');
+  assert.ok(chat.includes('<div class="smart-chat-mode-switch" role="tablist" aria-label='), 'place School/AI controls in the desktop chat header');
+  assert.ok(!chat.includes('<div class="smart-chat-identity">'), 'remove the signed-in user profile from the Chat page header');
 });
