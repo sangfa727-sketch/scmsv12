@@ -172,6 +172,18 @@ test('Permission updates map Default to removal and Allow/Deny to persisted bool
   assert.match(save, /catch\(e\)/);
 });
 
+test('Manage Access distinguishes a successful save from a failed post-save refresh', () => {
+  const source = read('js/29_teacher_access.js');
+  const render = block(source, 'async function _renderTeacherAccess()', 'window.openTeacherAccess');
+  assert.match(render, /if \(!root\) return false/);
+  assert.match(render, /return true;/);
+  assert.match(render, /return false;/);
+  assert.match(source, /saveRefreshFailed:/);
+  const save = block(source, 'window.teacherAccessSavePermission = async function(select)', null);
+  assert.match(save, /const refreshed = await _renderTeacherAccess\(\)/);
+  assert.match(save, /showToast\(refreshed \? _taUi\('saved'\) : _taUi\('saveRefreshFailed'\)\)/);
+});
+
 test('Effective access honors explicit overrides first and assignment-scopes teacher roles', () => {
   const source = read('js/29_teacher_access.js');
   const effective = block(source, 'function _taEffectiveAllowed(', 'function _taEffectiveLabel');
