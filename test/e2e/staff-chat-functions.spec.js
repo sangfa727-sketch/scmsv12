@@ -109,6 +109,22 @@ async function mountSmartChat(page, render = true) {
         record('markChatGroupRead', ...args);
         return { ok: true };
       },
+      getGradeChats: async (...args) => {
+        record('getGradeChats', ...args);
+        return [{ grade_name: 'Grade 1', unread_count: 0 }];
+      },
+      openGradeChat: async (...args) => {
+        record('openGradeChat', ...args);
+        return { ok: true, grade_name: 'Grade 1', rows: [] };
+      },
+      sendGradeMessage: async (...args) => {
+        record('sendGradeMessage', ...args);
+        return { ok: true };
+      },
+      markGradeRead: async (...args) => {
+        record('markGradeRead', ...args);
+        return { ok: true };
+      },
       getDepartmentChats: async (...args) => {
         record('getDepartmentChats', ...args);
         return [{ id: 51, department_code: 'SCI', department_name: 'Science Department', is_active: true }];
@@ -243,6 +259,47 @@ test('Department workspace requests department channels', async ({ page }) => {
   await page.evaluate(() => window.switchChatChannel('departments'));
   await expect.poll(async () => (await calls(page, 'getDepartmentChats')).length).toBeGreaterThan(0);
   await expect(page.locator('#smartChatModeBody')).toContainText('Science Department');
+});
+
+test('Department conversation sends a message through the API', async ({ page }) => {
+  await mountSmartChat(page);
+  await page.evaluate(() => window.switchChatChannel('departments'));
+  await page.locator('[data-testid="department-row-51"]').click();
+  const input = page.locator('#departmentChatInput');
+  await expect(input).toBeEnabled();
+  await input.fill('Department send functional check');
+  await page.locator('#departmentSendBtn').click();
+  await expect.poll(async () => (await calls(page, 'sendDepartmentMessage')).length).toBe(1);
+  expect((await calls(page, 'sendDepartmentMessage'))[0].args).toEqual([51, 'Department send functional check']);
+  await expect(input).toBeEnabled();
+});
+
+test('Project and event group conversation sends a message through the API', async ({ page }) => {
+  await mountSmartChat(page);
+  await page.evaluate(() => window.switchChatChannel('events'));
+  await page.locator('#chatGroupList button').filter({ hasText: 'Planning Group' }).click();
+  const input = page.locator('#chatGroupInput');
+  await expect(input).toBeVisible();
+  await input.fill('Group send functional check');
+  await page.locator('form').filter({ has: input }).locator('button[type="submit"]').click();
+  await expect.poll(async () => (await calls(page, 'sendChatGroupMessage')).length).toBe(1);
+  expect((await calls(page, 'sendChatGroupMessage'))[0].args).toEqual([31, 'Group send functional check']);
+});
+
+test('Grade conversation sends a message through the API', async ({ page }) => {
+  await mountSmartChat(page);
+  await page.evaluate(() => {
+    window.switchChatChannel('departments');
+    window._showGradeWorkspace();
+  });
+  await expect(page.locator('#gradeList')).toContainText('Grade 1');
+  await page.locator('[data-testid="grade-row-Grade 1"]').click();
+  const input = page.locator('#gradeChatInput');
+  await expect(input).toBeVisible();
+  await input.fill('Grade send functional check');
+  await page.locator('form').filter({ has: input }).locator('button[type="submit"]').click();
+  await expect.poll(async () => (await calls(page, 'sendGradeMessage')).length).toBe(1);
+  expect((await calls(page, 'sendGradeMessage'))[0].args).toEqual(['Grade 1', 'Grade send functional check']);
 });
 
 test('AI Assistant remains clearly labelled as a preview, not a connected chat', async ({ page }) => {
