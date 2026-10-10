@@ -353,6 +353,9 @@ test('admin official announcement uses verified recipients and sends through the
   await expect.poll(async () => (await calls(page, 'getChatRecipientPreview')).length).toBeGreaterThan(0);
   await expect(page.locator('#adminMsgRoutingStatus')).toHaveClass(/verified/);
 
+  // Admin composer is intentionally collapsed in the announcement workspace.
+  await page.locator('#announcementComposerToggle').click();
+  await expect(page.locator('#adminMsgReason')).toBeVisible();
   await page.locator('#adminMsgReason').fill('Staff operations update');
   await page.locator('#adminMsgBody').fill('Please review the updated duty schedule.');
   await expect(page.locator('#adminMsgSendBtn')).toBeEnabled();
