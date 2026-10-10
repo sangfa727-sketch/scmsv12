@@ -841,25 +841,29 @@ async function _sendInquiryFromComposer(e){
   return false;
 }
 window._inquiryKeydown=function(ev){if(ev.key==='Enter'&&!ev.shiftKey){ev.preventDefault();_sendInquiryFromComposer(ev);}};
-function _closeInquiryDraft(){_inquiryDraft=null;_renderInquiryDraft();}
+function _closeInquiryDraft(){_inquiryDraft=null;document.getElementById('inquiryDraftOverlay')?.remove();}
 function _renderInquiryDraft(){
-  const root=document.getElementById('inquiryTicketList'); if(!root)return;
-  if(!_inquiryDraft){
-    const noTickets=t('chat.noTicketsYet');
-    root.innerHTML=_inquiryTickets.length?_inquiryTickets.map(item=>{
-      const student=item.student_id?' · '+esc(item.student_id):'';
-      return `<button class="smart-chat-channel-card ${Number(item.id)===Number(_inquiryTicketId)?'active':''}" onclick="_openInquiryTicket(${Number(item.id)})"><span class="smart-chat-channel-icon">🎫</span><span><strong>${esc(item.subject)}</strong><small>${esc(item.status)} · ${esc(item.priority)}${student}</small></span><b>›</b></button>`;
-    }).join(''):'<div class="chat-empty-sub">'+noTickets+'</div>';
-    return;
-  }
-  root.innerHTML=`
-    <form class="smart-chat-inquiry-form" onsubmit="return _submitInquiryDraft(event)">
-      <label><span class="smart-chat-field-label">${t('chat.subject')}</span><input id="inquiryDraftSubject" maxlength="160" required placeholder="${t('chat.whatNeedsAttention')}"></label>
-      <label><span class="smart-chat-field-label">${t('chat.priority')}</span><select id="inquiryDraftPriority"><option value="NORMAL">${t('chat.priorityNormal')}</option><option value="LOW">${t('chat.priorityLow')}</option><option value="HIGH">${t('chat.priorityHigh')}</option><option value="URGENT">${t('chat.priorityUrgent')}</option></select></label>
-      <label><span class="smart-chat-field-label">${t('chat.studentId')} <small class="smart-chat-field-note">${t('chat.optionalSameSchool')}</small></span><input id="inquiryDraftStudent" maxlength="80" placeholder="${t('chat.studentId')}"></label>
-      <label><span class="smart-chat-field-label">${t('chat.details')}</span><textarea id="inquiryDraftBody" maxlength="4000" rows="5" required placeholder="${t('chat.describeIssue')}"></textarea></label>
-      <div class="smart-chat-inquiry-form-actions"><button type="button" class="btn-secondary" onclick="_closeInquiryDraft()">${t('chat.cancel')}</button><button id="inquiryDraftSubmitBtn" type="submit" class="btn-primary">${t('chat.createTicket')}</button></div>
-    </form>`;
+  if(!window.APP?.currentPage||_chatChannel!=='tickets')return;
+  document.getElementById('inquiryDraftOverlay')?.remove();
+  const overlay=document.createElement('div');
+  overlay.id='inquiryDraftOverlay';
+  overlay.className='smart-chat-group-modal-overlay smart-chat-inquiry-modal-overlay';
+  overlay.innerHTML=`<section class="smart-chat-group-modal" role="dialog" aria-modal="true" aria-labelledby="inquiryDraftTitle">
+    <header class="smart-chat-group-modal-head"><div><div class="smart-chat-kicker">${t('chat.inquiry')}</div><h2 id="inquiryDraftTitle">${t('chat.newTicket')}</h2><p>${t('chat.createOrSelectTicket')}</p></div><button type="button" class="smart-chat-group-modal-close" data-close-ticket-modal aria-label="${t('chat.cancel')}">×</button></header>
+    <form id="inquiryDraftForm" class="smart-chat-inquiry-form smart-chat-group-form">
+      <label><span class="smart-chat-field-label">${t('chat.subject')}</span><input id="inquiryDraftSubject" name="subject" maxlength="160" required placeholder="${t('chat.whatNeedsAttention')}"></label>
+      <label><span class="smart-chat-field-label">${t('chat.priority')}</span><select id="inquiryDraftPriority" name="priority"><option value="NORMAL">${t('chat.priorityNormal')}</option><option value="LOW">${t('chat.priorityLow')}</option><option value="HIGH">${t('chat.priorityHigh')}</option><option value="URGENT">${t('chat.priorityUrgent')}</option></select></label>
+      <label><span class="smart-chat-field-label">${t('chat.studentId')} <small class="smart-chat-field-note">${t('chat.optionalSameSchool')}</small></span><input id="inquiryDraftStudent" name="studentId" maxlength="80" placeholder="${t('chat.studentId')}"></label>
+      <label><span class="smart-chat-field-label">${t('chat.details')}</span><textarea id="inquiryDraftBody" name="body" maxlength="4000" rows="5" required placeholder="${t('chat.describeIssue')}"></textarea></label>
+      <div class="smart-chat-inquiry-form-actions"><button type="button" class="btn-secondary" data-close-ticket-modal>${t('chat.cancel')}</button><button id="inquiryDraftSubmitBtn" type="submit" class="btn-primary">${t('chat.createTicket')}</button></div>
+    </form>
+  </section>`;
+  document.body.appendChild(overlay);
+  const close=()=>_closeInquiryDraft();
+  overlay.querySelectorAll('[data-close-ticket-modal]').forEach(button=>button.addEventListener('click',close));
+  overlay.addEventListener('click',event=>{if(event.target===overlay)close();});
+  overlay.querySelector('#inquiryDraftForm')?.addEventListener('submit',_submitInquiryDraft);
+  overlay.querySelector('#inquiryDraftSubject')?.focus();
 }
 async function _newInquiryTicket(){_inquiryDraft=true;_renderInquiryDraft();}
 async function _submitInquiryDraft(e){
@@ -870,13 +874,19 @@ async function _submitInquiryDraft(e){
   const studentId=document.getElementById('inquiryDraftStudent')?.value.trim()||null;
   const btn=document.getElementById('inquiryDraftSubmitBtn');
   if(!subject||!body)return false;
-  if(btn)btn.disabled=true;
+  if(btn){btn.disabled=true;btn.textContent=t('chat.loading');}
   try{
     const r=await API.createInquiryTicket(subject,body,studentId,priority);
-    if(!r?.ok)throw new Error(r?.error||'ticket_create_failed');
-    _inquiryDraft=null;_inquiryTicketId=Number(r.ticket.id);await _loadInquiryTickets();
-  }catch(e){showToast(t('chat.ticketCreateFailed'));}
-  finally{const current=document.getElementById('inquiryDraftSubmitBtn');if(current)current.disabled=false;}
+    if(!r?.ok||!r.ticket?.id)throw new Error(r?.error||'ticket_create_failed');
+    _inquiryTicketId=Number(r.ticket.id);
+    _inquiryDraft=null;
+    document.getElementById('inquiryDraftOverlay')?.remove();
+    await _loadInquiryTickets();
+  }catch(e){
+    showToast(t('chat.ticketCreateFailed'));
+    const current=document.getElementById('inquiryDraftSubmitBtn');
+    if(current){current.disabled=false;current.textContent=t('chat.createTicket');}
+  }
   return false;
 }
 let _announcementComposerOpen=false;
