@@ -679,12 +679,12 @@ test('cached Staff Chat lists remain visible while refresh requests are pending'
   });
   await expect(page.locator('#inquiryTicketList')).toContainText('Parent request');
 
-  await page.evaluate(() => window.switchChatChannel('groups'));
+  await page.evaluate(() => window.switchChatChannel('events'));
   await expect(page.locator('#chatGroupList')).toContainText('Planning Group');
   await page.evaluate(() => {
     window.API.getChatGroups = () => new Promise(() => {});
     window.switchChatChannel('staff');
-    window.switchChatChannel('groups');
+    window.switchChatChannel('events');
   });
   await expect(page.locator('#chatGroupList')).toContainText('Planning Group');
 });
