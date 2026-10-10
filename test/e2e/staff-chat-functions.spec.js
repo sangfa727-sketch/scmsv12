@@ -1007,3 +1007,47 @@ test('Official Announcement send failure keeps the draft and restores the send c
   await expect(page.locator('#adminMsgBody')).toHaveValue('Keep this official announcement draft');
   await expect(page.locator('#adminMsgSendBtn')).toBeEnabled();
 });
+
+
+test('desktop Chat keeps all six tabs visible, aligned to the full width, with no horizontal tab scrolling', async ({ page }) => {
+  await page.setViewportSize({ width: 1280, height: 900 });
+  await mountSmartChat(page);
+  await expect(page.locator('#smartChatQuickNav [data-chat-quick-channel]')).toHaveCount(6);
+  await expect(page.locator('#smartChatQuickNav .smart-chat-quick-channel-hide')).toHaveCount(0);
+  await expect(page.locator('.smart-chat-identity')).toHaveCount(0);
+  await expect(page.locator('.smart-chat-hero .smart-chat-mode-switch')).toBeVisible();
+  const metrics = await page.locator('.smart-chat-quick-nav-track').evaluate(el => ({
+    clientWidth: el.clientWidth, scrollWidth: el.scrollWidth,
+    tabWidths: [...el.querySelectorAll('.smart-chat-quick-channel')].map(tab => tab.getBoundingClientRect().width),
+    viewportWidth: window.innerWidth
+  }));
+  expect(metrics.clientWidth).toBeGreaterThan(0);
+  expect(metrics.scrollWidth).toBeLessThanOrEqual(metrics.clientWidth + 1);
+  expect(Math.max(...metrics.tabWidths) - Math.min(...metrics.tabWidths)).toBeLessThan(30);
+  const conversation = await page.locator('#smartChatModeBody > .smart-chat-school-grid > .smart-chat-conversation').boundingBox();
+  expect(conversation).not.toBeNull();
+  expect(conversation!.width).toBeGreaterThan(metrics.viewportWidth * 0.75);
+});
+
+test('mobile can hide every chat type; opening a hidden type does not restore it without plus', async ({ page }) => {
+  await page.setViewportSize({ width: 390, height: 844 });
+  await mountSmartChat(page);
+  for (const id of ['staff', 'announcements', 'direct', 'departments', 'tickets', 'events']) {
+    const tab = page.locator('[data-chat-quick-channel="' + id + '"]');
+    if (await tab.count()) await tab.locator('xpath=..').locator('.smart-chat-quick-channel-hide').click();
+  }
+  await expect(page.locator('#smartChatQuickNav [data-chat-quick-channel]')).toHaveCount(0);
+  await expect(page.locator('#scChatTypeMenu')).toBeHidden();
+  await page.locator('.sc-chat-topbar .sc-chat-top-action').nth(1).click();
+  await expect(page.locator('#scChatTypeMenu [role="menuitem"]')).toHaveCount(6);
+  const directRow = page.locator('.sc-chat-type-option-row').filter({hasText:'Direct Messages'});
+  await directRow.locator('[role="menuitem"]').click();
+  await expect(page.locator('#scChatTypeMenu')).toBeHidden();
+  await expect(page.locator('[data-chat-quick-channel="direct"]')).toHaveCount(0);
+  await expect(page.locator('#smartChatModeBody')).toContainText(/Direct Messages|Start a conversation|No conversations/i);
+  await page.locator('.sc-chat-topbar .sc-chat-top-action').nth(1).click();
+  await expect(page.locator('.sc-chat-type-option-row').filter({hasText:'Direct Messages'})).toBeVisible();
+  await page.locator('.sc-chat-type-option-row').filter({hasText:'Direct Messages'}).locator('.sc-chat-type-enable').click();
+  await expect(page.locator('[data-chat-quick-channel="direct"]')).toBeVisible();
+  await expect(page.locator('.sc-chat-type-option-row').filter({hasText:'Direct Messages'})).toHaveCount(0);
+});
