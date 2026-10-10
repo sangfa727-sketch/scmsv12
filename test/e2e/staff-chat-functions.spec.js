@@ -1,6 +1,6 @@
 const { test, expect } = require('@playwright/test');
 
-async function mountSmartChat(page) {
+async function mountSmartChat(page, render = true) {
   await page.goto('/', { waitUntil: 'domcontentloaded' });
   await page.waitForFunction(() =>
     typeof window.renderChat === 'function' &&
@@ -135,9 +135,46 @@ async function mountSmartChat(page) {
       }
     };
 
-    window.renderChat();
+    if (render) window.renderChat();
   });
 }
+
+
+test('Desktop Chat entry does not change the existing SCMS chrome visibility', async ({ page }) => {
+  await page.setViewportSize({ width: 1280, height: 900 });
+  await mountSmartChat(page, false);
+  const selectors = ['#appHeader', '#sidebar', '#sidebarBackdrop', '#tabBar', '#fab'];
+  const before = await page.evaluate((items) => Object.fromEntries(items.map((selector) => {
+    const element = document.querySelector(selector);
+    return [selector, element ? getComputedStyle(element).display : 'missing'];
+  })), selectors);
+
+  await page.evaluate(() => window.renderChat());
+
+  const after = await page.evaluate((items) => Object.fromEntries(items.map((selector) => {
+    const element = document.querySelector(selector);
+    return [selector, element ? getComputedStyle(element).display : 'missing'];
+  })), selectors);
+  expect(after).toEqual(before);
+  await expect(page.locator('#appHeader')).toBeVisible();
+  await expect(page.locator('.smart-chat-hero')).toBeVisible();
+  await expect(page.locator('.smart-chat-mode-switch')).toBeVisible();
+  await expect(page.locator('.sc-chat-topbar')).toBeHidden();
+});
+
+test('Mobile Chat entry hides the global chrome and uses the mobile topbar', async ({ page }) => {
+  await page.setViewportSize({ width: 390, height: 844 });
+  await mountSmartChat(page, false);
+  await page.evaluate(() => window.renderChat());
+
+  for (const selector of ['#appHeader', '#sidebar', '#sidebarBackdrop', '#tabBar', '#fab']) {
+    const element = page.locator(selector);
+    if (await element.count()) {
+      await expect(element).toBeHidden();
+    }
+  }
+  await expect(page.locator('.sc-chat-topbar')).toBeVisible();
+});
 
 async function calls(page, name) {
   return page.evaluate((target) => window.__chatTestCalls.filter(x => x.name === target), name);
