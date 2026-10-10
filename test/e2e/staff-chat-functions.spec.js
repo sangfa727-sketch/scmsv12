@@ -756,17 +756,24 @@ test('mobile touch swipes scroll Staff Chat directory, announcement, and ticket 
       expect(box).toBeTruthy();
       const x = Math.round(box.x + box.width / 2);
       const y = Math.round(box.y + Math.min(box.height / 2, 240));
-      const before = await pane.evaluate(el => el.scrollTop);
-      // Chromium's synthesized touch-source scroll gesture exercises the browser's
-      // scrolling pipeline more reliably than manually dispatching raw touch events.
+      const metrics = await pane.evaluate(el => ({
+        scrollTop: el.scrollTop,
+        scrollHeight: el.scrollHeight,
+        clientHeight: el.clientHeight,
+        overflowY: getComputedStyle(el).overflowY
+      }));
+      expect(metrics.scrollHeight, `Expected ${selector} to contain overflowing content: ${JSON.stringify(metrics)}`).toBeGreaterThan(metrics.clientHeight);
+      const before = metrics.scrollTop;
+      // Start the touch gesture in the lower half of the pane, away from headers.
+      const gestureY = Math.round(box.y + Math.min(box.height - 24, Math.max(24, box.height * 0.72)));
       await cdp.send('Input.synthesizeScrollGesture', {
         x,
-        y,
-        yDistance: -Math.max(240, Math.round(box.height * 0.6)),
-        speed: 900,
+        y: gestureY,
+        yDistance: -Math.max(320, Math.round(box.height * 0.7)),
+        speed: 650,
         gestureSourceType: 'touch'
       });
-      await expect.poll(() => pane.evaluate(el => el.scrollTop), { timeout: 2000 }).toBeGreaterThan(before);
+      await expect.poll(() => pane.evaluate(el => el.scrollTop), { timeout: 3000 }).toBeGreaterThan(before);
     };
 
     await page.evaluate(() => window.switchChatChannel('direct'));
