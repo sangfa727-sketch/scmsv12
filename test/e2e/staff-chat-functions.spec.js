@@ -302,6 +302,64 @@ test('Grade conversation sends a message through the API', async ({ page }) => {
   expect((await calls(page, 'sendGradeMessage'))[0].args).toEqual(['Grade 1', 'Grade send functional check']);
 });
 
+test('Department Chat preserves the draft and restores controls when sending fails', async ({ page }) => {
+  await mountSmartChat(page);
+  await page.evaluate(() => window.switchChatChannel('departments'));
+  await page.locator('[data-testid="department-row-51"]').click();
+  await page.evaluate(() => {
+    window.API.sendDepartmentMessage = async (...args) => {
+      window.__chatTestCalls.push({ name: 'sendDepartmentMessage', args });
+      return { ok: false, error: 'simulated send rejection' };
+    };
+  });
+  const input = page.locator('#departmentChatInput');
+  await input.fill('Keep this department draft');
+  await page.locator('#departmentSendBtn').click();
+  await expect.poll(async () => (await calls(page, 'sendDepartmentMessage')).length).toBe(1);
+  await expect(input).toHaveValue('Keep this department draft');
+  await expect(input).toBeEnabled();
+  await expect(page.locator('#departmentSendBtn')).toBeEnabled();
+});
+
+test('Project and event group Chat preserves the draft when sending fails', async ({ page }) => {
+  await mountSmartChat(page);
+  await page.evaluate(() => window.switchChatChannel('events'));
+  await page.locator('#chatGroupList button').filter({ hasText: 'Planning Group' }).click();
+  await page.evaluate(() => {
+    window.API.sendChatGroupMessage = async (...args) => {
+      window.__chatTestCalls.push({ name: 'sendChatGroupMessage', args });
+      return { ok: false, error: 'simulated send rejection' };
+    };
+  });
+  const input = page.locator('#chatGroupInput');
+  await input.fill('Keep this group draft');
+  await page.locator('form').filter({ has: input }).locator('button[type="submit"]').click();
+  await expect.poll(async () => (await calls(page, 'sendChatGroupMessage')).length).toBe(1);
+  await expect(input).toHaveValue('Keep this group draft');
+  await expect(input).toBeVisible();
+});
+
+test('Grade Chat preserves the draft when sending fails', async ({ page }) => {
+  await mountSmartChat(page);
+  await page.evaluate(() => {
+    window.switchChatChannel('departments');
+    window._showGradeWorkspace();
+  });
+  await page.locator('[data-testid="grade-row-Grade 1"]').click();
+  await page.evaluate(() => {
+    window.API.sendGradeMessage = async (...args) => {
+      window.__chatTestCalls.push({ name: 'sendGradeMessage', args });
+      return { ok: false, error: 'simulated send rejection' };
+    };
+  });
+  const input = page.locator('#gradeChatInput');
+  await input.fill('Keep this grade draft');
+  await page.locator('form').filter({ has: input }).locator('button[type="submit"]').click();
+  await expect.poll(async () => (await calls(page, 'sendGradeMessage')).length).toBe(1);
+  await expect(input).toHaveValue('Keep this grade draft');
+  await expect(input).toBeVisible();
+});
+
 test('AI Assistant remains clearly labelled as a preview, not a connected chat', async ({ page }) => {
   await mountSmartChat(page);
   await page.evaluate(() => window.switchChatMode('ai'));
