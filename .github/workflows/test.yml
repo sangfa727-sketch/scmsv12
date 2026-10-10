@@ -84,10 +84,10 @@ jobs:
           done
           cat /tmp/scms-serve.log
           exit 1
-      - name: Run local Playwright smoke test
+      - name: Run local Playwright smoke, Staff Chat, and Manage Teacher/Access tests
         env:
           SCMS_URL: http://127.0.0.1:5173
-        run: npx playwright test test/e2e/ci-smoke.spec.js test/e2e/staff-chat-functions.spec.js
+        run: npx playwright test test/e2e/ci-smoke.spec.js test/e2e/staff-chat-functions.spec.js test/e2e/teacher-management-functions.spec.js
       - name: Write CI summary
         if: always()
         shell: bash
@@ -98,7 +98,7 @@ jobs:
             echo "- Commit: $GITHUB_SHA"
             echo "- Ref: $GITHUB_REF"
             echo "- Job result: ${{ job.status }}"
-            echo '- Scope: homepage/page-shell smoke plus mocked Staff Smart Chat UI function flows; real backend integration, authorization, and security remain untested.'
+            echo '- Scope: homepage/page-shell smoke plus mocked Staff Smart Chat and Manage Teacher/Access UI function flows; real backend integration, authorization, and security remain untested.'
           } >> "$GITHUB_STEP_SUMMARY"
       - name: Upload Playwright evidence
         if: always()
