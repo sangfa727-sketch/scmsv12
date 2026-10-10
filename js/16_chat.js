@@ -573,6 +573,12 @@ function _renderChatQuickNav() {
         '<span class="smart-chat-quick-channel-count' + (count > 0 ? ' has-unread' : '') + '"' + countLabel + '>' + (count > 0 ? (count > 99 ? '99+' : count) : '') + '</span>' +
       '</button>';
     }).join('') + '</div>';
+  // Keep the selected channel visible after switching; mobile users should never
+  // land on the first tab while a different workspace is active.
+  requestAnimationFrame(() => {
+    const active = nav.querySelector('.smart-chat-quick-channel.active');
+    if (active) active.scrollIntoView({block:'nearest',inline:'center',behavior:'auto'});
+  });
 }
 
 function _chatUnreadCount(channel) {
@@ -1131,6 +1137,10 @@ window.switchChatChannel = function(channel) {
   _renderChatQuickNav();
   _renderChatMode();
   _refreshChatChannelUnreadCounts();
+  requestAnimationFrame(() => {
+    const active = document.querySelector('#smartChatQuickNav .smart-chat-quick-channel.active');
+    if (active) active.scrollIntoView({block:'nearest',inline:'center',behavior:'auto'});
+  });
 };
 
 async function _loadChatMessages() {
