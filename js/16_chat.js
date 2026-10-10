@@ -377,6 +377,11 @@ window._refreshAdminComposerPreview = function() {
     }
     @keyframes scChatMenuIn{from{opacity:0;transform:translateY(-5px) scale(.97)}to{opacity:1;transform:translateY(0) scale(1)}}
     @media(prefers-reduced-motion:reduce){html.scms-chat-workspace #page-chat *,html.scms-chat-workspace #page-chat *::before,html.scms-chat-workspace #page-chat *::after{animation-duration:.01ms!important;transition-duration:.01ms!important}}
+    .smart-chat-direct-people{display:flex;flex:1 1 auto;flex-direction:column;gap:7px;min-height:0;overflow-x:hidden;overflow-y:auto;padding:8px 10px 14px;-webkit-overflow-scrolling:touch;touch-action:pan-y}
+    .smart-chat-direct-person{display:flex;width:100%;align-items:center;gap:10px;margin:0;padding:10px;text-align:left;border:1px solid var(--border);border-radius:15px;background:var(--surface);color:var(--text);box-shadow:0 1px 3px rgba(0,0,0,.04);transition:background .16s ease,border-color .16s ease,transform .16s ease}
+    .smart-chat-direct-person:active{transform:scale(.99)}
+    .smart-chat-direct-person:hover,.smart-chat-direct-person.active{background:var(--bg2);border-color:var(--accent)}
+    .smart-chat-direct-open{display:grid;place-items:center;width:28px;height:28px;flex:0 0 28px;border:1px solid var(--border);border-radius:50%;background:var(--bg2);color:var(--accent);font-size:17px;font-weight:800}
     .smart-chat-channel-back-row{display:flex;align-items:center;margin:0 0 8px}
     .smart-chat-channel-back{display:inline-flex;align-items:center;gap:5px;min-height:32px;padding:0 10px;border:1px solid var(--border);border-radius:9px;background:var(--bg2);color:var(--text2);font-size:11px;font-weight:700;cursor:pointer}
     .smart-chat-channel-back:hover{background:var(--surface2);color:var(--text)}
@@ -491,7 +496,7 @@ function renderChat() {
         <button type="button" class="sc-chat-top-action" onclick="_toggleChatTypeMenu()" aria-label="${esc(t('chat.manageChatTypes'))}" title="${esc(t('chat.manageChatTypes'))}" aria-haspopup="menu" aria-controls="scChatTypeMenu" aria-expanded="${_chatTypeMenuOpen ? 'true' : 'false'}">
           <svg viewBox="0 0 24 24" width="21" height="21" fill="currentColor" aria-hidden="true"><circle cx="5" cy="12" r="1.8"/><circle cx="12" cy="12" r="1.8"/><circle cx="19" cy="12" r="1.8"/></svg>
         </button>
-        <div id="scChatTypeMenu" class="sc-chat-type-menu" role="menu" aria-label="Hidden chat types" ${_chatTypeMenuOpen ? '' : 'hidden'}>${_chatTypeMenuMarkup()}</div>
+        <div id="scChatTypeMenu" class="sc-chat-type-menu" role="menu" aria-label="${esc(t('chat.manageChatTypes'))}" ${_chatTypeMenuOpen ? '' : 'hidden'}>${_chatTypeMenuMarkup()}</div>
       </header>
       <div class="sc-chat-workspace-content">
         <nav id="smartChatQuickNav" class="smart-chat-quick-nav" aria-label="${esc(t('chat.schoolChat'))}"></nav>
