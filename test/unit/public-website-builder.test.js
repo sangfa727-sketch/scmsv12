@@ -58,6 +58,7 @@ test('School Website navigation supports owner/admin defaults and delegated webs
  assert.match(sidebar,/id: 'website'/);
  assert.match(sidebar,/school-website\/create\.html/);
  assert.match(sidebar,/ownerOrAdmin/);
+ assert.match(sidebar,/if \(A\.is_admin\) return true/);
  assert.match(sidebar,/school_owner/);
  assert.match(sidebar,/website\.manage/);
  assert.match(sidebar,/School Website/);
