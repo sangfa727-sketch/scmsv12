@@ -269,7 +269,15 @@
       'chat.statusInProgress':'In progress',
       'chat.statusOpen':'Open',
       'chat.statusResolved':'Resolved',
-      'chat.statusWaiting':'Waiting'
+      'chat.statusWaiting':'Waiting',
+
+      'chat.switchChatMode':"Switch between School Chat and AI Assistant",
+      'chat.manageChatTypes':"Manage chat types",
+      'chat.hideTab':"Hide tab",
+      'chat.showTabOnBar':"Show this tab on the chat bar",
+      'chat.allChatTypesVisible':"All chat types are visible.",
+      'chat.keepOneChatTypeVisible':"Keep at least one chat type visible.",
+
     },
     my: {
       'chat.officialMessageSent':'အတည်ပြုထားသော ဝန်ထမ်း {count} ဦးထံ တရားဝင်မက်ဆေ့ချ် ပို့ပြီးပါပြီ။',
@@ -296,7 +304,15 @@
       'chat.statusInProgress':'ဆောင်ရွက်နေသည်',
       'chat.statusOpen':'ဖွင့်ထားသည်',
       'chat.statusResolved':'ဖြေရှင်းပြီး',
-      'chat.statusWaiting':'စောင့်ဆိုင်းနေသည်'
+      'chat.statusWaiting':'စောင့်ဆိုင်းနေသည်',
+
+      'chat.switchChatMode':"School Chat နှင့် AI Assistant ပြောင်းရန်",
+      'chat.manageChatTypes':"Chat အမျိုးအစားများ စီမံရန်",
+      'chat.hideTab':"Tab ဖျောက်ရန်",
+      'chat.showTabOnBar':"Chat bar ပေါ်တွင် ပြရန်",
+      'chat.allChatTypesVisible':"Chat အမျိုးအစားအားလုံးကို ပြထားသည်။",
+      'chat.keepOneChatTypeVisible':"အနည်းဆုံး Chat အမျိုးအစားတစ်ခုကို ပြထားပါ။",
+
     },
     th: {
       'chat.officialMessageSent':'ส่งข้อความทางการถึงบุคลากรที่ยืนยันแล้ว {count} คนเรียบร้อย',
@@ -323,7 +339,15 @@
       'chat.statusInProgress':'กำลังดำเนินการ',
       'chat.statusOpen':'เปิดอยู่',
       'chat.statusResolved':'แก้ไขแล้ว',
-      'chat.statusWaiting':'รอดำเนินการ'
+      'chat.statusWaiting':'รอดำเนินการ',
+
+      'chat.switchChatMode':"สลับระหว่างแชตโรงเรียนกับ AI Assistant",
+      'chat.manageChatTypes':"จัดการประเภทแชต",
+      'chat.hideTab':"ซ่อนแท็บ",
+      'chat.showTabOnBar':"แสดงแท็บนี้บนแถบแชต",
+      'chat.allChatTypesVisible':"แสดงประเภทแชตทั้งหมดแล้ว",
+      'chat.keepOneChatTypeVisible':"ต้องแสดงประเภทแชตอย่างน้อยหนึ่งรายการ",
+
     },
     jp: {
       'chat.officialMessageSent':'確認済みのスタッフ {count} 人に公式メッセージを送信しました。',
@@ -350,7 +374,15 @@
       'chat.statusInProgress':'進行中',
       'chat.statusOpen':'未対応',
       'chat.statusResolved':'解決済み',
-      'chat.statusWaiting':'保留中'
+      'chat.statusWaiting':'保留中',
+
+      'chat.switchChatMode':"スクールチャットとAIアシスタントを切り替え",
+      'chat.manageChatTypes':"チャット種別を管理",
+      'chat.hideTab':"タブを非表示",
+      'chat.showTabOnBar':"チャットバーにこのタブを表示",
+      'chat.allChatTypesVisible':"すべてのチャット種別を表示しています",
+      'chat.keepOneChatTypeVisible':"少なくとも1つのチャット種別を表示してください",
+
     },
     ms: {
       'chat.officialMessageSent':'Mesej rasmi telah dihantar kepada {count} kakitangan yang disahkan.',
@@ -377,7 +409,15 @@
       'chat.statusInProgress':'Sedang diproses',
       'chat.statusOpen':'Dibuka',
       'chat.statusResolved':'Diselesaikan',
-      'chat.statusWaiting':'Menunggu'
+      'chat.statusWaiting':'Menunggu',
+
+      'chat.switchChatMode':"Tukar antara Sembang Sekolah dan Pembantu AI",
+      'chat.manageChatTypes':"Urus jenis sembang",
+      'chat.hideTab':"Sembunyikan tab",
+      'chat.showTabOnBar':"Tunjukkan tab ini pada bar sembang",
+      'chat.allChatTypesVisible':"Semua jenis sembang sedang dipaparkan.",
+      'chat.keepOneChatTypeVisible':"Kekalkan sekurang-kurangnya satu jenis sembang yang kelihatan.",
+
     },
     km: {
       'chat.officialMessageSent':'បានផ្ញើសារផ្លូវការទៅបុគ្គលិកដែលបានផ្ទៀងផ្ទាត់ចំនួន {count} នាក់។',
@@ -404,7 +444,15 @@
       'chat.statusInProgress':'កំពុងដំណើរការ',
       'chat.statusOpen':'បើក',
       'chat.statusResolved':'បានដោះស្រាយ',
-      'chat.statusWaiting':'កំពុងរង់ចាំ'
+      'chat.statusWaiting':'កំពុងរង់ចាំ',
+
+      'chat.switchChatMode':"ប្ដូររវាងការជជែកសាលា និងជំនួយការ AI",
+      'chat.manageChatTypes':"គ្រប់គ្រងប្រភេទការជជែក",
+      'chat.hideTab':"លាក់ផ្ទាំង",
+      'chat.showTabOnBar':"បង្ហាញផ្ទាំងនេះនៅលើរបារជជែក",
+      'chat.allChatTypesVisible':"ប្រភេទការជជែកទាំងអស់កំពុងបង្ហាញ។",
+      'chat.keepOneChatTypeVisible':"សូមទុកប្រភេទការជជែកយ៉ាងតិចមួយឱ្យបង្ហាញ។",
+
     },
     zh: {
       'chat.officialMessageSent':'已向 {count} 名已验证员工发送官方消息。',
@@ -431,7 +479,15 @@
       'chat.statusInProgress':'处理中',
       'chat.statusOpen':'待处理',
       'chat.statusResolved':'已解决',
-      'chat.statusWaiting':'等待中'
+      'chat.statusWaiting':'等待中',
+
+      'chat.switchChatMode':"切换学校聊天与 AI 助手",
+      'chat.manageChatTypes':"管理聊天类型",
+      'chat.hideTab':"隐藏标签",
+      'chat.showTabOnBar':"在聊天栏显示此标签",
+      'chat.allChatTypesVisible':"所有聊天类型均已显示。",
+      'chat.keepOneChatTypeVisible':"请至少保留一个可见的聊天类型。",
+
     }
   };
   Object.keys(officialTicketLocaleParityFix).forEach(code =>
