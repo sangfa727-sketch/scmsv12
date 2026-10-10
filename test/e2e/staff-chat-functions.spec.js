@@ -224,7 +224,7 @@ test('Direct Chat loads the staff directory and opens a private conversation', a
   await mountSmartChat(page);
   await page.evaluate(() => window.switchChatChannel('direct'));
   await expect.poll(async () => (await calls(page, 'getDirectStaffDirectory')).length).toBeGreaterThan(0);
-  await expect(page.locator('#directStaffDirectory')).toContainText('Other Teacher');
+  await expect(page.locator('#directConversationList')).toContainText('Other Teacher');
   await page.evaluate(() => window.openDirectChat('teacher-2'));
   await expect.poll(async () => (await calls(page, 'getDirectMessages')).length).toBeGreaterThan(0);
   await expect(page.locator('#directMessageStream')).toContainText('Private hello');
@@ -377,11 +377,12 @@ test('mobile full-screen chat uses one topbar and persists chat type selection',
   await expect(page.locator('.smart-chat-mode-switch')).toBeHidden();
   await expect(page.locator('.sc-chat-mode-pill')).toContainText(/School Chat/i);
   await page.locator('.sc-chat-mode-pill').click();
-  await expect(page.locator('#scChatTypeMenu')).toBeVisible();
-  await page.locator('.sc-chat-type-option').filter({ hasText: /AI Assistant|AI Chat/i }).click();
+  await expect(page.locator('#scChatTypeMenu')).toBeHidden();
   await expect(page.locator('.sc-chat-mode-pill')).toContainText(/AI Assistant|AI Chat/i);
   await expect.poll(() => page.evaluate(() => localStorage.getItem('scms_chat_mode'))).toBe('ai');
-  await expect(page.locator('.sc-chat-type-option.active')).toHaveCount(1);
+  await page.locator('.sc-chat-topbar .sc-chat-top-action').nth(1).click();
+  await expect(page.locator('#scChatTypeMenu')).toBeVisible();
+  await expect(page.locator('#scChatTypeMenu [role="menuitemradio"]')).toHaveCount(0);
   await page.locator('.sc-chat-topbar .sc-chat-top-action').first().click();
   await expect(page.locator('html')).not.toHaveClass(/scms-chat-workspace/);
   await expect(page.locator('#page-chat')).toBeVisible();
@@ -542,7 +543,7 @@ test('mobile Staff Chat list panes remain independently scrollable when populate
     window.API.getDirectConversations = async () => [];
   });
   await page.evaluate(() => window.switchChatChannel('direct'));
-  const directory = page.locator('#directStaffDirectory');
+  const directory = page.locator('#directConversationList');
   await expect(directory.locator('.smart-chat-directory-item')).toHaveCount(28);
   const directoryScroll = await directory.evaluate((el) => {
     const before = el.scrollTop;
@@ -627,7 +628,7 @@ test('mobile one-to-one chat keeps message stream scrollable and composer visibl
     window.API.markDirectRead = async () => ({ ok: true });
   });
   await page.evaluate(() => window.switchChatChannel('direct'));
-  await page.locator('#directStaffDirectory .smart-chat-directory-item').first().waitFor();
+  await page.locator('#directConversationList .smart-chat-directory-item').first().waitFor();
   await page.evaluate(() => window.openDirectChat('teacher-2'));
 
   const shell = page.locator('#page-chat .smart-chat-direct-shell');
@@ -692,9 +693,9 @@ test('Direct Chat uses existing teacher profile photos with a safe initials fall
   }, photoUrl);
   await page.evaluate(() => window.switchChatChannel('direct'));
 
-  const contact = page.locator('#directStaffDirectory .smart-chat-directory-item').first();
+  const contact = page.locator('#directConversationList .smart-chat-directory-item').first();
   await expect(contact.locator('.smart-chat-profile-photo')).toHaveAttribute('src', photoUrl);
-  const fallbackContact = page.locator('#directStaffDirectory .smart-chat-directory-item').nth(1);
+  const fallbackContact = page.locator('#directConversationList .smart-chat-directory-item').nth(1);
   await expect(fallbackContact.locator('.smart-chat-avatar-initial')).toHaveText('N');
   await expect(fallbackContact.locator('.smart-chat-profile-photo')).toHaveCount(0);
 
@@ -749,12 +750,12 @@ test('Department creation modal selects existing staff and assigns them to the n
 test('Staff Chat preserves the last successful contact and announcement data on transient refresh errors', async ({ page }) => {
   await mountSmartChat(page);
   await page.evaluate(() => window.switchChatChannel('direct'));
-  await expect(page.locator('#directStaffDirectory')).toContainText('Other Teacher');
+  await expect(page.locator('#directConversationList')).toContainText('Other Teacher');
   await page.evaluate(() => {
     window.API.getDirectStaffDirectory = async () => { throw new Error('temporary_directory_error'); };
     window._loadDirectWorkspace();
   });
-  await expect(page.locator('#directStaffDirectory')).toContainText('Other Teacher');
+  await expect(page.locator('#directConversationList')).toContainText('Other Teacher');
 
   await page.evaluate(() => window.switchChatChannel('announcements'));
   await expect(page.locator('#announcementList')).toContainText('Read this announcement');
@@ -769,14 +770,14 @@ test('cached Staff Chat lists remain visible while refresh requests are pending'
   await mountSmartChat(page);
 
   await page.evaluate(() => window.switchChatChannel('direct'));
-  await expect(page.locator('#directStaffDirectory')).toContainText('Other Teacher');
+  await expect(page.locator('#directConversationList')).toContainText('Other Teacher');
   await page.evaluate(() => {
     window.API.getDirectStaffDirectory = () => new Promise(() => {});
     window.API.getDirectConversations = () => new Promise(() => {});
     window.switchChatChannel('staff');
     window.switchChatChannel('direct');
   });
-  await expect(page.locator('#directStaffDirectory')).toContainText('Other Teacher');
+  await expect(page.locator('#directConversationList')).toContainText('Other Teacher');
 
   await page.evaluate(() => {
     window.API.getGradeChats = async () => [{ grade_name: 'G1', unread_count: 0 }];
@@ -888,8 +889,8 @@ test('mobile Staff Chat directory, announcement, and ticket panes support touch 
     };
 
     await page.evaluate(() => window.switchChatChannel('direct'));
-    await expect(page.locator('#directStaffDirectory .smart-chat-directory-item')).toHaveCount(28);
-    await swipeUp('#directStaffDirectory');
+    await expect(page.locator('#directConversationList .smart-chat-directory-item')).toHaveCount(28);
+    await swipeUp('#directConversationList');
 
     await page.evaluate(() => window.switchChatChannel('announcements'));
     await expect(page.locator('#announcementList .smart-chat-announcement-card')).toHaveCount(24);
