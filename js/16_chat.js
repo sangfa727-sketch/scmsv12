@@ -326,6 +326,23 @@ window._refreshAdminComposerPreview = function() {
   s.textContent=`
     /* Desktop keeps the existing SCMS shell; the full-screen workspace is mobile-only. */
     .sc-chat-topbar{display:none}
+    @media(min-width:761px){
+      #page-chat .smart-chat-hero{display:flex;align-items:center;gap:22px;width:100%;min-width:0}
+      #page-chat .smart-chat-hero>div:first-of-type{flex:1 1 auto;min-width:0}
+      #page-chat .smart-chat-mode-switch{display:flex;flex:0 0 auto;align-items:center;gap:6px;margin-left:auto}
+      #page-chat .smart-chat-mode-switch button{white-space:nowrap}
+      #page-chat .smart-chat-identity{display:none!important}
+      #page-chat #smartChatQuickNav{width:100%;min-width:0;overflow:visible}
+      #page-chat .smart-chat-quick-nav-track{display:grid!important;grid-template-columns:repeat(6,minmax(0,1fr));gap:8px;width:100%;min-width:0;overflow:visible}
+      #page-chat .smart-chat-quick-channel-wrap{display:flex;min-width:0;width:100%;flex:1 1 0;box-sizing:border-box}
+      #page-chat .smart-chat-quick-channel{display:flex;justify-content:center;align-items:center;gap:7px;flex:1 1 auto;width:100%;min-width:0;padding-inline:8px;white-space:normal;overflow-wrap:anywhere}
+      #page-chat .smart-chat-quick-channel-name{min-width:0;overflow-wrap:anywhere;text-align:center}
+      #page-chat .smart-chat-quick-channel-hide{display:none!important}
+      #page-chat .smart-chat-school-grid{display:grid!important;grid-template-columns:minmax(220px,260px) minmax(0,1fr);gap:18px;width:100%;min-width:0;max-width:none}
+      #page-chat .smart-chat-school-grid>.smart-chat-channel-list{display:flex;min-width:0;width:100%}
+      #page-chat .smart-chat-school-grid>.smart-chat-conversation{display:flex;min-width:0;width:100%;max-width:none;flex:1 1 auto}
+      #page-chat #smartChatModeBody{width:100%;min-width:0}
+    }
     @media(max-width:760px){
       html.scms-chat-workspace #page-chat .smart-chat-shell{height:100dvh;min-height:100dvh;display:flex;flex-direction:column;gap:0;padding:0;overflow:hidden}
       html.scms-chat-workspace #page-chat .sc-chat-topbar{position:relative;z-index:30;display:grid;grid-template-columns:44px minmax(0,1fr) 44px;align-items:center;gap:10px;flex:0 0 auto;padding:calc(8px + env(safe-area-inset-top)) 12px 10px;border-bottom:1px solid var(--border);background:color-mix(in srgb,var(--surface) 94%,var(--sc-chat-accent))}
@@ -484,14 +501,10 @@ function renderChat() {
           <h1 class="page-title">${t('chat.schoolChat')}</h1>
           <p class="page-subtitle">${t('chat.schoolCommunicationDesc')}</p>
         </div>
-        <div class="smart-chat-identity">
-          <span class="smart-chat-avatar">${esc((window.APP?.teacher_name || '?')[0])}</span>
-          <span>${esc(window.APP?.teacher_name || t('chat.staff'))}</span>
-        </div>
+        <div class="smart-chat-mode-switch" role="tablist" aria-label="${esc(t('chat.switchChatMode'))}">
+        <button class="${_chatMode === 'school' ? 'active' : ''}" onclick="switchChatMode('school')" role="tab" aria-selected="${_chatMode === 'school'}">${_chatIcon('users')} ${t('chat.schoolChat')}</button>
+        <button class="${_chatMode === 'ai' ? 'active' : ''}" onclick="switchChatMode('ai')" role="tab" aria-selected="${_chatMode === 'ai'}">${_chatIcon('bot')} ${t('chat.aiAssistant')}</button>
       </div>
-      <div class="smart-chat-mode-switch" role="tablist">
-        <button class="${_chatMode === 'school' ? 'active' : ''}" onclick="switchChatMode('school')" role="tab">${_chatIcon('users')} ${t('chat.schoolChat')}</button>
-        <button class="${_chatMode === 'ai' ? 'active' : ''}" onclick="switchChatMode('ai')" role="tab">${_chatIcon('bot')} ${t('chat.aiAssistant')}</button>
       </div>
       <header class="sc-chat-topbar" aria-label="${esc(t('chat.communicationCenter'))}">
         <button type="button" class="sc-chat-top-action" onclick="_chatBackToMenu()" aria-label="${esc(t('chat.exitChat'))}" title="${esc(t('chat.exitChat'))}">
@@ -567,12 +580,21 @@ window._toggleChatTypeMenu = function() {
 function _chatTypeMenuMarkup() {
   const hidden = _chatQuickNavChannels().filter(c => _chatVisibleTypes[c.id] === false);
   if (!hidden.length) return '<div class="sc-chat-type-empty">' + esc(t('chat.allChatTypesVisible')) + '</div>';
-  return hidden.map(c => '<button type="button" class="sc-chat-type-option" role="menuitem" onclick="_showChatType(\'' + c.id + '\')">' +
-    '<span class="smart-chat-quick-channel-icon" aria-hidden="true">' + c.icon + '</span><span class="sc-chat-type-copy"><strong>' + esc(c.name) + '</strong><small>' + esc(t('chat.showTabOnBar')) + '</small></span><span class="sc-chat-type-enable" aria-hidden="true">＋</span></button>').join('');
+  return hidden.map(c => '<div class="sc-chat-type-row" role="none">' +
+    '<button type="button" class="sc-chat-type-option" role="menuitem" onclick="_openHiddenChatType(\\'' + c.id + '\\')">' +
+    '<span class="smart-chat-quick-channel-icon" aria-hidden="true">' + c.icon + '</span><span class="sc-chat-type-copy"><strong>' + esc(c.name) + '</strong><small>' + esc(t('chat.openChatType')) + '</small></span></button>' +
+    '<button type="button" class="sc-chat-type-enable" role="menuitem" onclick="_showChatType(\\'' + c.id + '\\')" aria-label="' + esc(t('chat.showTabOnBar')) + ' ' + esc(c.name) + '" title="' + esc(t('chat.showTabOnBar')) + '">＋</button></div>').join('');
 }
+window._openHiddenChatType = function(id) {
+  if (!_chatQuickNavChannels().some(channel => channel.id === id) || _chatVisibleTypes[id] !== false) return;
+  _chatTypeMenuOpen = false;
+  const menu = document.getElementById('scChatTypeMenu');
+  if (menu) { menu.hidden = true; menu.innerHTML = _chatTypeMenuMarkup(); }
+  document.querySelectorAll('.sc-chat-top-action[aria-haspopup="menu"]').forEach(button => button.setAttribute('aria-expanded', 'false'));
+  switchChatChannel(id);
+};
 window._hideChatType = function(id) {
-  const visible = _chatQuickNavChannels().filter(c => _chatVisibleTypes[c.id] !== false);
-  if (visible.length <= 1) { showToast(t('chat.keepOneChatTypeVisible')); return; }
+  if (!Object.prototype.hasOwnProperty.call(_chatVisibleTypes, id)) return;
   _chatVisibleTypes[id] = false;
   try { localStorage.setItem('scms_chat_visible_types', JSON.stringify(_chatVisibleTypes)); } catch (_) {}
   if (_chatChannel === id) _chatChannel = _chatQuickNavChannels().find(c => _chatVisibleTypes[c.id] !== false)?.id || 'staff';
@@ -609,7 +631,7 @@ function _renderChatQuickNav() {
   nav.setAttribute('aria-label', t('chat.schoolChat'));
   const channels = _chatQuickNavChannels();
   const visible = channels.filter(c => _chatVisibleTypes[c.id] !== false);
-  if (!visible.length) { _chatVisibleTypes.staff = true; visible.push(channels[0]); }
+  if (!visible.length) { nav.innerHTML = ''; return; }
   nav.innerHTML = '<div class="smart-chat-quick-nav-track" role="group">' +
     visible.map(c => {
       const count = _chatUnreadCount(c.id);
