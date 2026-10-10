@@ -18,7 +18,6 @@ let _chatTypeMenuOpen = false;
 let _chatVisibleTypes = (() => {
   const defaults = {staff:true,announcements:true,direct:true,departments:true,tickets:true,events:true};
   try { const saved = JSON.parse(localStorage.getItem('scms_chat_visible_types') || 'null'); if (saved && typeof saved === 'object') Object.keys(defaults).forEach(id => { if (typeof saved[id] === 'boolean') defaults[id] = saved[id]; }); } catch (_) {}
-  if (!Object.values(defaults).some(Boolean)) defaults.staff = true;
   return defaults;
 })();
 let _adminGradeRecipients = [];
