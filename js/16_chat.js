@@ -599,6 +599,7 @@ window._openHiddenChatType = function(id) {
   switchChatChannel(id);
 };
 window._hideChatType = function(id) {
+  if (typeof window.matchMedia !== 'function' || !window.matchMedia('(max-width: 760px)').matches) return;
   if (!Object.prototype.hasOwnProperty.call(_chatVisibleTypes, id)) return;
   _chatVisibleTypes[id] = false;
   try { localStorage.setItem('scms_chat_visible_types', JSON.stringify(_chatVisibleTypes)); } catch (_) {}
@@ -607,6 +608,7 @@ window._hideChatType = function(id) {
   const menu = document.getElementById('scChatTypeMenu'); if (menu) menu.innerHTML = _chatTypeMenuMarkup();
 };
 window._showChatType = function(id) {
+  if (typeof window.matchMedia !== 'function' || !window.matchMedia('(max-width: 760px)').matches) return;
   if (!Object.prototype.hasOwnProperty.call(_chatVisibleTypes, id)) return;
   _chatVisibleTypes[id] = true;
   try { localStorage.setItem('scms_chat_visible_types', JSON.stringify(_chatVisibleTypes)); } catch (_) {}
@@ -635,7 +637,9 @@ function _renderChatQuickNav() {
   nav.hidden = _chatMode !== 'school';
   nav.setAttribute('aria-label', t('chat.schoolChat'));
   const channels = _chatQuickNavChannels();
-  const visible = channels.filter(c => _chatVisibleTypes[c.id] !== false);
+  const isMobile = typeof window.matchMedia === 'function' && window.matchMedia('(max-width: 760px)').matches;
+  // Tab visibility is a mobile space-saving preference only. Desktop always shows every channel.
+  const visible = isMobile ? channels.filter(c => _chatVisibleTypes[c.id] !== false) : channels;
   if (!visible.length) { nav.innerHTML = ''; return; }
   nav.innerHTML = '<div class="smart-chat-quick-nav-track" role="group">' +
     visible.map(c => {
