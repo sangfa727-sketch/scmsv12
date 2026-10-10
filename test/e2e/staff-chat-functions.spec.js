@@ -341,7 +341,6 @@ test('admin official announcement uses verified recipients and sends through the
   await page.evaluate(() => {
     window.APP.is_admin = true;
     window.renderChat();
-    window.switchChatChannel('announcements');
   });
 
   // The native select is intentionally hidden by SCMS's custom-select enhancement.
