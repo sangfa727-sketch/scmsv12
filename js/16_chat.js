@@ -567,9 +567,9 @@ function _chatTypeMenuMarkup() {
   const hidden = _chatQuickNavChannels().filter(c => _chatVisibleTypes[c.id] === false);
   if (!hidden.length) return '<div class="sc-chat-type-empty">' + esc(t('chat.allChatTypesVisible')) + '</div>';
   return hidden.map(c => '<div class="sc-chat-type-option-row">' +
-    '<button type="button" class="sc-chat-type-option" role="menuitem" onclick="_openHiddenChatType(\'' + c.id + '\\')">' +
+    '<button type="button" class="sc-chat-type-option" role="menuitem" onclick="_openHiddenChatType(\'' + c.id + '\')">' +
     '<span class="smart-chat-quick-channel-icon" aria-hidden="true">' + c.icon + '</span><span class="sc-chat-type-copy"><strong>' + esc(c.name) + '</strong><small>' + esc(t('chat.openChatType')) + '</small></span></button>' +
-    '<button type="button" class="sc-chat-type-enable" aria-label="' + esc(t('chat.showTabOnBar')) + ': ' + esc(c.name) + '" title="' + esc(t('chat.showTabOnBar')) + '" onclick="_showChatType(\'' + c.id + '\\')">＋</button></div>').join('');
+    '<button type="button" class="sc-chat-type-enable" aria-label="' + esc(t('chat.showTabOnBar')) + ': ' + esc(c.name) + '" title="' + esc(t('chat.showTabOnBar')) + '" onclick="_showChatType(\'' + c.id + '\')">＋</button></div>').join('');
 }
 window._openHiddenChatType = function(id) {
   if (!Object.prototype.hasOwnProperty.call(_chatVisibleTypes, id) || _chatVisibleTypes[id] !== false) return;
@@ -629,9 +629,9 @@ function _renderChatQuickNav() {
       const active = c.id === _chatChannel;
       const countLabel = count > 0 ? ' aria-label="' + esc(t('chat.unreadMessages')) + ': ' + count + '"' : ' aria-hidden="true"';
       const hideButton = _isMobileChatLayout()
-        ? '<button type="button" class="smart-chat-quick-channel-hide" onclick="_hideChatType(\'' + c.id + '\\')" aria-label="' + esc(t('chat.hideTab')) + ' ' + esc(c.name) + '" title="' + esc(t('chat.hideTab')) + '">×</button>'
+        ? '<button type="button" class="smart-chat-quick-channel-hide" onclick="_hideChatType(\'' + c.id + '\')" aria-label="' + esc(t('chat.hideTab')) + ' ' + esc(c.name) + '" title="' + esc(t('chat.hideTab')) + '">×</button>'
         : '';
-      return '<div class="smart-chat-quick-channel-wrap"><button type="button" class="smart-chat-quick-channel' + (active ? ' active' : '') + '" data-chat-quick-channel="' + c.id + '" aria-pressed="' + (active ? 'true' : 'false') + '" onclick="switchChatChannel(\'' + c.id + '\\')">' +
+      return '<div class="smart-chat-quick-channel-wrap"><button type="button" class="smart-chat-quick-channel' + (active ? ' active' : '') + '" data-chat-quick-channel="' + c.id + '" aria-pressed="' + (active ? 'true' : 'false') + '" onclick="switchChatChannel(\'' + c.id + '\')">' +
         '<span class="smart-chat-quick-channel-icon" aria-hidden="true">' + c.icon + '</span>' +
         '<span class="smart-chat-quick-channel-name">' + esc(c.name) + '</span>' +
         '<span class="smart-chat-quick-channel-count' + (count > 0 ? ' has-unread' : '') + '"' + countLabel + '>' + (count > 0 ? (count > 99 ? '99+' : count) : '') + '</span>' +
