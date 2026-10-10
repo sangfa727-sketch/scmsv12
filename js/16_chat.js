@@ -779,7 +779,7 @@ async function _loadInquiryTickets(){
     _inquiryTickets=await API.getInquiryTickets();
     _renderInquiryTicketList();
     if(_inquiryTicketId) await _openInquiryTicket(_inquiryTicketId);
-   }catch(e){const box=document.getElementById('inquiryTicketList');if(box)box.innerHTML=`<div class="chat-error"><div>🎫</div><div>${t('chat.loadTicketsFailed')}</div><button type="button" class="btn-secondary" onclick="_loadInquiryTickets()">${t('chat.retry')}</button></div>`;}
+   }catch(e){const box=document.getElementById('inquiryTicketList');if(box&&!_inquiryTickets.length)box.innerHTML=`<div class="chat-error"><div>🎫</div><div>${t('chat.loadTicketsFailed')}</div><button type="button" class="btn-secondary" onclick="_loadInquiryTickets()">${t('chat.retry')}</button></div>`;}
 }
 async function _openInquiryTicket(id){
   _inquiryTicketId=Number(id); const shell=document.querySelector('.smart-chat-inquiry-shell');if(shell)shell.classList.add('has-selection'); const r=await API.openInquiryTicket(_inquiryTicketId); if(!r?.ok)return;
@@ -957,7 +957,7 @@ async function _loadAnnouncementWorkspace(autoOpen=true){
     if(!rows.length){_announcementId=null;list.innerHTML=`<div class="smart-chat-list-empty-card"><div class="icon">📢</div><strong>${t('chat.emptyTitle')}</strong><small>${t('chat.emptySub')}</small></div>`;stream.innerHTML=`<div class="chat-empty"><div class="chat-empty-icon">📢</div><div class="chat-empty-title">${t('chat.emptyTitle')}</div><div class="chat-empty-sub">${t('chat.emptySub')}</div></div>`;return;}
     _renderAnnouncementList(rows);
     if(autoOpen && !_announcementId) await _openAnnouncement(String(rows[0].id));
-   }catch(e){const list=document.getElementById('announcementList');if(list)list.innerHTML=`<div class="chat-error"><div>📢</div><div>${t('chat.loadFailed')}</div><button type="button" class="btn-secondary" onclick="_loadAnnouncementWorkspace(false)">${t('chat.retry')}</button></div>`;}
+   }catch(e){const list=document.getElementById('announcementList');if(list&&!Array.isArray(window._chatAnnouncements||null))list.innerHTML=`<div class="chat-error"><div>📢</div><div>${t('chat.loadFailed')}</div><button type="button" class="btn-secondary" onclick="_loadAnnouncementWorkspace(false)">${t('chat.retry')}</button></div>`;}
 }
 window._openAnnouncement=async function(id){
   const a=(window._chatAnnouncements||[]).find(x=>String(x.id)===String(id));
@@ -1086,7 +1086,7 @@ function _renderDirectHeader(){
   const root=document.getElementById('directConversationHead');
   if(!root||!_directPeer)return;
   root.innerHTML=`
-    <div class="smart-chat-direct-peer"><button type="button" class="smart-chat-mobile-back" onclick="_clearDirectSelection()" aria-label="${t('chat.backToDirectMessages')}" title="${t('chat.backToDirectMessages')}"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m15 18-6-6 6-6"/></svg></button>${_directAvatarMarkup(_directPeer,true)}<div><strong>${esc(_directPeer.teacher_name)}</strong><small>${esc(_directPeer.role||t('chat.teacher'))}</small></div></div>`;
+    <div class="smart-chat-direct-peer"><button type="button" class="smart-chat-mobile-back" onclick="_clearDirectSelection()" aria-label="${t('chat.directMessages')}" title="${t('chat.directMessages')}"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m15 18-6-6 6-6"/></svg></button>${_directAvatarMarkup(_directPeer,true)}<div><strong>${esc(_directPeer.teacher_name)}</strong><small>${esc(_directPeer.role||t('chat.teacher'))}</small></div></div>`;
 }
 
 function _setDirectMobileView(selected) {
