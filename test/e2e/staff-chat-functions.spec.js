@@ -400,3 +400,78 @@ test('sent and received Staff Chat messages use distinct readable bubble surface
   expect(surfaces.sent).toBeTruthy();
   expect(surfaces.sent).not.toBe(surfaces.received);
 });
+
+
+test('mobile Staff Chat list panes remain independently scrollable when populated', async ({ page }) => {
+  await mountSmartChat(page);
+  await page.setViewportSize({ width: 390, height: 844 });
+
+  await page.evaluate(() => {
+    window.API.getDirectStaffDirectory = async () => Array.from({ length: 28 }, (_, i) => ({
+      teacher_id: `teacher-${i + 1}`,
+      teacher_name: `Staff Member ${i + 1}`,
+      role: 'Teacher',
+      status: 'active'
+    }));
+    window.API.getDirectConversations = async () => [];
+  });
+  await page.evaluate(() => window.switchChatChannel('direct'));
+  const directory = page.locator('#directStaffDirectory');
+  await expect(directory.locator('.smart-chat-directory-item')).toHaveCount(28);
+  const directoryScroll = await directory.evaluate((el) => {
+    const before = el.scrollTop;
+    el.scrollTop = el.scrollHeight;
+    return { overflowY: getComputedStyle(el).overflowY, clientHeight: el.clientHeight, scrollHeight: el.scrollHeight, moved: el.scrollTop > before };
+  });
+  expect(directoryScroll.overflowY).toBe('auto');
+  expect(directoryScroll.clientHeight).toBeGreaterThan(0);
+  expect(directoryScroll.scrollHeight).toBeGreaterThan(directoryScroll.clientHeight);
+  expect(directoryScroll.moved).toBe(true);
+
+  await page.evaluate(() => {
+    window.API.getStaffAnnouncements = async () => Array.from({ length: 24 }, (_, i) => ({
+      id: `00000000-0000-4000-8000-${String(i + 1).padStart(12, '0')}`,
+      message_type: 'notice',
+      reason: `School update ${i + 1}`,
+      body: `Announcement body ${i + 1}`,
+      created_at: '2026-10-10T08:00:00.000Z'
+    }));
+    window.switchChatChannel('announcements');
+  });
+  const announcements = page.locator('#announcementList');
+  await expect(announcements.locator('.smart-chat-announcement-card')).toHaveCount(24);
+  // Mobile opens the first announcement automatically; return to the list pane before testing its scroll area.
+  await page.evaluate(() => window._clearAnnouncementSelection());
+  const announcementScroll = await announcements.evaluate((el) => {
+    const before = el.scrollTop;
+    el.scrollTop = el.scrollHeight;
+    return { overflowY: getComputedStyle(el).overflowY, clientHeight: el.clientHeight, scrollHeight: el.scrollHeight, moved: el.scrollTop > before };
+  });
+  expect(announcementScroll.overflowY).toBe('auto');
+  expect(announcementScroll.clientHeight).toBeGreaterThan(0);
+  expect(announcementScroll.scrollHeight).toBeGreaterThan(announcementScroll.clientHeight);
+  expect(announcementScroll.moved).toBe(true);
+
+  await page.evaluate(() => {
+    window.API.getInquiryTickets = async () => Array.from({ length: 24 }, (_, i) => ({
+      id: i + 100,
+      subject: `Parent request ${i + 1}`,
+      status: 'OPEN',
+      priority: 'NORMAL',
+      created_at: '2026-10-10T08:00:00.000Z',
+      unread_count: 0
+    }));
+    window.switchChatChannel('tickets');
+  });
+  const tickets = page.locator('#inquiryTicketList');
+  await expect(tickets.locator('.smart-chat-channel-card')).toHaveCount(24);
+  const ticketScroll = await tickets.evaluate((el) => {
+    const before = el.scrollTop;
+    el.scrollTop = el.scrollHeight;
+    return { overflowY: getComputedStyle(el).overflowY, clientHeight: el.clientHeight, scrollHeight: el.scrollHeight, moved: el.scrollTop > before };
+  });
+  expect(ticketScroll.overflowY).toBe('auto');
+  expect(ticketScroll.clientHeight).toBeGreaterThan(0);
+  expect(ticketScroll.scrollHeight).toBeGreaterThan(ticketScroll.clientHeight);
+  expect(ticketScroll.moved).toBe(true);
+});
