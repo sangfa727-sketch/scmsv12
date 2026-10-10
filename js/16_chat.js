@@ -1272,6 +1272,8 @@ window.sendChat = async function(ev) {
       _renderChatStream(window.APP.chatMessages); setTimeout(_loadChatMessages,1200);
     } else throw new Error((result&&(result.error||result.message))||t('chat.sendFailed'));
   } catch(e) {
+    // Preserve the user's message in the composer so a transient send failure is recoverable.
+    input.value=text; input.style.height='auto'; _autoGrowChatInput(input);
     optimistic.failed=true; delete optimistic.pending; _renderChatStream(window.APP.chatMessages); showToast(t('chat.sendFailed'));
   } finally { btn.disabled=false; input.disabled=false; input.focus(); }
   return false;
