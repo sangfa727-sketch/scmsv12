@@ -63,7 +63,7 @@ test.describe('Staff Chat full-screen browser regression', () => {
     await expect(page.locator('.sc-chat-mode-pill')).toContainText(/School Chat/i);
     await expect.poll(() => page.evaluate(() => localStorage.getItem('scms_chat_mode'))).toBe('school');
     await expect(page.locator('#scChatTypeMenu')).toHaveCount(1);
-    await page.locator('[data-chat-quick-channel="direct"]').locator('..').locator('.smart-chat-quick-channel-hide').click();
+    await page.locator('[data-chat-quick-channel="direct"]').locator('xpath=..').locator('.smart-chat-quick-channel-hide').click();
     await expect(page.locator('[data-chat-quick-channel="direct"]')).toHaveCount(0);
     await page.locator('.sc-chat-topbar .sc-chat-top-action').nth(1).click();
     await expect(page.locator('#scChatTypeMenu [role="menuitem"]')).toContainText('Direct Messages');
