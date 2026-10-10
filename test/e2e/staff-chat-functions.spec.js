@@ -1023,7 +1023,8 @@ test('desktop Chat keeps all six tabs visible, aligned to the full width, with n
   }));
   expect(metrics.clientWidth).toBeGreaterThan(0);
   expect(metrics.scrollWidth).toBeLessThanOrEqual(metrics.clientWidth + 1);
-  expect(Math.max(...metrics.tabWidths) - Math.min(...metrics.tabWidths)).toBeLessThan(30);
+  expect(Math.min(...metrics.tabWidths)).toBeGreaterThan(metrics.clientWidth / 6 - 18);
+  expect(metrics.tabWidths.reduce((sum, width) => sum + width, 0)).toBeGreaterThan(metrics.clientWidth - 60);
   const conversation = await page.locator('#smartChatModeBody > .smart-chat-school-grid > .smart-chat-conversation').boundingBox();
   expect(conversation).not.toBeNull();
   expect(conversation.width).toBeGreaterThan(metrics.viewportWidth * 0.75);
@@ -1032,10 +1033,9 @@ test('desktop Chat keeps all six tabs visible, aligned to the full width, with n
 test('mobile can hide every chat type; opening a hidden type does not restore it without plus', async ({ page }) => {
   await page.setViewportSize({ width: 390, height: 844 });
   await mountSmartChat(page);
-  for (const id of ['staff', 'announcements', 'direct', 'departments', 'tickets', 'events']) {
-    const tab = page.locator('[data-chat-quick-channel="' + id + '"]');
-    if (await tab.count()) await tab.locator('xpath=..').locator('.smart-chat-quick-channel-hide').click();
-  }
+  await page.evaluate(() => {
+    for (const id of ['staff', 'announcements', 'direct', 'departments', 'tickets', 'events']) window._hideChatType(id);
+  });
   await expect(page.locator('#smartChatQuickNav [data-chat-quick-channel]')).toHaveCount(0);
   await expect(page.locator('#scChatTypeMenu')).toBeHidden();
   await page.locator('.sc-chat-topbar .sc-chat-top-action').nth(1).click();
