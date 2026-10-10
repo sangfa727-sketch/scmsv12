@@ -113,6 +113,14 @@ async function mountSmartChat(page, render = true) {
         record('getDepartmentChats', ...args);
         return [{ id: 51, department_code: 'SCI', department_name: 'Science Department', is_active: true }];
       },
+      adminUpsertDepartment: async (...args) => {
+        record('adminUpsertDepartment', ...args);
+        return { ok: true, department_id: 52 };
+      },
+      adminSetDepartmentMembers: async (...args) => {
+        record('adminSetDepartmentMembers', ...args);
+        return { ok: true, member_count: (args[1] || []).length };
+      },
       openDepartmentChat: async (...args) => {
         record('openDepartmentChat', ...args);
         return { ok: true, department: { id: 51, department_code: 'SCI', department_name: 'Science Department' }, messages: [] };
@@ -306,6 +314,8 @@ test('Inquiry workspace creates a ticket and refreshes the list', async ({ page 
   await mountSmartChat(page);
   await page.evaluate(() => window.switchChatChannel('tickets'));
   await page.getByRole('button', { name: /new ticket/i }).click();
+  await expect(page.locator('#inquiryDraftOverlay')).toBeVisible();
+  await expect(page.locator('#inquiryTicketList')).toContainText('Parent request');
   await page.locator('#inquiryDraftSubject').fill('Functional test ticket');
   await page.locator('#inquiryDraftBody').fill('Ticket creation should call the API and refresh the list.');
   await page.locator('#inquiryDraftPriority').selectOption('NORMAL');
@@ -575,4 +585,45 @@ test('Direct Chat uses existing teacher profile photos with a safe initials fall
   await expect(page.locator('#directConversationList .smart-chat-profile-photo')).toHaveAttribute('src', photoUrl);
   await page.evaluate(() => window.openDirectChat('teacher-2'));
   await expect(page.locator('#directConversationHead .smart-chat-profile-photo')).toHaveAttribute('src', photoUrl);
+});
+
+
+
+test('Direct Chat header stays compact and renders only one peer identity', async ({ page }) => {
+  await page.setViewportSize({ width: 390, height: 844 });
+  await mountSmartChat(page);
+  await page.evaluate(() => window.switchChatChannel('direct'));
+  await page.evaluate(() => window.openDirectChat('teacher-2'));
+  const head = page.locator('#directConversationHead');
+  await expect(head.locator('.smart-chat-mobile-back')).toHaveCount(1);
+  await expect(head.locator('.smart-chat-direct-avatar')).toHaveCount(1);
+  await expect(head.locator('strong')).toHaveCount(1);
+  await expect(head.locator('.smart-chat-verified-pill')).toHaveCount(0);
+  const geometry = await head.evaluate(el => ({ height: el.getBoundingClientRect().height, width: el.getBoundingClientRect().width }));
+  expect(geometry.height).toBeLessThanOrEqual(62);
+  expect(geometry.width).toBeGreaterThan(0);
+});
+
+
+test('Department creation modal selects existing staff and assigns them to the new channel', async ({ page }) => {
+  await mountSmartChat(page);
+  await page.evaluate(() => {
+    window.APP.is_admin = true;
+    window.switchChatChannel('departments');
+  });
+  await expect(page.locator('#departmentList')).toContainText('Science Department');
+  await page.locator('#departmentComposerToggle').click();
+  const modal = page.locator('#departmentComposerOverlay');
+  await expect(modal).toBeVisible();
+  await expect(page.locator('#departmentList')).toContainText('Science Department');
+  await modal.locator('#departmentAdminName').fill('Math Department');
+  await expect(modal.locator('#departmentAdminCode')).toHaveValue('MATH_DEPARTMENT');
+  await modal.locator('input[name="departmentMember"][value="teacher-2"]').check();
+  await modal.locator('#departmentCreateSubmit').click();
+  await expect.poll(async () => (await calls(page, 'adminUpsertDepartment')).length).toBe(1);
+  await expect.poll(async () => (await calls(page, 'adminSetDepartmentMembers')).length).toBe(1);
+  expect((await calls(page, 'adminUpsertDepartment'))[0].args).toEqual(['MATH_DEPARTMENT', 'Math Department', true]);
+  expect((await calls(page, 'adminSetDepartmentMembers'))[0].args).toEqual([52, ['teacher-2']]);
+  await expect(page.locator('#departmentComposerOverlay')).toHaveCount(0);
+  await expect(page.locator('#departmentList')).toContainText('Science Department');
 });
