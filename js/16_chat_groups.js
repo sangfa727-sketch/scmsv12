@@ -11,7 +11,7 @@ function _renderGroupWorkspace(){
 async function _loadChatGroups(autoOpen=true){
  const requestToken=++_chatGroupListRequest;
  try{
-  const box=document.getElementById('chatGroupList');if(box&&!_chatGroups.length)box.innerHTML=skeletonCards(2);
+  const box=document.getElementById('chatGroupList');if(box&&_chatGroups.length)_renderChatGroupListIfCurrent();else if(box)box.innerHTML=skeletonCards(2);
   const groups=await API.getChatGroups();
   if(requestToken!==_chatGroupListRequest)return;
   _chatGroups=Array.isArray(groups)?groups:[];
