@@ -9956,3 +9956,246 @@ html.scms-chat-workspace #pages{overflow:auto}
   height:100%;
   line-height:1;
 }
+
+ 
+/* Staff Chat UI audit fixes: compact one-to-one header, real overlays, and full-height lists. */
+#page-chat #directConversationHead {
+  min-height:54px;
+  padding:7px 10px;
+  gap:8px;
+  box-sizing:border-box;
+}
+#page-chat #directConversationHead .smart-chat-direct-peer {
+  display:flex;
+  flex:1 1 auto;
+  flex-direction:row;
+  align-items:center;
+  min-width:0;
+  gap:8px;
+}
+#page-chat #directConversationHead .smart-chat-direct-peer > div:last-child {
+  min-width:0;
+  overflow:hidden;
+}
+#page-chat #directConversationHead .smart-chat-direct-peer strong {
+  display:block;
+  max-width:100%;
+  overflow:hidden;
+  text-overflow:ellipsis;
+  white-space:nowrap;
+  line-height:1.25;
+}
+#page-chat #directConversationHead .smart-chat-direct-peer small {
+  display:block;
+  overflow:hidden;
+  text-overflow:ellipsis;
+  white-space:nowrap;
+  line-height:1.3;
+}
+#page-chat #directConversationHead .smart-chat-direct-avatar.large {
+  flex:0 0 34px;
+  width:34px;
+  height:34px;
+  font-size:12px;
+}
+#page-chat #directConversationHead .smart-chat-mobile-back {
+  flex:0 0 36px;
+  width:36px;
+  min-width:36px;
+  height:36px;
+  min-height:36px;
+  border-radius:11px;
+}
+/* The subtitle already identifies the private conversation; do not repeat it in a pill. */
+#page-chat #directConversationHead > .smart-chat-verified-pill { display:none; }
+
+#page-chat #inquiryTicketList,
+#page-chat #departmentList,
+#page-chat #gradeList,
+#page-chat #chatGroupList,
+#page-chat #announcementList {
+  flex:1 1 auto;
+  min-height:0;
+  max-height:none;
+  box-sizing:border-box;
+}
+#page-chat #inquiryTicketList,
+#page-chat #departmentList,
+#page-chat #gradeList,
+#page-chat #chatGroupList {
+  display:flex;
+  flex-direction:column;
+  gap:6px;
+  padding:6px;
+}
+#page-chat #inquiryTicketList .smart-chat-channel-card,
+#page-chat #departmentList .smart-chat-channel-card,
+#page-chat #gradeList .smart-chat-channel-card,
+#page-chat #chatGroupList .smart-chat-channel-card {
+  flex:0 0 auto;
+  min-height:62px;
+  height:auto;
+  align-items:flex-start;
+  white-space:normal;
+  overflow:visible;
+}
+#page-chat #inquiryTicketList .smart-chat-channel-card > span:nth-child(2),
+#page-chat #departmentList .smart-chat-channel-card > span:nth-child(2),
+#page-chat #gradeList .smart-chat-channel-card > span:nth-child(2),
+#page-chat #chatGroupList .smart-chat-channel-card > span:nth-child(2) {
+  min-width:0;
+  white-space:normal;
+}
+#page-chat #inquiryTicketList .smart-chat-channel-card strong,
+#page-chat #inquiryTicketList .smart-chat-channel-card small,
+#page-chat #departmentList .smart-chat-channel-card strong,
+#page-chat #departmentList .smart-chat-channel-card small,
+#page-chat #gradeList .smart-chat-channel-card strong,
+#page-chat #gradeList .smart-chat-channel-card small,
+#page-chat #chatGroupList .smart-chat-channel-card strong,
+#page-chat #chatGroupList .smart-chat-channel-card small {
+  max-width:100%;
+  overflow:visible;
+  text-overflow:clip;
+  white-space:normal;
+  overflow-wrap:anywhere;
+}
+.smart-chat-department-modal-overlay,
+.smart-chat-inquiry-modal-overlay {
+  z-index:10060;
+  padding:calc(12px + env(safe-area-inset-top)) 12px calc(12px + env(safe-area-inset-bottom));
+}
+.smart-chat-department-modal-overlay .smart-chat-group-modal,
+.smart-chat-inquiry-modal-overlay .smart-chat-group-modal {
+  width:min(100%,560px);
+  max-height:calc(100dvh - 24px - env(safe-area-inset-top) - env(safe-area-inset-bottom));
+  overflow-x:hidden;
+  overflow-y:auto;
+  overscroll-behavior:contain;
+}
+.smart-chat-department-modal-overlay .smart-chat-group-member-field {
+  min-width:0;
+  margin:0;
+  padding:12px;
+  border:1px solid var(--border);
+  border-radius:12px;
+}
+.smart-chat-department-modal-overlay .smart-chat-group-member-field legend {
+  padding:0 5px;
+  color:var(--text);
+  font-size:13px;
+  font-weight:700;
+}
+.smart-chat-department-modal-overlay .smart-chat-group-member-list {
+  display:flex;
+  flex-direction:column;
+  gap:5px;
+  max-height:min(28dvh,260px);
+  overflow-y:auto;
+  overscroll-behavior:contain;
+  -webkit-overflow-scrolling:touch;
+}
+.smart-chat-department-modal-overlay .smart-chat-group-member {
+  display:flex;
+  align-items:center;
+  gap:10px;
+  min-height:44px;
+  padding:7px 9px;
+  border:1px solid var(--border);
+  border-radius:10px;
+  background:var(--bg2);
+}
+.smart-chat-department-modal-overlay .smart-chat-group-member input {
+  flex:0 0 18px;
+  width:18px;
+  height:18px;
+}
+.smart-chat-department-modal-overlay .smart-chat-group-member span {
+  display:flex;
+  flex-direction:column;
+  gap:2px;
+  min-width:0;
+}
+.smart-chat-department-modal-overlay .smart-chat-group-member strong,
+.smart-chat-department-modal-overlay .smart-chat-group-member small {
+  overflow-wrap:anywhere;
+}
+.smart-chat-modal-hint {
+  margin:0;
+  color:var(--muted);
+  font-size:12px;
+  line-height:1.45;
+}
+@media(max-width:760px) {
+  #page-chat #directConversationHead {
+    min-height:50px;
+    padding:6px 8px;
+    border-radius:0;
+  }
+  #page-chat #directConversationHead .smart-chat-direct-avatar.large {
+    flex-basis:32px;
+    width:32px;
+    height:32px;
+  }
+  #page-chat #directConversationHead .smart-chat-mobile-back {
+    flex-basis:34px;
+    width:34px;
+    min-width:34px;
+    height:34px;
+    min-height:34px;
+  }
+  #page-chat .smart-chat-inquiry-shell .smart-chat-direct-list,
+  #page-chat .smart-chat-department-shell .smart-chat-direct-list,
+  #page-chat .smart-chat-grade-shell .smart-chat-direct-list {
+    display:flex;
+    flex-direction:column;
+    min-height:0;
+    max-height:none;
+  }
+  #page-chat .smart-chat-inquiry-shell .smart-chat-direct-list > .btn-secondary {
+    flex:0 0 auto;
+    margin:6px;
+  }
+}
+
+/* Enforce compact one-to-one conversation header geometry against legacy chat styles. */
+#page-chat #directConversationHead.smart-chat-conversation-head {
+  display:flex;
+  flex:0 0 54px;
+  height:54px;
+  min-height:54px !important;
+  max-height:54px;
+  align-items:center;
+  justify-content:space-between;
+  overflow:hidden;
+  box-sizing:border-box;
+}
+#page-chat #directConversationHead .smart-chat-direct-peer {
+  display:flex;
+  flex:1 1 auto;
+  flex-direction:row;
+  align-items:center;
+  min-width:0;
+  min-height:0;
+  height:100%;
+  gap:8px;
+}
+#page-chat #directConversationHead .smart-chat-direct-peer > div:last-child {
+  flex:1 1 auto;
+  min-width:0;
+  max-width:100%;
+}
+#page-chat #directConversationHead .smart-chat-direct-peer strong,
+#page-chat #directConversationHead .smart-chat-direct-peer small {
+  max-width:100%;
+  margin:0;
+}
+@media(max-width:760px) {
+  #page-chat #directConversationHead.smart-chat-conversation-head {
+    flex-basis:50px;
+    height:50px;
+    min-height:50px !important;
+    max-height:50px;
+    padding:5px 8px;
+  }
+}

@@ -775,11 +775,13 @@ function _renderInquiryTicketList(){
   }).join(''):'<div class="smart-chat-list-empty-card"><div class="icon">🎫</div><strong>'+t('chat.noInquiryTickets')+'</strong><small>'+t('chat.createTicketHint')+'</small></div>';
 }
 async function _loadInquiryTickets(){
+  // Keep the last successful ticket list visible while the refresh is pending.
+  if(_inquiryTickets.length)_renderInquiryTicketList();
   try{
     _inquiryTickets=await API.getInquiryTickets();
     _renderInquiryTicketList();
     if(_inquiryTicketId) await _openInquiryTicket(_inquiryTicketId);
-   }catch(e){const box=document.getElementById('inquiryTicketList');if(box)box.innerHTML=`<div class="chat-error"><div>🎫</div><div>${t('chat.loadTicketsFailed')}</div><button type="button" class="btn-secondary" onclick="_loadInquiryTickets()">${t('chat.retry')}</button></div>`;}
+   }catch(e){const box=document.getElementById('inquiryTicketList');if(box&&!_inquiryTickets.length)box.innerHTML=`<div class="chat-error"><div>🎫</div><div>${t('chat.loadTicketsFailed')}</div><button type="button" class="btn-secondary" onclick="_loadInquiryTickets()">${t('chat.retry')}</button></div>`;}
 }
 async function _openInquiryTicket(id){
   _inquiryTicketId=Number(id); const shell=document.querySelector('.smart-chat-inquiry-shell');if(shell)shell.classList.add('has-selection'); const r=await API.openInquiryTicket(_inquiryTicketId); if(!r?.ok)return;
@@ -841,25 +843,29 @@ async function _sendInquiryFromComposer(e){
   return false;
 }
 window._inquiryKeydown=function(ev){if(ev.key==='Enter'&&!ev.shiftKey){ev.preventDefault();_sendInquiryFromComposer(ev);}};
-function _closeInquiryDraft(){_inquiryDraft=null;_renderInquiryDraft();}
+function _closeInquiryDraft(){_inquiryDraft=null;document.getElementById('inquiryDraftOverlay')?.remove();}
 function _renderInquiryDraft(){
-  const root=document.getElementById('inquiryTicketList'); if(!root)return;
-  if(!_inquiryDraft){
-    const noTickets=t('chat.noTicketsYet');
-    root.innerHTML=_inquiryTickets.length?_inquiryTickets.map(item=>{
-      const student=item.student_id?' · '+esc(item.student_id):'';
-      return `<button class="smart-chat-channel-card ${Number(item.id)===Number(_inquiryTicketId)?'active':''}" onclick="_openInquiryTicket(${Number(item.id)})"><span class="smart-chat-channel-icon">🎫</span><span><strong>${esc(item.subject)}</strong><small>${esc(item.status)} · ${esc(item.priority)}${student}</small></span><b>›</b></button>`;
-    }).join(''):'<div class="chat-empty-sub">'+noTickets+'</div>';
-    return;
-  }
-  root.innerHTML=`
-    <form class="smart-chat-inquiry-form" onsubmit="return _submitInquiryDraft(event)">
-      <label><span class="smart-chat-field-label">${t('chat.subject')}</span><input id="inquiryDraftSubject" maxlength="160" required placeholder="${t('chat.whatNeedsAttention')}"></label>
-      <label><span class="smart-chat-field-label">${t('chat.priority')}</span><select id="inquiryDraftPriority"><option value="NORMAL">${t('chat.priorityNormal')}</option><option value="LOW">${t('chat.priorityLow')}</option><option value="HIGH">${t('chat.priorityHigh')}</option><option value="URGENT">${t('chat.priorityUrgent')}</option></select></label>
-      <label><span class="smart-chat-field-label">${t('chat.studentId')} <small class="smart-chat-field-note">${t('chat.optionalSameSchool')}</small></span><input id="inquiryDraftStudent" maxlength="80" placeholder="${t('chat.studentId')}"></label>
-      <label><span class="smart-chat-field-label">${t('chat.details')}</span><textarea id="inquiryDraftBody" maxlength="4000" rows="5" required placeholder="${t('chat.describeIssue')}"></textarea></label>
-      <div class="smart-chat-inquiry-form-actions"><button type="button" class="btn-secondary" onclick="_closeInquiryDraft()">${t('chat.cancel')}</button><button id="inquiryDraftSubmitBtn" type="submit" class="btn-primary">${t('chat.createTicket')}</button></div>
-    </form>`;
+  if(!window.APP?.currentPage||_chatChannel!=='tickets')return;
+  document.getElementById('inquiryDraftOverlay')?.remove();
+  const overlay=document.createElement('div');
+  overlay.id='inquiryDraftOverlay';
+  overlay.className='smart-chat-group-modal-overlay smart-chat-inquiry-modal-overlay';
+  overlay.innerHTML=`<section class="smart-chat-group-modal" role="dialog" aria-modal="true" aria-labelledby="inquiryDraftTitle">
+    <header class="smart-chat-group-modal-head"><div><div class="smart-chat-kicker">${t('chat.inquiry')}</div><h2 id="inquiryDraftTitle">${t('chat.newTicket')}</h2><p>${t('chat.createOrSelectTicket')}</p></div><button type="button" class="smart-chat-group-modal-close" data-close-ticket-modal aria-label="${t('chat.cancel')}">×</button></header>
+    <form id="inquiryDraftForm" class="smart-chat-inquiry-form smart-chat-group-form">
+      <label><span class="smart-chat-field-label">${t('chat.subject')}</span><input id="inquiryDraftSubject" name="subject" maxlength="160" required placeholder="${t('chat.whatNeedsAttention')}"></label>
+      <label><span class="smart-chat-field-label">${t('chat.priority')}</span><select id="inquiryDraftPriority" name="priority"><option value="NORMAL">${t('chat.priorityNormal')}</option><option value="LOW">${t('chat.priorityLow')}</option><option value="HIGH">${t('chat.priorityHigh')}</option><option value="URGENT">${t('chat.priorityUrgent')}</option></select></label>
+      <label><span class="smart-chat-field-label">${t('chat.studentId')} <small class="smart-chat-field-note">${t('chat.optionalSameSchool')}</small></span><input id="inquiryDraftStudent" name="studentId" maxlength="80" placeholder="${t('chat.studentId')}"></label>
+      <label><span class="smart-chat-field-label">${t('chat.details')}</span><textarea id="inquiryDraftBody" name="body" maxlength="4000" rows="5" required placeholder="${t('chat.describeIssue')}"></textarea></label>
+      <div class="smart-chat-inquiry-form-actions"><button type="button" class="btn-secondary" data-close-ticket-modal>${t('chat.cancel')}</button><button id="inquiryDraftSubmitBtn" type="submit" class="btn-primary">${t('chat.createTicket')}</button></div>
+    </form>
+  </section>`;
+  document.body.appendChild(overlay);
+  const close=()=>_closeInquiryDraft();
+  overlay.querySelectorAll('[data-close-ticket-modal]').forEach(button=>button.addEventListener('click',close));
+  overlay.addEventListener('click',event=>{if(event.target===overlay)close();});
+  overlay.querySelector('#inquiryDraftForm')?.addEventListener('submit',_submitInquiryDraft);
+  overlay.querySelector('#inquiryDraftSubject')?.focus();
 }
 async function _newInquiryTicket(){_inquiryDraft=true;_renderInquiryDraft();}
 async function _submitInquiryDraft(e){
@@ -870,13 +876,19 @@ async function _submitInquiryDraft(e){
   const studentId=document.getElementById('inquiryDraftStudent')?.value.trim()||null;
   const btn=document.getElementById('inquiryDraftSubmitBtn');
   if(!subject||!body)return false;
-  if(btn)btn.disabled=true;
+  if(btn){btn.disabled=true;btn.textContent=t('chat.loading');}
   try{
     const r=await API.createInquiryTicket(subject,body,studentId,priority);
-    if(!r?.ok)throw new Error(r?.error||'ticket_create_failed');
-    _inquiryDraft=null;_inquiryTicketId=Number(r.ticket.id);await _loadInquiryTickets();
-  }catch(e){showToast(t('chat.ticketCreateFailed'));}
-  finally{const current=document.getElementById('inquiryDraftSubmitBtn');if(current)current.disabled=false;}
+    if(!r?.ok||!r.ticket?.id)throw new Error(r?.error||'ticket_create_failed');
+    _inquiryTicketId=Number(r.ticket.id);
+    _inquiryDraft=null;
+    document.getElementById('inquiryDraftOverlay')?.remove();
+    await _loadInquiryTickets();
+  }catch(e){
+    showToast(t('chat.ticketCreateFailed'));
+    const current=document.getElementById('inquiryDraftSubmitBtn');
+    if(current){current.disabled=false;current.textContent=t('chat.createTicket');}
+  }
   return false;
 }
 let _announcementComposerOpen=false;
@@ -939,6 +951,13 @@ function _renderAnnouncementWorkspace(){
     `<section class="smart-chat-direct-conversation"><div id="announcementHead" class="smart-chat-conversation-head"><div><strong>${t('chat.officialAnnouncements')}</strong><small>${t('chat.officialNotices')}</small></div><span class="smart-chat-verified-pill">${t('chat.verifiedStaffOnly')}</span></div><div id="announcementStream" class="chat-stream" aria-live="polite"><div class="chat-empty"><div class="chat-empty-icon">📢</div><div class="chat-empty-title">${t('chat.officialAnnouncements')}</div><div class="chat-empty-sub">${t('chat.emptySub')}</div></div></div></section></div>`;
 }
 async function _loadAnnouncementWorkspace(autoOpen=true){
+  const cached=Array.isArray(window._chatAnnouncements)?window._chatAnnouncements:null;
+  const cachedList=document.getElementById('announcementList');
+  if(cachedList&&cached?.length){
+    _renderAnnouncementList(cached);
+    const selected=cached.find(item=>String(item.id)===String(_announcementId))||(autoOpen?cached[0]:null);
+    if(selected)window._openAnnouncement(String(selected.id));
+  }
   try{
     const rows=await API.getStaffAnnouncements(50);
     const list=document.getElementById('announcementList'),stream=document.getElementById('announcementStream');
@@ -947,7 +966,7 @@ async function _loadAnnouncementWorkspace(autoOpen=true){
     if(!rows.length){_announcementId=null;list.innerHTML=`<div class="smart-chat-list-empty-card"><div class="icon">📢</div><strong>${t('chat.emptyTitle')}</strong><small>${t('chat.emptySub')}</small></div>`;stream.innerHTML=`<div class="chat-empty"><div class="chat-empty-icon">📢</div><div class="chat-empty-title">${t('chat.emptyTitle')}</div><div class="chat-empty-sub">${t('chat.emptySub')}</div></div>`;return;}
     _renderAnnouncementList(rows);
     if(autoOpen && !_announcementId) await _openAnnouncement(String(rows[0].id));
-   }catch(e){const list=document.getElementById('announcementList');if(list)list.innerHTML=`<div class="chat-error"><div>📢</div><div>${t('chat.loadFailed')}</div><button type="button" class="btn-secondary" onclick="_loadAnnouncementWorkspace(false)">${t('chat.retry')}</button></div>`;}
+   }catch(e){const list=document.getElementById('announcementList');const cachedRows=Array.isArray(window._chatAnnouncements)?window._chatAnnouncements:[];if(list&&cachedRows.length)_renderAnnouncementList(cachedRows);else if(list)list.innerHTML=`<div class="chat-error"><div>📢</div><div>${t('chat.loadFailed')}</div><button type="button" class="btn-secondary" onclick="_loadAnnouncementWorkspace(false)">${t('chat.retry')}</button></div>`;}
 }
 window._openAnnouncement=async function(id){
   const a=(window._chatAnnouncements||[]).find(x=>String(x.id)===String(id));
@@ -1002,6 +1021,9 @@ function _renderDirectWorkspace() {
 }
 
 async function _loadDirectWorkspace() {
+  // Paint last successful rows immediately; refresh in the background.
+  if (_directStaff.length) _renderDirectDirectory();
+  if (_directConversations.length) _renderDirectConversationList();
   try {
     const [staff, conversations] = await Promise.all([API.getDirectStaffDirectory(), API.getDirectConversations()]);
     _directStaff = Array.isArray(staff) ? staff : [];
@@ -1013,9 +1035,13 @@ async function _loadDirectWorkspace() {
       await _loadDirectMessages();
     }
   } catch (e) {
-    _directStaff=[]; _directConversations=[]; _renderDirectDirectory(); _renderDirectConversationList();
+    // A transient network/RPC failure is not an empty directory. Preserve the last
+    // successful rows and only show a blocking error when nothing has loaded yet.
+    if (!_directStaff.length) _renderDirectDirectory();
+    if (!_directConversations.length) _renderDirectConversationList();
     const stream=document.getElementById('directMessageStream');
-    if(stream) stream.innerHTML=`<div class="chat-error"><div>💬</div><div>${t('chat.unableLoadDirect')}</div><button class="btn-secondary" onclick="_loadDirectWorkspace()">${t('chat.retry')}</button></div>`;
+    if(stream && !_directConversationId && !_directStaff.length && !_directConversations.length)
+      stream.innerHTML=`<div class="chat-error"><div>💬</div><div>${t('chat.unableLoadDirect')}</div><button class="btn-secondary" onclick="_loadDirectWorkspace()">${t('chat.retry')}</button></div>`;
   }
 }
 
@@ -1072,8 +1098,7 @@ function _renderDirectHeader(){
   const root=document.getElementById('directConversationHead');
   if(!root||!_directPeer)return;
   root.innerHTML=`
-    <div class="smart-chat-direct-peer"><button class="smart-chat-mobile-back" onclick="_clearDirectSelection()"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m15 18-6-6 6-6"/></svg></button>${_directAvatarMarkup(_directPeer,true)}<div><strong>${esc(_directPeer.teacher_name)}</strong><small>${esc(_directPeer.role||t('chat.teacher'))} · ${t('chat.privateOneToOne')}</small></div></div>
-    <span class="smart-chat-verified-pill">${t('chat.privateOneToOne')}</span>`;
+    <div class="smart-chat-direct-peer"><button type="button" class="smart-chat-mobile-back" onclick="_clearDirectSelection()" aria-label="${t('chat.directMessages')}" title="${t('chat.directMessages')}"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m15 18-6-6 6-6"/></svg></button>${_directAvatarMarkup(_directPeer,true)}<div><strong>${esc(_directPeer.teacher_name)}</strong><small>${esc(_directPeer.role||t('chat.teacher'))}</small></div></div>`;
 }
 
 function _setDirectMobileView(selected) {
@@ -1089,18 +1114,26 @@ function _setDirectComposer(enabled){
 
 window._clearDirectSelection=function(){_directConversationId=null;_directPeer=null;_setDirectMobileView(false);_renderChatMode();};
 
-async function _loadDirectMessages(){
+async function _loadDirectMessages(silent=false){
   if(!_directConversationId)return;
+  const conversationId=_directConversationId;
   try{
-    const rows=await API.getDirectMessages(_directConversationId,50);
+    const rows=await API.getDirectMessages(conversationId,50);
+    if(conversationId!==_directConversationId)return;
     const stream=document.getElementById('directMessageStream');
     if(!stream)return;
-    if(!rows.length)stream.innerHTML=`<div class="chat-empty"><div class="chat-empty-icon">💬</div><div class="chat-empty-title">${t('chat.newConversation')}</div><div class="chat-empty-sub">${t('chat.sendFirstPrivate')}</div></div>`;
-    else _renderDirectMessages(rows);
-    _renderDirectHeader();_setDirectComposer(true);await API.markDirectRead(_directConversationId);
+    const signature=String(conversationId)+':'+JSON.stringify((Array.isArray(rows)?rows:[]).map(m=>[m.id,m.sender_teacher_id,m.text,m.created_at]));
+    if(stream.dataset.messageSignature!==signature){
+      if(!rows.length)stream.innerHTML=`<div class="chat-empty"><div class="chat-empty-icon">💬</div><div class="chat-empty-title">${t('chat.newConversation')}</div><div class="chat-empty-sub">${t('chat.sendFirstPrivate')}</div></div>`;
+      else _renderDirectMessages(rows);
+      stream.dataset.messageSignature=signature;
+    }
+    _renderDirectHeader();_setDirectComposer(true);
+    if(!silent)await API.markDirectRead(conversationId);
   }catch(e){
+    // Keep the last successful conversation visible during a transient failure.
     const stream=document.getElementById('directMessageStream');
-    if(stream)stream.innerHTML=`<div class="chat-error"><div>💬</div><div>${t('chat.unableLoadConversation')}</div><button class="btn-secondary" onclick="_loadDirectMessages()">${t('chat.retry')}</button></div>`;
+    if(stream&&!stream.dataset.messageSignature)stream.innerHTML=`<div class="chat-error"><div>💬</div><div>${t('chat.unableLoadConversation')}</div><button class="btn-secondary" onclick="_loadDirectMessages()">${t('chat.retry')}</button></div>`;
   }
 }
 
@@ -1159,20 +1192,25 @@ window.switchChatChannel = function(channel) {
 };
 
 async function _loadChatMessages() {
-  if (_chatMode !== 'school') return;
+  if (_chatMode !== 'school' || _chatChannel !== 'staff') return;
   try {
     const messages = await API.getChatMessages(_chatChannel, 50);
     window.APP.chatMessages = Array.isArray(messages) ? messages : [];
     _renderChatStream(window.APP.chatMessages);
   } catch (e) {
+    // Do not replace valid messages with a transient RPC error/empty response.
     const stream = document.getElementById('chatStream');
-    if (stream) stream.innerHTML = `<div class="chat-error"><div>💬</div><div>${t('chat.loadFailed')}</div><button class="btn-secondary" onclick="renderChat()">${t('chat.retry')}</button></div>`;
+    if (stream && !Array.isArray(window.APP?.chatMessages))
+      stream.innerHTML = `<div class="chat-error"><div>💬</div><div>${t('chat.loadFailed')}</div><button class="btn-secondary" onclick="_loadChatMessages()">${t('chat.retry')}</button></div>`;
   }
 }
 
 function _renderChatStream(messages) {
   const stream = document.getElementById('chatStream');
   if (!stream) return;
+  const signature = JSON.stringify((Array.isArray(messages) ? messages : []).map(m => [m.id,m.teacher_id,m.text,m.created_at,m.pending,m.failed]));
+  if (stream.dataset.messageSignature === signature) return;
+  stream.dataset.messageSignature = signature;
   if (!messages.length) {
     stream.innerHTML = `<div class="chat-empty"><div class="chat-empty-icon">💬</div><div class="chat-empty-title">${t('chat.emptyTitle')}</div><div class="chat-empty-sub">${t('chat.emptySub')}</div></div>`;
     return;
@@ -1254,17 +1292,17 @@ window.startChatPolling=function(){
     if(window.APP?.currentPage!=='chat')return;
     unreadRefreshTick = (unreadRefreshTick + 1) % 6;
     if(unreadRefreshTick === 0 && _chatMode === 'school') _refreshChatChannelUnreadCounts();
-    if(_chatMode==='school' && _chatChannel==='direct'){
+    if(_chatMode!=='school')return;
+    if(_chatChannel==='staff'){
+      _loadChatMessages();
+    }else if(_chatChannel==='direct' && _directConversationId){
       if(_directPollBusy)return;
       _directPollBusy=true;
-      try{
-        await _loadDirectWorkspace();
-      }finally{
-        _directPollBusy=false;
-      }
-    }else if(_chatMode==='school'){
-      _loadChatMessages();
+      try{ await _loadDirectMessages(true); }
+      finally{ _directPollBusy=false; }
     }
+    // Other workspaces own their refresh actions. Do not call the All Staff
+    // message endpoint while a different channel is open.
   },5000);
 };
 window.stopChatPolling=function(){

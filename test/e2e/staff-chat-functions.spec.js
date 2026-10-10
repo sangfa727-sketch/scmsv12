@@ -113,6 +113,14 @@ async function mountSmartChat(page, render = true) {
         record('getDepartmentChats', ...args);
         return [{ id: 51, department_code: 'SCI', department_name: 'Science Department', is_active: true }];
       },
+      adminUpsertDepartment: async (...args) => {
+        record('adminUpsertDepartment', ...args);
+        return { ok: true, department_id: 52 };
+      },
+      adminSetDepartmentMembers: async (...args) => {
+        record('adminSetDepartmentMembers', ...args);
+        return { ok: true, member_count: (args[1] || []).length };
+      },
       openDepartmentChat: async (...args) => {
         record('openDepartmentChat', ...args);
         return { ok: true, department: { id: 51, department_code: 'SCI', department_name: 'Science Department' }, messages: [] };
@@ -306,6 +314,8 @@ test('Inquiry workspace creates a ticket and refreshes the list', async ({ page 
   await mountSmartChat(page);
   await page.evaluate(() => window.switchChatChannel('tickets'));
   await page.getByRole('button', { name: /new ticket/i }).click();
+  await expect(page.locator('#inquiryDraftOverlay')).toBeVisible();
+  await expect(page.locator('#inquiryTicketList')).toContainText('Parent request');
   await page.locator('#inquiryDraftSubject').fill('Functional test ticket');
   await page.locator('#inquiryDraftBody').fill('Ticket creation should call the API and refresh the list.');
   await page.locator('#inquiryDraftPriority').selectOption('NORMAL');
@@ -477,6 +487,70 @@ test('mobile Staff Chat list panes remain independently scrollable when populate
 });
 
 
+
+test('mobile one-to-one chat keeps message stream scrollable and composer visible', async ({ page }) => {
+  await mountSmartChat(page);
+  await page.setViewportSize({ width: 390, height: 844 });
+  await page.evaluate(() => {
+    window.API.getDirectStaffDirectory = async () => [
+      { teacher_id: 'teacher-2', teacher_name: 'Other Teacher', role: 'Teacher', status: 'active', photo_url: null }
+    ];
+    window.API.getDirectConversations = async () => [];
+    window.API.openDirectConversation = async (teacherId) => ({
+      ok: true,
+      conversation_id: 42,
+      peer: { teacher_id: teacherId, teacher_name: 'Other Teacher', role: 'Teacher', photo_url: null }
+    });
+    window.API.getDirectMessages = async () => Array.from({ length: 35 }, (_, i) => ({
+      id: i + 1,
+      conversation_id: 42,
+      sender_teacher_id: i % 2 ? 'teacher-2' : (window.APP?.teacher_id || 'current-user'),
+      text: `Private message ${i + 1} — mobile scroll regression fixture`,
+      created_at: new Date(Date.now() - (35 - i) * 60000).toISOString()
+    }));
+    window.API.markDirectRead = async () => ({ ok: true });
+  });
+  await page.evaluate(() => window.switchChatChannel('direct'));
+  await page.locator('#directStaffDirectory .smart-chat-directory-item').first().waitFor();
+  await page.evaluate(() => window.openDirectChat('teacher-2'));
+
+  const shell = page.locator('#page-chat .smart-chat-direct-shell');
+  await expect(shell).toHaveClass(/has-selection/);
+  await expect(page.locator('#page-chat .smart-chat-direct-list')).toBeHidden();
+  const conversation = page.locator('#page-chat .smart-chat-direct-conversation');
+  const stream = page.locator('#directMessageStream');
+  const composer = page.locator('#page-chat .smart-chat-direct-composer');
+  await expect(page.locator('#directConversationHead')).toContainText('Other Teacher');
+  await expect(stream.locator('.chat-bubble-row')).toHaveCount(35);
+  await expect(composer).toBeVisible();
+  await expect(page.locator('#directChatInput')).toBeEnabled();
+  await expect(page.locator('#directChatSendBtn')).toBeEnabled();
+
+  const geometry = await page.evaluate(() => {
+    const shellEl = document.querySelector('#page-chat .smart-chat-direct-shell');
+    const conversationEl = document.querySelector('#page-chat .smart-chat-direct-conversation');
+    const streamEl = document.querySelector('#directMessageStream');
+    const composerEl = document.querySelector('#page-chat .smart-chat-direct-composer');
+    const rect = el => { const r = el.getBoundingClientRect(); return { top: r.top, bottom: r.bottom, height: r.height }; };
+    const before = streamEl.scrollTop;
+    streamEl.scrollTop = 0;
+    const scrollable = streamEl.scrollHeight > streamEl.clientHeight && streamEl.scrollTop < before;
+    return {
+      shell: rect(shellEl), conversation: rect(conversationEl), stream: rect(streamEl), composer: rect(composerEl),
+      streamOverflowY: getComputedStyle(streamEl).overflowY,
+      streamScrollHeight: streamEl.scrollHeight, streamClientHeight: streamEl.clientHeight,
+      scrollable,
+      viewportHeight: window.innerHeight
+    };
+  });
+  expect(geometry.conversation.height).toBeGreaterThan(0);
+  expect(geometry.composer.height).toBeGreaterThan(0);
+  expect(geometry.composer.bottom).toBeLessThanOrEqual(geometry.viewportHeight + 2);
+  expect(geometry.streamOverflowY).toBe('auto');
+  expect(geometry.streamScrollHeight).toBeGreaterThan(geometry.streamClientHeight);
+  expect(geometry.scrollable).toBe(true);
+});
+
 test('Direct Chat uses existing teacher profile photos with a safe initials fallback', async ({ page }) => {
   await mountSmartChat(page);
   const photoUrl = 'https://profiles.example.test/other-teacher.svg';
@@ -512,3 +586,128 @@ test('Direct Chat uses existing teacher profile photos with a safe initials fall
   await page.evaluate(() => window.openDirectChat('teacher-2'));
   await expect(page.locator('#directConversationHead .smart-chat-profile-photo')).toHaveAttribute('src', photoUrl);
 });
+
+
+
+test('Direct Chat header stays compact and renders only one peer identity', async ({ page }) => {
+  await page.setViewportSize({ width: 390, height: 844 });
+  await mountSmartChat(page);
+  await page.evaluate(() => window.switchChatChannel('direct'));
+  await page.evaluate(() => window.openDirectChat('teacher-2'));
+  const head = page.locator('#directConversationHead');
+  await expect(head.locator('.smart-chat-mobile-back')).toHaveCount(1);
+  await expect(head.locator('.smart-chat-direct-avatar')).toHaveCount(1);
+  await expect(head.locator('strong')).toHaveCount(1);
+  await expect(head.locator('.smart-chat-verified-pill')).toHaveCount(0);
+  const geometry = await head.evaluate(el => ({ height: el.getBoundingClientRect().height, width: el.getBoundingClientRect().width }));
+  expect(geometry.height).toBeLessThanOrEqual(54);
+  expect(geometry.width).toBeGreaterThan(0);
+});
+
+
+test('Department creation modal selects existing staff and assigns them to the new channel', async ({ page }) => {
+  await mountSmartChat(page);
+  await page.evaluate(() => {
+    window.APP.is_admin = true;
+    window.switchChatChannel('departments');
+  });
+  await expect(page.locator('#departmentList')).toContainText('Science Department');
+  await page.locator('#departmentComposerToggle').click();
+  const modal = page.locator('#departmentComposerOverlay');
+  await expect(modal).toBeVisible();
+  await expect(page.locator('#departmentList')).toContainText('Science Department');
+  await modal.locator('#departmentAdminName').fill('Math Department');
+  await expect(modal.locator('#departmentAdminCode')).toHaveValue('MATH_DEPARTMENT');
+  await modal.locator('input[name="departmentMember"][value="teacher-2"]').check();
+  await modal.locator('#departmentCreateSubmit').click();
+  await expect.poll(async () => (await calls(page, 'adminUpsertDepartment')).length).toBe(1);
+  await expect.poll(async () => (await calls(page, 'adminSetDepartmentMembers')).length).toBe(1);
+  expect((await calls(page, 'adminUpsertDepartment'))[0].args).toEqual(['MATH_DEPARTMENT', 'Math Department', true]);
+  expect((await calls(page, 'adminSetDepartmentMembers'))[0].args).toEqual([52, ['teacher-2']]);
+  await expect(page.locator('#departmentComposerOverlay')).toHaveCount(0);
+  await expect(page.locator('#departmentList')).toContainText('Science Department');
+});
+
+
+
+test('Staff Chat preserves the last successful contact and announcement data on transient refresh errors', async ({ page }) => {
+  await mountSmartChat(page);
+  await page.evaluate(() => window.switchChatChannel('direct'));
+  await expect(page.locator('#directStaffDirectory')).toContainText('Other Teacher');
+  await page.evaluate(() => {
+    window.API.getDirectStaffDirectory = async () => { throw new Error('temporary_directory_error'); };
+    window._loadDirectWorkspace();
+  });
+  await expect(page.locator('#directStaffDirectory')).toContainText('Other Teacher');
+
+  await page.evaluate(() => window.switchChatChannel('announcements'));
+  await expect(page.locator('#announcementList')).toContainText('Read this announcement');
+  await page.evaluate(() => {
+    window.API.getStaffAnnouncements = async () => { throw new Error('temporary_announcement_error'); };
+    window._loadAnnouncementWorkspace(false);
+  });
+  await expect(page.locator('#announcementList')).toContainText('Read this announcement');
+});
+
+test('cached Staff Chat lists remain visible while refresh requests are pending', async ({ page }) => {
+  await mountSmartChat(page);
+
+  await page.evaluate(() => window.switchChatChannel('direct'));
+  await expect(page.locator('#directStaffDirectory')).toContainText('Other Teacher');
+  await page.evaluate(() => {
+    window.API.getDirectStaffDirectory = () => new Promise(() => {});
+    window.API.getDirectConversations = () => new Promise(() => {});
+    window.switchChatChannel('staff');
+    window.switchChatChannel('direct');
+  });
+  await expect(page.locator('#directStaffDirectory')).toContainText('Other Teacher');
+
+  await page.evaluate(() => {
+    window.API.getGradeChats = async () => [{ grade_name: 'G1', unread_count: 0 }];
+    window._showGradeWorkspace();
+  });
+  await expect(page.locator('#gradeList')).toContainText('G1');
+  await page.evaluate(() => {
+    window.API.getGradeChats = () => new Promise(() => {});
+    window._showDepartmentWorkspace();
+    window._showGradeWorkspace();
+  });
+  await expect(page.locator('#gradeList')).toContainText('G1');
+
+  await page.evaluate(() => window.switchChatChannel('announcements'));
+  await expect(page.locator('#announcementList')).toContainText('notice');
+  await page.evaluate(() => {
+    window.API.getStaffAnnouncements = () => new Promise(() => {});
+    window.switchChatChannel('staff');
+    window.switchChatChannel('announcements');
+  });
+  await expect(page.locator('#announcementList')).toContainText('notice');
+
+  await page.evaluate(() => window.switchChatChannel('departments'));
+  await expect(page.locator('#departmentList')).toContainText('Science Department');
+  await page.evaluate(() => {
+    window.API.getDepartmentChats = () => new Promise(() => {});
+    window.switchChatChannel('staff');
+    window.switchChatChannel('departments');
+  });
+  await expect(page.locator('#departmentList')).toContainText('Science Department');
+
+  await page.evaluate(() => window.switchChatChannel('tickets'));
+  await expect(page.locator('#inquiryTicketList')).toContainText('Parent request');
+  await page.evaluate(() => {
+    window.API.getInquiryTickets = () => new Promise(() => {});
+    window.switchChatChannel('staff');
+    window.switchChatChannel('tickets');
+  });
+  await expect(page.locator('#inquiryTicketList')).toContainText('Parent request');
+
+  await page.evaluate(() => window.switchChatChannel('events'));
+  await expect(page.locator('#chatGroupList')).toContainText('Planning Group');
+  await page.evaluate(() => {
+    window.API.getChatGroups = () => new Promise(() => {});
+    window.switchChatChannel('staff');
+    window.switchChatChannel('events');
+  });
+  await expect(page.locator('#chatGroupList')).toContainText('Planning Group');
+});
+

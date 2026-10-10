@@ -11,7 +11,7 @@ function _renderGroupWorkspace(){
 async function _loadChatGroups(autoOpen=true){
  const requestToken=++_chatGroupListRequest;
  try{
-  const box=document.getElementById('chatGroupList');if(box)box.innerHTML=skeletonCards(2);
+  const box=document.getElementById('chatGroupList');if(box&&_chatGroups.length)_renderChatGroupListIfCurrent();else if(box)box.innerHTML=skeletonCards(2);
   const groups=await API.getChatGroups();
   if(requestToken!==_chatGroupListRequest)return;
   _chatGroups=Array.isArray(groups)?groups:[];
@@ -21,7 +21,7 @@ async function _loadChatGroups(autoOpen=true){
  }catch(e){
   if(requestToken!==_chatGroupListRequest)return;
   const box=document.getElementById('chatGroupList');
-  if(box)box.innerHTML=`<div class="chat-error"><div>🗂️</div><div>${t('chat.loadGroupsFailed')}</div><button type="button" class="btn-secondary" onclick="_loadChatGroups(false)">${t('chat.retry')}</button></div>`;
+  if(box&&!_chatGroups.length)box.innerHTML=`<div class="chat-error"><div>🗂️</div><div>${t('chat.loadGroupsFailed')}</div><button type="button" class="btn-secondary" onclick="_loadChatGroups(false)">${t('chat.retry')}</button></div>`;
  }
 }
 window._newChatGroup=async function(){
