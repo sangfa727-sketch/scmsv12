@@ -9,7 +9,7 @@ test('Staff Chat channel tabs can be hidden and restored from the three-dot menu
   assert.ok(source.includes("localStorage.setItem('scms_chat_visible_types'"), 'persist tab visibility preferences');
   assert.ok(source.includes("const visible = channels.filter(c => _chatVisibleTypes[c.id] !== false)"), 'only show enabled channel tabs');
   assert.ok(source.includes("function _chatTypeMenuMarkup()"), 'render a menu of hidden channel types only');
-  assert.ok(source.includes("function _hideChatType(id)"), 'provide a direct hide action on visible tabs');
+  assert.ok(source.includes("window._hideChatType = function(id)"), 'provide a direct hide action on visible tabs');
   assert.ok(source.includes("window._showChatType = function(id)"), 'provide a menu action to restore hidden tabs');
   assert.ok(source.includes("onclick=\"switchChatMode(_chatMode === 'school' ? 'ai' : 'school')\""), 'switch School Chat and AI directly without the old mode dropdown');
   assert.ok(!source.includes('role="menuitemradio"'), 'the three-dot menu no longer uses the old School/AI radio dropdown');
