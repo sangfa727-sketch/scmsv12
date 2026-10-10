@@ -32,7 +32,7 @@
   'chat.writePrivate': "プライベートメッセージを入力…",
   'chat.noMessages': "メッセージはまだありません",
 
-    'chat.gradeAccess':'このスタッフアカウントには有効な学年の割り当てがありません。','chat.gradePrefix':'学年: ','chat.individualPrefix':'個別: ', 
+    'chat.gradeAccess':'管理者に学年の設定と教師の割り当てを確認してもらってください。','chat.gradePrefix':'学年: ','chat.individualPrefix':'個別: ', 
 };
   Object.assign(overrides, {
     'hw.tapAdd':'＋をタップして宿題を追加','hw.due':'提出期限','hw.addTitle':'宿題を追加','hw.subject':'科目','hw.addSubject':'科目を追加','hw.class':'クラス','hw.type':'種類','hw.description':'説明','hw.descPh':'宿題の説明…','hw.lbPage':'LBページ','hw.wbPage':'WBページ','hw.pagePh1':'例: 24','hw.pagePh2':'例: 25','hw.dueDate':'提出期限','hw.saved':'✓ 宿題を保存しました','hw.editTitle':'宿題を編集','hw.updated':'✓ 更新しました','hw.confirmTitle':'この宿題を削除しますか？','hw.confirmBody':'この宿題を削除してもよろしいですか？',
@@ -93,12 +93,12 @@
   'chat.selectDepartment': '部署を選択',
   'chat.selectTeacher': '教員を選択',
   'chat.selectTicket': 'チケットを選択',
-  'chat.noGradeAccess': '学年へのアクセス権がありません',
-  'chat.noDepartmentAccess': '部署へのアクセス権がありません',
+  'chat.noGradeAccess': '利用可能な学年チャットはまだありません',
+  'chat.noDepartmentAccess': '利用可能な部署チャットはまだありません',
   'chat.noGroups': 'グループはありません',
   'chat.startGrade': '学年の会話を始めましょう。',
   'chat.staffOnlyGrade': '職員限定の学年会話',
-  'chat.departmentAccess': '管理者が有効な部署にあなたを割り当てる必要があります。',
+  'chat.departmentAccess': '管理者に部署の設定と職員の割り当てを確認してもらってください。',
     'err.connFailed':'接続に失敗しました','err.authFailed':'認証に失敗しました','err.notRegistered':'未登録です','err.startup':'起動に失敗しました','err.unknown':'不明なエラーが発生しました','toast.refreshing':'更新中…','toast.updated':'更新しました','toast.refreshFailed':'更新に失敗しました','subject.add':'科目を追加','subject.ph':'科目名','subject.enter':'科目名を入力してください','subject.adding':'追加中…','subject.added':'✓ 科目を追加しました','picker.searchPh':'検索…','chat.ph':'メッセージを入力…','chat.loadFailed':'チャットの読み込みに失敗しました','chat.retry':'再試行','chat.emptyTitle':'メッセージはありません','chat.emptySub':'会話を始めましょう','chat.sendFailed':'メッセージの送信に失敗しました',
     'enum.meal.Full':'完食','enum.meal.Half':'半分','enum.meal.Little':'少し','enum.meal.None':'食べていない','enum.mood.Happy':'嬉しい','enum.mood.OK':'普通','enum.mood.Tired':'疲れた','enum.mood.Sad':'悲しい','enum.mood.Energetic':'元気','enum.yesno.Yes':'はい','enum.yesno.No':'いいえ','enum.hwType.Homework':'宿題','enum.hwType.Lesson':'授業','enum.hwType.Test':'テスト','enum.hwType.Quiz':'小テスト','enum.hwType.Project':'プロジェクト','enum.hwType.Worksheet':'ワークシート','enum.commType.All':'すべて','enum.commType.General':'一般','enum.commType.Absent Alert':'欠席通知','enum.commType.Daily Report':'日次レポート','enum.commType.Praise':'称賛','enum.commType.Incident':'インシデント','enum.commType.Homework':'宿題','enum.commType.Broadcast':'一斉連絡','enum.commStatus.Sent':'送信済み','enum.commStatus.queued':'送信待ち','enum.commStatus.Queued':'送信待ち','enum.incType.All':'すべて','enum.incType.Good Behaviour':'良い行動','enum.incType.Participation':'参加','enum.incType.Achievement':'達成','enum.incType.Concern':'懸念','enum.incType.Conflict':'対立','enum.incType.Health':'健康','enum.incType.Bullying':'いじめ','enum.incType.Injury':'けが','enum.incType.Other':'その他','enum.severity.Info':'情報','enum.severity.Low':'低','enum.severity.Medium':'中','enum.severity.High':'高','enum.severity.Critical':'重大','enum.subject.Mathematics':'数学','enum.subject.English':'英語','enum.subject.Science':'理科','enum.subject.Social Studies':'社会',
     'common.deleted':'削除しました','common.itemNotFound':'項目が見つかりません','common.cantUndo':'元に戻せません','common.saveChanges':'変更を保存','common.opt':'任意',
