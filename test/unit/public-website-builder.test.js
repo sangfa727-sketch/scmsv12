@@ -69,3 +69,20 @@ test('Website Studio uses collection selectors for multi-element operations',()=
  assert.match(js,/const links=\$\$\("\.section-nav a"\)/);
  new Function(js);
 });
+
+
+test('School Website is available from the native sidebar only to owner/admin or delegated managers',()=>{
+ const sidebar=read('js/17_sidebar.js');
+ assert.match(sidebar,/id: 'website'/);
+ assert.match(sidebar,/ownerOrAdmin/);
+ assert.match(sidebar,/school_owner/);
+ assert.ok(sidebar.includes('website.manage'));
+ assert.ok(sidebar.includes('school-website/create.html'));
+ assert.match(sidebar,/School Website/);
+});
+
+test('School Website navigation scripts use fresh cache-busting versions',()=>{
+ const html=read('index.html');
+ assert.match(html,/js\/12_more\.js\?v=20261010a/);
+ assert.match(html,/js\/17_sidebar\.js\?v=20261010a/);
+});
