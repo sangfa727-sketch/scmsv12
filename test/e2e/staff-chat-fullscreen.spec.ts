@@ -42,33 +42,34 @@ test.describe('Staff Chat full-screen browser regression', () => {
     await expect(page.locator('#scChatTypeMenu')).toBeHidden();
   });
 
-  test('chat type menu opens, selects AI Chat, updates the active pill, and persists after re-entry', async ({ page }) => {
+  test('mode pill switches directly to AI Chat and persists after re-entry without a dropdown', async ({ page }) => {
     await page.setViewportSize({ width: 390, height: 844 });
     await signInAndOpenChat(page);
-
     await page.locator('.sc-chat-mode-pill').click();
-    await expect(page.locator('#scChatTypeMenu')).toBeVisible();
-    await expect(page.locator('#scChatTypeMenu [role="menuitemradio"]')).toHaveCount(2);
-
-    await page.locator('#scChatTypeMenu [role="menuitemradio"]').nth(1).click();
     await expect(page.locator('.sc-chat-mode-pill')).toContainText(/AI Chat|AI Assistant/i);
     await expect(page.locator('#scChatTypeMenu')).toBeHidden();
     await expect.poll(() => page.evaluate(() => localStorage.getItem('scms_chat_mode'))).toBe('ai');
-
     await page.locator('.sc-chat-topbar .sc-chat-top-action').first().click();
     await expect(page.locator('.sc-chat-topbar')).toBeHidden();
     await page.getByTestId('nav-chat').click();
     await expect(page.locator('.sc-chat-mode-pill')).toContainText(/AI Chat|AI Assistant/i);
   });
 
-  test('School Chat can be restored through the type menu and keeps a single menu instance', async ({ page }) => {
+  test('School Chat is restored by tapping the mode pill; three-dot menu manages hidden tabs', async ({ page }) => {
     await signInAndOpenChat(page);
     await page.locator('.sc-chat-mode-pill').click();
-    await page.locator('#scChatTypeMenu [role="menuitemradio"]').first().click();
-
+    await expect(page.locator('.sc-chat-mode-pill')).toContainText(/AI Chat|AI Assistant/i);
+    await page.locator('.sc-chat-mode-pill').click();
     await expect(page.locator('.sc-chat-mode-pill')).toContainText(/School Chat/i);
     await expect.poll(() => page.evaluate(() => localStorage.getItem('scms_chat_mode'))).toBe('school');
     await expect(page.locator('#scChatTypeMenu')).toHaveCount(1);
+    await page.locator('[data-chat-quick-channel="direct"]').locator('xpath=..').locator('.smart-chat-quick-channel-hide').click();
+    await expect(page.locator('[data-chat-quick-channel="direct"]')).toHaveCount(0);
+    await page.locator('.sc-chat-topbar .sc-chat-top-action').nth(1).click();
+    await expect(page.locator('#scChatTypeMenu [role="menuitem"]')).toContainText('Direct Messages');
+    await page.locator('#scChatTypeMenu [role="menuitem"]').filter({ hasText: 'Direct Messages' }).click();
+    await expect(page.locator('[data-chat-quick-channel="direct"]')).toBeVisible();
+    await expect(page.locator('#scChatTypeMenu')).toBeHidden();
   });
 
   test('workspace is vertically scrollable and has no horizontal overflow on mobile', async ({ page }) => {
@@ -123,7 +124,6 @@ test.describe('Staff Chat full-screen browser regression', () => {
     await page.setViewportSize({ width: 390, height: 844 });
     await signInAndOpenChat(page);
     await page.locator('.sc-chat-mode-pill').click();
-    await page.locator('#scChatTypeMenu [role="menuitemradio"]').nth(1).click();
 
     await expect(page.locator('.smart-chat-ai-card')).toBeVisible();
     await expect(page.locator('.smart-chat-ai-note')).toBeVisible();
