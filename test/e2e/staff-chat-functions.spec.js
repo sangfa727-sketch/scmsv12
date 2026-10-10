@@ -600,7 +600,7 @@ test('Direct Chat header stays compact and renders only one peer identity', asyn
   await expect(head.locator('strong')).toHaveCount(1);
   await expect(head.locator('.smart-chat-verified-pill')).toHaveCount(0);
   const geometry = await head.evaluate(el => ({ height: el.getBoundingClientRect().height, width: el.getBoundingClientRect().width }));
-  expect(geometry.height).toBeLessThanOrEqual(62);
+  expect(geometry.height).toBeLessThanOrEqual(54);
   expect(geometry.width).toBeGreaterThan(0);
 });
 
