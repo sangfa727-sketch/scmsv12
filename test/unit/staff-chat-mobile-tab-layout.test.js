@@ -41,7 +41,7 @@ test('desktop Staff Chat tabs are fixed-width and mode switch replaces the profi
   const chat = fs.readFileSync(path.resolve(__dirname, '../../js/16_chat.js'), 'utf8');
   assert.ok(source.includes('@media (min-width:761px)'), 'scope desktop-only tab layout separately');
   assert.ok(source.includes('.smart-chat-quick-nav-track { display:flex; width:100%; max-width:100%; min-width:0; gap:6px; overflow-x:hidden'), 'prevent horizontal scrolling on desktop tabs');
-  assert.ok(source.includes('.smart-chat-quick-channel-wrap { display:flex; flex:1 1 0; min-width:0'), 'distribute tabs across the available desktop width');
+  assert.ok(source.includes('.smart-chat-quick-channel-wrap { display:flex; flex:1 1 0% !important; width:0; min-width:0'), 'distribute tabs across the available desktop width');
   assert.ok(chat.includes('<div class="smart-chat-mode-switch" role="tablist" aria-label='), 'place School/AI controls in the desktop chat header');
   assert.ok(!chat.includes('<div class="smart-chat-identity">'), 'remove the signed-in user profile from the Chat page header');
 });
