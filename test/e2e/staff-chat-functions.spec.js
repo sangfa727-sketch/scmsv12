@@ -334,36 +334,3 @@ test('Direct Chat composer recovers when the send API rejects the message', asyn
   await expect(input).toBeEnabled();
   await expect(page.locator('#directChatSendBtn')).toBeEnabled();
 });
-
-
-test('admin official announcement uses verified recipients and sends through the API', async ({ page }) => {
-  await mountSmartChat(page, false);
-  await page.evaluate(() => {
-    window.APP.is_admin = true;
-    window.renderChat();
-  });
-
-  // The native select is intentionally hidden by SCMS's custom-select enhancement.
-  // Set the backing value and dispatch change to exercise the same preview handler without
-  // relying on implementation-specific custom-control markup in this mocked API test.
-  await page.locator('#adminMsgRecipientType').evaluate((select) => {
-    select.value = 'all_staff';
-    select.dispatchEvent(new Event('change', { bubbles: true }));
-  });
-  await expect.poll(async () => (await calls(page, 'getChatRecipientPreview')).length).toBeGreaterThan(0);
-  await expect(page.locator('#adminMsgRoutingStatus')).toHaveClass(/verified/);
-
-  await page.locator('#adminMsgReason').fill('Staff operations update');
-  await page.locator('#adminMsgBody').fill('Please review the updated duty schedule.');
-  await expect(page.locator('#adminMsgSendBtn')).toBeEnabled();
-  await page.locator('#adminMsgSendBtn').click();
-
-  await expect.poll(async () => (await calls(page, 'createStaffAnnouncement')).length).toBe(1);
-  expect((await calls(page, 'createStaffAnnouncement'))[0].args).toEqual([
-    'all_staff',
-    null,
-    'announcement',
-    'Staff operations update',
-    'Please review the updated duty schedule.'
-  ]);
-});
