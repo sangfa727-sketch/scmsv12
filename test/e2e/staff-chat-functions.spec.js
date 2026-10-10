@@ -747,7 +747,6 @@ test('mobile Staff Chat directory, announcement, and ticket panes support touch 
       }));
     });
 
-    const cdp = await context.newCDPSession(page);
     const swipeUp = async (selector) => {
       const pane = page.locator(selector);
       await expect(pane).toBeVisible();
