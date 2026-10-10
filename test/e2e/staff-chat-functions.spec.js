@@ -1026,7 +1026,7 @@ test('desktop Chat keeps all six tabs visible, aligned to the full width, with n
   expect(Math.max(...metrics.tabWidths) - Math.min(...metrics.tabWidths)).toBeLessThan(30);
   const conversation = await page.locator('#smartChatModeBody > .smart-chat-school-grid > .smart-chat-conversation').boundingBox();
   expect(conversation).not.toBeNull();
-  expect(conversation!.width).toBeGreaterThan(metrics.viewportWidth * 0.75);
+  expect(conversation.width).toBeGreaterThan(metrics.viewportWidth * 0.75);
 });
 
 test('mobile can hide every chat type; opening a hidden type does not restore it without plus', async ({ page }) => {
