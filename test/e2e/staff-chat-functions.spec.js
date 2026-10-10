@@ -940,3 +940,66 @@ test('Inquiry Chat preserves the draft and restores controls when sending fails'
   await expect(input).toBeEnabled();
   await expect(page.locator('#inquirySendBtn')).toBeEnabled();
 });
+
+test('mobile All Staff message stream stays independently scrollable with long conversations', async ({ browser }) => {
+  const context = await browser.newContext({
+    viewport: { width: 390, height: 844 },
+    deviceScaleFactor: 1,
+    isMobile: true,
+    hasTouch: true
+  });
+  const page = await context.newPage();
+  try {
+    await mountSmartChat(page);
+    await page.evaluate(() => {
+      window.API.getChatMessages = async () => Array.from({ length: 36 }, (_, i) => ({
+        id: `staff-scroll-${i + 1}`,
+        teacher_id: i % 2 ? 'teacher-2' : 'teacher-1',
+        teacher_name: i % 2 ? 'Other Teacher' : 'Test Teacher',
+        text: `Staff conversation message ${i + 1} — ${'long message content '.repeat(4)}`,
+        created_at: new Date(Date.UTC(2026, 9, 10, 8, i)).toISOString()
+      }));
+      window.switchChatChannel('staff');
+    });
+    const stream = page.locator('#chatStream');
+    await expect(stream.locator('.chat-message, .message, [data-message-id]')).not.toHaveCount(0);
+    const metrics = await stream.evaluate(el => ({
+      scrollHeight: el.scrollHeight,
+      clientHeight: el.clientHeight,
+      overflowY: getComputedStyle(el).overflowY,
+      touchAction: getComputedStyle(el).touchAction
+    }));
+    expect(metrics.scrollHeight, `All Staff stream should overflow: ${JSON.stringify(metrics)}`).toBeGreaterThan(metrics.clientHeight);
+    expect(['auto', 'scroll', 'overlay']).toContain(metrics.overflowY);
+    expect(metrics.touchAction).toContain('pan-y');
+    await stream.evaluate(el => { el.scrollTop = el.scrollHeight; });
+    await expect.poll(() => stream.evaluate(el => el.scrollTop)).toBeGreaterThan(0);
+    await expect(page.locator('#chatComposer')).toBeVisible();
+    await expect(page.locator('#chatInput')).toBeVisible();
+  } finally {
+    await context.close();
+  }
+});
+
+test('Official Announcement send failure keeps the draft and restores the send control', async ({ page }) => {
+  await mountSmartChat(page);
+  await page.evaluate(() => {
+    window.APP.is_admin = true;
+    window.renderChat();
+  });
+  await expect(page.locator('#adminMsgBody')).toBeVisible();
+  await page.locator('#adminMsgRecipientType').selectOption('all_staff');
+  await page.locator('#adminMsgRecipientType').dispatchEvent('change');
+  await expect(page.locator('#adminMsgSendBtn')).toBeEnabled();
+  await page.locator('#adminMsgBody').fill('Keep this official announcement draft');
+  await page.evaluate(() => {
+    window.API.createStaffAnnouncement = async (...args) => {
+      window.__chatTestCalls.push({ name: 'createStaffAnnouncement', args });
+      return { ok: false, error: 'simulated announcement rejection' };
+    };
+  });
+  await page.locator('#adminMsgSendBtn').click();
+  await expect.poll(async () => (await calls(page, 'createStaffAnnouncement')).length).toBe(1);
+  await expect(page.locator('#adminMsgBody')).toHaveValue('Keep this official announcement draft');
+  await expect(page.locator('#adminMsgSendBtn')).toBeEnabled();
+});
