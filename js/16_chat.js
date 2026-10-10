@@ -484,14 +484,10 @@ function renderChat() {
           <h1 class="page-title">${t('chat.schoolChat')}</h1>
           <p class="page-subtitle">${t('chat.schoolCommunicationDesc')}</p>
         </div>
-        <div class="smart-chat-identity">
-          <span class="smart-chat-avatar">${esc((window.APP?.teacher_name || '?')[0])}</span>
-          <span>${esc(window.APP?.teacher_name || t('chat.staff'))}</span>
+        <div class="smart-chat-mode-switch" role="tablist" aria-label="${esc(t('chat.switchChatMode'))}">
+          <button class="${_chatMode === 'school' ? 'active' : ''}" onclick="switchChatMode('school')" role="tab" aria-selected="${_chatMode === 'school' ? 'true' : 'false'}">${_chatIcon('users')} ${t('chat.schoolChat')}</button>
+          <button class="${_chatMode === 'ai' ? 'active' : ''}" onclick="switchChatMode('ai')" role="tab" aria-selected="${_chatMode === 'ai' ? 'true' : 'false'}">${_chatIcon('bot')} ${t('chat.aiAssistant')}</button>
         </div>
-      </div>
-      <div class="smart-chat-mode-switch" role="tablist">
-        <button class="${_chatMode === 'school' ? 'active' : ''}" onclick="switchChatMode('school')" role="tab">${_chatIcon('users')} ${t('chat.schoolChat')}</button>
-        <button class="${_chatMode === 'ai' ? 'active' : ''}" onclick="switchChatMode('ai')" role="tab">${_chatIcon('bot')} ${t('chat.aiAssistant')}</button>
       </div>
       <header class="sc-chat-topbar" aria-label="${esc(t('chat.communicationCenter'))}">
         <button type="button" class="sc-chat-top-action" onclick="_chatBackToMenu()" aria-label="${esc(t('chat.exitChat'))}" title="${esc(t('chat.exitChat'))}">
@@ -564,29 +560,46 @@ window._toggleChatTypeMenu = function() {
   if (menu) { menu.innerHTML = _chatTypeMenuMarkup(); menu.hidden = !_chatTypeMenuOpen; }
   document.querySelectorAll('.sc-chat-top-action[aria-haspopup="menu"]').forEach(b => b.setAttribute('aria-expanded', String(_chatTypeMenuOpen)));
 };
+function _isMobileChatLayout() {
+  return typeof window.matchMedia === 'function' && window.matchMedia('(max-width: 760px)').matches;
+}
 function _chatTypeMenuMarkup() {
   const hidden = _chatQuickNavChannels().filter(c => _chatVisibleTypes[c.id] === false);
   if (!hidden.length) return '<div class="sc-chat-type-empty">' + esc(t('chat.allChatTypesVisible')) + '</div>';
-  return hidden.map(c => '<button type="button" class="sc-chat-type-option" role="menuitem" onclick="_showChatType(\'' + c.id + '\')">' +
-    '<span class="smart-chat-quick-channel-icon" aria-hidden="true">' + c.icon + '</span><span class="sc-chat-type-copy"><strong>' + esc(c.name) + '</strong><small>' + esc(t('chat.showTabOnBar')) + '</small></span><span class="sc-chat-type-enable" aria-hidden="true">＋</span></button>').join('');
+  return hidden.map(c => '<div class="sc-chat-type-option-row">' +
+    '<button type="button" class="sc-chat-type-option" role="menuitem" onclick="_openHiddenChatType(\\'' + c.id + '\\')">' +
+    '<span class="smart-chat-quick-channel-icon" aria-hidden="true">' + c.icon + '</span><span class="sc-chat-type-copy"><strong>' + esc(c.name) + '</strong><small>' + esc(t('chat.openChatType')) + '</small></span></button>' +
+    '<button type="button" class="sc-chat-type-enable" aria-label="' + esc(t('chat.showTabOnBar')) + ': ' + esc(c.name) + '" title="' + esc(t('chat.showTabOnBar')) + '" onclick="_showChatType(\\'' + c.id + '\\')">＋</button></div>').join('');
 }
+window._openHiddenChatType = function(id) {
+  if (!Object.prototype.hasOwnProperty.call(_chatVisibleTypes, id) || _chatVisibleTypes[id] !== false) return;
+  _chatChannel = id;
+  _chatMode = 'school';
+  try { localStorage.setItem('scms_chat_mode', 'school'); } catch (_) {}
+  _chatTypeMenuOpen = false;
+  const menu = document.getElementById('scChatTypeMenu');
+  if (menu) { menu.hidden = true; menu.innerHTML = _chatTypeMenuMarkup(); }
+  document.querySelectorAll('.sc-chat-top-action[aria-haspopup="menu"]').forEach(b => b.setAttribute('aria-expanded', 'false'));
+  _renderChatMode();
+  _refreshChatChannelUnreadCounts();
+};
 window._hideChatType = function(id) {
-  const visible = _chatQuickNavChannels().filter(c => _chatVisibleTypes[c.id] !== false);
-  if (visible.length <= 1) { showToast(t('chat.keepOneChatTypeVisible')); return; }
+  if (!_isMobileChatLayout() || !Object.prototype.hasOwnProperty.call(_chatVisibleTypes, id)) return;
   _chatVisibleTypes[id] = false;
   try { localStorage.setItem('scms_chat_visible_types', JSON.stringify(_chatVisibleTypes)); } catch (_) {}
-  if (_chatChannel === id) _chatChannel = _chatQuickNavChannels().find(c => _chatVisibleTypes[c.id] !== false)?.id || 'staff';
-  _renderChatQuickNav(); _renderChatMode();
-  const menu = document.getElementById('scChatTypeMenu'); if (menu) menu.innerHTML = _chatTypeMenuMarkup();
+  if (_chatChannel === id) _chatChannel = _chatQuickNavChannels().find(c => c.id !== id && _chatVisibleTypes[c.id] !== false)?.id || id;
+  _renderChatQuickNav();
+  _renderChatMode();
+  const menu = document.getElementById('scChatTypeMenu');
+  if (menu) menu.innerHTML = _chatTypeMenuMarkup();
 };
 window._showChatType = function(id) {
-  if (!Object.prototype.hasOwnProperty.call(_chatVisibleTypes, id)) return;
+  if (!_isMobileChatLayout() || !Object.prototype.hasOwnProperty.call(_chatVisibleTypes, id)) return;
   _chatVisibleTypes[id] = true;
   try { localStorage.setItem('scms_chat_visible_types', JSON.stringify(_chatVisibleTypes)); } catch (_) {}
-  _chatTypeMenuOpen = false;
-  const menu = document.getElementById('scChatTypeMenu'); if (menu) { menu.hidden = true; menu.innerHTML = _chatTypeMenuMarkup(); }
+  const menu = document.getElementById('scChatTypeMenu');
+  if (menu) menu.innerHTML = _chatTypeMenuMarkup();
   _renderChatQuickNav();
-  if (_chatMode === 'school') switchChatChannel(id);
 };
 window._chooseChatType = function(mode) { window.switchChatMode(mode); };
 
@@ -608,24 +621,25 @@ function _renderChatQuickNav() {
   nav.hidden = _chatMode !== 'school';
   nav.setAttribute('aria-label', t('chat.schoolChat'));
   const channels = _chatQuickNavChannels();
-  const visible = channels.filter(c => _chatVisibleTypes[c.id] !== false);
-  if (!visible.length) { _chatVisibleTypes.staff = true; visible.push(channels[0]); }
+  // Desktop keeps every tab visible; the hide/restore feature is mobile-only.
+  const visible = _isMobileChatLayout() ? channels.filter(c => _chatVisibleTypes[c.id] !== false) : channels;
   nav.innerHTML = '<div class="smart-chat-quick-nav-track" role="group">' +
     visible.map(c => {
       const count = _chatUnreadCount(c.id);
       const active = c.id === _chatChannel;
       const countLabel = count > 0 ? ' aria-label="' + esc(t('chat.unreadMessages')) + ': ' + count + '"' : ' aria-hidden="true"';
-      return '<div class="smart-chat-quick-channel-wrap"><button type="button" class="smart-chat-quick-channel' + (active ? ' active' : '') + '" data-chat-quick-channel="' + c.id + '" aria-pressed="' + (active ? 'true' : 'false') + '" onclick="switchChatChannel(\'' + c.id + '\')">' +
+      const hideButton = _isMobileChatLayout()
+        ? '<button type="button" class="smart-chat-quick-channel-hide" onclick="_hideChatType(\\'' + c.id + '\\')" aria-label="' + esc(t('chat.hideTab')) + ' ' + esc(c.name) + '" title="' + esc(t('chat.hideTab')) + '">×</button>'
+        : '';
+      return '<div class="smart-chat-quick-channel-wrap"><button type="button" class="smart-chat-quick-channel' + (active ? ' active' : '') + '" data-chat-quick-channel="' + c.id + '" aria-pressed="' + (active ? 'true' : 'false') + '" onclick="switchChatChannel(\\'' + c.id + '\\')">' +
         '<span class="smart-chat-quick-channel-icon" aria-hidden="true">' + c.icon + '</span>' +
         '<span class="smart-chat-quick-channel-name">' + esc(c.name) + '</span>' +
         '<span class="smart-chat-quick-channel-count' + (count > 0 ? ' has-unread' : '') + '"' + countLabel + '>' + (count > 0 ? (count > 99 ? '99+' : count) : '') + '</span>' +
-      '</button><button type="button" class="smart-chat-quick-channel-hide" onclick="_hideChatType(\'' + c.id + '\')" aria-label="' + esc(t('chat.hideTab')) + ' ' + esc(c.name) + '" title="' + esc(t('chat.hideTab')) + '">×</button></div>';
+      '</button>' + hideButton + '</div>';
     }).join('') + '</div>';
-  // Keep the selected channel visible after switching; mobile users should never
-  // land on the first tab while a different workspace is active.
   requestAnimationFrame(() => {
     const active = nav.querySelector('.smart-chat-quick-channel.active');
-    if (active) active.scrollIntoView({block:'nearest',inline:'center',behavior:'auto'});
+    if (active && _isMobileChatLayout()) active.scrollIntoView({block:'nearest',inline:'center',behavior:'auto'});
   });
 }
 
