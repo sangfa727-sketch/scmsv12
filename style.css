@@ -10199,3 +10199,30 @@ html.scms-chat-workspace #pages{overflow:auto}
     padding:5px 8px;
   }
 }
+
+
+/* Staff Chat responsive tab policy: desktop has a fixed full-width tab bar; mobile owns hide/restore controls. */
+@media (min-width:761px) {
+  #page-chat .smart-chat-quick-nav { width:100%; max-width:100%; min-width:0; overflow:visible; box-sizing:border-box; }
+  #page-chat .smart-chat-quick-nav-track { display:flex; width:100%; max-width:100%; min-width:0; gap:6px; overflow-x:hidden; overflow-y:visible; padding:2px 2px 8px; box-sizing:border-box; }
+  #page-chat .smart-chat-quick-channel-wrap { display:flex; flex:1 1 0; min-width:0; max-width:none; align-items:stretch; }
+  #page-chat .smart-chat-quick-channel { display:flex; flex:1 1 0; width:100%; min-width:0; max-width:none; min-height:48px; height:auto; padding:6px 8px; gap:5px; justify-content:center; white-space:normal; overflow-wrap:anywhere; }
+  #page-chat .smart-chat-quick-channel-name { min-width:0; overflow:visible; white-space:normal; text-align:center; line-height:1.2; }
+  #page-chat .smart-chat-quick-channel-hide { display:none !important; }
+  #page-chat #smartChatModeBody { width:100%; max-width:none; min-width:0; }
+  #page-chat #smartChatModeBody > .smart-chat-school-grid { display:flex; width:100%; max-width:none; min-width:0; }
+  #page-chat #smartChatModeBody > .smart-chat-school-grid > .smart-chat-conversation { flex:1 1 100%; width:100%; max-width:none; min-width:0; }
+  #page-chat #smartChatModeBody > .smart-chat-school-grid > .smart-chat-conversation .chat-stream { width:100%; max-width:none; min-width:0; }
+  #page-chat .smart-chat-hero { align-items:center; }
+  #page-chat .smart-chat-hero > .smart-chat-mode-switch { flex:0 0 auto; width:auto; max-width:48%; margin:0 0 0 auto; }
+  #page-chat .smart-chat-hero > .smart-chat-mode-switch button { min-width:136px; }
+}
+@media (max-width:760px) {
+  #page-chat .smart-chat-quick-nav-track { width:100%; min-width:0; overflow-x:auto; overflow-y:hidden; }
+  #page-chat .smart-chat-quick-channel-wrap { flex:0 0 auto; max-width:100%; }
+  #page-chat .smart-chat-quick-channel { flex:0 0 auto; }
+  #page-chat .sc-chat-type-option-row { display:flex; align-items:center; gap:5px; width:100%; }
+  #page-chat .sc-chat-type-option-row .sc-chat-type-option { flex:1 1 auto; min-width:0; width:auto; }
+  #page-chat .sc-chat-type-option-row .sc-chat-type-enable { flex:0 0 40px; width:40px; height:40px; border:1px solid var(--border); border-radius:50%; background:var(--bg2); color:var(--sc-chat-accent, var(--accent)); font-size:22px; cursor:pointer; }
+  #page-chat .sc-chat-type-menu { max-height:min(70dvh,560px); overflow-y:auto; overscroll-behavior:contain; }
+}
