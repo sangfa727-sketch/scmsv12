@@ -1125,8 +1125,10 @@ window._directKeydown=function(ev){if(ev.key==='Enter'&&!ev.shiftKey){ev.prevent
 
 window._showSchoolChatChannels = function() { _chatChannel='staff'; _renderChatMode(); };
 
-function _chatChannelBack(label=t('chat.schoolChat')) {
-  return `<div class="smart-chat-channel-back-row"><button type="button" class="smart-chat-channel-back" onclick="_showSchoolChatChannels()" aria-label="${t('chat.backToSchoolChat')}">‹ <span>${esc(label)}</span></button></div>`;
+function _chatChannelBack() {
+  // Channel switching is handled by the persistent tab rail; a second Back
+  // control duplicates navigation and can mislead users about their active tab.
+  return '';
 }
 
 window.switchChatChannel = function(channel) {
