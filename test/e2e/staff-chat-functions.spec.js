@@ -344,8 +344,13 @@ test('admin official announcement uses verified recipients and sends through the
     window.switchChatChannel('announcements');
   });
 
-  // SCMS enhances native selects into a visible custom control; the backing select is intentionally hidden.
-  await page.locator('#adminMsgRecipientType').selectOption('all_staff');
+  // The native select is intentionally hidden by SCMS's custom-select enhancement.
+  // Set the backing value and dispatch change to exercise the same preview handler without
+  // relying on implementation-specific custom-control markup in this mocked API test.
+  await page.locator('#adminMsgRecipientType').evaluate((select) => {
+    select.value = 'all_staff';
+    select.dispatchEvent(new Event('change', { bubbles: true }));
+  });
   await expect.poll(async () => (await calls(page, 'getChatRecipientPreview')).length).toBeGreaterThan(0);
   await expect(page.locator('#adminMsgRoutingStatus')).toHaveClass(/verified/);
 
