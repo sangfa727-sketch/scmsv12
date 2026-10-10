@@ -9,7 +9,7 @@ async function mountSmartChat(page, render = true) {
     !!window.APP
   );
 
-  await page.evaluate(() => {
+  await page.evaluate((shouldRender) => {
     window.APP.platform = 'native';
     window.APP.currentPage = 'chat';
     window.APP.teacher_id = 'teacher-1';
@@ -135,8 +135,8 @@ async function mountSmartChat(page, render = true) {
       }
     };
 
-    if (render) window.renderChat();
-  });
+    if (shouldRender) window.renderChat();
+  }, render);
 }
 
 
