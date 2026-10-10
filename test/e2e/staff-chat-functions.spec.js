@@ -402,6 +402,27 @@ test('sent and received Staff Chat messages use distinct readable bubble surface
 });
 
 
+
+test('direct staff contact cards render existing profile photos with safe initials fallback', async ({ page }) => {
+  await mountSmartChat(page);
+  await page.setViewportSize({ width: 390, height: 844 });
+  await page.evaluate(() => {
+    window.API.getDirectStaffDirectory = async () => [
+      { teacher_id: 'profile-photo', teacher_name: 'Aye Chan', role: 'Teacher', status: 'active', photo_url: 'https://example.com/aye-chan.jpg' },
+      { teacher_id: 'profile-no-photo', teacher_name: 'Mya Win', role: 'Teacher', status: 'active', photo_url: null }
+    ];
+    window.API.getDirectConversations = async () => [];
+  });
+  await page.evaluate(() => window.switchChatChannel('direct'));
+  const photoContact = page.locator('#directStaffDirectory').getByText('Aye Chan');
+  await expect(photoContact).toBeVisible();
+  const photoAvatar = page.locator('#directStaffDirectory .smart-chat-profile-photo');
+  await expect(photoAvatar).toHaveAttribute('src', 'https://example.com/aye-chan.jpg');
+  const fallbackContact = page.locator('#directStaffDirectory').getByText('Mya Win');
+  await expect(fallbackContact).toBeVisible();
+  await expect(page.locator('#directStaffDirectory .smart-chat-direct-avatar').filter({ hasText: 'M' })).toBeVisible();
+});
+
 test('mobile Staff Chat list panes remain independently scrollable when populated', async ({ page }) => {
   await mountSmartChat(page);
   await page.setViewportSize({ width: 390, height: 844 });
