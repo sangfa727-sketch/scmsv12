@@ -475,3 +475,40 @@ test('mobile Staff Chat list panes remain independently scrollable when populate
   expect(ticketScroll.scrollHeight).toBeGreaterThan(ticketScroll.clientHeight);
   expect(ticketScroll.moved).toBe(true);
 });
+
+
+test('Direct Chat uses existing teacher profile photos with a safe initials fallback', async ({ page }) => {
+  await mountSmartChat(page);
+  const photoUrl = 'https://profiles.example.test/other-teacher.svg';
+  await page.route('https://profiles.example.test/**', (route) => route.fulfill({
+    status: 200,
+    contentType: 'image/svg+xml',
+    body: '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 10 10"><circle cx="5" cy="5" r="5" fill="#777"/></svg>'
+  }));
+  await page.evaluate((url) => {
+    window.API.getDirectStaffDirectory = async () => [
+      { teacher_id: 'teacher-2', teacher_name: 'Other Teacher', role: 'Teacher', photo_url: url },
+      { teacher_id: 'teacher-3', teacher_name: 'No Photo', role: 'Teacher', photo_url: 'javascript:alert(1)' }
+    ];
+    window.API.getDirectConversations = async () => [{
+      conversation_id: 21, teacher_id: 'teacher-2', teacher_name: 'Other Teacher',
+      role: 'Teacher', photo_url: url, last_message: 'Private hello', unread_count: 0
+    }];
+    window.API.openDirectConversation = async (teacherId) => ({
+      ok: true,
+      conversation_id: 21,
+      peer: { teacher_id: teacherId, teacher_name: 'Other Teacher', role: 'Teacher', photo_url: url }
+    });
+  }, photoUrl);
+  await page.evaluate(() => window.switchChatChannel('direct'));
+
+  const contact = page.locator('#directStaffDirectory .smart-chat-directory-item').first();
+  await expect(contact.locator('.smart-chat-profile-photo')).toHaveAttribute('src', photoUrl);
+  const fallbackContact = page.locator('#directStaffDirectory .smart-chat-directory-item').nth(1);
+  await expect(fallbackContact.locator('.smart-chat-avatar-initial')).toHaveText('N');
+  await expect(fallbackContact.locator('.smart-chat-profile-photo')).toHaveCount(0);
+
+  await expect(page.locator('#directConversationList .smart-chat-profile-photo')).toHaveAttribute('src', photoUrl);
+  await page.evaluate(() => window.openDirectChat('teacher-2'));
+  await expect(page.locator('#directConversationHead .smart-chat-profile-photo')).toHaveAttribute('src', photoUrl);
+});

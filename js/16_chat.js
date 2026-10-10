@@ -1019,13 +1019,26 @@ async function _loadDirectWorkspace() {
   }
 }
 
+function _directAvatarMarkup(person, large = false) {
+  const name = String(person?.teacher_name || '?').trim();
+  const initial = esc(Array.from(name)[0] || '?');
+  const rawPhoto = String(person?.photo_url || '').trim();
+  // Only render HTTPS or same-origin absolute paths from the existing profile record.
+  const safePhoto = (/^https:\/\/[^\s"'<>]+$/i.test(rawPhoto) ||
+    (/^\/(?!\/)[^"'<>]*$/.test(rawPhoto))) ? rawPhoto : '';
+  const image = safePhoto
+    ? `<img class="smart-chat-profile-photo" src="${esc(safePhoto)}" alt="" loading="lazy" decoding="async" referrerpolicy="no-referrer" onerror="this.remove()">`
+    : '';
+  return `<span class="smart-chat-direct-avatar${large ? ' large' : ''}" aria-hidden="true">${image}<span class="smart-chat-avatar-initial">${initial}</span></span>`;
+}
+
 function _renderDirectConversationList() {
   const root=document.getElementById('directConversationList');
   if(!root)return;
   if(!_directConversations.length){root.innerHTML=`<div class="smart-chat-list-empty">${t('chat.noConversations')}</div>`;return;}
   root.innerHTML=_directConversations.map(c=>`
     <button class="smart-chat-direct-item ${Number(c.conversation_id)===Number(_directConversationId)?'active':''}" onclick="openDirectChat('${esc(c.teacher_id)}')">
-      <span class="smart-chat-direct-avatar">${esc((c.teacher_name||'?')[0])}</span>
+      ${_directAvatarMarkup(c)}
       <span><strong>${esc(c.teacher_name)}</strong><small>${esc(c.last_message||t('chat.noMessages'))}</small></span>
       ${Number(c.unread_count)>0?`<b class="smart-chat-unread">${esc(c.unread_count)}</b>`:'<i></i>'}
     </button>`).join('');
@@ -1038,7 +1051,7 @@ function _renderDirectDirectory() {
   const rows=_directStaff.filter(t=>!q||String(t.teacher_name).toLowerCase().includes(q)||String(t.role||'').toLowerCase().includes(q));
   root.innerHTML=rows.length?rows.map(staffRow=>`
     <button class="smart-chat-directory-item" onclick="openDirectChat('${esc(staffRow.teacher_id)}')">
-      <span class="smart-chat-direct-avatar">${esc((staffRow.teacher_name||'?')[0])}</span>
+      ${_directAvatarMarkup(staffRow)}
       <span><strong>${esc(staffRow.teacher_name)}</strong><small>${esc(staffRow.role||t('chat.teacher'))}</small></span><b>›</b>
     </button>`).join('') :`<div class="smart-chat-list-empty">${t('chat.noActiveTeacher')}</div>`;
 }
@@ -1059,7 +1072,7 @@ function _renderDirectHeader(){
   const root=document.getElementById('directConversationHead');
   if(!root||!_directPeer)return;
   root.innerHTML=`
-    <div class="smart-chat-direct-peer"><button class="smart-chat-mobile-back" onclick="_clearDirectSelection()"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m15 18-6-6 6-6"/></svg></button><span class="smart-chat-direct-avatar large">${esc((_directPeer.teacher_name||'?')[0])}</span><div><strong>${esc(_directPeer.teacher_name)}</strong><small>${esc(_directPeer.role||t('chat.teacher'))} · ${t('chat.privateOneToOne')}</small></div></div>
+    <div class="smart-chat-direct-peer"><button class="smart-chat-mobile-back" onclick="_clearDirectSelection()"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m15 18-6-6 6-6"/></svg></button>${_directAvatarMarkup(_directPeer,true)}<div><strong>${esc(_directPeer.teacher_name)}</strong><small>${esc(_directPeer.role||t('chat.teacher'))} · ${t('chat.privateOneToOne')}</small></div></div>
     <span class="smart-chat-verified-pill">${t('chat.privateOneToOne')}</span>`;
 }
 
