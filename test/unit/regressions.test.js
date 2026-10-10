@@ -508,8 +508,17 @@ test('official announcement stays disabled while recipient verification is pendi
   assert.match(locales, /chat\.gradeRecipientsMissing/);
 });
 
+test('app bootstrap runs after FAB page registries initialize', () => {
+  const app = read('js/14_app.js');
+  const fabRegistry = app.indexOf('const FAB_PAGES = {');
+  const autoRun = app.lastIndexOf('\ninitApp();');
+  assert.ok(fabRegistry >= 0, 'FAB_PAGES registry must exist');
+  assert.ok(autoRun > fabRegistry, 'initial app bootstrap must run after FAB_PAGES initialization');
+  assert.match(app, /function _updateFabForPage\(pageId\)[\s\S]*?const conf = FAB_PAGES\[pageId\]/);
+});
+
 test('announcement recipient feedback assets use refreshed cache keys', () => {
   const html = read('index.html');
   assert.match(html, /js\/00f_chat_locales\.js\?v=20261009f/);
-  assert.match(html, /js\/16_chat\.js\?v=20261009f/);
+  assert.match(html, /js\/16_chat\.js\?v=20261010b/);
 });

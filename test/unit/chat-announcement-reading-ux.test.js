@@ -80,3 +80,34 @@ test('staff chat uses a coherent social-first responsive visual system', () => {
   assert.ok(styles.includes('#page-chat .smart-chat-admin-card {\n  margin-top:18px; padding:clamp(16px,2vw,24px);'), 'style admin tools as a distinct, deliberate section');
   assert.ok(styles.includes('#page-chat .chat-composer textarea,\n#page-chat .smart-chat-direct-composer textarea {\n  min-width:0; min-height:46px;'), 'provide a consistent touch-friendly message composer');
 });
+
+
+test('staff chat full-screen controls persist the selected type and support animated menu transitions', () => {
+  const source = fs.readFileSync(path.resolve(__dirname, '../../js/16_chat.js'), 'utf8');
+  assert.ok(source.includes("localStorage.getItem('scms_chat_mode') === 'ai'"), 'restore the saved School Chat or AI Chat selection');
+  assert.ok(source.includes("localStorage.setItem('scms_chat_mode', _chatMode)"), 'persist the selected chat type');
+  assert.ok(source.includes('sc-chat-topbar'), 'render the compact full-screen control bar');
+  assert.ok(source.includes('sc-chat-mode-pill'), 'show the active chat type in the central pill');
+  assert.ok(source.includes('sc-chat-type-menu'), 'provide the chat type menu behind the ellipsis control');
+  assert.ok(source.includes('window._toggleChatTypeMenu'), 'wire the menu open and close control');
+  assert.ok(source.includes('window._chooseChatType'), 'wire chat type selection');
+  assert.ok(source.includes('@keyframes scChatMenuIn'), 'animate the menu entrance');
+  assert.ok(source.includes('prefers-reduced-motion:reduce'), 'respect reduced-motion accessibility preferences');
+  assert.ok(source.includes('onclick="_chatBackToMenu()"'), 'preserve the existing exit/sidebar navigation entry point');
+  assert.ok(source.includes('sc-chat-workspace-content'), 'keep the full-screen conversation area scrollable');
+});
+
+
+test('legacy mobile chat fallback does not override the full-screen workspace scroll model', () => {
+  const styles = fs.readFileSync(path.resolve(__dirname, '../../style.css'), 'utf8');
+  const marker = 'Chat UI regression correction: keep one channel navigation and let the page scroll';
+  const start = styles.lastIndexOf(marker);
+  assert.ok(start >= 0, 'include the explicit mobile chat regression correction');
+  const correction = styles.slice(start);
+  assert.ok(correction.includes('html:not(.scms-chat-workspace) #pages'), 'scope legacy page scrolling outside the new full-screen workspace');
+  assert.ok(correction.includes('html:not(.scms-chat-workspace) #page-chat .smart-chat-conversation .chat-stream'), 'avoid overriding the full-screen conversation scroll container');
+  assert.ok(correction.includes('overflow-y:auto'), 'allow vertical page scrolling');
+  assert.ok(correction.includes('touch-action:pan-y'), 'preserve vertical touch gestures over the chat view');
+  assert.ok(correction.includes('html:not(.scms-chat-workspace) #page-chat .smart-chat-school-grid > .smart-chat-channel-list {\n    display:none;'), 'scope the legacy duplicate-rail fix outside the full-screen workspace');
+  assert.ok(correction.includes('.smart-chat-conversation .chat-stream {\n    max-height:none;'), 'avoid trapping vertical gestures inside a short message viewport');
+});
