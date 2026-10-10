@@ -17,7 +17,7 @@ const _TA_UI = {
     classRequired:'Please select a class first.', classSubjectRequired:'Please select a class and subject first.',
     saved:'Permission saved.', saveFailed:'Could not save permission.', classAddFailed:'Could not add class.',
     classRemoveFailed:'Could not remove class.', subjectAddFailed:'Could not add subject.',
-    subjectRemoveFailed:'Could not remove subject.', loadFailed:'Could not load permission information.'
+    subjectRemoveFailed:'Could not remove subject.', loadFailed:'Could not load permission information.', saveRefreshFailed:'Permission was saved, but the latest state could not be reloaded. Reopen Manage Access to verify.'
   },
   my: {
     loading:'တင်နေသည်…', manageTitle:'လုပ်ပိုင်ခွင့် စီမံရန်', subtitle:'အတွက် အတန်း၊ ဘာသာရပ်နှင့် လုပ်ပိုင်ခွင့် သတ်မှတ်ချက်များ',
@@ -30,7 +30,7 @@ const _TA_UI = {
     classRequired:'အတန်းကို အရင်ရွေးပါ။', classSubjectRequired:'အတန်းနှင့် ဘာသာရပ်ကို အရင်ရွေးပါ။',
     saved:'လုပ်ပိုင်ခွင့် သိမ်းပြီးပါပြီ။', saveFailed:'လုပ်ပိုင်ခွင့် သိမ်း၍ မရပါ။', classAddFailed:'အတန်းထည့်၍ မရပါ။',
     classRemoveFailed:'အတန်းဖယ်၍ မရပါ။', subjectAddFailed:'ဘာသာရပ်ထည့်၍ မရပါ။',
-    subjectRemoveFailed:'ဘာသာရပ်ဖယ်၍ မရပါ။', loadFailed:'လုပ်ပိုင်ခွင့် အချက်အလက် တင်မရပါ။'
+    subjectRemoveFailed:'ဘာသာရပ်ဖယ်၍ မရပါ။', loadFailed:'လုပ်ပိုင်ခွင့် အချက်အလက် တင်မရပါ။', saveRefreshFailed:'လုပ်ပိုင်ခွင့်ကို သိမ်းပြီးပါပြီ၊ သို့သော် နောက်ဆုံးအခြေအနေကို ပြန်မဖတ်နိုင်ပါ။ Manage Access ကို ပြန်ဖွင့်ပြီး စစ်ဆေးပါ။'
   },
   ms: {
     loading:'Memuat…', manageTitle:'Urus Akses', subtitle:'Tetapkan kelas, subjek dan akses kebenaran untuk',
@@ -43,7 +43,7 @@ const _TA_UI = {
     classRequired:'Sila pilih kelas dahulu.', classSubjectRequired:'Sila pilih kelas dan subjek dahulu.',
     saved:'Kebenaran disimpan.', saveFailed:'Tidak dapat menyimpan kebenaran.', classAddFailed:'Tidak dapat menambah kelas.',
     classRemoveFailed:'Tidak dapat membuang kelas.', subjectAddFailed:'Tidak dapat menambah subjek.',
-    subjectRemoveFailed:'Tidak dapat membuang subjek.', loadFailed:'Tidak dapat memuatkan maklumat kebenaran.'
+    subjectRemoveFailed:'Tidak dapat membuang subjek.', loadFailed:'Tidak dapat memuatkan maklumat kebenaran.', saveRefreshFailed:'Kebenaran telah disimpan, tetapi keadaan terkini tidak dapat dimuat semula. Buka semula Manage Access untuk mengesahkan.'
   },
   zh: {
     loading:'加载中…', manageTitle:'管理访问权限', subtitle:'为教师设置班级、科目和权限访问',
@@ -56,7 +56,7 @@ const _TA_UI = {
     classRequired:'请先选择班级。', classSubjectRequired:'请先选择班级和科目。',
     saved:'权限已保存。', saveFailed:'无法保存权限。', classAddFailed:'无法添加班级。',
     classRemoveFailed:'无法移除班级。', subjectAddFailed:'无法添加科目。',
-    subjectRemoveFailed:'无法移除科目。', loadFailed:'无法加载权限信息。'
+    subjectRemoveFailed:'无法移除科目。', loadFailed:'无法加载权限信息。', saveRefreshFailed:'权限已保存，但无法重新加载最新状态。请重新打开“管理访问权限”进行确认。'
   },
   th: {
     loading:'กำลังโหลด…', manageTitle:'จัดการสิทธิ์การเข้าถึง', subtitle:'กำหนดชั้นเรียน วิชา และสิทธิ์การเข้าถึงสำหรับ',
@@ -68,7 +68,7 @@ const _TA_UI = {
     classRequired:'กรุณาเลือกชั้นเรียนก่อน', classSubjectRequired:'กรุณาเลือกชั้นเรียนและวิชาก่อน',
     saved:'บันทึกสิทธิ์แล้ว', saveFailed:'ไม่สามารถบันทึกสิทธิ์ได้', classAddFailed:'ไม่สามารถเพิ่มชั้นเรียนได้',
     classRemoveFailed:'ไม่สามารถลบชั้นเรียนได้', subjectAddFailed:'ไม่สามารถเพิ่มวิชาได้',
-    subjectRemoveFailed:'ไม่สามารถลบวิชาได้', loadFailed:'ไม่สามารถโหลดข้อมูลสิทธิ์ได้'
+    subjectRemoveFailed:'ไม่สามารถลบวิชาได้', loadFailed:'ไม่สามารถโหลดข้อมูลสิทธิ์ได้', saveRefreshFailed:'บันทึกสิทธิ์แล้ว แต่ไม่สามารถโหลดสถานะล่าสุดได้ โปรดเปิดจัดการสิทธิ์อีกครั้งเพื่อตรวจสอบ'
   },
   jp: {
     loading:'読み込み中…', manageTitle:'アクセス管理', subtitle:'クラス・科目・権限を設定：',
@@ -79,7 +79,7 @@ const _TA_UI = {
     permissionHelp:'既定の権限は教師のロールに従います。クラス・科目ごとの権限を設定する場合は対象を選択してください。',
     classRequired:'先にクラスを選択してください。', classSubjectRequired:'先にクラスと科目を選択してください。',
     saved:'権限を保存しました。', saveFailed:'権限を保存できませんでした。', classAddFailed:'クラスを追加できませんでした。',
-    classRemoveFailed:'クラスを削除できませんでした。', subjectAddFailed:'科目を追加できませんでした。', loadFailed:'権限情報を読み込めませんでした。'
+    classRemoveFailed:'クラスを削除できませんでした。', subjectAddFailed:'科目を追加できませんでした。', loadFailed:'権限情報を読み込めませんでした。', saveRefreshFailed:'権限は保存されましたが、最新状態を再読み込みできませんでした。Manage Access を開き直して確認してください。'
   },
   km: {
     loading:'កំពុងផ្ទុក…', manageTitle:'គ្រប់គ្រងសិទ្ធិចូលប្រើ', subtitle:'កំណត់ថ្នាក់ មុខវិជ្ជា និងសិទ្ធិចូលប្រើសម្រាប់',
@@ -91,7 +91,7 @@ const _TA_UI = {
     classRequired:'សូមជ្រើសរើសថ្នាក់ជាមុនសិន។', classSubjectRequired:'សូមជ្រើសរើសថ្នាក់ និងមុខវិជ្ជាជាមុនសិន។',
     saved:'បានរក្សាទុកសិទ្ធិ។', saveFailed:'មិនអាចរក្សាទុកសិទ្ធិបានទេ។', classAddFailed:'មិនអាចបន្ថែមថ្នាក់បានទេ។',
     classRemoveFailed:'មិនអាចដកថ្នាក់បានទេ។', subjectAddFailed:'មិនអាចបន្ថែមមុខវិជ្ជាបានទេ။',
-    subjectRemoveFailed:'មិនអាចដកមុខវិជ្ជាបានទេ។', loadFailed:'មិនអាចផ្ទុកព័ត៌មានសិទ្ធិបានទេ។'
+    subjectRemoveFailed:'មិនអាចដកមុខវិជ្ជាបានទេ។', loadFailed:'មិនអាចផ្ទុកព័ត៌មានសិទ្ធិបានទេ។', saveRefreshFailed:'បានរក្សាទុកសិទ្ធិ ប៉ុន្តែមិនអាចផ្ទុកស្ថានភាពថ្មីបំផុតឡើងវិញបានទេ។ សូមបើក Manage Access ម្តងទៀតដើម្បីផ្ទៀងផ្ទាត់។'
   }
 };
 
@@ -234,7 +234,7 @@ function _taStateClass(state) {
 
 async function _renderTeacherAccess() {
   const root = document.getElementById('teacherAccessRoot');
-  if (!root) return;
+  if (!root) return false;
   const teacherId = root.dataset.teacherId;
   root.innerHTML = '<div class="text-center text-muted">' + _taUi('loading') + '</div>';
 
@@ -341,8 +341,10 @@ async function _renderTeacherAccess() {
         sel.addEventListener('change', refresh);
       });
     });
+    return true;
   } catch (e) {
     root.innerHTML = '<div class="form-error">' + _taUi('loadFailed') + ' ' + esc(e?.message || String(e)) + '</div>';
+    return false;
   }
 }
 
@@ -423,8 +425,8 @@ window.teacherAccessSavePermission = async function(select) {
     }
     // Re-read the persisted server state before claiming the change is saved.
     // This prevents a local <select> value from looking successful when the DB write failed.
-    await _renderTeacherAccess();
-    showToast('' + _taUi('saved') + '');
+    const refreshed = await _renderTeacherAccess();
+    showToast(refreshed ? _taUi('saved') : _taUi('saveRefreshFailed'));
   } catch(e) {
     await _renderTeacherAccess();
     showToast(e?.message || '' + _taUi('saveFailed') + '');
