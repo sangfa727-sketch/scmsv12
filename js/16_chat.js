@@ -953,7 +953,11 @@ function _renderAnnouncementWorkspace(){
 async function _loadAnnouncementWorkspace(autoOpen=true){
   const cached=Array.isArray(window._chatAnnouncements)?window._chatAnnouncements:null;
   const cachedList=document.getElementById('announcementList');
-  if(cachedList&&cached?.length)_renderAnnouncementList(cached);
+  if(cachedList&&cached?.length){
+    _renderAnnouncementList(cached);
+    const selected=cached.find(item=>String(item.id)===String(_announcementId))||(autoOpen?cached[0]:null);
+    if(selected)window._openAnnouncement(String(selected.id));
+  }
   try{
     const rows=await API.getStaffAnnouncements(50);
     const list=document.getElementById('announcementList'),stream=document.getElementById('announcementStream');
