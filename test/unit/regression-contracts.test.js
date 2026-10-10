@@ -756,5 +756,5 @@ test('official message recipient modes keep independent verified previews', () =
   assert.match(chat, /smart-chat-send-ready/);
   assert.match(chat, /adminMsgSendHint/);
   assert.match(html, /style\.css\?v=20261009e/);
-  assert.match(html, /js\/16_chat\.js\?v=20261010b/);
+  assert.match(html, /js\/16_chat\.js\?v=20261010c/);
 });
