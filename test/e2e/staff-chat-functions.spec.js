@@ -370,3 +370,12 @@ test('admin official announcement uses verified recipients and sends through the
     'Please review the updated duty schedule.'
   ]);
 });
+
+test('channel workspaces rely on the persistent channel tabs instead of a duplicate Back button', async ({ page }) => {
+  await mountSmartChat(page);
+  for (const channel of ['announcements', 'tickets', 'events', 'departments']) {
+    await page.evaluate((id) => window.switchChatChannel(id), channel);
+    await expect(page.locator('.smart-chat-channel-back')).toHaveCount(0);
+    await expect(page.locator('#smartChatQuickNav .smart-chat-quick-channel.active')).toHaveAttribute('data-chat-quick-channel', channel);
+  }
+});

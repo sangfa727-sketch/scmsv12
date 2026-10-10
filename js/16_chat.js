@@ -573,6 +573,12 @@ function _renderChatQuickNav() {
         '<span class="smart-chat-quick-channel-count' + (count > 0 ? ' has-unread' : '') + '"' + countLabel + '>' + (count > 0 ? (count > 99 ? '99+' : count) : '') + '</span>' +
       '</button>';
     }).join('') + '</div>';
+  // Keep the selected channel visible after switching; mobile users should never
+  // land on the first tab while a different workspace is active.
+  requestAnimationFrame(() => {
+    const active = nav.querySelector('.smart-chat-quick-channel.active');
+    if (active) active.scrollIntoView({block:'nearest',inline:'center',behavior:'auto'});
+  });
 }
 
 function _chatUnreadCount(channel) {
@@ -1119,8 +1125,10 @@ window._directKeydown=function(ev){if(ev.key==='Enter'&&!ev.shiftKey){ev.prevent
 
 window._showSchoolChatChannels = function() { _chatChannel='staff'; _renderChatMode(); };
 
-function _chatChannelBack(label=t('chat.schoolChat')) {
-  return `<div class="smart-chat-channel-back-row"><button type="button" class="smart-chat-channel-back" onclick="_showSchoolChatChannels()" aria-label="${t('chat.backToSchoolChat')}">‹ <span>${esc(label)}</span></button></div>`;
+function _chatChannelBack() {
+  // Channel switching is handled by the persistent tab rail; a second Back
+  // control duplicates navigation and can mislead users about their active tab.
+  return '';
 }
 
 window.switchChatChannel = function(channel) {
@@ -1131,6 +1139,10 @@ window.switchChatChannel = function(channel) {
   _renderChatQuickNav();
   _renderChatMode();
   _refreshChatChannelUnreadCounts();
+  requestAnimationFrame(() => {
+    const active = document.querySelector('#smartChatQuickNav .smart-chat-quick-channel.active');
+    if (active) active.scrollIntoView({block:'nearest',inline:'center',behavior:'auto'});
+  });
 };
 
 async function _loadChatMessages() {
