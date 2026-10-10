@@ -485,10 +485,10 @@ function renderChat() {
         <button type="button" class="sc-chat-top-action" onclick="_chatBackToMenu()" aria-label="${esc(t('chat.exitChat'))}" title="${esc(t('chat.exitChat'))}">
           <svg viewBox="0 0 24 24" width="21" height="21" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M4 6h16M4 12h16M4 18h16"/></svg>
         </button>
-        <button type="button" class="sc-chat-mode-pill" onclick="switchChatMode(_chatMode === 'school' ? 'ai' : 'school')" aria-label="Switch between School Chat and AI Assistant" title="Switch chat mode">
+        <button type="button" class="sc-chat-mode-pill" onclick="switchChatMode(_chatMode === 'school' ? 'ai' : 'school')" aria-label="${esc(t('chat.switchChatMode'))}" title="${esc(t('chat.switchChatMode'))}">
           ${_chatMode === 'school' ? _chatIcon('users') + esc(t('chat.schoolChat')) : _chatIcon('bot') + esc(t('chat.aiAssistant'))}
         </button>
-        <button type="button" class="sc-chat-top-action" onclick="_toggleChatTypeMenu()" aria-label="Manage chat type tabs" title="Manage chat type tabs" aria-haspopup="menu" aria-controls="scChatTypeMenu" aria-expanded="${_chatTypeMenuOpen ? 'true' : 'false'}">
+        <button type="button" class="sc-chat-top-action" onclick="_toggleChatTypeMenu()" aria-label="${esc(t('chat.manageChatTypes'))}" title="${esc(t('chat.manageChatTypes'))}" aria-haspopup="menu" aria-controls="scChatTypeMenu" aria-expanded="${_chatTypeMenuOpen ? 'true' : 'false'}">
           <svg viewBox="0 0 24 24" width="21" height="21" fill="currentColor" aria-hidden="true"><circle cx="5" cy="12" r="1.8"/><circle cx="12" cy="12" r="1.8"/><circle cx="19" cy="12" r="1.8"/></svg>
         </button>
         <div id="scChatTypeMenu" class="sc-chat-type-menu" role="menu" aria-label="Hidden chat types" ${_chatTypeMenuOpen ? '' : 'hidden'}>${_chatTypeMenuMarkup()}</div>
@@ -554,13 +554,13 @@ window._toggleChatTypeMenu = function() {
 };
 function _chatTypeMenuMarkup() {
   const hidden = _chatQuickNavChannels().filter(c => _chatVisibleTypes[c.id] === false);
-  if (!hidden.length) return '<div class="sc-chat-type-empty">All chat types are visible. Use × on a tab to hide it.</div>';
+  if (!hidden.length) return '<div class="sc-chat-type-empty">' + esc(t('chat.allChatTypesVisible')) + '</div>';
   return hidden.map(c => '<button type="button" class="sc-chat-type-option" role="menuitem" onclick="_showChatType(\'' + c.id + '\')">' +
-    '<span class="smart-chat-quick-channel-icon" aria-hidden="true">' + c.icon + '</span><span class="sc-chat-type-copy"><strong>' + esc(c.name) + '</strong><small>Show this tab on the chat bar</small></span><span class="sc-chat-type-enable" aria-hidden="true">＋</span></button>').join('');
+    '<span class="smart-chat-quick-channel-icon" aria-hidden="true">' + c.icon + '</span><span class="sc-chat-type-copy"><strong>' + esc(c.name) + '</strong><small>' + esc(t('chat.showTabOnBar')) + '</small></span><span class="sc-chat-type-enable" aria-hidden="true">＋</span></button>').join('');
 }
 window._hideChatType = function(id) {
   const visible = _chatQuickNavChannels().filter(c => _chatVisibleTypes[c.id] !== false);
-  if (visible.length <= 1) { showToast('Keep at least one chat type visible.'); return; }
+  if (visible.length <= 1) { showToast(t('chat.keepOneChatTypeVisible')); return; }
   _chatVisibleTypes[id] = false;
   try { localStorage.setItem('scms_chat_visible_types', JSON.stringify(_chatVisibleTypes)); } catch (_) {}
   if (_chatChannel === id) _chatChannel = _chatQuickNavChannels().find(c => _chatVisibleTypes[c.id] !== false)?.id || 'staff';
@@ -607,7 +607,7 @@ function _renderChatQuickNav() {
         '<span class="smart-chat-quick-channel-icon" aria-hidden="true">' + c.icon + '</span>' +
         '<span class="smart-chat-quick-channel-name">' + esc(c.name) + '</span>' +
         '<span class="smart-chat-quick-channel-count' + (count > 0 ? ' has-unread' : '') + '"' + countLabel + '>' + (count > 0 ? (count > 99 ? '99+' : count) : '') + '</span>' +
-      '</button><button type="button" class="smart-chat-quick-channel-hide" onclick="_hideChatType(\'' + c.id + '\')" aria-label="Hide ' + esc(c.name) + ' tab" title="Hide tab">×</button></div>';
+      '</button><button type="button" class="smart-chat-quick-channel-hide" onclick="_hideChatType(\'' + c.id + '\')" aria-label="' + esc(t('chat.hideTab')) + ' ' + esc(c.name) + '" title="' + esc(t('chat.hideTab')) + '">×</button></div>';
     }).join('') + '</div>';
   // Keep the selected channel visible after switching; mobile users should never
   // land on the first tab while a different workspace is active.
