@@ -440,6 +440,8 @@ test('mobile Staff Chat list panes remain independently scrollable when populate
   });
   const announcements = page.locator('#announcementList');
   await expect(announcements.locator('.smart-chat-announcement-card')).toHaveCount(24);
+  // Mobile opens the first announcement automatically; return to the list pane before testing its scroll area.
+  await page.evaluate(() => window._clearAnnouncementSelection());
   const announcementScroll = await announcements.evaluate((el) => {
     const before = el.scrollTop;
     el.scrollTop = el.scrollHeight;
