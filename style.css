@@ -10157,3 +10157,45 @@ html.scms-chat-workspace #pages{overflow:auto}
     margin:6px;
   }
 }
+
+/* Enforce compact one-to-one conversation header geometry against legacy chat styles. */
+#page-chat #directConversationHead.smart-chat-conversation-head {
+  display:flex;
+  flex:0 0 54px;
+  height:54px;
+  min-height:54px !important;
+  max-height:54px;
+  align-items:center;
+  justify-content:space-between;
+  overflow:hidden;
+  box-sizing:border-box;
+}
+#page-chat #directConversationHead .smart-chat-direct-peer {
+  display:flex;
+  flex:1 1 auto;
+  flex-direction:row;
+  align-items:center;
+  min-width:0;
+  min-height:0;
+  height:100%;
+  gap:8px;
+}
+#page-chat #directConversationHead .smart-chat-direct-peer > div:last-child {
+  flex:1 1 auto;
+  min-width:0;
+  max-width:100%;
+}
+#page-chat #directConversationHead .smart-chat-direct-peer strong,
+#page-chat #directConversationHead .smart-chat-direct-peer small {
+  max-width:100%;
+  margin:0;
+}
+@media(max-width:760px) {
+  #page-chat #directConversationHead.smart-chat-conversation-head {
+    flex-basis:50px;
+    height:50px;
+    min-height:50px !important;
+    max-height:50px;
+    padding:5px 8px;
+  }
+}
