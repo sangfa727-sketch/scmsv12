@@ -275,6 +275,7 @@
       'chat.manageChatTypes':"Manage chat types",
       'chat.hideTab':"Hide tab",
       'chat.showTabOnBar':"Show this tab on the chat bar",
+      'chat.openChatType':"Open this chat type",
       'chat.allChatTypesVisible':"All chat types are visible.",
       'chat.keepOneChatTypeVisible':"Keep at least one chat type visible.",
 
@@ -310,6 +311,7 @@
       'chat.manageChatTypes':"Chat အမျိုးအစားများ စီမံရန်",
       'chat.hideTab':"Tab ဖျောက်ရန်",
       'chat.showTabOnBar':"Chat bar ပေါ်တွင် ပြရန်",
+      'chat.openChatType':"ဤ Chat အမျိုးအစားကို ဖွင့်ရန်",
       'chat.allChatTypesVisible':"Chat အမျိုးအစားအားလုံးကို ပြထားသည်။",
       'chat.keepOneChatTypeVisible':"အနည်းဆုံး Chat အမျိုးအစားတစ်ခုကို ပြထားပါ။",
 
@@ -345,6 +347,7 @@
       'chat.manageChatTypes':"จัดการประเภทแชต",
       'chat.hideTab':"ซ่อนแท็บ",
       'chat.showTabOnBar':"แสดงแท็บนี้บนแถบแชต",
+      'chat.openChatType':"เปิดแชตประเภทนี้",
       'chat.allChatTypesVisible':"แสดงประเภทแชตทั้งหมดแล้ว",
       'chat.keepOneChatTypeVisible':"ต้องแสดงประเภทแชตอย่างน้อยหนึ่งรายการ",
 
@@ -380,6 +383,7 @@
       'chat.manageChatTypes':"チャット種別を管理",
       'chat.hideTab':"タブを非表示",
       'chat.showTabOnBar':"チャットバーにこのタブを表示",
+      'chat.openChatType':"このチャットを開く",
       'chat.allChatTypesVisible':"すべてのチャット種別を表示しています",
       'chat.keepOneChatTypeVisible':"少なくとも1つのチャット種別を表示してください",
 
@@ -415,6 +419,7 @@
       'chat.manageChatTypes':"Urus jenis sembang",
       'chat.hideTab':"Sembunyikan tab",
       'chat.showTabOnBar':"Tunjukkan tab ini pada bar sembang",
+      'chat.openChatType':"Buka jenis sembang ini",
       'chat.allChatTypesVisible':"Semua jenis sembang sedang dipaparkan.",
       'chat.keepOneChatTypeVisible':"Kekalkan sekurang-kurangnya satu jenis sembang yang kelihatan.",
 
@@ -450,6 +455,7 @@
       'chat.manageChatTypes':"គ្រប់គ្រងប្រភេទការជជែក",
       'chat.hideTab':"លាក់ផ្ទាំង",
       'chat.showTabOnBar':"បង្ហាញផ្ទាំងនេះនៅលើរបារជជែក",
+      'chat.openChatType':"បើកប្រភេទការជជែកនេះ",
       'chat.allChatTypesVisible':"ប្រភេទការជជែកទាំងអស់កំពុងបង្ហាញ។",
       'chat.keepOneChatTypeVisible':"សូមទុកប្រភេទការជជែកយ៉ាងតិចមួយឱ្យបង្ហាញ។",
 
@@ -485,6 +491,7 @@
       'chat.manageChatTypes':"管理聊天类型",
       'chat.hideTab':"隐藏标签",
       'chat.showTabOnBar':"在聊天栏显示此标签",
+      'chat.openChatType':"打开此聊天类型",
       'chat.allChatTypesVisible':"所有聊天类型均已显示。",
       'chat.keepOneChatTypeVisible':"请至少保留一个可见的聊天类型。",
 
