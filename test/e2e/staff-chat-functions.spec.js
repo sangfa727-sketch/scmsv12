@@ -711,3 +711,77 @@ test('cached Staff Chat lists remain visible while refresh requests are pending'
   await expect(page.locator('#chatGroupList')).toContainText('Planning Group');
 });
 
+
+test('mobile touch swipes scroll Staff Chat directory, announcement, and ticket lists', async ({ browser }) => {
+  const context = await browser.newContext({
+    viewport: { width: 390, height: 844 },
+    deviceScaleFactor: 1,
+    isMobile: true,
+    hasTouch: true
+  });
+  const page = await context.newPage();
+  try {
+    await mountSmartChat(page);
+    await page.evaluate(() => {
+      window.API.getDirectStaffDirectory = async () => Array.from({ length: 28 }, (_, i) => ({
+        teacher_id: `touch-teacher-${i + 1}`,
+        teacher_name: `Touch Staff ${i + 1}`,
+        role: 'Teacher',
+        status: 'active'
+      }));
+      window.API.getDirectConversations = async () => [];
+      window.API.getStaffAnnouncements = async () => Array.from({ length: 24 }, (_, i) => ({
+        id: `00000000-0000-4000-8000-${String(i + 1).padStart(12, '0')}`,
+        message_type: 'notice',
+        reason: `Touch notice ${i + 1}`,
+        body: `Touch announcement body ${i + 1}`,
+        created_at: '2026-10-10T08:00:00.000Z'
+      }));
+      window.API.getInquiryTickets = async () => Array.from({ length: 24 }, (_, i) => ({
+        id: i + 201,
+        subject: `Touch ticket ${i + 1}`,
+        status: 'OPEN',
+        priority: 'NORMAL',
+        created_at: '2026-10-10T08:00:00.000Z',
+        unread_count: 0
+      }));
+    });
+
+    const cdp = await context.newCDPSession(page);
+    const swipeUp = async (selector) => {
+      const pane = page.locator(selector);
+      await expect(pane).toBeVisible();
+      await pane.scrollIntoViewIfNeeded();
+      const box = await pane.boundingBox();
+      expect(box).toBeTruthy();
+      const x = Math.round(box.x + box.width / 2);
+      const y = Math.round(box.y + Math.min(box.height / 2, 240));
+      const before = await pane.evaluate(el => el.scrollTop);
+      // Chromium's synthesized touch-source scroll gesture exercises the browser's
+      // scrolling pipeline more reliably than manually dispatching raw touch events.
+      await cdp.send('Input.synthesizeScrollGesture', {
+        x,
+        y,
+        yDistance: -Math.max(240, Math.round(box.height * 0.6)),
+        speed: 900,
+        gestureSourceType: 'touch'
+      });
+      await expect.poll(() => pane.evaluate(el => el.scrollTop), { timeout: 2000 }).toBeGreaterThan(before);
+    };
+
+    await page.evaluate(() => window.switchChatChannel('direct'));
+    await expect(page.locator('#directStaffDirectory .smart-chat-directory-item')).toHaveCount(28);
+    await swipeUp('#directStaffDirectory .smart-chat-directory');
+
+    await page.evaluate(() => window.switchChatChannel('announcements'));
+    await expect(page.locator('#announcementList .smart-chat-announcement-card')).toHaveCount(24);
+    await page.evaluate(() => window._clearAnnouncementSelection());
+    await swipeUp('#announcementList');
+
+    await page.evaluate(() => window.switchChatChannel('tickets'));
+    await expect(page.locator('#inquiryTicketList .smart-chat-channel-card')).toHaveCount(24);
+    await swipeUp('#inquiryTicketList');
+  } finally {
+    await context.close();
+  }
+});
