@@ -379,3 +379,24 @@ test('channel workspaces rely on the persistent channel tabs instead of a duplic
     await expect(page.locator('#smartChatQuickNav .smart-chat-quick-channel.active')).toHaveAttribute('data-chat-quick-channel', channel);
   }
 });
+
+test('sent and received Staff Chat messages use distinct readable bubble surfaces', async ({ page }) => {
+  await mountSmartChat(page);
+  await page.locator('#chatInput').fill('Outgoing contrast regression');
+  await page.locator('#chatSendBtn').click();
+  const received = page.locator('#chatStream .chat-bubble-row.theirs .chat-bubble').first();
+  const sent = page.locator('#chatStream .chat-bubble-row.mine .chat-bubble').last();
+  await expect(received).toContainText('Staff hello');
+  await expect(sent).toContainText('Outgoing contrast regression');
+  const surfaces = await page.evaluate(() => {
+    const receivedBubble = document.querySelector('#chatStream .chat-bubble-row.theirs .chat-bubble');
+    const sentBubble = [...document.querySelectorAll('#chatStream .chat-bubble-row.mine .chat-bubble')].at(-1);
+    return {
+      received: receivedBubble ? getComputedStyle(receivedBubble).backgroundColor : null,
+      sent: sentBubble ? getComputedStyle(sentBubble).backgroundColor : null
+    };
+  });
+  expect(surfaces.received).toBeTruthy();
+  expect(surfaces.sent).toBeTruthy();
+  expect(surfaces.sent).not.toBe(surfaces.received);
+});
