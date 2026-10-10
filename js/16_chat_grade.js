@@ -25,10 +25,7 @@ async function _openGradeChat(name,silent=false){
   const r=await API.openGradeChat(requestedGrade);if(requestToken!==_gradeOpenRequest)return;if(!r?.ok)throw new Error(r?.error||'Unauthorized');
   _gradeName=String(r.grade_name||requestedGrade).trim();_setGradeMobileView(true);
   const msgs=Array.isArray(r.rows)?r.rows:[];
-  if(silent&&_gradeName===requestedGrade&&JSON.stringify(msgs)===JSON.stringify(_gradeMessages)){
-    try{await API.markGradeRead(_gradeName);}catch(_){}
-    return;
-  }
+  if(silent&&_gradeName===requestedGrade&&JSON.stringify(msgs)===JSON.stringify(_gradeMessages))return;
   const messageHtml=msgs.length?msgs.map(m=>{
    const mine=m.sender_teacher_id===window.APP?.teacher_id;
    const author=mine?t('chat.you'):esc(m.sender_teacher_name||t('chat.staff'));
