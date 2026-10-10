@@ -771,7 +771,7 @@ test('mobile touch swipes scroll Staff Chat directory, announcement, and ticket 
 
     await page.evaluate(() => window.switchChatChannel('direct'));
     await expect(page.locator('#directStaffDirectory .smart-chat-directory-item')).toHaveCount(28);
-    await swipeUp('#directStaffDirectory .smart-chat-directory');
+    await swipeUp('#directStaffDirectory');
 
     await page.evaluate(() => window.switchChatChannel('announcements'));
     await expect(page.locator('#announcementList .smart-chat-announcement-card')).toHaveCount(24);
