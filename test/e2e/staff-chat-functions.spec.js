@@ -627,3 +627,24 @@ test('Department creation modal selects existing staff and assigns them to the n
   await expect(page.locator('#departmentComposerOverlay')).toHaveCount(0);
   await expect(page.locator('#departmentList')).toContainText('Science Department');
 });
+
+
+
+test('Staff Chat preserves the last successful contact and announcement data on transient refresh errors', async ({ page }) => {
+  await mountSmartChat(page);
+  await page.evaluate(() => window.switchChatChannel('direct'));
+  await expect(page.locator('#directStaffDirectory')).toContainText('Other Teacher');
+  await page.evaluate(() => {
+    window.API.getDirectStaffDirectory = async () => { throw new Error('temporary_directory_error'); };
+    window._loadDirectWorkspace();
+  });
+  await expect(page.locator('#directStaffDirectory')).toContainText('Other Teacher');
+
+  await page.evaluate(() => window.switchChatChannel('announcements'));
+  await expect(page.locator('#announcementList')).toContainText('Read this announcement');
+  await page.evaluate(() => {
+    window.API.getStaffAnnouncements = async () => { throw new Error('temporary_announcement_error'); };
+    window._loadAnnouncementWorkspace(false);
+  });
+  await expect(page.locator('#announcementList')).toContainText('Read this announcement');
+});
