@@ -23,45 +23,12 @@ jobs:
       - name: Run frontend syntax and regression tests
         run: npm test
 
-  playwright-local:
-    name: Playwright local UI regression tests
-    runs-on: ubuntu-latest
-    if: github.event_name == 'pull_request' || github.event_name == 'push'
-    steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-node@v4
-        with:
-          node-version: 20
-      - run: npm install --no-audit --no-fund
-      - name: Install Chromium for Playwright
-        run: npx playwright install --with-deps chromium
-      - name: Start local SCMS frontend
-        run: |
-          npm run serve > /tmp/scms-serve.log 2>&1 &
-          for i in {1..30}; do
-            if curl --fail --silent http://127.0.0.1:5173/ >/dev/null; then exit 0; fi
-            sleep 1
-          done
-          cat /tmp/scms-serve.log
-          exit 1
-      - name: Run local UI smoke and Manage Teacher/Access tests
-        env:
-          SCMS_URL: http://127.0.0.1:5173
-        run: npx playwright test test/e2e/ci-smoke.spec.js test/e2e/teacher-management-functions.spec.js
-      - uses: actions/upload-artifact@v4
-        if: failure()
-        with:
-          name: playwright-local-report
-          path: |
-            playwright-report/
-            test-results/
-          retention-days: 14
-
   website-rls:
     name: Public website RLS runtime test
     runs-on: ubuntu-latest
     services:
       postgres:
+        # Public ECR mirror avoids Docker Hub anonymous pull throttling in CI.
         image: public.ecr.aws/docker/library/postgres:16
         env:
           POSTGRES_USER: scms_test
@@ -91,6 +58,58 @@ jobs:
         env:
           PGPASSWORD: scms_test
         run: psql -h 127.0.0.1 -U scms_test -d scms_test -v ON_ERROR_STOP=1 -f school-website/db/sandbox_rls_runtime_test.sql
+
+  playwright-ci:
+    name: Playwright local smoke test (automatic PR/push)
+    if: github.event_name == 'pull_request' || github.event_name == 'push'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+      - name: Install dependencies
+        run: npm install --no-audit --no-fund
+      - name: Install Chromium
+        run: npx playwright install --with-deps chromium
+      - name: Start SCMS locally
+        run: |
+          npm run serve > /tmp/scms-serve.log 2>&1 &
+          echo $! > /tmp/scms-serve.pid
+          for i in {1..30}; do
+            if curl --fail --silent http://127.0.0.1:5173/ > /dev/null; then
+              exit 0
+            fi
+            sleep 1
+          done
+          cat /tmp/scms-serve.log
+          exit 1
+      - name: Run local Playwright smoke, Staff Chat, and Manage Teacher/Access tests
+        env:
+          SCMS_URL: http://127.0.0.1:5173
+        run: npx playwright test test/e2e/ci-smoke.spec.js test/e2e/staff-chat-functions.spec.js test/e2e/teacher-management-functions.spec.js
+      - name: Write CI summary
+        if: always()
+        shell: bash
+        run: |
+          {
+            echo '## SCMS Playwright CI'
+            echo "- Event: $GITHUB_EVENT_NAME"
+            echo "- Commit: $GITHUB_SHA"
+            echo "- Ref: $GITHUB_REF"
+            echo "- Job result: ${{ job.status }}"
+            echo '- Scope: homepage/page-shell smoke plus mocked Staff Smart Chat and Manage Teacher/Access UI function flows; real backend integration, authorization, and security remain untested.'
+          } >> "$GITHUB_STEP_SUMMARY"
+      - name: Upload Playwright evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: playwright-local-evidence
+          path: |
+            playwright-report/
+            test-results/
+          if-no-files-found: ignore
+          retention-days: 14
 
   e2e:
     name: Playwright (scheduled/manual only)
