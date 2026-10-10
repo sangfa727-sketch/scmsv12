@@ -327,6 +327,7 @@ window._refreshAdminComposerPreview = function() {
     /* Desktop keeps the existing SCMS shell; the full-screen workspace is mobile-only. */
     .sc-chat-topbar{display:none}
     @media(min-width:761px){
+      #page-chat .smart-chat-shell{width:100%;max-width:none;min-width:0}
       #page-chat .smart-chat-hero{display:flex;align-items:center;gap:22px;width:100%;min-width:0}
       #page-chat .smart-chat-hero>div:first-of-type{flex:1 1 auto;min-width:0}
       #page-chat .smart-chat-mode-switch{display:flex;flex:0 0 auto;align-items:center;gap:6px;margin-left:auto}
@@ -366,6 +367,10 @@ window._refreshAdminComposerPreview = function() {
       html.scms-chat-workspace #page-chat .sc-chat-type-menu{position:absolute;top:calc(100% + 8px);right:12px;width:min(260px,calc(100vw - 24px));padding:7px;border:1px solid var(--border);border-radius:17px;background:var(--surface);box-shadow:0 18px 48px rgba(0,0,0,.22);transform-origin:top right;animation:scChatMenuIn .18s cubic-bezier(.2,.8,.2,1) both}
       html.scms-chat-workspace #page-chat .sc-chat-type-menu[hidden]{display:none}
       html.scms-chat-workspace #page-chat .sc-chat-type-option{display:flex;align-items:center;gap:12px;width:100%;min-height:52px;padding:9px 12px;border-radius:12px;text-align:left;color:var(--text);transition:background .16s ease,transform .16s ease}
+      html.scms-chat-workspace #page-chat .sc-chat-type-row{display:flex;align-items:center;gap:5px}
+      html.scms-chat-workspace #page-chat .sc-chat-type-row .sc-chat-type-option{flex:1;min-width:0;width:auto}
+      html.scms-chat-workspace #page-chat .sc-chat-type-enable{display:grid;place-items:center;width:34px;height:34px;flex:0 0 34px;border:1px solid var(--border);border-radius:50%;background:var(--bg2);color:var(--sc-chat-accent);font-size:19px;font-weight:800}
+      html.scms-chat-workspace #page-chat .sc-chat-type-enable:active{transform:scale(.92)}
       html.scms-chat-workspace #page-chat .sc-chat-type-option:active{transform:scale(.985)}
       html.scms-chat-workspace #page-chat .sc-chat-type-option.active{background:color-mix(in srgb,var(--sc-chat-accent) 12%,var(--surface))}
       html.scms-chat-workspace #page-chat .sc-chat-type-option .sc-chat-type-copy{display:flex;flex-direction:column;gap:2px;min-width:0;flex:1}
@@ -581,9 +586,9 @@ function _chatTypeMenuMarkup() {
   const hidden = _chatQuickNavChannels().filter(c => _chatVisibleTypes[c.id] === false);
   if (!hidden.length) return '<div class="sc-chat-type-empty">' + esc(t('chat.allChatTypesVisible')) + '</div>';
   return hidden.map(c => '<div class="sc-chat-type-row" role="none">' +
-    '<button type="button" class="sc-chat-type-option" role="menuitem" onclick="_openHiddenChatType(\\'' + c.id + '\\')">' +
+    '<button type="button" class="sc-chat-type-option" role="menuitem" onclick="_openHiddenChatType(\'' + c.id + '\')">' +
     '<span class="smart-chat-quick-channel-icon" aria-hidden="true">' + c.icon + '</span><span class="sc-chat-type-copy"><strong>' + esc(c.name) + '</strong><small>' + esc(t('chat.openChatType')) + '</small></span></button>' +
-    '<button type="button" class="sc-chat-type-enable" role="menuitem" onclick="_showChatType(\\'' + c.id + '\\')" aria-label="' + esc(t('chat.showTabOnBar')) + ' ' + esc(c.name) + '" title="' + esc(t('chat.showTabOnBar')) + '">＋</button></div>').join('');
+    '<button type="button" class="sc-chat-type-enable" role="menuitem" onclick="_showChatType(\'' + c.id + '\')" aria-label="' + esc(t('chat.showTabOnBar')) + ' ' + esc(c.name) + '" title="' + esc(t('chat.showTabOnBar')) + '">＋</button></div>').join('');
 }
 window._openHiddenChatType = function(id) {
   if (!_chatQuickNavChannels().some(channel => channel.id === id) || _chatVisibleTypes[id] !== false) return;
