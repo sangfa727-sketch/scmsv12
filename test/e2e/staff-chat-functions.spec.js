@@ -652,6 +652,28 @@ test('Staff Chat preserves the last successful contact and announcement data on 
 test('cached Staff Chat lists remain visible while refresh requests are pending', async ({ page }) => {
   await mountSmartChat(page);
 
+  await page.evaluate(() => window.switchChatChannel('direct'));
+  await expect(page.locator('#directStaffDirectory')).toContainText('Other Teacher');
+  await page.evaluate(() => {
+    window.API.getDirectStaffDirectory = () => new Promise(() => {});
+    window.API.getDirectConversations = () => new Promise(() => {});
+    window.switchChatChannel('staff');
+    window.switchChatChannel('direct');
+  });
+  await expect(page.locator('#directStaffDirectory')).toContainText('Other Teacher');
+
+  await page.evaluate(() => {
+    window.API.getGradeChats = async () => [{ grade_name: 'G1', unread_count: 0 }];
+    window._showGradeWorkspace();
+  });
+  await expect(page.locator('#gradeList')).toContainText('G1');
+  await page.evaluate(() => {
+    window.API.getGradeChats = () => new Promise(() => {});
+    window._showDepartmentWorkspace();
+    window._showGradeWorkspace();
+  });
+  await expect(page.locator('#gradeList')).toContainText('G1');
+
   await page.evaluate(() => window.switchChatChannel('announcements'));
   await expect(page.locator('#announcementList')).toContainText('notice');
   await page.evaluate(() => {
