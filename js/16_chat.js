@@ -775,6 +775,8 @@ function _renderInquiryTicketList(){
   }).join(''):'<div class="smart-chat-list-empty-card"><div class="icon">🎫</div><strong>'+t('chat.noInquiryTickets')+'</strong><small>'+t('chat.createTicketHint')+'</small></div>';
 }
 async function _loadInquiryTickets(){
+  // Keep the last successful ticket list visible while the refresh is pending.
+  if(_inquiryTickets.length)_renderInquiryTicketList();
   try{
     _inquiryTickets=await API.getInquiryTickets();
     _renderInquiryTicketList();
@@ -949,6 +951,9 @@ function _renderAnnouncementWorkspace(){
     `<section class="smart-chat-direct-conversation"><div id="announcementHead" class="smart-chat-conversation-head"><div><strong>${t('chat.officialAnnouncements')}</strong><small>${t('chat.officialNotices')}</small></div><span class="smart-chat-verified-pill">${t('chat.verifiedStaffOnly')}</span></div><div id="announcementStream" class="chat-stream" aria-live="polite"><div class="chat-empty"><div class="chat-empty-icon">📢</div><div class="chat-empty-title">${t('chat.officialAnnouncements')}</div><div class="chat-empty-sub">${t('chat.emptySub')}</div></div></div></section></div>`;
 }
 async function _loadAnnouncementWorkspace(autoOpen=true){
+  const cached=Array.isArray(window._chatAnnouncements)?window._chatAnnouncements:null;
+  const cachedList=document.getElementById('announcementList');
+  if(cachedList&&cached?.length)_renderAnnouncementList(cached);
   try{
     const rows=await API.getStaffAnnouncements(50);
     const list=document.getElementById('announcementList'),stream=document.getElementById('announcementStream');
@@ -957,7 +962,7 @@ async function _loadAnnouncementWorkspace(autoOpen=true){
     if(!rows.length){_announcementId=null;list.innerHTML=`<div class="smart-chat-list-empty-card"><div class="icon">📢</div><strong>${t('chat.emptyTitle')}</strong><small>${t('chat.emptySub')}</small></div>`;stream.innerHTML=`<div class="chat-empty"><div class="chat-empty-icon">📢</div><div class="chat-empty-title">${t('chat.emptyTitle')}</div><div class="chat-empty-sub">${t('chat.emptySub')}</div></div>`;return;}
     _renderAnnouncementList(rows);
     if(autoOpen && !_announcementId) await _openAnnouncement(String(rows[0].id));
-   }catch(e){const list=document.getElementById('announcementList');if(list&&!Array.isArray(window._chatAnnouncements||null))list.innerHTML=`<div class="chat-error"><div>📢</div><div>${t('chat.loadFailed')}</div><button type="button" class="btn-secondary" onclick="_loadAnnouncementWorkspace(false)">${t('chat.retry')}</button></div>`;}
+   }catch(e){const list=document.getElementById('announcementList');const cachedRows=Array.isArray(window._chatAnnouncements)?window._chatAnnouncements:[];if(list&&cachedRows.length)_renderAnnouncementList(cachedRows);else if(list)list.innerHTML=`<div class="chat-error"><div>📢</div><div>${t('chat.loadFailed')}</div><button type="button" class="btn-secondary" onclick="_loadAnnouncementWorkspace(false)">${t('chat.retry')}</button></div>`;}
 }
 window._openAnnouncement=async function(id){
   const a=(window._chatAnnouncements||[]).find(x=>String(x.id)===String(id));
@@ -1012,6 +1017,9 @@ function _renderDirectWorkspace() {
 }
 
 async function _loadDirectWorkspace() {
+  // Paint last successful rows immediately; refresh in the background.
+  if (_directStaff.length) _renderDirectDirectory();
+  if (_directConversations.length) _renderDirectConversationList();
   try {
     const [staff, conversations] = await Promise.all([API.getDirectStaffDirectory(), API.getDirectConversations()]);
     _directStaff = Array.isArray(staff) ? staff : [];
