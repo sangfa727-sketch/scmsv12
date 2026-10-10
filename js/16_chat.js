@@ -329,7 +329,7 @@ window._refreshAdminComposerPreview = function() {
       #page-chat .smart-chat-shell{width:100%;max-width:none;min-width:0}
       #page-chat .smart-chat-hero{display:flex;align-items:center;gap:22px;width:100%;min-width:0}
       #page-chat .smart-chat-hero>div:first-of-type{flex:1 1 auto;min-width:0}
-      #page-chat .smart-chat-mode-switch{display:flex;flex:0 0 auto;align-items:center;gap:6px;margin-left:auto}
+      #page-chat .smart-chat-mode-switch{display:flex;flex:0 0 auto;align-items:center;gap:6px;margin:0 0 0 auto}
       #page-chat .smart-chat-mode-switch button{white-space:nowrap}
       #page-chat .smart-chat-identity{display:none!important}
       #page-chat #smartChatQuickNav{width:100%;min-width:0;overflow:visible}
