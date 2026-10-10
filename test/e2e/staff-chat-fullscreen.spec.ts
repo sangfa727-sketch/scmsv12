@@ -68,8 +68,11 @@ test.describe('Staff Chat full-screen browser regression', () => {
     await page.locator('.sc-chat-topbar .sc-chat-top-action').nth(1).click();
     await expect(page.locator('#scChatTypeMenu [role="menuitem"]')).toContainText('Direct Messages');
     await page.locator('#scChatTypeMenu [role="menuitem"]').filter({ hasText: 'Direct Messages' }).click();
-    await expect(page.locator('[data-chat-quick-channel="direct"]')).toBeVisible();
+    await expect(page.locator('[data-chat-quick-channel="direct"]')).toHaveCount(0);
     await expect(page.locator('#scChatTypeMenu')).toBeHidden();
+    await page.locator('.sc-chat-topbar .sc-chat-top-action').nth(1).click();
+    await page.locator('.sc-chat-type-option-row').filter({ hasText: 'Direct Messages' }).locator('.sc-chat-type-enable').click();
+    await expect(page.locator('[data-chat-quick-channel="direct"]')).toBeVisible();
   });
 
   test('workspace is vertically scrollable and has no horizontal overflow on mobile', async ({ page }) => {
