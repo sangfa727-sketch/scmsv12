@@ -55,21 +55,47 @@ test.describe('Staff Chat full-screen browser regression', () => {
     await expect(page.locator('.sc-chat-mode-pill')).toContainText(/AI Chat|AI Assistant/i);
   });
 
-  test('School Chat is restored by tapping the mode pill; three-dot menu manages hidden tabs', async ({ page }) => {
+  test('mobile hidden chat types navigate without re-enabling; plus control restores the tab', async ({ page }) => {
+    await page.setViewportSize({ width: 390, height: 844 });
     await signInAndOpenChat(page);
-    await page.locator('.sc-chat-mode-pill').click();
-    await expect(page.locator('.sc-chat-mode-pill')).toContainText(/AI Chat|AI Assistant/i);
-    await page.locator('.sc-chat-mode-pill').click();
-    await expect(page.locator('.sc-chat-mode-pill')).toContainText(/School Chat/i);
-    await expect.poll(() => page.evaluate(() => localStorage.getItem('scms_chat_mode'))).toBe('school');
-    await expect(page.locator('#scChatTypeMenu')).toHaveCount(1);
     await page.locator('[data-chat-quick-channel="direct"]').locator('xpath=..').locator('.smart-chat-quick-channel-hide').click();
     await expect(page.locator('[data-chat-quick-channel="direct"]')).toHaveCount(0);
     await page.locator('.sc-chat-topbar .sc-chat-top-action').nth(1).click();
-    await expect(page.locator('#scChatTypeMenu [role="menuitem"]')).toContainText('Direct Messages');
-    await page.locator('#scChatTypeMenu [role="menuitem"]').filter({ hasText: 'Direct Messages' }).click();
+    const hiddenType = page.locator('#scChatTypeMenu .sc-chat-type-option').filter({ hasText: 'Direct Messages' });
+    await expect(hiddenType).toBeVisible();
+    await hiddenType.click();
+    await expect(page.locator('.smart-chat-direct-shell')).toBeVisible();
+    await expect(page.locator('[data-chat-quick-channel="direct"]')).toHaveCount(0);
+    await page.locator('.sc-chat-topbar .sc-chat-top-action').nth(1).click();
+    await page.locator('#scChatTypeMenu .sc-chat-type-enable[aria-label*="Direct Messages"]').click();
     await expect(page.locator('[data-chat-quick-channel="direct"]')).toBeVisible();
-    await expect(page.locator('#scChatTypeMenu')).toBeHidden();
+  });
+
+  test('desktop tabs fill the row, have no mobile hide controls, and keep All Staff wide', async ({ page }) => {
+    await page.setViewportSize({ width: 1440, height: 900 });
+    await signInAndOpenChat(page);
+    await expect(page.locator('.smart-chat-identity')).toHaveCount(0);
+    await expect(page.locator('.smart-chat-mode-switch')).toBeVisible();
+    await expect(page.locator('.smart-chat-quick-channel-hide:visible')).toHaveCount(0);
+    const layout = await page.evaluate(() => {
+      const track = document.querySelector('.smart-chat-quick-nav-track') as HTMLElement | null;
+      const conversation = document.querySelector('.smart-chat-conversation') as HTMLElement | null;
+      const channelList = document.querySelector('.smart-chat-channel-list') as HTMLElement | null;
+      const body = document.querySelector('#smartChatModeBody') as HTMLElement | null;
+      return {
+        columns: track ? getComputedStyle(track).gridTemplateColumns : '',
+        trackWidth: track?.getBoundingClientRect().width ?? 0,
+        bodyWidth: body?.getBoundingClientRect().width ?? 0,
+        conversationWidth: conversation?.getBoundingClientRect().width ?? 0,
+        channelListWidth: channelList?.getBoundingClientRect().width ?? 0,
+        overflowWidth: track ? track.scrollWidth - track.clientWidth : 0
+      };
+    });
+    expect(layout.columns.split(' ').length).toBe(6);
+    expect(layout.trackWidth).toBeGreaterThan(700);
+    expect(layout.bodyWidth).toBeGreaterThan(800);
+    expect(layout.conversationWidth).toBeGreaterThan(layout.channelListWidth * 2);
+    expect(layout.overflowWidth).toBeLessThanOrEqual(1);
   });
 
   test('workspace is vertically scrollable and has no horizontal overflow on mobile', async ({ page }) => {
