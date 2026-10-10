@@ -334,3 +334,32 @@ test('Direct Chat composer recovers when the send API rejects the message', asyn
   await expect(input).toBeEnabled();
   await expect(page.locator('#directChatSendBtn')).toBeEnabled();
 });
+
+
+test('admin official announcement uses verified recipients and sends through the API', async ({ page }) => {
+  await mountSmartChat(page, false);
+  await page.evaluate(() => {
+    window.APP.is_admin = true;
+    window.renderChat();
+    window.switchChatChannel('announcements');
+  });
+
+  await expect(page.locator('#adminMsgRecipientType')).toBeVisible();
+  await page.locator('#adminMsgRecipientType').selectOption('all_staff');
+  await expect.poll(async () => (await calls(page, 'getChatRecipientPreview')).length).toBeGreaterThan(0);
+  await expect(page.locator('#adminMsgRoutingStatus')).toHaveClass(/verified/);
+
+  await page.locator('#adminMsgReason').fill('Staff operations update');
+  await page.locator('#adminMsgBody').fill('Please review the updated duty schedule.');
+  await expect(page.locator('#adminMsgSendBtn')).toBeEnabled();
+  await page.locator('#adminMsgSendBtn').click();
+
+  await expect.poll(async () => (await calls(page, 'createStaffAnnouncement')).length).toBe(1);
+  expect((await calls(page, 'createStaffAnnouncement'))[0].args).toEqual([
+    'all_staff',
+    null,
+    'announcement',
+    'Staff operations update',
+    'Please review the updated duty schedule.'
+  ]);
+});
