@@ -456,6 +456,7 @@ test('Direct Chat composer recovers when the send API rejects the message', asyn
   await expect(input).toBeEnabled();
   await input.fill('Rejected direct message');
   await page.locator('#directChatSendBtn').click();
+  await expect(input).toHaveValue('Rejected direct message');
   await expect(input).toBeEnabled();
   await expect(page.locator('#directChatSendBtn')).toBeEnabled();
 });
@@ -901,4 +902,41 @@ test('mobile Staff Chat directory, announcement, and ticket panes support touch 
   } finally {
     await context.close();
   }
+});
+
+
+test('All Staff Chat preserves the draft and restores controls when sending fails', async ({ page }) => {
+  await mountSmartChat(page);
+  await page.evaluate(() => {
+    window.API.sendChatMessage = async (...args) => {
+      window.__chatTestCalls.push({ name: 'sendChatMessage', args });
+      return { ok: false, error: 'simulated send rejection' };
+    };
+  });
+  const input = page.locator('#chatInput');
+  await input.fill('Keep this All Staff draft');
+  await page.locator('#chatSendBtn').click();
+  await expect.poll(async () => (await calls(page, 'sendChatMessage')).length).toBe(1);
+  await expect(input).toHaveValue('Keep this All Staff draft');
+  await expect(input).toBeEnabled();
+  await expect(page.locator('#chatSendBtn')).toBeEnabled();
+});
+
+test('Inquiry Chat preserves the draft and restores controls when sending fails', async ({ page }) => {
+  await mountSmartChat(page);
+  await page.evaluate(() => {
+    window.API.sendInquiryMessage = async (...args) => {
+      window.__chatTestCalls.push({ name: 'sendInquiryMessage', args });
+      return { ok: false, error: 'simulated send rejection' };
+    };
+    window.switchChatChannel('tickets');
+  });
+  await page.evaluate(() => window._openInquiryTicket(41));
+  const input = page.locator('#inquiryChatInput');
+  await input.fill('Keep this inquiry draft');
+  await page.locator('#inquirySendBtn').click();
+  await expect.poll(async () => (await calls(page, 'sendInquiryMessage')).length).toBe(1);
+  await expect(input).toHaveValue('Keep this inquiry draft');
+  await expect(input).toBeEnabled();
+  await expect(page.locator('#inquirySendBtn')).toBeEnabled();
 });
