@@ -477,6 +477,70 @@ test('mobile Staff Chat list panes remain independently scrollable when populate
 });
 
 
+
+test('mobile one-to-one chat keeps message stream scrollable and composer visible', async ({ page }) => {
+  await mountSmartChat(page);
+  await page.setViewportSize({ width: 390, height: 844 });
+  await page.evaluate(() => {
+    window.API.getDirectStaffDirectory = async () => [
+      { teacher_id: 'teacher-2', teacher_name: 'Other Teacher', role: 'Teacher', status: 'active', photo_url: null }
+    ];
+    window.API.getDirectConversations = async () => [];
+    window.API.openDirectConversation = async (teacherId) => ({
+      ok: true,
+      conversation_id: 42,
+      peer: { teacher_id: teacherId, teacher_name: 'Other Teacher', role: 'Teacher', photo_url: null }
+    });
+    window.API.getDirectMessages = async () => Array.from({ length: 35 }, (_, i) => ({
+      id: i + 1,
+      conversation_id: 42,
+      sender_teacher_id: i % 2 ? 'teacher-2' : (window.APP?.teacher_id || 'current-user'),
+      text: `Private message ${i + 1} — mobile scroll regression fixture`,
+      created_at: new Date(Date.now() - (35 - i) * 60000).toISOString()
+    }));
+    window.API.markDirectRead = async () => ({ ok: true });
+  });
+  await page.evaluate(() => window.switchChatChannel('direct'));
+  await page.locator('#directStaffDirectory .smart-chat-directory-item').first().waitFor();
+  await page.evaluate(() => window.openDirectChat('teacher-2'));
+
+  const shell = page.locator('#page-chat .smart-chat-direct-shell');
+  await expect(shell).toHaveClass(/has-selection/);
+  await expect(page.locator('#page-chat .smart-chat-direct-list')).toBeHidden();
+  const conversation = page.locator('#page-chat .smart-chat-direct-conversation');
+  const stream = page.locator('#directMessageStream');
+  const composer = page.locator('#page-chat .smart-chat-direct-composer');
+  await expect(page.locator('#directConversationHead')).toContainText('Other Teacher');
+  await expect(stream.locator('.chat-bubble-row')).toHaveCount(35);
+  await expect(composer).toBeVisible();
+  await expect(page.locator('#directChatInput')).toBeEnabled();
+  await expect(page.locator('#directChatSendBtn')).toBeEnabled();
+
+  const geometry = await page.evaluate(() => {
+    const shellEl = document.querySelector('#page-chat .smart-chat-direct-shell');
+    const conversationEl = document.querySelector('#page-chat .smart-chat-direct-conversation');
+    const streamEl = document.querySelector('#directMessageStream');
+    const composerEl = document.querySelector('#page-chat .smart-chat-direct-composer');
+    const rect = el => { const r = el.getBoundingClientRect(); return { top: r.top, bottom: r.bottom, height: r.height }; };
+    const before = streamEl.scrollTop;
+    streamEl.scrollTop = 0;
+    const scrollable = streamEl.scrollHeight > streamEl.clientHeight && streamEl.scrollTop < before;
+    return {
+      shell: rect(shellEl), conversation: rect(conversationEl), stream: rect(streamEl), composer: rect(composerEl),
+      streamOverflowY: getComputedStyle(streamEl).overflowY,
+      streamScrollHeight: streamEl.scrollHeight, streamClientHeight: streamEl.clientHeight,
+      scrollable,
+      viewportHeight: window.innerHeight
+    };
+  });
+  expect(geometry.conversation.height).toBeGreaterThan(0);
+  expect(geometry.composer.height).toBeGreaterThan(0);
+  expect(geometry.composer.bottom).toBeLessThanOrEqual(geometry.viewportHeight + 2);
+  expect(geometry.streamOverflowY).toBe('auto');
+  expect(geometry.streamScrollHeight).toBeGreaterThan(geometry.streamClientHeight);
+  expect(geometry.scrollable).toBe(true);
+});
+
 test('Direct Chat uses existing teacher profile photos with a safe initials fallback', async ({ page }) => {
   await mountSmartChat(page);
   const photoUrl = 'https://profiles.example.test/other-teacher.svg';
