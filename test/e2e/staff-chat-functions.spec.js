@@ -648,3 +648,44 @@ test('Staff Chat preserves the last successful contact and announcement data on 
   });
   await expect(page.locator('#announcementList')).toContainText('Read this announcement');
 });
+
+test('cached Staff Chat lists remain visible while refresh requests are pending', async ({ page }) => {
+  await mountSmartChat(page);
+
+  await page.evaluate(() => window.switchChatChannel('announcements'));
+  await expect(page.locator('#announcementList')).toContainText('notice');
+  await page.evaluate(() => {
+    window.API.getStaffAnnouncements = () => new Promise(() => {});
+    window.switchChatChannel('staff');
+    window.switchChatChannel('announcements');
+  });
+  await expect(page.locator('#announcementList')).toContainText('notice');
+
+  await page.evaluate(() => window.switchChatChannel('departments'));
+  await expect(page.locator('#departmentList')).toContainText('Science Department');
+  await page.evaluate(() => {
+    window.API.getDepartmentChats = () => new Promise(() => {});
+    window.switchChatChannel('staff');
+    window.switchChatChannel('departments');
+  });
+  await expect(page.locator('#departmentList')).toContainText('Science Department');
+
+  await page.evaluate(() => window.switchChatChannel('tickets'));
+  await expect(page.locator('#inquiryTicketList')).toContainText('Parent request');
+  await page.evaluate(() => {
+    window.API.getInquiryTickets = () => new Promise(() => {});
+    window.switchChatChannel('staff');
+    window.switchChatChannel('tickets');
+  });
+  await expect(page.locator('#inquiryTicketList')).toContainText('Parent request');
+
+  await page.evaluate(() => window.switchChatChannel('groups'));
+  await expect(page.locator('#chatGroupList')).toContainText('Planning Group');
+  await page.evaluate(() => {
+    window.API.getChatGroups = () => new Promise(() => {});
+    window.switchChatChannel('staff');
+    window.switchChatChannel('groups');
+  });
+  await expect(page.locator('#chatGroupList')).toContainText('Planning Group');
+});
+
