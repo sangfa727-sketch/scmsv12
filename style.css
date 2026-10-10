@@ -10205,8 +10205,8 @@ html.scms-chat-workspace #pages{overflow:auto}
 @media (min-width:761px) {
   #page-chat .smart-chat-quick-nav { width:100%; max-width:100%; min-width:0; overflow:visible; box-sizing:border-box; }
   #page-chat .smart-chat-quick-nav-track { display:flex; width:100%; max-width:100%; min-width:0; gap:6px; overflow-x:hidden; overflow-y:visible; padding:2px 2px 8px; box-sizing:border-box; }
-  #page-chat .smart-chat-quick-channel-wrap { display:flex; flex:1 1 0; min-width:0; max-width:none; align-items:stretch; }
-  #page-chat .smart-chat-quick-channel { display:flex; flex:1 1 0; width:100%; min-width:0; max-width:none; min-height:48px; height:auto; padding:6px 8px; gap:5px; justify-content:center; white-space:normal; overflow-wrap:anywhere; }
+  #page-chat .smart-chat-quick-channel-wrap { display:flex; flex:1 1 0% !important; width:0; min-width:0; max-width:none; align-items:stretch; }
+  #page-chat .smart-chat-quick-channel { display:flex; flex:1 1 auto !important; width:100%; min-width:0; max-width:none; min-height:48px; height:auto; padding:6px 8px; gap:5px; justify-content:center; white-space:normal; overflow-wrap:anywhere; }
   #page-chat .smart-chat-quick-channel-name { min-width:0; overflow:visible; white-space:normal; text-align:center; line-height:1.2; }
   #page-chat .smart-chat-quick-channel-hide { display:none !important; }
   #page-chat #smartChatModeBody { width:100%; max-width:none; min-width:0; }
