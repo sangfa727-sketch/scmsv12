@@ -377,6 +377,13 @@ window._refreshAdminComposerPreview = function() {
     }
     @keyframes scChatMenuIn{from{opacity:0;transform:translateY(-5px) scale(.97)}to{opacity:1;transform:translateY(0) scale(1)}}
     @media(prefers-reduced-motion:reduce){html.scms-chat-workspace #page-chat *,html.scms-chat-workspace #page-chat *::before,html.scms-chat-workspace #page-chat *::after{animation-duration:.01ms!important;transition-duration:.01ms!important}}
+    #page-chat .smart-chat-quick-channel-wrap{display:flex;align-items:center;gap:3px;flex:0 0 auto;padding:2px;border:1px solid transparent;border-radius:15px}
+    #page-chat .smart-chat-quick-channel-wrap:has(.smart-chat-quick-channel.active){background:color-mix(in srgb,var(--sc-chat-accent) 8%,var(--surface))}
+    #page-chat .smart-chat-quick-channel-hide{display:grid;place-items:center;width:23px;height:23px;flex:0 0 23px;border:1px solid var(--border);border-radius:50%;background:var(--surface);color:var(--muted);font-size:15px;line-height:1;opacity:.72}
+    #page-chat .smart-chat-quick-channel-hide:hover{opacity:1;color:var(--text);background:var(--bg2)}
+    #page-chat .smart-chat-quick-channel-hide:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+    #page-chat .sc-chat-type-empty{padding:12px 10px;color:var(--muted);font-size:12px;text-align:center}
+    #page-chat .sc-chat-type-option .sc-chat-type-enable{display:grid;place-items:center;width:28px;height:28px;flex:0 0 28px;border:1px solid var(--border);border-radius:50%;color:var(--accent);font-size:18px;font-weight:800}
     .smart-chat-direct-people{display:flex;flex:1 1 auto;flex-direction:column;gap:7px;min-height:0;overflow-x:hidden;overflow-y:auto;padding:8px 10px 14px;-webkit-overflow-scrolling:touch;touch-action:pan-y}
     .smart-chat-direct-person{display:flex;width:100%;align-items:center;gap:10px;margin:0;padding:10px;text-align:left;border:1px solid var(--border);border-radius:15px;background:var(--surface);color:var(--text);box-shadow:0 1px 3px rgba(0,0,0,.04);transition:background .16s ease,border-color .16s ease,transform .16s ease}
     .smart-chat-direct-person:active{transform:scale(.99)}
