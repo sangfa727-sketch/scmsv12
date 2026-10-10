@@ -766,12 +766,22 @@ test('mobile touch swipes scroll Staff Chat directory, announcement, and ticket 
       const before = metrics.scrollTop;
       // Start the touch gesture in the lower half of the pane, away from headers.
       const gestureY = Math.round(box.y + Math.min(box.height - 24, Math.max(24, box.height * 0.72)));
-      await cdp.send('Input.synthesizeScrollGesture', {
-        x,
-        y: gestureY,
-        yDistance: -Math.max(320, Math.round(box.height * 0.7)),
-        speed: 650,
-        gestureSourceType: 'touch'
+      // Dispatch an explicit touch drag instead of CDP's synthesized wheel-like
+      // scroll gesture; this exercises the same touch path used by mobile browsers.
+      const distance = Math.max(320, Math.round(box.height * 0.7));
+      await cdp.send('Input.dispatchTouchEvent', {
+        type: 'touchStart',
+        touchPoints: [{ x, y: gestureY, id: 1 }]
+      });
+      for (let step = 1; step <= 8; step += 1) {
+        await cdp.send('Input.dispatchTouchEvent', {
+          type: 'touchMove',
+          touchPoints: [{ x, y: gestureY - Math.round(distance * step / 8), id: 1 }]
+        });
+      }
+      await cdp.send('Input.dispatchTouchEvent', {
+        type: 'touchEnd',
+        touchPoints: []
       });
       await expect.poll(() => pane.evaluate(el => el.scrollTop), { timeout: 3000 }).toBeGreaterThan(before);
     };
