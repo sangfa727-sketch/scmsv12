@@ -1013,9 +1013,13 @@ async function _loadDirectWorkspace() {
       await _loadDirectMessages();
     }
   } catch (e) {
-    _directStaff=[]; _directConversations=[]; _renderDirectDirectory(); _renderDirectConversationList();
+    // A transient network/RPC failure is not an empty directory. Preserve the last
+    // successful rows and only show a blocking error when nothing has loaded yet.
+    if (!_directStaff.length) _renderDirectDirectory();
+    if (!_directConversations.length) _renderDirectConversationList();
     const stream=document.getElementById('directMessageStream');
-    if(stream) stream.innerHTML=`<div class="chat-error"><div>💬</div><div>${t('chat.unableLoadDirect')}</div><button class="btn-secondary" onclick="_loadDirectWorkspace()">${t('chat.retry')}</button></div>`;
+    if(stream && !_directConversationId && !_directStaff.length && !_directConversations.length)
+      stream.innerHTML=`<div class="chat-error"><div>💬</div><div>${t('chat.unableLoadDirect')}</div><button class="btn-secondary" onclick="_loadDirectWorkspace()">${t('chat.retry')}</button></div>`;
   }
 }
 
@@ -1072,8 +1076,7 @@ function _renderDirectHeader(){
   const root=document.getElementById('directConversationHead');
   if(!root||!_directPeer)return;
   root.innerHTML=`
-    <div class="smart-chat-direct-peer"><button class="smart-chat-mobile-back" onclick="_clearDirectSelection()"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m15 18-6-6 6-6"/></svg></button>${_directAvatarMarkup(_directPeer,true)}<div><strong>${esc(_directPeer.teacher_name)}</strong><small>${esc(_directPeer.role||t('chat.teacher'))} · ${t('chat.privateOneToOne')}</small></div></div>
-    <span class="smart-chat-verified-pill">${t('chat.privateOneToOne')}</span>`;
+    <div class="smart-chat-direct-peer"><button type="button" class="smart-chat-mobile-back" onclick="_clearDirectSelection()" aria-label="${t('chat.backToDirectMessages')}" title="${t('chat.backToDirectMessages')}"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m15 18-6-6 6-6"/></svg></button>${_directAvatarMarkup(_directPeer,true)}<div><strong>${esc(_directPeer.teacher_name)}</strong><small>${esc(_directPeer.role||t('chat.teacher'))}</small></div></div>`;
 }
 
 function _setDirectMobileView(selected) {
@@ -1089,18 +1092,26 @@ function _setDirectComposer(enabled){
 
 window._clearDirectSelection=function(){_directConversationId=null;_directPeer=null;_setDirectMobileView(false);_renderChatMode();};
 
-async function _loadDirectMessages(){
+async function _loadDirectMessages(silent=false){
   if(!_directConversationId)return;
+  const conversationId=_directConversationId;
   try{
-    const rows=await API.getDirectMessages(_directConversationId,50);
+    const rows=await API.getDirectMessages(conversationId,50);
+    if(conversationId!==_directConversationId)return;
     const stream=document.getElementById('directMessageStream');
     if(!stream)return;
-    if(!rows.length)stream.innerHTML=`<div class="chat-empty"><div class="chat-empty-icon">💬</div><div class="chat-empty-title">${t('chat.newConversation')}</div><div class="chat-empty-sub">${t('chat.sendFirstPrivate')}</div></div>`;
-    else _renderDirectMessages(rows);
-    _renderDirectHeader();_setDirectComposer(true);await API.markDirectRead(_directConversationId);
+    const signature=String(conversationId)+':'+JSON.stringify((Array.isArray(rows)?rows:[]).map(m=>[m.id,m.sender_teacher_id,m.text,m.created_at]));
+    if(stream.dataset.messageSignature!==signature){
+      if(!rows.length)stream.innerHTML=`<div class="chat-empty"><div class="chat-empty-icon">💬</div><div class="chat-empty-title">${t('chat.newConversation')}</div><div class="chat-empty-sub">${t('chat.sendFirstPrivate')}</div></div>`;
+      else _renderDirectMessages(rows);
+      stream.dataset.messageSignature=signature;
+    }
+    _renderDirectHeader();_setDirectComposer(true);
+    if(!silent)await API.markDirectRead(conversationId);
   }catch(e){
+    // Keep the last successful conversation visible during a transient failure.
     const stream=document.getElementById('directMessageStream');
-    if(stream)stream.innerHTML=`<div class="chat-error"><div>💬</div><div>${t('chat.unableLoadConversation')}</div><button class="btn-secondary" onclick="_loadDirectMessages()">${t('chat.retry')}</button></div>`;
+    if(stream&&!stream.dataset.messageSignature)stream.innerHTML=`<div class="chat-error"><div>💬</div><div>${t('chat.unableLoadConversation')}</div><button class="btn-secondary" onclick="_loadDirectMessages()">${t('chat.retry')}</button></div>`;
   }
 }
 
@@ -1159,20 +1170,25 @@ window.switchChatChannel = function(channel) {
 };
 
 async function _loadChatMessages() {
-  if (_chatMode !== 'school') return;
+  if (_chatMode !== 'school' || _chatChannel !== 'staff') return;
   try {
     const messages = await API.getChatMessages(_chatChannel, 50);
     window.APP.chatMessages = Array.isArray(messages) ? messages : [];
     _renderChatStream(window.APP.chatMessages);
   } catch (e) {
+    // Do not replace valid messages with a transient RPC error/empty response.
     const stream = document.getElementById('chatStream');
-    if (stream) stream.innerHTML = `<div class="chat-error"><div>💬</div><div>${t('chat.loadFailed')}</div><button class="btn-secondary" onclick="renderChat()">${t('chat.retry')}</button></div>`;
+    if (stream && !Array.isArray(window.APP?.chatMessages))
+      stream.innerHTML = `<div class="chat-error"><div>💬</div><div>${t('chat.loadFailed')}</div><button class="btn-secondary" onclick="_loadChatMessages()">${t('chat.retry')}</button></div>`;
   }
 }
 
 function _renderChatStream(messages) {
   const stream = document.getElementById('chatStream');
   if (!stream) return;
+  const signature = JSON.stringify((Array.isArray(messages) ? messages : []).map(m => [m.id,m.teacher_id,m.text,m.created_at,m.pending,m.failed]));
+  if (stream.dataset.messageSignature === signature) return;
+  stream.dataset.messageSignature = signature;
   if (!messages.length) {
     stream.innerHTML = `<div class="chat-empty"><div class="chat-empty-icon">💬</div><div class="chat-empty-title">${t('chat.emptyTitle')}</div><div class="chat-empty-sub">${t('chat.emptySub')}</div></div>`;
     return;
@@ -1254,17 +1270,17 @@ window.startChatPolling=function(){
     if(window.APP?.currentPage!=='chat')return;
     unreadRefreshTick = (unreadRefreshTick + 1) % 6;
     if(unreadRefreshTick === 0 && _chatMode === 'school') _refreshChatChannelUnreadCounts();
-    if(_chatMode==='school' && _chatChannel==='direct'){
+    if(_chatMode!=='school')return;
+    if(_chatChannel==='staff'){
+      _loadChatMessages();
+    }else if(_chatChannel==='direct' && _directConversationId){
       if(_directPollBusy)return;
       _directPollBusy=true;
-      try{
-        await _loadDirectWorkspace();
-      }finally{
-        _directPollBusy=false;
-      }
-    }else if(_chatMode==='school'){
-      _loadChatMessages();
+      try{ await _loadDirectMessages(true); }
+      finally{ _directPollBusy=false; }
     }
+    // Other workspaces own their refresh actions. Do not call the All Staff
+    // message endpoint while a different channel is open.
   },5000);
 };
 window.stopChatPolling=function(){
