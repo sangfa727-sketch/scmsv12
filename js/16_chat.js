@@ -344,9 +344,13 @@ window._refreshAdminComposerPreview = function() {
       html.scms-chat-workspace #pages{padding-top:0!important}
       html.scms-chat-workspace #page-chat{height:100dvh!important;min-height:100dvh!important;margin:0!important;padding:0!important}
       html.scms-chat-workspace #page-chat .smart-chat-shell{min-height:100dvh;box-sizing:border-box}
+      html.scms-chat-workspace #page-chat .sc-chat-workspace-content{display:flex;flex:1 1 auto;flex-direction:column;min-height:0;overflow:hidden}
+      html.scms-chat-workspace #page-chat #smartChatQuickNav{flex:0 0 auto}
+      html.scms-chat-workspace #page-chat #smartChatModeBody{display:flex;flex:1 1 auto;flex-direction:column;min-height:0;overflow:hidden}
+      html.scms-chat-workspace #page-chat #smartChatModeBody>.smart-chat-school-grid{display:flex;flex:1 1 auto;min-height:0;overflow:hidden}
       html.scms-chat-workspace #page-chat .smart-chat-school-grid>.smart-chat-channel-list{display:none!important}
-      html.scms-chat-workspace #page-chat .smart-chat-conversation{min-height:0}
-      html.scms-chat-workspace #page-chat .smart-chat-conversation .chat-stream{max-height:none;min-height:0;overflow:visible;touch-action:pan-y}
+      html.scms-chat-workspace #page-chat .smart-chat-conversation{display:flex;flex:1 1 auto;flex-direction:column;min-height:0;overflow:hidden}
+      html.scms-chat-workspace #page-chat .smart-chat-conversation .chat-stream{display:block;flex:1 1 auto;max-height:none;min-height:0;overflow-x:hidden;overflow-y:auto;overscroll-behavior:contain;-webkit-overflow-scrolling:touch;touch-action:pan-y}
       html.scms-chat-workspace #page-chat .smart-chat-conversation .chat-composer{position:sticky;bottom:0;z-index:20;flex:0 0 auto}
     }
     @keyframes scChatMenuIn{from{opacity:0;transform:translateY(-5px) scale(.97)}to{opacity:1;transform:translateY(0) scale(1)}}
