@@ -962,7 +962,7 @@ test('mobile All Staff message stream stays independently scrollable with long c
       window.switchChatChannel('staff');
     });
     const stream = page.locator('#chatStream');
-    await expect(stream.locator('.chat-message, .message, [data-message-id]')).not.toHaveCount(0);
+    await expect(stream.locator('.chat-bubble-row')).toHaveCount(36);
     const metrics = await stream.evaluate(el => ({
       scrollHeight: el.scrollHeight,
       clientHeight: el.clientHeight,
@@ -990,8 +990,8 @@ test('Official Announcement send failure keeps the draft and restores the send c
   await expect(page.locator('#adminMsgBody')).toBeVisible();
   await page.locator('#adminMsgRecipientType').selectOption('all_staff');
   await page.locator('#adminMsgRecipientType').dispatchEvent('change');
-  await expect(page.locator('#adminMsgSendBtn')).toBeEnabled();
   await page.locator('#adminMsgBody').fill('Keep this official announcement draft');
+  await expect(page.locator('#adminMsgSendBtn')).toBeEnabled();
   await page.evaluate(() => {
     window.API.createStaffAnnouncement = async (...args) => {
       window.__chatTestCalls.push({ name: 'createStaffAnnouncement', args });
