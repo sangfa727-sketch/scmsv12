@@ -7,7 +7,7 @@ test('Staff Chat channel visibility is a mobile-only preference and hidden menu 
   const source = fs.readFileSync(path.resolve(__dirname, '../../js/16_chat.js'), 'utf8');
   assert.ok(source.includes("localStorage.getItem('scms_chat_visible_types'"), 'restore tab visibility preferences');
   assert.ok(source.includes("localStorage.setItem('scms_chat_visible_types'"), 'persist tab visibility preferences');
-  assert.ok(source.includes("const visible = channels.filter(c => _chatVisibleTypes[c.id] !== false)"), 'only show enabled channel tabs');
+  assert.ok(source.includes("const visible = isMobile ? channels.filter(c => _chatVisibleTypes[c.id] !== false) : channels"), 'only apply saved visibility preferences on mobile');
   assert.ok(source.includes("function _chatTypeMenuMarkup()"), 'render a menu of hidden channel types');
   assert.ok(source.includes("window._hideChatType = function(id)"), 'provide a direct hide action on mobile tabs');
   assert.ok(!source.includes("visible.length <= 1"), 'allow every mobile tab to be hidden');
