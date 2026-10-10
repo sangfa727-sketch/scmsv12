@@ -92,6 +92,7 @@ test('website studio uses querySelectorAll for every DOM collection loop',()=>{
  assert.doesNotMatch(js,/(?<!\$)\$\([^)]*\)\.forEach/);
  assert.match(js,/\$\$\("\[data-field\]"\)\.forEach/);
  assert.match(js,/\$\$\("\.template-option"\)\.forEach/);
+ assert.match(js,/const links=\$\$\("\.section-nav a"\)/);
  new Function(js);
 });
 
