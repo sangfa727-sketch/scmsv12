@@ -240,6 +240,29 @@ test('Official Announcements loads and marks the selected UUID announcement read
   await expect.poll(async () => (await calls(page, 'markStaffAnnouncementRead')).length).toBeGreaterThan(0);
 });
 
+test('Official Announcements composer overlays the workspace without shifting the announcement card', async ({ page }) => {
+  await mountSmartChat(page);
+  await page.evaluate(() => {
+    window.APP.is_admin = true;
+    window.switchChatChannel('announcements');
+  });
+  const plus = page.locator('#announcementComposerToggle');
+  await expect(plus).toBeVisible();
+  const listHead = page.locator('.smart-chat-announcement-shell .smart-chat-direct-list-head');
+  const before = await listHead.evaluate(el => Math.round(el.getBoundingClientRect().top));
+  await plus.click();
+  const composer = page.locator('#announcementComposer');
+  await expect(composer).toBeVisible();
+  await expect(composer).toHaveAttribute('aria-hidden', 'false');
+  expect(await composer.evaluate(el => getComputedStyle(el).position)).toBe('fixed');
+  await expect(composer.locator('.smart-chat-composer-close')).toBeVisible();
+  const after = await listHead.evaluate(el => Math.round(el.getBoundingClientRect().top));
+  expect(after).toBe(before);
+  await composer.locator('.smart-chat-composer-close').click();
+  await expect(composer).toBeHidden();
+  await expect(composer).toHaveAttribute('aria-hidden', 'true');
+});
+
 test('Inquiry workspace loads its ticket list', async ({ page }) => {
   await mountSmartChat(page);
   await page.evaluate(() => window.switchChatChannel('tickets'));
