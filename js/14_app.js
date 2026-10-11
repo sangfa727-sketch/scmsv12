@@ -384,8 +384,7 @@ async function initApp() {
   }
 }
 
-// Auto-run once on script load
-initApp();
+// Initial app bootstrap is invoked at the end of this file, after all registries initialize.
 
 // Exposed so 00_landing.js can re-run boot after Telegram login completes
 window.bootAfterLogin = function () {
@@ -1096,3 +1095,6 @@ window.emptyState = function(icon, title, subtitle = '') {
     </div>
   `;
 };
+
+// Run only after lexical constants (including FAB_PAGES) have initialized.
+initApp();

@@ -125,15 +125,15 @@ test('group chat mobile layout keeps the nested conversation wrapper shrinkable'
   );
 });
 
-test('chat channel rail prioritizes daily conversations and shows only data-backed unread badges', () => {
+test('chat channel rail prioritizes All Staff and official announcements, with data-backed unread badges', () => {
   const js = fs.readFileSync(path.resolve(__dirname, '../../js/16_chat.js'), 'utf8');
   const css = fs.readFileSync(path.resolve(__dirname, '../../style.css'), 'utf8');
   const staff = js.indexOf("{ id:'staff', name:t('chat.allStaff')");
+  const announcements = js.indexOf("{ id:'announcements', name:t('chat.officialAnnouncements')");
   const direct = js.indexOf("{ id:'direct', name:t('chat.directMessages')");
   const departments = js.indexOf("{ id:'departments', name:t('chat.departmentGrade')");
-  const announcements = js.indexOf("{ id:'announcements', name:t('chat.officialAnnouncements')");
-  assert.ok(staff >= 0 && direct > staff && departments > direct && announcements > departments,
-    'All Staff, Direct Messages, and Departments should appear first in the daily-use rail');
+  assert.ok(staff >= 0 && announcements > staff && direct > announcements && departments > direct,
+    'All Staff stays first and Official Announcements is promoted ahead of secondary daily channels');
   assert.match(js, /function _chatUnreadCount\(channel\)/);
   assert.match(js, /getDirectConversations/);
   assert.match(js, /getInquiryTickets/);

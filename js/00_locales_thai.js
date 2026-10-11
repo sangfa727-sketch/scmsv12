@@ -32,7 +32,7 @@
   'chat.writePrivate': "เขียนข้อความส่วนตัว...",
   'chat.noMessages': "ยังไม่มีข้อความ",
 
-    'chat.gradeAccess':'ยังไม่มีการมอบหมายระดับชั้นที่ใช้งานอยู่สำหรับบัญชีบุคลากรนี้','chat.gradePrefix':'ระดับชั้น: ','chat.individualPrefix':'รายบุคคล: ', 
+    'chat.gradeAccess':'โปรดขอให้ผู้ดูแลตรวจสอบการตั้งค่าระดับชั้นและการมอบหมายครู','chat.gradePrefix':'ระดับชั้น: ','chat.individualPrefix':'รายบุคคล: ', 
 };
   Object.assign(overrides, {
     'hw.tapAdd':'แตะ + เพื่อเพิ่มการบ้าน','hw.due':'กำหนดส่ง','hw.addTitle':'เพิ่มการบ้าน','hw.subject':'วิชา','hw.addSubject':'เพิ่มวิชา','hw.class':'ชั้นเรียน','hw.type':'ประเภท','hw.description':'รายละเอียด','hw.descPh':'รายละเอียดการบ้าน…','hw.lbPage':'หน้า LB','hw.wbPage':'หน้า WB','hw.pagePh1':'เช่น 24','hw.pagePh2':'เช่น 25','hw.dueDate':'วันครบกำหนด','hw.saved':'✓ บันทึกการบ้านแล้ว','hw.editTitle':'แก้ไขการบ้าน','hw.updated':'✓ อัปเดตแล้ว','hw.confirmTitle':'ลบการบ้านนี้?','hw.confirmBody':'คุณแน่ใจหรือไม่ว่าต้องการลบการบ้านนี้?',
@@ -93,12 +93,12 @@
   'chat.selectDepartment': 'เลือกแผนก',
   'chat.selectTeacher': 'เลือกครู',
   'chat.selectTicket': 'เลือกรายการสอบถาม',
-  'chat.noGradeAccess': 'ยังไม่มีสิทธิ์เข้าถึงระดับชั้น',
-  'chat.noDepartmentAccess': 'ยังไม่มีสิทธิ์เข้าถึงแผนก',
+  'chat.noGradeAccess': 'ยังไม่มีแชตระดับชั้นที่พร้อมใช้งาน',
+  'chat.noDepartmentAccess': 'ยังไม่มีแชตแผนกที่พร้อมใช้งาน',
   'chat.noGroups': 'ยังไม่มีกลุ่ม',
   'chat.startGrade': 'เริ่มการสนทนาระดับชั้น',
   'chat.staffOnlyGrade': 'การสนทนาระดับชั้นสำหรับบุคลากร',
-  'chat.departmentAccess': 'ผู้ดูแลระบบต้องมอบหมายคุณให้กับแผนกที่ใช้งานอยู่ก่อน',
+  'chat.departmentAccess': 'โปรดขอให้ผู้ดูแลตรวจสอบการตั้งค่าแผนกและการมอบหมายบุคลากร',
     'err.connFailed':'การเชื่อมต่อล้มเหลว','err.authFailed':'การยืนยันตัวตนล้มเหลว','err.notRegistered':'ยังไม่ได้ลงทะเบียน','err.startup':'เริ่มต้นระบบไม่สำเร็จ','err.unknown':'เกิดข้อผิดพลาดที่ไม่ทราบสาเหตุ','toast.refreshing':'กำลังรีเฟรช…','toast.updated':'อัปเดตแล้ว','toast.refreshFailed':'รีเฟรชไม่สำเร็จ','subject.add':'เพิ่มวิชา','subject.ph':'ชื่อวิชา','subject.enter':'กรุณาใส่ชื่อวิชา','subject.adding':'กำลังเพิ่ม…','subject.added':'✓ เพิ่มวิชาแล้ว','picker.searchPh':'ค้นหา…','chat.ph':'พิมพ์ข้อความ…','chat.loadFailed':'โหลดแชตไม่สำเร็จ','chat.retry':'ลองอีกครั้ง','chat.emptyTitle':'ยังไม่มีข้อความ','chat.emptySub':'เริ่มการสนทนาได้เลย','chat.sendFailed':'ส่งข้อความไม่สำเร็จ',
     'enum.meal.Full':'หมดจาน','enum.meal.Half':'ครึ่งหนึ่ง','enum.meal.Little':'เล็กน้อย','enum.meal.None':'ไม่ได้กิน','enum.mood.Happy':'มีความสุข','enum.mood.OK':'ปกติ','enum.mood.Tired':'เหนื่อย','enum.mood.Sad':'เศร้า','enum.mood.Energetic':'กระฉับกระเฉง','enum.yesno.Yes':'ใช่','enum.yesno.No':'ไม่','enum.hwType.Homework':'การบ้าน','enum.hwType.Lesson':'บทเรียน','enum.hwType.Test':'แบบทดสอบ','enum.hwType.Quiz':'แบบทดสอบสั้น','enum.hwType.Project':'โครงงาน','enum.hwType.Worksheet':'ใบงาน','enum.commType.All':'ทั้งหมด','enum.commType.General':'ทั่วไป','enum.commType.Absent Alert':'แจ้งขาดเรียน','enum.commType.Daily Report':'รายงานประจำวัน','enum.commType.Praise':'ชื่นชม','enum.commType.Incident':'เหตุการณ์','enum.commType.Homework':'การบ้าน','enum.commType.Broadcast':'ประกาศ','enum.commStatus.Sent':'ส่งแล้ว','enum.commStatus.queued':'รอส่ง','enum.commStatus.Queued':'รอส่ง','enum.incType.All':'ทั้งหมด','enum.incType.Good Behaviour':'พฤติกรรมดี','enum.incType.Participation':'การมีส่วนร่วม','enum.incType.Achievement':'ความสำเร็จ','enum.incType.Concern':'ข้อกังวล','enum.incType.Conflict':'ความขัดแย้ง','enum.incType.Health':'สุขภาพ','enum.incType.Bullying':'การกลั่นแกล้ง','enum.incType.Injury':'การบาดเจ็บ','enum.incType.Other':'อื่นๆ','enum.severity.Info':'ข้อมูล','enum.severity.Low':'ต่ำ','enum.severity.Medium':'ปานกลาง','enum.severity.High':'สูง','enum.severity.Critical':'วิกฤต','enum.subject.Mathematics':'คณิตศาสตร์','enum.subject.English':'ภาษาอังกฤษ','enum.subject.Science':'วิทยาศาสตร์','enum.subject.Social Studies':'สังคมศึกษา',
     'common.deleted':'ลบแล้ว','common.itemNotFound':'ไม่พบรายการ','common.cantUndo':'ไม่สามารถยกเลิกได้','common.saveChanges':'บันทึกการเปลี่ยนแปลง','common.opt':'ไม่บังคับ',

@@ -12,4 +12,5 @@ test('department chat clears selected conversation and stale messages after auth
   assert.ok(source.includes("t('chat.selectDepartmentBelong')"), 'replace stale conversation with neutral empty state');
   assert.ok(source.includes("h.innerHTML='<div class=\"smart-chat-direct-peer\"><div><strong>'+t('chat.selectDepartmentBelong')"), 'clear the stale department header');
   assert.ok(source.includes("showToast(t('chat.departmentUnauthorized'))"), 'explain denied access to the user');
+  assert.match(source, /class="smart-chat-refresh-btn"[^>]*aria-label=/, 'department refresh control must expose an accessible name');
 });

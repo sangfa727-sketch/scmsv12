@@ -588,12 +588,12 @@ window.I18N_MY = {
   'chat.selectDepartment': 'ဌာန ရွေးပါ',
   'chat.selectTeacher': 'ဆရာ/ဆရာမ ရွေးပါ',
   'chat.selectTicket': 'Ticket ရွေးပါ',
-  'chat.noGradeAccess': 'အဆင့် Chat ဝင်ခွင့် မရှိသေးပါ',
-  'chat.noDepartmentAccess': 'ဌာန Chat ဝင်ခွင့် မရှိသေးပါ',
+  'chat.noGradeAccess': 'အတန်းစကားပြောခန်း မရှိသေးပါ',
+  'chat.noDepartmentAccess': 'ဌာနစကားပြောခန်း မရှိသေးပါ',
   'chat.noGroups': 'အဖွဲ့ မရှိသေးပါ',
   'chat.startGrade': 'အဆင့်အလိုက် စကားပြောမှု စတင်ပါ။',
   'chat.staffOnlyGrade': 'ဝန်ထမ်းများအတွက်သာ အဆင့် Chat',
-  'chat.departmentAccess': 'Admin က သင့်ကို အသက်ဝင်သော ဌာနတစ်ခုတွင် သတ်မှတ်ပေးရပါမည်။',
+  'chat.departmentAccess': 'ဌာနဖွဲ့စည်းမှုနှင့် ဝန်ထမ်းတာဝန်ပေးအပ်မှုများကို စီမံခန့်ခွဲသူထံ စစ်ဆေးပေးရန် မေးမြန်းပါ။',
   'chat.ph': 'သင့်အဖွဲ့ကို မက်ဆေ့ချ်ပို့ပါ…',
   'chat.loadFailed': 'မက်ဆေ့ချ်များ ဖွင့်၍မရပါ',
   'chat.retry': 'ထပ်ကြိုးစားပါ',
@@ -1519,7 +1519,7 @@ window.I18N_MY = {
   'chat.writePrivate': "သီးသန့်စာရေးပါ...",
   'chat.noMessages': "စာမရှိသေးပါ။",
 
-  'chat.gradeAccess': 'ဤဝန်ထမ်းအကောင့်အတွက် လက်ရှိအသုံးပြုနိုင်သော အတန်းတာဝန်ပေးအပ်မှု မရှိသေးပါ။',
+  'chat.gradeAccess': 'အတန်းဖွဲ့စည်းမှုနှင့် ဆရာ/ဆရာမ တာဝန်ပေးအပ်မှုများကို စီမံခန့်ခွဲသူထံ စစ်ဆေးပေးရန် မေးမြန်းပါ။',
   'chat.gradePrefix': 'အတန်း: '
   ,'chat.individualPrefix': 'တစ်ဦးချင်း: '
 };

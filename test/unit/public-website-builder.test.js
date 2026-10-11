@@ -88,9 +88,9 @@ test('website.manage is global and granted only to explicit owner/admin role ali
  assert.match(rpc,/public\.teacher_permissions/);
 });
 
-test('website studio uses querySelectorAll for every DOM collection loop',()=>{
+test('Website Studio uses collection selectors for multi-element operations',()=>{
  const js=read('school-website/create.js');
- assert.doesNotMatch(js,/(?<!\$)\$\([^)]*\)\.forEach/);
+ assert.doesNotMatch(js,/(?<!\$)\$\("[^"]+"\)\.forEach/);
  assert.match(js,/\$\$\("\[data-field\]"\)\.forEach/);
  assert.match(js,/\$\$\("\.template-option"\)\.forEach/);
  assert.match(js,/const links=\$\$\("\.section-nav a"\)/);

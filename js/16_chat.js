@@ -10,7 +10,16 @@ let _chatChannel = 'staff';
 let _chatPollTimer = null;
 let _directPollBusy = false;
 let _chatScrollLock = false;
-let _chatMode = 'school';
+let _chatMode = (() => {
+  try { return localStorage.getItem('scms_chat_mode') === 'ai' ? 'ai' : 'school'; }
+  catch (_) { return 'school'; }
+})();
+let _chatTypeMenuOpen = false;
+let _chatVisibleTypes = (() => {
+  const defaults = {staff:true,announcements:true,direct:true,departments:true,tickets:true,events:true};
+  try { const saved = JSON.parse(localStorage.getItem('scms_chat_visible_types') || 'null'); if (saved && typeof saved === 'object') Object.keys(defaults).forEach(id => { if (typeof saved[id] === 'boolean') defaults[id] = saved[id]; }); } catch (_) {}
+  return defaults;
+})();
 let _adminGradeRecipients = [];
 let _adminAllStaffRecipients = [];
 let _adminTeacherRecipients = [];
@@ -314,7 +323,103 @@ window._refreshAdminComposerPreview = function() {
   const s=document.createElement('style');
   s.id='smart-chat-ux-patch';
   s.textContent=`
-    .smart-chat-hero{position:relative}\n    /* Chat workspace: temporarily replaces the global SCMS chrome while active. */\n    html.scms-chat-workspace #appHeader,\n    html.scms-chat-workspace #sidebar,\n    html.scms-chat-workspace #sidebarBackdrop,\n    html.scms-chat-workspace #tabBar,\n    html.scms-chat-workspace #fab{display:none !important}\n    html.scms-chat-workspace #pages{padding-top:0 !important}\n    html.scms-chat-workspace #page-chat{height:100dvh !important;min-height:100dvh !important;margin:0 !important;padding:0 !important}\n    html.scms-chat-workspace #page-chat .smart-chat-shell{min-height:100dvh;box-sizing:border-box}\n    .smart-chat-channel-back-row{display:flex;align-items:center;margin:0 0 8px}\n    .smart-chat-channel-back{display:inline-flex;align-items:center;gap:5px;min-height:32px;padding:0 10px;border:1px solid var(--border);border-radius:9px;background:var(--bg2);color:var(--text2);font-size:11px;font-weight:700;cursor:pointer}\n    .smart-chat-channel-back:hover{background:var(--surface2);color:var(--text)}
+    /* Desktop keeps the existing SCMS shell; the full-screen workspace is mobile-only. */
+    .sc-chat-topbar{display:none}
+    @media(min-width:761px){
+      #page-chat .smart-chat-nav-back{display:none!important}
+      #page-chat .smart-chat-shell{width:100%;max-width:none;min-width:0}
+      #page-chat .smart-chat-hero{display:flex;align-items:center;gap:22px;width:100%;min-width:0}
+      #page-chat .smart-chat-hero>div:first-of-type{flex:1 1 auto;min-width:0}
+      #page-chat .smart-chat-mode-switch{display:flex;flex:0 0 auto;align-items:center;gap:6px;margin:0 0 0 auto}
+      #page-chat .smart-chat-mode-switch button{white-space:nowrap}
+      #page-chat .smart-chat-identity{display:none!important}
+      #page-chat #smartChatQuickNav{width:100%;min-width:0;overflow:visible}
+      #page-chat .smart-chat-quick-nav-track{display:grid!important;grid-template-columns:repeat(6,minmax(0,1fr));gap:8px;width:100%;min-width:0;overflow:visible}
+      #page-chat .smart-chat-quick-channel-wrap{display:flex;min-width:0;width:100%;flex:1 1 0;box-sizing:border-box}
+      #page-chat .smart-chat-quick-channel{display:flex;justify-content:center;align-items:center;gap:7px;flex:1 1 auto;width:100%;min-width:0;padding-inline:8px;white-space:normal;overflow-wrap:anywhere}
+      #page-chat .smart-chat-quick-channel-name{min-width:0;overflow-wrap:anywhere;text-align:center}
+      #page-chat .smart-chat-quick-channel-hide{display:none!important}
+      #page-chat .smart-chat-school-grid{display:grid!important;grid-template-columns:minmax(220px,260px) minmax(0,1fr);gap:18px;width:100%;min-width:0;max-width:none}
+      #page-chat .smart-chat-school-grid>.smart-chat-channel-list{display:flex;min-width:0;width:100%}
+      #page-chat .smart-chat-school-grid>.smart-chat-conversation{display:flex;min-width:0;width:100%;max-width:none;flex:1 1 auto}
+      #page-chat #smartChatModeBody{width:100%;min-width:0}
+    }
+    @media(max-width:760px){
+      html.scms-chat-workspace #page-chat .smart-chat-shell{height:100dvh;min-height:100dvh;display:flex;flex-direction:column;gap:0;padding:0;overflow:hidden}
+      html.scms-chat-workspace #page-chat .sc-chat-topbar{position:relative;z-index:30;display:grid;grid-template-columns:44px minmax(0,1fr) 44px;align-items:center;gap:10px;flex:0 0 auto;padding:calc(8px + env(safe-area-inset-top)) 12px 10px;border-bottom:1px solid var(--border);background:color-mix(in srgb,var(--surface) 94%,var(--sc-chat-accent))}
+      html.scms-chat-workspace #page-chat .sc-chat-top-action{width:38px;height:38px;display:grid;place-items:center;border:1px solid var(--border);border-radius:50%;background:var(--bg2);color:var(--text);transition:transform .18s ease,background .18s ease,box-shadow .18s ease}
+      #page-chat .smart-chat-nav-back{order:0;display:grid;place-items:center;flex:0 0 36px;width:36px;min-width:36px;height:36px;padding:0;border-radius:11px;font-size:0;line-height:1}
+      #page-chat .smart-chat-nav-back .smart-chat-nav-icon{display:block;font-size:25px;font-weight:500;line-height:1}
+      #page-chat .smart-chat-nav-back .smart-chat-nav-label{display:none}
+      html.scms-chat-workspace #page-chat .sc-chat-top-action:active{transform:scale(.92)}
+      html.scms-chat-workspace #page-chat .sc-chat-mode-pill svg,html.scms-chat-workspace #page-chat .sc-chat-type-option svg{width:18px;height:18px;flex:0 0 18px;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
+      html.scms-chat-workspace #page-chat .sc-chat-mode-pill{justify-self:center;display:flex;align-items:center;gap:8px;max-width:100%;min-width:0;min-height:42px;padding:0 16px;border:1px solid var(--border);border-radius:999px;background:var(--surface);color:var(--text);font-weight:750;box-shadow:0 3px 12px rgba(20,30,55,.06);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;transition:background .2s ease,border-color .2s ease,transform .2s ease}
+      html.scms-chat-workspace #page-chat .sc-chat-mode-pill:active{transform:scale(.97)}
+      html.scms-chat-workspace #page-chat .smart-chat-quick-channel-wrap{display:flex;align-items:center;gap:3px;flex:0 0 auto;padding:2px;border:1px solid transparent;border-radius:15px}
+      html.scms-chat-workspace #page-chat .smart-chat-quick-channel-wrap:has(.smart-chat-quick-channel.active){background:color-mix(in srgb,var(--sc-chat-accent) 8%,var(--surface))}
+      html.scms-chat-workspace #page-chat .smart-chat-quick-channel{min-height:46px;padding:0 13px;border-radius:13px;box-shadow:0 1px 2px rgba(0,0,0,.04)}
+      html.scms-chat-workspace #page-chat .smart-chat-quick-channel-hide{display:grid;place-items:center;width:23px;height:23px;flex:0 0 23px;border:1px solid var(--border);border-radius:50%;background:var(--surface);color:var(--muted);font-size:15px;line-height:1;opacity:.72}
+      html.scms-chat-workspace #page-chat .smart-chat-quick-channel-hide:active{transform:scale(.9);opacity:1}
+      html.scms-chat-workspace #page-chat .smart-chat-direct-people{display:flex;flex:1 1 auto;flex-direction:column;gap:7px;min-height:0;overflow-x:hidden;overflow-y:auto;padding:8px 10px max(14px,env(safe-area-inset-bottom));-webkit-overflow-scrolling:touch;touch-action:pan-y}
+      html.scms-chat-workspace #page-chat .smart-chat-direct-person{display:flex;width:100%;align-items:center;gap:10px;margin:0;padding:10px;text-align:left;border:1px solid var(--border);border-radius:15px;background:var(--surface);color:var(--text);box-shadow:0 1px 3px rgba(0,0,0,.04);transition:background .16s ease,border-color .16s ease,transform .16s ease}
+      html.scms-chat-workspace #page-chat .smart-chat-direct-person:active{transform:scale(.99)}
+      html.scms-chat-workspace #page-chat .smart-chat-direct-person:hover,html.scms-chat-workspace #page-chat .smart-chat-direct-person.active{background:var(--bg2);border-color:var(--accent)}
+      html.scms-chat-workspace #page-chat .smart-chat-direct-open{display:grid;place-items:center;width:28px;height:28px;flex:0 0 28px;border:1px solid var(--border);border-radius:50%;background:var(--bg2);color:var(--accent);font-size:17px;font-weight:800}
+      html.scms-chat-workspace #page-chat .sc-chat-type-empty{padding:12px 10px;color:var(--muted);font-size:12px;text-align:center}
+      html.scms-chat-workspace #page-chat .sc-chat-type-option .sc-chat-type-enable{display:grid;place-items:center;width:28px;height:28px;border:1px solid var(--border);border-radius:50%;color:var(--sc-chat-accent);font-size:18px;font-weight:800}
+      html.scms-chat-workspace #page-chat .sc-chat-type-menu{position:absolute;top:calc(100% + 8px);right:12px;width:min(260px,calc(100vw - 24px));padding:7px;border:1px solid var(--border);border-radius:17px;background:var(--surface);box-shadow:0 18px 48px rgba(0,0,0,.22);transform-origin:top right;animation:scChatMenuIn .18s cubic-bezier(.2,.8,.2,1) both}
+      html.scms-chat-workspace #page-chat .sc-chat-type-menu[hidden]{display:none}
+      html.scms-chat-workspace #page-chat .sc-chat-type-option{display:flex;align-items:center;gap:12px;width:100%;min-height:52px;padding:9px 12px;border-radius:12px;text-align:left;color:var(--text);transition:background .16s ease,transform .16s ease}
+      html.scms-chat-workspace #page-chat .sc-chat-type-row{display:flex;align-items:center;gap:5px}
+      html.scms-chat-workspace #page-chat .sc-chat-type-row .sc-chat-type-option{flex:1;min-width:0;width:auto}
+      html.scms-chat-workspace #page-chat .sc-chat-type-enable{display:grid;place-items:center;width:34px;height:34px;flex:0 0 34px;border:1px solid var(--border);border-radius:50%;background:var(--bg2);color:var(--sc-chat-accent);font-size:19px;font-weight:800}
+      html.scms-chat-workspace #page-chat .sc-chat-type-enable:active{transform:scale(.92)}
+      html.scms-chat-workspace #page-chat .sc-chat-type-option:active{transform:scale(.985)}
+      html.scms-chat-workspace #page-chat .sc-chat-type-option.active{background:color-mix(in srgb,var(--sc-chat-accent) 12%,var(--surface))}
+      html.scms-chat-workspace #page-chat .sc-chat-type-option .sc-chat-type-copy{display:flex;flex-direction:column;gap:2px;min-width:0;flex:1}
+      html.scms-chat-workspace #page-chat .sc-chat-type-option small{font-size:11px;color:var(--muted)}
+      html.scms-chat-workspace #page-chat .sc-chat-workspace-content{display:flex;flex:1 1 auto;flex-direction:column;min-height:0;overflow-y:auto;overflow-x:hidden;-webkit-overflow-scrolling:touch;touch-action:pan-y;padding:0 0 max(8px,env(safe-area-inset-bottom))}
+      html.scms-chat-workspace #page-chat .smart-chat-hero{display:none!important}
+      html.scms-chat-workspace #page-chat .smart-chat-mode-switch{display:none!important}
+      html.scms-chat-workspace #page-chat .smart-chat-shell #smartChatQuickNav{flex:0 0 auto;padding-inline:12px}
+      html.scms-chat-workspace #page-chat .smart-chat-shell #smartChatModeBody{min-height:0}
+      html.scms-chat-workspace #appHeader,html.scms-chat-workspace #sidebar,html.scms-chat-workspace #sidebarBackdrop,html.scms-chat-workspace #tabBar,html.scms-chat-workspace #fab{display:none!important}
+      html.scms-chat-workspace #pages{padding-top:0!important}
+      html.scms-chat-workspace #page-chat{height:100dvh!important;min-height:100dvh!important;margin:0!important;padding:0!important}
+      html.scms-chat-workspace #page-chat .smart-chat-shell{min-height:100dvh;box-sizing:border-box}
+      html.scms-chat-workspace #page-chat .sc-chat-workspace-content{display:flex;flex:1 1 auto;flex-direction:column;min-height:0;overflow:hidden}
+      html.scms-chat-workspace #page-chat #smartChatQuickNav{flex:0 0 auto}
+      html.scms-chat-workspace #page-chat #smartChatModeBody{display:flex;flex:1 1 auto;flex-direction:column;min-height:0;overflow:hidden}
+      html.scms-chat-workspace #page-chat #smartChatModeBody>.smart-chat-school-grid{display:flex;flex:1 1 auto;min-height:0;overflow:hidden}
+      html.scms-chat-workspace #page-chat .smart-chat-school-grid>.smart-chat-channel-list{display:none!important}
+      html.scms-chat-workspace #page-chat .smart-chat-school-grid{height:100%;width:100%;flex:1 1 auto;min-height:0}
+      html.scms-chat-workspace #page-chat .smart-chat-conversation{display:flex;flex:1 1 auto;width:100%;height:100%;min-width:0;min-height:0;flex-direction:column;overflow:hidden;border-radius:0}
+      html.scms-chat-workspace #page-chat .smart-chat-conversation .chat-stream{display:block;flex:1 1 0;max-height:none;min-height:0;height:100%;overflow-x:hidden;overflow-y:auto;overscroll-behavior:contain;-webkit-overflow-scrolling:touch;touch-action:pan-y;padding:12px 10px}
+      html.scms-chat-workspace #page-chat .smart-chat-conversation .chat-composer{position:sticky;bottom:0;z-index:20;flex:0 0 auto;margin:8px 10px max(10px,env(safe-area-inset-bottom));padding:7px;gap:8px;border:1px solid var(--border);border-radius:24px;background:var(--surface);box-shadow:0 4px 18px rgba(0,0,0,.08)}
+      html.scms-chat-workspace #page-chat .smart-chat-conversation .chat-composer textarea{min-width:0;min-height:40px;max-height:112px;border:1px solid transparent;border-radius:19px;background:var(--bg2);padding:10px 13px}
+      html.scms-chat-workspace #page-chat .smart-chat-conversation .chat-composer textarea:focus{border-color:color-mix(in srgb,var(--accent) 45%,var(--border))}
+      html.scms-chat-workspace #page-chat .smart-chat-conversation .chat-send-btn{width:42px;height:42px;flex:0 0 42px}
+    }
+    @keyframes scChatMenuIn{from{opacity:0;transform:translateY(-5px) scale(.97)}to{opacity:1;transform:translateY(0) scale(1)}}
+    @media(prefers-reduced-motion:reduce){html.scms-chat-workspace #page-chat *,html.scms-chat-workspace #page-chat *::before,html.scms-chat-workspace #page-chat *::after{animation-duration:.01ms!important;transition-duration:.01ms!important}}
+    #page-chat .smart-chat-quick-channel-wrap{display:flex;align-items:center;gap:3px;flex:0 0 auto;padding:2px;border:1px solid transparent;border-radius:15px}
+    #page-chat .smart-chat-quick-channel-wrap:has(.smart-chat-quick-channel.active){background:color-mix(in srgb,var(--sc-chat-accent) 8%,var(--surface))}
+    #page-chat .smart-chat-quick-channel-hide{display:grid;place-items:center;width:23px;height:23px;flex:0 0 23px;border:1px solid var(--border);border-radius:50%;background:var(--surface);color:var(--muted);font-size:15px;line-height:1;opacity:.72}
+    #page-chat .smart-chat-quick-channel-hide:hover{opacity:1;color:var(--text);background:var(--bg2)}
+    #page-chat .smart-chat-quick-channel-hide:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+    #page-chat .sc-chat-type-empty{padding:12px 10px;color:var(--muted);font-size:12px;text-align:center}
+    #page-chat .sc-chat-type-option .sc-chat-type-enable{display:grid;place-items:center;width:28px;height:28px;flex:0 0 28px;border:1px solid var(--border);border-radius:50%;color:var(--accent);font-size:18px;font-weight:800}
+    .smart-chat-direct-people{display:flex;flex:1 1 auto;flex-direction:column;gap:7px;min-height:0;overflow-x:hidden;overflow-y:auto;padding:8px 10px 14px;-webkit-overflow-scrolling:touch;touch-action:pan-y}
+    .smart-chat-direct-person{display:flex;width:100%;align-items:center;gap:10px;margin:0;padding:10px;text-align:left;border:1px solid var(--border);border-radius:15px;background:var(--surface);color:var(--text);box-shadow:0 1px 3px rgba(0,0,0,.04);transition:background .16s ease,border-color .16s ease,transform .16s ease}
+    .smart-chat-direct-person:active{transform:scale(.99)}
+    .smart-chat-direct-person:hover,.smart-chat-direct-person.active{background:var(--bg2);border-color:var(--accent)}
+    .smart-chat-direct-open{display:grid;place-items:center;width:28px;height:28px;flex:0 0 28px;border:1px solid var(--border);border-radius:50%;background:var(--bg2);color:var(--accent);font-size:17px;font-weight:800}
+    .smart-chat-channel-back-row{display:flex;align-items:center;margin:0 0 8px}
+    .smart-chat-channel-back{display:inline-flex;align-items:center;gap:5px;min-height:32px;padding:0 10px;border:1px solid var(--border);border-radius:9px;background:var(--bg2);color:var(--text2);font-size:11px;font-weight:700;cursor:pointer}
+    .smart-chat-channel-back:hover{background:var(--surface2);color:var(--text)}
+    .smart-chat-channel-back-row{display:flex;align-items:center;margin:0 0 8px}
+    .smart-chat-channel-back{display:inline-flex;align-items:center;gap:5px;min-height:32px;padding:0 10px;border:1px solid var(--border);border-radius:9px;background:var(--bg2);color:var(--text2);font-size:11px;font-weight:700;cursor:pointer}
+    .smart-chat-channel-back:hover{background:var(--surface2);color:var(--text)}
     .smart-chat-list-actions{display:flex;align-items:center;gap:5px}
     .smart-chat-list-actions>button{width:30px;height:30px;border:1px solid var(--border);border-radius:9px;background:var(--bg2);color:var(--text2);font-weight:800;cursor:pointer;display:inline-flex;align-items:center;justify-content:center}
     .smart-chat-list-actions>button:hover{background:var(--surface2);color:var(--text)}
@@ -346,6 +451,12 @@ window._refreshAdminComposerPreview = function() {
       .smart-chat-hero>div:first-of-type{min-width:0;flex:1}
       .smart-chat-hero .page-title{font-size:21px}
       .smart-chat-hero .page-subtitle{font-size:11px;line-height:1.4}
+      #page-chat .smart-chat-hero{display:grid;grid-template-columns:36px minmax(0,1fr);align-items:center;column-gap:10px;row-gap:6px;min-width:0}
+      #page-chat .smart-chat-nav-back{grid-column:1;grid-row:1;justify-self:start;align-self:center}
+      #page-chat .smart-chat-hero>div:first-of-type{grid-column:2;grid-row:1;min-width:0}
+      #page-chat .smart-chat-hero .page-title{margin:0;font-size:21px;line-height:1.25;overflow-wrap:anywhere}
+      #page-chat .smart-chat-hero .page-subtitle{margin-top:4px}
+      #page-chat .smart-chat-mode-switch{grid-column:1 / -1;grid-row:2;justify-self:end;display:flex;flex-wrap:wrap;justify-content:flex-end;gap:6px;position:static;max-width:100%;margin:0}
       .smart-chat-nav-back{order:-1;min-width:62px;height:34px}
       .smart-chat-mode-switch{position:sticky;top:0;z-index:5}
       .smart-chat-channel-list{scroll-snap-type:x proximity;overscroll-behavior-x:contain}
@@ -398,29 +509,33 @@ function renderChat() {
   page.innerHTML = `
     <div class="smart-chat-shell">
       <div class="smart-chat-hero">
-        <button type="button" class="smart-chat-nav-back" onclick="_chatBackToMenu()" aria-label="${t('chat.exitChat')}">‹ <span>${t('chat.exitChat')}</span></button>
+        <button type="button" class="smart-chat-nav-back" onclick="_chatBackToMenu()" aria-label="${t('chat.exitChat')}" title="${t('chat.exitChat')}"><span class="smart-chat-nav-icon" aria-hidden="true">‹</span><span class="smart-chat-nav-label">${t('chat.exitChat')}</span></button>
         <div>
           <div class="page-eyebrow">${t('chat.communicationCenter')}</div>
           <h1 class="page-title">${t('chat.schoolChat')}</h1>
           <p class="page-subtitle">${t('chat.schoolCommunicationDesc')}</p>
         </div>
-        <div class="smart-chat-identity">
-          <span class="smart-chat-avatar">${esc((window.APP?.teacher_name || '?')[0])}</span>
-          <span>${esc(window.APP?.teacher_name || t('chat.staff'))}</span>
-        </div>
+        <div class="smart-chat-mode-switch" role="tablist" aria-label="${esc(t('chat.switchChatMode'))}">
+        <button class="${_chatMode === 'school' ? 'active' : ''}" onclick="switchChatMode('school')" role="tab" aria-selected="${_chatMode === 'school'}">${_chatIcon('users')} ${t('chat.schoolChat')}</button>
+        <button class="${_chatMode === 'ai' ? 'active' : ''}" onclick="switchChatMode('ai')" role="tab" aria-selected="${_chatMode === 'ai'}">${_chatIcon('bot')} ${t('chat.aiAssistant')}</button>
       </div>
-
-      <div class="smart-chat-mode-switch" role="tablist">
-        <button class="${_chatMode === 'school' ? 'active' : ''}" onclick="switchChatMode('school')" role="tab">
-          ${_chatIcon('users')} ${t('chat.schoolChat')}
-        </button>
-        <button class="${_chatMode === 'ai' ? 'active' : ''}" onclick="switchChatMode('ai')" role="tab">
-          ${_chatIcon('bot')} ${t('chat.aiAssistant')}
-        </button>
       </div>
-
-      <nav id="smartChatQuickNav" class="smart-chat-quick-nav" aria-label="${esc(t('chat.schoolChat'))}"></nav>
-      <div id="smartChatModeBody"></div>
+      <header class="sc-chat-topbar" aria-label="${esc(t('chat.communicationCenter'))}">
+        <button type="button" class="sc-chat-top-action" onclick="_chatBackToMenu()" aria-label="${esc(t('chat.exitChat'))}" title="${esc(t('chat.exitChat'))}">
+          <svg viewBox="0 0 24 24" width="21" height="21" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m15 18-6-6 6-6"/></svg>
+        </button>
+        <button type="button" class="sc-chat-mode-pill" onclick="switchChatMode(_chatMode === 'school' ? 'ai' : 'school')" aria-label="${esc(t('chat.switchChatMode'))}" title="${esc(t('chat.switchChatMode'))}">
+          ${_chatMode === 'school' ? _chatIcon('users') + esc(t('chat.schoolChat')) : _chatIcon('bot') + esc(t('chat.aiAssistant'))}
+        </button>
+        <button type="button" class="sc-chat-top-action" onclick="_toggleChatTypeMenu()" aria-label="${esc(t('chat.manageChatTypes'))}" title="${esc(t('chat.manageChatTypes'))}" aria-haspopup="menu" aria-controls="scChatTypeMenu" aria-expanded="${_chatTypeMenuOpen ? 'true' : 'false'}">
+          <svg viewBox="0 0 24 24" width="21" height="21" fill="currentColor" aria-hidden="true"><circle cx="5" cy="12" r="1.8"/><circle cx="12" cy="12" r="1.8"/><circle cx="19" cy="12" r="1.8"/></svg>
+        </button>
+        <div id="scChatTypeMenu" class="sc-chat-type-menu" role="menu" aria-label="${esc(t('chat.manageChatTypes'))}" ${_chatTypeMenuOpen ? '' : 'hidden'}>${_chatTypeMenuMarkup()}</div>
+      </header>
+      <div class="sc-chat-workspace-content">
+        <nav id="smartChatQuickNav" class="smart-chat-quick-nav" aria-label="${esc(t('chat.schoolChat'))}"></nav>
+        <div id="smartChatModeBody"></div>
+      </div>
     </div>`;
 
   _renderChatMode();
@@ -428,39 +543,103 @@ function renderChat() {
 }
 
 window._chatBackToMenu = function() {
-  _exitChatWorkspace();
+  const isMobileWorkspace = typeof window.matchMedia === 'function'
+    && window.matchMedia('(max-width: 760px)').matches;
+  // Desktop retains the normal SCMS header/sidebar and never uses this control.
+  if (!isMobileWorkspace) return;
+  const root = document.documentElement;
+  const isFullscreen = !!root?.classList.contains('scms-chat-workspace');
   try {
-    if (typeof closeSidebar === 'function') closeSidebar();
-    if (typeof isTWA === 'function' && !isTWA() && typeof openSidebar === 'function') {
-      openSidebar();
-      return;
+    if (isFullscreen) {
+      // Fullscreen ‹ returns to the ordinary Chat page with the app chrome restored.
+      _exitChatWorkspace();
+      // Restore the standard mobile app shell with its menu control available.
+      // Keep the drawer closed so it does not overlay and block the reverse toggle.
+      if (typeof closeSidebar === 'function') closeSidebar();
+    } else {
+      // The compact › control re-enters fullscreen without navigating away from Chat.
+      if (typeof closeSidebar === 'function') closeSidebar();
+      _enterChatWorkspace();
     }
-    if (typeof goToPage === 'function') {
-      goToPage('dashboard');
-      return;
+    const icon = document.querySelector('#page-chat .smart-chat-nav-back .smart-chat-nav-icon');
+    if (icon) icon.textContent = root?.classList.contains('scms-chat-workspace') ? '‹' : '›';
+    const control = document.querySelector('#page-chat .smart-chat-nav-back');
+    if (control) {
+      const label = root?.classList.contains('scms-chat-workspace') ? t('chat.exitChat') : t('chat.schoolChat');
+      control.setAttribute('aria-label', label);
+      control.setAttribute('title', label);
     }
-    if (window.APP) window.APP.currentPage = 'dashboard';
   } catch (e) {
-    console.warn('[chat] menu navigation failed', e);
+    console.warn('[chat] mobile fullscreen toggle failed', e);
   }
 };
 
 window.switchChatMode = function(mode) {
   _chatMode = mode === 'ai' ? 'ai' : 'school';
-  document.querySelectorAll('.smart-chat-mode-switch button').forEach((b, i) =>
-    b.classList.toggle('active', (_chatMode === 'school' && i === 0) || (_chatMode === 'ai' && i === 1))
-  );
+  try { localStorage.setItem('scms_chat_mode', _chatMode); } catch (_) {}
+  _chatTypeMenuOpen = false;
+  document.querySelectorAll('.smart-chat-mode-switch button').forEach((button, index) => {
+    button.classList.toggle('active', (_chatMode === 'school' && index === 0) || (_chatMode === 'ai' && index === 1));
+  });
   _renderChatQuickNav();
   _renderChatMode();
   if (_chatMode === 'school') _refreshChatChannelUnreadCounts();
+  const menu = document.getElementById('scChatTypeMenu');
+  if (menu) menu.hidden = true;
+  document.querySelectorAll('.sc-chat-top-action[aria-haspopup="menu"]').forEach(b => b.setAttribute('aria-expanded','false'));
+  const pill = document.querySelector('.sc-chat-mode-pill');
+  if (pill) pill.innerHTML = (_chatMode === 'school' ? _chatIcon('users') + esc(t('chat.schoolChat')) : _chatIcon('bot') + esc(t('chat.aiAssistant')));
 };
+window._toggleChatTypeMenu = function() {
+  _chatTypeMenuOpen = !_chatTypeMenuOpen;
+  const menu = document.getElementById('scChatTypeMenu');
+  if (menu) { menu.innerHTML = _chatTypeMenuMarkup(); menu.hidden = !_chatTypeMenuOpen; }
+  document.querySelectorAll('.sc-chat-top-action[aria-haspopup="menu"]').forEach(b => b.setAttribute('aria-expanded', String(_chatTypeMenuOpen)));
+};
+function _chatTypeMenuMarkup() {
+  const hidden = _chatQuickNavChannels().filter(c => _chatVisibleTypes[c.id] === false);
+  if (!hidden.length) return '<div class="sc-chat-type-empty">' + esc(t('chat.allChatTypesVisible')) + '</div>';
+  return hidden.map(c => '<div class="sc-chat-type-row" role="none">' +
+    '<button type="button" class="sc-chat-type-option" role="menuitem" onclick="_openHiddenChatType(\'' + c.id + '\')">' +
+    '<span class="smart-chat-quick-channel-icon" aria-hidden="true">' + c.icon + '</span><span class="sc-chat-type-copy"><strong>' + esc(c.name) + '</strong><small>' + esc(t('chat.openChatType')) + '</small></span></button>' +
+    '<button type="button" class="sc-chat-type-enable" role="menuitem" onclick="_showChatType(\'' + c.id + '\')" aria-label="' + esc(t('chat.showTabOnBar')) + ' ' + esc(c.name) + '" title="' + esc(t('chat.showTabOnBar')) + '">＋</button></div>').join('');
+}
+window._openHiddenChatType = function(id) {
+  if (!_chatQuickNavChannels().some(channel => channel.id === id) || _chatVisibleTypes[id] !== false) return;
+  _chatTypeMenuOpen = false;
+  const menu = document.getElementById('scChatTypeMenu');
+  if (menu) { menu.hidden = true; menu.innerHTML = _chatTypeMenuMarkup(); }
+  document.querySelectorAll('.sc-chat-top-action[aria-haspopup="menu"]').forEach(button => button.setAttribute('aria-expanded', 'false'));
+  switchChatChannel(id);
+};
+window._hideChatType = function(id) {
+  if (typeof window.matchMedia !== 'function' || !window.matchMedia('(max-width: 760px)').matches) return;
+  if (!Object.prototype.hasOwnProperty.call(_chatVisibleTypes, id)) return;
+  _chatVisibleTypes[id] = false;
+  try { localStorage.setItem('scms_chat_visible_types', JSON.stringify(_chatVisibleTypes)); } catch (_) {}
+  if (_chatChannel === id) _chatChannel = _chatQuickNavChannels().find(c => _chatVisibleTypes[c.id] !== false)?.id || 'staff';
+  _renderChatQuickNav(); _renderChatMode();
+  const menu = document.getElementById('scChatTypeMenu'); if (menu) menu.innerHTML = _chatTypeMenuMarkup();
+};
+window._showChatType = function(id) {
+  if (typeof window.matchMedia !== 'function' || !window.matchMedia('(max-width: 760px)').matches) return;
+  if (!Object.prototype.hasOwnProperty.call(_chatVisibleTypes, id)) return;
+  _chatVisibleTypes[id] = true;
+  try { localStorage.setItem('scms_chat_visible_types', JSON.stringify(_chatVisibleTypes)); } catch (_) {}
+  _chatTypeMenuOpen = false;
+  const menu = document.getElementById('scChatTypeMenu'); if (menu) { menu.hidden = true; menu.innerHTML = _chatTypeMenuMarkup(); }
+  _renderChatQuickNav();
+  if (_chatMode === 'school') switchChatChannel(id);
+};
+window._chooseChatType = function(mode) { window.switchChatMode(mode); };
 
 function _chatQuickNavChannels() {
   return [
     { id:'staff', name:t('chat.allStaff'), icon:'👥' },
+    // Official notices are a high-priority school-wide workflow, not a buried secondary channel.
+    { id:'announcements', name:t('chat.officialAnnouncements'), icon:'📢' },
     { id:'direct', name:t('chat.directMessages'), icon:'👤' },
     { id:'departments', name:t('chat.departmentGrade'), icon:'📚' },
-    { id:'announcements', name:t('chat.officialAnnouncements'), icon:'📢' },
     { id:'tickets', name:t('chat.workspace.tickets'), icon:'🎫' },
     { id:'events', name:t('chat.workspace.groups'), icon:'🗂️' }
   ];
@@ -471,17 +650,28 @@ function _renderChatQuickNav() {
   if (!nav) return;
   nav.hidden = _chatMode !== 'school';
   nav.setAttribute('aria-label', t('chat.schoolChat'));
+  const channels = _chatQuickNavChannels();
+  const isMobile = typeof window.matchMedia === 'function' && window.matchMedia('(max-width: 760px)').matches;
+  // Tab visibility is a mobile space-saving preference only. Desktop always shows every channel.
+  const visible = isMobile ? channels.filter(c => _chatVisibleTypes[c.id] !== false) : channels;
+  if (!visible.length) { nav.innerHTML = ''; return; }
   nav.innerHTML = '<div class="smart-chat-quick-nav-track" role="group">' +
-    _chatQuickNavChannels().map(c => {
+    visible.map(c => {
       const count = _chatUnreadCount(c.id);
       const active = c.id === _chatChannel;
       const countLabel = count > 0 ? ' aria-label="' + esc(t('chat.unreadMessages')) + ': ' + count + '"' : ' aria-hidden="true"';
-      return '<button type="button" class="smart-chat-quick-channel' + (active ? ' active' : '') + '" data-chat-quick-channel="' + c.id + '" aria-pressed="' + (active ? 'true' : 'false') + '" onclick="switchChatChannel(\'' + c.id + '\')">' +
+      return '<div class="smart-chat-quick-channel-wrap"><button type="button" class="smart-chat-quick-channel' + (active ? ' active' : '') + '" data-chat-quick-channel="' + c.id + '" aria-pressed="' + (active ? 'true' : 'false') + '" onclick="switchChatChannel(\'' + c.id + '\')">' +
         '<span class="smart-chat-quick-channel-icon" aria-hidden="true">' + c.icon + '</span>' +
         '<span class="smart-chat-quick-channel-name">' + esc(c.name) + '</span>' +
         '<span class="smart-chat-quick-channel-count' + (count > 0 ? ' has-unread' : '') + '"' + countLabel + '>' + (count > 0 ? (count > 99 ? '99+' : count) : '') + '</span>' +
-      '</button>';
+      '</button><button type="button" class="smart-chat-quick-channel-hide" onclick="_hideChatType(\'' + c.id + '\')" aria-label="' + esc(t('chat.hideTab')) + ' ' + esc(c.name) + '" title="' + esc(t('chat.hideTab')) + '">×</button></div>';
     }).join('') + '</div>';
+  // Keep the selected channel visible after switching; mobile users should never
+  // land on the first tab while a different workspace is active.
+  requestAnimationFrame(() => {
+    const active = nav.querySelector('.smart-chat-quick-channel.active');
+    if (active) active.scrollIntoView({block:'nearest',inline:'center',behavior:'auto'});
+  });
 }
 
 function _chatUnreadCount(channel) {
@@ -639,8 +829,7 @@ function _renderChatMode() {
           <button type="submit" class="chat-send-btn" id="chatSendBtn" ${_chatChannel === 'staff' ? '' : 'disabled'}>${_chatChannel === 'staff' ? _chatIcon('send') : t('chat.preview')}</button>
         </form>
       </section>
-    </div>
-    ${_renderAdminComposer()}`;
+    </div>`;
   _loadChatMessages();
   setTimeout(() => {
     _refreshAdminComposerPreview();
@@ -679,11 +868,13 @@ function _renderInquiryTicketList(){
   }).join(''):'<div class="smart-chat-list-empty-card"><div class="icon">🎫</div><strong>'+t('chat.noInquiryTickets')+'</strong><small>'+t('chat.createTicketHint')+'</small></div>';
 }
 async function _loadInquiryTickets(){
+  // Keep the last successful ticket list visible while the refresh is pending.
+  if(_inquiryTickets.length)_renderInquiryTicketList();
   try{
     _inquiryTickets=await API.getInquiryTickets();
     _renderInquiryTicketList();
     if(_inquiryTicketId) await _openInquiryTicket(_inquiryTicketId);
-   }catch(e){const box=document.getElementById('inquiryTicketList');if(box)box.innerHTML=`<div class="chat-error"><div>🎫</div><div>${t('chat.loadTicketsFailed')}</div><button type="button" class="btn-secondary" onclick="_loadInquiryTickets()">${t('chat.retry')}</button></div>`;}
+   }catch(e){const box=document.getElementById('inquiryTicketList');if(box&&!_inquiryTickets.length)box.innerHTML=`<div class="chat-error"><div>🎫</div><div>${t('chat.loadTicketsFailed')}</div><button type="button" class="btn-secondary" onclick="_loadInquiryTickets()">${t('chat.retry')}</button></div>`;}
 }
 async function _openInquiryTicket(id){
   _inquiryTicketId=Number(id); const shell=document.querySelector('.smart-chat-inquiry-shell');if(shell)shell.classList.add('has-selection'); const r=await API.openInquiryTicket(_inquiryTicketId); if(!r?.ok)return;
@@ -718,8 +909,13 @@ async function _updateInquiryTicket(){
   if(!window.APP?.is_admin||!_inquiryTicketId)return;
   const status=document.getElementById('inquiryStatusSelect')?.value||null;
   const assignee=document.getElementById('inquiryAssigneeSelect')?.value||null;
-  const r=await API.updateInquiryTicket(_inquiryTicketId,status,assignee||null);
-  if(r?.ok){await _loadInquiryTickets();await _openInquiryTicket(_inquiryTicketId);}else showToast(t('chat.ticketUpdateFailed'));
+  try{
+    const r=await API.updateInquiryTicket(_inquiryTicketId,status,assignee||null);
+    if(r?.ok){await _loadInquiryTickets();await _openInquiryTicket(_inquiryTicketId);}
+    else showToast(t('chat.ticketUpdateFailed'));
+  }catch(e){
+    showToast(t('chat.ticketUpdateFailed'));
+  }
 }
 async function _sendInquiryFromComposer(e){
   e?.preventDefault?.();
@@ -740,25 +936,29 @@ async function _sendInquiryFromComposer(e){
   return false;
 }
 window._inquiryKeydown=function(ev){if(ev.key==='Enter'&&!ev.shiftKey){ev.preventDefault();_sendInquiryFromComposer(ev);}};
-function _closeInquiryDraft(){_inquiryDraft=null;_renderInquiryDraft();}
+function _closeInquiryDraft(){_inquiryDraft=null;document.getElementById('inquiryDraftOverlay')?.remove();}
 function _renderInquiryDraft(){
-  const root=document.getElementById('inquiryTicketList'); if(!root)return;
-  if(!_inquiryDraft){
-    const noTickets=t('chat.noTicketsYet');
-    root.innerHTML=_inquiryTickets.length?_inquiryTickets.map(item=>{
-      const student=item.student_id?' · '+esc(item.student_id):'';
-      return `<button class="smart-chat-channel-card ${Number(item.id)===Number(_inquiryTicketId)?'active':''}" onclick="_openInquiryTicket(${Number(item.id)})"><span class="smart-chat-channel-icon">🎫</span><span><strong>${esc(item.subject)}</strong><small>${esc(item.status)} · ${esc(item.priority)}${student}</small></span><b>›</b></button>`;
-    }).join(''):'<div class="chat-empty-sub">'+noTickets+'</div>';
-    return;
-  }
-  root.innerHTML=`
-    <form class="smart-chat-inquiry-form" onsubmit="return _submitInquiryDraft(event)">
-      <label><span class="smart-chat-field-label">${t('chat.subject')}</span><input id="inquiryDraftSubject" maxlength="160" required placeholder="${t('chat.whatNeedsAttention')}"></label>
-      <label><span class="smart-chat-field-label">${t('chat.priority')}</span><select id="inquiryDraftPriority"><option value="NORMAL">${t('chat.priorityNormal')}</option><option value="LOW">${t('chat.priorityLow')}</option><option value="HIGH">${t('chat.priorityHigh')}</option><option value="URGENT">${t('chat.priorityUrgent')}</option></select></label>
-      <label><span class="smart-chat-field-label">${t('chat.studentId')} <small class="smart-chat-field-note">${t('chat.optionalSameSchool')}</small></span><input id="inquiryDraftStudent" maxlength="80" placeholder="${t('chat.studentId')}"></label>
-      <label><span class="smart-chat-field-label">${t('chat.details')}</span><textarea id="inquiryDraftBody" maxlength="4000" rows="5" required placeholder="${t('chat.describeIssue')}"></textarea></label>
-      <div class="smart-chat-inquiry-form-actions"><button type="button" class="btn-secondary" onclick="_closeInquiryDraft()">${t('chat.cancel')}</button><button id="inquiryDraftSubmitBtn" type="submit" class="btn-primary">${t('chat.createTicket')}</button></div>
-    </form>`;
+  if(!window.APP?.currentPage||_chatChannel!=='tickets')return;
+  document.getElementById('inquiryDraftOverlay')?.remove();
+  const overlay=document.createElement('div');
+  overlay.id='inquiryDraftOverlay';
+  overlay.className='smart-chat-group-modal-overlay smart-chat-inquiry-modal-overlay';
+  overlay.innerHTML=`<section class="smart-chat-group-modal" role="dialog" aria-modal="true" aria-labelledby="inquiryDraftTitle">
+    <header class="smart-chat-group-modal-head"><div><div class="smart-chat-kicker">${t('chat.inquiry')}</div><h2 id="inquiryDraftTitle">${t('chat.newTicket')}</h2><p>${t('chat.createOrSelectTicket')}</p></div><button type="button" class="smart-chat-group-modal-close" data-close-ticket-modal aria-label="${t('chat.cancel')}">×</button></header>
+    <form id="inquiryDraftForm" class="smart-chat-inquiry-form smart-chat-group-form">
+      <label><span class="smart-chat-field-label">${t('chat.subject')}</span><input id="inquiryDraftSubject" name="subject" maxlength="160" required placeholder="${t('chat.whatNeedsAttention')}"></label>
+      <label><span class="smart-chat-field-label">${t('chat.priority')}</span><select id="inquiryDraftPriority" name="priority"><option value="NORMAL">${t('chat.priorityNormal')}</option><option value="LOW">${t('chat.priorityLow')}</option><option value="HIGH">${t('chat.priorityHigh')}</option><option value="URGENT">${t('chat.priorityUrgent')}</option></select></label>
+      <label><span class="smart-chat-field-label">${t('chat.studentId')} <small class="smart-chat-field-note">${t('chat.optionalSameSchool')}</small></span><input id="inquiryDraftStudent" name="studentId" maxlength="80" placeholder="${t('chat.studentId')}"></label>
+      <label><span class="smart-chat-field-label">${t('chat.details')}</span><textarea id="inquiryDraftBody" name="body" maxlength="4000" rows="5" required placeholder="${t('chat.describeIssue')}"></textarea></label>
+      <div class="smart-chat-inquiry-form-actions"><button type="button" class="btn-secondary" data-close-ticket-modal>${t('chat.cancel')}</button><button id="inquiryDraftSubmitBtn" type="submit" class="btn-primary">${t('chat.createTicket')}</button></div>
+    </form>
+  </section>`;
+  document.body.appendChild(overlay);
+  const close=()=>_closeInquiryDraft();
+  overlay.querySelectorAll('[data-close-ticket-modal]').forEach(button=>button.addEventListener('click',close));
+  overlay.addEventListener('click',event=>{if(event.target===overlay)close();});
+  overlay.querySelector('#inquiryDraftForm')?.addEventListener('submit',_submitInquiryDraft);
+  overlay.querySelector('#inquiryDraftSubject')?.focus();
 }
 async function _newInquiryTicket(){_inquiryDraft=true;_renderInquiryDraft();}
 async function _submitInquiryDraft(e){
@@ -769,13 +969,19 @@ async function _submitInquiryDraft(e){
   const studentId=document.getElementById('inquiryDraftStudent')?.value.trim()||null;
   const btn=document.getElementById('inquiryDraftSubmitBtn');
   if(!subject||!body)return false;
-  if(btn)btn.disabled=true;
+  if(btn){btn.disabled=true;btn.textContent=t('chat.loading');}
   try{
     const r=await API.createInquiryTicket(subject,body,studentId,priority);
-    if(!r?.ok)throw new Error(r?.error||'ticket_create_failed');
-    _inquiryDraft=null;_inquiryTicketId=Number(r.ticket.id);await _loadInquiryTickets();
-  }catch(e){showToast(t('chat.ticketCreateFailed'));}
-  finally{const current=document.getElementById('inquiryDraftSubmitBtn');if(current)current.disabled=false;}
+    if(!r?.ok||!r.ticket?.id)throw new Error(r?.error||'ticket_create_failed');
+    _inquiryTicketId=Number(r.ticket.id);
+    _inquiryDraft=null;
+    document.getElementById('inquiryDraftOverlay')?.remove();
+    await _loadInquiryTickets();
+  }catch(e){
+    showToast(t('chat.ticketCreateFailed'));
+    const current=document.getElementById('inquiryDraftSubmitBtn');
+    if(current){current.disabled=false;current.textContent=t('chat.createTicket');}
+  }
   return false;
 }
 let _announcementComposerOpen=false;
@@ -794,44 +1000,97 @@ window._toggleAnnouncementComposer=function(force=null){
     requestAnimationFrame(()=>document.getElementById('adminMsgBody')?.focus());
   }
 };
+function _announcementExcerpt(value,limit=96){
+  const text=String(value||'').replace(/\s+/g,' ').trim();
+  if(!text)return '';
+  return text.length>limit?text.slice(0,limit-1).trimEnd()+'…':text;
+}
+function _formatAnnouncementDate(value){
+  if(!value)return '';
+  const date=new Date(value);
+  return Number.isNaN(date.getTime())?String(value):date.toLocaleString([], {dateStyle:'medium',timeStyle:'short'});
+}
+function _renderAnnouncementList(rows){
+  const list=document.getElementById('announcementList');
+  if(!list)return;
+  list.innerHTML=rows.map(a=>{
+    // Announcement IDs are UUIDs from Postgres; never coerce them to Number.
+    const id=String(a.id||'');
+    if(!/^[0-9a-f]{8}-[0-9a-f]{4}-[1-8][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(id))return '';
+    const type=String(a.message_type||t('chat.officialNotices'));
+    const excerpt=_announcementExcerpt(a.body);
+    const date=_formatAnnouncementDate(a.created_at);
+    const unread=!a.read_at;
+    const summary=excerpt||_announcementExcerpt(a.reason)||t('chat.officialNotices');
+    const accessible=[t('chat.officialAnnouncements'),type,summary,date].filter(Boolean).join(', ');
+    const selected=id===String(_announcementId||'');
+    return '<button type="button" class="smart-chat-channel-card smart-chat-announcement-card '+(selected?'active':'')+'" aria-label="'+esc(accessible)+'" aria-current="'+(selected?'true':'false')+'" onclick="_openAnnouncement(\''+id+'\')">'+
+      '<span class="smart-chat-channel-icon" aria-hidden="true">📢</span>'+
+      '<span class="smart-chat-channel-copy"><strong>'+esc(type)+'</strong>'+
+      '<small class="smart-chat-announcement-excerpt">'+esc(summary)+'</small>'+
+      '<small class="smart-chat-announcement-date">'+esc(date)+'</small></span>'+
+      (unread?'<span class="smart-chat-announcement-unread" aria-hidden="true">•</span>':'<span class="smart-chat-channel-chevron" aria-hidden="true">›</span>')+
+      '</button>';
+  }).join('');
+}
 function _renderAnnouncementWorkspace(){
   const composer=window.APP?.is_admin ? `<div id="announcementComposer" class="smart-chat-composer-drawer">${_renderAdminComposer()}</div>` : '';
-  return _chatChannelBack(t('chat.schoolChat')) + composer +
+  return _chatChannelBack(t('chat.officialAnnouncements')) + composer +
     '<div class="smart-chat-direct-shell smart-chat-announcement-shell'+(_announcementId?' has-selection':'')+'">'+
-    `<aside class="smart-chat-direct-list"><div class="smart-chat-direct-list-head"><div><div class="smart-chat-kicker">${t('chat.official')}</div><strong>${t('chat.announcements')}</strong></div><div class="smart-chat-list-actions">`+
-    (window.APP?.is_admin ? `<button type="button" class="smart-chat-add-btn" id="announcementComposerToggle" onclick="_toggleAnnouncementComposer()" aria-expanded="false" aria-controls="announcementComposer" title="${t('chat.newOfficialMessage')}">+</button>` : '')+
-    `<button type="button" class="smart-chat-refresh-btn" onclick="_loadAnnouncementWorkspace()" title="${t('chat.refresh')}">↻</button></div></div>`+
-    '<div id="announcementList" class="smart-chat-conversation-list"></div></aside>'+
-    `<section class="smart-chat-direct-conversation"><div id="announcementHead" class="smart-chat-conversation-head"><div><strong>${t('chat.officialAnnouncements')}</strong><small>${t('chat.schoolAuthorizedNotices')}</small></div><span class="smart-chat-verified-pill">${t('chat.verified')}</span></div><div id="announcementStream" class="chat-stream"><div class="chat-empty"><div class="chat-empty-icon">📢</div><div class="chat-empty-title">${t('chat.officialAnnouncements')}</div><div class="chat-empty-sub">${t('chat.loading')}</div></div></div></section></div>`;
+    `<aside class="smart-chat-direct-list"><div class="smart-chat-direct-list-head"><div><div class="smart-chat-kicker">${t('chat.officialAnnouncements')}</div><strong>${t('chat.officialAnnouncements')}</strong></div><div class="smart-chat-list-actions">`+
+    (window.APP?.is_admin ? `<button type="button" class="smart-chat-add-btn" id="announcementComposerToggle" onclick="_toggleAnnouncementComposer()" aria-expanded="false" aria-controls="announcementComposer" title="${t('chat.officialAnnouncements')}">+</button>` : '')+
+    `<button type="button" class="smart-chat-refresh-btn" onclick="_loadAnnouncementWorkspace()" aria-label="${t('chat.refresh')}" title="${t('chat.refresh')}">↻</button></div></div>`+
+    '<div id="announcementList" class="smart-chat-conversation-list" aria-label="'+esc(t('chat.officialAnnouncements'))+'"></div></aside>'+
+    `<section class="smart-chat-direct-conversation"><div id="announcementHead" class="smart-chat-conversation-head"><div><strong>${t('chat.officialAnnouncements')}</strong><small>${t('chat.officialNotices')}</small></div><span class="smart-chat-verified-pill">${t('chat.verifiedStaffOnly')}</span></div><div id="announcementStream" class="chat-stream" aria-live="polite"><div class="chat-empty"><div class="chat-empty-icon">📢</div><div class="chat-empty-title">${t('chat.officialAnnouncements')}</div><div class="chat-empty-sub">${t('chat.emptySub')}</div></div></div></section></div>`;
 }
 async function _loadAnnouncementWorkspace(autoOpen=true){
+  const cached=Array.isArray(window._chatAnnouncements)?window._chatAnnouncements:null;
+  const cachedList=document.getElementById('announcementList');
+  if(cachedList&&cached?.length){
+    _renderAnnouncementList(cached);
+    const selected=cached.find(item=>String(item.id)===String(_announcementId))||(autoOpen?cached[0]:null);
+    if(selected)window._openAnnouncement(String(selected.id));
+  }
   try{
     const rows=await API.getStaffAnnouncements(50);
     const list=document.getElementById('announcementList'),stream=document.getElementById('announcementStream');
     if(!list||!stream)return;
     window._chatAnnouncements=rows;
-    if(!rows.length){_announcementId=null;list.innerHTML=`<div class="smart-chat-list-empty-card"><div class="icon">📢</div><strong>${t('chat.noOfficialAnnouncements')}</strong><small>${t('chat.newVerifiedNotices')}</small></div>`;stream.innerHTML=`<div class="chat-empty"><div class="chat-empty-icon">📢</div><div class="chat-empty-title">${t('chat.noOfficialAnnouncements')}</div><div class="chat-empty-sub">${t('chat.newVerifiedNotices')}</div></div>`;return;}
-    list.innerHTML=rows.map(a=>'<button class="smart-chat-channel-card '+(Number(a.id)===Number(_announcementId)?'active':'')+'" onclick="_openAnnouncement('+Number(a.id)+')"><span class="smart-chat-channel-icon">📢</span><span><strong>'+esc(a.message_type||t('chat.officialNotice'))+'</strong><small>'+esc(a.created_at||'')+'</small></span><b>'+(!a.read_at?'•':'›')+'</b></button>').join('');
-    if(autoOpen && !_announcementId) await _openAnnouncement(Number(rows[0].id));
-   }catch(e){const list=document.getElementById('announcementList');if(list)list.innerHTML=`<div class="chat-error"><div>📢</div><div>${t('chat.loadAnnouncementsFailed')}</div><button type="button" class="btn-secondary" onclick="_loadAnnouncementWorkspace(false)">${t('chat.retry')}</button></div>`;}
+    if(!rows.length){_announcementId=null;list.innerHTML=`<div class="smart-chat-list-empty-card"><div class="icon">📢</div><strong>${t('chat.emptyTitle')}</strong><small>${t('chat.emptySub')}</small></div>`;stream.innerHTML=`<div class="chat-empty"><div class="chat-empty-icon">📢</div><div class="chat-empty-title">${t('chat.emptyTitle')}</div><div class="chat-empty-sub">${t('chat.emptySub')}</div></div>`;return;}
+    _renderAnnouncementList(rows);
+    if(autoOpen && !_announcementId) await _openAnnouncement(String(rows[0].id));
+   }catch(e){const list=document.getElementById('announcementList');const cachedRows=Array.isArray(window._chatAnnouncements)?window._chatAnnouncements:[];if(list&&cachedRows.length)_renderAnnouncementList(cachedRows);else if(list)list.innerHTML=`<div class="chat-error"><div>📢</div><div>${t('chat.loadFailed')}</div><button type="button" class="btn-secondary" onclick="_loadAnnouncementWorkspace(false)">${t('chat.retry')}</button></div>`;}
 }
 window._openAnnouncement=async function(id){
-  const a=(window._chatAnnouncements||[]).find(x=>Number(x.id)===Number(id));
+  const a=(window._chatAnnouncements||[]).find(x=>String(x.id)===String(id));
   const stream=document.getElementById('announcementStream');if(!a||!stream)return;
-  _announcementId=Number(id);
+  _announcementId=String(id);
   const shell=document.querySelector('.smart-chat-announcement-shell');if(shell)shell.classList.add('has-selection');
+  _renderAnnouncementList(window._chatAnnouncements||[]);
   const head=document.getElementById('announcementHead');
-   if(head)head.innerHTML=`<div class="smart-chat-direct-peer"><button type="button" class="smart-chat-mobile-back" onclick="_clearAnnouncementSelection()" aria-label="${t('chat.backToAnnouncements')}">‹</button><div><strong>${t('chat.officialPrefix')} ${esc(a.message_type||t('chat.announcement'))}</strong><small>${esc(a.created_at||'')}</small></div></div><span class="smart-chat-verified-pill">${t('chat.verified')}</span>`;
-   stream.innerHTML=`<article class="smart-chat-official-preview"><div class="smart-chat-preview-label">${t('chat.systemGeneratedOfficialMessage')}</div><div class="smart-chat-preview-header">${esc(a.message_type||t('chat.officialAnnouncement'))}</div><div class="smart-chat-preview-meta">${esc(a.created_at||'')} · ${(!a.read_at?t('chat.unread'):t('chat.read'))}</div><div class="smart-chat-preview-reason"><strong>${t('chat.reason')}</strong><span>${esc(a.reason||t('chat.officialCommunication'))}</span></div><div class="smart-chat-preview-body">${esc(a.body||'').replace(/\n/g,'<br>')}</div></article>`;
-  try{if(API.markStaffAnnouncementRead)await API.markStaffAnnouncementRead(id);a.read_at=a.read_at||new Date().toISOString();}catch(e){}
+  if(head)head.innerHTML=`<div class="smart-chat-direct-peer"><button type="button" class="smart-chat-mobile-back" onclick="_clearAnnouncementSelection()" aria-label="${t('chat.officialAnnouncements')}">‹</button><div><strong>${esc(a.message_type||t('chat.officialAnnouncements'))}</strong><small>${esc(_formatAnnouncementDate(a.created_at))}</small></div></div><span class="smart-chat-verified-pill">${t('chat.verifiedStaffOnly')}</span>`;
+  stream.innerHTML=`<article class="smart-chat-official-preview smart-chat-announcement-detail"><div class="smart-chat-preview-label">${t('chat.officialNotices')}</div><h2 class="smart-chat-preview-header">${esc(a.message_type||t('chat.officialAnnouncements'))}</h2><div class="smart-chat-preview-meta">${esc(_formatAnnouncementDate(a.created_at))}</div><div class="smart-chat-preview-reason"><span>${esc(a.reason||t('chat.officialNotices'))}</span></div><div class="smart-chat-preview-body">${esc(a.body||'').replace(/\n/g,'<br>')}</div></article>`;
+  try{
+    if(API.markStaffAnnouncementRead){
+      const result=await API.markStaffAnnouncementRead(id);
+      if(result?.ok!==true)throw new Error(result?.error||'announcement_read_failed');
+      a.read_at=a.read_at||new Date().toISOString();
+      const meta=stream.querySelector('.smart-chat-preview-meta');
+      if(meta)meta.textContent=_formatAnnouncementDate(a.created_at);
+      _renderAnnouncementList(window._chatAnnouncements||[]);
+    }
+  }catch(e){
+    // Keep the item unread unless the server confirms the read receipt.
+  }
 };
 window._clearAnnouncementSelection=function(){
   _announcementId=null;
   const shell=document.querySelector('.smart-chat-announcement-shell');if(shell)shell.classList.remove('has-selection');
   const head=document.getElementById('announcementHead');
-  if(head)head.innerHTML=`<div><strong>${t('chat.officialAnnouncements')}</strong><small>${t('chat.selectAnnouncementToRead')}</small></div><span class="smart-chat-verified-pill">${t('chat.verified')}</span>`;
+  if(head)head.innerHTML=`<div><strong>${t('chat.officialAnnouncements')}</strong><small>${t('chat.officialNotices')}</small></div><span class="smart-chat-verified-pill">${t('chat.verifiedStaffOnly')}</span>`;
   const stream=document.getElementById('announcementStream');
-  if(stream)stream.innerHTML=`<div class="chat-empty"><div class="chat-empty-icon">📢</div><div class="chat-empty-title">${t('chat.selectAnnouncement')}</div><div class="chat-empty-sub">${t('chat.chooseOfficialNotice')}</div></div>`;
+  if(stream)stream.innerHTML=`<div class="chat-empty"><div class="chat-empty-icon">📢</div><div class="chat-empty-title">${t('chat.emptyTitle')}</div><div class="chat-empty-sub">${t('chat.emptySub')}</div></div>`;
+  _renderAnnouncementList(window._chatAnnouncements||[]);
 };
 function _renderDirectWorkspace() {
   return _chatChannelBack(t('chat.schoolChat')) + `
@@ -839,9 +1098,7 @@ function _renderDirectWorkspace() {
       <aside class="smart-chat-direct-list">
         <div class="smart-chat-direct-list-head"><div><div class="smart-chat-kicker">${t('chat.privateLabel')}</div><strong>${t('chat.directMessages')}</strong></div><button type="button" onclick="_loadDirectWorkspace()" title="${t('chat.refresh')}">↻</button></div>
         <label class="smart-chat-direct-search"><span>⌕</span><input id="directStaffSearch" placeholder="${t('chat.findTeacher')}" oninput="_renderDirectDirectory()"></label>
-        <div id="directConversationList" class="smart-chat-conversation-list"></div>
-        <div class="smart-chat-directory-title">${t('chat.startNewConversation')}</div>
-        <div id="directStaffDirectory" class="smart-chat-directory"></div>
+        <div id="directConversationList" class="smart-chat-conversation-list smart-chat-direct-people" aria-label="${esc(t('chat.directMessages'))}"></div>
       </aside>
       <section class="smart-chat-direct-conversation">
         <div id="directConversationHead" class="smart-chat-conversation-head"><div><strong>${t('chat.selectTeacher')}</strong><small>${t('chat.activeStaffOnly')}</small></div><span class="smart-chat-verified-pill">${t('chat.verifiedStaffOnly')}</span></div>
@@ -855,6 +1112,9 @@ function _renderDirectWorkspace() {
 }
 
 async function _loadDirectWorkspace() {
+  // Paint last successful rows immediately; refresh in the background.
+  if (_directStaff.length) _renderDirectDirectory();
+  if (_directConversations.length) _renderDirectConversationList();
   try {
     const [staff, conversations] = await Promise.all([API.getDirectStaffDirectory(), API.getDirectConversations()]);
     _directStaff = Array.isArray(staff) ? staff : [];
@@ -866,35 +1126,43 @@ async function _loadDirectWorkspace() {
       await _loadDirectMessages();
     }
   } catch (e) {
-    _directStaff=[]; _directConversations=[]; _renderDirectDirectory(); _renderDirectConversationList();
+    // A transient network/RPC failure is not an empty directory. Preserve the last
+    // successful rows and only show a blocking error when nothing has loaded yet.
+    if (!_directStaff.length) _renderDirectDirectory();
+    if (!_directConversations.length) _renderDirectConversationList();
     const stream=document.getElementById('directMessageStream');
-    if(stream) stream.innerHTML=`<div class="chat-error"><div>💬</div><div>${t('chat.unableLoadDirect')}</div><button class="btn-secondary" onclick="_loadDirectWorkspace()">${t('chat.retry')}</button></div>`;
+    if(stream && !_directConversationId && !_directStaff.length && !_directConversations.length)
+      stream.innerHTML=`<div class="chat-error"><div>💬</div><div>${t('chat.unableLoadDirect')}</div><button class="btn-secondary" onclick="_loadDirectWorkspace()">${t('chat.retry')}</button></div>`;
   }
+}
+
+function _directAvatarMarkup(person, large = false) {
+  const name = String(person?.teacher_name || '?').trim();
+  const initial = esc(Array.from(name)[0] || '?');
+  const rawPhoto = String(person?.photo_url || '').trim();
+  // Only render HTTPS or same-origin absolute paths from the existing profile record.
+  const safePhoto = (/^https:\/\/[^\s"'<>]+$/i.test(rawPhoto) ||
+    (/^\/(?!\/)[^"'<>]*$/.test(rawPhoto))) ? rawPhoto : '';
+  const image = safePhoto
+    ? `<img class="smart-chat-profile-photo" src="${esc(safePhoto)}" alt="" loading="lazy" decoding="async" referrerpolicy="no-referrer" onerror="this.remove()">`
+    : '';
+  return `<span class="smart-chat-direct-avatar${large ? ' large' : ''}" aria-hidden="true">${image}<span class="smart-chat-avatar-initial">${initial}</span></span>`;
 }
 
 function _renderDirectConversationList() {
   const root=document.getElementById('directConversationList');
   if(!root)return;
-  if(!_directConversations.length){root.innerHTML=`<div class="smart-chat-list-empty">${t('chat.noConversations')}</div>`;return;}
-  root.innerHTML=_directConversations.map(c=>`
-    <button class="smart-chat-direct-item ${Number(c.conversation_id)===Number(_directConversationId)?'active':''}" onclick="openDirectChat('${esc(c.teacher_id)}')">
-      <span class="smart-chat-direct-avatar">${esc((c.teacher_name||'?')[0])}</span>
-      <span><strong>${esc(c.teacher_name)}</strong><small>${esc(c.last_message||t('chat.noMessages'))}</small></span>
-      ${Number(c.unread_count)>0?`<b class="smart-chat-unread">${esc(c.unread_count)}</b>`:'<i></i>'}
-    </button>`).join('');
+  const q=String(document.getElementById('directStaffSearch')?.value||'').trim().toLowerCase();
+  const matches=person=>!q||String(person.teacher_name||'').toLowerCase().includes(q)||String(person.role||'').toLowerCase().includes(q);
+  const conversations=_directConversations.filter(matches);
+  const existingIds=new Set(_directConversations.map(c=>String(c.teacher_id)));
+  const available=_directStaff.filter(person=>!existingIds.has(String(person.teacher_id))&&matches(person));
+  const conversationRows=conversations.map(c=>`<button type="button" class="smart-chat-direct-person smart-chat-direct-item smart-chat-directory-item ${Number(c.conversation_id)===Number(_directConversationId)?'active':''}" onclick="openDirectChat('${esc(c.teacher_id)}')">${_directAvatarMarkup(c)}<span><strong>${esc(c.teacher_name)}</strong><small>${esc(c.last_message||t('chat.noMessages'))}</small></span>${Number(c.unread_count)>0?`<b class="smart-chat-unread">${esc(c.unread_count)}</b>`:'<b class="smart-chat-direct-open" aria-hidden="true">›</b>'}</button>`).join('');
+  const availableRows=available.map(person=>`<button type="button" class="smart-chat-direct-person smart-chat-directory-item" onclick="openDirectChat('${esc(person.teacher_id)}')">${_directAvatarMarkup(person)}<span><strong>${esc(person.teacher_name)}</strong><small>${esc(person.role||t('chat.teacher'))}</small></span><b class="smart-chat-direct-open" aria-hidden="true">＋</b></button>`).join('');
+  root.innerHTML=conversationRows+availableRows||`<div class="smart-chat-list-empty">${q?t('chat.noActiveTeacher'):t('chat.noConversations')}</div>`;
 }
 
-function _renderDirectDirectory() {
-  const root=document.getElementById('directStaffDirectory');
-  if(!root)return;
-  const q=String(document.getElementById('directStaffSearch')?.value||'').trim().toLowerCase();
-  const rows=_directStaff.filter(t=>!q||String(t.teacher_name).toLowerCase().includes(q)||String(t.role||'').toLowerCase().includes(q));
-  root.innerHTML=rows.length?rows.map(staffRow=>`
-    <button class="smart-chat-directory-item" onclick="openDirectChat('${esc(staffRow.teacher_id)}')">
-      <span class="smart-chat-direct-avatar">${esc((staffRow.teacher_name||'?')[0])}</span>
-      <span><strong>${esc(staffRow.teacher_name)}</strong><small>${esc(staffRow.role||t('chat.teacher'))}</small></span><b>›</b>
-    </button>`).join('') :`<div class="smart-chat-list-empty">${t('chat.noActiveTeacher')}</div>`;
-}
+function _renderDirectDirectory() { _renderDirectConversationList(); }
 
 window.openDirectChat=async function(teacherId){
   try{
@@ -912,8 +1180,7 @@ function _renderDirectHeader(){
   const root=document.getElementById('directConversationHead');
   if(!root||!_directPeer)return;
   root.innerHTML=`
-    <div class="smart-chat-direct-peer"><button class="smart-chat-mobile-back" onclick="_clearDirectSelection()"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m15 18-6-6 6-6"/></svg></button><span class="smart-chat-direct-avatar large">${esc((_directPeer.teacher_name||'?')[0])}</span><div><strong>${esc(_directPeer.teacher_name)}</strong><small>${esc(_directPeer.role||t('chat.teacher'))} · ${t('chat.privateOneToOne')}</small></div></div>
-    <span class="smart-chat-verified-pill">${t('chat.privateOneToOne')}</span>`;
+    <div class="smart-chat-direct-peer"><button type="button" class="smart-chat-mobile-back" onclick="_clearDirectSelection()" aria-label="${t('chat.directMessages')}" title="${t('chat.directMessages')}"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m15 18-6-6 6-6"/></svg></button>${_directAvatarMarkup(_directPeer,true)}<div><strong>${esc(_directPeer.teacher_name)}</strong><small>${esc(_directPeer.role||t('chat.teacher'))}</small></div></div>`;
 }
 
 function _setDirectMobileView(selected) {
@@ -929,18 +1196,26 @@ function _setDirectComposer(enabled){
 
 window._clearDirectSelection=function(){_directConversationId=null;_directPeer=null;_setDirectMobileView(false);_renderChatMode();};
 
-async function _loadDirectMessages(){
+async function _loadDirectMessages(silent=false){
   if(!_directConversationId)return;
+  const conversationId=_directConversationId;
   try{
-    const rows=await API.getDirectMessages(_directConversationId,50);
+    const rows=await API.getDirectMessages(conversationId,50);
+    if(conversationId!==_directConversationId)return;
     const stream=document.getElementById('directMessageStream');
     if(!stream)return;
-    if(!rows.length)stream.innerHTML=`<div class="chat-empty"><div class="chat-empty-icon">💬</div><div class="chat-empty-title">${t('chat.newConversation')}</div><div class="chat-empty-sub">${t('chat.sendFirstPrivate')}</div></div>`;
-    else _renderDirectMessages(rows);
-    _renderDirectHeader();_setDirectComposer(true);await API.markDirectRead(_directConversationId);
+    const signature=String(conversationId)+':'+JSON.stringify((Array.isArray(rows)?rows:[]).map(m=>[m.id,m.sender_teacher_id,m.text,m.created_at]));
+    if(stream.dataset.messageSignature!==signature){
+      if(!rows.length)stream.innerHTML=`<div class="chat-empty"><div class="chat-empty-icon">💬</div><div class="chat-empty-title">${t('chat.newConversation')}</div><div class="chat-empty-sub">${t('chat.sendFirstPrivate')}</div></div>`;
+      else _renderDirectMessages(rows);
+      stream.dataset.messageSignature=signature;
+    }
+    _renderDirectHeader();_setDirectComposer(true);
+    if(!silent)await API.markDirectRead(conversationId);
   }catch(e){
+    // Keep the last successful conversation visible during a transient failure.
     const stream=document.getElementById('directMessageStream');
-    if(stream)stream.innerHTML=`<div class="chat-error"><div>💬</div><div>${t('chat.unableLoadConversation')}</div><button class="btn-secondary" onclick="_loadDirectMessages()">${t('chat.retry')}</button></div>`;
+    if(stream&&!stream.dataset.messageSignature)stream.innerHTML=`<div class="chat-error"><div>💬</div><div>${t('chat.unableLoadConversation')}</div><button class="btn-secondary" onclick="_loadDirectMessages()">${t('chat.retry')}</button></div>`;
   }
 }
 
@@ -978,8 +1253,10 @@ window._directKeydown=function(ev){if(ev.key==='Enter'&&!ev.shiftKey){ev.prevent
 
 window._showSchoolChatChannels = function() { _chatChannel='staff'; _renderChatMode(); };
 
-function _chatChannelBack(label=t('chat.schoolChat')) {
-  return `<div class="smart-chat-channel-back-row"><button type="button" class="smart-chat-channel-back" onclick="_showSchoolChatChannels()" aria-label="${t('chat.backToSchoolChat')}">‹ <span>${esc(label)}</span></button></div>`;
+function _chatChannelBack() {
+  // Channel switching is handled by the persistent tab rail; a second Back
+  // control duplicates navigation and can mislead users about their active tab.
+  return '';
 }
 
 window.switchChatChannel = function(channel) {
@@ -990,23 +1267,32 @@ window.switchChatChannel = function(channel) {
   _renderChatQuickNav();
   _renderChatMode();
   _refreshChatChannelUnreadCounts();
+  requestAnimationFrame(() => {
+    const active = document.querySelector('#smartChatQuickNav .smart-chat-quick-channel.active');
+    if (active) active.scrollIntoView({block:'nearest',inline:'center',behavior:'auto'});
+  });
 };
 
 async function _loadChatMessages() {
-  if (_chatMode !== 'school') return;
+  if (_chatMode !== 'school' || _chatChannel !== 'staff') return;
   try {
     const messages = await API.getChatMessages(_chatChannel, 50);
     window.APP.chatMessages = Array.isArray(messages) ? messages : [];
     _renderChatStream(window.APP.chatMessages);
   } catch (e) {
+    // Do not replace valid messages with a transient RPC error/empty response.
     const stream = document.getElementById('chatStream');
-    if (stream) stream.innerHTML = `<div class="chat-error"><div>💬</div><div>${t('chat.loadFailed')}</div><button class="btn-secondary" onclick="renderChat()">${t('chat.retry')}</button></div>`;
+    if (stream && !Array.isArray(window.APP?.chatMessages))
+      stream.innerHTML = `<div class="chat-error"><div>💬</div><div>${t('chat.loadFailed')}</div><button class="btn-secondary" onclick="_loadChatMessages()">${t('chat.retry')}</button></div>`;
   }
 }
 
 function _renderChatStream(messages) {
   const stream = document.getElementById('chatStream');
   if (!stream) return;
+  const signature = JSON.stringify((Array.isArray(messages) ? messages : []).map(m => [m.id,m.teacher_id,m.text,m.created_at,m.pending,m.failed]));
+  if (stream.dataset.messageSignature === signature) return;
+  stream.dataset.messageSignature = signature;
   if (!messages.length) {
     stream.innerHTML = `<div class="chat-empty"><div class="chat-empty-icon">💬</div><div class="chat-empty-title">${t('chat.emptyTitle')}</div><div class="chat-empty-sub">${t('chat.emptySub')}</div></div>`;
     return;
@@ -1068,6 +1354,8 @@ window.sendChat = async function(ev) {
       _renderChatStream(window.APP.chatMessages); setTimeout(_loadChatMessages,1200);
     } else throw new Error((result&&(result.error||result.message))||t('chat.sendFailed'));
   } catch(e) {
+    // Preserve the user's message in the composer so a transient send failure is recoverable.
+    input.value=text; input.style.height='auto'; _autoGrowChatInput(input);
     optimistic.failed=true; delete optimistic.pending; _renderChatStream(window.APP.chatMessages); showToast(t('chat.sendFailed'));
   } finally { btn.disabled=false; input.disabled=false; input.focus(); }
   return false;
@@ -1088,17 +1376,17 @@ window.startChatPolling=function(){
     if(window.APP?.currentPage!=='chat')return;
     unreadRefreshTick = (unreadRefreshTick + 1) % 6;
     if(unreadRefreshTick === 0 && _chatMode === 'school') _refreshChatChannelUnreadCounts();
-    if(_chatMode==='school' && _chatChannel==='direct'){
+    if(_chatMode!=='school')return;
+    if(_chatChannel==='staff'){
+      _loadChatMessages();
+    }else if(_chatChannel==='direct' && _directConversationId){
       if(_directPollBusy)return;
       _directPollBusy=true;
-      try{
-        await _loadDirectWorkspace();
-      }finally{
-        _directPollBusy=false;
-      }
-    }else if(_chatMode==='school'){
-      _loadChatMessages();
+      try{ await _loadDirectMessages(true); }
+      finally{ _directPollBusy=false; }
     }
+    // Other workspaces own their refresh actions. Do not call the All Staff
+    // message endpoint while a different channel is open.
   },5000);
 };
 window.stopChatPolling=function(){
