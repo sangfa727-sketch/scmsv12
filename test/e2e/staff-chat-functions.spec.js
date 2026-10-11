@@ -1131,3 +1131,95 @@ test('Group Chat shows retry UI when loading the group list fails', async ({ pag
   await expect(page.locator('#chatGroupList .chat-error')).toBeVisible();
   await expect(page.locator('#chatGroupList')).toContainText('Retry');
 });
+
+
+test('Direct Chat preserves unread badge when mark-read is rejected', async ({ page }) => {
+  await mountSmartChat(page);
+  await page.evaluate(() => {
+    window.API.markDirectRead = async (...args) => {
+      window.__chatTestCalls.push({ name: 'markDirectRead', args });
+      return { ok: false, error: 'simulated read rejection' };
+    };
+    window.switchChatChannel('direct');
+  });
+  await page.evaluate(() => window.openDirectChat('teacher-2'));
+  await expect.poll(async () => (await calls(page, 'markDirectRead')).length).toBe(1);
+  await expect(page.locator('#directConversationList .smart-chat-unread')).toContainText('1');
+  await expect(page.locator('#directMessageStream .chat-error')).toHaveCount(0);
+});
+
+test('Direct Chat clears unread badge only after mark-read succeeds', async ({ page }) => {
+  await mountSmartChat(page);
+  await page.evaluate(() => {
+    window.API.markDirectRead = async (...args) => {
+      window.__chatTestCalls.push({ name: 'markDirectRead', args });
+      return { ok: true };
+    };
+    window.switchChatChannel('direct');
+  });
+  await page.evaluate(() => window.openDirectChat('teacher-2'));
+  await expect.poll(async () => (await calls(page, 'markDirectRead')).length).toBe(1);
+  await expect(page.locator('#directConversationList .smart-chat-unread')).toHaveCount(0);
+});
+
+test('Inquiry Chat preserves unread count when mark-read is rejected', async ({ page }) => {
+  await mountSmartChat(page);
+  await page.evaluate(() => {
+    window.API.getInquiryTickets = async () => [{
+      id: 41, subject: 'Parent request', status: 'OPEN', priority: 'NORMAL', unread_count: 4
+    }];
+    window.API.markInquiryRead = async (...args) => {
+      window.__chatTestCalls.push({ name: 'markInquiryRead', args });
+      return { ok: false, error: 'simulated read rejection' };
+    };
+    window.switchChatChannel('tickets');
+  });
+  await expect(page.locator('#inquiryTicketList')).toContainText('Parent request');
+  await page.evaluate(() => window._openInquiryTicket(41));
+  await expect.poll(async () => (await calls(page, 'markInquiryRead')).length).toBeGreaterThan(0);
+  await expect(page.locator('#inquiryTicketList .smart-chat-unread')).toContainText('4');
+});
+
+test('Inquiry Chat clears unread count only after mark-read succeeds', async ({ page }) => {
+  await mountSmartChat(page);
+  await page.evaluate(() => {
+    window.API.getInquiryTickets = async () => [{
+      id: 41, subject: 'Parent request', status: 'OPEN', priority: 'NORMAL', unread_count: 4
+    }];
+    window.API.markInquiryRead = async (...args) => {
+      window.__chatTestCalls.push({ name: 'markInquiryRead', args });
+      return { ok: true };
+    };
+    window.switchChatChannel('tickets');
+  });
+  await expect(page.locator('#inquiryTicketList')).toContainText('Parent request');
+  await page.evaluate(() => window._openInquiryTicket(41));
+  await expect.poll(async () => (await calls(page, 'markInquiryRead')).length).toBeGreaterThan(0);
+  await expect(page.locator('#inquiryTicketList .smart-chat-unread')).toHaveCount(0);
+});
+
+test('Inquiry Chat shows retry UI on open failure and recovers without stale messages', async ({ page }) => {
+  await mountSmartChat(page);
+  await page.evaluate(() => {
+    let attempts = 0;
+    window.API.openInquiryTicket = async (...args) => {
+      window.__chatTestCalls.push({ name: 'openInquiryTicket', args });
+      attempts += 1;
+      if (attempts === 1) return { ok: false, error: 'simulated ticket open failure' };
+      return {
+        ok: true,
+        ticket: { id: 41, subject: 'Parent request', status: 'OPEN', priority: 'NORMAL' },
+        messages: [{ id: 99, sender_teacher_name: 'Other Teacher', body: 'Recovered ticket message', created_at: '2026-10-11T08:00:00Z' }]
+      };
+    };
+    window.switchChatChannel('tickets');
+  });
+  await expect(page.locator('#inquiryTicketList')).toContainText('Parent request');
+  await page.evaluate(() => window._openInquiryTicket(41));
+  await expect(page.locator('#inquiryMessageStream .chat-error')).toBeVisible();
+  await expect(page.locator('#inquiryChatInput')).toBeDisabled();
+  await page.locator('#inquiryMessageStream .chat-error button').click();
+  await expect(page.locator('#inquiryMessageStream')).toContainText('Recovered ticket message');
+  await expect(page.locator('#inquiryMessageStream .chat-error')).toHaveCount(0);
+  await expect(page.locator('#inquiryChatInput')).toBeEnabled();
+});
