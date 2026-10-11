@@ -91,11 +91,11 @@
   };
   Object.keys(localizedUi).forEach(code=>Object.assign(chat[code],localizedUi[code]));
   const localizedChatStates={
-    th:{'chat.loading':'กำลังโหลด…','chat.openFailed':'เปิดไม่สำเร็จ','chat.schoolIsolated':'แยกตามโรงเรียน','chat.gradeRecipientsMissing':'ไม่พบครูที่ใช้งานอยู่และผ่านการยืนยันสำหรับระดับชั้นนี้ ตรวจสอบการจับคู่ชั้นเรียนและการมอบหมายครูที่ใช้งานอยู่ แล้วรีเฟรชผู้รับ'},
-    jp:{'chat.loading':'読み込み中…','chat.openFailed':'開けませんでした','chat.schoolIsolated':'学校ごとに分離','chat.gradeRecipientsMissing':'この学年に有効で確認済みの教員が見つかりません。学年とクラスの対応、教員の有効な担当割り当てを確認し、受信者を更新してください。'},
-    ms:{'chat.loading':'Memuatkan…','chat.openFailed':'Gagal dibuka','chat.schoolIsolated':'Diasingkan mengikut sekolah','chat.gradeRecipientsMissing':'Tiada guru aktif yang disahkan ditemui untuk tahun ini. Semak pemetaan tahun/kelas dan tugasan guru aktif, kemudian muat semula penerima.'},
-    km:{'chat.loading':'កំពុងផ្ទុក…','chat.openFailed':'មិនអាចបើកបានទេ','chat.schoolIsolated':'បំបែកតាមសាលា','chat.gradeRecipientsMissing':'រកមិនឃើញគ្រូសកម្មដែលបានផ្ទៀងផ្ទាត់សម្រាប់ថ្នាក់នេះទេ។ សូមពិនិត្យការផ្គូផ្គងថ្នាក់ និងការចាត់តាំងគ្រូសកម្ម រួចធ្វើបច្ចុប្បន្នភាពអ្នកទទួល។'},
-    zh:{'chat.loading':'正在加载…','chat.openFailed':'打开失败','chat.schoolIsolated':'按学校隔离','chat.gradeRecipientsMissing':'未找到该年级的活跃已验证教师。请检查年级/班级映射和教师当前任课分配，然后刷新收件人。'}
+    th:{'chat.retry':'ลองอีกครั้ง','chat.loading':'กำลังโหลด…','chat.openFailed':'เปิดไม่สำเร็จ','chat.schoolIsolated':'แยกตามโรงเรียน','chat.gradeRecipientsMissing':'ไม่พบครูที่ใช้งานอยู่และผ่านการยืนยันสำหรับระดับชั้นนี้ ตรวจสอบการจับคู่ชั้นเรียนและการมอบหมายครูที่ใช้งานอยู่ แล้วรีเฟรชผู้รับ'},
+    jp:{'chat.retry':'再試行','chat.loading':'読み込み中…','chat.openFailed':'開けませんでした','chat.schoolIsolated':'学校ごとに分離','chat.gradeRecipientsMissing':'この学年に有効で確認済みの教員が見つかりません。学年とクラスの対応、教員の有効な担当割り当てを確認し、受信者を更新してください。'},
+    ms:{'chat.retry':'Cuba lagi','chat.loading':'Memuatkan…','chat.openFailed':'Gagal dibuka','chat.schoolIsolated':'Diasingkan mengikut sekolah','chat.gradeRecipientsMissing':'Tiada guru aktif yang disahkan ditemui untuk tahun ini. Semak pemetaan tahun/kelas dan tugasan guru aktif, kemudian muat semula penerima.'},
+    km:{'chat.retry':'ព្យាយាមម្តងទៀត','chat.loading':'កំពុងផ្ទុក…','chat.openFailed':'មិនអាចបើកបានទេ','chat.schoolIsolated':'បំបែកតាមសាលា','chat.gradeRecipientsMissing':'រកមិនឃើញគ្រូសកម្មដែលបានផ្ទៀងផ្ទាត់សម្រាប់ថ្នាក់នេះទេ។ សូមពិនិត្យការផ្គូផ្គងថ្នាក់ និងការចាត់តាំងគ្រូសកម្ម រួចធ្វើបច្ចុប្បន្នភាពអ្នកទទួល។'},
+    zh:{'chat.retry':'再试一次','chat.loading':'正在加载…','chat.openFailed':'打开失败','chat.schoolIsolated':'按学校隔离','chat.gradeRecipientsMissing':'未找到该年级的活跃已验证教师。请检查年级/班级映射和教师当前任课分配，然后刷新收件人。'}
   };
   Object.keys(localizedChatStates).forEach(code=>Object.assign(chat[code],localizedChatStates[code]));
 
