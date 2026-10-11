@@ -101,7 +101,7 @@ begin
     'id', section_id,
     'type', section_type,
     'label', section_label,
-    'visible', visible,
+    'visible', case when section_type = 'hero' then true else visible end,
     'locked', section_type = 'hero'
   ) order by ordinality), '[]'::jsonb)
     into v_sections

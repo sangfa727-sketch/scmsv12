@@ -25,7 +25,7 @@ test('optional sections remain progressive and safe',()=>{
  const html=read('school-website/create.html'),js=read('school-website/create.js');
  for(const section of ['programs','facilities','news','gallery','admissions','contact']) assert.match(html,new RegExp('data-section="'+section+'"'));
  assert.doesNotMatch(js,/insertApplication|supabase\.from|\.insert\(/i);
- assert.match(js,/Preview only/);
+ assert.match(js,/rpc_school_website_submit_draft_for_review/);assert.match(js,/rpc_school_website_publish_draft/);assert.match(js,/draftStatus/);
 });
 test('mobile preview remains on-demand and source compiles',()=>{
  const html=read('school-website/create.html'),css=read('school-website/create.css'),js=read('school-website/create.js');
