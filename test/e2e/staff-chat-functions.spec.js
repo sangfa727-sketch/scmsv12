@@ -1241,6 +1241,9 @@ test('Official Announcements plus opens a fixed modal without shifting the mobil
   await expect(plus).toBeVisible();
   await expect(page.locator('#announcementList .smart-chat-announcement-card')).toHaveCount(1);
   await expect(page.locator('#announcementStream .smart-chat-announcement-detail')).toBeVisible();
+  // Ensure the target control is already in view before taking geometry measurements.
+  // Otherwise Playwright's click auto-scroll can be mistaken for a modal layout shift.
+  await plus.scrollIntoViewIfNeeded();
   const before = await page.evaluate(() => {
     const shell = document.querySelector('.smart-chat-announcement-shell');
     const list = document.querySelector('#announcementList');
