@@ -112,7 +112,7 @@ test('every literal Staff Chat UI key has a real translation in all seven suppor
   const usedKeys = new Set();
   for (const relativePath of chatFiles) {
     const source = fs.readFileSync(path.join(ROOT, relativePath), 'utf8');
-    for (const match of source.matchAll(/\\bt\\(\\s*['"]chat\\.([^'"]+)['"]\\s*\\)/g)) {
+    for (const match of source.matchAll(/\bt\(\s*['"]chat\.([^'"]+)['"]\s*\)/g)) {
       usedKeys.add('chat.' + match[1]);
     }
   }
