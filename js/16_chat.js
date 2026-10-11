@@ -425,12 +425,12 @@ window._refreshAdminComposerPreview = function() {
     .smart-chat-list-actions>button:hover{background:var(--surface2);color:var(--text)}
     .smart-chat-add-btn{font-size:20px;line-height:1}
     .smart-chat-refresh-btn{font-size:15px}
-    .smart-chat-composer-drawer{display:none;margin-top:10px}
+    .smart-chat-composer-drawer{display:none;margin:0}
     #adminMsgSendBtn{white-space:nowrap;min-width:max-content;padding-inline:12px;font-size:11px}
     .smart-chat-department-shell:not(.has-selection){grid-template-columns:1fr}
     .smart-chat-department-shell:not(.has-selection) .smart-chat-direct-conversation{display:none !important}
     @media(max-width:760px){#adminMsgSendBtn{font-size:10px;padding-inline:10px}}
-    .smart-chat-composer-drawer.is-open{display:block}
+    .smart-chat-composer-drawer.is-open{display:block;position:fixed;z-index:10080;top:50%;left:50%;transform:translate(-50%,-50%);width:min(720px,calc(100vw - 24px));max-height:calc(100dvh - 32px);overflow-y:auto;overscroll-behavior:contain;border:1px solid var(--border);border-radius:16px;background:var(--surface);box-shadow:0 0 0 100vmax rgba(8,12,22,.62),0 24px 70px rgba(0,0,0,.32);-webkit-overflow-scrolling:touch}
     .smart-chat-composer-drawer .smart-chat-admin-card{margin:0}
     .smart-chat-conversation-list{min-height:0}
     .smart-chat-list-empty-card{margin:8px 0;padding:16px 12px;border:1px dashed var(--border);border-radius:12px;background:var(--bg2);text-align:center}
@@ -1012,7 +1012,7 @@ window._toggleAnnouncementComposer=function(force=null){
   _announcementComposerOpen=force===null?!_announcementComposerOpen:!!force;
   const card=document.getElementById('announcementComposer');
   const btn=document.getElementById('announcementComposerToggle');
-  if(card)card.classList.toggle('is-open',_announcementComposerOpen);
+  if(card){card.classList.toggle('is-open',_announcementComposerOpen);card.setAttribute('aria-hidden',String(!_announcementComposerOpen));}
   if(btn){
     btn.setAttribute('aria-expanded',String(_announcementComposerOpen));
     btn.textContent=_announcementComposerOpen?'×':'+';
