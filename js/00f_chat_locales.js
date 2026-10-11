@@ -63,7 +63,13 @@
     zh:{'chat.allStaff':'全体员工','chat.gradePrefix':'年级：','chat.individualPrefix':'个人：','chat.selectTeacher':'选择教师','chat.communicationCenter':'沟通中心','chat.schoolCommunicationDesc':'学校沟通与 AI 操作清晰分开，一键切换','chat.staffGeneral':'员工群聊','chat.officialNotices':'系统生成的官方通知','chat.departmentGrade':'部门与年级','chat.classDepartmentChannels':'班级 / 部门频道','chat.workspace.tickets':'咨询工单','chat.studentParentConversations':'学生 / 家长会话','chat.directMessages':'1对1私信','chat.privateStaffChat':'员工私聊','chat.workspace.groups':'项目 / 活动群组','chat.temporaryWorkGroups':'临时工作组','chat.verifiedStaffOnly':'仅限已验证员工','chat.inquiryDescription':'员工专用学生 / 家长问题跟踪','chat.noMessages':'暂无消息','chat.officialPrefix':'官方','chat.announcement':'公告','chat.verified':'已验证','chat.findTeacher':'搜索教师…','chat.startNewConversation':'开始新会话','chat.activeStaffOnly':'仅限活跃员工','chat.startDirect':'选择教师开始发消息…','chat.noConversations':'暂无会话','chat.writePrivate':'输入私信…','chat.newConversation':'新会话','chat.sendFirstPrivate':'发送第一条私信','chat.loadFailed':'无法加载聊天','chat.emptySub':'开始会话','chat.pending':'发送中','chat.failed':'失败','chat.today':'今天','chat.yesterday':'昨天','chat.channelPreviewOnly':'此频道仅供预览','chat.aiPreview':'AI 预览'}
   };
   Object.keys(localized).forEach(code=>Object.assign(chat[code],localized[code]));
-  Object.keys(chat).forEach(code=>fallbackKeys.forEach(k=>{if(!(k in chat[code])) chat[code][k]=chat.en[k];}));
+    // Preserve translations already supplied by the base locale files. Only use English
+  // when neither the Chat extension nor the base locale has a usable value.
+  const baseLocaleMaps={en:window.I18N_EN||{},my:window.I18N_MY||{},th:window.I18N_TH||{},jp:window.I18N_JP||{},ms:window.I18N_MS||{},km:window.I18N_KM||{},zh:window.I18N_ZH||{}};
+  Object.keys(chat).forEach(code=>fallbackKeys.forEach(k=>{
+    const baseValue=baseLocaleMaps[code]?.[k];
+    if(!(k in chat[code])&&!(typeof baseValue==='string'&&baseValue.trim()))chat[code][k]=chat.en[k];
+  }));
 
 
   const localizedUi={
