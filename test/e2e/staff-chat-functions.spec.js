@@ -1056,7 +1056,7 @@ test('Desktop channel tabs fill the available row and the All Staff conversation
 
 test('mobile Chat arrow toggles fullscreen off and on without changing the active page', async ({ page }) => {
   await mountSmartChat(page);
-  await page.setViewportSize({ width: 390, height: 844 });
+  await page.setViewportSize({ width: 360, height: 844 });
   // The onboarding tour can appear after the app shell mounts; dismiss it before interaction.
   const onboardingSkip = page.getByRole('button', { name: 'Skip' });
   if (await onboardingSkip.isVisible().catch(() => false)) await onboardingSkip.click({ force: true });
@@ -1069,6 +1069,29 @@ test('mobile Chat arrow toggles fullscreen off and on without changing the activ
   await expect(page.locator('.sc-chat-topbar')).toBeHidden();
   await expect(page.locator('.smart-chat-nav-back')).toBeVisible();
   await expect(page.locator('.smart-chat-nav-icon')).toHaveText('›');
+
+  const headerLayout = await page.evaluate(() => {
+    const button = document.querySelector('#page-chat .smart-chat-nav-back');
+    const title = document.querySelector('#page-chat .smart-chat-hero .page-title');
+    if (!button || !title) return null;
+    const b = button.getBoundingClientRect();
+    const t = title.getBoundingClientRect();
+    return {
+      buttonWidth: b.width,
+      buttonHeight: b.height,
+      buttonRight: b.right,
+      titleLeft: t.left,
+      titleRight: t.right,
+      titleWidth: t.width,
+      viewportWidth: window.innerWidth
+    };
+  });
+  expect(headerLayout).not.toBeNull();
+  expect(headerLayout.buttonWidth).toBeLessThanOrEqual(36);
+  expect(headerLayout.buttonHeight).toBeLessThanOrEqual(36);
+  expect(headerLayout.titleLeft).toBeGreaterThan(headerLayout.buttonRight);
+  expect(headerLayout.titleWidth).toBeGreaterThanOrEqual(120);
+  expect(headerLayout.titleRight).toBeLessThanOrEqual(headerLayout.viewportWidth + 1);
 
   await page.locator('.smart-chat-nav-back').click();
   await expect(page.locator('html')).toHaveClass(/scms-chat-workspace/);

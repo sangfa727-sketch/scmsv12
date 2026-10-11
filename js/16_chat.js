@@ -451,6 +451,12 @@ window._refreshAdminComposerPreview = function() {
       .smart-chat-hero>div:first-of-type{min-width:0;flex:1}
       .smart-chat-hero .page-title{font-size:21px}
       .smart-chat-hero .page-subtitle{font-size:11px;line-height:1.4}
+      #page-chat .smart-chat-hero{display:grid;grid-template-columns:36px minmax(0,1fr);align-items:center;column-gap:10px;row-gap:6px;min-width:0}
+      #page-chat .smart-chat-nav-back{grid-column:1;grid-row:1;justify-self:start;align-self:center}
+      #page-chat .smart-chat-hero>div:first-of-type{grid-column:2;grid-row:1;min-width:0}
+      #page-chat .smart-chat-hero .page-title{margin:0;font-size:21px;line-height:1.25;overflow-wrap:anywhere}
+      #page-chat .smart-chat-hero .page-subtitle{margin-top:4px}
+      #page-chat .smart-chat-mode-switch{grid-column:1 / -1;grid-row:2;justify-self:end;display:flex;flex-wrap:wrap;justify-content:flex-end;gap:6px;position:static;max-width:100%;margin:0}
       .smart-chat-nav-back{order:-1;min-width:62px;height:34px}
       .smart-chat-mode-switch{position:sticky;top:0;z-index:5}
       .smart-chat-channel-list{scroll-snap-type:x proximity;overscroll-behavior-x:contain}
