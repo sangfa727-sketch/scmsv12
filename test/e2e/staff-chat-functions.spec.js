@@ -1470,3 +1470,16 @@ test('Direct Chat unread badge ignores a stale refresh that returns after a succ
   await page.evaluate(() => window.__staleUnreadRefreshPromise);
   await expect(badge).toHaveText('');
 });
+
+test('All Staff initial message-load failure shows a retry state instead of a blank stream', async ({ page }) => {
+  await mountSmartChat(page, false);
+  await page.evaluate(() => {
+    window.APP.chatMessages = [];
+    window.API.getChatMessages = async () => { throw new Error('simulated initial load failure'); };
+    window.renderChat();
+    window.switchChatChannel('staff');
+  });
+  await expect(page.locator('#chatStream .chat-error')).toBeVisible();
+  await expect(page.locator('#chatStream .chat-error')).toContainText(/retry|ပြန်ကြိုးစား/i);
+  await expect(page.locator('#chatStream .chat-error button')).toBeVisible();
+});
