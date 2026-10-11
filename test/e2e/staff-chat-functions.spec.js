@@ -1734,7 +1734,7 @@ test('mobile Official Announcement composer overlays the visible workspace and c
     };
   });
   expect(overlayLayout.position).toBe('fixed');
-  expect(await overlay.evaluate(el => el.parentElement)).toBe(await page.evaluate(() => document.body));
+  expect(await overlay.evaluate(el => el.parentElement.tagName)).toBe('BODY');
   expect(Math.abs(overlayLayout.x)).toBeLessThanOrEqual(1);
   expect(Math.abs(overlayLayout.y)).toBeLessThanOrEqual(1);
   expect(Math.abs(overlayLayout.width - overlayLayout.viewportWidth)).toBeLessThanOrEqual(1);
