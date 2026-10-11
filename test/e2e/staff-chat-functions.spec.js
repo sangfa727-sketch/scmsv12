@@ -1554,9 +1554,16 @@ test('All Staff initial message-load failure shows a retry state instead of a bl
 });
 
 
-test('Official Announcement composer dismisses via Escape and backdrop without losing list scroll', async ({ page }) => {
-  await page.setViewportSize({ width: 390, height: 844 });
-  await mountSmartChat(page, false);
+test('Official Announcement composer dismisses via Escape and backdrop without losing list scroll', async ({ browser }) => {
+  const context = await browser.newContext({
+    viewport: { width: 390, height: 844 },
+    deviceScaleFactor: 1,
+    isMobile: true,
+    hasTouch: true
+  });
+  const page = await context.newPage();
+  try {
+    await mountSmartChat(page, false);
   await page.evaluate(() => {
     window.APP.is_admin = true;
     window.API.getStaffAnnouncements = async () => Array.from({ length: 24 }, (_, i) => ({
@@ -1596,4 +1603,7 @@ test('Official Announcement composer dismisses via Escape and backdrop without l
   await expect(page.locator('#announcementComposer')).toBeHidden();
   await expect(page.locator('html')).not.toHaveClass(/scms-announcement-composer-open/);
   await expect.poll(() => list.evaluate(el => el.scrollTop)).toBe(initialScrollTop);
+  } finally {
+    await context.close();
+  }
 });
