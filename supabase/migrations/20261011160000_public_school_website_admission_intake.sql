@@ -88,6 +88,23 @@ revoke all on public.website_sites from public, anon, authenticated;
 revoke all on public.website_admission_applications from public, anon, authenticated;
 revoke all on public.website_admission_rate_limits from public, anon, authenticated;
 
+create or replace function public.rpc_website_site_origin_allowed(p_hostname text)
+returns boolean
+language sql
+security definer
+set search_path = public, pg_temp
+as $function$
+  select exists (
+    select 1
+      from public.website_sites
+     where hostname = lower(trim(coalesce(p_hostname, '')))
+       and active = true
+  );
+$function$;
+
+revoke all on function public.rpc_website_site_origin_allowed(text) from public, anon, authenticated;
+grant execute on function public.rpc_website_site_origin_allowed(text) to service_role;
+
 create or replace function public.rpc_website_admission_submit(
   p_hostname text,
   p_identity_hash text,
