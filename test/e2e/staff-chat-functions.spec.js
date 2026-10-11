@@ -1230,6 +1230,9 @@ test('Official Announcements plus opens a fixed modal without shifting the mobil
   await mountSmartChat(page, false);
   await page.evaluate(() => {
     window.APP.is_admin = true;
+    // The saved Chat mode may be AI; explicitly enter School Chat before selecting
+    // the Official Announcements channel so this test exercises the intended workspace.
+    window.switchChatMode('school');
     window.renderChat();
     window.switchChatChannel('announcements');
   });
