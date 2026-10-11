@@ -586,4 +586,4 @@ begin
 end
 $review$;
 
-select 'Public School Website admission intake and review runtime tests passed' as result;
+select 'School Website admission, draft, publication, and subdomain runtime tests passed' as result;
