@@ -578,7 +578,7 @@
     const merged=Object.assign({},base,additions);
     // If a missing Chat-extension key was filled with English, restore the base locale's
     // translation rather than overwriting it. Explicit Chat translations still take priority.
-    if(code!=='en')fallbackKeys.forEach(k=>{
+    if(code!=='en')Object.keys(en).forEach(k=>{
       const baseValue=base[k];
       if(additions[k]===en[k]&&typeof baseValue==='string'&&baseValue.trim()&&baseValue!==en[k])merged[k]=baseValue;
     });
