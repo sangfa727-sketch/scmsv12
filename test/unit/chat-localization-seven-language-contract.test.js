@@ -5,7 +5,16 @@ const vm = require('node:vm');
 const path = require('node:path');
 
 const ROOT = path.resolve(__dirname, '..', '..');
-const LOCALE_FILE = path.join(ROOT, 'js', '00f_chat_locales.js');
+const LOCALE_FILES = [
+  '00a_locales_en.js',
+  '00b_locales_my.js',
+  '00_locales_thai.js',
+  '00_locales_jp.js',
+  '00d_locales_ms.js',
+  '00e_locales_km.js',
+  '00e_locales_zh.js',
+  '00f_chat_locales.js',
+];
 const LANGUAGES = ['en', 'my', 'th', 'jp', 'ms', 'km', 'zh'];
 const REQUIRED_KEYS = [
   'chat.schoolChat',
@@ -24,8 +33,12 @@ const REQUIRED_KEYS = [
 
 function loadChatLocales() {
   const window = {};
-  const source = fs.readFileSync(LOCALE_FILE, 'utf8');
-  vm.runInNewContext(source, { window }, { filename: LOCALE_FILE });
+  const context = { window };
+  for (const filename of LOCALE_FILES) {
+    const fullPath = path.join(ROOT, 'js', filename);
+    const source = fs.readFileSync(fullPath, 'utf8');
+    vm.runInNewContext(source, context, { filename: fullPath });
+  }
   return Object.fromEntries(LANGUAGES.map(code => {
     const globalName = 'I18N_' + code.toUpperCase();
     assert.equal(typeof window[globalName], 'object', globalName + ' must be exported');
@@ -61,6 +74,22 @@ test('Staff Chat and Official Announcements labels do not silently fall back to 
         code + ' locale must translate ' + key + ' instead of copying English'
       );
     }
+  }
+});
+
+
+test('Chat locale extension preserves existing base translations instead of replacing them with English', () => {
+  const locales = loadChatLocales();
+  const expected = {
+    my: 'ထပ်ကြိုးစားပါ',
+    th: 'ลองอีกครั้ง',
+    jp: '再試行',
+    ms: 'Cuba lagi',
+    km: 'ព្យាយាមម្តងទៀត',
+    zh: '再试一次',
+  };
+  for (const [code, value] of Object.entries(expected)) {
+    assert.equal(locales[code]['chat.retry'], value, code + ' base retry translation must survive the Chat extension');
   }
 });
 
