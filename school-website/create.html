@@ -5,14 +5,25 @@
   <meta name="viewport" content="width=device-width,initial-scale=1">
   <meta name="referrer" content="strict-origin-when-cross-origin">
   <title>Create Your School Website — SCMS</title>
+  <script>
+    (function () {
+      try {
+        var saved = localStorage.getItem('scms_theme');
+        document.documentElement.setAttribute('data-theme', saved === 'dark' ? 'dark' : 'light');
+        document.documentElement.style.colorScheme = saved === 'dark' ? 'dark' : 'light';
+      } catch (_) {
+        document.documentElement.setAttribute('data-theme', 'light');
+      }
+    })();
+  </script>
   <link rel="stylesheet" href="./create.css">
 </head>
 <body class="auth-pending">
-  <style>.auth-pending .builder-header,.auth-pending .builder,.access-denied .builder-header,.access-denied .builder{display:none}.website-access-gate{position:fixed;inset:0;z-index:9999;display:grid;place-content:center;gap:12px;padding:24px;background:#f5f6f8;color:#172033;text-align:center;font:500 16px system-ui}.website-access-gate[hidden]{display:none}.website-access-gate p{max-width:440px;margin:0;line-height:1.5}.website-access-gate button{justify-self:center;padding:10px 16px;border:0;border-radius:10px;background:#172033;color:#fff;font:inherit}</style>
+  <style>.auth-pending .builder-header,.auth-pending .builder,.access-denied .builder-header,.access-denied .builder{display:none}.website-access-gate{position:fixed;inset:0;z-index:9999;display:grid;place-content:center;gap:12px;padding:24px;background:var(--ws-page,#f5f6f8);color:var(--ws-ink,#172033);text-align:center;font:500 16px system-ui}.website-access-gate[hidden]{display:none}.website-access-gate p{max-width:440px;margin:0;line-height:1.5}.website-access-gate button{justify-self:center;padding:10px 16px;border:0;border-radius:10px;background:var(--ws-accent,#172033);color:#fff;font:inherit}</style>
   <section id="accessGate" class="website-access-gate" role="status" aria-live="polite"><strong>Verifying School Website access…</strong><p>Please wait while SCMS checks your signed-in session and school permissions.</p></section>
   <header class="builder-header">
     <div class="brand"><span class="brand-mark">S</span><div><strong>Create your school website</strong><span>SCMS Website Studio</span></div></div>
-    <div class="header-actions"><span id="saveState" class="save-state">Draft</span><button id="siteAddressButton" class="button secondary" type="button">Website address</button><button id="admissionInboxButton" class="button secondary" type="button">Admissions</button><button id="previewToggle" class="button secondary" type="button" aria-expanded="false">Preview</button><button id="submitReviewButton" class="button secondary" type="button">Submit for review</button><button id="publishButton" class="button primary" type="button">Publish</button></div>
+    <div class="header-actions"><button id="themeToggle" class="button secondary theme-toggle" type="button" aria-label="Switch to dark theme" aria-pressed="false">☾ Dark</button><span id="saveState" class="save-state">Draft</span><button id="siteAddressButton" class="button secondary" type="button">Website address</button><button id="admissionInboxButton" class="button secondary" type="button">Admissions</button><button id="previewToggle" class="button secondary" type="button" aria-expanded="false">Preview</button><button id="submitReviewButton" class="button secondary" type="button">Submit for review</button><button id="publishButton" class="button primary" type="button">Publish</button></div>
   </header>
   <main class="builder">
     <section class="workspace" aria-label="Website editor">
@@ -125,6 +136,35 @@
     </section>
   </dialog>
   <div id="toast" class="toast" role="status" aria-live="polite"></div>
+  <script>
+    (function () {
+      var root = document.documentElement;
+      var button = document.getElementById('themeToggle');
+      function normalize(value) { return value === 'dark' ? 'dark' : 'light'; }
+      function applyTheme(value, persist) {
+        var theme = normalize(value);
+        root.setAttribute('data-theme', theme);
+        root.style.colorScheme = theme;
+        if (persist) { try { localStorage.setItem('scms_theme', theme); } catch (_) {} }
+        if (button) {
+          button.textContent = theme === 'dark' ? '☀ Light' : '☾ Dark';
+          button.setAttribute('aria-label', theme === 'dark' ? 'Switch to light theme' : 'Switch to dark theme');
+          button.setAttribute('aria-pressed', theme === 'dark' ? 'true' : 'false');
+        }
+        window.dispatchEvent(new CustomEvent('themeChanged', { detail: { theme: theme } }));
+      }
+      applyTheme(root.getAttribute('data-theme'), false);
+      if (button) button.addEventListener('click', function () {
+        applyTheme(root.getAttribute('data-theme') === 'dark' ? 'light' : 'dark', true);
+      });
+      window.addEventListener('storage', function (event) {
+        if (event.key === 'scms_theme') applyTheme(event.newValue, false);
+      });
+      window.addEventListener('themeChanged', function (event) {
+        if (event.detail && event.detail.theme) applyTheme(event.detail.theme, false);
+      });
+    })();
+  </script>
   <script src="../js/00_env.js?v=20261010a"></script>
   <script src="../js/01_config.js?v=20261010a"></script>
   <script>
