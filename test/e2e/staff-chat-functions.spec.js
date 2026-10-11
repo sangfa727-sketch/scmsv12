@@ -1007,3 +1007,48 @@ test('Official Announcement send failure keeps the draft and restores the send c
   await expect(page.locator('#adminMsgBody')).toHaveValue('Keep this official announcement draft');
   await expect(page.locator('#adminMsgSendBtn')).toBeEnabled();
 });
+
+
+test('Mobile users can hide every channel, navigate hidden types without enabling tabs, and re-enable separately', async ({ page }) => {
+  await page.setViewportSize({ width: 390, height: 844 });
+  await mountSmartChat(page);
+  const ids = ['staff', 'announcements', 'direct', 'departments', 'tickets', 'events'];
+  for (const id of ids) {
+    await page.evaluate((channel) => window._hideChatType(channel), id);
+  }
+  await expect(page.locator('#smartChatQuickNav .smart-chat-quick-channel')).toHaveCount(0);
+  await page.evaluate(() => window._toggleChatTypeMenu());
+  await expect(page.locator('#scChatTypeMenu .sc-chat-type-option')).toHaveCount(6);
+  await page.locator('#scChatTypeMenu .sc-chat-type-option').filter({ hasText: 'Direct Messages' }).click();
+  await expect(page.locator('.smart-chat-direct-shell')).toBeVisible();
+  await expect(page.locator('[data-chat-quick-channel="direct"]')).toHaveCount(0);
+  expect(await page.evaluate(() => JSON.parse(localStorage.getItem('scms_chat_visible_types') || '{}').direct)).toBe(false);
+  await page.evaluate(() => window._toggleChatTypeMenu());
+  await page.locator('#scChatTypeMenu .sc-chat-type-enable[aria-label*="Direct Messages"]').click();
+  await expect(page.locator('[data-chat-quick-channel="direct"]')).toBeVisible();
+  expect(await page.evaluate(() => JSON.parse(localStorage.getItem('scms_chat_visible_types') || '{}').direct)).toBe(true);
+});
+
+test('Desktop channel tabs fill the available row and the All Staff conversation is wider than its list', async ({ page }) => {
+  await page.setViewportSize({ width: 1440, height: 900 });
+  await mountSmartChat(page);
+  await expect(page.locator('.smart-chat-identity')).toHaveCount(0);
+  await expect(page.locator('.smart-chat-mode-switch')).toBeVisible();
+  await expect(page.locator('.smart-chat-quick-channel-hide:visible')).toHaveCount(0);
+  const layout = await page.evaluate(() => {
+    const track = document.querySelector('.smart-chat-quick-nav-track');
+    const conversation = document.querySelector('.smart-chat-conversation');
+    const channelList = document.querySelector('.smart-chat-channel-list');
+    return {
+      columns: track ? getComputedStyle(track).gridTemplateColumns.split(' ').length : 0,
+      trackWidth: track?.getBoundingClientRect().width || 0,
+      conversationWidth: conversation?.getBoundingClientRect().width || 0,
+      channelListWidth: channelList?.getBoundingClientRect().width || 0,
+      overflowWidth: track ? track.scrollWidth - track.clientWidth : 0
+    };
+  });
+  expect(layout.columns).toBe(6);
+  expect(layout.trackWidth).toBeGreaterThan(700);
+  expect(layout.conversationWidth).toBeGreaterThan(layout.channelListWidth * 2);
+  expect(layout.overflowWidth).toBeLessThanOrEqual(1);
+});
