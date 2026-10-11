@@ -1055,6 +1055,26 @@ async function _submitInquiryDraft(e){
 let _announcementComposerOpen=false;
 let _announcementComposerScrollY=0;
 let _announcementComposerBodyStyles=null;
+let _announcementComposerPlaceholder=null;
+function _mountAnnouncementComposerOverlay(card){
+  if(!card || card.parentElement===document.body)return;
+  // A transformed/scrolling chat ancestor can become the containing block for
+  // position:fixed. Portal the overlay to body so it owns the real viewport.
+  _announcementComposerPlaceholder=document.createComment('announcement-composer-position');
+  card.parentNode.insertBefore(_announcementComposerPlaceholder,card);
+  document.body.appendChild(card);
+}
+function _restoreAnnouncementComposerOverlay(card){
+  if(!card || card.parentElement!==document.body)return;
+  if(_announcementComposerPlaceholder?.isConnected){
+    _announcementComposerPlaceholder.parentNode.insertBefore(card,_announcementComposerPlaceholder);
+    _announcementComposerPlaceholder.remove();
+  }else{
+    // The chat workspace was re-rendered while the overlay was open.
+    card.remove();
+  }
+  _announcementComposerPlaceholder=null;
+}
 function _lockAnnouncementPageScroll(){
   // The composer is a fixed viewport overlay. Do not change body positioning,
   // overflow, or window scroll here: mobile browsers can shift the chat workspace
@@ -1074,8 +1094,10 @@ window._toggleAnnouncementComposer=function(force=null){
   const card=document.getElementById('announcementComposer');
   const buttons=[document.getElementById('announcementComposerToggle'),document.getElementById('announcementComposerToggleMobile')].filter(Boolean);
   if(card){
+    if(_announcementComposerOpen)_mountAnnouncementComposerOverlay(card);
     card.classList.toggle('is-open',_announcementComposerOpen);
     card.onclick=event=>{if(event.target===card)window._toggleAnnouncementComposer(false);};
+    if(!_announcementComposerOpen)_restoreAnnouncementComposerOverlay(card);
   }
   document.documentElement.classList.toggle('scms-announcement-composer-open',_announcementComposerOpen);
   buttons.forEach(btn=>{
