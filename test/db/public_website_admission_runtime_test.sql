@@ -240,6 +240,9 @@ begin
 end
 $test$;
 
+delete from public.website_admission_applications;
+delete from public.website_admission_rate_limits;
+
 insert into public.website_admission_applications
   (application_id,school_id,source_host,idempotency_key,student_name,applying_grade,guardian_name,guardian_phone,status,created_at,updated_at)
 values
