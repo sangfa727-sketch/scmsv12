@@ -434,7 +434,7 @@ window._refreshAdminComposerPreview = function() {
     .smart-chat-composer-drawer.is-open{display:flex}
     .smart-chat-composer-drawer .smart-chat-admin-card{width:min(100%,720px);max-height:min(88dvh,820px);overflow-y:auto;overscroll-behavior:contain;box-shadow:0 24px 80px rgba(0,0,0,.32)}
     .smart-chat-composer-close{flex:0 0 34px;width:34px;height:34px;border:1px solid var(--border);border-radius:10px;background:var(--bg2);color:var(--text);font-size:22px;line-height:1;display:inline-flex;align-items:center;justify-content:center;cursor:pointer}
-    html.scms-announcement-composer-open,html.scms-announcement-composer-open body{overflow:hidden!important}
+    /* The fixed composer overlay blocks background interaction; locking html/body overflow here can reset mobile scroll and shift the workspace. */
     @media(max-width:760px){.smart-chat-composer-drawer{padding:calc(10px + env(safe-area-inset-top)) 10px calc(10px + env(safe-area-inset-bottom))}.smart-chat-composer-drawer .smart-chat-admin-card{width:100%;max-height:calc(100dvh - 20px);border-radius:18px;padding:12px}#page-chat .smart-chat-announcement-add-mobile{display:inline-flex}}
     .smart-chat-composer-drawer .smart-chat-admin-card{margin:0}
     .smart-chat-announcement-add-mobile{display:none;flex:0 0 34px;width:34px;height:34px;border:1px solid var(--border);border-radius:10px;background:var(--bg2);color:var(--text);font-size:20px;line-height:1;align-items:center;justify-content:center;cursor:pointer}
