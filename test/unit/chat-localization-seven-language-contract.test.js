@@ -76,3 +76,27 @@ test('one verified recipient wording is intentionally supplied for all seven loc
   assert.equal(new Set(values).size, LANGUAGES.length,
     'each supported language should have its own oneVerifiedRecipient wording');
 });
+
+test('Official Announcements composer labels are explicitly translated in all seven languages', () => {
+  const locales = loadChatLocales();
+  const keys = [
+    'chat.adminTools', 'chat.officialMessage', 'chat.officialMessageHint',
+    'chat.serverVerified', 'chat.recipientType', 'chat.allStaff', 'chat.grade',
+    'chat.individualTeacher', 'chat.teacher', 'chat.loadingGrades',
+    'chat.messageType', 'chat.reason', 'chat.officialCommunication',
+    'chat.announcement', 'chat.officialTask', 'chat.staffNotice',
+    'chat.messageBody', 'chat.writeOfficialMessage', 'chat.checkingRecipients',
+    'chat.refreshRecipients', 'chat.send'
+  ];
+
+  for (const code of LANGUAGES) {
+    for (const key of keys) {
+      const value = locales[code][key];
+      assert.equal(typeof value, 'string', code + ' is missing ' + key);
+      assert.notEqual(value.trim(), '', code + ' has an empty translation for ' + key);
+      if (code !== 'en') {
+        assert.notEqual(value, locales.en[key], code + ' must not fall back to English for ' + key);
+      }
+    }
+  }
+});
