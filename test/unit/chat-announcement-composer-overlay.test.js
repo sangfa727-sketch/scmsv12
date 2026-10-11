@@ -11,7 +11,8 @@ test('Official Announcements composer opens as a modal overlay without creating 
   const renderEnd = source.indexOf('async function _loadAnnouncementWorkspace', renderStart);
   assert.ok(renderStart >= 0 && renderEnd > renderStart, 'find the announcement workspace renderer');
   const renderer = source.slice(renderStart, renderEnd);
-  assert.ok(renderer.includes('class="smart-chat-composer-drawer${_announcementComposerOpen?\\' is-open\\':\\'\\'}"'), 'composer visibility is driven by modal state');
+  assert.ok(renderer.includes('class="smart-chat-composer-drawer${_announcementComposerOpen?'), 'composer visibility is driven by modal state');
+  assert.ok(renderer.includes("_announcementComposerOpen?' is-open':''"), 'open class follows modal state');
   assert.ok(renderer.includes('aria-controls="announcementComposer"'), 'plus control targets the overlay');
   assert.ok(source.includes('position:fixed;inset:0;z-index:12000'), 'overlay is fixed to viewport, not normal document flow');
   assert.ok(source.includes('.smart-chat-composer-drawer.is-open{display:flex}'), 'open state centers the form as an overlay');
