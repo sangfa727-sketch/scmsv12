@@ -67,14 +67,14 @@ begin
   end if;
 
   if exists (
-    select 1 from jsonb_array_elements(v->'rows') row_data
+    select 1 from jsonb_array_elements(v->'rows') as e(row_data)
      where (row_data->>'conversation_id')::bigint = 102
   ) then
     raise exception 'conversation with foreign-school peer membership leaked into list: %', v->'rows';
   end if;
 
   select row_data into v_row
-    from jsonb_array_elements(v->'rows') row_data
+    from jsonb_array_elements(v->'rows') as e(row_data)
    where (row_data->>'conversation_id')::bigint = 101;
   if v_row is null then
     raise exception 'expected same-school conversation 101 to remain visible';
@@ -87,7 +87,7 @@ begin
   end if;
 
   select row_data into v_row
-    from jsonb_array_elements(v->'rows') row_data
+    from jsonb_array_elements(v->'rows') as e(row_data)
    where (row_data->>'conversation_id')::bigint = 103;
   if v_row->>'last_message' is distinct from 'valid same-school message' then
     raise exception 'valid same-school preview was lost: %', v_row;
