@@ -1352,6 +1352,75 @@ test('Grade Chat clears unread count only after mark-read succeeds', async ({ pa
 });
 
 
+test('Department Chat read receipts update only the department that was opened', async ({ page }) => {
+  await mountSmartChat(page);
+  await page.evaluate(() => {
+    window.__departmentReadResolvers = {};
+    window.API.getDepartmentChats = async () => [
+      { id: 51, department_code: 'SCI', department_name: 'Science Department', is_active: true, unread_count: 3 },
+      { id: 52, department_code: 'ART', department_name: 'Arts Department', is_active: true, unread_count: 5 }
+    ];
+    window.API.openDepartmentChat = async (id) => ({
+      ok: true,
+      department: {
+        id,
+        department_code: id === 51 ? 'SCI' : 'ART',
+        department_name: id === 51 ? 'Science Department' : 'Arts Department'
+      },
+      rows: []
+    });
+    window.API.markDepartmentRead = (id) => new Promise(resolve => {
+      window.__departmentReadResolvers[id] = resolve;
+    });
+    window.switchChatChannel('departments');
+  });
+
+  await expect(page.locator('[data-testid="department-row-51"]')).toBeVisible();
+  await page.locator('[data-testid="department-row-51"]').click();
+  await expect.poll(() => page.evaluate(() => Boolean(window.__departmentReadResolvers[51]))).toBe(true);
+  await page.locator('[data-testid="department-row-52"]').click();
+  await expect.poll(() => page.evaluate(() => Boolean(window.__departmentReadResolvers[52]))).toBe(true);
+
+  // The older receipt completes while Arts is selected; it must not clear Arts' unread badge.
+  await page.evaluate(() => window.__departmentReadResolvers[51]({ ok: true }));
+  await expect(page.locator('[data-testid="department-row-51"]')).not.toContainText('3');
+  await expect(page.locator('[data-testid="department-row-52"]')).toContainText('5');
+
+  await page.evaluate(() => window.__departmentReadResolvers[52]({ ok: true }));
+  await expect(page.locator('[data-testid="department-row-52"]')).not.toContainText('5');
+});
+
+test('Grade Chat read receipts update only the grade that was opened', async ({ page }) => {
+  await mountSmartChat(page);
+  await page.evaluate(() => {
+    window.__gradeReadResolvers = {};
+    window.API.getGradeChats = async () => [
+      { grade_name: 'Grade 1', unread_count: 3 },
+      { grade_name: 'Grade 2', unread_count: 5 }
+    ];
+    window.API.openGradeChat = async (name) => ({ ok: true, grade_name: name, rows: [] });
+    window.API.markGradeRead = (name) => new Promise(resolve => {
+      window.__gradeReadResolvers[name] = resolve;
+    });
+    window.switchChatChannel('departments');
+    window._showGradeWorkspace();
+  });
+
+  await expect(page.locator('[data-testid="grade-row-Grade 1"]')).toBeVisible();
+  await page.locator('[data-testid="grade-row-Grade 1"]').click();
+  await expect.poll(() => page.evaluate(() => Boolean(window.__gradeReadResolvers['Grade 1']))).toBe(true);
+  await page.locator('[data-testid="grade-row-Grade 2"]').click();
+  await expect.poll(() => page.evaluate(() => Boolean(window.__gradeReadResolvers['Grade 2']))).toBe(true);
+
+  // The older receipt completes while Grade 2 is selected; it must not clear Grade 2's unread badge.
+  await page.evaluate(() => window.__gradeReadResolvers['Grade 1']({ ok: true }));
+  await expect(page.locator('[data-testid="grade-row-Grade 1"]')).not.toContainText('3');
+  await expect(page.locator('[data-testid="grade-row-Grade 2"]')).toContainText('5');
+
+  await page.evaluate(() => window.__gradeReadResolvers['Grade 2']({ ok: true }));
+  await expect(page.locator('[data-testid="grade-row-Grade 2"]')).not.toContainText('5');
+});
+
 test('Official Announcements composer closes cleanly when switching channels', async ({ page }) => {
   await page.setViewportSize({ width: 390, height: 844 });
   await mountSmartChat(page, false);
