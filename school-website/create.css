@@ -79,3 +79,87 @@ dialog,
 .site-address-current p{margin:7px 0;overflow-wrap:anywhere;font-weight:700}
 .site-address-current a{font-size:.88rem;font-weight:700}
 .site-address-dialog .dialog-actions{display:flex;gap:8px;justify-content:space-between;flex-wrap:wrap;margin-top:18px}
+
+/* SCMS core theme bridge: the editor chrome follows data-theme/scms_theme.
+   The central page canvas and its live preview intentionally remain a light website mockup. */
+:root{
+  --ws-page:#f4f6f8;
+  --ws-ink:#17202a;
+  --ws-muted:#68727d;
+  --ws-surface:#fff;
+  --ws-surface-soft:#f8fbfd;
+  --ws-line:#e4e8ec;
+  --ws-accent:#173d5c;
+  --ws-focus:0 0 0 3px rgba(37,99,235,.22);
+}
+html[data-theme="dark"]{
+  color-scheme:dark;
+  --ws-page:#10151b;
+  --ws-ink:#f2f6f9;
+  --ws-muted:#8996a3;
+  --ws-surface:#19232d;
+  --ws-surface-soft:#161d25;
+  --ws-line:rgba(214,228,242,.12);
+  --ws-accent:#78a8d0;
+  --ws-focus:0 0 0 3px rgba(120,168,208,.28);
+}
+html[data-theme="light"]{color-scheme:light}
+body{background:var(--ws-page);color:var(--ws-ink)}
+.builder-header{background:color-mix(in srgb,var(--ws-surface) 90%,transparent);border-color:var(--ws-line)}
+.brand strong,.workspace-top h1,.template-strip strong,.content-strip strong,.next-step-card strong{color:var(--ws-ink)}
+.brand span:last-child,.muted,.template-strip small,.content-strip small,.next-step-card small,.section-nav-label{color:var(--ws-muted)}
+.button.secondary{background:var(--ws-surface);color:var(--ws-ink);border-color:var(--ws-line)}
+.button.primary{background:var(--ws-accent);color:#fff}
+.save-state{color:var(--ws-muted)}
+.section-nav{background:color-mix(in srgb,var(--ws-page) 92%,transparent)}
+.section-nav a{background:var(--ws-surface);color:var(--ws-muted);border-color:var(--ws-line)}
+.section-nav a:hover{background:var(--ws-surface-soft);border-color:var(--ws-accent)}
+.section-nav a.active{background:color-mix(in srgb,var(--ws-accent) 14%,var(--ws-surface));border-color:var(--ws-accent);color:var(--ws-ink)}
+.template-strip,.content-strip,.next-step-card{background:var(--ws-surface);border-color:var(--ws-line)}
+.content-strip{background:var(--ws-surface-soft)}
+.field-progress,.text-button{color:var(--ws-accent)}
+.add-section{color:var(--ws-muted);border-color:var(--ws-line)}
+dialog{background:var(--ws-surface);color:var(--ws-ink)}
+.editor-dialog .icon-button{color:var(--ws-muted)}
+.editor-dialog textarea,.site-address-form input,.admission-review-actions select{background:var(--ws-surface-soft);color:var(--ws-ink);border-color:var(--ws-line)}
+.editor-dialog textarea::placeholder{color:var(--ws-muted)}
+.section-options button,.template-option{background:var(--ws-surface);color:var(--ws-ink);border-color:var(--ws-line)}
+.template-option.selected,.section-options button:hover{background:var(--ws-surface-soft);border-color:var(--ws-accent)}
+.template-option span,.section-options small{color:var(--ws-muted)}
+.site-address-current{background:var(--ws-surface-soft);border-color:var(--ws-line)}
+.admission-review-card,.admission-inbox-empty{background:var(--ws-surface);border-color:var(--ws-line);color:var(--ws-ink)}
+.admission-review-card .admission-status,.admission-review-details strong{color:var(--ws-muted)}
+html[data-theme="dark"] .website-access-gate{background:#10151b;color:#f2f6f9}
+html[data-theme="dark"] .website-access-gate button{background:#78a8d0;color:#10151b}
+.theme-toggle{white-space:nowrap;min-width:86px}
+@media(max-width:760px){
+  .builder-header{position:sticky;top:0;min-height:0;padding:10px 12px;display:flex;flex-wrap:wrap;gap:9px}
+  .brand{flex:1 0 100%;gap:9px}
+  .brand-mark{width:32px;height:32px;border-radius:10px}
+  .header-actions{width:100%;max-width:100%;gap:7px;overflow-x:auto;overflow-y:hidden;padding:1px 0 4px;scrollbar-width:thin;overscroll-behavior-x:contain;-webkit-overflow-scrolling:touch}
+  .header-actions .button{flex:0 0 auto;min-height:42px;padding:9px 12px;font-size:.78rem}
+  .header-actions .save-state{display:none}
+  .theme-toggle{min-width:78px}
+  .builder{grid-template-columns:minmax(0,1fr);padding:15px 10px 36px;gap:12px}
+  .workspace-top{margin:3px 2px 14px}
+  .workspace-top h1{font-size:1.55rem;line-height:1.15}
+  .workspace-top .muted{font-size:.9rem;line-height:1.55}
+  .template-strip,.content-strip{margin-left:0;margin-right:0}
+  .section-nav{top:0;z-index:20;margin-bottom:10px;padding:6px 0;gap:8px}
+  .section-nav a{min-height:40px;padding:8px 12px}
+  .page-canvas{width:100%;max-width:100%}
+  .site-block{min-width:0}
+  .preview-panel{inset:112px 8px 8px;max-height:calc(100dvh - 120px);overflow:hidden}
+  .preview-device{height:calc(100% - 36px);min-height:0}
+  .editor-dialog{padding:18px}
+  .dialog-actions{position:sticky;bottom:0;padding-top:8px;background:var(--ws-surface)}
+  .section-options{grid-template-columns:minmax(0,1fr)}
+}
+@media(max-width:380px){
+  .brand strong{font-size:.78rem}
+  .header-actions .button{padding-inline:10px;font-size:.74rem}
+  .workspace-top h1{font-size:1.4rem}
+  .site-block{padding-left:15px;padding-right:15px}
+  .section-controls{left:7px;right:7px;gap:3px}
+  .section-controls button{min-width:36px}
+}
