@@ -50,9 +50,46 @@ alter table public.website_sites
     site_slug is null or site_slug ~ '^[a-z0-9]+(-[a-z0-9]+)*$'
   );
 
+alter table public.website_sites
+  drop constraint if exists website_sites_active_status_consistency;
+alter table public.website_sites
+  add constraint website_sites_active_status_consistency check (
+    (active = true and provisioning_status = 'active')
+    or (active = false and provisioning_status in ('pending_activation','suspended'))
+  );
+
 create unique index if not exists website_sites_school_platform_slug_uq
   on public.website_sites(school_id, platform_domain)
   where site_slug is not null and platform_domain is not null;
+
+create or replace function private.website_sync_sites_with_platform_domain()
+returns trigger
+language plpgsql
+security definer
+set search_path = public, pg_temp
+as $function$
+begin
+  if new.base_domain is distinct from old.base_domain
+     and exists(select 1 from public.website_sites where platform_domain = old.base_domain) then
+    raise exception 'platform domain cannot be renamed while school sites are assigned';
+  end if;
+
+  if (old.active = true and new.active = false)
+     or (old.verified_at is not null and new.verified_at is null) then
+    update public.website_sites
+       set active = false,
+           provisioning_status = 'pending_activation',
+           updated_at = now()
+     where platform_domain = old.base_domain;
+  end if;
+  return new;
+end;
+$function$;
+
+drop trigger if exists website_platform_domain_sync_sites on public.website_platform_domains;
+create trigger website_platform_domain_sync_sites
+before update of base_domain, active, verified_at on public.website_platform_domains
+for each row execute function private.website_sync_sites_with_platform_domain();
 
 create or replace function public.rpc_school_website_get_site(p_session_token text)
 returns jsonb
