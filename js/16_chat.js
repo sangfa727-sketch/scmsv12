@@ -432,6 +432,7 @@ window._refreshAdminComposerPreview = function() {
     @media(max-width:760px){#adminMsgSendBtn{font-size:10px;padding-inline:10px}}
     .smart-chat-composer-drawer.is-open{display:block;position:fixed;z-index:10080;top:50%;left:50%;transform:translate(-50%,-50%);width:min(720px,calc(100vw - 24px));max-height:calc(100dvh - 32px);overflow-y:auto;overscroll-behavior:contain;border:1px solid var(--border);border-radius:16px;background:var(--surface);box-shadow:0 0 0 100vmax rgba(8,12,22,.62),0 24px 70px rgba(0,0,0,.32);-webkit-overflow-scrolling:touch}
     .smart-chat-composer-drawer .smart-chat-admin-card{margin:0}
+    .smart-chat-composer-close{flex:0 0 34px;width:34px;height:34px;border:1px solid var(--border);border-radius:50%;background:var(--bg2);color:var(--text);font-size:23px;line-height:1;display:grid;place-items:center;cursor:pointer}
     .smart-chat-conversation-list{min-height:0}
     .smart-chat-list-empty-card{margin:8px 0;padding:16px 12px;border:1px dashed var(--border);border-radius:12px;background:var(--bg2);text-align:center}
     .smart-chat-list-empty-card .icon{font-size:20px;margin-bottom:5px}
@@ -1056,7 +1057,7 @@ function _renderAnnouncementList(rows){
   }).join('');
 }
 function _renderAnnouncementWorkspace(){
-  const composer=window.APP?.is_admin ? `<div id="announcementComposer" class="smart-chat-composer-drawer">${_renderAdminComposer()}</div>` : '';
+  const composer=window.APP?.is_admin ? `<div id="announcementComposer" class="smart-chat-composer-drawer" role="dialog" aria-modal="true" aria-label="${t("chat.adminComposer")}" aria-hidden="true">${_renderAdminComposer()}</div>` : '';
   return _chatChannelBack(t('chat.officialAnnouncements')) + composer +
     '<div class="smart-chat-direct-shell smart-chat-announcement-shell'+(_announcementId?' has-selection':'')+'">'+
     `<aside class="smart-chat-direct-list"><div class="smart-chat-direct-list-head"><div><div class="smart-chat-kicker">${t('chat.officialAnnouncements')}</div><strong>${t('chat.officialAnnouncements')}</strong></div><div class="smart-chat-list-actions">`+
