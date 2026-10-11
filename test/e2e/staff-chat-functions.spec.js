@@ -1552,3 +1552,48 @@ test('All Staff initial message-load failure shows a retry state instead of a bl
   await expect(page.locator('#chatStream .chat-error')).toContainText(/retry|ပြန်ကြိုးစား/i);
   await expect(page.locator('#chatStream .chat-error button')).toBeVisible();
 });
+
+
+test('Official Announcement composer dismisses via Escape and backdrop without losing list scroll', async ({ page }) => {
+  await page.setViewportSize({ width: 390, height: 844 });
+  await mountSmartChat(page, false);
+  await page.evaluate(() => {
+    window.APP.is_admin = true;
+    window.API.getStaffAnnouncements = async () => Array.from({ length: 24 }, (_, i) => ({
+      id: `00000000-0000-4000-8000-${String(i + 1).padStart(12, '0')}`,
+      message_type: 'notice',
+      reason: `Modal scroll notice ${i + 1}`,
+      body: `Modal scroll announcement body ${i + 1}`,
+      created_at: '2026-10-10T08:00:00.000Z'
+    }));
+    window.switchChatMode('school');
+    window.renderChat();
+    window.switchChatChannel('announcements');
+  });
+
+  const list = page.locator('#announcementList');
+  const plus = page.locator('#announcementComposerToggleMobile');
+  await expect(list.locator('.smart-chat-announcement-card')).toHaveCount(24);
+  await expect(plus).toBeVisible();
+  await list.evaluate(el => { el.scrollTop = el.scrollHeight; });
+  const initialScrollTop = await list.evaluate(el => el.scrollTop);
+  expect(initialScrollTop).toBeGreaterThan(0);
+
+  await plus.click();
+  await expect(page.locator('#announcementComposer')).toBeVisible();
+  await expect(page.locator('#announcementComposer')).toHaveCSS('position', 'fixed');
+  await expect.poll(() => list.evaluate(el => el.scrollTop)).toBe(initialScrollTop);
+
+  await page.keyboard.press('Escape');
+  await expect(page.locator('#announcementComposer')).toBeHidden();
+  await expect(page.locator('html')).not.toHaveClass(/scms-announcement-composer-open/);
+  await expect.poll(() => list.evaluate(el => el.scrollTop)).toBe(initialScrollTop);
+
+  await plus.click();
+  await expect(page.locator('#announcementComposer')).toBeVisible();
+  // The top-left corner is backdrop padding, outside the centered admin card.
+  await page.mouse.click(4, 4);
+  await expect(page.locator('#announcementComposer')).toBeHidden();
+  await expect(page.locator('html')).not.toHaveClass(/scms-announcement-composer-open/);
+  await expect.poll(() => list.evaluate(el => el.scrollTop)).toBe(initialScrollTop);
+});
