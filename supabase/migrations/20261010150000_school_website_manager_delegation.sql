@@ -87,6 +87,19 @@ begin
        and subject_id is null;
   end if;
 
+  insert into public.audit_log(source, actor, action, school_id, payload)
+  values (
+    'web',
+    'school_website_manager',
+    case when p_allowed then 'website.manager_grant' else 'website.manager_revoke' end,
+    v_actor.school_id,
+    jsonb_build_object(
+      'target_teacher_id', v_target.teacher_id,
+      'permission_key', 'website.manage',
+      'allowed', p_allowed
+    )
+  );
+
   return jsonb_build_object('ok', true, 'teacher_id', v_target.teacher_id, 'allowed', p_allowed);
 end;
 $function$;
