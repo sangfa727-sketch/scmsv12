@@ -370,17 +370,17 @@ window._refreshAdminComposerPreview = function() {
       html.scms-chat-workspace #page-chat .smart-chat-direct-open{display:grid;place-items:center;width:28px;height:28px;flex:0 0 28px;border:1px solid var(--border);border-radius:50%;background:var(--bg2);color:var(--accent);font-size:17px;font-weight:800}
       html.scms-chat-workspace #page-chat .sc-chat-type-empty{padding:12px 10px;color:var(--muted);font-size:12px;text-align:center}
       html.scms-chat-workspace #page-chat .sc-chat-type-option .sc-chat-type-enable{display:grid;place-items:center;width:28px;height:28px;border:1px solid var(--border);border-radius:50%;color:var(--sc-chat-accent);font-size:18px;font-weight:800}
-      html.scms-chat-workspace #page-chat .sc-chat-type-menu{position:absolute;top:calc(100% + 8px);right:12px;width:min(260px,calc(100vw - 24px));padding:7px;border:1px solid var(--border);border-radius:17px;background:var(--surface);box-shadow:0 18px 48px rgba(0,0,0,.22);transform-origin:top right;animation:scChatMenuIn .18s cubic-bezier(.2,.8,.2,1) both}
+      html.scms-chat-workspace #page-chat .sc-chat-type-menu{position:absolute;top:calc(100% + 6px);right:8px;width:min(228px,calc(100vw - 20px));max-height:min(42dvh,320px);box-sizing:border-box;overflow-x:hidden;overflow-y:auto;overscroll-behavior:contain;-webkit-overflow-scrolling:touch;padding:5px;border:1px solid var(--border);border-radius:14px;background:var(--surface);box-shadow:0 12px 30px rgba(0,0,0,.2);transform-origin:top right;animation:scChatMenuIn .18s cubic-bezier(.2,.8,.2,1) both}
       html.scms-chat-workspace #page-chat .sc-chat-type-menu[hidden]{display:none}
-      html.scms-chat-workspace #page-chat .sc-chat-type-option{display:flex;align-items:center;gap:12px;width:100%;min-height:52px;padding:9px 12px;border-radius:12px;text-align:left;color:var(--text);transition:background .16s ease,transform .16s ease}
+      html.scms-chat-workspace #page-chat .sc-chat-type-option{display:flex;align-items:center;gap:8px;width:100%;min-height:42px;padding:7px 8px;border-radius:10px;text-align:left;color:var(--text);transition:background .16s ease,transform .16s ease}
       html.scms-chat-workspace #page-chat .sc-chat-type-row{display:flex;align-items:center;gap:5px}
       html.scms-chat-workspace #page-chat .sc-chat-type-row .sc-chat-type-option{flex:1;min-width:0;width:auto}
-      html.scms-chat-workspace #page-chat .sc-chat-type-enable{display:grid;place-items:center;width:34px;height:34px;flex:0 0 34px;border:1px solid var(--border);border-radius:50%;background:var(--bg2);color:var(--sc-chat-accent);font-size:19px;font-weight:800}
+      html.scms-chat-workspace #page-chat .sc-chat-type-enable{display:grid;place-items:center;width:30px;height:30px;flex:0 0 30px;border:1px solid var(--border);border-radius:50%;background:var(--bg2);color:var(--sc-chat-accent);font-size:17px;font-weight:800}
       html.scms-chat-workspace #page-chat .sc-chat-type-enable:active{transform:scale(.92)}
       html.scms-chat-workspace #page-chat .sc-chat-type-option:active{transform:scale(.985)}
       html.scms-chat-workspace #page-chat .sc-chat-type-option.active{background:color-mix(in srgb,var(--sc-chat-accent) 12%,var(--surface))}
       html.scms-chat-workspace #page-chat .sc-chat-type-option .sc-chat-type-copy{display:flex;flex-direction:column;gap:2px;min-width:0;flex:1}
-      html.scms-chat-workspace #page-chat .sc-chat-type-option small{font-size:11px;color:var(--muted)}
+      html.scms-chat-workspace #page-chat .sc-chat-type-option small{font-size:10px;color:var(--muted)}
       html.scms-chat-workspace #page-chat .sc-chat-workspace-content{display:flex;flex:1 1 auto;flex-direction:column;min-height:0;overflow-y:auto;overflow-x:hidden;-webkit-overflow-scrolling:touch;touch-action:pan-y;padding:0 0 max(8px,env(safe-area-inset-bottom))}
       html.scms-chat-workspace #page-chat .smart-chat-hero{display:none!important}
       html.scms-chat-workspace #page-chat .smart-chat-mode-switch{display:none!important}
@@ -598,7 +598,32 @@ window.switchChatMode = function(mode) {
   const pill = document.querySelector('.sc-chat-mode-pill');
   if (pill) pill.innerHTML = (_chatMode === 'school' ? _chatIcon('users') + esc(t('chat.schoolChat')) : _chatIcon('bot') + esc(t('chat.aiAssistant')));
 };
+function _closeChatTypeMenu() {
+  _chatTypeMenuOpen = false;
+  const menu = document.getElementById('scChatTypeMenu');
+  if (menu) menu.hidden = true;
+  document.querySelectorAll('.sc-chat-top-action[aria-haspopup="menu"]').forEach(button => button.setAttribute('aria-expanded', 'false'));
+}
+
+function _bindChatTypeMenuDismissHandlers() {
+  if (window.__scChatTypeMenuDismissBound) return;
+  window.__scChatTypeMenuDismissBound = true;
+  document.addEventListener('pointerdown', event => {
+    if (!_chatTypeMenuOpen) return;
+    const menu = document.getElementById('scChatTypeMenu');
+    const trigger = document.querySelector('#page-chat .sc-chat-top-action[aria-haspopup="menu"]');
+    if (menu?.contains(event.target) || trigger?.contains(event.target)) return;
+    _closeChatTypeMenu();
+  }, true);
+  document.addEventListener('keydown', event => {
+    if (event.key !== 'Escape' || !_chatTypeMenuOpen) return;
+    _closeChatTypeMenu();
+    document.querySelector('#page-chat .sc-chat-top-action[aria-haspopup="menu"]')?.focus();
+  });
+}
+
 window._toggleChatTypeMenu = function() {
+  _bindChatTypeMenuDismissHandlers();
   _chatTypeMenuOpen = !_chatTypeMenuOpen;
   const menu = document.getElementById('scChatTypeMenu');
   if (menu) { menu.innerHTML = _chatTypeMenuMarkup(); menu.hidden = !_chatTypeMenuOpen; }
