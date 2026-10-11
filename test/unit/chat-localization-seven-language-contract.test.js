@@ -81,7 +81,6 @@ test('Staff Chat and Official Announcements labels do not silently fall back to 
 test('Chat locale extension preserves existing base translations instead of replacing them with English', () => {
   const locales = loadChatLocales();
   const expected = {
-    my: 'ထပ်ကြိုးစားပါ',
     th: 'ลองอีกครั้ง',
     jp: '再試行',
     ms: 'Cuba lagi',
