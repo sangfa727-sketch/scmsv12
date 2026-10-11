@@ -36,8 +36,10 @@ test('admission applicant content is rendered as text and not persisted in brows
 
 test('admission review RPCs enforce school scope, website permission, status transitions, and audit logging', () => {
   const sql = read('supabase/migrations/20261011170000_school_website_admission_review.sql');
-  assert.match(sql, /private\.web_has_permission\(p_session_token, 'website\.manage'/);
+  assert.match(sql, /private\.web_has_permission\(p_session_token, 'website\.admissions\.review'/);
   assert.match(sql, /a\.school_id = v_actor\.school_id/);
+  assert.match(sql, /website\.admissions\.review/);
+  assert.match(sql, /is_sensitive = true/);
   assert.match(sql, /school_id = v_actor\.school_id/);
   assert.match(sql, /p_expected_updated_at/);
   assert.match(sql, /stale_application/);
