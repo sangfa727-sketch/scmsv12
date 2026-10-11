@@ -655,12 +655,16 @@ test('mobile one-to-one chat keeps message stream scrollable and composer visibl
     return {
       shell: rect(shellEl), conversation: rect(conversationEl), stream: rect(streamEl), composer: rect(composerEl),
       streamOverflowY: getComputedStyle(streamEl).overflowY,
+      conversationRadius: getComputedStyle(conversationEl).borderTopLeftRadius,
       streamScrollHeight: streamEl.scrollHeight, streamClientHeight: streamEl.clientHeight,
       scrollable,
       viewportHeight: window.innerHeight
     };
   });
-  expect(geometry.conversation.height).toBeGreaterThan(0);
+  // The selected mobile 1-on-1 conversation should use more of the phone
+  // viewport and keep the conversation card corners visibly rounded.
+  expect(geometry.conversation.height).toBeGreaterThan(geometry.viewportHeight - 170);
+  expect(geometry.conversationRadius).toBe('18px');
   expect(geometry.composer.height).toBeGreaterThan(0);
   expect(geometry.composer.bottom).toBeLessThanOrEqual(geometry.viewportHeight + 2);
   expect(geometry.streamOverflowY).toBe('auto');
