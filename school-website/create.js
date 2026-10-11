@@ -29,7 +29,7 @@ let draftSaveInFlight=false;
 let draftSaveQueued=false;
 function updateDraftActionButtons(){
  const stateText=$("#saveState").textContent||"";
- const saving=stateText.startsWith("Saving")||stateText.startsWith("Loading");
+ const saving=stateText.startsWith("Saving")||stateText.startsWith("Loading")||stateText.startsWith("Submitting")||stateText.startsWith("Publishing");
  const review=$("#submitReviewButton"),publish=$("#publishButton");
  if(review)review.disabled=!remoteDraftReady||draftConflict||draftVersion<1||draftStatus!=="draft"||saving;
  if(publish)publish.disabled=!publishAuthorized||!remoteDraftReady||draftConflict||draftVersion<1||draftStatus!=="review"||saving;
