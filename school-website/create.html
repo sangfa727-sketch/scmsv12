@@ -160,9 +160,6 @@
       window.addEventListener('storage', function (event) {
         if (event.key === 'scms_theme') applyTheme(event.newValue, false);
       });
-      window.addEventListener('themeChanged', function (event) {
-        if (event.detail && event.detail.theme) applyTheme(event.detail.theme, false);
-      });
     })();
   </script>
   <script src="../js/00_env.js?v=20261010a"></script>
