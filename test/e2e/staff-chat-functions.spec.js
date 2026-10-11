@@ -1056,10 +1056,11 @@ test('Desktop channel tabs fill the available row and the All Staff conversation
 
 test('mobile Chat arrow toggles fullscreen off and on without changing the active page', async ({ page }) => {
   await mountSmartChat(page);
-  // Dismiss the first-run onboarding overlay so it cannot intercept the toggle click.
-  const onboardingSkip = page.getByRole('button', { name: 'Skip' });
-  if (await onboardingSkip.isVisible().catch(() => false)) await onboardingSkip.click();
   await page.setViewportSize({ width: 390, height: 844 });
+  // The onboarding tour can appear after the app shell mounts; dismiss it before interaction.
+  const onboardingSkip = page.getByRole('button', { name: 'Skip' });
+  if (await onboardingSkip.isVisible().catch(() => false)) await onboardingSkip.click({ force: true });
+  await expect(page.locator('#tourOverlay')).toBeHidden();
   await expect(page.locator('html')).toHaveClass(/scms-chat-workspace/);
   await expect(page.locator('.sc-chat-topbar')).toBeVisible();
 
