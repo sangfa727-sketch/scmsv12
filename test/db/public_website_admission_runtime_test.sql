@@ -378,6 +378,19 @@ begin
   end if;
 
   v := public.rpc_school_website_save_draft(
+    'owner-b-session',
+    jsonb_build_object('template','modern','schoolName',''),
+    0
+  );
+  if v->>'ok' is distinct from 'true' then
+    raise exception 'an incomplete profile may be saved as a draft: %', v;
+  end if;
+  v := public.rpc_school_website_submit_draft_for_review('owner-b-session',1);
+  if v->>'error' is distinct from 'incomplete_draft' then
+    raise exception 'incomplete profile must not be submitted for review: %', v;
+  end if;
+
+  v := public.rpc_school_website_save_draft(
     'owner-a-session',
     jsonb_build_object('template','unknown','schoolName','Invalid template'),
     2
