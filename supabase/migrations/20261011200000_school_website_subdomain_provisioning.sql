@@ -96,7 +96,8 @@ begin
     into v_site
     from public.website_sites
    where school_id = v_actor.school_id
-   order by case when platform_domain = v_base_domain then 0 else 1 end, created_at desc
+     and (v_base_domain is null or platform_domain = v_base_domain)
+   order by created_at desc
    limit 1;
 
   select exists(select 1 from public.website_publications where school_id = v_actor.school_id)
