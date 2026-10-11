@@ -114,6 +114,7 @@ begin
   if nullif(trim(p_session_token), '') is null
      or p_application_id is null
      or p_expected_updated_at is null
+     or p_new_status is null
      or p_new_status not in ('reviewing','accepted','rejected','withdrawn') then
     return jsonb_build_object('ok', false, 'error', 'invalid_request');
   end if;
