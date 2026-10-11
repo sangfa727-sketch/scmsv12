@@ -11,7 +11,9 @@ test('template-first website studio stays outside private SCMS data',()=>{
  assert.match(html,/data-template="modern"/);
  assert.match(html,/Add your information/i);
  assert.match(js,/localStorage/);
- assert.doesNotMatch(js,/supabase|service_role|students|attendance|billing|health/i);
+ assert.doesNotMatch(js,/service_role|students|attendance|billing|health/i);
+ assert.match(js,/rpc_school_website_list_admissions/);
+ assert.match(js,/rpc_school_website_update_admission_status/);
 });
 test('school admin fills guided fields instead of designing a blank website',()=>{
  const html=read('school-website/create.html'),js=read('school-website/create.js');
