@@ -89,7 +89,7 @@ test('chat type menu and channel actions persist, validate, and re-render select
 test('mobile Chat arrow toggles fullscreen both ways and desktop keeps the normal shell', () => {
   assert.match(core, /const isMobileWorkspace = typeof window\.matchMedia === 'function'[\s\S]*?window\.matchMedia\('\(max-width: 760px\)'\)\.matches/);
   assert.match(core, /if \(!isMobileWorkspace\) return/);
-  assert.match(core, /if \(isFullscreen\) \{[\s\S]*?_exitChatWorkspace\(\)[\s\S]*?openSidebar\(\)/);
+  assert.match(core, /if \(isFullscreen\) \{[\s\S]*?_exitChatWorkspace\(\)[\s\S]*?closeSidebar\(\)/);
   assert.match(core, /else \{[\s\S]*?_enterChatWorkspace\(\)/);
   assert.match(core, /smart-chat-nav-icon/);
   assert.match(core, /classList\.contains\('scms-chat-workspace'\) \? '‹' : '›'/);
