@@ -1403,6 +1403,7 @@ test('Official Announcement read failure preserves the unread marker', async ({ 
       window.__chatTestCalls.push({ name: 'markStaffAnnouncementRead', args });
       return { ok: false, error: 'simulated read rejection' };
     };
+    window.renderChat();
     window.switchChatChannel('announcements');
   });
   const card = page.locator('#announcementList .smart-chat-announcement-card');
@@ -1422,6 +1423,7 @@ test('Late Official Announcement read receipts cannot overwrite the currently se
       { id: '22222222-2222-4222-8222-222222222222', message_type: 'notice', reason: 'Second notice', body: 'Second announcement body', created_at: '2026-10-11T08:00:00.000Z', read_at: null }
     ];
     window.API.markStaffAnnouncementRead = (id) => new Promise(resolve => { window.__announcementReadResolvers[id] = resolve; });
+    window.renderChat();
     window.switchChatChannel('announcements');
   });
   const cards = page.locator('#announcementList .smart-chat-announcement-card');
