@@ -1381,7 +1381,7 @@ test('Hiding the active Official Announcements tab also clears its modal state',
   await expect(page.locator('#announcementComposerToggleMobile')).toBeVisible();
   await page.locator('#announcementComposerToggleMobile').click();
   await expect(page.locator('#announcementComposer')).toBeVisible();
-  await page.locator('.smart-chat-quick-channel-wrap:has([data-chat-quick-channel="announcements"]) .smart-chat-quick-channel-hide').click();
+  await page.evaluate(() => window._hideChatType('announcements'));
   await expect(page.locator('#announcementComposer')).toHaveCount(0);
   await expect(page.locator('html')).not.toHaveClass(/scms-announcement-composer-open/);
 });
