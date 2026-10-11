@@ -65,6 +65,7 @@ declare
   v_base_domain text;
   v_site record;
   v_domain_ready boolean := false;
+  v_site_found boolean := false;
   v_has_publication boolean := false;
 begin
   if nullif(trim(p_session_token), '') is null then
@@ -99,6 +100,7 @@ begin
      and (v_base_domain is null or platform_domain = v_base_domain)
    order by created_at desc
    limit 1;
+  v_site_found := found;
 
   select exists(select 1 from public.website_publications where school_id = v_actor.school_id)
     into v_has_publication;
@@ -107,7 +109,7 @@ begin
     'ok', true,
     'platform_domain_configured', v_domain_ready,
     'base_domain', v_base_domain,
-    'found', found,
+    'found', v_site_found,
     'site', case when v_site.hostname is null then null else jsonb_build_object(
       'slug', v_site.site_slug,
       'hostname', v_site.hostname,
