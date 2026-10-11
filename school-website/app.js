@@ -83,6 +83,11 @@
     if(!Array.isArray(content.programs)||content.programs.length===0)$("#programs").hidden=true;
     if(!Array.isArray(content.facilities)||content.facilities.length===0)$("#facilities").hidden=true;
     if(!Array.isArray(content.news)||content.news.length===0)$("#news").hidden=true;
+    const nav=$('nav[aria-label="Primary"]');
+    if(nav)nav.querySelectorAll('a[href^="#"]').forEach(link=>{
+      const section=$(link.getAttribute("href"));
+      link.hidden=!!section&&section.hidden;
+    });
     document.title=schoolName+" | School Website";
   }
   async function boot(){
