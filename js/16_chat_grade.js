@@ -40,7 +40,7 @@ async function _openGradeChat(name,silent=false){
   }
   _gradeMessages=msgs;
   requestAnimationFrame(()=>{const stream=document.getElementById('gradeMessageStream');if(stream)stream.scrollTop=stream.scrollHeight;});
-  const readGrade=String(_gradeName);try{const readResult=await API.markGradeRead(readGrade);if(requestToken!==_gradeOpenRequest)return;if(readResult?.ok===true){const row=_gradeRows.find(item=>String(item.grade_name)===readGrade);if(row)row.unread_count=0;_renderGradeList();}}catch(_){/* Keep unread count unless the server confirms the read receipt. */}
+  const readGrade=String(_gradeName);try{const readResult=await API.markGradeRead(readGrade);if(readResult?.ok===true){const row=_gradeRows.find(item=>String(item.grade_name)===readGrade);if(row)row.unread_count=0;_renderGradeList();}}catch(_){/* Keep unread count unless the server confirms the read receipt. */}
   if(requestToken!==_gradeOpenRequest)return;
   if(!silent)_startGradePolling();
   _renderGradeList();
