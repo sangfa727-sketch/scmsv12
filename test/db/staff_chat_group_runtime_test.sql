@@ -68,6 +68,18 @@ begin
   if v->>'ok' is distinct from 'false' or v->>'error' is distinct from 'group_forbidden' then
     raise exception 'cross-school non-member unexpectedly opened group: %',v;
   end if;
+  v := public.rpc_chat_group_send('session-foreign',g_id,'unauthorized message');
+  if v->>'ok' is distinct from 'false' or v->>'error' is distinct from 'group_forbidden' then
+    raise exception 'cross-school non-member unexpectedly sent a message: %',v;
+  end if;
+  v := public.rpc_chat_group_mark_read('session-foreign',g_id);
+  if v->>'ok' is distinct from 'false' or v->>'error' is distinct from 'group_forbidden' then
+    raise exception 'cross-school non-member unexpectedly marked the group read: %',v;
+  end if;
+  v := public.rpc_chat_group_list('session-foreign',null,50);
+  if v->>'ok' is distinct from 'true' or jsonb_array_length(v->'rows')<>0 then
+    raise exception 'cross-school list exposed a group: %',v;
+  end if;
 
   -- Every invalid member list must fail before creating any group row.
   v := public.rpc_chat_group_create('session-owner','Foreign member',null,'PROJECT',null,null,'["member-1","foreign-1"]'::jsonb);
@@ -108,6 +120,12 @@ begin
   v := public.rpc_chat_group_create('invalid-session','Invalid session',null,'PROJECT',null,null,'[]'::jsonb);
   if v->>'ok' is distinct from 'false' or v->>'error' is distinct from 'invalid_session' then
     raise exception 'invalid session was not rejected: %',v;
+  end if;
+
+  update public.staff_project_event_groups set status='CLOSED' where id=g_id;
+  v := public.rpc_chat_group_send('session-owner',g_id,'message to closed group');
+  if v->>'ok' is distinct from 'false' or v->>'error' is distinct from 'group_closed' then
+    raise exception 'closed group accepted a message: %',v;
   end if;
 
   select count(*) into group_count from public.staff_project_event_groups;
