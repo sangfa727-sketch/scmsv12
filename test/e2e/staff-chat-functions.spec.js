@@ -1720,7 +1720,9 @@ test('mobile Official Announcement composer overlays the visible workspace and c
     return { x: r.x, y: r.y, width: r.width, height: r.height };
   });
 
-  await toggle.click();
+  // Avoid Playwright's automatic scroll-into-view adjustment; this test measures
+  // whether opening the overlay itself shifts the workspace, not test-runner scrolling.
+  await toggle.evaluate(el => el.click());
   await expect(overlay).toBeVisible();
   await expect(overlay.locator('.smart-chat-admin-card')).toBeVisible();
   await expect(toggle).toHaveAttribute('aria-expanded', 'true');
