@@ -27,6 +27,7 @@ const REQUIRED_KEYS = [
   'chat.individualTeacher', 'chat.messageType', 'chat.announcement', 'chat.officialTask',
   'chat.refreshRecipients', 'chat.sendOfficialMessage', 'chat.checkingRecipients',
   'chat.reasonBodyRequired', 'chat.messageBody', 'chat.writeOfficialMessage',
+  'chat.loading', 'chat.openFailed', 'chat.schoolIsolated', 'chat.gradeRecipientsMissing',
   'chat.newOfficialMessage', 'chat.closeOfficialMessage', 'chat.officialAnnouncements',
   'chat.officialNotices', 'chat.refresh', 'chat.noVerifiedSameSchoolRecipient', 'chat.verifiedRecipients',
 ];
