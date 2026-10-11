@@ -583,6 +583,30 @@ begin
      or has_table_privilege('authenticated','public.website_admission_applications','select') then
     raise exception 'client roles must not read admission table directly';
   end if;
+  -- Revoking platform-domain verification suspends its sites and disables both public reads and intake origin checks.
+  update public.website_platform_domains
+     set active = false, is_default = false, updated_at = now()
+   where base_domain = 'schools.example.test';
+
+  if exists(select 1 from public.website_sites
+    where hostname = 'bright-future.schools.example.test' and active = true) then
+    raise exception 'root-domain deactivation must suspend its public sites';
+  end if;
+  if public.rpc_website_site_origin_allowed('bright-future.schools.example.test') is distinct from false then
+    raise exception 'admission intake origin must be denied after root-domain deactivation';
+  end if;
+  v := public.rpc_school_website_get_published('bright-future.schools.example.test');
+  if v->>'found' is distinct from 'false' then
+    raise exception 'public content must be hidden after root-domain deactivation: %', v;
+  end if;
+  select count(*) into v_count from public.audit_log
+   where action='website.site_suspended_by_domain'
+     and school_id='school-a'
+     and payload->>'hostname'='bright-future.schools.example.test';
+  if v_count <> 1 then
+    raise exception 'root-domain deactivation should create a site suspension audit event, got %', v_count;
+  end if;
+
 end
 $review$;
 
