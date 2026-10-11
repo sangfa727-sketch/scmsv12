@@ -25,8 +25,6 @@ create index if not exists website_sites_school_active_idx
 create table if not exists public.website_admission_applications (
   application_id uuid primary key default gen_random_uuid(),
   school_id text not null,
-  source_hostname text not null,
-  idempotency_key text not null,
   student_name text not null,
   date_of_birth date,
   applying_grade text not null,
@@ -216,11 +214,11 @@ end;
 $function$;
 
 revoke all on function public.rpc_website_admission_submit(text,text,text,text,text,text,text,text,text,text,text,text) from public, anon, authenticated;
-grant execute on function public.rpc_website_admission_submit(text,text,text,text,text,text,text,text,text) to service_role;
+grant execute on function public.rpc_website_admission_submit(text,text,text,text,text,text,text,text,text,text,text,text) to service_role;
 
 comment on table public.website_admission_applications is
   'Isolated public admission intake only; never a Student Core record. Client roles have no read/write access.';
 comment on table public.website_sites is
   'Trusted hostname-to-school registry. Provisioned only through a separately authorized admin workflow.';
-comment on function public.rpc_website_admission_submit(text,text,text,text,text,text,text,text,text) is
+comment on function public.rpc_website_admission_submit(text,text,text,text,text,text,text,text,text,text,text,text) is
   'Service-role-only public intake RPC. Resolves school by exact trusted hostname, rate-limits hashed identity, enforces idempotency, and inserts only isolated intake records.';
