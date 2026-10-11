@@ -111,10 +111,10 @@ insert into public.teacher_permissions(school_id,teacher_id,permission_key,allow
   ('school-b','owner-b','website.publish',true,'global',null,null);
 
 
-insert into public.website_sites(school_id, hostname, active) values
-  ('school-a', 'school-a.example.test', true),
-  ('school-b', 'school-b.example.test', true),
-  ('school-disabled', 'closed.example.test', false);
+insert into public.website_sites(school_id, hostname, active, provisioning_status) values
+  ('school-a', 'school-a.example.test', true, 'active'),
+  ('school-b', 'school-b.example.test', true, 'active'),
+  ('school-disabled', 'closed.example.test', false, 'pending_activation');
 
 do $test$
 declare
