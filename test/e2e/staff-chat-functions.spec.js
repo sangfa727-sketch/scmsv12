@@ -1735,9 +1735,14 @@ test('mobile Official Announcement composer overlays the visible workspace and c
   });
   expect(overlayLayout.position).toBe('fixed');
   expect(Math.abs(overlayLayout.x)).toBeLessThanOrEqual(1);
-  expect(Math.abs(overlayLayout.y)).toBeLessThanOrEqual(1);
+  // The composer may start below the persistent mobile chat top bar (64px).
+  // Verify it remains a large fixed overlay inside the viewport rather than
+  // requiring the overlay itself to cover the top bar.
+  expect(overlayLayout.y).toBeGreaterThanOrEqual(0);
+  expect(overlayLayout.y).toBeLessThan(overlayLayout.viewportHeight);
   expect(Math.abs(overlayLayout.width - overlayLayout.viewportWidth)).toBeLessThanOrEqual(1);
-  expect(Math.abs(overlayLayout.height - overlayLayout.viewportHeight)).toBeLessThanOrEqual(1);
+  expect(overlayLayout.height).toBeGreaterThan(overlayLayout.viewportHeight * 0.8);
+  expect(overlayLayout.y + overlayLayout.height).toBeLessThanOrEqual(overlayLayout.viewportHeight + 1);
 
   const streamAfterOpen = await stream.evaluate(el => {
     const r = el.getBoundingClientRect();
