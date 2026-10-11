@@ -1124,6 +1124,7 @@ test('Group Chat shows retry UI when loading the group list fails', async ({ pag
   });
   await expect(page.locator('#chatGroupList')).toBeVisible();
   await page.evaluate(async () => {
+    window._chatGroups = [];
     window.API.getChatGroups = async () => { throw new Error('simulated group-list failure'); };
     await window._loadChatGroups(false);
   });
