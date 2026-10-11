@@ -15,6 +15,7 @@ const fieldMeta={
 };
 const $=s=>document.querySelector(s),$$=s=>[...document.querySelectorAll(s)];
 const dialog=$("#editorDialog"),input=$("#dialogInput"),title=$("#dialogTitle"),label=$("#dialogLabel"),hint=$("#dialogHint"),toast=$("#toast");
+if(window.SCMS_WEBSITE_CONTEXT?.admissionsAuthorized!==true)$("#admissionInboxButton").hidden=true;
 let activeField=null,activeCollection=null;
 function showToast(message){toast.textContent=message;toast.classList.add("show");clearTimeout(showToast.t);showToast.t=setTimeout(()=>toast.classList.remove("show"),1800)}
 function openField(field){activeField=field;activeCollection=null;const m=fieldMeta[field];title.textContent=m[0];label.textContent=m[0];input.value=state[field];hint.textContent=m[2];input.placeholder=m[1];input.maxLength=field==="aboutText"?4000:field==="contactText"?2000:300;input.removeAttribute("aria-invalid");dialog.showModal();setTimeout(()=>input.focus(),30)}
