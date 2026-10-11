@@ -10204,6 +10204,10 @@ html.scms-chat-workspace #pages{overflow:auto}
 /* Staff Chat mobile one-to-one conversation: extend closer to the phone bottom
    and restore a softly rounded conversation card without changing desktop layout. */
 @media (max-width:760px) {
+  #page-chat .smart-chat-direct-shell.has-selection {
+    height:calc(100dvh - 145px);
+    min-height:0;
+  }
   #page-chat .smart-chat-direct-shell.has-selection .smart-chat-direct-conversation {
     height:calc(100dvh - 145px);
     min-height:calc(100dvh - 145px);
