@@ -95,7 +95,7 @@ function _renderAdminComposer() {
           <h2>${t('chat.officialMessage')}</h2>
           <p>${t('chat.officialMessageHint')}</p>
         </div>
-        <span class="smart-chat-preview-badge">${t('chat.serverVerified')}</span>
+        <span class="smart-chat-preview-badge">${t('chat.serverVerified')}</span><button type="button" class="smart-chat-composer-close" onclick="_toggleAnnouncementComposer(false)" aria-label="${t('chat.closeOfficialMessage')}" title="${t('chat.closeOfficialMessage')}">×</button>
       </div>
 
       <div class="smart-chat-form-grid">
