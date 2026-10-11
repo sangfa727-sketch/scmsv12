@@ -1119,11 +1119,13 @@ test('Group Chat preserves unread count when the server rejects mark-read', asyn
 
 test('Group Chat shows retry UI when loading the group list fails', async ({ page }) => {
   await mountSmartChat(page);
-  await page.evaluate(() => {
+  await page.evaluate(async () => {
+    // Clear any cached groups first: the app can restore the last-used channel
+    // from localStorage, so a previous successful render may already have data.
+    window.API.getChatGroups = async () => [];
+    await window._loadChatGroups(false);
     window.API.getChatGroups = async () => { throw new Error('simulated group-list failure'); };
-    // Render the group workspace after installing the failing API stub so the
-    // assertion exercises the actual list-load error path deterministically.
-    window.renderChatGroups();
+    await window._loadChatGroups(false);
   });
   await expect(page.locator('#chatGroupList .chat-error')).toBeVisible();
   await expect(page.locator('#chatGroupList')).toContainText('Retry');
