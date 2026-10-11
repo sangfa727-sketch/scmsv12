@@ -208,7 +208,7 @@ async function saveAdmissionStatus(button){
  }
 }
 
-$("[data-field]").forEach(el=>el.addEventListener("click",()=>openField(el.dataset.field)));
+$$("[data-field]").forEach(el=>el.addEventListener("click",()=>openField(el.dataset.field)));
 document.addEventListener("click",e=>{const admissionSave=e.target.closest("[data-admission-save]");if(admissionSave){saveAdmissionStatus(admissionSave);return;}const sectionButton=e.target.closest("[data-section-action]");if(sectionButton){sectionAction(sectionButton.dataset.sectionId,sectionButton.dataset.sectionAction);return;}const add=e.target.closest("[data-add-item]");if(add)openItem(add.dataset.addItem);const remove=e.target.closest("[data-remove]");if(remove){state[remove.dataset.remove].splice(Number(remove.dataset.index),1);render();showToast("Removed from draft")}});
 $$(".block-edit").forEach(el=>el.addEventListener("click",()=>{const b=el.dataset.edit;if(fieldMeta[b])openField(b);else if(["programs","facilities","news"].includes(b))openItem(b);else showToast("Choose the fields you need to update.")}));
 $("#dialogSave").addEventListener("click",e=>{e.preventDefault();const value=input.value.trim();if(!value){input.setAttribute("aria-invalid","true");input.focus();hint.textContent="Please enter some information before saving.";return;}if(activeField)state[activeField]=value;if(activeCollection)state[activeCollection].push(value);dialog.close();render();showToast("Draft updated")});
