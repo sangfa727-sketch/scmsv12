@@ -623,6 +623,7 @@ window._hideChatType = function(id) {
   if (!Object.prototype.hasOwnProperty.call(_chatVisibleTypes, id)) return;
   _chatVisibleTypes[id] = false;
   try { localStorage.setItem('scms_chat_visible_types', JSON.stringify(_chatVisibleTypes)); } catch (_) {}
+  if (id === 'announcements' && _announcementComposerOpen) window._toggleAnnouncementComposer(false);
   if (_chatChannel === id) _chatChannel = _chatQuickNavChannels().find(c => _chatVisibleTypes[c.id] !== false)?.id || 'staff';
   _renderChatQuickNav(); _renderChatMode();
   const menu = document.getElementById('scChatTypeMenu'); if (menu) menu.innerHTML = _chatTypeMenuMarkup();
@@ -1327,6 +1328,10 @@ function _chatChannelBack() {
 window.switchChatChannel = function(channel) {
   const allowed = _chatQuickNavChannels().some(item => item.id === channel);
   if (!allowed) return;
+  // A fixed composer can outlive its workspace when the root is re-rendered.
+  // Dismiss it before leaving Announcements so the modal state and page scroll
+  // lock cannot leak into another channel or reopen unexpectedly on return.
+  if (_announcementComposerOpen && channel !== 'announcements') window._toggleAnnouncementComposer(false);
   _chatChannel = channel;
   if (_chatMode !== 'school') _chatMode = 'school';
   _renderChatQuickNav();
