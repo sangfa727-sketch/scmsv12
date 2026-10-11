@@ -20,3 +20,10 @@ main{max-width:1100px;margin:auto;padding:28px 20px 72px}
 .contact{padding-bottom:0}
 footer{padding:28px 20px;text-align:center;color:#777166;border-top:1px solid #ddd9cf;font-size:.82rem}
 @media(max-width:720px){.site-header{align-items:flex-start;flex-direction:column}nav{gap:12px}.hero{padding-top:56px}}
+
+/* Public template variants use only published theme metadata. */
+body[data-template="classic"]{font-family:Georgia,"Times New Roman",serif}
+body[data-template="classic"] .hero h2{font-weight:600;letter-spacing:-.035em}
+body[data-template="premium"] .hero{padding-top:clamp(80px,15vw,170px)}
+body[data-template="premium"] .card{padding-top:42px;padding-bottom:42px}
+[hidden]{display:none!important}
