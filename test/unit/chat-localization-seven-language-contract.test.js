@@ -16,6 +16,19 @@ const REQUIRED_KEYS = [
 
 function loadChatLocales() {
   const window = {};
+  const baseFiles = [
+    '00a_locales_en.js',
+    '00b_locales_my.js',
+    '00_locales_jp.js',
+    '00_locales_thai.js',
+    '00d_locales_ms.js',
+    '00e_locales_km.js',
+    '00e_locales_zh.js'
+  ];
+  for (const filename of baseFiles) {
+    const filePath = path.join(ROOT, 'js', filename);
+    vm.runInNewContext(fs.readFileSync(filePath, 'utf8'), { window }, { filename: filePath });
+  }
   const source = fs.readFileSync(LOCALE_FILE, 'utf8');
   vm.runInNewContext(source, { window }, { filename: LOCALE_FILE });
   return Object.fromEntries(LANGUAGES.map(code => {
