@@ -28,6 +28,7 @@ const REQUIRED_KEYS = [
   'chat.refreshRecipients', 'chat.sendOfficialMessage', 'chat.checkingRecipients',
   'chat.reasonBodyRequired', 'chat.messageBody', 'chat.writeOfficialMessage',
   'chat.loading', 'chat.openFailed', 'chat.schoolIsolated', 'chat.gradeRecipientsMissing',
+  'chat.retry', 'chat.sendFailed',
   'chat.newOfficialMessage', 'chat.closeOfficialMessage', 'chat.officialAnnouncements',
   'chat.officialNotices', 'chat.refresh', 'chat.noVerifiedSameSchoolRecipient', 'chat.verifiedRecipients',
 ];
@@ -35,19 +36,25 @@ const REQUIRED_KEYS = [
 function loadChatLocales() {
   const window = {};
   const context = { window };
+  let baseLocales = {};
   for (const filename of LOCALE_FILES) {
     const fullPath = path.join(ROOT, 'js', filename);
     if (filename === '00f_chat_locales.js') {
-      assert.equal(window.I18N_TH?.['chat.retry'], 'ลองอีกครั้ง', 'Thai base retry translation must be loaded before the Chat extension');
+      baseLocales = Object.fromEntries(LANGUAGES.map(code => {
+        const globalName = 'I18N_' + code.toUpperCase();
+        return [code, { ...(window[globalName] || {}) }];
+      }));
     }
     const source = fs.readFileSync(fullPath, 'utf8');
     vm.runInNewContext(source, context, { filename: fullPath });
   }
-  return Object.fromEntries(LANGUAGES.map(code => {
+  const result = Object.fromEntries(LANGUAGES.map(code => {
     const globalName = 'I18N_' + code.toUpperCase();
     assert.equal(typeof window[globalName], 'object', globalName + ' must be exported');
     return [code, window[globalName]];
   }));
+  loadChatLocales.baseLocales = baseLocales;
+  return result;
 }
 
 test('School Chat labels exist and are non-empty in every supported language', () => {
@@ -82,17 +89,13 @@ test('Staff Chat and Official Announcements labels do not silently fall back to 
 });
 
 
-test('Chat locale extension preserves existing base translations instead of replacing them with English', () => {
+test('Chat locale extension preserves base send-failure translations when it has no override', () => {
   const locales = loadChatLocales();
-  const expected = {
-    th: 'ลองอีกครั้ง',
-    jp: '再試行',
-    ms: 'Cuba lagi',
-    km: 'ព្យាយាមម្តងទៀត',
-    zh: '再试一次',
-  };
-  for (const [code, value] of Object.entries(expected)) {
-    assert.equal(locales[code]['chat.retry'], value, code + ' base retry translation must survive the Chat extension');
+  const base = loadChatLocales.baseLocales;
+  for (const code of ['th', 'jp', 'ms', 'km', 'zh']) {
+    assert.ok(base[code]['chat.sendFailed'], code + ' base locale must define chat.sendFailed');
+    assert.notEqual(base[code]['chat.sendFailed'], locales.en['chat.sendFailed'], code + ' base send-failure text must be translated');
+    assert.equal(locales[code]['chat.sendFailed'], base[code]['chat.sendFailed'], code + ' base translation must survive the Chat extension');
   }
 });
 
