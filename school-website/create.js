@@ -213,7 +213,11 @@ $$(".block-edit").forEach(el=>el.addEventListener("click",()=>{const b=el.datase
 $("#dialogSave").addEventListener("click",e=>{e.preventDefault();const value=input.value.trim();if(!value){input.setAttribute("aria-invalid","true");input.focus();hint.textContent="Please enter some information before saving.";return;}if(activeField)state[activeField]=value;if(activeCollection)state[activeCollection].push(value);dialog.close();render();showToast("Draft updated")});
 $("#addSectionBottom").addEventListener("click",addSection);$("#closeSectionDialog").addEventListener("click",()=>$("#sectionDialog").close());
 $$(".section-options button").forEach(b=>b.addEventListener("click",()=>{const c=b.dataset.section;$("#sectionDialog").close();if(["programs","facilities","news"].includes(c))openItem(c);else showToast(c+" will be available as a guided section in the next builder step.")}));
-$("#admissionInboxButton").addEventListener("click",()=>{const d=$("#admissionInboxDialog");if(!d.open)d.showModal();loadAdmissions(true)});\n$("#closeAdmissionInbox").addEventListener("click",()=>$("#admissionInboxDialog").close());\n$("#refreshAdmissionInbox").addEventListener("click",()=>loadAdmissions(true));\n$("#loadOlderAdmissions").addEventListener("click",()=>loadAdmissions(false));\n$("#previewToggle").addEventListener("click",()=>{const p=$("#previewPanel");p.classList.toggle("open");$("#previewToggle").setAttribute("aria-expanded",String(p.classList.contains("open")))});
+$("#admissionInboxButton").addEventListener("click",()=>{const d=$("#admissionInboxDialog");if(!d.open)d.showModal();loadAdmissions(true)});
+$("#closeAdmissionInbox").addEventListener("click",()=>$("#admissionInboxDialog").close());
+$("#refreshAdmissionInbox").addEventListener("click",()=>loadAdmissions(true));
+$("#loadOlderAdmissions").addEventListener("click",()=>loadAdmissions(false));
+$("#previewToggle").addEventListener("click",()=>{const p=$("#previewPanel");p.classList.toggle("open");$("#previewToggle").setAttribute("aria-expanded",String(p.classList.contains("open")))});
 $("#closePreview").addEventListener("click",()=>$("#previewPanel").classList.remove("open"));
 $("#publishButton").addEventListener("click",()=>showToast("Preview only — publishing requires authorized review and the secure publish workflow."));
 const templateDialog=$("#templateDialog");
