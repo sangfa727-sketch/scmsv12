@@ -257,6 +257,15 @@ declare
   v_first_id uuid;
   v_second_id uuid;
 begin
+  v := public.rpc_school_website_authorize('owner-a-session');
+  if v->>'authorized' is distinct from 'true' or v->>'admissions_authorized' is distinct from 'true' then
+    raise exception 'school owner should receive the separate admission-review capability: %', v;
+  end if;
+  v := public.rpc_school_website_authorize('staff-a-session');
+  if v->>'authorized' is distinct from 'true' or v->>'admissions_authorized' is distinct from 'false' then
+    raise exception 'content-only manager must not receive admission-review capability: %', v;
+  end if;
+
   v := public.rpc_school_website_list_admissions('staff-a-session',null,null,25);
   if v->>'error' is distinct from 'access_denied' then
     raise exception 'content managers without website.admissions.review should not read applications: %', v;
