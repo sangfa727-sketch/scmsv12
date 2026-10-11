@@ -34,6 +34,7 @@ test('public admission edge endpoint uses server secret only and calls the isola
 test('public admission migration isolates private intake and grants RPC only to service_role', () => {
   const sql = read('supabase/migrations/20261011160000_public_school_website_admission_intake.sql');
   assert.match(sql, /create table if not exists public\.website_sites/i);
+  assert.match(sql, /rpc_website_site_origin_allowed/);
   assert.match(sql, /create table if not exists public\.website_admission_applications/i);
   assert.match(sql, /create table if not exists public\.website_admission_rate_limits/i);
   assert.match(sql, /unique \(school_id, idempotency_key\)/i);
