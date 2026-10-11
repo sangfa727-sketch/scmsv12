@@ -130,6 +130,7 @@ test('School Website manager delegation is limited to same-school non-privileged
  assert.match(migration,/on conflict \([\s\S]*coalesce\(class_name, ''\)[\s\S]*coalesce\(subject_id, 0\)/);
  assert.match(migration,/where teacher_permissions\.school_id = excluded\.school_id/);
  assert.match(migration,/returning id into v_permission_id/);
+ assert.match(migration,/public\.audit_log/); assert.match(migration,/website\.manager_grant/); assert.match(migration,/website\.manager_revoke/);
  assert.match(migration,/where school_id = v_actor\.school_id/);
  assert.match(migration,/revoke all on function public\.rpc_school_website_set_manager\(text, text, boolean\) from public/i);
  assert.match(migration,/grant execute on function public\.rpc_school_website_set_manager\(text, text, boolean\) to anon, authenticated/i);
