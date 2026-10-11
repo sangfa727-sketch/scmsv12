@@ -1389,3 +1389,51 @@ test('Hiding the active Official Announcements tab also clears its modal state',
   await expect(page.locator('#announcementComposer')).toHaveCount(0);
   await expect(page.locator('html')).not.toHaveClass(/scms-announcement-composer-open/);
 });
+
+
+test('Official Announcement read failure preserves the unread marker', async ({ page }) => {
+  await mountSmartChat(page, false);
+  await page.evaluate(() => {
+    window.API.getStaffAnnouncements = async () => [{
+      id: '11111111-1111-4111-8111-111111111111',
+      message_type: 'notice', reason: 'Unread announcement', body: 'Unread announcement body',
+      created_at: '2026-10-10T08:00:00.000Z', read_at: null
+    }];
+    window.API.markStaffAnnouncementRead = async (...args) => {
+      window.__chatTestCalls.push({ name: 'markStaffAnnouncementRead', args });
+      return { ok: false, error: 'simulated read rejection' };
+    };
+    window.switchChatChannel('announcements');
+  });
+  const card = page.locator('#announcementList .smart-chat-announcement-card');
+  await expect(card).toContainText('Unread announcement');
+  await card.click();
+  await expect(page.locator('#announcementStream')).toContainText('Unread announcement body');
+  await expect.poll(async () => (await calls(page, 'markStaffAnnouncementRead')).length).toBe(1);
+  await expect(card.locator('.smart-chat-announcement-unread')).toBeVisible();
+});
+
+test('Late Official Announcement read receipts cannot overwrite the currently selected detail', async ({ page }) => {
+  await mountSmartChat(page, false);
+  await page.evaluate(() => {
+    window.__announcementReadResolvers = {};
+    window.API.getStaffAnnouncements = async () => [
+      { id: '11111111-1111-4111-8111-111111111111', message_type: 'notice', reason: 'First notice', body: 'First announcement body', created_at: '2026-10-10T08:00:00.000Z', read_at: null },
+      { id: '22222222-2222-4222-8222-222222222222', message_type: 'notice', reason: 'Second notice', body: 'Second announcement body', created_at: '2026-10-11T08:00:00.000Z', read_at: null }
+    ];
+    window.API.markStaffAnnouncementRead = (id) => new Promise(resolve => { window.__announcementReadResolvers[id] = resolve; });
+    window.switchChatChannel('announcements');
+  });
+  const cards = page.locator('#announcementList .smart-chat-announcement-card');
+  await expect(cards).toHaveCount(2);
+  await cards.nth(0).click();
+  await expect(page.locator('#announcementStream')).toContainText('First announcement body');
+  await cards.nth(1).click();
+  await expect(page.locator('#announcementStream')).toContainText('Second announcement body');
+  const selectedMeta = await page.locator('#announcementStream .smart-chat-preview-meta').textContent();
+  await expect.poll(() => page.evaluate(() => Object.keys(window.__announcementReadResolvers).length)).toBe(2);
+  await page.evaluate(() => window.__announcementReadResolvers['22222222-2222-4222-8222-222222222222']({ ok: true }));
+  await page.evaluate(() => window.__announcementReadResolvers['11111111-1111-4111-8111-111111111111']({ ok: true }));
+  await expect(page.locator('#announcementStream')).toContainText('Second announcement body');
+  await expect(page.locator('#announcementStream .smart-chat-preview-meta')).toHaveText(selectedMeta);
+});
