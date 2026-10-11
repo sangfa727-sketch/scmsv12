@@ -537,10 +537,10 @@ function renderChat() {
 }
 
 window._chatBackToMenu = function() {
-  const isMobile = typeof window.matchMedia === 'function'
+  const isMobileWorkspace = typeof window.matchMedia === 'function'
     && window.matchMedia('(max-width: 760px)').matches;
   // Desktop retains the normal SCMS header/sidebar and never uses this control.
-  if (!isMobile) return;
+  if (!isMobileWorkspace) return;
   const root = document.documentElement;
   const isFullscreen = !!root?.classList.contains('scms-chat-workspace');
   try {
