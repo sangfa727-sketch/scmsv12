@@ -177,7 +177,7 @@ async function refreshSiteAddress(){
   }
   form.hidden=!configured||!!currentSite;
   if(activate){
-   activate.hidden=!currentSite||currentSite.active===true;
+   activate.hidden=!currentSite||currentSite.active===true||!publishAuthorized;
    activate.disabled=!publishAuthorized||!configured||result.has_publication!==true||currentSite?.status==="suspended";
   }
   updateSiteAddressPreview();
@@ -231,6 +231,7 @@ async function activateSiteAddress(){
   await refreshSiteAddress();
  }catch(error){
   const reason=error instanceof Error?error.message:"";
+  await refreshSiteAddress();
   $("#siteAddressStatus").textContent=reason==="publication_required"
    ?"Publish a reviewed website version before activation."
    :reason==="platform_domain_not_configured"
@@ -239,9 +240,6 @@ async function activateSiteAddress(){
      ?"This site is suspended and requires platform-operator review."
      :"The public site could not be activated. Check publication and permissions.";
   $("#siteAddressStatus").dataset.state="error";
-  await refreshSiteAddress();
- }finally{
-  // refreshSiteAddress recalculates activation eligibility from the server state.
  }
 }
 function admissionStatusLabel(status){
