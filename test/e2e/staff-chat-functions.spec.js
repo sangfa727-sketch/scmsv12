@@ -1236,6 +1236,8 @@ test('Official Announcements plus opens a fixed modal without shifting the mobil
 
   const plus = page.locator('#announcementComposerToggle');
   await expect(plus).toBeVisible();
+  await expect(page.locator('#announcementList .smart-chat-announcement-card')).toHaveCount(1);
+  await expect(page.locator('#announcementStream .smart-chat-announcement-detail')).toBeVisible();
   const before = await page.evaluate(() => {
     const shell = document.querySelector('.smart-chat-announcement-shell');
     const list = document.querySelector('#announcementList');
