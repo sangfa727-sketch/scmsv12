@@ -30,13 +30,190 @@ function renderPreview(){const meta=templateMeta[state.template]||templateMeta.m
 function escapeHtml(v){return String(v).replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]||c))}
 function render(){normalizeSections();renderSectionLayout();$$("[data-field]").forEach(el=>{const f=el.dataset.field;const fallback={logo:"＋ Add your school logo",schoolName:"Click here to add your school name",tagline:"Click here to add a short welcome message",aboutTitle:"Click here to add your school introduction",aboutText:"Tell families what makes your school special. A short, clear introduction works best.",contactTitle:"Click here to add your contact details",contactText:"Phone · Email · Address · Location"}[f];el.textContent=state[f]||fallback;el.classList.toggle("filled",!!state[f])});renderCollection("programs");renderCollection("facilities");renderCollection("news");applyTemplate();renderPreview();updateProgress();persistDraft()}
 function addSection(){$("#sectionDialog").showModal()}function initSectionNavigation(){const links=$$(".section-nav a"),sections=links.map(a=>$(a.getAttribute("href"))).filter(Boolean);if(!("IntersectionObserver" in window))return;const observer=new IntersectionObserver(entries=>{const visible=entries.filter(e=>e.isIntersecting).sort((a,b)=>b.intersectionRatio-a.intersectionRatio)[0];if(!visible)return;links.forEach(a=>a.classList.toggle("active",a.getAttribute("href")==="#"+visible.target.id));},{rootMargin:"-22% 0px -62% 0px",threshold:[0,.25,.5]});sections.forEach(section=>observer.observe(section));links.forEach(link=>link.addEventListener("click",()=>links.forEach(a=>a.classList.toggle("active",a===link))));if(links[0])links[0].classList.add("active")}
-$$("[data-field]").forEach(el=>el.addEventListener("click",()=>openField(el.dataset.field)));
-document.addEventListener("click",e=>{const sectionButton=e.target.closest("[data-section-action]");if(sectionButton){sectionAction(sectionButton.dataset.sectionId,sectionButton.dataset.sectionAction);return;}const add=e.target.closest("[data-add-item]");if(add)openItem(add.dataset.addItem);const remove=e.target.closest("[data-remove]");if(remove){state[remove.dataset.remove].splice(Number(remove.dataset.index),1);render();showToast("Removed from draft")}});
+
+let admissionCursor=null;
+let admissionHasMore=false;
+let admissionLoading=false;
+
+function getWebsiteSessionToken(){
+ try{
+  const session=JSON.parse(localStorage.getItem("scms_web_session")||sessionStorage.getItem("scms_web_session")||"null");
+  return typeof session?.session_token==="string"?session.session_token.trim():"";
+ }catch(_){return ""}
+}
+async function websiteRpc(name,args){
+ const config=window.SCMS_CONFIG||{};
+ if(typeof config.SUPABASE_URL!=="string"||typeof config.SUPABASE_ANON!=="string")throw new Error("backend_unavailable");
+ const token=getWebsiteSessionToken();
+ if(!token)throw new Error("access_denied");
+ const response=await fetch(config.SUPABASE_URL+"/rest/v1/rpc/"+encodeURIComponent(name),{
+  method:"POST",
+  headers:{apikey:config.SUPABASE_ANON,Authorization:"Bearer "+config.SUPABASE_ANON,"Content-Type":"application/json"},
+  body:JSON.stringify({...args,p_session_token:token}),
+  cache:"no-store",
+  credentials:"omit"
+ });
+ if(!response.ok)throw new Error("backend_unavailable");
+ const result=await response.json();
+ if(!result||result.ok!==true)throw new Error(typeof result?.error==="string"?result.error:"backend_unavailable");
+ return result;
+}
+function admissionStatusLabel(status){
+ return ({pending:"Pending",reviewing:"Reviewing",accepted:"Accepted",rejected:"Rejected",withdrawn:"Withdrawn"})[status]||"Unknown";
+}
+function addAdmissionDetail(parent,label,value){
+ const wrap=document.createElement("div");
+ const strong=document.createElement("strong");
+ strong.textContent=label;
+ const p=document.createElement("p");
+ p.textContent=value===null||value===undefined||value===""?"—":String(value);
+ wrap.append(strong,p);
+ parent.appendChild(wrap);
+}
+function renderAdmissionCard(item){
+ const card=document.createElement("article");
+ card.className="admission-review-card";
+ card.dataset.applicationId=String(item.application_id||"");
+ card.dataset.updatedAt=String(item.updated_at||"");
+ const header=document.createElement("header");
+ const h=document.createElement("h3");
+ h.textContent=String(item.student_name||"Unnamed applicant");
+ const status=document.createElement("span");
+ status.className="admission-status";
+ status.textContent=admissionStatusLabel(item.status);
+ header.append(h,status);
+ card.appendChild(header);
+ const details=document.createElement("div");
+ details.className="admission-review-details";
+ addAdmissionDetail(details,"Applying for",item.applying_grade);
+ addAdmissionDetail(details,"Date of birth",item.date_of_birth);
+ addAdmissionDetail(details,"Parent / guardian",item.guardian_name);
+ addAdmissionDetail(details,"Phone",item.guardian_phone);
+ addAdmissionDetail(details,"Email",item.guardian_email);
+ addAdmissionDetail(details,"Previous school",item.previous_school);
+ addAdmissionDetail(details,"Preferred contact",item.preferred_contact);
+ addAdmissionDetail(details,"Received",item.created_at?new Date(item.created_at).toLocaleString():"—");
+ addAdmissionDetail(details,"Website",item.source_host);
+ card.appendChild(details);
+ if(item.message){
+  const message=document.createElement("p");
+  message.className="admission-review-message";
+  message.textContent=String(item.message);
+  card.appendChild(message);
+ }
+ const actions=document.createElement("div");
+ actions.className="admission-review-actions";
+ const select=document.createElement("select");
+ select.setAttribute("aria-label","Update application status");
+ const options=item.status==="pending"?["pending","reviewing","accepted","rejected","withdrawn"]:
+  item.status==="reviewing"?["reviewing","accepted","rejected","withdrawn"]:[item.status];
+ options.forEach(value=>{
+  const option=document.createElement("option");
+  option.value=value;
+  option.textContent=admissionStatusLabel(value);
+  option.selected=value===item.status;
+  select.appendChild(option);
+ });
+ const closed=!["pending","reviewing"].includes(item.status);
+ select.disabled=closed;
+ select.addEventListener("change",()=>{save.disabled=select.value===item.status||closed});
+ const save=document.createElement("button");
+ save.type="button";
+ save.className="button primary";
+ save.textContent="Save status";
+ save.dataset.admissionSave="true";
+ save.disabled=closed;
+ actions.append(select,save);
+ card.appendChild(actions);
+ return card;
+}
+function setAdmissionInboxStatus(message,kind){
+ const status=$("#admissionInboxStatus");
+ if(!status)return;
+ status.textContent=message;
+ status.dataset.state=kind||"info";
+}
+async function loadAdmissions(reset){
+ if(admissionLoading)return;
+ const list=$("#admissionInboxList"),older=$("#loadOlderAdmissions");
+ if(!list)return;
+ if(reset){admissionCursor=null;admissionHasMore=false;list.replaceChildren()}
+ admissionLoading=true;
+ if(older)older.disabled=true;
+ setAdmissionInboxStatus("Loading admission applications…","pending");
+ try{
+  const result=await websiteRpc("rpc_school_website_list_admissions",{
+   p_before_created_at:admissionCursor?.created_at||null,
+   p_before_application_id:admissionCursor?.application_id||null,
+   p_limit:25
+  });
+  const items=Array.isArray(result.items)?result.items:[];
+  if(reset&&items.length===0){
+   const empty=document.createElement("p");
+   empty.className="admission-inbox-empty";
+   empty.textContent="No admission applications have been submitted to this school yet.";
+   list.appendChild(empty);
+  }else{
+   const empty=list.querySelector(".admission-inbox-empty");
+   if(empty)empty.remove();
+   items.forEach(item=>list.appendChild(renderAdmissionCard(item)));
+  }
+  admissionHasMore=result.has_more===true;
+  admissionCursor=admissionHasMore&&result.next_cursor_created_at&&result.next_cursor_application_id
+   ?{created_at:result.next_cursor_created_at,application_id:result.next_cursor_application_id}:null;
+  if(older){older.hidden=!admissionHasMore;older.disabled=false}
+  setAdmissionInboxStatus(items.length+" application"+(items.length===1?"":"s")+" loaded.","success");
+ }catch(error){
+  if(older)older.disabled=false;
+  const reason=error instanceof Error?error.message:"";
+  setAdmissionInboxStatus(reason==="access_denied"?"Your session or website-manager permission is no longer valid. Close this panel and sign in again.":"Admission applications could not be loaded. Please try again.","error");
+ }finally{
+  admissionLoading=false;
+ }
+}
+async function saveAdmissionStatus(button){
+ const card=button.closest(".admission-review-card");
+ const select=card?.querySelector("select");
+ if(!card||!select||button.disabled)return;
+ const newStatus=select.value;
+ const token=getWebsiteSessionToken();
+ if(!token){setAdmissionInboxStatus("Your session has expired. Please sign in again.","error");return}
+ button.disabled=true;
+ select.disabled=true;
+ button.textContent="Saving…";
+ setAdmissionInboxStatus("Saving application status…","pending");
+ try{
+  const result=await websiteRpc("rpc_school_website_update_admission_status",{
+   p_application_id:card.dataset.applicationId,
+   p_new_status:newStatus,
+   p_expected_updated_at:card.dataset.updatedAt
+  });
+  setAdmissionInboxStatus(result.unchanged?"Application status was already up to date.":"Application status updated.","success");
+  await loadAdmissions(true);
+ }catch(error){
+  const reason=error instanceof Error?error.message:"";
+  if(reason==="stale_application"){
+   setAdmissionInboxStatus("This application changed in another session. Refreshing the latest status.","notice");
+   await loadAdmissions(true);
+  }else if(reason==="application_closed"){
+   setAdmissionInboxStatus("This application is closed and cannot be changed again.","error");
+   await loadAdmissions(true);
+  }else{
+   setAdmissionInboxStatus("Status could not be updated. Please refresh and try again.","error");
+   button.disabled=false;
+   select.disabled=false;
+   button.textContent="Save status";
+  }
+ }
+}
+
+$("[data-field]").forEach(el=>el.addEventListener("click",()=>openField(el.dataset.field)));
+document.addEventListener("click",e=>{const admissionSave=e.target.closest("[data-admission-save]");if(admissionSave){saveAdmissionStatus(admissionSave);return;}const sectionButton=e.target.closest("[data-section-action]");if(sectionButton){sectionAction(sectionButton.dataset.sectionId,sectionButton.dataset.sectionAction);return;}const add=e.target.closest("[data-add-item]");if(add)openItem(add.dataset.addItem);const remove=e.target.closest("[data-remove]");if(remove){state[remove.dataset.remove].splice(Number(remove.dataset.index),1);render();showToast("Removed from draft")}});
 $$(".block-edit").forEach(el=>el.addEventListener("click",()=>{const b=el.dataset.edit;if(fieldMeta[b])openField(b);else if(["programs","facilities","news"].includes(b))openItem(b);else showToast("Choose the fields you need to update.")}));
 $("#dialogSave").addEventListener("click",e=>{e.preventDefault();const value=input.value.trim();if(!value){input.setAttribute("aria-invalid","true");input.focus();hint.textContent="Please enter some information before saving.";return;}if(activeField)state[activeField]=value;if(activeCollection)state[activeCollection].push(value);dialog.close();render();showToast("Draft updated")});
 $("#addSectionBottom").addEventListener("click",addSection);$("#closeSectionDialog").addEventListener("click",()=>$("#sectionDialog").close());
 $$(".section-options button").forEach(b=>b.addEventListener("click",()=>{const c=b.dataset.section;$("#sectionDialog").close();if(["programs","facilities","news"].includes(c))openItem(c);else showToast(c+" will be available as a guided section in the next builder step.")}));
-$("#previewToggle").addEventListener("click",()=>{const p=$("#previewPanel");p.classList.toggle("open");$("#previewToggle").setAttribute("aria-expanded",String(p.classList.contains("open")))});
+$("#admissionInboxButton").addEventListener("click",()=>{const d=$("#admissionInboxDialog");if(!d.open)d.showModal();loadAdmissions(true)});\n$("#closeAdmissionInbox").addEventListener("click",()=>$("#admissionInboxDialog").close());\n$("#refreshAdmissionInbox").addEventListener("click",()=>loadAdmissions(true));\n$("#loadOlderAdmissions").addEventListener("click",()=>loadAdmissions(false));\n$("#previewToggle").addEventListener("click",()=>{const p=$("#previewPanel");p.classList.toggle("open");$("#previewToggle").setAttribute("aria-expanded",String(p.classList.contains("open")))});
 $("#closePreview").addEventListener("click",()=>$("#previewPanel").classList.remove("open"));
 $("#publishButton").addEventListener("click",()=>showToast("Preview only — publishing requires authorized review and the secure publish workflow."));
 const templateDialog=$("#templateDialog");
