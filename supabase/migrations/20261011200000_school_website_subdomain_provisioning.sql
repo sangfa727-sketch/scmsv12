@@ -199,6 +199,15 @@ begin
      where hostname = v_hostname
      limit 1;
     if v_existing.school_id = v_actor.school_id then
+      update public.website_sites
+         set site_slug = coalesce(site_slug, v_slug),
+             platform_domain = coalesce(platform_domain, v_base_domain),
+             provisioning_status = case when active then 'active' else 'pending_activation' end,
+             updated_at = now()
+       where hostname = v_hostname
+         and school_id = v_actor.school_id
+         and platform_domain is null
+         and site_slug is null;
       return jsonb_build_object('ok', true, 'hostname', v_hostname,
         'active', v_existing.active, 'status', v_existing.provisioning_status, 'unchanged', true);
     end if;
@@ -263,6 +272,9 @@ begin
    for update;
   if not found then
     return jsonb_build_object('ok', false, 'error', 'site_not_found');
+  end if;
+  if v_site.provisioning_status = 'suspended' then
+    return jsonb_build_object('ok', false, 'error', 'site_suspended');
   end if;
   if not exists(select 1 from public.website_publications where school_id = v_actor.school_id) then
     return jsonb_build_object('ok', false, 'error', 'publication_required');
