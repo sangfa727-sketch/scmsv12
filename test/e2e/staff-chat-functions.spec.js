@@ -390,6 +390,32 @@ test('mobile full-screen chat uses one topbar and persists chat type selection',
   await expect(page.locator('#sidebar')).toBeVisible();
 });
 
+test('mobile three-dot chat menu dismisses on outside tap and Escape with compact dimensions', async ({ page }) => {
+  await page.setViewportSize({ width: 390, height: 844 });
+  await mountSmartChat(page);
+  const trigger = page.locator('.sc-chat-topbar .sc-chat-top-action[aria-haspopup="menu"]');
+  const menu = page.locator('#scChatTypeMenu');
+
+  await trigger.click();
+  await expect(menu).toBeVisible();
+  const dimensions = await menu.evaluate(el => {
+    const rect = el.getBoundingClientRect();
+    return { width: rect.width, height: rect.height, maxHeight: getComputedStyle(el).maxHeight };
+  });
+  expect(dimensions.width).toBeLessThanOrEqual(230);
+  expect(dimensions.height).toBeLessThanOrEqual(320);
+
+  await page.locator('.sc-chat-mode-pill').click();
+  await expect(menu).toBeHidden();
+  await expect(trigger).toHaveAttribute('aria-expanded', 'false');
+
+  await trigger.click();
+  await expect(menu).toBeVisible();
+  await page.keyboard.press('Escape');
+  await expect(menu).toBeHidden();
+  await expect(trigger).toHaveAttribute('aria-expanded', 'false');
+});
+
 test('desktop Chat keeps the original hero and mode tabs without mobile topbar', async ({ page }) => {
   await page.setViewportSize({ width: 1280, height: 800 });
   await mountSmartChat(page);
