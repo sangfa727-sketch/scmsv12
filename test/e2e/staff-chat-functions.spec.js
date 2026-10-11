@@ -1582,7 +1582,14 @@ test('Official Announcement composer dismisses via Escape and backdrop without l
   const plus = page.locator('#announcementComposerToggleMobile');
   await expect(list.locator('.smart-chat-announcement-card')).toHaveCount(24);
   await expect(plus).toBeVisible();
-  await list.evaluate(el => { el.scrollTop = el.scrollHeight; });
+  // mountSmartChat renders the channel in an isolated test shell without the
+  // production flex-height constraints. Constrain the list explicitly so this
+  // test exercises composer scroll preservation rather than the shell layout.
+  await list.evaluate(el => {
+    el.style.maxHeight = '280px';
+    el.style.overflowY = 'auto';
+    el.scrollTop = el.scrollHeight;
+  });
   const initialScrollTop = await list.evaluate(el => el.scrollTop);
   expect(initialScrollTop).toBeGreaterThan(0);
 
