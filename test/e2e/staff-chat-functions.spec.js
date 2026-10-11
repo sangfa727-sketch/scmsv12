@@ -1700,12 +1700,15 @@ test('mobile Official Announcement composer overlays the list and closes through
   await mountSmartChat(page, false);
   await page.evaluate(() => {
     window.APP.is_admin = true;
+    // Explicitly enter School Chat; the saved mode can otherwise be AI Chat.
+    window.switchChatMode('school');
     window.renderChat();
     window.switchChatChannel('announcements');
   });
 
   const overlay = page.locator('#announcementComposer');
-  const toggle = page.locator('#announcementComposerToggle');
+  // Mobile uses its dedicated visible plus control; the desktop control is hidden.
+  const toggle = page.locator('#announcementComposerToggleMobile');
   const list = page.locator('#announcementList');
   await expect(toggle).toBeVisible();
   await expect(list).toBeVisible();
