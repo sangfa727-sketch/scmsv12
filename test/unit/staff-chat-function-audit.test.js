@@ -86,10 +86,13 @@ test('chat type menu and channel actions persist, validate, and re-render select
   assert.match(core, /window\._chatBackToMenu\s*=\s*function\(\)[\s\S]*?_exitChatWorkspace\(\)/);
 });
 
-test('mobile sidebar control stays on Chat while desktop navigation remains unchanged', () => {
+test('mobile Chat arrow toggles fullscreen both ways and desktop keeps the normal shell', () => {
   assert.match(core, /const isMobileWorkspace = typeof window\.matchMedia === 'function'[\s\S]*?window\.matchMedia\('\(max-width: 760px\)'\)\.matches/);
-  assert.match(core, /if \(isMobileWorkspace\) \{[\s\S]*?if \(typeof openSidebar === 'function'\) openSidebar\(\);\s*return;/);
-  assert.match(core, /Keep the existing desktop navigation behavior unchanged\.[\s\S]*?typeof isTWA === 'function' && !isTWA\(\) && typeof openSidebar === 'function'/);
+  assert.match(core, /if \(!isMobileWorkspace\) return/);
+  assert.match(core, /if \(isFullscreen\) \{[\s\S]*?_exitChatWorkspace\(\)[\s\S]*?openSidebar\(\)/);
+  assert.match(core, /else \{[\s\S]*?_enterChatWorkspace\(\)/);
+  assert.match(core, /smart-chat-nav-icon/);
+  assert.match(core, /classList\.contains\('scms-chat-workspace'\) \? '‹' : '›'/);
 });
 
 test('all message-send paths validate input and provide failure handling', () => {
