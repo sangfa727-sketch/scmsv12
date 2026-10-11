@@ -99,7 +99,7 @@ jobs:
         run: psql -h 127.0.0.1 -U scms_website_test -d scms_website_test -v ON_ERROR_STOP=1 -f test/db/school_website_manager_delegation_runtime_test.sql
 
   public-website-admission-runtime:
-    name: Public School Website admission intake runtime test
+    name: School Website admission, draft, publication, and subdomain runtime tests
     runs-on: ubuntu-latest
     services:
       postgres:
@@ -136,7 +136,7 @@ jobs:
             sleep 1
           done
           exit 1
-      - name: Run isolated public admission database runtime harness
+      - name: Run isolated School Website database runtime harness
         env:
           PGPASSWORD: scms_admission_test
         run: psql -h 127.0.0.1 -U scms_admission_test -d scms_admission_test -v ON_ERROR_STOP=1 -f test/db/public_website_admission_runtime_test.sql

@@ -89,6 +89,7 @@ $function$;
 \ir ../../supabase/migrations/20261011170000_school_website_admission_review.sql
 \ir ../../supabase/migrations/20261011180000_school_website_persistent_drafts.sql
 \ir ../../supabase/migrations/20261011190000_school_website_publish_and_public_read.sql
+\ir ../../supabase/migrations/20261011200000_school_website_subdomain_provisioning.sql
 
 insert into public.teachers(teacher_id,school_id,role,status) values
   ('owner-a','school-a','owner','active'),
@@ -110,10 +111,10 @@ insert into public.teacher_permissions(school_id,teacher_id,permission_key,allow
   ('school-b','owner-b','website.publish',true,'global',null,null);
 
 
-insert into public.website_sites(school_id, hostname, active) values
-  ('school-a', 'school-a.example.test', true),
-  ('school-b', 'school-b.example.test', true),
-  ('school-disabled', 'closed.example.test', false);
+insert into public.website_sites(school_id, hostname, active, provisioning_status) values
+  ('school-a', 'school-a.example.test', true, 'active'),
+  ('school-b', 'school-b.example.test', true, 'active'),
+  ('school-disabled', 'closed.example.test', false, 'pending_activation');
 
 do $test$
 declare
@@ -265,6 +266,55 @@ declare
   v_first_id uuid;
   v_second_id uuid;
 begin
+  v := public.rpc_school_website_get_site('owner-a-session');
+  if v->>'ok' is distinct from 'true' or v->>'platform_domain_configured' is distinct from 'false' then
+    raise exception 'platform domain should be unconfigured by default: %', v;
+  end if;
+  v := public.rpc_school_website_provision_subdomain('owner-a-session','bright-future');
+  if v->>'error' is distinct from 'platform_domain_not_configured' then
+    raise exception 'site reservation must fail closed before platform domain setup: %', v;
+  end if;
+
+  insert into public.website_platform_domains(base_domain,active,is_default,verified_at)
+  values ('schools.example.test',true,true,now());
+
+  v := public.rpc_school_website_get_site('owner-a-session');
+  if v->>'platform_domain_configured' is distinct from 'true' or v->>'found' is distinct from 'false' then
+    raise exception 'verified default domain should be available with no reserved school site: %', v;
+  end if;
+  v := public.rpc_school_website_provision_subdomain('owner-a-session','www');
+  if v->>'error' is distinct from 'invalid_slug' then
+    raise exception 'reserved subdomain should be rejected: %', v;
+  end if;
+
+  v := public.rpc_school_website_provision_subdomain('owner-a-session','bright-future');
+  if v->>'ok' is distinct from 'true'
+     or v->>'hostname' is distinct from 'bright-future.schools.example.test'
+     or v->>'active' is distinct from 'false'
+     or v->>'status' is distinct from 'pending_activation' then
+    raise exception 'subdomain reservation should remain inactive: %', v;
+  end if;
+  v := public.rpc_school_website_provision_subdomain('owner-a-session','bright-future');
+  if v->>'ok' is distinct from 'true' or v->>'unchanged' is distinct from 'true' then
+    raise exception 'repeated reservation should be idempotent: %', v;
+  end if;
+  v := public.rpc_school_website_provision_subdomain('owner-a-session','another-school-name');
+  if v->>'error' is distinct from 'site_already_provisioned' then
+    raise exception 'second platform subdomain should not silently replace the first: %', v;
+  end if;
+  v := public.rpc_school_website_provision_subdomain('owner-b-session','bright-future');
+  if v->>'error' is distinct from 'hostname_unavailable' then
+    raise exception 'hostname collision must not cross school tenants: %', v;
+  end if;
+  v := public.rpc_school_website_activate_site('owner-a-session');
+  if v->>'error' is distinct from 'publication_required' then
+    raise exception 'site must not activate before a publication exists: %', v;
+  end if;
+  v := public.rpc_school_website_activate_site('staff-a-session');
+  if v->>'error' is distinct from 'access_denied' then
+    raise exception 'content manager without publish permission must not activate a site: %', v;
+  end if;
+
   -- Persistent draft save/load is tenant-scoped, versioned, and sanitized.
   v := public.rpc_school_website_load_draft('owner-a-session');
   if v->>'ok' is distinct from 'true' or v->>'found' is distinct from 'false' or v->>'version' is distinct from '0' then
@@ -350,6 +400,20 @@ begin
      or v ? 'school_id' then
     raise exception 'public read did not return only the published school content: %', v;
   end if;
+
+  v := public.rpc_school_website_activate_site('owner-a-session');
+  if v->>'ok' is distinct from 'true' or v->>'active' is distinct from 'true'
+     or v->>'hostname' is distinct from 'bright-future.schools.example.test' then
+    raise exception 'authorized site activation failed: %', v;
+  end if;
+  v := public.rpc_school_website_get_published('bright-future.schools.example.test');
+  if v->>'found' is distinct from 'true' or v->'content'->>'schoolName' is distinct from 'Updated School' then
+    raise exception 'newly activated subdomain must resolve the published snapshot: %', v;
+  end if;
+  v := public.rpc_school_website_get_site('owner-a-session');
+  if v->'site'->>'active' is distinct from 'true' or v->'site'->>'hostname' is distinct from 'bright-future.schools.example.test' then
+    raise exception 'site status endpoint did not reflect activation: %', v;
+  end if;
   v := public.rpc_school_website_get_published('school-b.example.test');
   if v->>'ok' is distinct from 'true' or v->>'found' is distinct from 'false' then
     raise exception 'school B must not see school A publication: %', v;
@@ -402,8 +466,10 @@ begin
   if has_table_privilege('anon','public.website_drafts','select')
      or has_table_privilege('authenticated','public.website_drafts','select')
      or has_table_privilege('anon','public.website_publications','select')
-     or has_table_privilege('authenticated','public.website_publications','select') then
-    raise exception 'client roles must not read draft or publication tables directly';
+     or has_table_privilege('authenticated','public.website_publications','select')
+     or has_table_privilege('anon','public.website_platform_domains','select')
+     or has_table_privilege('authenticated','public.website_platform_domains','select') then
+    raise exception 'client roles must not read draft, publication, or platform-domain tables directly';
   end if;
   if not has_function_privilege('anon','public.rpc_school_website_get_published(text)','execute') then
     raise exception 'public published-content RPC should be executable by anon';
@@ -517,7 +583,31 @@ begin
      or has_table_privilege('authenticated','public.website_admission_applications','select') then
     raise exception 'client roles must not read admission table directly';
   end if;
+  -- Revoking platform-domain verification suspends its sites and disables both public reads and intake origin checks.
+  update public.website_platform_domains
+     set active = false, is_default = false, updated_at = now()
+   where base_domain = 'schools.example.test';
+
+  if exists(select 1 from public.website_sites
+    where hostname = 'bright-future.schools.example.test' and active = true) then
+    raise exception 'root-domain deactivation must suspend its public sites';
+  end if;
+  if public.rpc_website_site_origin_allowed('bright-future.schools.example.test') is distinct from false then
+    raise exception 'admission intake origin must be denied after root-domain deactivation';
+  end if;
+  v := public.rpc_school_website_get_published('bright-future.schools.example.test');
+  if v->>'found' is distinct from 'false' then
+    raise exception 'public content must be hidden after root-domain deactivation: %', v;
+  end if;
+  select count(*) into v_count from public.audit_log
+   where action='website.site_suspended_by_domain'
+     and school_id='school-a'
+     and payload->>'hostname'='bright-future.schools.example.test';
+  if v_count <> 1 then
+    raise exception 'root-domain deactivation should create a site suspension audit event, got %', v_count;
+  end if;
+
 end
 $review$;
 
-select 'Public School Website admission intake and review runtime tests passed' as result;
+select 'School Website admission, draft, publication, and subdomain runtime tests passed' as result;

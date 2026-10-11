@@ -134,6 +134,114 @@ async function websiteRpc(name,args){
  if(!result||result.ok!==true)throw new Error(typeof result?.error==="string"?result.error:"backend_unavailable");
  return result;
 }
+let siteBaseDomain="";
+let currentSite=null;
+function updateSiteAddressPreview(){
+ const input=$("#siteSlugInput"),preview=$("#siteAddressPreview"),button=$("#reserveSiteAddress");
+ const slug=String(input?.value||"").trim().toLowerCase();
+ const valid=/^[a-z0-9]+(-[a-z0-9]+)*$/.test(slug)&&slug.length>=3&&slug.length<=63&&!["www","api","admin","app","mail","scms","school","schools","static","assets","docs","support","status","help"].includes(slug);
+ if(preview)preview.textContent=siteBaseDomain&&valid
+  ?"Address preview: "+slug+"."+siteBaseDomain
+  :siteBaseDomain?"Use 3–63 lowercase letters, numbers, and single hyphens; reserved names cannot be used.":"The platform domain must be configured before an address can be reserved.";
+ if(button)button.disabled=!siteBaseDomain||!valid||!!currentSite;
+}
+async function refreshSiteAddress(){
+ const status=$("#siteAddressStatus"),current=$("#siteAddressCurrent"),hostname=$("#siteAddressHostname"),link=$("#siteAddressPublicLink"),form=$("#siteAddressReserveForm"),activate=$("#activateSiteAddress");
+ status.textContent="Checking site configuration…";
+ if(activate)activate.hidden=true;
+ try{
+  const result=await websiteRpc("rpc_school_website_get_site",{});
+  siteBaseDomain=typeof result.base_domain==="string"?result.base_domain:"";
+  currentSite=result.site&&typeof result.site==="object"?result.site:null;
+  const configured=result.platform_domain_configured===true&&!!siteBaseDomain;
+  if(currentSite){
+   current.hidden=false;
+   hostname.textContent=String(currentSite.hostname||"");
+   const validHost=/^[a-z0-9][a-z0-9.-]{1,251}[a-z0-9]$/.test(String(currentSite.hostname||""))&&!String(currentSite.hostname||"").includes("..");
+   link.hidden=!(currentSite.active===true&&validHost);
+   if(!link.hidden)link.href="https://"+currentSite.hostname;
+   if(currentSite.active===true){
+    status.textContent="Public website is active at this address.";
+    status.dataset.state="success";
+   }else{
+    status.textContent="Address reserved but inactive. Activate only after the platform root domain, wildcard DNS, and TLS are verified.";
+    status.dataset.state="notice";
+   }
+  }else{
+   current.hidden=true;
+   link.hidden=true;
+   status.textContent=configured
+    ?"Choose a unique subdomain. Reserving it does not make the site public."
+    :"The platform domain is not configured yet. No address has been reserved; an SCMS platform operator must configure a verified root domain first.";
+   status.dataset.state=configured?"info":"notice";
+  }
+  form.hidden=!configured||!!currentSite;
+  if(activate){
+   activate.hidden=!currentSite||currentSite.active===true||!publishAuthorized;
+   activate.disabled=!publishAuthorized||!configured||result.has_publication!==true||currentSite?.status==="suspended";
+  }
+  updateSiteAddressPreview();
+ }catch(_){
+  currentSite=null;
+  siteBaseDomain="";
+  current.hidden=true;
+  link.hidden=true;
+  form.hidden=false;
+  if(activate)activate.hidden=true;
+  status.textContent="Site configuration could not be loaded. Please refresh and try again.";
+  status.dataset.state="error";
+  updateSiteAddressPreview();
+ }
+}
+async function reserveSiteAddress(){
+ const slug=String($("#siteSlugInput").value||"").trim().toLowerCase();
+ if(!siteBaseDomain||currentSite)return;
+ const button=$("#reserveSiteAddress");
+ button.disabled=true;
+ $("#siteAddressStatus").textContent="Reserving subdomain…";
+ try{
+  const result=await websiteRpc("rpc_school_website_provision_subdomain",{p_slug:slug});
+  $("#siteSlugInput").value=slug;
+  showToast("Address reserved. It is not public until activated.");
+  await refreshSiteAddress();
+ }catch(error){
+  const reason=error instanceof Error?error.message:"";
+  $("#siteAddressStatus").textContent=reason==="invalid_slug"
+   ?"Choose a valid name that is not reserved."
+   :reason==="hostname_unavailable"
+    ?"That address is already reserved. Choose another name."
+    :reason==="site_already_provisioned"
+     ?"This school already has a reserved address. Refreshing its status."
+     :"The address could not be reserved. Please try again.";
+  $("#siteAddressStatus").dataset.state="error";
+  if(reason==="site_already_provisioned")await refreshSiteAddress();
+  else updateSiteAddressPreview();
+ }finally{
+  button.disabled=!siteBaseDomain||!!currentSite;
+ }
+}
+async function activateSiteAddress(){
+ if(!publishAuthorized||!currentSite)return;
+ const button=$("#activateSiteAddress");
+ button.disabled=true;
+ $("#siteAddressStatus").textContent="Activating public website…";
+ try{
+  await websiteRpc("rpc_school_website_activate_site",{});
+  showToast("Public website activated.");
+  await refreshSiteAddress();
+ }catch(error){
+  const reason=error instanceof Error?error.message:"";
+  await refreshSiteAddress();
+  $("#siteAddressStatus").textContent=reason==="publication_required"
+   ?"Publish a reviewed website version before activation."
+   :reason==="platform_domain_not_configured"
+    ?"The verified platform domain is not configured yet."
+    :reason==="site_suspended"
+     ?"This site is suspended and requires platform-operator review."
+     :"The public site could not be activated. Check publication and permissions.";
+  $("#siteAddressStatus").dataset.state="error";
+ }
+}
 function admissionStatusLabel(status){
  return ({pending:"Pending",reviewing:"Reviewing",accepted:"Accepted",rejected:"Rejected",withdrawn:"Withdrawn"})[status]||"Unknown";
 }
@@ -289,6 +397,12 @@ $$(".block-edit").forEach(el=>el.addEventListener("click",()=>{const b=el.datase
 $("#dialogSave").addEventListener("click",e=>{e.preventDefault();const value=input.value.trim();if(!value){input.setAttribute("aria-invalid","true");input.focus();hint.textContent="Please enter some information before saving.";return;}if(activeField)state[activeField]=value;if(activeCollection)state[activeCollection].push(value);dialog.close();render();showToast("Draft updated")});
 $("#addSectionBottom").addEventListener("click",addSection);$("#closeSectionDialog").addEventListener("click",()=>$("#sectionDialog").close());
 $$(".section-options button").forEach(b=>b.addEventListener("click",()=>{const c=b.dataset.section;$("#sectionDialog").close();if(["programs","facilities","news"].includes(c))openItem(c);else showToast(c+" will be available as a guided section in the next builder step.")}));
+$("#siteAddressButton").addEventListener("click",()=>{const d=$("#siteAddressDialog");if(!d.open)d.showModal();refreshSiteAddress()});
+$("#closeSiteAddress").addEventListener("click",()=>$("#siteAddressDialog").close());
+$("#refreshSiteAddress").addEventListener("click",refreshSiteAddress);
+$("#reserveSiteAddress").addEventListener("click",reserveSiteAddress);
+$("#activateSiteAddress").addEventListener("click",activateSiteAddress);
+$("#siteSlugInput").addEventListener("input",updateSiteAddressPreview);
 $("#admissionInboxButton").addEventListener("click",()=>{const d=$("#admissionInboxDialog");if(!d.open)d.showModal();loadAdmissions(true)});
 $("#closeAdmissionInbox").addEventListener("click",()=>$("#admissionInboxDialog").close());
 $("#refreshAdmissionInbox").addEventListener("click",()=>loadAdmissions(true));
