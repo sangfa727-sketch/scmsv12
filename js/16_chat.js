@@ -435,8 +435,9 @@ window._refreshAdminComposerPreview = function() {
     .smart-chat-composer-drawer .smart-chat-admin-card{width:min(100%,720px);max-height:min(88dvh,820px);overflow-y:auto;overscroll-behavior:contain;box-shadow:0 24px 80px rgba(0,0,0,.32)}
     .smart-chat-composer-close{flex:0 0 34px;width:34px;height:34px;border:1px solid var(--border);border-radius:10px;background:var(--bg2);color:var(--text);font-size:22px;line-height:1;display:inline-flex;align-items:center;justify-content:center;cursor:pointer}
     html.scms-announcement-composer-open,html.scms-announcement-composer-open body{overflow:hidden!important}
-    @media(max-width:760px){.smart-chat-composer-drawer{padding:calc(10px + env(safe-area-inset-top)) 10px calc(10px + env(safe-area-inset-bottom))}.smart-chat-composer-drawer .smart-chat-admin-card{width:100%;max-height:calc(100dvh - 20px);border-radius:18px;padding:12px}}
+    @media(max-width:760px){.smart-chat-composer-drawer{padding:calc(10px + env(safe-area-inset-top)) 10px calc(10px + env(safe-area-inset-bottom))}.smart-chat-composer-drawer .smart-chat-admin-card{width:100%;max-height:calc(100dvh - 20px);border-radius:18px;padding:12px}#page-chat .smart-chat-announcement-add-mobile{display:inline-flex}}
     .smart-chat-composer-drawer .smart-chat-admin-card{margin:0}
+    .smart-chat-announcement-add-mobile{display:none;flex:0 0 34px;width:34px;height:34px;border:1px solid var(--border);border-radius:10px;background:var(--bg2);color:var(--text);font-size:20px;line-height:1;align-items:center;justify-content:center;cursor:pointer}
     .smart-chat-conversation-list{min-height:0}
     .smart-chat-list-empty-card{margin:8px 0;padding:16px 12px;border:1px dashed var(--border);border-radius:12px;background:var(--bg2);text-align:center}
     .smart-chat-list-empty-card .icon{font-size:20px;margin-bottom:5px}
@@ -1016,17 +1017,18 @@ window._toggleAnnouncementComposer=function(force=null){
   if(!window.APP?.is_admin)return;
   _announcementComposerOpen=force===null?!_announcementComposerOpen:!!force;
   const card=document.getElementById('announcementComposer');
-  const btn=document.getElementById('announcementComposerToggle');
+  const buttons=[document.getElementById('announcementComposerToggle'),document.getElementById('announcementComposerToggleMobile')].filter(Boolean);
   if(card){
     card.classList.toggle('is-open',_announcementComposerOpen);
     card.onclick=event=>{if(event.target===card)window._toggleAnnouncementComposer(false);};
   }
   document.documentElement.classList.toggle('scms-announcement-composer-open',_announcementComposerOpen);
-  if(btn){
+  buttons.forEach(btn=>{
     btn.setAttribute('aria-expanded',String(_announcementComposerOpen));
     btn.textContent=_announcementComposerOpen?'×':'+';
     btn.title=_announcementComposerOpen?t('chat.closeOfficialMessage'):t('chat.newOfficialMessage');
-  }
+    btn.setAttribute('aria-label',_announcementComposerOpen?t('chat.closeOfficialMessage'):t('chat.newOfficialMessage'));
+  });
   if(_announcementComposerOpen){
     requestAnimationFrame(()=>document.getElementById('adminMsgBody')?.focus());
   }
@@ -1078,7 +1080,7 @@ function _renderAnnouncementWorkspace(){
     (window.APP?.is_admin ? `<button type="button" class="smart-chat-add-btn" id="announcementComposerToggle" onclick="_toggleAnnouncementComposer()" aria-expanded="${_announcementComposerOpen?'true':'false'}" aria-controls="announcementComposer" title="${t(_announcementComposerOpen?'chat.closeOfficialMessage':'chat.newOfficialMessage')}">${_announcementComposerOpen?'×':'+'}</button>` : '')+
     `<button type="button" class="smart-chat-refresh-btn" onclick="_loadAnnouncementWorkspace()" aria-label="${t('chat.refresh')}" title="${t('chat.refresh')}">↻</button></div></div>`+
     '<div id="announcementList" class="smart-chat-conversation-list" aria-label="'+esc(t('chat.officialAnnouncements'))+'"></div></aside>'+
-    `<section class="smart-chat-direct-conversation"><div id="announcementHead" class="smart-chat-conversation-head"><div><strong>${t('chat.officialAnnouncements')}</strong><small>${t('chat.officialNotices')}</small></div><span class="smart-chat-verified-pill">${t('chat.verifiedStaffOnly')}</span></div><div id="announcementStream" class="chat-stream" aria-live="polite"><div class="chat-empty"><div class="chat-empty-icon">📢</div><div class="chat-empty-title">${t('chat.officialAnnouncements')}</div><div class="chat-empty-sub">${t('chat.emptySub')}</div></div></div></section></div>`;
+    `<section class="smart-chat-direct-conversation"><div id="announcementHead" class="smart-chat-conversation-head"><div><strong>${t('chat.officialAnnouncements')}</strong><small>${t('chat.officialNotices')}</small></div>${window.APP?.is_admin ? `<button type="button" class="smart-chat-announcement-add-mobile" id="announcementComposerToggleMobile" onclick="_toggleAnnouncementComposer()" aria-expanded="${_announcementComposerOpen?'true':'false'}" aria-controls="announcementComposer" aria-label="${t(_announcementComposerOpen?'chat.closeOfficialMessage':'chat.newOfficialMessage')}" title="${t(_announcementComposerOpen?'chat.closeOfficialMessage':'chat.newOfficialMessage')}">${_announcementComposerOpen?'×':'+'}</button>` : ''}<span class="smart-chat-verified-pill">${t('chat.verifiedStaffOnly')}</span></div><div id="announcementStream" class="chat-stream" aria-live="polite"><div class="chat-empty"><div class="chat-empty-icon">📢</div><div class="chat-empty-title">${t('chat.officialAnnouncements')}</div><div class="chat-empty-sub">${t('chat.emptySub')}</div></div></div></section></div>`;
 }
 async function _loadAnnouncementWorkspace(autoOpen=true){
   const cached=Array.isArray(window._chatAnnouncements)?window._chatAnnouncements:null;
