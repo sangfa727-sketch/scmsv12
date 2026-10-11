@@ -166,7 +166,7 @@ async function loadAdmissions(reset){
  }catch(error){
   if(older)older.disabled=false;
   const reason=error instanceof Error?error.message:"";
-  setAdmissionInboxStatus(reason==="access_denied"?"Your session or website-manager permission is no longer valid. Close this panel and sign in again.":"Admission applications could not be loaded. Please try again.","error");
+  setAdmissionInboxStatus(reason==="access_denied"?"Your account is not authorized to review admission applications, or your session has expired.":"Admission applications could not be loaded. Please try again.","error");
  }finally{
   admissionLoading=false;
  }
