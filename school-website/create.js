@@ -17,6 +17,13 @@ const $=s=>document.querySelector(s),$$=s=>[...document.querySelectorAll(s)];
 const dialog=$("#editorDialog"),input=$("#dialogInput"),title=$("#dialogTitle"),label=$("#dialogLabel"),hint=$("#dialogHint"),toast=$("#toast");
 if(window.SCMS_WEBSITE_CONTEXT?.admissionsAuthorized!==true)$("#admissionInboxButton").hidden=true;
 let activeField=null,activeCollection=null;
+let draftVersion=0;
+let remoteDraftReady=false;
+let draftHydrating=true;
+let draftConflict=false;
+let draftSaveTimer=null;
+let draftSaveInFlight=false;
+let draftSaveQueued=false;
 function showToast(message){toast.textContent=message;toast.classList.add("show");clearTimeout(showToast.t);showToast.t=setTimeout(()=>toast.classList.remove("show"),1800)}
 function openField(field){activeField=field;activeCollection=null;const m=fieldMeta[field];title.textContent=m[0];label.textContent=m[0];input.value=state[field];hint.textContent=m[2];input.placeholder=m[1];input.maxLength=field==="aboutText"?4000:field==="contactText"?2000:300;input.removeAttribute("aria-invalid");dialog.showModal();setTimeout(()=>input.focus(),30)}
 function openItem(collection){activeCollection=collection;activeField=null;const names={programs:["Add a program","Example: Primary Education"],facilities:["Add a facility","Example: Science & Innovation Lab"],news:["Add news or event","Example: Open Day 2026"]};const m=names[collection];title.textContent=m[0];label.textContent="Title";input.value="";hint.textContent=m[1];input.placeholder=m[1];input.maxLength=200;input.removeAttribute("aria-invalid");dialog.showModal();setTimeout(()=>input.focus(),30)}
@@ -25,7 +32,59 @@ function normalizeSections(){if(!Array.isArray(state.sections)||!state.sections.
 function renderSectionLayout(){normalizeSections();const canvas=$("#pageCanvas");const canonical=new Map($$("#pageCanvas > .site-block").map(n=>[n.dataset.block,n]));for(const meta of state.sections){if(!document.getElementById(meta.id)){const source=canonical.get(meta.type||meta.id);if(source&&meta.id!==source.id){const copy=source.cloneNode(true);copy.id=meta.id;copy.dataset.block=meta.id;copy.dataset.sectionLabel=meta.label||source.dataset.sectionLabel||meta.type;copy.querySelectorAll("[id]").forEach(el=>{el.id=el.id+"-"+meta.id});copy.querySelectorAll("[data-section-id]").forEach(b=>b.dataset.sectionId=meta.id);canvas.appendChild(copy);}}const node=document.getElementById(meta.id);if(!node)continue;node.hidden=!meta.visible;const hide=node.querySelector("[data-section-action=hide]");if(hide){hide.textContent=meta.visible?"Hide":"Show";hide.setAttribute("aria-label",(meta.visible?"Hide ":"Show ")+(meta.label||meta.id));hide.disabled=!!meta.locked;}const up=node.querySelector("[data-section-action=up]"),down=node.querySelector("[data-section-action=down]"),dup=node.querySelector("[data-section-action=duplicate]");if(up)up.disabled=state.sections[0]?.id===meta.id;if(down)down.disabled=state.sections[state.sections.length-1]?.id===meta.id;if(dup)dup.disabled=!!meta.locked;canvas.appendChild(node);}}
 function sectionIndex(id){return state.sections.findIndex(x=>x.id===id)}
 function sectionAction(id,action){normalizeSections();const i=sectionIndex(id),m=state.sections[i];if(i<0||!m)return;if(action==="hide"&&!m.locked)m.visible=!m.visible;else if(action==="up"&&i>0)[state.sections[i-1],state.sections[i]]=[state.sections[i],state.sections[i-1]];else if(action==="down"&&i<state.sections.length-1)[state.sections[i+1],state.sections[i]]=[state.sections[i],state.sections[i+1]];else if(action==="duplicate"&&!m.locked){const copyId=m.id+"-copy-"+Date.now().toString(36);state.sections.splice(i+1,0,{...m,id:copyId,label:(m.label||m.id)+" copy",locked:false});}render();showToast(action==="hide"?(m.visible?"Section shown":"Section hidden"):action==="up"?"Section moved up":action==="down"?"Section moved down":action==="duplicate"?"Section duplicated":"Section updated");}
-function draftStorageKey(){const schoolId=window.SCMS_WEBSITE_CONTEXT?.schoolId;if(typeof schoolId!=="string"||!schoolId.trim())throw new Error("School context is required");return "scms-website-draft:"+encodeURIComponent(schoolId)}function persistDraft(){try{localStorage.setItem(draftStorageKey(),JSON.stringify(state));$("#saveState").textContent="Saved locally"}catch(_){$("#saveState").textContent="Draft"}}function updateProgress(){const fields=["schoolName","tagline","aboutTitle","aboutText","contactTitle","contactText"];const done=fields.filter(f=>state[f]).length;$("#fieldProgress").textContent=done+" of "+fields.length+" completed"}
+function draftStorageKey(){const schoolId=window.SCMS_WEBSITE_CONTEXT?.schoolId;if(typeof schoolId!=="string"||!schoolId.trim())throw new Error("School context is required");return "scms-website-draft:"+encodeURIComponent(schoolId)}function draftPayload(){
+ return {
+  template:state.template,
+  schoolName:state.schoolName,
+  tagline:state.tagline,
+  aboutTitle:state.aboutTitle,
+  aboutText:state.aboutText,
+  contactTitle:state.contactTitle,
+  contactText:state.contactText,
+  programs:state.programs,
+  facilities:state.facilities,
+  news:state.news,
+  sections:state.sections.map(section=>({id:section.id,type:section.type,label:section.label,visible:section.visible,locked:section.type==="hero"}))
+ };
+}
+function scheduleRemoteDraftSave(){
+ if(draftHydrating||!remoteDraftReady||draftConflict)return;
+ clearTimeout(draftSaveTimer);
+ $("#saveState").textContent="Saving to SCMS…";
+ draftSaveTimer=setTimeout(saveRemoteDraft,700);
+}
+async function saveRemoteDraft(){
+ if(draftHydrating||!remoteDraftReady||draftConflict)return;
+ if(draftSaveInFlight){draftSaveQueued=true;return;}
+ draftSaveInFlight=true;
+ draftSaveQueued=false;
+ const snapshot=draftPayload();
+ try{
+  const result=await websiteRpc("rpc_school_website_save_draft",{p_content:snapshot,p_expected_version:draftVersion});
+  draftVersion=Number.isInteger(result.version)?result.version:draftVersion;
+  if(JSON.stringify(snapshot)===JSON.stringify(draftPayload()))$("#saveState").textContent="Saved to SCMS";
+ }catch(error){
+  const reason=error instanceof Error?error.message:"";
+  if(reason==="stale_draft"){
+   draftConflict=true;
+   $("#saveState").textContent="Draft conflict — reload";
+   showToast("This draft changed in another session. Reload before editing further.");
+  }else{
+   $("#saveState").textContent="Offline backup only";
+  }
+ }finally{
+  draftSaveInFlight=false;
+  if(draftSaveQueued){draftSaveQueued=false;scheduleRemoteDraftSave();}
+ }
+}
+function persistDraft(){
+ try{localStorage.setItem(draftStorageKey(),JSON.stringify(state))}catch(_){}
+ if(draftHydrating){$("#saveState").textContent="Loading draft…";return;}
+ if(!remoteDraftReady){$("#saveState").textContent="Offline backup only";return;}
+ if(draftConflict){$("#saveState").textContent="Draft conflict — reload";return;}
+ scheduleRemoteDraftSave();
+}
+function updateProgress(){const fields=["schoolName","tagline","aboutTitle","aboutText","contactTitle","contactText"];const done=fields.filter(f=>state[f]).length;$("#fieldProgress").textContent=done+" of "+fields.length+" completed"}
 function renderCollection(c){const target=$("#"+(c==="programs"?"programItems":c==="facilities"?"facilityItems":"newsItems"));const items=state[c];target.innerHTML=items.length?items.map((x,i)=>'<article class="added-card"><button class="remove-card" data-remove="'+c+'" data-index="'+i+'" aria-label="Remove">×</button><b>'+escapeHtml(x)+'</b><span>Ready for review</span></article>').join(""):'<button class="add-card" data-add-item="'+c+'" type="button">＋<span>'+({programs:"Add your first program",facilities:"Show families your school",news:"Add your first news item"}[c])+"</span></button>"}
 function renderPreview(){const meta=templateMeta[state.template]||templateMeta.modern;const name=escapeHtml(state.schoolName||"Your School"),tag=escapeHtml(state.tagline||meta.hero);const contentByType={about:["About",state.aboutText],programs:["Programs",state.programs.join(" · ")],facilities:["School life",state.facilities.join(" · ")],news:["News & events",state.news.join(" · ")],contact:["Contact",state.contactText]};const sections=state.sections.filter(s=>s.visible&&contentByType[s.type]).map(s=>contentByType[s.type]);const preview=$("#previewCanvas");preview.dataset.template=state.template;preview.innerHTML='<div class="mini-hero"><div class="mini-logo">'+(state.schoolName?escapeHtml(state.schoolName[0].toUpperCase()):"S")+'</div><h1>'+name+'</h1><p>'+tag+'</p></div>'+sections.map(x=>'<section class="mini-section"><h2>'+escapeHtml(x[0])+'</h2><p>'+escapeHtml(x[1]||"Content will appear here when you add it.")+"</p></section>").join("")}
 function escapeHtml(v){return String(v).replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]||c))}
@@ -224,7 +283,31 @@ $("#publishButton").addEventListener("click",()=>showToast("Preview only — pub
 const templateDialog=$("#templateDialog");
 $("#changeTemplate").addEventListener("click",()=>templateDialog.showModal());$("#closeTemplateDialog").addEventListener("click",()=>templateDialog.close());
 $$(".template-option").forEach(b=>b.addEventListener("click",()=>{state.template=b.dataset.template;$$(".template-option").forEach(x=>x.classList.toggle("selected",x===b));templateDialog.close();showToast(b.querySelector("b").textContent+" selected")}));
-try{const saved=JSON.parse(localStorage.getItem(draftStorageKey())||"null");if(saved)Object.assign(state,saved)}catch(_){}normalizeSections();
-render();
-initSectionNavigation();
+async function bootDraftStudio(){
+ let localDraft=null;
+ try{localDraft=JSON.parse(localStorage.getItem(draftStorageKey())||"null")}catch(_){}
+ let serverFound=false;
+ try{
+  const result=await websiteRpc("rpc_school_website_load_draft",{});
+  draftVersion=Number.isInteger(result.version)?result.version:0;
+  serverFound=result.found===true;
+  if(serverFound&&result.content&&typeof result.content==="object")Object.assign(state,result.content);
+  else if(localDraft&&typeof localDraft==="object")Object.assign(state,localDraft);
+  remoteDraftReady=true;
+ }catch(_){
+  if(localDraft&&typeof localDraft==="object")Object.assign(state,localDraft);
+  remoteDraftReady=false;
+ }
+ normalizeSections();
+ render();
+ initSectionNavigation();
+ draftHydrating=false;
+ if(remoteDraftReady){
+  if(!serverFound&&localDraft&&typeof localDraft==="object")scheduleRemoteDraftSave();
+  else $("#saveState").textContent=serverFound?"Saved to SCMS":"Ready — changes save to SCMS";
+ }else{
+  $("#saveState").textContent="Offline backup only";
+ }
+}
+bootDraftStudio();
 })();
