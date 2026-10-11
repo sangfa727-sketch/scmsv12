@@ -989,8 +989,8 @@ test('Official Announcement send failure keeps the draft and restores the send c
     window.renderChat();
   });
   await page.evaluate(() => window.switchChatChannel('announcements'));
-  await expect(page.locator('#announcementComposerToggleMobile')).toBeVisible();
-  await page.locator('#announcementComposerToggleMobile').click();
+  await expect(page.locator('#announcementComposerToggle')).toBeVisible();
+  await page.locator('#announcementComposerToggle').click();
   await expect(page.locator('#adminMsgBody')).toBeVisible();
   await page.locator('#adminMsgRecipientType').selectOption('all_staff');
   await page.locator('#adminMsgRecipientType').dispatchEvent('change');
@@ -1360,6 +1360,7 @@ test('Official Announcements composer closes cleanly when switching channels', a
     window.renderChat();
     window.switchChatChannel('announcements');
   });
+  await expect(page.locator('#announcementStream .smart-chat-announcement-detail')).toBeVisible();
   await expect(page.locator('#announcementComposerToggleMobile')).toBeVisible();
   await page.locator('#announcementComposerToggleMobile').click();
   await expect(page.locator('#announcementComposer')).toBeVisible();
@@ -1378,6 +1379,7 @@ test('Hiding the active Official Announcements tab also clears its modal state',
     window.renderChat();
     window.switchChatChannel('announcements');
   });
+  await expect(page.locator('#announcementStream .smart-chat-announcement-detail')).toBeVisible();
   await expect(page.locator('#announcementComposerToggleMobile')).toBeVisible();
   await page.locator('#announcementComposerToggleMobile').click();
   await expect(page.locator('#announcementComposer')).toBeVisible();
