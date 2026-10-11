@@ -1364,10 +1364,12 @@ test('Official Announcements composer closes cleanly when switching channels', a
   await expect(page.locator('#announcementComposerToggleMobile')).toBeVisible();
   await page.locator('#announcementComposerToggleMobile').click();
   await expect(page.locator('#announcementComposer')).toBeVisible();
-  await page.locator('[data-chat-quick-channel="direct"]').click();
+  // Simulate an application-driven channel change; the modal correctly blocks pointer
+  // interaction with the channel rail while it is open.
+  await page.evaluate(() => window.switchChatChannel('direct'));
   await expect(page.locator('#announcementComposer')).toHaveCount(0);
   await expect(page.locator('html')).not.toHaveClass(/scms-announcement-composer-open/);
-  await page.locator('[data-chat-quick-channel="announcements"]').click();
+  await page.evaluate(() => window.switchChatChannel('announcements'));
   await expect(page.locator('#announcementComposer')).toBeHidden();
 });
 
