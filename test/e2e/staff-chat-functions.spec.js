@@ -1252,7 +1252,9 @@ test('Official Announcements plus opens a fixed modal without shifting the mobil
     return { shell: rect(shell), list: rect(list), detail: rect(detail) };
   });
 
-  await plus.click();
+  // Force the already-visible button activation so Playwright does not auto-scroll the page
+  // between the baseline and post-open geometry measurements. The real click handler still runs.
+  await plus.click({ force: true });
   await expect(page.locator('#announcementComposer')).toHaveCSS('position', 'fixed');
   await expect(page.locator('#announcementComposer .smart-chat-admin-card')).toBeVisible();
   await expect(page.locator('.smart-chat-composer-close')).toBeVisible();
