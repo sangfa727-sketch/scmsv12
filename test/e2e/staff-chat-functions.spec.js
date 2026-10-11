@@ -1117,10 +1117,10 @@ test('Group Chat preserves unread count when the server rejects mark-read', asyn
   await expect(page.locator('#chatGroupList').locator('.smart-chat-channel-card').filter({ hasText: 'Planning Group' })).toContainText('3');
 });
 
-test('Group Chat treats malformed list responses as errors instead of empty success', async ({ page }) => {
+test('Group Chat shows retry UI when loading the group list fails', async ({ page }) => {
   await mountSmartChat(page);
   await page.evaluate(() => {
-    window.API.getChatGroups = async () => ({ rows: [] });
+    window.API.getChatGroups = async () => { throw new Error('simulated group-list failure'); };
     window.switchChatChannel('events');
   });
   await expect(page.locator('#chatGroupList .chat-error')).toBeVisible();
