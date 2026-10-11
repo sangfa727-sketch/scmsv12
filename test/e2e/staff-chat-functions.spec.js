@@ -1271,3 +1271,82 @@ test('Official Announcements plus opens a fixed modal without shifting the mobil
   await expect(page.locator('#announcementComposer')).toBeHidden();
   await expect(page.locator('html')).not.toHaveClass(/scms-announcement-composer-open/);
 });
+
+
+test('Department Chat preserves unread count when mark-read is rejected', async ({ page }) => {
+  await mountSmartChat(page);
+  await page.evaluate(() => {
+    window.API.getDepartmentChats = async (...args) => {
+      window.__chatTestCalls.push({ name: 'getDepartmentChats', args });
+      return [{ id: 51, department_code: 'SCI', department_name: 'Science Department', is_active: true, unread_count: 3 }];
+    };
+    window.API.markDepartmentRead = async (...args) => {
+      window.__chatTestCalls.push({ name: 'markDepartmentRead', args });
+      return { ok: false, error: 'simulated read rejection' };
+    };
+    window.switchChatChannel('departments');
+  });
+  await expect(page.locator('#departmentList')).toContainText('Science Department');
+  await page.locator('[data-testid="department-row-51"]').click();
+  await expect.poll(async () => (await calls(page, 'markDepartmentRead')).length).toBe(1);
+  await expect(page.locator('[data-testid="department-row-51"]')).toContainText('3');
+});
+
+test('Department Chat clears unread count only after mark-read succeeds', async ({ page }) => {
+  await mountSmartChat(page);
+  await page.evaluate(() => {
+    window.API.getDepartmentChats = async (...args) => {
+      window.__chatTestCalls.push({ name: 'getDepartmentChats', args });
+      return [{ id: 51, department_code: 'SCI', department_name: 'Science Department', is_active: true, unread_count: 3 }];
+    };
+    window.API.markDepartmentRead = async (...args) => {
+      window.__chatTestCalls.push({ name: 'markDepartmentRead', args });
+      return { ok: true };
+    };
+    window.switchChatChannel('departments');
+  });
+  await expect(page.locator('#departmentList')).toContainText('Science Department');
+  await page.locator('[data-testid="department-row-51"]').click();
+  await expect.poll(async () => (await calls(page, 'markDepartmentRead')).length).toBe(1);
+  await expect(page.locator('[data-testid="department-row-51"]')).not.toContainText('3');
+});
+
+test('Grade Chat preserves unread count when mark-read is rejected', async ({ page }) => {
+  await mountSmartChat(page);
+  await page.evaluate(() => {
+    window.API.getGradeChats = async (...args) => {
+      window.__chatTestCalls.push({ name: 'getGradeChats', args });
+      return [{ grade_name: 'Grade 1', unread_count: 4 }];
+    };
+    window.API.markGradeRead = async (...args) => {
+      window.__chatTestCalls.push({ name: 'markGradeRead', args });
+      return { ok: false, error: 'simulated read rejection' };
+    };
+    window.switchChatChannel('departments');
+    window._showGradeWorkspace();
+  });
+  await expect(page.locator('#gradeList')).toContainText('Grade 1');
+  await page.locator('[data-testid="grade-row-Grade 1"]').click();
+  await expect.poll(async () => (await calls(page, 'markGradeRead')).length).toBe(1);
+  await expect(page.locator('[data-testid="grade-row-Grade 1"]')).toContainText('4');
+});
+
+test('Grade Chat clears unread count only after mark-read succeeds', async ({ page }) => {
+  await mountSmartChat(page);
+  await page.evaluate(() => {
+    window.API.getGradeChats = async (...args) => {
+      window.__chatTestCalls.push({ name: 'getGradeChats', args });
+      return [{ grade_name: 'Grade 1', unread_count: 4 }];
+    };
+    window.API.markGradeRead = async (...args) => {
+      window.__chatTestCalls.push({ name: 'markGradeRead', args });
+      return { ok: true };
+    };
+    window.switchChatChannel('departments');
+    window._showGradeWorkspace();
+  });
+  await expect(page.locator('#gradeList')).toContainText('Grade 1');
+  await page.locator('[data-testid="grade-row-Grade 1"]').click();
+  await expect.poll(async () => (await calls(page, 'markGradeRead')).length).toBe(1);
+  await expect(page.locator('[data-testid="grade-row-Grade 1"]')).not.toContainText('4');
+});
