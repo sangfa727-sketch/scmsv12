@@ -400,8 +400,13 @@ begin
   end if;
 
   if has_table_privilege('anon','public.website_drafts','select')
-     or has_table_privilege('authenticated','public.website_drafts','select') then
-    raise exception 'client roles must not read draft storage directly';
+     or has_table_privilege('authenticated','public.website_drafts','select')
+     or has_table_privilege('anon','public.website_publications','select')
+     or has_table_privilege('authenticated','public.website_publications','select') then
+    raise exception 'client roles must not read draft or publication tables directly';
+  end if;
+  if not has_function_privilege('anon','public.rpc_school_website_get_published(text)','execute') then
+    raise exception 'public published-content RPC should be executable by anon';
   end if;
 
   v := public.rpc_school_website_authorize('owner-a-session');
