@@ -193,23 +193,27 @@ begin
   returning hostname into v_inserted;
 
   if v_inserted is null then
-    select school_id, active, provisioning_status
+    select school_id, active, provisioning_status, site_slug, platform_domain
       into v_existing
       from public.website_sites
      where hostname = v_hostname
      limit 1;
     if v_existing.school_id = v_actor.school_id then
       update public.website_sites
-         set site_slug = coalesce(site_slug, v_slug),
-             platform_domain = coalesce(platform_domain, v_base_domain),
+         set site_slug = v_slug,
+             platform_domain = v_base_domain,
              provisioning_status = case when active then 'active' else 'pending_activation' end,
              updated_at = now()
        where hostname = v_hostname
          and school_id = v_actor.school_id
          and platform_domain is null
-         and site_slug is null;
-      return jsonb_build_object('ok', true, 'hostname', v_hostname,
-        'active', v_existing.active, 'status', v_existing.provisioning_status, 'unchanged', true);
+         and site_slug is null
+      returning active, provisioning_status into v_existing;
+      if found then
+        return jsonb_build_object('ok', true, 'hostname', v_hostname,
+          'active', v_existing.active, 'status', v_existing.provisioning_status, 'unchanged', true);
+      end if;
+      return jsonb_build_object('ok', false, 'error', 'site_already_provisioned', 'hostname', v_hostname);
     end if;
     return jsonb_build_object('ok', false, 'error', 'hostname_unavailable');
   end if;
