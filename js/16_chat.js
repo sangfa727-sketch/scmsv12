@@ -547,8 +547,9 @@ window._chatBackToMenu = function() {
     if (isFullscreen) {
       // Fullscreen ‹ returns to the ordinary Chat page with the app chrome restored.
       _exitChatWorkspace();
+      // Restore the standard mobile app shell with its menu control available.
+      // Keep the drawer closed so it does not overlay and block the reverse toggle.
       if (typeof closeSidebar === 'function') closeSidebar();
-      if (typeof openSidebar === 'function') openSidebar();
     } else {
       // The compact › control re-enters fullscreen without navigating away from Chat.
       if (typeof closeSidebar === 'function') closeSidebar();
