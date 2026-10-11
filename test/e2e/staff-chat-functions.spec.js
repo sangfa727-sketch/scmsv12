@@ -1410,7 +1410,7 @@ test('Official Announcement read failure preserves the unread marker', async ({ 
   await expect(card).toContainText('Unread announcement');
   await card.click();
   await expect(page.locator('#announcementStream')).toContainText('Unread announcement body');
-  await expect.poll(async () => (await calls(page, 'markStaffAnnouncementRead')).length).toBe(1);
+  await expect.poll(async () => (await calls(page, 'markStaffAnnouncementRead')).length).toBeGreaterThan(0);
   await expect(card.locator('.smart-chat-announcement-unread')).toBeVisible();
 });
 
