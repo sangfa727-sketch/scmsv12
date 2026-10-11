@@ -1044,12 +1044,9 @@ window._toggleAnnouncementComposer=function(force=null){
     btn.title=_announcementComposerOpen?t('chat.closeOfficialMessage'):t('chat.newOfficialMessage');
     btn.setAttribute('aria-label',_announcementComposerOpen?t('chat.closeOfficialMessage'):t('chat.newOfficialMessage'));
   });
-  if(_announcementComposerOpen){
-    requestAnimationFrame(()=>{
-      document.querySelector('#announcementComposer .smart-chat-composer-close')?.focus({preventScroll:true});
-    });
-  }else{
-  }
+  // Do not move focus automatically on mobile: focusing a control inside a
+  // fixed overlay can scroll the underlying document in mobile browser engines.
+  // The close button remains reachable through normal keyboard navigation.
 };
 if(!window.__SCMS_ANNOUNCEMENT_COMPOSER_ESCAPE_BOUND__){
   window.__SCMS_ANNOUNCEMENT_COMPOSER_ESCAPE_BOUND__=true;
