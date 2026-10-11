@@ -13,7 +13,7 @@ test('public admission edge endpoint requires HTTPS Origin and returns exact-ori
   assert.match(edge, /Access-Control-Allow-Origin", origin/);
   assert.doesNotMatch(edge, /Access-Control-Allow-Origin":\s*"\*"/);
   assert.match(edge, /Vary", "Origin"/);
-  assert.match(edge, /credentials:\s*"omit"/);
+  assert.match(edge, /Access-Control-Allow-Methods", "POST, OPTIONS"/);
 });
 
 test('public admission edge endpoint uses server secret only and calls the isolated intake RPC', () => {
