@@ -63,6 +63,41 @@ jobs:
           PGPASSWORD: scms_test
         run: psql -h 127.0.0.1 -U scms_test -d scms_test -v ON_ERROR_STOP=1 -f test/db/manage_teacher_access_permission_gate_runtime_test.sql
 
+  staff-chat-group-runtime:
+    name: Staff Chat Group Chat backend runtime test
+    runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: public.ecr.aws/docker/library/postgres:16
+        env:
+          POSTGRES_USER: scms_chat_test
+          POSTGRES_PASSWORD: scms_chat_test
+          POSTGRES_DB: scms_chat_test
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U scms_chat_test -d scms_chat_test"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 10
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install PostgreSQL client
+        run: sudo apt-get update && sudo apt-get install -y postgresql-client
+      - name: Wait for PostgreSQL
+        env:
+          PGPASSWORD: scms_chat_test
+        run: |
+          for i in {1..30}; do
+            pg_isready -h 127.0.0.1 -p 5432 -U scms_chat_test -d scms_chat_test && exit 0
+            sleep 1
+          done
+          exit 1
+      - name: Run isolated Group Chat schema, authorization, membership, and persistence tests
+        env:
+          PGPASSWORD: scms_chat_test
+        run: psql -h 127.0.0.1 -U scms_chat_test -d scms_chat_test -v ON_ERROR_STOP=1 -f test/db/staff_chat_group_runtime_test.sql
+
   playwright-ci:
     name: Playwright local smoke test (automatic PR/push)
     if: github.event_name == 'pull_request' || github.event_name == 'push'
