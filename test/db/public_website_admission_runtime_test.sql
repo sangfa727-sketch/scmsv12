@@ -88,6 +88,7 @@ $function$;
 
 \ir ../../supabase/migrations/20261011170000_school_website_admission_review.sql
 \ir ../../supabase/migrations/20261011180000_school_website_persistent_drafts.sql
+\ir ../../supabase/migrations/20261011190000_school_website_publish_and_public_read.sql
 
 insert into public.teachers(teacher_id,school_id,role,status) values
   ('owner-a','school-a','owner','active'),
@@ -103,7 +104,10 @@ insert into public.teacher_permissions(school_id,teacher_id,permission_key,allow
   ('school-b','owner-b','website.manage',true,'global',null,null),
   ('school-a','owner-a','website.admissions.review',true,'global',null,null),
   ('school-a','staff-a','website.admissions.review',false,'global',null,null),
-  ('school-b','owner-b','website.admissions.review',true,'global',null,null);
+  ('school-b','owner-b','website.admissions.review',true,'global',null,null),
+  ('school-a','owner-a','website.publish',true,'global',null,null),
+  ('school-a','staff-a','website.publish',false,'global',null,null),
+  ('school-b','owner-b','website.publish',true,'global',null,null);
 
 
 insert into public.website_sites(school_id, hostname, active) values
@@ -319,6 +323,55 @@ begin
     raise exception 'stale draft overwrite should be rejected: %', v;
   end if;
 
+  -- Review and publication require separate permissions; public reads resolve only active hostnames.
+  v := public.rpc_school_website_submit_draft_for_review('staff-a-session',2);
+  if v->>'ok' is distinct from 'true' or v->>'status' is distinct from 'review' or v->>'version' is distinct from '3' then
+    raise exception 'authorized editor could not submit draft for review: %', v;
+  end if;
+
+  v := public.rpc_school_website_publish_draft('owner-a-session',2);
+  if v->>'error' is distinct from 'stale_draft' then
+    raise exception 'publish should reject a stale draft version: %', v;
+  end if;
+  v := public.rpc_school_website_publish_draft('staff-a-session',3);
+  if v->>'error' is distinct from 'access_denied' then
+    raise exception 'content manager must not publish without website.publish: %', v;
+  end if;
+
+  v := public.rpc_school_website_publish_draft('owner-a-session',3);
+  if v->>'ok' is distinct from 'true' or v->>'status' is distinct from 'published'
+     or v->>'draft_version' is distinct from '4' or v->>'public_site_active' is distinct from 'true' then
+    raise exception 'authorized publication failed: %', v;
+  end if;
+
+  v := public.rpc_school_website_get_published('school-a.example.test');
+  if v->>'ok' is distinct from 'true' or v->>'found' is distinct from 'true'
+     or v->'content'->>'schoolName' is distinct from 'Updated School'
+     or v ? 'school_id' then
+    raise exception 'public read did not return only the published school content: %', v;
+  end if;
+  v := public.rpc_school_website_get_published('school-b.example.test');
+  if v->>'ok' is distinct from 'true' or v->>'found' is distinct from 'false' then
+    raise exception 'school B must not see school A publication: %', v;
+  end if;
+  v := public.rpc_school_website_get_published('unknown.example.test');
+  if v->>'found' is distinct from 'false' then
+    raise exception 'unknown hostname must not resolve to a publication: %', v;
+  end if;
+
+  v := public.rpc_school_website_save_draft(
+    'owner-a-session',
+    jsonb_build_object('template','modern','schoolName','Unpublished edit'),
+    4
+  );
+  if v->>'ok' is distinct from 'true' or v->>'status' is distinct from 'draft' or v->>'version' is distinct from '5' then
+    raise exception 'editing a published site should create a new unpublished draft version: %', v;
+  end if;
+  v := public.rpc_school_website_get_published('school-a.example.test');
+  if v->'content'->>'schoolName' is distinct from 'Updated School' then
+    raise exception 'editing a draft must not mutate the published snapshot: %', v;
+  end if;
+
   v := public.rpc_school_website_load_draft('owner-b-session');
   if v->>'ok' is distinct from 'true' or v->>'found' is distinct from 'false' then
     raise exception 'other school must not read or discover school A draft: %', v;
@@ -339,11 +392,11 @@ begin
   end if;
 
   v := public.rpc_school_website_authorize('owner-a-session');
-  if v->>'authorized' is distinct from 'true' or v->>'admissions_authorized' is distinct from 'true' then
+  if v->>'authorized' is distinct from 'true' or v->>'admissions_authorized' is distinct from 'true' or v->>'publish_authorized' is distinct from 'true' then
     raise exception 'school owner should receive the separate admission-review capability: %', v;
   end if;
   v := public.rpc_school_website_authorize('staff-a-session');
-  if v->>'authorized' is distinct from 'true' or v->>'admissions_authorized' is distinct from 'false' then
+  if v->>'authorized' is distinct from 'true' or v->>'admissions_authorized' is distinct from 'false' or v->>'publish_authorized' is distinct from 'false' then
     raise exception 'content-only manager must not receive admission-review capability: %', v;
   end if;
 
