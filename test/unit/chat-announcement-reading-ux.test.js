@@ -111,3 +111,17 @@ test('legacy mobile chat fallback does not override the full-screen workspace sc
   assert.ok(correction.includes('html:not(.scms-chat-workspace) #page-chat .smart-chat-school-grid > .smart-chat-channel-list {\n    display:none;'), 'scope the legacy duplicate-rail fix outside the full-screen workspace');
   assert.ok(correction.includes('.smart-chat-conversation .chat-stream {\n    max-height:none;'), 'avoid trapping vertical gestures inside a short message viewport');
 });
+
+test('Official composer opens as a fixed modal overlay without adding a second page layout row', () => {
+  const source = fs.readFileSync(path.resolve(__dirname, '../../js/16_chat.js'), 'utf8');
+  assert.ok(source.includes('position:fixed;z-index:10080;top:50%;left:50%'),
+    'the official composer must overlay the workspace instead of participating in page flow');
+  assert.ok(source.includes('box-shadow:0 0 0 100vmax rgba(8,12,22,.62)'),
+    'the open composer must visually dim the underlying announcement workspace');
+  assert.ok(source.includes('class="smart-chat-composer-close"'),
+    'the modal must provide a clear close control');
+  assert.ok(source.includes('aria-modal="true"'),
+    'the composer overlay must expose modal semantics');
+  assert.ok(source.includes('card.setAttribute(\'aria-hidden\',String(!_announcementComposerOpen))'),
+    'the hidden composer must be marked hidden from assistive technology');
+});
