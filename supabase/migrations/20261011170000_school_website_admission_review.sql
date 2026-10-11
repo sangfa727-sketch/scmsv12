@@ -23,6 +23,58 @@ values ('owner', 'website.admissions.review', true),
        ('super_admin', 'website.admissions.review', true)
 on conflict (role, permission_key) do nothing;
 
+-- Extend the existing Website Studio gate with the dedicated PII-review capability.
+create or replace function public.rpc_school_website_authorize(p_session_token text)
+returns jsonb
+language plpgsql
+security definer
+set search_path = public, pg_temp
+as $function$
+declare
+  v_school_id text;
+  v_role text;
+  v_admissions_authorized boolean;
+begin
+  if nullif(trim(p_session_token), '') is null then
+    return jsonb_build_object('ok', false, 'authorized', false, 'error', 'access_denied');
+  end if;
+
+  select s.school_id, s.role
+    into v_school_id, v_role
+    from public.app_web_sessions s
+    join public.teachers t
+      on t.teacher_id = s.teacher_id
+     and t.school_id = s.school_id
+     and t.role = s.role
+   where s.session_token = p_session_token
+     and s.expires_at > now()
+     and t.status = 'active'
+   limit 1;
+  if not found then
+    return jsonb_build_object('ok', false, 'authorized', false, 'error', 'access_denied');
+  end if;
+
+  if private.web_has_permission(p_session_token, 'website.manage', null, null) is distinct from true then
+    return jsonb_build_object('ok', false, 'authorized', false, 'error', 'access_denied');
+  end if;
+
+  v_admissions_authorized := private.web_has_permission(
+    p_session_token, 'website.admissions.review', null, null
+  ) is true;
+
+  return jsonb_build_object(
+    'ok', true,
+    'authorized', true,
+    'school_id', v_school_id,
+    'role', v_role,
+    'admissions_authorized', coalesce(v_admissions_authorized, false)
+  );
+end;
+$function$;
+
+revoke all on function public.rpc_school_website_authorize(text) from public;
+grant execute on function public.rpc_school_website_authorize(text) to anon, authenticated;
+
 create or replace function public.rpc_school_website_list_admissions(
   p_session_token text,
   p_before_created_at timestamptz default null,
