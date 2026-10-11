@@ -1632,3 +1632,39 @@ test('Official Announcement composer dismisses via Escape and backdrop without s
     await context.close();
   }
 });
+
+
+test('mobile Chat type switcher supports horizontal touch scrolling without duplicate quick-nav rails', async ({ browser }) => {
+  const context = await browser.newContext({
+    viewport: { width: 360, height: 844 },
+    deviceScaleFactor: 1,
+    isMobile: true,
+    hasTouch: true
+  });
+  const page = await context.newPage();
+  try {
+    await mountSmartChat(page);
+    const nav = page.locator('#smartChatQuickNav');
+    const track = page.locator('#smartChatQuickNav .smart-chat-quick-nav-track');
+    await expect(nav).toBeVisible();
+    await expect(page.locator('#smartChatQuickNav')).toHaveCount(1);
+    await expect(track.locator('.smart-chat-quick-channel')).toHaveCount(6);
+
+    const before = await track.evaluate(el => ({
+      clientWidth: el.clientWidth,
+      scrollWidth: el.scrollWidth,
+      scrollLeft: el.scrollLeft,
+      overflowX: getComputedStyle(el).overflowX,
+      touchAction: getComputedStyle(el).touchAction
+    }));
+    expect(before.scrollWidth, `Mobile Chat type rail should overflow horizontally: ${JSON.stringify(before)}`).toBeGreaterThan(before.clientWidth);
+    expect(['auto', 'scroll', 'overlay']).toContain(before.overflowX);
+    expect(before.touchAction).toContain('pan-x');
+
+    await track.evaluate(el => { el.scrollLeft = el.scrollWidth; });
+    await expect.poll(() => track.evaluate(el => el.scrollLeft)).toBeGreaterThan(0);
+    await expect(page.locator('#smartChatQuickNav .smart-chat-quick-channel')).toHaveCount(6);
+  } finally {
+    await context.close();
+  }
+});
