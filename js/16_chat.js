@@ -1016,19 +1016,14 @@ let _announcementComposerOpen=false;
 let _announcementComposerScrollY=0;
 let _announcementComposerBodyStyles=null;
 function _lockAnnouncementPageScroll(){
+  // The composer is a fixed viewport overlay. Do not change body positioning,
+  // overflow, or window scroll here: mobile browsers can shift the chat workspace
+  // when those properties change. The overlay/root state handles interaction.
   _announcementComposerScrollY=Number.isFinite(window.scrollY)?window.scrollY:0;
-  const body=document.body;
-  if(!body)return;
-  _announcementComposerBodyStyles={position:body.style.position,top:body.style.top,left:body.style.left,right:body.style.right,width:body.style.width,overflow:body.style.overflow};
-  // The composer itself is a fixed overlay and the root class locks page overflow.
-  // Fixing the body here offsets the entire chat workspace on mobile by scrollY.
-  body.style.overflow='hidden';
 }
 function _unlockAnnouncementPageScroll(){
-  const body=document.body,styles=_announcementComposerBodyStyles;
-  if(body&&styles){body.style.position=styles.position;body.style.top=styles.top;body.style.left=styles.left;body.style.right=styles.right;body.style.width=styles.width;body.style.overflow=styles.overflow;}
+  // Intentionally preserve the current page scroll position when dismissing.
   _announcementComposerBodyStyles=null;
-  window.scrollTo(0,_announcementComposerScrollY);
 }
 window._toggleAnnouncementComposer=function(force=null){
   if(!window.APP?.is_admin)return;
@@ -1052,10 +1047,8 @@ window._toggleAnnouncementComposer=function(force=null){
   if(_announcementComposerOpen){
     requestAnimationFrame(()=>{
       document.querySelector('#announcementComposer .smart-chat-composer-close')?.focus({preventScroll:true});
-      window.scrollTo(0,_announcementComposerScrollY);
     });
   }else{
-    window.scrollTo(0,_announcementComposerScrollY);
   }
 };
 if(!window.__SCMS_ANNOUNCEMENT_COMPOSER_ESCAPE_BOUND__){
