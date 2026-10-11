@@ -30,9 +30,10 @@ let draftSaveQueued=false;
 function updateDraftActionButtons(){
  const stateText=$("#saveState").textContent||"";
  const saving=stateText.startsWith("Saving")||stateText.startsWith("Loading")||stateText.startsWith("Submitting")||stateText.startsWith("Publishing");
+ const synced=["Saved to SCMS","Submitted for review","Published to SCMS"].includes(stateText)||stateText.startsWith("Ready — changes save to SCMS");
  const review=$("#submitReviewButton"),publish=$("#publishButton");
- if(review)review.disabled=!remoteDraftReady||draftConflict||draftVersion<1||draftStatus!=="draft"||saving;
- if(publish)publish.disabled=!publishAuthorized||!remoteDraftReady||draftConflict||draftVersion<1||draftStatus!=="review"||saving;
+ if(review)review.disabled=!remoteDraftReady||!synced||draftConflict||draftVersion<1||draftStatus!=="draft"||saving;
+ if(publish)publish.disabled=!publishAuthorized||!remoteDraftReady||!synced||draftConflict||draftVersion<1||draftStatus!=="review"||saving;
 }
 function showToast(message){toast.textContent=message;toast.classList.add("show");clearTimeout(showToast.t);showToast.t=setTimeout(()=>toast.classList.remove("show"),1800)}
 function openField(field){activeField=field;activeCollection=null;const m=fieldMeta[field];title.textContent=m[0];label.textContent=m[0];input.value=state[field];hint.textContent=m[2];input.placeholder=m[1];input.maxLength=field==="aboutText"?4000:field==="contactText"?2000:300;input.removeAttribute("aria-invalid");dialog.showModal();setTimeout(()=>input.focus(),30)}
