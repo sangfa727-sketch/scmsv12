@@ -18,6 +18,8 @@ test('Website Studio exposes review and publish actions only when their server c
   assert.match(sql, /website\.publish/);
   assert.match(sql, /v_publish_authorized/);
   assert.match(sql, /review_required/);
+  assert.match(sql, /incomplete_draft/);
+  assert.match(sql, /incomplete_publication/);
   assert.match(sql, /stale_draft/);
   new Function(js);
 });
