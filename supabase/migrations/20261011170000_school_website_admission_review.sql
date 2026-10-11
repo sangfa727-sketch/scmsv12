@@ -2,6 +2,27 @@
 -- Release artifact only; do not apply to production without explicit approval.
 -- Intake rows remain separate from Student Core. This migration adds staff review only.
 
+-- Admission applications contain child/guardian personal information, so review access
+-- is separate from ordinary public-website content editing.
+insert into public.permission_definitions
+  (permission_key, category, description, scope_type, is_sensitive, is_active, display_order)
+values
+  ('website.admissions.review', 'school_website', 'Review public admission applications and update their intake status', 'global', true, true, 91)
+on conflict (permission_key) do update set
+  category = excluded.category,
+  description = excluded.description,
+  scope_type = excluded.scope_type,
+  is_sensitive = true,
+  is_active = true,
+  display_order = excluded.display_order;
+
+insert into public.role_permissions (role, permission_key, allowed)
+values ('owner', 'website.admissions.review', true),
+       ('school_owner', 'website.admissions.review', true),
+       ('admin', 'website.admissions.review', true),
+       ('super_admin', 'website.admissions.review', true)
+on conflict (role, permission_key) do nothing;
+
 create or replace function public.rpc_school_website_list_admissions(
   p_session_token text,
   p_before_created_at timestamptz default null,
@@ -41,7 +62,7 @@ begin
     return jsonb_build_object('ok', false, 'error', 'access_denied');
   end if;
 
-  if private.web_has_permission(p_session_token, 'website.manage', null, null) is distinct from true then
+  if private.web_has_permission(p_session_token, 'website.admissions.review', null, null) is distinct from true then
     return jsonb_build_object('ok', false, 'error', 'access_denied');
   end if;
 
