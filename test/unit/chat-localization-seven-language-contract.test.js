@@ -12,6 +12,14 @@ const REQUIRED_KEYS = [
   'chat.oneVerifiedRecipient',
   'chat.staffNotice',
   'chat.groupMembersPrompt',
+  // Official Announcements composer and its modal controls.
+  'chat.adminTools', 'chat.officialMessage', 'chat.officialMessageHint',
+  'chat.serverVerified', 'chat.recipientType', 'chat.allStaff', 'chat.grade',
+  'chat.individualTeacher', 'chat.messageType', 'chat.announcement', 'chat.officialTask',
+  'chat.refreshRecipients', 'chat.sendOfficialMessage', 'chat.checkingRecipients',
+  'chat.reasonBodyRequired', 'chat.messageBody', 'chat.writeOfficialMessage',
+  'chat.newOfficialMessage', 'chat.closeOfficialMessage', 'chat.officialAnnouncements',
+  'chat.officialNotices', 'chat.refresh', 'chat.noVerifiedSameSchoolRecipient', 'chat.verifiedRecipients',
 ];
 
 function loadChatLocales() {
@@ -41,7 +49,7 @@ test('School Chat labels exist and are non-empty in every supported language', (
   }
 });
 
-test('School Chat labels do not silently fall back to English in non-English locales', () => {
+test('Staff Chat and Official Announcements labels do not silently fall back to English in non-English locales', () => {
   const locales = loadChatLocales();
   const english = locales.en;
 
