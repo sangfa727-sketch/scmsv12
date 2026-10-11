@@ -1020,9 +1020,9 @@ function _lockAnnouncementPageScroll(){
   const body=document.body;
   if(!body)return;
   _announcementComposerBodyStyles={position:body.style.position,top:body.style.top,left:body.style.left,right:body.style.right,width:body.style.width,overflow:body.style.overflow};
-  body.style.position='fixed';
-  body.style.top=`-${_announcementComposerScrollY}px`;
-  body.style.left='0';body.style.right='0';body.style.width='100%';body.style.overflow='hidden';
+  // The composer itself is a fixed overlay and the root class locks page overflow.
+  // Fixing the body here offsets the entire chat workspace on mobile by scrollY.
+  body.style.overflow='hidden';
 }
 function _unlockAnnouncementPageScroll(){
   const body=document.body,styles=_announcementComposerBodyStyles;
