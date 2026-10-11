@@ -12,9 +12,9 @@ test('Website Studio exposes a private admission inbox and status controls', () 
   const css = read('school-website/create.css');
   assert.match(html, /id="admissionInboxButton"/);
   assert.match(html, /id="admissionInboxDialog"/);
-  assert.match(html, /id="admissionInboxList"/);
+  assert.match(html, /id="admissionInboxList"/);\n  assert.match(html, /admissionsAuthorized: result\.admissions_authorized === true/);
   assert.match(js, /rpc_school_website_list_admissions/);
-  assert.match(js, /rpc_school_website_update_admission_status/);
+  assert.match(js, /rpc_school_website_update_admission_status/);\n  assert.match(js, /admissionsAuthorized!==true/);
   assert.match(js, /p_expected_updated_at/);
   assert.match(js, /stale_application/);
   assert.match(css, /\.admission-review-card/);
