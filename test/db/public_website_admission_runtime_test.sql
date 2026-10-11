@@ -22,6 +22,21 @@ create table public.app_web_sessions (
   role text not null,
   expires_at timestamptz not null
 );
+create table public.permission_definitions (
+  permission_key text primary key,
+  category text not null,
+  description text not null,
+  scope_type text not null,
+  is_sensitive boolean not null,
+  is_active boolean not null,
+  display_order integer not null
+);
+create table public.role_permissions (
+  role text not null,
+  permission_key text not null references public.permission_definitions(permission_key),
+  allowed boolean not null,
+  primary key (role, permission_key)
+);
 create table public.teacher_permissions (
   school_id text not null,
   teacher_id text not null,
@@ -83,8 +98,11 @@ insert into public.app_web_sessions(session_token,school_id,teacher_id,role,expi
   ('owner-b-session','school-b','owner-b','owner',now()+interval '1 day');
 insert into public.teacher_permissions(school_id,teacher_id,permission_key,allowed,scope_type,class_name,subject_id) values
   ('school-a','owner-a','website.manage',true,'global',null,null),
-  ('school-a','staff-a','website.manage',false,'global',null,null),
-  ('school-b','owner-b','website.manage',true,'global',null,null);
+  ('school-a','staff-a','website.manage',true,'global',null,null),
+  ('school-b','owner-b','website.manage',true,'global',null,null),
+  ('school-a','owner-a','website.admissions.review',true,'global',null,null),
+  ('school-a','staff-a','website.admissions.review',false,'global',null,null),
+  ('school-b','owner-b','website.admissions.review',true,'global',null,null);
 
 
 insert into public.website_sites(school_id, hostname, active) values
