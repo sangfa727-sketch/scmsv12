@@ -1013,9 +1013,12 @@ async function _submitInquiryDraft(e){
   return false;
 }
 let _announcementComposerOpen=false;
+let _announcementComposerScrollY=0;
 window._toggleAnnouncementComposer=function(force=null){
   if(!window.APP?.is_admin)return;
-  _announcementComposerOpen=force===null?!_announcementComposerOpen:!!force;
+  const nextOpen=force===null?!_announcementComposerOpen:!!force;
+  if(!_announcementComposerOpen&&nextOpen)_announcementComposerScrollY=window.scrollY||document.documentElement.scrollTop||0;
+  _announcementComposerOpen=nextOpen;
   const card=document.getElementById('announcementComposer');
   const buttons=[document.getElementById('announcementComposerToggle'),document.getElementById('announcementComposerToggleMobile')].filter(Boolean);
   if(card){
@@ -1030,7 +1033,12 @@ window._toggleAnnouncementComposer=function(force=null){
     btn.setAttribute('aria-label',_announcementComposerOpen?t('chat.closeOfficialMessage'):t('chat.newOfficialMessage'));
   });
   if(_announcementComposerOpen){
-    requestAnimationFrame(()=>document.querySelector('#announcementComposer .smart-chat-composer-close')?.focus({preventScroll:true}));
+    requestAnimationFrame(()=>{
+      document.querySelector('#announcementComposer .smart-chat-composer-close')?.focus({preventScroll:true});
+      window.scrollTo(0,_announcementComposerScrollY);
+    });
+  }else{
+    window.scrollTo(0,_announcementComposerScrollY);
   }
 };
 if(!window.__SCMS_ANNOUNCEMENT_COMPOSER_ESCAPE_BOUND__){
