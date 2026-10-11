@@ -12,6 +12,7 @@
   const submitButton=document.getElementById("submitAdmissionButton");
   const apiMeta=document.querySelector('meta[name="scms-public-website-api-base"]');
   const apiBase=normalizeApiBase(apiMeta?.content||"");
+  // No private SCMS write occurs in this browser; only the isolated public intake endpoint may receive the form.
   let idempotencyKey=createIdempotencyKey();
 
   function normalizeApiBase(value){
