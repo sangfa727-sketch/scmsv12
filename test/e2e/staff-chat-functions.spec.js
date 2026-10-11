@@ -1052,3 +1052,27 @@ test('Desktop channel tabs fill the available row and the All Staff conversation
   expect(layout.conversationWidth).toBeGreaterThan(layout.channelListWidth * 2);
   expect(layout.overflowWidth).toBeLessThanOrEqual(1);
 });
+
+
+test('mobile Chat arrow toggles fullscreen off and on without changing the active page', async ({ page }) => {
+  await mountSmartChat(page);
+  await page.setViewportSize({ width: 390, height: 844 });
+  // The onboarding tour can appear after the app shell mounts; dismiss it before interaction.
+  const onboardingSkip = page.getByRole('button', { name: 'Skip' });
+  if (await onboardingSkip.isVisible().catch(() => false)) await onboardingSkip.click({ force: true });
+  await expect(page.locator('#tourOverlay')).toBeHidden();
+  await expect(page.locator('html')).toHaveClass(/scms-chat-workspace/);
+  await expect(page.locator('.sc-chat-topbar')).toBeVisible();
+
+  await page.locator('.sc-chat-topbar .sc-chat-top-action').first().click();
+  await expect(page.locator('html')).not.toHaveClass(/scms-chat-workspace/);
+  await expect(page.locator('.sc-chat-topbar')).toBeHidden();
+  await expect(page.locator('.smart-chat-nav-back')).toBeVisible();
+  await expect(page.locator('.smart-chat-nav-icon')).toHaveText('›');
+
+  await page.locator('.smart-chat-nav-back').click();
+  await expect(page.locator('html')).toHaveClass(/scms-chat-workspace/);
+  await expect(page.locator('.sc-chat-topbar')).toBeVisible();
+  await expect(page.locator('.smart-chat-nav-icon')).toHaveText('‹');
+  await expect.poll(() => page.evaluate(() => window.APP.currentPage)).toBe('chat');
+});

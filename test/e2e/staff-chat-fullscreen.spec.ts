@@ -116,15 +116,27 @@ test.describe('Staff Chat full-screen browser regression', () => {
     expect(metrics.workspaceClientHeight).toBeGreaterThan(0);
   });
 
-  test('mobile sidebar control restores the original app chrome and opens the existing sidebar', async ({ page }) => {
+  test('mobile arrow toggles between fullscreen Chat and the normal Chat page without losing context', async ({ page }) => {
     await page.setViewportSize({ width: 390, height: 844 });
     await signInAndOpenChat(page);
-    await page.locator('.sc-chat-topbar .sc-chat-top-action').first().click();
 
+    await page.locator('.sc-chat-topbar .sc-chat-top-action').first().click();
     await expect(page.locator('.sc-chat-topbar')).toBeHidden();
     await expect(page.locator('#page-chat')).toBeVisible();
     await expect(page.locator('#appHeader')).toBeVisible();
     await expect(page.locator('#sidebar')).toBeVisible();
+    await expect(page.locator('.smart-chat-nav-back')).toBeVisible();
+    await expect(page.locator('.smart-chat-nav-icon')).toHaveText('›');
+
+    await page.locator('.smart-chat-nav-back').click();
+    await expect(page.locator('html')).toHaveClass(/scms-chat-workspace/);
+    await expect(page.locator('.sc-chat-topbar')).toBeVisible();
+    await expect(page.locator('#appHeader')).toBeHidden();
+    await expect(page.locator('.smart-chat-nav-icon')).toHaveText('‹');
+
+    await page.locator('.sc-chat-topbar .sc-chat-top-action').first().click();
+    await expect(page.locator('html')).not.toHaveClass(/scms-chat-workspace/);
+    await expect(page.locator('#appHeader')).toBeVisible();
   });
 
   test('desktop keeps the original SCMS navigation and Chat header instead of mobile fullscreen chrome', async ({ page }) => {
@@ -134,6 +146,7 @@ test.describe('Staff Chat full-screen browser regression', () => {
     await expect(page.locator('#appHeader')).toBeVisible();
     await expect(page.locator('.smart-chat-hero')).toBeVisible();
     await expect(page.locator('.smart-chat-mode-switch')).toBeVisible();
+    await expect(page.locator('.smart-chat-nav-back')).toBeHidden();
     await expect(page.locator('.sc-chat-topbar')).toBeHidden();
   });
 

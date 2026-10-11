@@ -326,6 +326,7 @@ window._refreshAdminComposerPreview = function() {
     /* Desktop keeps the existing SCMS shell; the full-screen workspace is mobile-only. */
     .sc-chat-topbar{display:none}
     @media(min-width:761px){
+      #page-chat .smart-chat-nav-back{display:none!important}
       #page-chat .smart-chat-shell{width:100%;max-width:none;min-width:0}
       #page-chat .smart-chat-hero{display:flex;align-items:center;gap:22px;width:100%;min-width:0}
       #page-chat .smart-chat-hero>div:first-of-type{flex:1 1 auto;min-width:0}
@@ -346,7 +347,10 @@ window._refreshAdminComposerPreview = function() {
     @media(max-width:760px){
       html.scms-chat-workspace #page-chat .smart-chat-shell{height:100dvh;min-height:100dvh;display:flex;flex-direction:column;gap:0;padding:0;overflow:hidden}
       html.scms-chat-workspace #page-chat .sc-chat-topbar{position:relative;z-index:30;display:grid;grid-template-columns:44px minmax(0,1fr) 44px;align-items:center;gap:10px;flex:0 0 auto;padding:calc(8px + env(safe-area-inset-top)) 12px 10px;border-bottom:1px solid var(--border);background:color-mix(in srgb,var(--surface) 94%,var(--sc-chat-accent))}
-      html.scms-chat-workspace #page-chat .sc-chat-top-action{width:42px;height:42px;display:grid;place-items:center;border:1px solid var(--border);border-radius:50%;background:var(--bg2);color:var(--text);transition:transform .18s ease,background .18s ease,box-shadow .18s ease}
+      html.scms-chat-workspace #page-chat .sc-chat-top-action{width:38px;height:38px;display:grid;place-items:center;border:1px solid var(--border);border-radius:50%;background:var(--bg2);color:var(--text);transition:transform .18s ease,background .18s ease,box-shadow .18s ease}
+      #page-chat .smart-chat-nav-back{order:0;display:grid;place-items:center;flex:0 0 36px;width:36px;min-width:36px;height:36px;padding:0;border-radius:11px;font-size:0;line-height:1}
+      #page-chat .smart-chat-nav-back .smart-chat-nav-icon{display:block;font-size:25px;font-weight:500;line-height:1}
+      #page-chat .smart-chat-nav-back .smart-chat-nav-label{display:none}
       html.scms-chat-workspace #page-chat .sc-chat-top-action:active{transform:scale(.92)}
       html.scms-chat-workspace #page-chat .sc-chat-mode-pill svg,html.scms-chat-workspace #page-chat .sc-chat-type-option svg{width:18px;height:18px;flex:0 0 18px;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
       html.scms-chat-workspace #page-chat .sc-chat-mode-pill{justify-self:center;display:flex;align-items:center;gap:8px;max-width:100%;min-width:0;min-height:42px;padding:0 16px;border:1px solid var(--border);border-radius:999px;background:var(--surface);color:var(--text);font-weight:750;box-shadow:0 3px 12px rgba(20,30,55,.06);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;transition:background .2s ease,border-color .2s ease,transform .2s ease}
@@ -499,7 +503,7 @@ function renderChat() {
   page.innerHTML = `
     <div class="smart-chat-shell">
       <div class="smart-chat-hero">
-        <button type="button" class="smart-chat-nav-back" onclick="_chatBackToMenu()" aria-label="${t('chat.exitChat')}">‹ <span>${t('chat.exitChat')}</span></button>
+        <button type="button" class="smart-chat-nav-back" onclick="_chatBackToMenu()" aria-label="${t('chat.exitChat')}" title="${t('chat.exitChat')}"><span class="smart-chat-nav-icon" aria-hidden="true">‹</span><span class="smart-chat-nav-label">${t('chat.exitChat')}</span></button>
         <div>
           <div class="page-eyebrow">${t('chat.communicationCenter')}</div>
           <h1 class="page-title">${t('chat.schoolChat')}</h1>
@@ -512,7 +516,7 @@ function renderChat() {
       </div>
       <header class="sc-chat-topbar" aria-label="${esc(t('chat.communicationCenter'))}">
         <button type="button" class="sc-chat-top-action" onclick="_chatBackToMenu()" aria-label="${esc(t('chat.exitChat'))}" title="${esc(t('chat.exitChat'))}">
-          <svg viewBox="0 0 24 24" width="21" height="21" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M4 6h16M4 12h16M4 18h16"/></svg>
+          <svg viewBox="0 0 24 24" width="21" height="21" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m15 18-6-6 6-6"/></svg>
         </button>
         <button type="button" class="sc-chat-mode-pill" onclick="switchChatMode(_chatMode === 'school' ? 'ai' : 'school')" aria-label="${esc(t('chat.switchChatMode'))}" title="${esc(t('chat.switchChatMode'))}">
           ${_chatMode === 'school' ? _chatIcon('users') + esc(t('chat.schoolChat')) : _chatIcon('bot') + esc(t('chat.aiAssistant'))}
@@ -535,27 +539,32 @@ function renderChat() {
 window._chatBackToMenu = function() {
   const isMobileWorkspace = typeof window.matchMedia === 'function'
     && window.matchMedia('(max-width: 760px)').matches;
-  _exitChatWorkspace();
+  // Desktop retains the normal SCMS header/sidebar and never uses this control.
+  if (!isMobileWorkspace) return;
+  const root = document.documentElement;
+  const isFullscreen = !!root?.classList.contains('scms-chat-workspace');
   try {
-    if (typeof closeSidebar === 'function') closeSidebar();
-    if (isMobileWorkspace) {
-      // On mobile this is the sidebar control, not a leave-chat/back-to-dashboard action.
-      // Keep the current Chat page and conversation mounted while restoring the original app chrome.
-      if (typeof openSidebar === 'function') openSidebar();
-      return;
+    if (isFullscreen) {
+      // Fullscreen ‹ returns to the ordinary Chat page with the app chrome restored.
+      _exitChatWorkspace();
+      // Restore the standard mobile app shell with its menu control available.
+      // Keep the drawer closed so it does not overlay and block the reverse toggle.
+      if (typeof closeSidebar === 'function') closeSidebar();
+    } else {
+      // The compact › control re-enters fullscreen without navigating away from Chat.
+      if (typeof closeSidebar === 'function') closeSidebar();
+      _enterChatWorkspace();
     }
-    // Keep the existing desktop navigation behavior unchanged.
-    if (typeof isTWA === 'function' && !isTWA() && typeof openSidebar === 'function') {
-      openSidebar();
-      return;
+    const icon = document.querySelector('#page-chat .smart-chat-nav-back .smart-chat-nav-icon');
+    if (icon) icon.textContent = root?.classList.contains('scms-chat-workspace') ? '‹' : '›';
+    const control = document.querySelector('#page-chat .smart-chat-nav-back');
+    if (control) {
+      const label = root?.classList.contains('scms-chat-workspace') ? t('chat.exitChat') : t('chat.schoolChat');
+      control.setAttribute('aria-label', label);
+      control.setAttribute('title', label);
     }
-    if (typeof goToPage === 'function') {
-      goToPage('dashboard');
-      return;
-    }
-    if (window.APP) window.APP.currentPage = 'dashboard';
   } catch (e) {
-    console.warn('[chat] sidebar control failed', e);
+    console.warn('[chat] mobile fullscreen toggle failed', e);
   }
 };
 
