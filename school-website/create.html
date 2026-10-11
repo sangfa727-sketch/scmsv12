@@ -137,7 +137,7 @@
       const result = await response.json();
       if (!result || result.ok !== true || result.authorized !== true ||
           typeof result.school_id !== 'string' || !result.school_id.trim()) return deny();
-      window.SCMS_WEBSITE_CONTEXT = Object.freeze({ schoolId: result.school_id, role: result.role || '' });
+      window.SCMS_WEBSITE_CONTEXT = Object.freeze({ schoolId: result.school_id, role: result.role || '', admissionsAuthorized: result.admissions_authorized === true });
       document.body.classList.remove('auth-pending');
       gate.hidden = true;
       const editor = document.createElement('script');
