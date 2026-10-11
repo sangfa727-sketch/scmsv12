@@ -1695,7 +1695,7 @@ test('mobile Chat type switcher supports horizontal touch scrolling without dupl
   }
 });
 
-test('mobile Official Announcement composer overlays the list and closes through all dismissal paths', async ({ page }) => {
+test('mobile Official Announcement composer overlays the visible workspace and closes through all dismissal paths', async ({ page }) => {
   await page.setViewportSize({ width: 390, height: 844 });
   await mountSmartChat(page, false);
   await page.evaluate(() => {
@@ -1707,14 +1707,15 @@ test('mobile Official Announcement composer overlays the list and closes through
   });
 
   const overlay = page.locator('#announcementComposer');
-  // Mobile uses its dedicated visible plus control; the desktop control is hidden.
+  // On mobile, the directory/list is intentionally hidden while the detail workspace is active.
+  // Assert against the visible stream instead of expecting the desktop list pane to be visible.
   const toggle = page.locator('#announcementComposerToggleMobile');
-  const list = page.locator('#announcementList');
+  const stream = page.locator('#announcementStream');
   await expect(toggle).toBeVisible();
-  await expect(list).toBeVisible();
+  await expect(stream).toBeVisible();
   await expect(overlay).toBeHidden();
 
-  const listBefore = await list.evaluate(el => {
+  const streamBefore = await stream.evaluate(el => {
     const r = el.getBoundingClientRect();
     return { x: r.x, y: r.y, width: r.width, height: r.height };
   });
@@ -1738,20 +1739,20 @@ test('mobile Official Announcement composer overlays the list and closes through
   expect(Math.abs(overlayLayout.width - overlayLayout.viewportWidth)).toBeLessThanOrEqual(1);
   expect(Math.abs(overlayLayout.height - overlayLayout.viewportHeight)).toBeLessThanOrEqual(1);
 
-  const listAfterOpen = await list.evaluate(el => {
+  const streamAfterOpen = await stream.evaluate(el => {
     const r = el.getBoundingClientRect();
     return { x: r.x, y: r.y, width: r.width, height: r.height };
   });
-  expect(listAfterOpen).toEqual(listBefore);
+  expect(streamAfterOpen).toEqual(streamBefore);
 
-  // Tapping the dimmed backdrop should dismiss the overlay without reflowing the list.
+  // Tapping the dimmed backdrop should dismiss the overlay without reflowing the visible workspace.
   await overlay.click({ position: { x: 3, y: 3 } });
   await expect(overlay).toBeHidden();
   await expect(toggle).toHaveAttribute('aria-expanded', 'false');
-  expect(await list.evaluate(el => {
+  expect(await stream.evaluate(el => {
     const r = el.getBoundingClientRect();
     return { x: r.x, y: r.y, width: r.width, height: r.height };
-  })).toEqual(listBefore);
+  })).toEqual(streamBefore);
 
   // Escape and the explicit close button are also supported dismissal paths.
   await toggle.click();
