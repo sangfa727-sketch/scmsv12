@@ -12,7 +12,7 @@ test('public admission edge endpoint requires HTTPS Origin and returns exact-ori
   assert.match(edge, /parsed\.protocol !== "https:"/);
   assert.match(edge, /Access-Control-Allow-Origin", origin/);
   assert.doesNotMatch(edge, /Access-Control-Allow-Origin":\s*"\*"/);
-  assert.match(edge, /Vary", "Origin"/);
+  assert.match(edge, /"Vary":\s*"Origin"/);
   assert.match(edge, /Access-Control-Allow-Methods", "POST, OPTIONS"/);
 });
 
