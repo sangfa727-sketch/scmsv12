@@ -38,7 +38,8 @@ function requestIdentity(request: Request): string | null {
   for (const header of RATE_IDENTITY_HEADERS) {
     const raw = request.headers.get(header);
     if (!raw) continue;
-    const chain = raw.split(",").map(part => part.trim()).filter(Boolean);\n    const value = header === "x-forwarded-for" ? chain.at(-1) ?? "" : raw.trim();
+    const chain = raw.split(",").map(part => part.trim()).filter(Boolean);
+    const value = header === "x-forwarded-for" ? chain.at(-1) ?? "" : raw.trim();
     if (value && value.length <= 128) return value;
   }
   return null;
