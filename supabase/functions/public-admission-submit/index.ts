@@ -83,21 +83,47 @@ async function readBodyLimited(request: Request): Promise<string> {
   return new TextDecoder("utf-8", { fatal: true }).decode(body);
 }
 
+async function activeOriginAllowed(hostname: string, supabaseUrl: string, serviceRoleKey: string): Promise<boolean> {
+  try {
+    const response = await fetch(new URL("/rest/v1/rpc/rpc_website_site_origin_allowed", supabaseUrl), {
+      method: "POST",
+      headers: {
+        apikey: serviceRoleKey,
+        Authorization: `Bearer ${serviceRoleKey}`,
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({ p_hostname: hostname }),
+    });
+    if (!response.ok) return false;
+    return await response.json() === true;
+  } catch {
+    return false;
+  }
+}
+
 Deno.serve(async (request: Request) => {
   const origin = trustedOrigin(request);
-  if (request.method === "OPTIONS") {
-    return origin
-      ? new Response(null, { status: 204, headers: {
-          "Access-Control-Allow-Origin": origin.origin,
-          "Access-Control-Allow-Methods": "POST, OPTIONS",
-          "Access-Control-Allow-Headers": "content-type",
-          "Access-Control-Max-Age": "600",
-          "Vary": "Origin",
-        } })
-      : json({ ok: false, error: "invalid_origin" }, 403, null);
-  }
-  if (request.method !== "POST") return json({ ok: false, error: "method_not_allowed" }, 405, origin?.origin ?? null);
   if (!origin) return json({ ok: false, error: "invalid_origin" }, 403, null);
+
+  const supabaseUrl = Deno.env.get("SUPABASE_URL");
+  const serviceRoleKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY");
+  if (!supabaseUrl || !serviceRoleKey) return json({ ok: false, error: "backend_unavailable" }, 503, null);
+
+  // Only an active, server-registered website hostname receives CORS permission.
+  if (!(await activeOriginAllowed(origin.hostname, supabaseUrl, serviceRoleKey))) {
+    return json({ ok: false, error: "unknown_school" }, 403, null);
+  }
+
+  if (request.method === "OPTIONS") {
+    return new Response(null, { status: 204, headers: {
+      "Access-Control-Allow-Origin": origin.origin,
+      "Access-Control-Allow-Methods": "POST, OPTIONS",
+      "Access-Control-Allow-Headers": "content-type",
+      "Access-Control-Max-Age": "600",
+      "Vary": "Origin",
+    } });
+  }
+  if (request.method !== "POST") return json({ ok: false, error: "method_not_allowed" }, 405, origin.origin);
   if (request.headers.get("content-type")?.split(";")[0].trim().toLowerCase() !== "application/json") {
     return json({ ok: false, error: "invalid_content_type" }, 415, origin.origin);
   }
@@ -105,10 +131,8 @@ Deno.serve(async (request: Request) => {
   const identity = requestIdentity(request);
   if (!identity) return json({ ok: false, error: "rate_limit_identity_unavailable" }, 503, origin.origin);
 
-  const supabaseUrl = Deno.env.get("SUPABASE_URL");
-  const serviceRoleKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY");
   const rateLimitSalt = Deno.env.get("SCMS_ADMISSION_RATE_LIMIT_SALT");
-  if (!supabaseUrl || !serviceRoleKey || !rateLimitSalt || rateLimitSalt.length < 32) {
+  if (!rateLimitSalt || rateLimitSalt.length < 32) {
     return json({ ok: false, error: "backend_unavailable" }, 503, origin.origin);
   }
 
