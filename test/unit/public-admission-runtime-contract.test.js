@@ -24,7 +24,9 @@ test('public admission edge endpoint uses server secret only and calls the isola
   assert.match(edge, /p_identity_hash:\s*await hmacIdentity\(identity, rateLimitSalt\)/);
   assert.match(edge, /website\.trim\(\)/);
   assert.match(edge, /MAX_BODY_CHARS/);
-  assert.match(edge, /Authorization: `Bearer \\${serviceRoleKey}`/);\n  assert.match(edge, /SCMS_ADMISSION_RATE_LIMIT_SALT/);\n  assert.match(edge, /readBodyLimited/);
+  assert.ok(edge.includes('Authorization: `Bearer ${serviceRoleKey}`'));
+  assert.match(edge, /SCMS_ADMISSION_RATE_LIMIT_SALT/);
+  assert.match(edge, /readBodyLimited/);
   assert.doesNotMatch(edge, /students|service_role.*console\.log/i);
 });
 
