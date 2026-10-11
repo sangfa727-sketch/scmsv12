@@ -1099,3 +1099,30 @@ test('mobile Chat arrow toggles fullscreen off and on without changing the activ
   await expect(page.locator('.smart-chat-nav-icon')).toHaveText('‹');
   await expect.poll(() => page.evaluate(() => window.APP.currentPage)).toBe('chat');
 });
+
+
+test('Group Chat preserves unread count when the server rejects mark-read', async ({ page }) => {
+  await mountSmartChat(page);
+  await page.evaluate(() => {
+    window.API.getChatGroups = async () => [{ id: 31, name: 'Planning Group', group_type: 'PROJECT', status: 'OPEN', unread_count: 3 }];
+    window.API.markChatGroupRead = async (...args) => {
+      window.__chatTestCalls.push({ name: 'markChatGroupRead', args });
+      return { ok: false, error: 'simulated read rejection' };
+    };
+    window.switchChatChannel('events');
+  });
+  await expect(page.locator('#chatGroupList')).toContainText('Planning Group');
+  await page.evaluate(() => window._openChatGroup(31));
+  await expect.poll(async () => (await calls(page, 'markChatGroupRead')).length).toBe(1);
+  await expect(page.locator('#chatGroupList').locator('.smart-chat-channel-card').filter({ hasText: 'Planning Group' })).toContainText('3');
+});
+
+test('Group Chat treats malformed list responses as errors instead of empty success', async ({ page }) => {
+  await mountSmartChat(page);
+  await page.evaluate(() => {
+    window.API.getChatGroups = async () => ({ rows: [] });
+    window.switchChatChannel('events');
+  });
+  await expect(page.locator('#chatGroupList .chat-error')).toBeVisible();
+  await expect(page.locator('#chatGroupList')).toContainText('Retry');
+});
