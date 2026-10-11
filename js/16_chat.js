@@ -1030,7 +1030,7 @@ window._toggleAnnouncementComposer=function(force=null){
     btn.setAttribute('aria-label',_announcementComposerOpen?t('chat.closeOfficialMessage'):t('chat.newOfficialMessage'));
   });
   if(_announcementComposerOpen){
-    requestAnimationFrame(()=>document.getElementById('adminMsgBody')?.focus());
+    requestAnimationFrame(()=>document.getElementById('adminMsgBody')?.focus({preventScroll:true}));
   }
 };
 if(!window.__SCMS_ANNOUNCEMENT_COMPOSER_ESCAPE_BOUND__){
