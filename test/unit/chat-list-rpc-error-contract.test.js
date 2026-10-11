@@ -32,3 +32,14 @@ test('successful empty department and grade lists remain valid empty states', as
   assert.deepEqual(await api.getDepartmentChats(), []);
   assert.deepEqual(await api.getGradeChats(), []);
 });
+
+
+test('group list RPC errors are not converted into an empty group list', async () => {
+  const api = loadChatApi({ ok: false, error: 'invalid_session' });
+  await assert.rejects(api.getChatGroups(), /invalid_session/);
+});
+
+test('group list rejects malformed RPC responses that omit the explicit success flag', async () => {
+  const api = loadChatApi({ rows: [] });
+  await assert.rejects(api.getChatGroups(), /chat_group_list_failed/);
+});
