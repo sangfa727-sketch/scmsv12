@@ -516,5 +516,16 @@
   );
 
   const maps={en:'I18N_EN',my:'I18N_MY',th:'I18N_TH',jp:'I18N_JP',ms:'I18N_MS',km:'I18N_KM',zh:'I18N_ZH'};
-  Object.keys(maps).forEach(code=>{ window[maps[code]]=Object.assign({},window[maps[code]]||{},code==='en'?en:code==='my'?my:chat[code]); });
+  Object.keys(maps).forEach(code=>{
+    const base=window[maps[code]]||{};
+    const additions=code==='en'?en:code==='my'?my:chat[code];
+    const merged=Object.assign({},base,additions);
+    // If a missing Chat-extension key was filled with English, restore the base locale's
+    // translation rather than overwriting it. Explicit Chat translations still take priority.
+    if(code!=='en')fallbackKeys.forEach(k=>{
+      const baseValue=base[k];
+      if(additions[k]===en[k]&&typeof baseValue==='string'&&baseValue.trim()&&baseValue!==en[k])merged[k]=baseValue;
+    });
+    window[maps[code]]=merged;
+  });
 })();
