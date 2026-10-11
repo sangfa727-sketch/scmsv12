@@ -18,6 +18,7 @@ const LOCALE_FILES = [
 const LANGUAGES = ['en', 'my', 'th', 'jp', 'ms', 'km', 'zh'];
 const REQUIRED_KEYS = [
   'chat.schoolChat',
+  'chat.aiPlaceholder', 'chat.authorized', 'chat.officialAnnouncement',
   'chat.oneVerifiedRecipient',
   'chat.staffNotice',
   'chat.groupMembersPrompt',
