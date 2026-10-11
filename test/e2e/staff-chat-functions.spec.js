@@ -1350,3 +1350,38 @@ test('Grade Chat clears unread count only after mark-read succeeds', async ({ pa
   await expect.poll(async () => (await calls(page, 'markGradeRead')).length).toBe(1);
   await expect(page.locator('[data-testid="grade-row-Grade 1"]')).not.toContainText('4');
 });
+
+
+test('Official Announcements composer closes cleanly when switching channels', async ({ page }) => {
+  await page.setViewportSize({ width: 390, height: 844 });
+  await mountSmartChat(page, false);
+  await page.evaluate(() => {
+    window.APP.is_admin = true;
+    window.renderChat();
+    window.switchChatChannel('announcements');
+  });
+  await expect(page.locator('#announcementComposerToggle')).toBeVisible();
+  await page.locator('#announcementComposerToggle').click();
+  await expect(page.locator('#announcementComposer')).toBeVisible();
+  await page.locator('[data-chat-quick-channel="direct"]').click();
+  await expect(page.locator('#announcementComposer')).toHaveCount(0);
+  await expect(page.locator('html')).not.toHaveClass(/scms-announcement-composer-open/);
+  await page.locator('[data-chat-quick-channel="announcements"]').click();
+  await expect(page.locator('#announcementComposer')).toBeHidden();
+});
+
+test('Hiding the active Official Announcements tab also clears its modal state', async ({ page }) => {
+  await page.setViewportSize({ width: 390, height: 844 });
+  await mountSmartChat(page, false);
+  await page.evaluate(() => {
+    window.APP.is_admin = true;
+    window.renderChat();
+    window.switchChatChannel('announcements');
+  });
+  await expect(page.locator('#announcementComposerToggle')).toBeVisible();
+  await page.locator('#announcementComposerToggle').click();
+  await expect(page.locator('#announcementComposer')).toBeVisible();
+  await page.locator('.smart-chat-quick-channel-wrap:has([data-chat-quick-channel="announcements"]) .smart-chat-quick-channel-hide').click();
+  await expect(page.locator('#announcementComposer')).toHaveCount(0);
+  await expect(page.locator('html')).not.toHaveClass(/scms-announcement-composer-open/);
+});
