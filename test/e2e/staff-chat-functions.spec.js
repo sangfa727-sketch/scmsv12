@@ -467,22 +467,22 @@ test('admin official announcement uses verified recipients and sends through the
   await page.evaluate(() => {
     window.APP.is_admin = true;
     window.renderChat();
-    window.switchChatChannel('announcements');
   });
+  await page.evaluate(() => window.switchChatChannel('announcements'));
+
+  // Open the modal before interacting with its controls so focus/visibility behavior matches real use.
+  await page.locator('#announcementComposerToggle').click();
+  await expect(page.locator('#adminMsgRecipientType')).toHaveCount(1);
+  await expect(page.locator('#adminMsgReason')).toBeVisible();
 
   // The native select is intentionally hidden by SCMS's custom-select enhancement.
   // Set its backing value and dispatch change to exercise the preview handler.
-  await expect(page.locator('#adminMsgRecipientType')).toHaveCount(1);
   await page.locator('#adminMsgRecipientType').evaluate((select) => {
     select.value = 'all_staff';
     select.dispatchEvent(new Event('change', { bubbles: true }));
   });
   await expect.poll(async () => (await calls(page, 'getChatRecipientPreview')).length).toBeGreaterThan(0);
   await expect(page.locator('#adminMsgRoutingStatus')).toHaveClass(/verified/);
-
-  // Admin composer is intentionally collapsed in the announcement workspace.
-  await page.locator('#announcementComposerToggle').click();
-  await expect(page.locator('#adminMsgReason')).toBeVisible();
   await page.locator('#adminMsgReason').fill('Staff operations update');
   await page.locator('#adminMsgBody').fill('Please review the updated duty schedule.');
   await expect(page.locator('#adminMsgSendBtn')).toBeEnabled();
@@ -987,8 +987,8 @@ test('Official Announcement send failure keeps the draft and restores the send c
   await page.evaluate(() => {
     window.APP.is_admin = true;
     window.renderChat();
-    window.switchChatChannel('announcements');
   });
+  await page.evaluate(() => window.switchChatChannel('announcements'));
   await expect(page.locator('#announcementComposerToggle')).toBeVisible();
   await page.locator('#announcementComposerToggle').click();
   await expect(page.locator('#adminMsgBody')).toBeVisible();
@@ -1222,4 +1222,52 @@ test('Inquiry Chat shows retry UI on open failure and recovers without stale mes
   await expect(page.locator('#inquiryMessageStream')).toContainText('Recovered ticket message');
   await expect(page.locator('#inquiryMessageStream .chat-error')).toHaveCount(0);
   await expect(page.locator('#inquiryChatInput')).toBeEnabled();
+});
+
+
+test('Official Announcements plus opens a fixed modal without shifting the mobile workspace', async ({ page }) => {
+  await page.setViewportSize({ width: 390, height: 844 });
+  await mountSmartChat(page, false);
+  await page.evaluate(() => {
+    window.APP.is_admin = true;
+    // The saved Chat mode may be AI; explicitly enter School Chat before selecting
+    // the Official Announcements channel so this test exercises the intended workspace.
+    window.switchChatMode('school');
+    window.renderChat();
+    window.switchChatChannel('announcements');
+  });
+
+  const plus = page.locator('#announcementComposerToggleMobile');
+  await expect(plus).toBeVisible();
+  await expect(page.locator('#announcementList .smart-chat-announcement-card')).toHaveCount(1);
+  await expect(page.locator('#announcementStream .smart-chat-announcement-detail')).toBeVisible();
+  // Ensure the target control is already in view before taking geometry measurements.
+  // Otherwise Playwright's click auto-scroll can be mistaken for a modal layout shift.
+  await plus.scrollIntoViewIfNeeded();
+  const before = await page.evaluate(() => {
+    const shell = document.querySelector('.smart-chat-announcement-shell');
+    const list = document.querySelector('#announcementList');
+    const detail = document.querySelector('#announcementStream');
+    const rect = (element) => { const r = element.getBoundingClientRect(); return { x: r.x, y: r.y, width: r.width, height: r.height }; };
+    return { shell: rect(shell), list: rect(list), detail: rect(detail) };
+  });
+
+  // Force the already-visible button activation so Playwright does not auto-scroll the page
+  // between the baseline and post-open geometry measurements. The real click handler still runs.
+  await plus.evaluate((button) => button.click());
+  await expect(page.locator('#announcementComposer')).toHaveCSS('position', 'fixed');
+  await expect(page.locator('#announcementComposer .smart-chat-admin-card')).toBeVisible();
+  await expect(page.locator('.smart-chat-composer-close')).toBeVisible();
+  const after = await page.evaluate(() => {
+    const shell = document.querySelector('.smart-chat-announcement-shell');
+    const list = document.querySelector('#announcementList');
+    const detail = document.querySelector('#announcementStream');
+    const rect = (element) => { const r = element.getBoundingClientRect(); return { x: r.x, y: r.y, width: r.width, height: r.height }; };
+    return { shell: rect(shell), list: rect(list), detail: rect(detail) };
+  });
+  expect(after).toEqual(before);
+
+  await page.locator('.smart-chat-composer-close').click();
+  await expect(page.locator('#announcementComposer')).toBeHidden();
+  await expect(page.locator('html')).not.toHaveClass(/scms-announcement-composer-open/);
 });

@@ -88,7 +88,7 @@ function _renderAdminComposer() {
   if (!window.APP?.is_admin) return '';
   const recipients = _adminGradeRecipients;
   return `
-    <section class="smart-chat-admin-card" aria-label="${t('chat.adminComposer')}">
+    <section class="smart-chat-admin-card" role="dialog" aria-modal="true" aria-label="${t('chat.adminComposer')}">
       <div class="smart-chat-section-head">
         <div>
           <div class="smart-chat-kicker">${t('chat.adminTools')}</div>
@@ -96,6 +96,7 @@ function _renderAdminComposer() {
           <p>${t('chat.officialMessageHint')}</p>
         </div>
         <span class="smart-chat-preview-badge">${t('chat.serverVerified')}</span>
+        <button type="button" class="smart-chat-composer-close" onclick="_toggleAnnouncementComposer(false)" aria-label="${t('chat.closeOfficialMessage')}" title="${t('chat.closeOfficialMessage')}">×</button>
       </div>
 
       <div class="smart-chat-form-grid">
@@ -425,13 +426,18 @@ window._refreshAdminComposerPreview = function() {
     .smart-chat-list-actions>button:hover{background:var(--surface2);color:var(--text)}
     .smart-chat-add-btn{font-size:20px;line-height:1}
     .smart-chat-refresh-btn{font-size:15px}
-    .smart-chat-composer-drawer{display:none;margin-top:10px}
+    .smart-chat-composer-drawer{display:none;position:fixed;inset:0;z-index:12000;align-items:center;justify-content:center;box-sizing:border-box;margin:0;padding:calc(16px + env(safe-area-inset-top)) 16px calc(16px + env(safe-area-inset-bottom));background:rgba(7,12,22,.64);backdrop-filter:blur(5px);-webkit-backdrop-filter:blur(5px);overflow:auto;overscroll-behavior:contain}
     #adminMsgSendBtn{white-space:nowrap;min-width:max-content;padding-inline:12px;font-size:11px}
     .smart-chat-department-shell:not(.has-selection){grid-template-columns:1fr}
     .smart-chat-department-shell:not(.has-selection) .smart-chat-direct-conversation{display:none !important}
     @media(max-width:760px){#adminMsgSendBtn{font-size:10px;padding-inline:10px}}
-    .smart-chat-composer-drawer.is-open{display:block}
+    .smart-chat-composer-drawer.is-open{display:flex}
+    .smart-chat-composer-drawer .smart-chat-admin-card{width:min(100%,720px);max-height:min(88dvh,820px);overflow-y:auto;overscroll-behavior:contain;box-shadow:0 24px 80px rgba(0,0,0,.32)}
+    .smart-chat-composer-close{flex:0 0 34px;width:34px;height:34px;border:1px solid var(--border);border-radius:10px;background:var(--bg2);color:var(--text);font-size:22px;line-height:1;display:inline-flex;align-items:center;justify-content:center;cursor:pointer}
+    /* The fixed composer overlay blocks background interaction; locking html/body overflow here can reset mobile scroll and shift the workspace. */
+    @media(max-width:760px){.smart-chat-composer-drawer{padding:calc(10px + env(safe-area-inset-top)) 10px calc(10px + env(safe-area-inset-bottom))}.smart-chat-composer-drawer .smart-chat-admin-card{width:100%;max-height:calc(100dvh - 20px);border-radius:18px;padding:12px}#page-chat .smart-chat-announcement-add-mobile{display:inline-flex}}
     .smart-chat-composer-drawer .smart-chat-admin-card{margin:0}
+    .smart-chat-announcement-add-mobile{display:none;flex:0 0 34px;width:34px;height:34px;border:1px solid var(--border);border-radius:10px;background:var(--bg2);color:var(--text);font-size:20px;line-height:1;align-items:center;justify-content:center;cursor:pointer}
     .smart-chat-conversation-list{min-height:0}
     .smart-chat-list-empty-card{margin:8px 0;padding:16px 12px;border:1px dashed var(--border);border-radius:12px;background:var(--bg2);text-align:center}
     .smart-chat-list-empty-card .icon{font-size:20px;margin-bottom:5px}
@@ -1007,21 +1013,47 @@ async function _submitInquiryDraft(e){
   return false;
 }
 let _announcementComposerOpen=false;
+let _announcementComposerScrollY=0;
+let _announcementComposerBodyStyles=null;
+function _lockAnnouncementPageScroll(){
+  // The composer is a fixed viewport overlay. Do not change body positioning,
+  // overflow, or window scroll here: mobile browsers can shift the chat workspace
+  // when those properties change. The overlay/root state handles interaction.
+  _announcementComposerScrollY=Number.isFinite(window.scrollY)?window.scrollY:0;
+}
+function _unlockAnnouncementPageScroll(){
+  // Intentionally preserve the current page scroll position when dismissing.
+  _announcementComposerBodyStyles=null;
+}
 window._toggleAnnouncementComposer=function(force=null){
   if(!window.APP?.is_admin)return;
-  _announcementComposerOpen=force===null?!_announcementComposerOpen:!!force;
+  const nextOpen=force===null?!_announcementComposerOpen:!!force;
+  if(!_announcementComposerOpen&&nextOpen)_lockAnnouncementPageScroll();
+  if(_announcementComposerOpen&&!nextOpen)_unlockAnnouncementPageScroll();
+  _announcementComposerOpen=nextOpen;
   const card=document.getElementById('announcementComposer');
-  const btn=document.getElementById('announcementComposerToggle');
-  if(card)card.classList.toggle('is-open',_announcementComposerOpen);
-  if(btn){
+  const buttons=[document.getElementById('announcementComposerToggle'),document.getElementById('announcementComposerToggleMobile')].filter(Boolean);
+  if(card){
+    card.classList.toggle('is-open',_announcementComposerOpen);
+    card.onclick=event=>{if(event.target===card)window._toggleAnnouncementComposer(false);};
+  }
+  document.documentElement.classList.toggle('scms-announcement-composer-open',_announcementComposerOpen);
+  buttons.forEach(btn=>{
     btn.setAttribute('aria-expanded',String(_announcementComposerOpen));
     btn.textContent=_announcementComposerOpen?'×':'+';
     btn.title=_announcementComposerOpen?t('chat.closeOfficialMessage'):t('chat.newOfficialMessage');
-  }
-  if(_announcementComposerOpen){
-    requestAnimationFrame(()=>document.getElementById('adminMsgBody')?.focus());
-  }
+    btn.setAttribute('aria-label',_announcementComposerOpen?t('chat.closeOfficialMessage'):t('chat.newOfficialMessage'));
+  });
+  // Do not move focus automatically on mobile: focusing a control inside a
+  // fixed overlay can scroll the underlying document in mobile browser engines.
+  // The close button remains reachable through normal keyboard navigation.
 };
+if(!window.__SCMS_ANNOUNCEMENT_COMPOSER_ESCAPE_BOUND__){
+  window.__SCMS_ANNOUNCEMENT_COMPOSER_ESCAPE_BOUND__=true;
+  document.addEventListener('keydown',event=>{
+    if(event.key==='Escape'&&_announcementComposerOpen)window._toggleAnnouncementComposer(false);
+  });
+}
 function _announcementExcerpt(value,limit=96){
   const text=String(value||'').replace(/\s+/g,' ').trim();
   if(!text)return '';
@@ -1056,14 +1088,14 @@ function _renderAnnouncementList(rows){
   }).join('');
 }
 function _renderAnnouncementWorkspace(){
-  const composer=window.APP?.is_admin ? `<div id="announcementComposer" class="smart-chat-composer-drawer">${_renderAdminComposer()}</div>` : '';
+  const composer=window.APP?.is_admin ? `<div id="announcementComposer" class="smart-chat-composer-drawer${_announcementComposerOpen?' is-open':''}">${_renderAdminComposer()}</div>` : '';
   return _chatChannelBack(t('chat.officialAnnouncements')) + composer +
     '<div class="smart-chat-direct-shell smart-chat-announcement-shell'+(_announcementId?' has-selection':'')+'">'+
     `<aside class="smart-chat-direct-list"><div class="smart-chat-direct-list-head"><div><div class="smart-chat-kicker">${t('chat.officialAnnouncements')}</div><strong>${t('chat.officialAnnouncements')}</strong></div><div class="smart-chat-list-actions">`+
-    (window.APP?.is_admin ? `<button type="button" class="smart-chat-add-btn" id="announcementComposerToggle" onclick="_toggleAnnouncementComposer()" aria-expanded="false" aria-controls="announcementComposer" title="${t('chat.officialAnnouncements')}">+</button>` : '')+
+    (window.APP?.is_admin ? `<button type="button" class="smart-chat-add-btn" id="announcementComposerToggle" onclick="_toggleAnnouncementComposer()" aria-expanded="${_announcementComposerOpen?'true':'false'}" aria-controls="announcementComposer" title="${t(_announcementComposerOpen?'chat.closeOfficialMessage':'chat.newOfficialMessage')}">${_announcementComposerOpen?'×':'+'}</button>` : '')+
     `<button type="button" class="smart-chat-refresh-btn" onclick="_loadAnnouncementWorkspace()" aria-label="${t('chat.refresh')}" title="${t('chat.refresh')}">↻</button></div></div>`+
     '<div id="announcementList" class="smart-chat-conversation-list" aria-label="'+esc(t('chat.officialAnnouncements'))+'"></div></aside>'+
-    `<section class="smart-chat-direct-conversation"><div id="announcementHead" class="smart-chat-conversation-head"><div><strong>${t('chat.officialAnnouncements')}</strong><small>${t('chat.officialNotices')}</small></div><span class="smart-chat-verified-pill">${t('chat.verifiedStaffOnly')}</span></div><div id="announcementStream" class="chat-stream" aria-live="polite"><div class="chat-empty"><div class="chat-empty-icon">📢</div><div class="chat-empty-title">${t('chat.officialAnnouncements')}</div><div class="chat-empty-sub">${t('chat.emptySub')}</div></div></div></section></div>`;
+    `<section class="smart-chat-direct-conversation"><div id="announcementHead" class="smart-chat-conversation-head"><div><strong>${t('chat.officialAnnouncements')}</strong><small>${t('chat.officialNotices')}</small></div>${window.APP?.is_admin ? `<button type="button" class="smart-chat-announcement-add-mobile" id="announcementComposerToggleMobile" onclick="_toggleAnnouncementComposer()" aria-expanded="${_announcementComposerOpen?'true':'false'}" aria-controls="announcementComposer" aria-label="${t(_announcementComposerOpen?'chat.closeOfficialMessage':'chat.newOfficialMessage')}" title="${t(_announcementComposerOpen?'chat.closeOfficialMessage':'chat.newOfficialMessage')}">${_announcementComposerOpen?'×':'+'}</button>` : ''}<span class="smart-chat-verified-pill">${t('chat.verifiedStaffOnly')}</span></div><div id="announcementStream" class="chat-stream" aria-live="polite"><div class="chat-empty"><div class="chat-empty-icon">📢</div><div class="chat-empty-title">${t('chat.officialAnnouncements')}</div><div class="chat-empty-sub">${t('chat.emptySub')}</div></div></div></section></div>`;
 }
 async function _loadAnnouncementWorkspace(autoOpen=true){
   const cached=Array.isArray(window._chatAnnouncements)?window._chatAnnouncements:null;
@@ -1090,7 +1122,7 @@ window._openAnnouncement=async function(id){
   const shell=document.querySelector('.smart-chat-announcement-shell');if(shell)shell.classList.add('has-selection');
   _renderAnnouncementList(window._chatAnnouncements||[]);
   const head=document.getElementById('announcementHead');
-  if(head)head.innerHTML=`<div class="smart-chat-direct-peer"><button type="button" class="smart-chat-mobile-back" onclick="_clearAnnouncementSelection()" aria-label="${t('chat.officialAnnouncements')}">‹</button><div><strong>${esc(a.message_type||t('chat.officialAnnouncements'))}</strong><small>${esc(_formatAnnouncementDate(a.created_at))}</small></div></div><span class="smart-chat-verified-pill">${t('chat.verifiedStaffOnly')}</span>`;
+  if(head)head.innerHTML=`<div class="smart-chat-direct-peer"><button type="button" class="smart-chat-mobile-back" onclick="_clearAnnouncementSelection()" aria-label="${t('chat.officialAnnouncements')}">‹</button><div><strong>${esc(a.message_type||t('chat.officialAnnouncements'))}</strong><small>${esc(_formatAnnouncementDate(a.created_at))}</small></div></div>${window.APP?.is_admin ? `<button type="button" class="smart-chat-announcement-add-mobile" id="announcementComposerToggleMobile" onclick="_toggleAnnouncementComposer()" aria-expanded="${_announcementComposerOpen?'true':'false'}" aria-controls="announcementComposer" aria-label="${t(_announcementComposerOpen?'chat.closeOfficialMessage':'chat.newOfficialMessage')}" title="${t(_announcementComposerOpen?'chat.closeOfficialMessage':'chat.newOfficialMessage')}">${_announcementComposerOpen?'×':'+'}</button>` : ''}<span class="smart-chat-verified-pill">${t('chat.verifiedStaffOnly')}</span>`;
   stream.innerHTML=`<article class="smart-chat-official-preview smart-chat-announcement-detail"><div class="smart-chat-preview-label">${t('chat.officialNotices')}</div><h2 class="smart-chat-preview-header">${esc(a.message_type||t('chat.officialAnnouncements'))}</h2><div class="smart-chat-preview-meta">${esc(_formatAnnouncementDate(a.created_at))}</div><div class="smart-chat-preview-reason"><span>${esc(a.reason||t('chat.officialNotices'))}</span></div><div class="smart-chat-preview-body">${esc(a.body||'').replace(/\n/g,'<br>')}</div></article>`;
   try{
     if(API.markStaffAnnouncementRead){
@@ -1109,7 +1141,7 @@ window._clearAnnouncementSelection=function(){
   _announcementId=null;
   const shell=document.querySelector('.smart-chat-announcement-shell');if(shell)shell.classList.remove('has-selection');
   const head=document.getElementById('announcementHead');
-  if(head)head.innerHTML=`<div><strong>${t('chat.officialAnnouncements')}</strong><small>${t('chat.officialNotices')}</small></div><span class="smart-chat-verified-pill">${t('chat.verifiedStaffOnly')}</span>`;
+  if(head)head.innerHTML=`<div><strong>${t('chat.officialAnnouncements')}</strong><small>${t('chat.officialNotices')}</small></div>${window.APP?.is_admin ? `<button type="button" class="smart-chat-announcement-add-mobile" id="announcementComposerToggleMobile" onclick="_toggleAnnouncementComposer()" aria-expanded="${_announcementComposerOpen?'true':'false'}" aria-controls="announcementComposer" aria-label="${t(_announcementComposerOpen?'chat.closeOfficialMessage':'chat.newOfficialMessage')}" title="${t(_announcementComposerOpen?'chat.closeOfficialMessage':'chat.newOfficialMessage')}">${_announcementComposerOpen?'×':'+'}</button>` : ''}<span class="smart-chat-verified-pill">${t('chat.verifiedStaffOnly')}</span>`;
   const stream=document.getElementById('announcementStream');
   if(stream)stream.innerHTML=`<div class="chat-empty"><div class="chat-empty-icon">📢</div><div class="chat-empty-title">${t('chat.emptyTitle')}</div><div class="chat-empty-sub">${t('chat.emptySub')}</div></div>`;
   _renderAnnouncementList(window._chatAnnouncements||[]);
