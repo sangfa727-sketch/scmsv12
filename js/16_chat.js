@@ -425,12 +425,15 @@ window._refreshAdminComposerPreview = function() {
     .smart-chat-list-actions>button:hover{background:var(--surface2);color:var(--text)}
     .smart-chat-add-btn{font-size:20px;line-height:1}
     .smart-chat-refresh-btn{font-size:15px}
-    .smart-chat-composer-drawer{display:none;margin-top:10px}
+    .smart-chat-composer-drawer{display:none;position:fixed;inset:0;z-index:12000;align-items:center;justify-content:center;box-sizing:border-box;margin:0;padding:calc(16px + env(safe-area-inset-top)) 16px calc(16px + env(safe-area-inset-bottom));background:rgba(7,12,22,.64);backdrop-filter:blur(5px);-webkit-backdrop-filter:blur(5px);overflow:auto;overscroll-behavior:contain}
     #adminMsgSendBtn{white-space:nowrap;min-width:max-content;padding-inline:12px;font-size:11px}
     .smart-chat-department-shell:not(.has-selection){grid-template-columns:1fr}
     .smart-chat-department-shell:not(.has-selection) .smart-chat-direct-conversation{display:none !important}
     @media(max-width:760px){#adminMsgSendBtn{font-size:10px;padding-inline:10px}}
-    .smart-chat-composer-drawer.is-open{display:block}
+    .smart-chat-composer-drawer.is-open{display:flex}
+    .smart-chat-composer-drawer .smart-chat-admin-card{width:min(100%,720px);max-height:min(88dvh,820px);overflow-y:auto;overscroll-behavior:contain;box-shadow:0 24px 80px rgba(0,0,0,.32)}
+    html.scms-announcement-composer-open,html.scms-announcement-composer-open body{overflow:hidden!important}
+    @media(max-width:760px){.smart-chat-composer-drawer{padding:calc(10px + env(safe-area-inset-top)) 10px calc(10px + env(safe-area-inset-bottom))}.smart-chat-composer-drawer .smart-chat-admin-card{width:100%;max-height:calc(100dvh - 20px);border-radius:18px;padding:12px}}
     .smart-chat-composer-drawer .smart-chat-admin-card{margin:0}
     .smart-chat-conversation-list{min-height:0}
     .smart-chat-list-empty-card{margin:8px 0;padding:16px 12px;border:1px dashed var(--border);border-radius:12px;background:var(--bg2);text-align:center}
@@ -1012,7 +1015,11 @@ window._toggleAnnouncementComposer=function(force=null){
   _announcementComposerOpen=force===null?!_announcementComposerOpen:!!force;
   const card=document.getElementById('announcementComposer');
   const btn=document.getElementById('announcementComposerToggle');
-  if(card)card.classList.toggle('is-open',_announcementComposerOpen);
+  if(card){
+    card.classList.toggle('is-open',_announcementComposerOpen);
+    card.onclick=event=>{if(event.target===card)window._toggleAnnouncementComposer(false);};
+  }
+  document.documentElement.classList.toggle('scms-announcement-composer-open',_announcementComposerOpen);
   if(btn){
     btn.setAttribute('aria-expanded',String(_announcementComposerOpen));
     btn.textContent=_announcementComposerOpen?'×':'+';
@@ -1022,6 +1029,12 @@ window._toggleAnnouncementComposer=function(force=null){
     requestAnimationFrame(()=>document.getElementById('adminMsgBody')?.focus());
   }
 };
+if(!window.__SCMS_ANNOUNCEMENT_COMPOSER_ESCAPE_BOUND__){
+  window.__SCMS_ANNOUNCEMENT_COMPOSER_ESCAPE_BOUND__=true;
+  document.addEventListener('keydown',event=>{
+    if(event.key==='Escape'&&_announcementComposerOpen)window._toggleAnnouncementComposer(false);
+  });
+}
 function _announcementExcerpt(value,limit=96){
   const text=String(value||'').replace(/\s+/g,' ').trim();
   if(!text)return '';
@@ -1056,11 +1069,11 @@ function _renderAnnouncementList(rows){
   }).join('');
 }
 function _renderAnnouncementWorkspace(){
-  const composer=window.APP?.is_admin ? `<div id="announcementComposer" class="smart-chat-composer-drawer">${_renderAdminComposer()}</div>` : '';
+  const composer=window.APP?.is_admin ? `<div id="announcementComposer" class="smart-chat-composer-drawer${_announcementComposerOpen?' is-open':''}">${_renderAdminComposer()}</div>` : '';
   return _chatChannelBack(t('chat.officialAnnouncements')) + composer +
     '<div class="smart-chat-direct-shell smart-chat-announcement-shell'+(_announcementId?' has-selection':'')+'">'+
     `<aside class="smart-chat-direct-list"><div class="smart-chat-direct-list-head"><div><div class="smart-chat-kicker">${t('chat.officialAnnouncements')}</div><strong>${t('chat.officialAnnouncements')}</strong></div><div class="smart-chat-list-actions">`+
-    (window.APP?.is_admin ? `<button type="button" class="smart-chat-add-btn" id="announcementComposerToggle" onclick="_toggleAnnouncementComposer()" aria-expanded="false" aria-controls="announcementComposer" title="${t('chat.officialAnnouncements')}">+</button>` : '')+
+    (window.APP?.is_admin ? `<button type="button" class="smart-chat-add-btn" id="announcementComposerToggle" onclick="_toggleAnnouncementComposer()" aria-expanded="${_announcementComposerOpen?'true':'false'}" aria-controls="announcementComposer" title="${t(_announcementComposerOpen?'chat.closeOfficialMessage':'chat.newOfficialMessage')}">${_announcementComposerOpen?'×':'+'}</button>` : '')+
     `<button type="button" class="smart-chat-refresh-btn" onclick="_loadAnnouncementWorkspace()" aria-label="${t('chat.refresh')}" title="${t('chat.refresh')}">↻</button></div></div>`+
     '<div id="announcementList" class="smart-chat-conversation-list" aria-label="'+esc(t('chat.officialAnnouncements'))+'"></div></aside>'+
     `<section class="smart-chat-direct-conversation"><div id="announcementHead" class="smart-chat-conversation-head"><div><strong>${t('chat.officialAnnouncements')}</strong><small>${t('chat.officialNotices')}</small></div><span class="smart-chat-verified-pill">${t('chat.verifiedStaffOnly')}</span></div><div id="announcementStream" class="chat-stream" aria-live="polite"><div class="chat-empty"><div class="chat-empty-icon">📢</div><div class="chat-empty-title">${t('chat.officialAnnouncements')}</div><div class="chat-empty-sub">${t('chat.emptySub')}</div></div></div></section></div>`;
