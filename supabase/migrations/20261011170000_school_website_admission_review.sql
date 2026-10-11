@@ -155,7 +155,7 @@ begin
     return jsonb_build_object('ok', false, 'error', 'access_denied');
   end if;
 
-  if private.web_has_permission(p_session_token, 'website.manage', null, null) is distinct from true then
+  if private.web_has_permission(p_session_token, 'website.admissions.review', null, null) is distinct from true then
     return jsonb_build_object('ok', false, 'error', 'access_denied');
   end if;
 
