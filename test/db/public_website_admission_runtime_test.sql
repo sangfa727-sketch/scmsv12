@@ -250,7 +250,7 @@ values
 do $review$
 declare
   v jsonb;
-  v second jsonb;
+  second jsonb;
   v_id uuid;
   v_updated_at timestamptz;
   v_count bigint;
