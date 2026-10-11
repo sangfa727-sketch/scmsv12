@@ -1374,7 +1374,7 @@ async function _loadChatMessages() {
   } catch (e) {
     // Do not replace valid messages with a transient RPC error/empty response.
     const stream = document.getElementById('chatStream');
-    if (stream && !Array.isArray(window.APP?.chatMessages))
+    if (stream && (!Array.isArray(window.APP?.chatMessages) || window.APP.chatMessages.length === 0))
       stream.innerHTML = `<div class="chat-error"><div>💬</div><div>${t('chat.loadFailed')}</div><button class="btn-secondary" onclick="_loadChatMessages()">${t('chat.retry')}</button></div>`;
   }
 }
