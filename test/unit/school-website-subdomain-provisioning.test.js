@@ -29,6 +29,9 @@ test('subdomain provisioning requires a verified platform-owned root domain and 
   assert.match(sql, /create table if not exists public\.website_platform_domains/);
   assert.match(sql, /verified_at is not null/);
   assert.match(sql, /website_platform_domains_one_active_default/);
+  assert.match(sql, /website_sites_active_status_consistency/);
+  assert.match(sql, /private\.website_sync_sites_with_platform_domain/);
+  assert.match(sql, /website\.site_suspended_by_domain/);
   assert.match(sql, /platform_domain_not_configured/);
   assert.match(sql, /invalid_slug/);
   assert.match(sql, /hostname_unavailable/);
