@@ -21,10 +21,10 @@ test('public admission edge endpoint uses server secret only and calls the isola
   assert.match(edge, /Deno\.env\.get\("SUPABASE_SERVICE_ROLE_KEY"\)/);
   assert.match(edge, /rpc_website_admission_submit/);
   assert.match(edge, /p_hostname:\s*origin\.hostname/);
-  assert.match(edge, /p_identity_hash:\s*await sha256\(identity\)/);
+  assert.match(edge, /p_identity_hash:\s*await hmacIdentity\(identity, rateLimitSalt\)/);
   assert.match(edge, /website\.trim\(\)/);
   assert.match(edge, /MAX_BODY_CHARS/);
-  assert.match(edge, /credentials/);
+  assert.match(edge, /Authorization: `Bearer \\${serviceRoleKey}`/);\n  assert.match(edge, /SCMS_ADMISSION_RATE_LIMIT_SALT/);\n  assert.match(edge, /readBodyLimited/);
   assert.doesNotMatch(edge, /students|service_role.*console\.log/i);
 });
 
