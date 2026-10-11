@@ -76,11 +76,18 @@ begin
 
   if (old.active = true and new.active = false)
      or (old.verified_at is not null and new.verified_at is null) then
-    update public.website_sites
-       set active = false,
-           provisioning_status = 'pending_activation',
-           updated_at = now()
-     where platform_domain = old.base_domain;
+    with changed_sites as (
+      update public.website_sites
+         set active = false,
+             provisioning_status = 'pending_activation',
+             updated_at = now()
+       where platform_domain = old.base_domain
+       returning school_id, hostname
+    )
+    insert into public.audit_log(source, actor, action, school_id, payload)
+    select 'web', 'platform_domain_registry', 'website.site_suspended_by_domain',
+           school_id, jsonb_build_object('hostname', hostname, 'base_domain', old.base_domain)
+      from changed_sites;
   end if;
   return new;
 end;
