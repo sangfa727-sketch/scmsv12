@@ -88,7 +88,7 @@ function _renderAdminComposer() {
   if (!window.APP?.is_admin) return '';
   const recipients = _adminGradeRecipients;
   return `
-    <section class="smart-chat-admin-card" aria-label="${t('chat.adminComposer')}">
+    <section class="smart-chat-admin-card" role="dialog" aria-modal="true" aria-label="${t('chat.adminComposer')}">
       <div class="smart-chat-section-head">
         <div>
           <div class="smart-chat-kicker">${t('chat.adminTools')}</div>
@@ -96,6 +96,7 @@ function _renderAdminComposer() {
           <p>${t('chat.officialMessageHint')}</p>
         </div>
         <span class="smart-chat-preview-badge">${t('chat.serverVerified')}</span>
+        <button type="button" class="smart-chat-composer-close" onclick="_toggleAnnouncementComposer(false)" aria-label="${t('chat.closeOfficialMessage')}" title="${t('chat.closeOfficialMessage')}">×</button>
       </div>
 
       <div class="smart-chat-form-grid">
@@ -432,6 +433,7 @@ window._refreshAdminComposerPreview = function() {
     @media(max-width:760px){#adminMsgSendBtn{font-size:10px;padding-inline:10px}}
     .smart-chat-composer-drawer.is-open{display:flex}
     .smart-chat-composer-drawer .smart-chat-admin-card{width:min(100%,720px);max-height:min(88dvh,820px);overflow-y:auto;overscroll-behavior:contain;box-shadow:0 24px 80px rgba(0,0,0,.32)}
+    .smart-chat-composer-close{flex:0 0 34px;width:34px;height:34px;border:1px solid var(--border);border-radius:10px;background:var(--bg2);color:var(--text);font-size:22px;line-height:1;display:inline-flex;align-items:center;justify-content:center;cursor:pointer}
     html.scms-announcement-composer-open,html.scms-announcement-composer-open body{overflow:hidden!important}
     @media(max-width:760px){.smart-chat-composer-drawer{padding:calc(10px + env(safe-area-inset-top)) 10px calc(10px + env(safe-area-inset-bottom))}.smart-chat-composer-drawer .smart-chat-admin-card{width:100%;max-height:calc(100dvh - 20px);border-radius:18px;padding:12px}}
     .smart-chat-composer-drawer .smart-chat-admin-card{margin:0}
