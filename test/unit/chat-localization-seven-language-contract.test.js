@@ -37,6 +37,9 @@ function loadChatLocales() {
   const context = { window };
   for (const filename of LOCALE_FILES) {
     const fullPath = path.join(ROOT, 'js', filename);
+    if (filename === '00f_chat_locales.js') {
+      assert.equal(window.I18N_TH?.['chat.retry'], 'ลองอีกครั้ง', 'Thai base retry translation must be loaded before the Chat extension');
+    }
     const source = fs.readFileSync(fullPath, 'utf8');
     vm.runInNewContext(source, context, { filename: fullPath });
   }
