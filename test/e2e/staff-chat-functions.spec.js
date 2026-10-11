@@ -1694,3 +1694,72 @@ test('mobile Chat type switcher supports horizontal touch scrolling without dupl
     await context.close();
   }
 });
+
+test('mobile Official Announcement composer overlays the list and closes through all dismissal paths', async ({ page }) => {
+  await page.setViewportSize({ width: 390, height: 844 });
+  await mountSmartChat(page, false);
+  await page.evaluate(() => {
+    window.APP.is_admin = true;
+    window.renderChat();
+    window.switchChatChannel('announcements');
+  });
+
+  const overlay = page.locator('#announcementComposer');
+  const toggle = page.locator('#announcementComposerToggle');
+  const list = page.locator('#announcementList');
+  await expect(toggle).toBeVisible();
+  await expect(list).toBeVisible();
+  await expect(overlay).toBeHidden();
+
+  const listBefore = await list.evaluate(el => {
+    const r = el.getBoundingClientRect();
+    return { x: r.x, y: r.y, width: r.width, height: r.height };
+  });
+
+  await toggle.click();
+  await expect(overlay).toBeVisible();
+  await expect(overlay.locator('.smart-chat-admin-card')).toBeVisible();
+  await expect(toggle).toHaveAttribute('aria-expanded', 'true');
+
+  const overlayLayout = await overlay.evaluate(el => {
+    const r = el.getBoundingClientRect();
+    return {
+      position: getComputedStyle(el).position,
+      x: r.x, y: r.y, width: r.width, height: r.height,
+      viewportWidth: window.innerWidth, viewportHeight: window.innerHeight
+    };
+  });
+  expect(overlayLayout.position).toBe('fixed');
+  expect(Math.abs(overlayLayout.x)).toBeLessThanOrEqual(1);
+  expect(Math.abs(overlayLayout.y)).toBeLessThanOrEqual(1);
+  expect(Math.abs(overlayLayout.width - overlayLayout.viewportWidth)).toBeLessThanOrEqual(1);
+  expect(Math.abs(overlayLayout.height - overlayLayout.viewportHeight)).toBeLessThanOrEqual(1);
+
+  const listAfterOpen = await list.evaluate(el => {
+    const r = el.getBoundingClientRect();
+    return { x: r.x, y: r.y, width: r.width, height: r.height };
+  });
+  expect(listAfterOpen).toEqual(listBefore);
+
+  // Tapping the dimmed backdrop should dismiss the overlay without reflowing the list.
+  await overlay.click({ position: { x: 3, y: 3 } });
+  await expect(overlay).toBeHidden();
+  await expect(toggle).toHaveAttribute('aria-expanded', 'false');
+  expect(await list.evaluate(el => {
+    const r = el.getBoundingClientRect();
+    return { x: r.x, y: r.y, width: r.width, height: r.height };
+  })).toEqual(listBefore);
+
+  // Escape and the explicit close button are also supported dismissal paths.
+  await toggle.click();
+  await expect(overlay).toBeVisible();
+  await page.keyboard.press('Escape');
+  await expect(overlay).toBeHidden();
+
+  await toggle.click();
+  await expect(overlay).toBeVisible();
+  await overlay.locator('.smart-chat-composer-close').click();
+  await expect(overlay).toBeHidden();
+  await expect(toggle).toHaveAttribute('aria-expanded', 'false');
+});
+
