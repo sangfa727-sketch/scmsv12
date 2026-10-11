@@ -1,5 +1,3 @@
-import "jsr:@supabase/functions-js/edge-runtime.d.ts";
-
 const MAX_BODY_CHARS = 16_000;
 const RATE_IDENTITY_HEADERS = ["cf-connecting-ip", "x-real-ip", "x-forwarded-for"];
 
