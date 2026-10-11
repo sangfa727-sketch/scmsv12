@@ -858,7 +858,7 @@ function _renderInquiryWorkspace() {
     </div>`;
 }
 
-let _inquiryTickets=[], _inquiryTicketId=null, _inquiryCurrentTicket=null, _inquiryDraft=null;
+let _inquiryTickets=[], _inquiryTicketId=null, _inquiryCurrentTicket=null, _inquiryDraft=null, _inquiryOpenRequest=0;
 function _renderInquiryTicketList(){
   const box=document.getElementById('inquiryTicketList'); if(!box)return;
   const unreadTitle=t('chat.unreadMessages');
@@ -877,8 +877,27 @@ async function _loadInquiryTickets(){
    }catch(e){const box=document.getElementById('inquiryTicketList');if(box&&!_inquiryTickets.length)box.innerHTML=`<div class="chat-error"><div>🎫</div><div>${t('chat.loadTicketsFailed')}</div><button type="button" class="btn-secondary" onclick="_loadInquiryTickets()">${t('chat.retry')}</button></div>`;}
 }
 async function _openInquiryTicket(id){
-  _inquiryTicketId=Number(id); const shell=document.querySelector('.smart-chat-inquiry-shell');if(shell)shell.classList.add('has-selection'); const r=await API.openInquiryTicket(_inquiryTicketId); if(!r?.ok)return;
+  const requestedId=Number(id);
+  if(!Number.isFinite(requestedId)||requestedId<=0)return;
+  const requestToken=++_inquiryOpenRequest;
+  _inquiryTicketId=requestedId;_inquiryCurrentTicket=null;
+  const shell=document.querySelector('.smart-chat-inquiry-shell');if(shell)shell.classList.add('has-selection');
   const h=document.getElementById('inquiryTicketHead'), s=document.getElementById('inquiryMessageStream'), input=document.getElementById('inquiryChatInput'), btn=document.getElementById('inquirySendBtn');
+  if(h)h.innerHTML=`<div><strong>${t('chat.loading')}</strong><small>${t('chat.authorizedTicketAccess')}</small></div><span class="smart-chat-verified-pill">${t('chat.schoolIsolated')}</span>`;
+  if(s)s.innerHTML=`<div class="chat-empty-sub">${t('chat.loading')}</div>`;
+  if(input){input.disabled=true;input.placeholder=t('chat.loading');}
+  if(btn)btn.disabled=true;
+  let r=null;
+  try{r=await API.openInquiryTicket(requestedId);}catch(_){}
+  if(requestToken!==_inquiryOpenRequest||document.getElementById('inquiryTicketHead')!==h)return;
+  if(!r?.ok||!r.ticket){
+    _inquiryCurrentTicket=null;
+    if(h)h.innerHTML=`<div><strong>${t('chat.openFailed')}</strong><small>${t('chat.authorizedTicketAccess')}</small></div><span class="smart-chat-verified-pill">${t('chat.schoolIsolated')}</span>`;
+    if(s)s.innerHTML=`<div class="chat-error"><div>🎫</div><div>${t('chat.openFailed')}</div><button type="button" class="btn-secondary" onclick="_openInquiryTicket(${requestedId})">${t('chat.retry')}</button></div>`;
+    if(input){input.disabled=true;input.placeholder=t('chat.selectTicketDots');}
+    if(btn)btn.disabled=true;
+    return;
+  }
   _inquiryCurrentTicket=r.ticket;
   const adminControls=window.APP?.is_admin?`<div class="smart-chat-inquiry-admin"><label>${t('chat.status')} <select id="inquiryStatusSelect" onchange="_updateInquiryTicket()"><option value="OPEN">${t('chat.statusOpen')}</option><option value="ASSIGNED">${t('chat.statusAssigned')}</option><option value="IN_PROGRESS">${t('chat.statusInProgress')}</option><option value="WAITING">${t('chat.statusWaiting')}</option><option value="RESOLVED">${t('chat.statusResolved')}</option><option value="CLOSED">${t('chat.statusClosed')}</option></select></label><label>${t('chat.assignee')} <select id="inquiryAssigneeSelect" onchange="_updateInquiryTicket()"><option value="">${t('chat.unassigned')}</option></select></label></div>`:'';
   if(h)h.innerHTML=`<div class="smart-chat-direct-peer"><button type="button" class="smart-chat-mobile-back" onclick="_clearInquirySelection()" aria-label="${t('chat.backToInquiryTickets')}">‹</button><span class="smart-chat-direct-avatar large" aria-hidden="true">🎫</span><div><strong>${esc(r.ticket.subject)}</strong><small>${esc(r.ticket.status)} · ${esc(r.ticket.priority)}${r.ticket.student_id?' · '+t('chat.studentLabel')+' '+esc(r.ticket.student_id):''}</small></div></div><span class="smart-chat-verified-pill">${t('chat.authorized')}</span>${adminControls}`;
@@ -896,14 +915,17 @@ async function _openInquiryTicket(id){
   if(btn)btn.disabled=input?.disabled||!_inquiryTicketId;
   if(window.API?.markInquiryRead){
     try{
-      await API.markInquiryRead(_inquiryTicketId);
-      const item=_inquiryTickets.find(t=>Number(t.id)===Number(_inquiryTicketId));
-      if(item) item.unread_count=0;
-      _renderInquiryTicketList();
-    }catch(e){ /* read state is best-effort; authorization remains server-side */ }
+      const readResult=await API.markInquiryRead(requestedId);
+      if(requestToken!==_inquiryOpenRequest||document.getElementById('inquiryTicketHead')!==h)return;
+      if(readResult?.ok===true){
+        const item=_inquiryTickets.find(t=>Number(t.id)===requestedId);
+        if(item)item.unread_count=0;
+        _renderInquiryTicketList();
+      }
+    }catch(_){ /* preserve unread state when the read receipt fails */ }
   }
 }
-window._clearInquirySelection=function(){_inquiryTicketId=null;_inquiryCurrentTicket=null;const shell=document.querySelector('.smart-chat-inquiry-shell');if(shell)shell.classList.remove('has-selection');const h=document.getElementById('inquiryTicketHead');if(h)h.innerHTML=`<div><strong>${t('chat.selectTicket')}</strong><small>${t('chat.authorizedTicketAccess')}</small></div><span class="smart-chat-verified-pill">${t('chat.schoolIsolated')}</span>`;const s=document.getElementById('inquiryMessageStream');if(s)s.innerHTML=`<div class="chat-empty"><div class="chat-empty-icon">🎫</div><div class="chat-empty-title">${t('chat.selectTicket')}</div><div class="chat-empty-sub">${t('chat.createOrSelectTicket')}</div></div>`;const i=document.getElementById('inquiryChatInput');if(i){i.disabled=true;i.placeholder=t('chat.selectTicketDots');}const b=document.getElementById('inquirySendBtn');if(b)b.disabled=true;_renderInquiryTicketList();};
+window._clearInquirySelection=function(){_inquiryOpenRequest++;_inquiryTicketId=null;_inquiryCurrentTicket=null;const shell=document.querySelector('.smart-chat-inquiry-shell');if(shell)shell.classList.remove('has-selection');const h=document.getElementById('inquiryTicketHead');if(h)h.innerHTML=`<div><strong>${t('chat.selectTicket')}</strong><small>${t('chat.authorizedTicketAccess')}</small></div><span class="smart-chat-verified-pill">${t('chat.schoolIsolated')}</span>`;const s=document.getElementById('inquiryMessageStream');if(s)s.innerHTML=`<div class="chat-empty"><div class="chat-empty-icon">🎫</div><div class="chat-empty-title">${t('chat.selectTicket')}</div><div class="chat-empty-sub">${t('chat.createOrSelectTicket')}</div></div>`;const i=document.getElementById('inquiryChatInput');if(i){i.disabled=true;i.placeholder=t('chat.selectTicketDots');}const b=document.getElementById('inquirySendBtn');if(b)b.disabled=true;_renderInquiryTicketList();};
 
 async function _updateInquiryTicket(){
   if(!window.APP?.is_admin||!_inquiryTicketId)return;
@@ -1211,7 +1233,18 @@ async function _loadDirectMessages(silent=false){
       stream.dataset.messageSignature=signature;
     }
     _renderDirectHeader();_setDirectComposer(true);
-    if(!silent)await API.markDirectRead(conversationId);
+    if(!silent&&typeof API.markDirectRead==='function'){
+      try{
+        const readResult=await API.markDirectRead(conversationId);
+        if(conversationId!==_directConversationId)return;
+        // Only clear the badge after the backend confirms the read receipt.
+        if(readResult?.ok===true){
+          const conversation=_directConversations.find(c=>Number(c.conversation_id)===conversationId);
+          if(conversation)conversation.unread_count=0;
+          _renderDirectConversationList();
+        }
+      }catch(_){ /* preserve unread state when the read receipt fails */ }
+    }
   }catch(e){
     // Keep the last successful conversation visible during a transient failure.
     const stream=document.getElementById('directMessageStream');
