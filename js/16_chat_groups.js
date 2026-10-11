@@ -83,6 +83,7 @@ window._openChatGroup=async function(id){
   if(requestToken!==_chatGroupOpenRequest)return false;
   const group=_chatGroups.find(g=>Number(g.id)===requestedId);if(group&&markedRead)group.unread_count=0;
   _renderChatGroupListIfCurrent();
+  if(markedRead)window._invalidateChatUnreadRefresh?.();
   return true;
  }catch(e){
   if(requestToken!==_chatGroupOpenRequest)return false;

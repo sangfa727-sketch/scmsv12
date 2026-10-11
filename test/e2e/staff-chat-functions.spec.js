@@ -1439,3 +1439,34 @@ test('Late Official Announcement read receipts cannot overwrite the currently se
   await expect(page.locator('#announcementStream')).toContainText('Second announcement body');
   await expect(page.locator('#announcementStream .smart-chat-preview-meta')).toHaveText(selectedMeta);
 });
+
+
+test('Direct Chat unread badge ignores a stale refresh that returns after a successful read receipt', async ({ page }) => {
+  await mountSmartChat(page);
+  await page.evaluate(() => {
+    window.API.getDirectConversations = async (...args) => {
+      window.__chatTestCalls.push({ name: 'getDirectConversations', args });
+      return [{ conversation_id: 21, teacher_id: 'teacher-2', teacher_name: 'Other Teacher', role: 'Teacher', last_message: 'Private hello', unread_count: 2 }];
+    };
+    window.switchChatChannel('direct');
+  });
+  await expect(page.locator('#directConversationList')).toContainText('Other Teacher');
+  await page.evaluate(() => {
+    window.__resolveStaleUnreadRefresh = null;
+    window.API.getDirectConversations = (...args) => {
+      window.__chatTestCalls.push({ name: 'getDirectConversationsStale', args });
+      return new Promise(resolve => { window.__resolveStaleUnreadRefresh = resolve; });
+    };
+    window.__staleUnreadRefreshPromise = window._refreshChatChannelUnreadCounts();
+  });
+  await page.evaluate(() => window.openDirectChat('teacher-2'));
+  await expect.poll(async () => (await calls(page, 'markDirectRead')).length).toBeGreaterThan(0);
+  const badge = page.locator('[data-chat-quick-channel="direct"] .smart-chat-quick-channel-count');
+  await expect(badge).toHaveText('');
+  await page.evaluate(() => window.__resolveStaleUnreadRefresh([{
+    conversation_id: 21, teacher_id: 'teacher-2', teacher_name: 'Other Teacher',
+    role: 'Teacher', last_message: 'Private hello', unread_count: 2
+  }]));
+  await page.evaluate(() => window.__staleUnreadRefreshPromise);
+  await expect(badge).toHaveText('');
+});

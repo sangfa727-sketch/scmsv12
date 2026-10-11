@@ -28,6 +28,7 @@ let _adminRecipientLoading = false;
 let _directConversationId = null;
 let _announcementId = null;
 let _announcementOpenRequest = 0;
+let _chatUnreadRefreshRequest = 0;
 let _directPeer = null;
 let _directStaff = [];
 let _directConversations = [];
@@ -711,6 +712,15 @@ function _renderChatChannelUnreadBadges() {
   }
 }
 
+window._invalidateChatUnreadRefresh = function() {
+  // A read receipt has newer authoritative state than any unread-count refresh
+  // that began before it. Ignore those pending responses and repaint local state.
+  _chatUnreadRefreshRequest++;
+  _renderChatChannelUnreadBadges();
+  _renderChatTabUnreadBadge();
+  _renderChatQuickNav();
+};
+
 function _renderChatTabUnreadBadge() {
   const badge = document.getElementById('chatTabUnreadBadge');
   if (!badge) return;
@@ -725,6 +735,7 @@ function _renderChatTabUnreadBadge() {
 
 async function _refreshChatChannelUnreadCounts() {
   if (_chatMode !== 'school' || !window.API) return;
+  const requestToken = ++_chatUnreadRefreshRequest;
   const requests = [
     ['direct', 'getDirectConversations'],
     ['tickets', 'getInquiryTickets'],
@@ -734,12 +745,13 @@ async function _refreshChatChannelUnreadCounts() {
   await Promise.allSettled(requests.map(async ([channel, method]) => {
     if (typeof API[method] !== 'function') return;
     const rows = channel === 'announcements' ? await API[method](50) : await API[method]();
-    if (!Array.isArray(rows)) return;
+    if (requestToken !== _chatUnreadRefreshRequest || !Array.isArray(rows)) return;
     if (channel === 'direct') _directConversations = rows;
     else if (channel === 'tickets') _inquiryTickets = rows;
     else if (channel === 'announcements') window._chatAnnouncements = rows;
     else if (channel === 'events' && typeof _chatGroups !== 'undefined') _chatGroups = rows;
   }));
+  if (requestToken !== _chatUnreadRefreshRequest) return;
   _renderChatChannelUnreadBadges();
   _renderChatTabUnreadBadge();
 }
@@ -929,6 +941,7 @@ async function _openInquiryTicket(id){
         const item=_inquiryTickets.find(t=>Number(t.id)===requestedId);
         if(item)item.unread_count=0;
         _renderInquiryTicketList();
+        window._invalidateChatUnreadRefresh?.();
       }
     }catch(_){ /* preserve unread state when the read receipt fails */ }
   }
@@ -1139,6 +1152,7 @@ window._openAnnouncement=async function(id){
         if(meta)meta.textContent=_formatAnnouncementDate(a.created_at);
       }
       _renderAnnouncementList(window._chatAnnouncements||[]);
+      window._invalidateChatUnreadRefresh?.();
     }
   }catch(e){
     // Keep the item unread unless the server confirms the read receipt.
@@ -1282,6 +1296,7 @@ async function _loadDirectMessages(silent=false){
           const conversation=_directConversations.find(c=>Number(c.conversation_id)===conversationId);
           if(conversation)conversation.unread_count=0;
           _renderDirectConversationList();
+          window._invalidateChatUnreadRefresh?.();
         }
       }catch(_){ /* preserve unread state when the read receipt fails */ }
     }
