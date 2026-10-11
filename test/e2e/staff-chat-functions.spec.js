@@ -1234,7 +1234,7 @@ test('Official Announcements plus opens a fixed modal without shifting the mobil
     window.switchChatChannel('announcements');
   });
 
-  const plus = page.locator('#announcementComposerToggleMobile');
+  const plus = page.locator('#announcementComposerToggle');
   await expect(plus).toBeVisible();
   await expect(page.locator('#announcementList .smart-chat-announcement-card')).toHaveCount(1);
   await expect(page.locator('#announcementStream .smart-chat-announcement-detail')).toBeVisible();
