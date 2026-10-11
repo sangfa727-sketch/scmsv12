@@ -259,7 +259,7 @@ declare
 begin
   v := public.rpc_school_website_list_admissions('staff-a-session',null,null,25);
   if v->>'error' is distinct from 'access_denied' then
-    raise exception 'staff without website.manage should not read applications: %', v;
+    raise exception 'content managers without website.admissions.review should not read applications: %', v;
   end if;
 
   v := public.rpc_school_website_list_admissions('owner-a-session',null,null,25);
@@ -267,8 +267,8 @@ begin
     raise exception 'school A owner should see exactly its two applications: %', v;
   end if;
   if exists (
-    select 1 from jsonb_array_elements(v->'items') item
-    where item->>'source_host' = 'school-b.example.test'
+    select 1 from jsonb_array_elements(v->'items') as item(value)
+    where value->>'source_host' = 'school-b.example.test'
   ) then
     raise exception 'school A owner received another school application';
   end if;
