@@ -470,19 +470,19 @@ test('admin official announcement uses verified recipients and sends through the
   });
   await page.evaluate(() => window.switchChatChannel('announcements'));
 
+  // Open the modal before interacting with its controls so focus/visibility behavior matches real use.
+  await page.locator('#announcementComposerToggle').click();
+  await expect(page.locator('#adminMsgRecipientType')).toHaveCount(1);
+  await expect(page.locator('#adminMsgReason')).toBeVisible();
+
   // The native select is intentionally hidden by SCMS's custom-select enhancement.
   // Set its backing value and dispatch change to exercise the preview handler.
-  await expect(page.locator('#adminMsgRecipientType')).toHaveCount(1);
   await page.locator('#adminMsgRecipientType').evaluate((select) => {
     select.value = 'all_staff';
     select.dispatchEvent(new Event('change', { bubbles: true }));
   });
   await expect.poll(async () => (await calls(page, 'getChatRecipientPreview')).length).toBeGreaterThan(0);
   await expect(page.locator('#adminMsgRoutingStatus')).toHaveClass(/verified/);
-
-  // Admin composer is intentionally collapsed in the announcement workspace.
-  await page.locator('#announcementComposerToggle').click();
-  await expect(page.locator('#adminMsgReason')).toBeVisible();
   await page.locator('#adminMsgReason').fill('Staff operations update');
   await page.locator('#adminMsgBody').fill('Please review the updated duty schedule.');
   await expect(page.locator('#adminMsgSendBtn')).toBeEnabled();
