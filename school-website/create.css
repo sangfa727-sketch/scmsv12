@@ -49,3 +49,21 @@ dialog,
 .section-controls{position:absolute;left:16px;top:16px;display:flex;align-items:center;gap:4px;z-index:3;opacity:.72}.section-controls>span{font-size:.68rem;font-weight:800;color:var(--muted);margin-right:3px}.section-controls button{min-width:38px;min-height:38px;border:1px solid var(--line);border-radius:9px;background:rgba(255,255,255,.94);color:#52616d;font-size:.72rem;font-weight:800}.section-controls button:hover:not(:disabled){border-color:#7892a7;background:#f4f8fb}.section-controls button:disabled{opacity:.38;cursor:not-allowed}.section-controls button:focus-visible{outline:0;box-shadow:0 0 0 3px #e8f0f5}.site-block:hover .section-controls{opacity:1}.site-block[hidden]{display:none!important}
 @media(max-width:620px){.section-controls{left:10px;right:10px;top:9px;overflow-x:auto;opacity:1}.section-controls>span{flex:0 0 auto}.section-controls button{min-width:40px}.site-block{padding-top:72px}}
 
+
+
+/* Private admission review inbox. All application values are inserted as text nodes. */
+.admission-inbox-dialog{width:min(760px,calc(100vw - 28px));max-height:min(82vh,900px);overflow:auto}
+.admission-inbox-list{display:grid;gap:12px;margin:16px 0}
+.admission-review-card{border:1px solid var(--line);border-radius:14px;padding:14px;background:var(--surface);display:grid;gap:10px;min-width:0}
+.admission-review-card header{display:flex;justify-content:space-between;align-items:flex-start;gap:12px;flex-wrap:wrap}
+.admission-review-card h3{margin:0;font-size:1rem;overflow-wrap:anywhere}
+.admission-review-card .admission-status{font-size:.75rem;font-weight:800;letter-spacing:.02em;text-transform:uppercase;color:var(--muted)}
+.admission-review-details{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px 14px}
+.admission-review-details p{margin:0;overflow-wrap:anywhere;white-space:pre-wrap;font-size:.88rem}
+.admission-review-details strong{display:block;font-size:.72rem;text-transform:uppercase;letter-spacing:.04em;color:var(--muted);margin-bottom:3px}
+.admission-review-message{border-top:1px solid var(--line);padding-top:10px;white-space:pre-wrap;overflow-wrap:anywhere}
+.admission-review-actions{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+.admission-review-actions select{min-width:0;max-width:100%;padding:9px 10px;border:1px solid var(--line);border-radius:9px;background:var(--surface);color:var(--text);font:inherit}
+.admission-review-actions button:disabled{opacity:.55;cursor:not-allowed}
+.admission-inbox-empty{padding:24px;border:1px dashed var(--line);border-radius:12px;color:var(--muted);text-align:center}
+@media(max-width:560px){.admission-review-details{grid-template-columns:minmax(0,1fr)}.admission-review-actions select{flex:1 1 100%}.admission-inbox-dialog{padding:16px}}
