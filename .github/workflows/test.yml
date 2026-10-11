@@ -98,6 +98,49 @@ jobs:
           PGPASSWORD: scms_website_test
         run: psql -h 127.0.0.1 -U scms_website_test -d scms_website_test -v ON_ERROR_STOP=1 -f test/db/school_website_manager_delegation_runtime_test.sql
 
+  public-website-admission-runtime:
+    name: Public School Website admission intake runtime test
+    runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: public.ecr.aws/docker/library/postgres:16
+        env:
+          POSTGRES_USER: scms_admission_test
+          POSTGRES_PASSWORD: scms_admission_test
+          POSTGRES_DB: scms_admission_test
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U scms_admission_test -d scms_admission_test"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+      - name: Install PostgreSQL client
+        run: sudo apt-get update && sudo apt-get install -y postgresql-client
+      - uses: denoland/setup-deno@v2
+        with:
+          deno-version: v2.x
+      - name: Check Edge Function types
+        run: deno check supabase/functions/public-admission-submit/index.ts
+      - name: Wait for PostgreSQL
+        env:
+          PGPASSWORD: scms_admission_test
+        run: |
+          for i in {1..30}; do
+            pg_isready -h 127.0.0.1 -p 5432 -U scms_admission_test -d scms_admission_test && exit 0
+            sleep 1
+          done
+          exit 1
+      - name: Run isolated public admission database runtime harness
+        env:
+          PGPASSWORD: scms_admission_test
+        run: psql -h 127.0.0.1 -U scms_admission_test -d scms_admission_test -v ON_ERROR_STOP=1 -f test/db/public_website_admission_runtime_test.sql
+
   staff-chat-group-runtime:
     name: Staff Chat Group Chat backend runtime test
     runs-on: ubuntu-latest

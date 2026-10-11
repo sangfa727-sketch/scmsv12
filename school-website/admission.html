@@ -4,6 +4,8 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width,initial-scale=1">
   <meta name="referrer" content="strict-origin-when-cross-origin">
+  <!-- Set this to the HTTPS Supabase project origin during deployment; blank fails closed. -->
+  <meta name="scms-public-website-api-base" content="">
   <title>Admission Application — SCMS School Website</title>
   <link rel="stylesheet" href="./styles.css">
   <link rel="stylesheet" href="./admission.css">
@@ -32,7 +34,7 @@
         </div>
         <label>Message / additional information <textarea name="message" maxlength="4000" rows="5"></textarea></label>
         <input class="hp" name="website" tabindex="-1" autocomplete="off" aria-hidden="true">
-        <button type="submit">Submit admission application</button>
+        <button id="submitAdmissionButton" type="submit">Submit admission application</button>
         <p id="formStatus" class="form-status" role="status" aria-live="polite"></p>
       </form>
     </section>
