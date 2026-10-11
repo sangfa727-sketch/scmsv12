@@ -1099,3 +1099,35 @@ test('mobile Chat arrow toggles fullscreen off and on without changing the activ
   await expect(page.locator('.smart-chat-nav-icon')).toHaveText('‹');
   await expect.poll(() => page.evaluate(() => window.APP.currentPage)).toBe('chat');
 });
+
+
+test('Group Chat preserves unread count when the server rejects mark-read', async ({ page }) => {
+  await mountSmartChat(page);
+  await page.evaluate(() => {
+    window.API.getChatGroups = async () => [{ id: 31, name: 'Planning Group', group_type: 'PROJECT', status: 'OPEN', unread_count: 3 }];
+    window.API.markChatGroupRead = async (...args) => {
+      window.__chatTestCalls.push({ name: 'markChatGroupRead', args });
+      return { ok: false, error: 'simulated read rejection' };
+    };
+    window.switchChatChannel('events');
+  });
+  await expect(page.locator('#chatGroupList')).toContainText('Planning Group');
+  await page.evaluate(() => window._openChatGroup(31));
+  await expect.poll(async () => (await calls(page, 'markChatGroupRead')).length).toBe(1);
+  await expect(page.locator('#chatGroupList').locator('.smart-chat-channel-card').filter({ hasText: 'Planning Group' })).toContainText('3');
+});
+
+test('Group Chat shows retry UI when loading the group list fails', async ({ page }) => {
+  await mountSmartChat(page);
+  await page.evaluate(async () => {
+    // Mount the actual group-list DOM first; Chat may restore a different channel.
+    window.API.getChatGroups = async () => [];
+    window.renderChatGroups();
+    await window._loadChatGroups(false);
+    // Clear cached rows so the failed refresh must render its error/retry state.
+    window.API.getChatGroups = async () => { throw new Error('simulated group-list failure'); };
+    await window._loadChatGroups(false);
+  });
+  await expect(page.locator('#chatGroupList .chat-error')).toBeVisible();
+  await expect(page.locator('#chatGroupList')).toContainText('Retry');
+});
