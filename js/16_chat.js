@@ -485,9 +485,8 @@ window._refreshAdminComposerPreview = function() {
       .smart-chat-conversation-head{padding:9px 10px}
       .smart-chat-verified-pill{font-size:9px}
       .smart-chat-ai-card,.smart-chat-admin-card{border-radius:12px}
-      .smart-chat-composer-drawer{margin-top:8px}
+      /* Fixed viewport overlay: never inherit the old drawer's content offset. */
       .smart-chat-ai-composer{position:sticky;bottom:0}
-      .smart-chat-composer-drawer .smart-chat-admin-card{max-height:calc(100dvh - 150px);overflow:auto}
     }
     @media(max-width:380px){
       .smart-chat-nav-back span{display:none}
@@ -1066,6 +1065,9 @@ function _mountAnnouncementComposerOverlay(card){
 }
 function _restoreAnnouncementComposerOverlay(card){
   if(!card || card.parentElement!==document.body)return;
+  // Reparenting a fixed overlay can trigger scroll anchoring in mobile browsers.
+  // Preserve every chat stream's position across the move, not just window.scrollY.
+  const streamPositions=Array.from(document.querySelectorAll('.chat-stream')).map(el=>[el,el.scrollTop]);
   if(_announcementComposerPlaceholder?.isConnected){
     _announcementComposerPlaceholder.parentNode.insertBefore(card,_announcementComposerPlaceholder);
     _announcementComposerPlaceholder.remove();
@@ -1074,6 +1076,12 @@ function _restoreAnnouncementComposerOverlay(card){
     card.remove();
   }
   _announcementComposerPlaceholder=null;
+  const restoreStreamPositions=()=>streamPositions.forEach(([el,top])=>{
+    if(el.isConnected)el.scrollTop=top;
+  });
+  restoreStreamPositions();
+  // Apply once after layout/scroll anchoring has settled as well.
+  requestAnimationFrame(restoreStreamPositions);
 }
 function _lockAnnouncementPageScroll(){
   // The composer is a fixed viewport overlay. Do not change body positioning,
