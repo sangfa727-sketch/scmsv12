@@ -8,7 +8,8 @@ const read = (file) => fs.readFileSync(path.join(ROOT, file), 'utf8');
 
 test('public admission edge endpoint requires HTTPS Origin and returns exact-origin CORS', () => {
   const edge = read('supabase/functions/public-admission-submit/index.ts');
-  assert.match(edge, /function trustedOrigin/);\n  assert.match(edge, /function activeOriginAllowed/);
+  assert.match(edge, /function trustedOrigin/);
+  assert.match(edge, /function activeOriginAllowed/);
   assert.match(edge, /parsed\.protocol !== "https:"/);
   assert.match(edge, /Access-Control-Allow-Origin", origin/);
   assert.doesNotMatch(edge, /Access-Control-Allow-Origin":\s*"\*"/);
