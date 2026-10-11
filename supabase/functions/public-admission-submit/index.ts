@@ -38,16 +38,50 @@ function requestIdentity(request: Request): string | null {
   for (const header of RATE_IDENTITY_HEADERS) {
     const raw = request.headers.get(header);
     if (!raw) continue;
-    const value = header === "x-forwarded-for" ? raw.split(",")[0].trim() : raw.trim();
+    const chain = raw.split(",").map(part => part.trim()).filter(Boolean);\n    const value = header === "x-forwarded-for" ? chain.at(-1) ?? "" : raw.trim();
     if (value && value.length <= 128) return value;
   }
   return null;
 }
 
-async function sha256(value: string): Promise<string> {
-  const bytes = new TextEncoder().encode(value);
-  const digest = await crypto.subtle.digest("SHA-256", bytes);
+async function hmacIdentity(value: string, secret: string): Promise<string> {
+  const key = await crypto.subtle.importKey(
+    "raw",
+    new TextEncoder().encode(secret),
+    { name: "HMAC", hash: "SHA-256" },
+    false,
+    ["sign"],
+  );
+  const digest = await crypto.subtle.sign("HMAC", key, new TextEncoder().encode(value));
   return [...new Uint8Array(digest)].map(byte => byte.toString(16).padStart(2, "0")).join("");
+}
+
+async function readBodyLimited(request: Request): Promise<string> {
+  const reader = request.body?.getReader();
+  if (!reader) throw new Error("empty_body");
+  const chunks: Uint8Array[] = [];
+  let total = 0;
+  try {
+    while (true) {
+      const { done, value } = await reader.read();
+      if (done) break;
+      total += value.byteLength;
+      if (total > MAX_BODY_CHARS) {
+        await reader.cancel();
+        throw new Error("body_too_large");
+      }
+      chunks.push(value);
+    }
+  } finally {
+    reader.releaseLock();
+  }
+  const body = new Uint8Array(total);
+  let offset = 0;
+  for (const chunk of chunks) {
+    body.set(chunk, offset);
+    offset += chunk.byteLength;
+  }
+  return new TextDecoder("utf-8", { fatal: true }).decode(body);
 }
 
 Deno.serve(async (request: Request) => {
@@ -74,10 +108,21 @@ Deno.serve(async (request: Request) => {
 
   const supabaseUrl = Deno.env.get("SUPABASE_URL");
   const serviceRoleKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY");
-  if (!supabaseUrl || !serviceRoleKey) return json({ ok: false, error: "backend_unavailable" }, 503, origin.origin);
+  const rateLimitSalt = Deno.env.get("SCMS_ADMISSION_RATE_LIMIT_SALT");
+  if (!supabaseUrl || !serviceRoleKey || !rateLimitSalt || rateLimitSalt.length < 32) {
+    return json({ ok: false, error: "backend_unavailable" }, 503, origin.origin);
+  }
 
   try {
-    const raw = await request.text();
+    let raw: string;
+    try {
+      raw = await readBodyLimited(request);
+    } catch (error) {
+      if (error instanceof Error && error.message === "body_too_large") {
+        return json({ ok: false, error: "invalid_request_size" }, 413, origin.origin);
+      }
+      return json({ ok: false, error: "invalid_request_body" }, 400, origin.origin);
+    }
     if (raw.length === 0 || raw.length > MAX_BODY_CHARS) return json({ ok: false, error: "invalid_request_size" }, 413, origin.origin);
     let body: Record<string, unknown>;
     try {
@@ -91,7 +136,7 @@ Deno.serve(async (request: Request) => {
 
     const payload = {
       p_hostname: origin.hostname,
-      p_identity_hash: await sha256(identity),
+      p_identity_hash: await hmacIdentity(identity, rateLimitSalt),
       p_idempotency_key: body.idempotencyKey,
       p_student_name: body.student_name,
       p_date_of_birth: body.date_of_birth ?? "",
