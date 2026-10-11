@@ -20,6 +20,19 @@ declare
   i integer;
   v_key text;
 begin
+  if public.rpc_website_site_origin_allowed('school-a.example.test') is not true then
+    raise exception 'active registered site should be allowed for CORS';
+  end if;
+  if public.rpc_website_site_origin_allowed('closed.example.test') is not false
+     or public.rpc_website_site_origin_allowed('unknown.example.test') is not false then
+    raise exception 'inactive/unknown site must not receive CORS permission';
+  end if;
+  if has_function_privilege('anon', 'public.rpc_website_site_origin_allowed(text)', 'execute')
+     or has_function_privilege('authenticated', 'public.rpc_website_site_origin_allowed(text)', 'execute')
+     or not has_function_privilege('service_role', 'public.rpc_website_site_origin_allowed(text)', 'execute') then
+    raise exception 'site-origin RPC execute grants are not service-role-only';
+  end if;
+
   v := public.rpc_website_admission_submit(
     'unknown.example.test', repeat('a',64), 'admission-key-unknown-0001',
     'Student', '', 'Grade 1', 'Guardian', '09123456789', '', '', 'phone', ''
