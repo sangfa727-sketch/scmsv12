@@ -134,7 +134,7 @@ begin
     return jsonb_build_object('ok', false, 'error', 'access_denied');
   end if;
 
-  select draft_id, status, version
+  select draft_id, status, version, content
     into v_draft
     from public.website_drafts
    where school_id = v_actor.school_id
@@ -147,6 +147,9 @@ begin
   end if;
   if v_draft.status <> 'draft' then
     return jsonb_build_object('ok', false, 'error', 'invalid_draft_state', 'status', v_draft.status);
+  end if;
+  if nullif(trim(coalesce(v_draft.content->>'schoolName','')), '') is null then
+    return jsonb_build_object('ok', false, 'error', 'incomplete_draft');
   end if;
 
   update public.website_drafts
@@ -213,6 +216,9 @@ begin
   end if;
   if v_draft.status <> 'review' then
     return jsonb_build_object('ok', false, 'error', 'review_required', 'status', v_draft.status);
+  end if;
+  if nullif(trim(coalesce(v_draft.content->>'schoolName','')), '') is null then
+    return jsonb_build_object('ok', false, 'error', 'incomplete_publication');
   end if;
 
   insert into public.website_publications
