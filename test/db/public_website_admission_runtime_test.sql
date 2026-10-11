@@ -87,6 +87,7 @@ as $function$
 $function$;
 
 \ir ../../supabase/migrations/20261011170000_school_website_admission_review.sql
+\ir ../../supabase/migrations/20261011180000_school_website_persistent_drafts.sql
 
 insert into public.teachers(teacher_id,school_id,role,status) values
   ('owner-a','school-a','owner','active'),
@@ -260,6 +261,83 @@ declare
   v_first_id uuid;
   v_second_id uuid;
 begin
+  -- Persistent draft save/load is tenant-scoped, versioned, and sanitized.
+  v := public.rpc_school_website_load_draft('owner-a-session');
+  if v->>'ok' is distinct from 'true' or v->>'found' is distinct from 'false' or v->>'version' is distinct from '0' then
+    raise exception 'new school should start without a saved draft: %', v;
+  end if;
+
+  v := public.rpc_school_website_save_draft(
+    'owner-a-session',
+    jsonb_build_object(
+      'template','modern',
+      'schoolName','  Bright Future School  ',
+      'tagline','Learning with care',
+      'aboutText',repeat('x',4500),
+      'programs',jsonb_build_array(' Math ',jsonb_build_object('unsafe','not text'),'Science'),
+      'sections',jsonb_build_array(
+        jsonb_build_object('id','hero','type','hero','label','Hero','visible',true,'locked',false),
+        jsonb_build_object('id','hero','type','hero','label','Duplicate','visible',false)
+      ),
+      'logo','data:image/svg+xml;base64,PRIVATE'
+    ),
+    0
+  );
+  if v->>'ok' is distinct from 'true' or v->>'version' is distinct from '1' then
+    raise exception 'first draft save failed: %', v;
+  end if;
+  if v->'content'->>'schoolName' is distinct from 'Bright Future School'
+     or char_length(v->'content'->>'aboutText') <> 4000
+     or v->'content' ? 'logo'
+     or jsonb_array_length(v->'content'->'programs') <> 2
+     or jsonb_array_length(v->'content'->'sections') <> 1
+     or v->'content'->'sections'->0->>'locked' is distinct from 'true' then
+    raise exception 'draft content was not safely normalized: %', v->'content';
+  end if;
+
+  v := public.rpc_school_website_load_draft('staff-a-session');
+  if v->>'ok' is distinct from 'true' or v->>'version' is distinct from '1' then
+    raise exception 'same-school content manager could not load the draft: %', v;
+  end if;
+
+  v := public.rpc_school_website_save_draft(
+    'owner-a-session',
+    jsonb_build_object('template','premium','schoolName','Updated School'),
+    1
+  );
+  if v->>'ok' is distinct from 'true' or v->>'version' is distinct from '2'
+     or v->'content'->>'template' is distinct from 'premium' then
+    raise exception 'versioned draft update failed: %', v;
+  end if;
+
+  v := public.rpc_school_website_save_draft(
+    'owner-a-session',
+    jsonb_build_object('template','modern','schoolName','Stale overwrite'),
+    1
+  );
+  if v->>'error' is distinct from 'stale_draft' or v->>'current_version' is distinct from '2' then
+    raise exception 'stale draft overwrite should be rejected: %', v;
+  end if;
+
+  v := public.rpc_school_website_load_draft('owner-b-session');
+  if v->>'ok' is distinct from 'true' or v->>'found' is distinct from 'false' then
+    raise exception 'other school must not read or discover school A draft: %', v;
+  end if;
+
+  v := public.rpc_school_website_save_draft(
+    'owner-a-session',
+    jsonb_build_object('template','unknown','schoolName','Invalid template'),
+    2
+  );
+  if v->>'error' is distinct from 'invalid_content' then
+    raise exception 'invalid draft template should be rejected: %', v;
+  end if;
+
+  if has_table_privilege('anon','public.website_drafts','select')
+     or has_table_privilege('authenticated','public.website_drafts','select') then
+    raise exception 'client roles must not read draft storage directly';
+  end if;
+
   v := public.rpc_school_website_authorize('owner-a-session');
   if v->>'authorized' is distinct from 'true' or v->>'admissions_authorized' is distinct from 'true' then
     raise exception 'school owner should receive the separate admission-review capability: %', v;
