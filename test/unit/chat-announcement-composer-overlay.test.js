@@ -20,6 +20,8 @@ test('Official Announcements composer opens as a modal overlay without creating 
   assert.ok(source.includes('event.target===card)window._toggleAnnouncementComposer(false)'), 'backdrop click closes the modal');
   assert.ok(source.includes("event.key==='Escape'&&_announcementComposerOpen"), 'Escape closes the modal');
   assert.ok(source.includes('scms-announcement-composer-open'), 'background scroll is locked while modal is open');
+  assert.ok(source.includes('role="dialog" aria-modal="true"'), 'form exposes accessible modal semantics');
+  assert.ok(source.includes('class="smart-chat-composer-close"'), 'form provides an explicit localized close control');
 });
 
 test('Official Announcements list and detail remain behind the overlay instead of becoming a second row', () => {
