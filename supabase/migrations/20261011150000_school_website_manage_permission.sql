@@ -25,6 +25,3 @@ values
   ('super_admin', 'website.manage', true)
 on conflict (role, permission_key) do update
   set allowed = excluded.allowed;
-
-comment on column public.permission_definitions.permission_key is
-  'Canonical permission key. website.manage gates authenticated School Website Studio management RPCs.';
