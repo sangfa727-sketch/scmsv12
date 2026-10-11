@@ -52,6 +52,19 @@ test('section management exposes safe hide, reorder and duplicate controls',()=>
  assert.match(css,/\.section-controls/);assert.match(css,/\.site-block\[hidden\]/);new Function(js);
 });
 
+
+test('School Website navigation supports owner/admin defaults and delegated website.manage permission',()=>{
+ const sidebar=read('js/17_sidebar.js');
+ assert.match(sidebar,/id: 'website'/);
+ assert.match(sidebar,/school-website\/create\.html/);
+ assert.match(sidebar,/ownerOrAdmin/);
+ assert.match(sidebar,/if \(A\.is_admin\) return true/);
+ assert.match(sidebar,/school_owner/);
+ assert.match(sidebar,/website\.manage/);
+ assert.match(sidebar,/School Website/);
+});
+
+
 test('School Website is discoverable from More on Telegram/mobile and desktop app layouts',()=>{
  const more=read('js/12_more.js');
  assert.match(more,/canManageWebsite/);
@@ -61,6 +74,20 @@ test('School Website is discoverable from More on Telegram/mobile and desktop ap
  assert.match(more,/school-website\/create\.html/);
  assert.match(more,/School Website/);
 });
+
+test('website.manage is global and granted only to explicit owner/admin role aliases by default',()=>{
+ const migration=read('supabase/migrations/20261009100000_school_website_manage_permission.sql');
+ assert.match(migration,/'website\.manage'/);
+ assert.match(migration,/'global'/);
+ for (const role of ['owner','school_owner','admin','super_admin']) {
+  assert.match(migration,new RegExp("'"+role+"',\\s*'website\\.manage',\\s*true"));
+ }
+ assert.doesNotMatch(migration,/values\s*\(\s*'teacher',\s*'website\.manage',\s*true/i);
+ const rpc=read('supabase/migrations/20260929075000_teacher_access_management_rpc.sql');
+ assert.match(rpc,/p_action='permission_set'/);
+ assert.match(rpc,/public\.teacher_permissions/);
+});
+
 test('Website Studio uses collection selectors for multi-element operations',()=>{
  const js=read('school-website/create.js');
  assert.doesNotMatch(js,/(?<!\$)\$\("[^"]+"\)\.forEach/);
@@ -68,4 +95,43 @@ test('Website Studio uses collection selectors for multi-element operations',()=
  assert.match(js,/\$\$\("\.template-option"\)\.forEach/);
  assert.match(js,/const links=\$\$\("\.section-nav a"\)/);
  new Function(js);
+});
+
+
+test('School Website Studio loads deployment environment guard before backend config',()=>{
+ const html=read('school-website/create.html');
+ assert.ok(html.indexOf('../js/00_env.js') >= 0, 'environment guard must be loaded');
+ assert.ok(html.indexOf('../js/00_env.js') < html.indexOf('../js/01_config.js'), 'environment guard must run before config');
+ const env=read('js/00_env.js');
+ assert.match(env,/localhost.*127\.0\.0\.1.*::1/);
+});
+
+test('School Website Studio fails closed until the server verifies an active authorized school session',()=>{
+ const html=read('school-website/create.html'),migration=read('supabase/migrations/20261010120000_school_website_server_authorization.sql');
+ assert.match(html,/auth-pending/); assert.match(html,/access-denied \.builder/); assert.match(html,/AbortController/); assert.match(html,/scms_web_session/); assert.match(html,/rpc_school_website_authorize/); assert.match(html,/result\.authorized !== true/); assert.match(html,/editor\.src = '\.\/create\.js'/);
+ assert.match(migration,/security definer/i); assert.match(migration,/private\.web_has_permission\(p_session_token, 'website\.manage', null, null\)/); assert.match(migration,/is distinct from true/i); assert.match(migration,/s\.expires_at > now\(\)/); assert.match(migration,/t\.status = 'active'/); assert.match(migration,/revoke all on function public\.rpc_school_website_authorize\(text\) from public/i); assert.match(migration,/grant execute on function public\.rpc_school_website_authorize\(text\) to anon, authenticated/i);
+});
+
+test('website drafts are isolated by the verified school context',()=>{
+ const js=read('school-website/create.js'); assert.match(js,/verified school authorization/); assert.match(js,/if\(!window\.SCMS_WEBSITE_CONTEXT\?\.schoolId\)/); assert.match(js,/function draftStorageKey\(\)/); assert.match(js,/SCMS_WEBSITE_CONTEXT\?\.schoolId/); assert.match(js,/scms-website-draft:/); assert.match(js,/localStorage\.setItem\(draftStorageKey\(\)/); assert.match(js,/localStorage\.getItem\(draftStorageKey\(\)/); new Function(js);
+});
+
+test('School Website manager delegation is limited to same-school non-privileged staff and one permission',()=>{
+ const migration=read('supabase/migrations/20261010150000_school_website_manager_delegation.sql');
+ assert.match(migration,/rpc_school_website_set_manager/);
+ assert.match(migration,/v_actor\.role not in \('owner', 'school_owner', 'admin', 'super_admin'\)/);
+ assert.match(migration,/school_id = v_actor\.school_id/);
+ assert.match(migration,/v_target\.status <> 'active'/);
+ assert.match(migration,/v_target\.role in \('owner', 'school_owner', 'admin', 'super_admin'\)/);
+ assert.match(migration,/'website\.manage'/);
+ assert.match(migration,/scope_type = 'global'/);
+ assert.match(migration,/p_allowed is null/);
+ assert.match(migration,/permission_scope_conflict/);
+ assert.match(migration,/on conflict \([\s\S]*coalesce\(class_name, ''\)[\s\S]*coalesce\(subject_id, 0\)/);
+ assert.match(migration,/where teacher_permissions\.school_id = excluded\.school_id/);
+ assert.match(migration,/returning id into v_permission_id/);
+ assert.match(migration,/public\.audit_log/); assert.match(migration,/website\.manager_grant/); assert.match(migration,/website\.manager_revoke/);
+ assert.match(migration,/where school_id = v_actor\.school_id/);
+ assert.match(migration,/revoke all on function public\.rpc_school_website_set_manager\(text, text, boolean\) from public/i);
+ assert.match(migration,/grant execute on function public\.rpc_school_website_set_manager\(text, text, boolean\) to anon, authenticated/i);
 });
