@@ -27,6 +27,7 @@ let _adminRecipientRequestId = 0;
 let _adminRecipientLoading = false;
 let _directConversationId = null;
 let _announcementId = null;
+let _announcementOpenRequest = 0;
 let _directPeer = null;
 let _directStaff = [];
 let _directConversations = [];
@@ -1119,6 +1120,7 @@ async function _loadAnnouncementWorkspace(autoOpen=true){
 window._openAnnouncement=async function(id){
   const a=(window._chatAnnouncements||[]).find(x=>String(x.id)===String(id));
   const stream=document.getElementById('announcementStream');if(!a||!stream)return;
+  const requestToken=++_announcementOpenRequest;
   _announcementId=String(id);
   const shell=document.querySelector('.smart-chat-announcement-shell');if(shell)shell.classList.add('has-selection');
   _renderAnnouncementList(window._chatAnnouncements||[]);
@@ -1130,8 +1132,12 @@ window._openAnnouncement=async function(id){
       const result=await API.markStaffAnnouncementRead(id);
       if(result?.ok!==true)throw new Error(result?.error||'announcement_read_failed');
       a.read_at=a.read_at||new Date().toISOString();
-      const meta=stream.querySelector('.smart-chat-preview-meta');
-      if(meta)meta.textContent=_formatAnnouncementDate(a.created_at);
+      // The server may finish an older read receipt after another announcement
+      // is selected. Update the detail pane only if this request still owns it.
+      if(requestToken===_announcementOpenRequest&&String(_announcementId)===String(id)&&document.getElementById('announcementStream')===stream){
+        const meta=stream.querySelector('.smart-chat-preview-meta');
+        if(meta)meta.textContent=_formatAnnouncementDate(a.created_at);
+      }
       _renderAnnouncementList(window._chatAnnouncements||[]);
     }
   }catch(e){
@@ -1139,6 +1145,7 @@ window._openAnnouncement=async function(id){
   }
 };
 window._clearAnnouncementSelection=function(){
+  _announcementOpenRequest++;
   _announcementId=null;
   const shell=document.querySelector('.smart-chat-announcement-shell');if(shell)shell.classList.remove('has-selection');
   const head=document.getElementById('announcementHead');
