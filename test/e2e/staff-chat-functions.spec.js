@@ -987,8 +987,8 @@ test('Official Announcement send failure keeps the draft and restores the send c
   await page.evaluate(() => {
     window.APP.is_admin = true;
     window.renderChat();
-    window.switchChatChannel('announcements');
   });
+  await page.evaluate(() => window.switchChatChannel('announcements'));
   await expect(page.locator('#announcementComposerToggle')).toBeVisible();
   await page.locator('#announcementComposerToggle').click();
   await expect(page.locator('#adminMsgBody')).toBeVisible();
