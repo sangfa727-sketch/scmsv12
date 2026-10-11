@@ -113,3 +113,32 @@ test('one verified recipient wording is intentionally supplied for all seven loc
   assert.equal(new Set(values).size, LANGUAGES.length,
     'each supported language should have its own oneVerifiedRecipient wording');
 });
+
+
+test('every literal Staff Chat UI key has an explicit non-English translation', () => {
+  const locales = loadChatLocales();
+  const chatFiles = [
+    'js/16_chat.js',
+    'js/16_chat_department.js',
+    'js/16_chat_grade.js',
+    'js/16_chat_groups.js'
+  ];
+  const usedKeys = new Set();
+  for (const relativePath of chatFiles) {
+    const source = fs.readFileSync(path.join(ROOT, relativePath), 'utf8');
+    for (const match of source.matchAll(/\bt\(\s*['"]chat\.([^'"]+)['"]\s*\)/g)) {
+      usedKeys.add('chat.' + match[1]);
+    }
+  }
+
+  assert.ok(usedKeys.size > 100, 'audit the actual Staff Chat UI key set');
+  for (const code of LANGUAGES.filter(code => code !== 'en')) {
+    for (const key of usedKeys) {
+      const translated = locales[code][key];
+      assert.equal(typeof translated, 'string', code + ' is missing ' + key);
+      assert.notEqual(translated.trim(), '', code + ' has an empty translation for ' + key);
+      assert.notEqual(translated, locales.en[key],
+        code + ' is silently falling back to English for ' + key);
+    }
+  }
+});
