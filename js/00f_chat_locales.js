@@ -501,6 +501,36 @@
     Object.assign(code === 'en' ? en : code === 'my' ? my : chat[code], officialTicketLocaleParityFix[code])
   );
 
+
+  // Explicit translations for every label in the Official Announcements composer.
+  // Keep these out of the English fallback path so the form never renders half-translated.
+  const officialComposerLocaleFix = {
+    en: {
+      'chat.adminTools':"ADMIN TOOLS",'chat.officialMessage':"Official message",'chat.officialMessageHint':"Official messages require a reason and are routed only to server-verified active staff.",'chat.serverVerified':"SERVER VERIFIED",'chat.recipientType':"Recipient type",'chat.allStaff':"All Staff",'chat.grade':"Grade",'chat.individualTeacher':"Individual teacher",'chat.teacher':"Teacher",'chat.loadingGrades':"Loading available grades…",'chat.messageType':"Message type",'chat.reason':"Reason",'chat.officialCommunication':"Official school communication",'chat.announcement':"Announcement",'chat.officialTask':"Official task",'chat.staffNotice':"Staff notice",'chat.messageBody':"Message body",'chat.writeOfficialMessage':"Write an official message…",'chat.checkingRecipients':"Checking verified recipients…",'chat.refreshRecipients':"Refresh recipients",'chat.send':"Send"
+    },
+    my: {
+      'chat.adminTools':"ကိစ္စစီမံခန့်ခွဲရေး",'chat.officialMessage':"တရားဝင်စာတို",'chat.officialMessageHint':"တရားဝင်စာတိုတွင် အကြောင်းပြချက်ပါရမည်ဖြစ်ပြီး ဆာဗာမှ အတည်ပြုထားသော လက်ရှိဝန်ထမ်းများထံသာ ပို့မည်။",'chat.serverVerified':"ဆာဗာမှ အတည်ပြုပြီး",'chat.recipientType':"လက်ခံသူအမျိုးအစား",'chat.allStaff':"ဝန်ထမ်းအားလုံး",'chat.grade':"အတန်း",'chat.individualTeacher':"ဆရာ/ဆရာမတစ်ဦးချင်း",'chat.teacher':"ဆရာ/ဆရာမ",'chat.loadingGrades':"ရရှိနိုင်သောအတန်းများကို ဖွင့်နေသည်…",'chat.messageType':"စာတိုအမျိုးအစား",'chat.reason':"အကြောင်းပြချက်",'chat.officialCommunication':"ကျောင်း၏ တရားဝင်ဆက်သွယ်ရေး",'chat.announcement':"ကြေညာချက်",'chat.officialTask':"တရားဝင်တာဝန်",'chat.staffNotice':"ဝန်ထမ်းအသိပေးချက်",'chat.messageBody':"စာတိုအကြောင်းအရာ",'chat.writeOfficialMessage':"တရားဝင်စာတို ရေးပါ…",'chat.checkingRecipients':"အတည်ပြုထားသော လက်ခံသူများကို စစ်ဆေးနေသည်…",'chat.refreshRecipients':"လက်ခံသူစာရင်း ပြန်လည်ရယူရန်",'chat.send':"ပို့ရန်"
+    },
+    th: {
+      'chat.adminTools':"เครื่องมือผู้ดูแล",'chat.officialMessage':"ข้อความทางการ",'chat.officialMessageHint':"ข้อความทางการต้องระบุเหตุผล และจะส่งเฉพาะเจ้าหน้าที่ที่ใช้งานอยู่ซึ่งเซิร์ฟเวอร์ยืนยันแล้ว",'chat.serverVerified':"ยืนยันโดยเซิร์ฟเวอร์แล้ว",'chat.recipientType':"ประเภทผู้รับ",'chat.allStaff':"บุคลากรทั้งหมด",'chat.grade':"ระดับชั้น",'chat.individualTeacher':"ครูรายบุคคล",'chat.teacher':"ครู",'chat.loadingGrades':"กำลังโหลดระดับชั้นที่ใช้ได้…",'chat.messageType':"ประเภทข้อความ",'chat.reason':"เหตุผล",'chat.officialCommunication':"การสื่อสารอย่างเป็นทางการของโรงเรียน",'chat.announcement':"ประกาศ",'chat.officialTask':"งานทางการ",'chat.staffNotice':"ประกาศเจ้าหน้าที่",'chat.messageBody':"เนื้อหาข้อความ",'chat.writeOfficialMessage':"เขียนข้อความทางการ…",'chat.checkingRecipients':"กำลังตรวจสอบผู้รับที่ยืนยันแล้ว…",'chat.refreshRecipients':"รีเฟรชรายชื่อผู้รับ",'chat.send':"ส่ง"
+    },
+    jp: {
+      'chat.adminTools':"管理者ツール",'chat.officialMessage':"公式メッセージ",'chat.officialMessageHint':"公式メッセージには理由が必要です。サーバーが確認した有効なスタッフのみに送信されます。",'chat.serverVerified':"サーバー確認済み",'chat.recipientType':"受信者の種類",'chat.allStaff':"全スタッフ",'chat.grade':"学年",'chat.individualTeacher':"個別の教師",'chat.teacher':"教師",'chat.loadingGrades':"利用可能な学年を読み込み中…",'chat.messageType':"メッセージの種類",'chat.reason':"理由",'chat.officialCommunication':"学校公式連絡",'chat.announcement':"お知らせ",'chat.officialTask':"公式タスク",'chat.staffNotice':"スタッフ通知",'chat.messageBody':"メッセージ本文",'chat.writeOfficialMessage':"公式メッセージを書く…",'chat.checkingRecipients':"確認済みの受信者を確認中…",'chat.refreshRecipients':"受信者を更新",'chat.send':"送信"
+    },
+    ms: {
+      'chat.adminTools':"Alat pentadbir",'chat.officialMessage':"Mesej rasmi",'chat.officialMessageHint':"Mesej rasmi memerlukan sebab dan hanya dihantar kepada staf aktif yang disahkan oleh pelayan.",'chat.serverVerified':"DISAHKAN PELAYAN",'chat.recipientType':"Jenis penerima",'chat.allStaff':"Semua Staf",'chat.grade':"Tingkatan",'chat.individualTeacher':"Guru individu",'chat.teacher':"Guru",'chat.loadingGrades':"Memuatkan tingkatan yang tersedia…",'chat.messageType':"Jenis mesej",'chat.reason':"Sebab",'chat.officialCommunication':"Komunikasi rasmi sekolah",'chat.announcement':"Pengumuman",'chat.officialTask':"Tugasan rasmi",'chat.staffNotice':"Notis staf",'chat.messageBody':"Kandungan mesej",'chat.writeOfficialMessage':"Tulis mesej rasmi…",'chat.checkingRecipients':"Menyemak penerima yang disahkan…",'chat.refreshRecipients':"Muat semula penerima",'chat.send':"Hantar"
+    },
+    km: {
+      'chat.adminTools':"ឧបករណ៍អ្នកគ្រប់គ្រង",'chat.officialMessage':"សារផ្លូវការ",'chat.officialMessageHint':"សារផ្លូវការត្រូវមានមូលហេតុ ហើយផ្ញើតែទៅបុគ្គលិកសកម្មដែលម៉ាស៊ីនមេបានផ្ទៀងផ្ទាត់ប៉ុណ្ណោះ។",'chat.serverVerified':"បានផ្ទៀងផ្ទាត់ដោយម៉ាស៊ីនមេ",'chat.recipientType':"ប្រភេទអ្នកទទួល",'chat.allStaff':"បុគ្គលិកទាំងអស់",'chat.grade':"កម្រិតថ្នាក់",'chat.individualTeacher':"គ្រូម្នាក់ៗ",'chat.teacher':"គ្រូ",'chat.loadingGrades':"កំពុងផ្ទុកកម្រិតថ្នាក់ដែលមាន…",'chat.messageType':"ប្រភេទសារ",'chat.reason':"មូលហេតុ",'chat.officialCommunication':"ការទំនាក់ទំនងផ្លូវការរបស់សាលា",'chat.announcement':"សេចក្តីជូនដំណឹង",'chat.officialTask':"ភារកិច្ចផ្លូវការ",'chat.staffNotice':"សេចក្តីជូនដំណឹងបុគ្គលិក",'chat.messageBody':"ខ្លឹមសារសារ",'chat.writeOfficialMessage':"សរសេរសារផ្លូវការ…",'chat.checkingRecipients':"កំពុងពិនិត្យអ្នកទទួលដែលបានផ្ទៀងផ្ទាត់…",'chat.refreshRecipients':"ធ្វើបច្ចុប្បន្នភាពអ្នកទទួល",'chat.send':"ផ្ញើ"
+    },
+    zh: {
+      'chat.adminTools':"管理员工具",'chat.officialMessage':"官方消息",'chat.officialMessageHint':"官方消息必须填写原因，并且只发送给服务器验证过的在职员工。",'chat.serverVerified':"服务器已验证",'chat.recipientType':"接收对象类型",'chat.allStaff':"全体员工",'chat.grade':"年级",'chat.individualTeacher':"指定教师",'chat.teacher':"教师",'chat.loadingGrades':"正在加载可用年级…",'chat.messageType':"消息类型",'chat.reason':"原因",'chat.officialCommunication':"学校官方沟通",'chat.announcement':"公告",'chat.officialTask':"官方任务",'chat.staffNotice':"员工通知",'chat.messageBody':"消息内容",'chat.writeOfficialMessage':"输入官方消息…",'chat.checkingRecipients':"正在检查已验证的接收者…",'chat.refreshRecipients':"刷新接收者",'chat.send':"发送"
+    }
+  };
+  Object.keys(officialComposerLocaleFix).forEach(code =>
+    Object.assign(code === 'en' ? en : code === 'my' ? my : chat[code], officialComposerLocaleFix[code])
+  );
+
   const maps={en:'I18N_EN',my:'I18N_MY',th:'I18N_TH',jp:'I18N_JP',ms:'I18N_MS',km:'I18N_KM',zh:'I18N_ZH'};
   Object.keys(maps).forEach(code=>{ window[maps[code]]=Object.assign({},window[maps[code]]||{},code==='en'?en:code==='my'?my:chat[code]); });
 })();
