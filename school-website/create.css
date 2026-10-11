@@ -145,7 +145,7 @@ html[data-theme="dark"] .website-access-gate button{background:#78a8d0;color:#10
   .workspace-top h1{font-size:1.55rem;line-height:1.15}
   .workspace-top .muted{font-size:.9rem;line-height:1.55}
   .template-strip,.content-strip{margin-left:0;margin-right:0}
-  .section-nav{top:0;z-index:20;margin-bottom:10px;padding:6px 0;gap:8px}
+  .section-nav{top:105px;z-index:20;margin-bottom:10px;padding:6px 0;gap:8px}
   .section-nav a{min-height:40px;padding:8px 12px}
   .page-canvas{width:100%;max-width:100%}
   .site-block{min-width:0}
