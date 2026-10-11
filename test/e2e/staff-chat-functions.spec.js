@@ -1554,7 +1554,7 @@ test('All Staff initial message-load failure shows a retry state instead of a bl
 });
 
 
-test('Official Announcement composer dismisses via Escape and backdrop without losing list scroll', async ({ browser }) => {
+test('Official Announcement composer dismisses via Escape and backdrop without shifting mobile conversation scroll', async ({ browser }) => {
   const context = await browser.newContext({
     viewport: { width: 390, height: 844 },
     deviceScaleFactor: 1,
@@ -1564,59 +1564,66 @@ test('Official Announcement composer dismisses via Escape and backdrop without l
   const page = await context.newPage();
   try {
     await mountSmartChat(page, false);
-  await page.evaluate(() => {
-    window.APP.is_admin = true;
-    window.API.getStaffAnnouncements = async () => Array.from({ length: 24 }, (_, i) => ({
-      id: `00000000-0000-4000-8000-${String(i + 1).padStart(12, '0')}`,
-      message_type: 'notice',
-      reason: `Modal scroll notice ${i + 1}`,
-      body: `Modal scroll announcement body ${i + 1}`,
-      created_at: '2026-10-10T08:00:00.000Z'
+    await page.evaluate(() => {
+      window.APP.is_admin = true;
+      window.API.getStaffAnnouncements = async () => Array.from({ length: 24 }, (_, i) => ({
+        id: `00000000-0000-4000-8000-${String(i + 1).padStart(12, '0')}`,
+        message_type: 'notice',
+        reason: `Modal scroll notice ${i + 1}`,
+        body: `Modal scroll announcement body ${i + 1}`,
+        created_at: '2026-10-10T08:00:00.000Z'
+      }));
+      window.switchChatMode('school');
+      window.renderChat();
+      window.switchChatChannel('announcements');
+    });
+
+    const list = page.locator('#announcementList');
+    const stream = page.locator('#announcementStream');
+    const plus = page.locator('#announcementComposerToggleMobile');
+    await expect(list.locator('.smart-chat-announcement-card')).toHaveCount(24);
+    await expect(plus).toBeVisible();
+
+    // On mobile the announcement directory is a hidden desktop pane. Exercise
+    // scroll preservation on the visible conversation stream instead.
+    await stream.evaluate(el => {
+      el.innerHTML = Array.from({ length: 24 }, (_, i) =>
+        `<div class="chat-bubble received"><p>Long announcement detail ${i + 1}: preserve this conversation position.</p></div>`
+      ).join('');
+      el.style.height = '280px';
+      el.style.minHeight = '0';
+      el.style.maxHeight = '280px';
+      el.style.flex = 'none';
+      el.style.overflowY = 'scroll';
+    });
+    const streamMetrics = await stream.evaluate(el => ({
+      clientHeight: el.clientHeight,
+      scrollHeight: el.scrollHeight
     }));
-    window.switchChatMode('school');
-    window.renderChat();
-    window.switchChatChannel('announcements');
-  });
+    expect(streamMetrics.scrollHeight).toBeGreaterThan(streamMetrics.clientHeight);
+    const initialScrollTop = await stream.evaluate(el => {
+      el.scrollTop = el.scrollHeight;
+      return el.scrollTop;
+    });
+    expect(initialScrollTop).toBeGreaterThan(0);
 
-  const list = page.locator('#announcementList');
-  const plus = page.locator('#announcementComposerToggleMobile');
-  await expect(list.locator('.smart-chat-announcement-card')).toHaveCount(24);
-  await expect(plus).toBeVisible();
-  // mountSmartChat renders the channel in an isolated test shell without the
-  // production flex-height constraints. Constrain the list explicitly so this
-  // test exercises composer scroll preservation rather than the shell layout.
-  const listMetrics = await list.evaluate(el => {
-    el.style.height = '280px';
-    el.style.minHeight = '0';
-    el.style.maxHeight = '280px';
-    el.style.flex = 'none';
-    el.style.overflowY = 'scroll';
-    return { clientHeight: el.clientHeight, scrollHeight: el.scrollHeight };
-  });
-  expect(listMetrics.scrollHeight).toBeGreaterThan(listMetrics.clientHeight);
-  const initialScrollTop = await list.evaluate(el => {
-    el.scrollTop = el.scrollHeight;
-    return el.scrollTop;
-  });
-  expect(initialScrollTop).toBeGreaterThan(0);
+    await plus.click();
+    await expect(page.locator('#announcementComposer')).toBeVisible();
+    await expect(page.locator('#announcementComposer')).toHaveCSS('position', 'fixed');
+    await expect.poll(() => stream.evaluate(el => el.scrollTop)).toBe(initialScrollTop);
 
-  await plus.click();
-  await expect(page.locator('#announcementComposer')).toBeVisible();
-  await expect(page.locator('#announcementComposer')).toHaveCSS('position', 'fixed');
-  await expect.poll(() => list.evaluate(el => el.scrollTop)).toBe(initialScrollTop);
+    await page.keyboard.press('Escape');
+    await expect(page.locator('#announcementComposer')).toBeHidden();
+    await expect(page.locator('html')).not.toHaveClass(/scms-announcement-composer-open/);
+    await expect.poll(() => stream.evaluate(el => el.scrollTop)).toBe(initialScrollTop);
 
-  await page.keyboard.press('Escape');
-  await expect(page.locator('#announcementComposer')).toBeHidden();
-  await expect(page.locator('html')).not.toHaveClass(/scms-announcement-composer-open/);
-  await expect.poll(() => list.evaluate(el => el.scrollTop)).toBe(initialScrollTop);
-
-  await plus.click();
-  await expect(page.locator('#announcementComposer')).toBeVisible();
-  // The top-left corner is backdrop padding, outside the centered admin card.
-  await page.mouse.click(4, 4);
-  await expect(page.locator('#announcementComposer')).toBeHidden();
-  await expect(page.locator('html')).not.toHaveClass(/scms-announcement-composer-open/);
-  await expect.poll(() => list.evaluate(el => el.scrollTop)).toBe(initialScrollTop);
+    await plus.click();
+    await expect(page.locator('#announcementComposer')).toBeVisible();
+    // The top-left corner is backdrop padding, outside the centered admin card.
+    await page.mouse.click(4, 4);
+    await expect(page.locator('#announcementComposer')).toBeHidden();
+    await expect(page.locator('html')).not.toHaveClass(/scms-announcement-composer-open/);
+    await expect.poll(() => stream.evaluate(el => el.scrollTop)).toBe(initialScrollTop);
   } finally {
     await context.close();
   }
