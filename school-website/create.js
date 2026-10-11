@@ -309,9 +309,10 @@ async function submitDraftForReview(){
  }catch(error){
   const reason=error instanceof Error?error.message:"";
   if(reason==="stale_draft"){draftConflict=true;$("#saveState").textContent="Draft conflict — reload";}
+  else if(reason==="incomplete_draft")$("#saveState").textContent="Add school name before review";
   else $("#saveState").textContent="Review submission failed";
   updateDraftActionButtons();
-  showToast("Could not submit this draft for review. Refresh and try again.");
+  showToast(reason==="incomplete_draft"?"Add the school name before submitting this draft for review.":"Could not submit this draft for review. Refresh and try again.");
  }
 }
 async function publishWebsiteDraft(){
@@ -331,9 +332,10 @@ async function publishWebsiteDraft(){
  }catch(error){
   const reason=error instanceof Error?error.message:"";
   if(reason==="stale_draft"){draftConflict=true;$("#saveState").textContent="Draft conflict — reload";}
+  else if(reason==="incomplete_publication")$("#saveState").textContent="Add school name before publishing";
   else $("#saveState").textContent="Publish failed";
   updateDraftActionButtons();
-  showToast("Could not publish this version. Verify review status and permissions, then refresh.");
+  showToast(reason==="incomplete_publication"?"Add the school name before publishing this version.":"Could not publish this version. Verify review status and permissions, then refresh.");
  }
 }
 $("#submitReviewButton").addEventListener("click",submitDraftForReview);
