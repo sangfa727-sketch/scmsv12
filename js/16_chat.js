@@ -1014,10 +1014,27 @@ async function _submitInquiryDraft(e){
 }
 let _announcementComposerOpen=false;
 let _announcementComposerScrollY=0;
+let _announcementComposerBodyStyles=null;
+function _lockAnnouncementPageScroll(){
+  _announcementComposerScrollY=window.scrollY||document.documentElement.scrollTop||0;
+  const body=document.body;
+  if(!body)return;
+  _announcementComposerBodyStyles={position:body.style.position,top:body.style.top,left:body.style.left,right:body.style.right,width:body.style.width,overflow:body.style.overflow};
+  body.style.position='fixed';
+  body.style.top=`-${_announcementComposerScrollY}px`;
+  body.style.left='0';body.style.right='0';body.style.width='100%';body.style.overflow='hidden';
+}
+function _unlockAnnouncementPageScroll(){
+  const body=document.body,styles=_announcementComposerBodyStyles;
+  if(body&&styles){body.style.position=styles.position;body.style.top=styles.top;body.style.left=styles.left;body.style.right=styles.right;body.style.width=styles.width;body.style.overflow=styles.overflow;}
+  _announcementComposerBodyStyles=null;
+  window.scrollTo(0,_announcementComposerScrollY);
+}
 window._toggleAnnouncementComposer=function(force=null){
   if(!window.APP?.is_admin)return;
   const nextOpen=force===null?!_announcementComposerOpen:!!force;
-  if(!_announcementComposerOpen&&nextOpen)_announcementComposerScrollY=window.scrollY||document.documentElement.scrollTop||0;
+  if(!_announcementComposerOpen&&nextOpen)_lockAnnouncementPageScroll();
+  if(_announcementComposerOpen&&!nextOpen)_unlockAnnouncementPageScroll();
   _announcementComposerOpen=nextOpen;
   const card=document.getElementById('announcementComposer');
   const buttons=[document.getElementById('announcementComposerToggle'),document.getElementById('announcementComposerToggleMobile')].filter(Boolean);
