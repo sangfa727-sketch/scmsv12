@@ -15,6 +15,10 @@ test('Official Announcements composer opens as a modal overlay without creating 
   assert.ok(renderer.includes("_announcementComposerOpen?' is-open':''"), 'open class follows modal state');
   assert.ok(renderer.includes('aria-controls="announcementComposer"'), 'plus control targets the overlay');
   assert.ok(source.includes('position:fixed;inset:0;z-index:12000'), 'overlay is fixed to viewport, not normal document flow');
+  assert.ok(source.includes('function _mountAnnouncementComposerOverlay(card)'), 'overlay has a dedicated viewport mounting helper');
+  assert.ok(source.includes('document.body.appendChild(card)'), 'overlay is portaled outside transformed chat ancestors');
+  assert.ok(source.includes('function _restoreAnnouncementComposerOverlay(card)'), 'overlay is restored to its original workspace position on close');
+  assert.ok(source.includes('_announcementComposerPlaceholder.parentNode.insertBefore(card,_announcementComposerPlaceholder)'), 'closing preserves the composer position in the workspace');
   assert.ok(source.includes('.smart-chat-composer-drawer.is-open{display:flex}'), 'open state centers the form as an overlay');
   assert.ok(source.includes('max-height:calc(100dvh - 20px)'), 'mobile form stays within viewport and scrolls internally');
   assert.ok(source.includes('event.target===card)window._toggleAnnouncementComposer(false)'), 'backdrop click closes the modal');
