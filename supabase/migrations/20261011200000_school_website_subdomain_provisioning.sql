@@ -97,6 +97,7 @@ begin
     into v_site
     from public.website_sites
    where school_id = v_actor.school_id
+     and site_slug is not null
      and (v_base_domain is null or platform_domain = v_base_domain)
    order by created_at desc
    limit 1;
