@@ -1016,7 +1016,7 @@ let _announcementComposerOpen=false;
 let _announcementComposerScrollY=0;
 let _announcementComposerBodyStyles=null;
 function _lockAnnouncementPageScroll(){
-  _announcementComposerScrollY=window.scrollY||document.documentElement.scrollTop||0;
+  _announcementComposerScrollY=Number.isFinite(window.scrollY)?window.scrollY:0;
   const body=document.body;
   if(!body)return;
   _announcementComposerBodyStyles={position:body.style.position,top:body.style.top,left:body.style.left,right:body.style.right,width:body.style.width,overflow:body.style.overflow};
