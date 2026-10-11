@@ -1223,3 +1223,41 @@ test('Inquiry Chat shows retry UI on open failure and recovers without stale mes
   await expect(page.locator('#inquiryMessageStream .chat-error')).toHaveCount(0);
   await expect(page.locator('#inquiryChatInput')).toBeEnabled();
 });
+
+
+test('Official Announcements plus opens a fixed modal without shifting the mobile workspace', async ({ page }) => {
+  await page.setViewportSize({ width: 390, height: 844 });
+  await mountSmartChat(page, false);
+  await page.evaluate(() => {
+    window.APP.is_admin = true;
+    window.renderChat();
+    window.switchChatChannel('announcements');
+  });
+
+  const plus = page.locator('#announcementComposerToggle');
+  await expect(plus).toBeVisible();
+  const before = await page.evaluate(() => {
+    const shell = document.querySelector('.smart-chat-announcement-shell');
+    const list = document.querySelector('#announcementList');
+    const detail = document.querySelector('#announcementStream');
+    const rect = (element) => { const r = element.getBoundingClientRect(); return { x: r.x, y: r.y, width: r.width, height: r.height }; };
+    return { shell: rect(shell), list: rect(list), detail: rect(detail) };
+  });
+
+  await plus.click();
+  await expect(page.locator('#announcementComposer')).toHaveCSS('position', 'fixed');
+  await expect(page.locator('#announcementComposer .smart-chat-admin-card')).toBeVisible();
+  await expect(page.locator('.smart-chat-composer-close')).toBeVisible();
+  const after = await page.evaluate(() => {
+    const shell = document.querySelector('.smart-chat-announcement-shell');
+    const list = document.querySelector('#announcementList');
+    const detail = document.querySelector('#announcementStream');
+    const rect = (element) => { const r = element.getBoundingClientRect(); return { x: r.x, y: r.y, width: r.width, height: r.height }; };
+    return { shell: rect(shell), list: rect(list), detail: rect(detail) };
+  });
+  expect(after).toEqual(before);
+
+  await page.locator('.smart-chat-composer-close').click();
+  await expect(page.locator('#announcementComposer')).toBeHidden();
+  await expect(page.locator('html')).not.toHaveClass(/scms-announcement-composer-open/);
+});
