@@ -241,7 +241,7 @@ async function activateSiteAddress(){
   $("#siteAddressStatus").dataset.state="error";
   await refreshSiteAddress();
  }finally{
-  if(button)button.disabled=!publishAuthorized||!currentSite;
+  // refreshSiteAddress recalculates activation eligibility from the server state.
  }
 }
 function admissionStatusLabel(status){
