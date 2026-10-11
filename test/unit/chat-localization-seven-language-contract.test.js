@@ -89,13 +89,13 @@ test('Staff Chat and Official Announcements labels do not silently fall back to 
 });
 
 
-test('Chat locale extension preserves base send-failure translations when it has no override', () => {
+test('Chat retry and send-failure states are explicitly localized in every supported language', () => {
   const locales = loadChatLocales();
-  const base = loadChatLocales.baseLocales;
-  for (const code of ['th', 'jp', 'ms', 'km', 'zh']) {
-    assert.ok(base[code]['chat.sendFailed'], code + ' base locale must define chat.sendFailed');
-    assert.notEqual(base[code]['chat.sendFailed'], locales.en['chat.sendFailed'], code + ' base send-failure text must be translated');
-    assert.equal(locales[code]['chat.sendFailed'], base[code]['chat.sendFailed'], code + ' base translation must survive the Chat extension');
+  for (const code of LANGUAGES.filter(code => code !== 'en')) {
+    assert.ok(locales[code]['chat.retry'], code + ' retry text must be present');
+    assert.ok(locales[code]['chat.sendFailed'], code + ' send-failure text must be present');
+    assert.notEqual(locales[code]['chat.retry'], locales.en['chat.retry'], code + ' retry text must be translated');
+    assert.notEqual(locales[code]['chat.sendFailed'], locales.en['chat.sendFailed'], code + ' send-failure text must be translated');
   }
 });
 
