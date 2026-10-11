@@ -16,14 +16,24 @@ const fieldMeta={
 const $=s=>document.querySelector(s),$$=s=>[...document.querySelectorAll(s)];
 const dialog=$("#editorDialog"),input=$("#dialogInput"),title=$("#dialogTitle"),label=$("#dialogLabel"),hint=$("#dialogHint"),toast=$("#toast");
 if(window.SCMS_WEBSITE_CONTEXT?.admissionsAuthorized!==true)$("#admissionInboxButton").hidden=true;
+const publishAuthorized=window.SCMS_WEBSITE_CONTEXT?.publishAuthorized===true;
+if(!publishAuthorized)$("#publishButton").hidden=true;
 let activeField=null,activeCollection=null;
 let draftVersion=0;
+let draftStatus="draft";
 let remoteDraftReady=false;
 let draftHydrating=true;
 let draftConflict=false;
 let draftSaveTimer=null;
 let draftSaveInFlight=false;
 let draftSaveQueued=false;
+function updateDraftActionButtons(){
+ const stateText=$("#saveState").textContent||"";
+ const saving=stateText.startsWith("Saving")||stateText.startsWith("Loading");
+ const review=$("#submitReviewButton"),publish=$("#publishButton");
+ if(review)review.disabled=!remoteDraftReady||draftConflict||draftVersion<1||draftStatus!=="draft"||saving;
+ if(publish)publish.disabled=!publishAuthorized||!remoteDraftReady||draftConflict||draftVersion<1||draftStatus!=="review"||saving;
+}
 function showToast(message){toast.textContent=message;toast.classList.add("show");clearTimeout(showToast.t);showToast.t=setTimeout(()=>toast.classList.remove("show"),1800)}
 function openField(field){activeField=field;activeCollection=null;const m=fieldMeta[field];title.textContent=m[0];label.textContent=m[0];input.value=state[field];hint.textContent=m[2];input.placeholder=m[1];input.maxLength=field==="aboutText"?4000:field==="contactText"?2000:300;input.removeAttribute("aria-invalid");dialog.showModal();setTimeout(()=>input.focus(),30)}
 function openItem(collection){activeCollection=collection;activeField=null;const names={programs:["Add a program","Example: Primary Education"],facilities:["Add a facility","Example: Science & Innovation Lab"],news:["Add news or event","Example: Open Day 2026"]};const m=names[collection];title.textContent=m[0];label.textContent="Title";input.value="";hint.textContent=m[1];input.placeholder=m[1];input.maxLength=200;input.removeAttribute("aria-invalid");dialog.showModal();setTimeout(()=>input.focus(),30)}
@@ -51,6 +61,7 @@ function scheduleRemoteDraftSave(){
  if(draftHydrating||!remoteDraftReady||draftConflict)return;
  clearTimeout(draftSaveTimer);
  $("#saveState").textContent="Saving to SCMS…";
+ updateDraftActionButtons();
  draftSaveTimer=setTimeout(saveRemoteDraft,700);
 }
 async function saveRemoteDraft(){
@@ -62,15 +73,19 @@ async function saveRemoteDraft(){
  try{
   const result=await websiteRpc("rpc_school_website_save_draft",{p_content:snapshot,p_expected_version:draftVersion});
   draftVersion=Number.isInteger(result.version)?result.version:draftVersion;
+  draftStatus=typeof result.status==="string"?result.status:"draft";
   if(JSON.stringify(snapshot)===JSON.stringify(draftPayload()))$("#saveState").textContent="Saved to SCMS";
+  updateDraftActionButtons();
  }catch(error){
   const reason=error instanceof Error?error.message:"";
   if(reason==="stale_draft"){
    draftConflict=true;
    $("#saveState").textContent="Draft conflict — reload";
+   updateDraftActionButtons();
    showToast("This draft changed in another session. Reload before editing further.");
   }else{
    $("#saveState").textContent="Offline backup only";
+   updateDraftActionButtons();
   }
  }finally{
   draftSaveInFlight=false;
@@ -79,9 +94,9 @@ async function saveRemoteDraft(){
 }
 function persistDraft(){
  try{localStorage.setItem(draftStorageKey(),JSON.stringify(state))}catch(_){}
- if(draftHydrating){$("#saveState").textContent="Loading draft…";return;}
- if(!remoteDraftReady){$("#saveState").textContent="Offline backup only";return;}
- if(draftConflict){$("#saveState").textContent="Draft conflict — reload";return;}
+ if(draftHydrating){$("#saveState").textContent="Loading draft…";updateDraftActionButtons();return;}
+ if(!remoteDraftReady){$("#saveState").textContent="Offline backup only";updateDraftActionButtons();return;}
+ if(draftConflict){$("#saveState").textContent="Draft conflict — reload";updateDraftActionButtons();return;}
  scheduleRemoteDraftSave();
 }
 function updateProgress(){const fields=["schoolName","tagline","aboutTitle","aboutText","contactTitle","contactText"];const done=fields.filter(f=>state[f]).length;$("#fieldProgress").textContent=done+" of "+fields.length+" completed"}
@@ -279,7 +294,50 @@ $("#refreshAdmissionInbox").addEventListener("click",()=>loadAdmissions(true));
 $("#loadOlderAdmissions").addEventListener("click",()=>loadAdmissions(false));
 $("#previewToggle").addEventListener("click",()=>{const p=$("#previewPanel");p.classList.toggle("open");$("#previewToggle").setAttribute("aria-expanded",String(p.classList.contains("open")))});
 $("#closePreview").addEventListener("click",()=>$("#previewPanel").classList.remove("open"));
-$("#publishButton").addEventListener("click",()=>showToast("Preview only — publishing requires authorized review and the secure publish workflow."));
+async function submitDraftForReview(){
+ if(!remoteDraftReady||draftConflict||draftVersion<1||draftStatus!=="draft")return;
+ $("#submitReviewButton").disabled=true;
+ $("#saveState").textContent="Submitting for review…";
+ updateDraftActionButtons();
+ try{
+  const result=await websiteRpc("rpc_school_website_submit_draft_for_review",{p_expected_version:draftVersion});
+  draftVersion=result.version;
+  draftStatus=result.status||"review";
+  $("#saveState").textContent="Submitted for review";
+  updateDraftActionButtons();
+  showToast("Draft submitted for authorized review.");
+ }catch(error){
+  const reason=error instanceof Error?error.message:"";
+  if(reason==="stale_draft"){draftConflict=true;$("#saveState").textContent="Draft conflict — reload";}
+  else $("#saveState").textContent="Review submission failed";
+  updateDraftActionButtons();
+  showToast("Could not submit this draft for review. Refresh and try again.");
+ }
+}
+async function publishWebsiteDraft(){
+ if(!publishAuthorized||!remoteDraftReady||draftConflict||draftVersion<1||draftStatus!=="review")return;
+ $("#publishButton").disabled=true;
+ $("#saveState").textContent="Publishing…";
+ updateDraftActionButtons();
+ try{
+  const result=await websiteRpc("rpc_school_website_publish_draft",{p_expected_version:draftVersion});
+  draftVersion=result.draft_version;
+  draftStatus="published";
+  $("#saveState").textContent="Published to SCMS";
+  updateDraftActionButtons();
+  showToast(result.public_site_active===true
+   ?"Website published. The active school hostname can now serve this published version."
+   :"Content published, but the public site is not active yet. Domain/site activation is still required.");
+ }catch(error){
+  const reason=error instanceof Error?error.message:"";
+  if(reason==="stale_draft"){draftConflict=true;$("#saveState").textContent="Draft conflict — reload";}
+  else $("#saveState").textContent="Publish failed";
+  updateDraftActionButtons();
+  showToast("Could not publish this version. Verify review status and permissions, then refresh.");
+ }
+}
+$("#submitReviewButton").addEventListener("click",submitDraftForReview);
+$("#publishButton").addEventListener("click",publishWebsiteDraft);
 const templateDialog=$("#templateDialog");
 $("#changeTemplate").addEventListener("click",()=>templateDialog.showModal());$("#closeTemplateDialog").addEventListener("click",()=>templateDialog.close());
 $$(".template-option").forEach(b=>b.addEventListener("click",()=>{state.template=b.dataset.template;$$(".template-option").forEach(x=>x.classList.toggle("selected",x===b));templateDialog.close();showToast(b.querySelector("b").textContent+" selected")}));
@@ -290,6 +348,7 @@ async function bootDraftStudio(){
  try{
   const result=await websiteRpc("rpc_school_website_load_draft",{});
   draftVersion=Number.isInteger(result.version)?result.version:0;
+  draftStatus=typeof result.status==="string"?result.status:"draft";
   serverFound=result.found===true;
   if(serverFound&&result.content&&typeof result.content==="object")Object.assign(state,result.content);
   else if(localDraft&&typeof localDraft==="object")Object.assign(state,localDraft);
@@ -308,6 +367,7 @@ async function bootDraftStudio(){
  }else{
   $("#saveState").textContent="Offline backup only";
  }
+ updateDraftActionButtons();
 }
 bootDraftStudio();
 })();
