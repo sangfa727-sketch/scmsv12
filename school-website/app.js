@@ -76,13 +76,13 @@
     renderItems("programList",content.programs);
     renderItems("facilityList",content.facilities);
     renderItems("newsList",content.news);
-    if(!Array.isArray(content.programs)||content.programs.length===0)$("#programs").hidden=true;
-    if(!Array.isArray(content.facilities)||content.facilities.length===0)$("#facilities").hidden=true;
-    if(!Array.isArray(content.news)||content.news.length===0)$("#news").hidden=true;
     const sections=Array.isArray(content.sections)?content.sections:[];
     const admissionsSection=sections.find(item=>item&&item.id==="admissions");
     $("#admissions").hidden=!!admissionsSection&&admissionsSection.visible===false;
     applySectionVisibility(content);
+    if(!Array.isArray(content.programs)||content.programs.length===0)$("#programs").hidden=true;
+    if(!Array.isArray(content.facilities)||content.facilities.length===0)$("#facilities").hidden=true;
+    if(!Array.isArray(content.news)||content.news.length===0)$("#news").hidden=true;
     document.title=schoolName+" | School Website";
   }
   async function boot(){
