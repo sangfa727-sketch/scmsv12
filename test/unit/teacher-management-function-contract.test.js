@@ -130,7 +130,18 @@ test('Manage Access loads catalog and assignments together and renders scoped pe
   assert.match(render, /_taScopeControls\(p,catalog\)/);
   assert.match(render, /addEventListener\('change'/);
   assert.match(render, /catch \(e\)/);
-  assert.match(render, /_taUi\('loadFailed'\)/);
+  assert.match(render, /_taErrorMessage\(e, 'loadFailed'\)/);
+});
+
+test('Manage Access translates unknown permission keys and hides raw backend error identifiers', () => {
+  const source = read('js/29_teacher_access.js');
+  assert.match(source, /function _taPermissionFallback\(key\)/);
+  assert.match(source, /normalized\.replace\(\/\\\\b\\\\w\/g/);
+  assert.match(source, /dict\[_taLang\(\)\]\?\.\[key\] \|\| dict\.en\[key\] \|\| _taPermissionFallback\(key\)/);
+  assert.match(source, /function _taErrorMessage\(error, fallbackKey\)/);
+  assert.match(source, /return _taUi\('accessDenied'\)/);
+  assert.match(source, /return _taUi\(fallbackKey \|\| 'operationFailed'\)/);
+  assert.match(source, /root\.innerHTML = '<div class="form-error">' \+ _taErrorMessage\(e, 'loadFailed'\) \+ '<\\/div>'/);
 });
 
 test('Class and subject assignment handlers validate required selections and send the correct RPC actions', () => {
