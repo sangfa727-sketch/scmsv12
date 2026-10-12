@@ -16,6 +16,7 @@ SET search_path TO 'public', 'pg_temp'
 AS $function$
 DECLARE
   v_admin record;
+  v_teacher_id text := trim(coalesce(p_teacher_id, ''));
   v_login_name text := trim(p_login_name);
   v_email text := lower(trim(coalesce(p_email, '')));
 BEGIN
@@ -49,7 +50,7 @@ BEGIN
     RETURN jsonb_build_object('ok', false, 'error', 'insufficient_role');
   END IF;
 
-  IF p_teacher_id IS NULL OR trim(p_teacher_id) = '' THEN
+  IF v_teacher_id = '' THEN
     RETURN jsonb_build_object('ok', false, 'error', 'teacher_id_required');
   END IF;
 
@@ -74,7 +75,7 @@ BEGIN
     RETURN jsonb_build_object('ok', false, 'error', 'email_required');
   END IF;
 
-  IF EXISTS (SELECT 1 FROM public.teachers WHERE lower(teacher_id) = lower(p_teacher_id)) THEN
+  IF EXISTS (SELECT 1 FROM public.teachers WHERE lower(trim(teacher_id)) = lower(v_teacher_id)) THEN
     RETURN jsonb_build_object('ok', false, 'error', 'duplicate_id');
   END IF;
 
@@ -90,18 +91,18 @@ BEGIN
     (teacher_id, login_name, teacher_name, school_id, status, role, email,
      password_hash, must_change_password, password_changed_at)
   VALUES
-    (p_teacher_id, v_login_name, p_teacher_name, v_admin.school_id, 'active',
+    (v_teacher_id, v_login_name, p_teacher_name, v_admin.school_id, 'active',
      p_role, v_email, public._scms_hash_password(p_initial_pin), true, now());
 
   INSERT INTO public.audit_log(source, actor, action, school_id, payload)
   VALUES (
     'web', v_admin.teacher_id, 'teacher.create', v_admin.school_id,
-    jsonb_build_object('teacher_id', p_teacher_id, 'role', p_role)
+    jsonb_build_object('teacher_id', v_teacher_id, 'role', p_role)
   );
 
   RETURN jsonb_build_object(
     'ok', true,
-    'teacher_id', p_teacher_id,
+    'teacher_id', v_teacher_id,
     'login_name', v_login_name,
     'teacher_name', p_teacher_name,
     'school_id', v_admin.school_id,
