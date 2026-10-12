@@ -118,7 +118,7 @@ CREATE OR REPLACE FUNCTION public.rpc_admin_update_teacher_profile(
   p_teacher_name text,
   p_login_name text,
   p_email text DEFAULT NULL,
-  p_role text DEFAULT 'teacher'
+  p_role text DEFAULT NULL
 )
 RETURNS jsonb
 LANGUAGE plpgsql
@@ -128,7 +128,7 @@ AS $function$
 DECLARE
   v_admin record;
   v_target_role text;
-  v_role text := lower(trim(coalesce(p_role, 'teacher')));
+  v_role text;
   v_name text := trim(coalesce(p_teacher_name, ''));
   v_login text := trim(coalesce(p_login_name, ''));
   v_email text := lower(trim(coalesce(p_email, '')));
@@ -152,14 +152,6 @@ BEGIN
     RETURN jsonb_build_object('ok', false, 'error', 'not_admin');
   END IF;
 
-  IF v_role NOT IN ('teacher', 'assistant_teacher', 'senior_teacher', 'school_coordinator', 'administrative_assistant', 'admin', 'super_admin') THEN
-    RETURN jsonb_build_object('ok', false, 'error', 'invalid_role');
-  END IF;
-
-  IF v_admin.admin_role <> 'super_admin' AND v_role IN ('admin', 'super_admin') THEN
-    RETURN jsonb_build_object('ok', false, 'error', 'insufficient_role');
-  END IF;
-
   SELECT teacher_id, teacher_name, login_name, email, role
     INTO v_old
     FROM public.teachers
@@ -171,7 +163,32 @@ BEGIN
     RETURN jsonb_build_object('ok', false, 'error', 'teacher_not_found');
   END IF;
 
-  IF v_admin.admin_role <> 'super_admin' AND v_old.role = 'super_admin' THEN
+  -- Omitted or NULL role means "leave the current role unchanged".
+  -- This prevents non-role profile edits from silently downgrading admins.
+  IF p_role IS NULL THEN
+    v_role := v_old.role;
+  ELSE
+    v_role := lower(trim(p_role));
+    IF v_role NOT IN ('teacher', 'assistant_teacher', 'senior_teacher', 'school_coordinator', 'administrative_assistant', 'admin', 'super_admin') THEN
+      RETURN jsonb_build_object('ok', false, 'error', 'invalid_role');
+    END IF;
+  END IF;
+
+  IF v_admin.admin_role <> 'super_admin'
+     AND v_old.role = 'super_admin' THEN
+    RETURN jsonb_build_object('ok', false, 'error', 'insufficient_role');
+  END IF;
+
+  -- A regular admin may not promote, demote, or otherwise change another admin's role.
+  IF v_admin.admin_role <> 'super_admin'
+     AND v_old.role = 'admin'
+     AND v_role IS DISTINCT FROM v_old.role THEN
+    RETURN jsonb_build_object('ok', false, 'error', 'insufficient_role');
+  END IF;
+
+  IF v_admin.admin_role <> 'super_admin'
+     AND v_role IN ('admin', 'super_admin')
+     AND v_role IS DISTINCT FROM v_old.role THEN
     RETURN jsonb_build_object('ok', false, 'error', 'insufficient_role');
   END IF;
 
