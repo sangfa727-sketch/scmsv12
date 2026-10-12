@@ -33,7 +33,8 @@ async function mountAdmin(page) {
         { permission_key: 'students.view', category: 'Students', scope_type: 'global', description: 'View students' },
         { permission_key: 'students.edit', category: 'Students', scope_type: 'class', description: 'Edit students' },
         { permission_key: 'attendance.view', category: 'Attendance', scope_type: 'subject', description: 'View attendance' },
-        { permission_key: 'grades.edit', category: 'Academics', scope_type: 'class_subject', description: 'Edit grades' }
+        { permission_key: 'grades.edit', category: 'Academics', scope_type: 'class_subject', description: 'Edit grades' },
+        { permission_key: 'custom.permission_key', category: 'custom_area', scope_type: 'global', description: 'Custom permission used to verify readable fallback labels' }
       ],
       role_permissions: [{ role: 'teacher', permission_key: 'students.view', allowed: true }]
     };
@@ -92,7 +93,7 @@ test('Edit Teacher sends the selected role and updated fields to the RPC', async
 test('Manage Access renders scoped permissions and persists Allow/Default choices through RPC', async ({ page }) => {
   await mountAdmin(page);
   await page.evaluate(() => window.openTeacherAccess('teacher-2', 'Other Teacher'));
-  await expect(page.locator('.teacher-access-sheet')).toBeVisible();
+  await expect(page.locator('.teacher-access-sheet:visible')).toBeVisible();
   await expect(page.locator('.teacher-access-sheet')).toContainText('Manage Access');
   await expect(page.locator('#teacherAccessRoot')).toContainText('Other Teacher');
 
@@ -261,4 +262,28 @@ test('Reset Teacher password sends the new password to the guarded RPC without e
   expect(call.payload.p_new_password).toBe('new-secret-987');
   const toasts = await page.evaluate(() => window.__teacherTestToasts);
   expect(toasts.join(' ')).not.toContain('new-secret-987');
+});
+
+
+test('Manage Access never displays raw permission/category keys in any of the seven supported languages', async ({ page }) => {
+  await mountAdmin(page);
+  const languages = ['en', 'my', 'th', 'jp', 'ms', 'km', 'zh'];
+  for (const language of languages) {
+    await page.reload({ waitUntil: 'domcontentloaded' });
+    await mountAdmin(page);
+    await page.evaluate((lang) => { window.I18N.current = lang; }, language);
+    await page.evaluate(() => window.openTeacherAccess('teacher-2', 'Other Teacher'));
+    const sheet = page.locator('.teacher-access-sheet:visible').first();
+    await expect(sheet).toBeVisible();
+    const permissionLabel = sheet.locator('.teacher-access-perm-row[data-permission="custom.permission_key"] .teacher-access-perm-copy strong');
+    await expect(permissionLabel).toBeVisible();
+    const permissionText = await permissionLabel.textContent();
+    const categoryText = await sheet.locator('.teacher-access-perm-row[data-permission="custom.permission_key"]').evaluate(row => row.closest('.teacher-access-perm-group')?.querySelector('.teacher-access-perm-category')?.textContent || '');
+    expect(categoryText).not.toBe('');
+    expect(permissionText).not.toContain('custom.permission_key');
+    expect(permissionText).not.toContain('_');
+    expect(categoryText).not.toContain('custom_area');
+    expect(categoryText).not.toContain('_');
+    await page.evaluate(() => window.closeModal());
+  }
 });

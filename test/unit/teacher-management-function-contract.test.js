@@ -63,6 +63,25 @@ test('Create and edit teacher forms validate required fields and restore save co
   assert.match(edit, /_invalidateTeacherManagerCache\(\)/);
 });
 
+test('Manage Teacher errors use localized copy and never expose raw RPC/database identifiers', () => {
+  const source = read('js/15_settings.js');
+  const manager = block(source, 'window.openTeacherManager = async function()', 'function _teacherLifecycleCopy');
+  assert.match(manager, /t\('tm\.loadFailed'\)/);
+  assert.doesNotMatch(manager, /e\?\.message|String\(e\)/);
+  const lifecycle = block(source, 'window.setTeacherLifecycle = async function(teacherId, action)', 'function _renderTeacherList');
+  assert.match(lifecycle, /catch \(e\) \{ showToast\(t\('common\.saveFailed'\)\); \}/);
+  const edit = block(source, 'window.saveTeacherEdit = async function(teacherId)', 'window.doCreateTeacher');
+  assert.match(edit, /err\.textContent = t\('common\.saveFailed'\)/);
+  const create = block(source, 'window.doCreateTeacher = async function()', 'window.openTeacherCardModal');
+  assert.match(create, /errEl\.textContent = t\('ct\.createFailed'\)/);
+  assert.doesNotMatch(create, /result\.message/);
+  const card = block(source, 'window.openTeacherCardModal = async function(teacherId, teacherName, teacherLoginName)', 'window.resetTeacherPassword');
+  assert.match(card, /esc\(t\('tm\.cardFailed'\)\)/);
+  assert.doesNotMatch(card, /e\?\.message|String\(e\)/);
+  const reset = block(source, 'window.resetTeacherPassword = function(teacherId, teacherName)', 'window.openMyAccessSettings');
+  assert.match(reset, /err: t\('common\.unknown'\)/);
+});
+ 
 test('Role picker never offers admin or super_admin unless the current actor is super_admin', () => {
   const source = read('js/15_settings.js');
   assert.match(source, /SCMS_OPERATIONAL_ROLES = Object\.freeze\(\['teacher','assistant_teacher','senior_teacher','school_coordinator','administrative_assistant','admin','super_admin'\]\)/);
@@ -130,7 +149,18 @@ test('Manage Access loads catalog and assignments together and renders scoped pe
   assert.match(render, /_taScopeControls\(p,catalog\)/);
   assert.match(render, /addEventListener\('change'/);
   assert.match(render, /catch \(e\)/);
-  assert.match(render, /_taUi\('loadFailed'\)/);
+  assert.match(render, /_taErrorMessage\(e, 'loadFailed'\)/);
+});
+
+test('Manage Access translates unknown permission keys and hides raw backend error identifiers', () => {
+  const source = read('js/29_teacher_access.js');
+  assert.match(source, /function _taPermissionFallback\(key\)/);
+  assert.ok(source.includes("normalized.replace(/\\b\\w/g"));
+  assert.match(source, /dict\[_taLang\(\)\]\?\.\[key\] \|\| dict\.en\[key\] \|\| _taPermissionFallback\(key\)/);
+  assert.match(source, /function _taErrorMessage\(error, fallbackKey\)/);
+  assert.match(source, /return _taUi\('accessDenied'\)/);
+  assert.match(source, /return _taUi\(fallbackKey \|\| 'operationFailed'\)/);
+  assert.ok(source.includes("root.innerHTML = '<div class=\"form-error\">' + _taErrorMessage(e, 'loadFailed') + '</div>';"));
 });
 
 test('Class and subject assignment handlers validate required selections and send the correct RPC actions', () => {

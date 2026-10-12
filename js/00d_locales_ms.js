@@ -2,7 +2,7 @@
 window.I18N_MS = {
   "app.title": "SCMS — Pengurusan Kelas Sekolah",
   "common.all": "Semua",
-  "common.edit": "Edit",
+  "common.edit": "Sunting",
   "common.close": "Tutup",
   "common.cancel": "Batal",
   "common.add": "Tambah",

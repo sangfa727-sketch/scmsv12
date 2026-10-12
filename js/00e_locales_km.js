@@ -1093,7 +1093,7 @@ window.I18N_KM = {
   "inv.failed": "មិនអាចបង្កើតការអញ្ជើញបានទេ៖ {err}",
   "ct.title": "+ គ្រូថ្មី",
   "ct.subtitle": "បង្កើតគណនីចូល។ គ្រូនឹងត្រូវប្តូរលេខសម្ងាត់ដំបូង។",
-  "ct.teacherId": "Teacher ID *",
+  "ct.teacherId": "\u17a2\u178f\u17d2\u178f\u179b\u17c1\u1781\u1782\u17d2\u179a\u17bc",
   "ct.teacherIdPh": "ឧ. T1001",
   "ct.loginName": "ឈ្មោះចូល *",
   "ct.loginNamePh": "ឧ. teacher1",
@@ -1475,4 +1475,5 @@ window.I18N_KM = {
   "chat.gradeAccess": "សូមស្នើឱ្យអ្នកគ្រប់គ្រងពិនិត្យការកំណត់ថ្នាក់ និងការចាត់តាំងគ្រូ។",
   "chat.gradePrefix": "ថ្នាក់: ",
   "chat.individualPrefix": "បុគ្គល: "
+
 };
