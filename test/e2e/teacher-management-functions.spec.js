@@ -138,6 +138,7 @@ test('Create Teacher validates and sends the selected operational role to the se
   await page.locator('#newTEmail').fill('new.teacher@example.test');
   await page.locator('#newTRole').selectOption('assistant_teacher');
   await expect(page.locator('#newTPw')).toHaveAttribute('type', 'password');
+  await expect(page.locator('#newTPw')).toHaveValue('');
   await page.locator('#newTPw').fill('valid-pin-123');
   await page.locator('#newTBtn').click();
 
