@@ -175,7 +175,7 @@ function _taDescription(key, fallback) {
   const description = String(fallback || '').trim();
   const permissionKey = String(key || '').trim();
   const label = _taText(key).trim();
-  const normalize = (value) => String(value || '').replace(/\\s+/g, ' ').trim().toLocaleLowerCase();
+  const normalize = (value) => String(value || '').replace(/\s+/g, ' ').trim().toLocaleLowerCase();
   // A key or a description that merely repeats the translated title adds noise,
   // leaks internal permission identifiers, and creates duplicate labels in the UI.
   if (!description || normalize(description) === normalize(permissionKey) ||
