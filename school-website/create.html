@@ -69,7 +69,7 @@
           <button class="editable body-placeholder" data-field="contactText" type="button">Phone · Email · Address · Location</button>
         </section>
       </div>
-      <section class="next-step-card"><span class="section-kicker">3 · REVIEW</span><strong>Preview your finished website before it goes live.</strong><small>Publishing will stay protected behind the authorized review workflow.</small><button id="addSectionBottom" class="add-section" type="button">＋ Add another content section</button></section>
+      <section class="next-step-card"><span class="section-kicker">3 · REVIEW</span><strong>Preview your finished website before it goes live.</strong><small>Publishing will stay protected behind the authorized review workflow.</small><div class="section-manager"><div class="section-manager-heading"><strong>Page sections</strong><small>Restore hidden sections or hide sections you do not need.</small></div><div id="sectionManager" class="section-manager-list" aria-label="Show or hide page sections"></div></div><button id="addSectionBottom" class="add-section" type="button">＋ Add another content section</button></section>
     </section>
     <aside id="previewPanel" class="preview-panel" aria-label="Website preview">
       <div class="preview-top"><strong>Live preview</strong><button id="closePreview" class="icon-button" type="button" aria-label="Close preview">×</button></div>
@@ -95,9 +95,9 @@
   <dialog id="templateDialog"><div class="editor-dialog">
     <div class="dialog-top"><div><span class="section-kicker">WEBSITE STYLE</span><h2>Choose a template</h2></div><button id="closeTemplateDialog" class="icon-button" type="button">×</button></div>
     <div class="template-options">
-      <button class="template-option selected" data-template="modern" type="button"><b>Modern School</b><span>Clean, calm and welcoming</span></button>
-      <button class="template-option" data-template="classic" type="button"><b>Classic Academy</b><span>Formal and traditional</span></button>
-      <button class="template-option" data-template="premium" type="button"><b>Premium Campus</b><span>Editorial and sophisticated</span></button>
+      <button class="template-option selected" data-template="modern" type="button"><div class="template-swatch swatch-modern" aria-hidden="true"><i></i><b></b><span></span></div><b>Modern School</b><span>Clean, calm and welcoming</span></button>
+      <button class="template-option" data-template="classic" type="button"><div class="template-swatch swatch-classic" aria-hidden="true"><i></i><b></b><span></span></div><b>Classic Academy</b><span>Formal, academic and traditional</span></button>
+      <button class="template-option" data-template="premium" type="button"><div class="template-swatch swatch-premium" aria-hidden="true"><i></i><b></b><span></span></div><b>Premium Campus</b><span>Editorial, confident and sophisticated</span></button>
     </div>
   </div></dialog>
   <dialog id="siteAddressDialog" aria-labelledby="siteAddressTitle">
