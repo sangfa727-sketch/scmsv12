@@ -24,7 +24,10 @@ CREATE TABLE public.teachers (
   teacher_name text NOT NULL,
   email text,
   last_web_login_at timestamptz,
-  photo_url text
+  photo_url text,
+  password_hash text,
+  must_change_password boolean NOT NULL DEFAULT false,
+  password_changed_at timestamptz
 );
 
 CREATE TABLE public.app_web_sessions (
@@ -116,6 +119,15 @@ CREATE TABLE public.audit_log (
   payload jsonb NOT NULL DEFAULT '{}'::jsonb
 );
 
+-- Test-only password hash stand-in; the production RPC still runs unchanged.
+CREATE OR REPLACE FUNCTION public._scms_hash_password(p_password text)
+RETURNS text
+LANGUAGE sql
+IMMUTABLE
+AS $hash$
+  SELECT 'test-hash:' || p_password;
+$hash$;
+
 -- Deterministic helper stub: the RPC function and tenant-bound queries below are real.
 CREATE OR REPLACE FUNCTION private.web_has_permission(p_session_token text, p_permission text)
 RETURNS boolean
@@ -179,6 +191,7 @@ VALUES ('school-b', 'teacher-b', 'students.view', true, 'global');
 -- Apply the follow-up migration that fixes expression-index upsert behavior in live RPC.
 \ir ../../supabase/migrations/20261006230000_fix_teacher_permission_upsert_conflict.sql
 \ir ../../supabase/migrations/20261012120000_teacher_access_audit_actor_attribution.sql
+\ir ../../supabase/migrations/20261012140000_teacher_password_reset_audit.sql
 -- Replaying against the fully hardened and persistence-fixed definition must be a no-op.
 \ir ../../supabase/migrations/20261005260000_manage_teacher_access_permission_gate.sql
 
@@ -484,3 +497,83 @@ BEGIN
   RAISE NOTICE 'Manage Teacher/Access audit actor attribution tests passed.';
 END
 $audit_actor_assertions$;
+
+
+-- Password reset must be tenant-bound, session-guarded, and auditable without storing secrets.
+DO $password_reset_assertions$
+DECLARE
+  v jsonb;
+  v_count integer;
+  v_actor text;
+  v_payload jsonb;
+BEGIN
+  v := public.rpc_admin_reset_teacher_password('expired-token', 'teacher-a', 'valid-reset-987');
+  IF v->>'error' <> 'not_admin' THEN
+    RAISE EXCEPTION 'Expired admin session must fail closed for password reset; got %', v;
+  END IF;
+
+  v := public.rpc_admin_reset_teacher_password('admin-a-token', 'teacher-b', 'valid-reset-987');
+  IF v->>'error' <> 'teacher_not_found' THEN
+    RAISE EXCEPTION 'Cross-school password reset must fail closed; got %', v;
+  END IF;
+
+  v := public.rpc_admin_reset_teacher_password('admin-a-token', 'super-a', 'valid-reset-987');
+  IF v->>'error' <> 'insufficient_role' THEN
+    RAISE EXCEPTION 'School admin must not reset a super-admin password; got %', v;
+  END IF;
+
+  v := public.rpc_admin_reset_teacher_password('admin-a-token', 'teacher-a', '12345');
+  IF v->>'error' <> 'pin_too_short' THEN
+    RAISE EXCEPTION 'Server must reject passwords shorter than six characters; got %', v;
+  END IF;
+
+  SELECT count(*) INTO v_count
+    FROM public.audit_log
+   WHERE action = 'teacher.password_reset';
+  IF v_count <> 0 THEN
+    RAISE EXCEPTION 'Denied password reset attempts must not create success audit events; count=%', v_count;
+  END IF;
+
+  v := public.rpc_admin_reset_teacher_password('admin-a-token', 'teacher-a', 'valid-reset-987');
+  IF v->>'ok' <> 'true' THEN
+    RAISE EXCEPTION 'Authorized same-school password reset should succeed; got %', v;
+  END IF;
+
+  SELECT actor, payload INTO v_actor, v_payload
+    FROM public.audit_log
+   WHERE action = 'teacher.password_reset'
+     AND school_id = 'school-a'
+   ORDER BY id DESC
+   LIMIT 1;
+  IF v_actor <> 'admin-a' THEN
+    RAISE EXCEPTION 'Password reset audit actor must be the authenticated admin; got %', v_actor;
+  END IF;
+  IF v_payload->>'teacher_id' <> 'teacher-a'
+     OR v_payload ? 'password'
+     OR v_payload ? 'password_hash'
+     OR v_payload::text LIKE '%valid-reset-987%' THEN
+    RAISE EXCEPTION 'Password reset audit payload must identify target but never contain password material; got %', v_payload;
+  END IF;
+
+  IF NOT EXISTS (
+    SELECT 1 FROM public.teachers
+     WHERE teacher_id = 'teacher-a'
+       AND school_id = 'school-a'
+       AND password_hash = 'test-hash:valid-reset-987'
+       AND must_change_password = true
+       AND password_changed_at IS NOT NULL
+  ) THEN
+    RAISE EXCEPTION 'Authorized password reset must persist the hash and force password change';
+  END IF;
+
+  IF EXISTS (
+    SELECT 1 FROM public.app_web_sessions
+     WHERE teacher_id = 'teacher-a'
+       AND school_id = 'school-a'
+  ) THEN
+    RAISE EXCEPTION 'Password reset must invalidate target teacher sessions';
+  END IF;
+
+  RAISE NOTICE 'Manage Teacher password reset audit and isolation tests passed.';
+END
+$password_reset_assertions$;
