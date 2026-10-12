@@ -181,18 +181,24 @@ VALUES ('school-b', 'teacher-b', 'students.view', true, 'global');
 -- Replaying against the fully hardened and persistence-fixed definition must be a no-op.
 \ir ../../supabase/migrations/20261005260000_manage_teacher_access_permission_gate.sql
 
--- Regression-check the migration's action-specific detector against a deliberately
--- partial definition. This is read-only string analysis: the live function in the
--- disposable database remains fully hardened, and the migration is not applied
--- to a partially modified function in this harness.
-DO $partial_gate_regression$
+-- Exercise the migration's fail-closed behavior against an actually partial RPC.
+-- Keep the original definition in a temporary table, create the partial state inside
+-- a transaction, and expect the migration to throw. If it does not throw, fail this test.
+CREATE TEMP TABLE manage_teacher_access_original_definition AS
+SELECT pg_get_functiondef(p.oid) AS definition
+  FROM pg_proc p
+  JOIN pg_namespace n ON n.oid = p.pronamespace
+ WHERE n.nspname = 'public'
+   AND p.proname = 'rpc_manage_teacher_access'
+   AND p.proargtypes = '25 25 25 25 20 25 25 16 25'::oidvector
+ LIMIT 1;
+
+BEGIN;
+
+DO $prepare_partial_gate$
 DECLARE
   v_def text;
   v_partial text;
-  v_catalog boolean;
-  v_list boolean;
-  v_assignment boolean;
-  v_permission boolean;
   v_catalog_block text := $catalog$
   if p_action = 'catalog'
      and not private.web_has_permission(p_session_token, 'permissions.manage') then
@@ -200,39 +206,53 @@ DECLARE
   end if;
 $catalog$;
 BEGIN
-  SELECT pg_get_functiondef(p.oid)
-    INTO v_def
-    FROM pg_proc p
-    JOIN pg_namespace n ON n.oid = p.pronamespace
-   WHERE n.nspname = 'public'
-     AND p.proname = 'rpc_manage_teacher_access'
-     AND p.proargtypes = '25 25 25 25 20 25 25 16 25'::oidvector
-   LIMIT 1;
+  SELECT definition INTO v_def
+    FROM pg_temp.manage_teacher_access_original_definition;
 
   v_partial := replace(v_def, v_catalog_block, '');
   IF v_partial = v_def THEN
     RAISE EXCEPTION 'Partial-gate regression setup failed: catalog gate block not found';
   END IF;
 
-  v_catalog := v_partial ~* 'p_action\s*=\s*''catalog''\s+and\s+not\s+private\.web_has_permission\s*\(\s*p_session_token\s*,\s*''permissions\.manage''\s*\)';
-  v_list := v_partial ~* 'p_action\s*=\s*''list''\s+and\s+not\s+private\.web_has_permission\s*\(\s*p_session_token\s*,\s*''teachers\.view''\s*\)';
-  v_assignment := v_partial ~* 'p_action\s+in\s*\(\s*''class_add''\s*,\s*''class_remove''\s*,\s*''subject_add''\s*,\s*''subject_remove''\s*\)\s+and\s+not\s+private\.web_has_permission\s*\(\s*p_session_token\s*,\s*''teachers\.manage''\s*\)';
-  v_permission := v_partial ~* 'p_action\s+in\s*\(\s*''permission_set''\s*,\s*''permission_remove''\s*\)\s+and\s+not\s+private\.web_has_permission\s*\(\s*p_session_token\s*,\s*''permissions\.manage''\s*\)';
-
-  IF v_catalog OR NOT v_list OR NOT v_assignment OR NOT v_permission THEN
-    RAISE EXCEPTION 'Partial-gate detector regression: expected exactly the catalog gate to be absent; got catalog=%, list=%, assignment=%, permission=%',
-      v_catalog, v_list, v_assignment, v_permission;
+  IF v_partial ~* 'p_action\s*=\s*''catalog''\s+and\s+not\s+private\.web_has_permission\s*\(\s*p_session_token\s*,\s*''permissions\.manage''\s*\)'
+     OR NOT (v_partial ~* 'p_action\s*=\s*''list''\s+and\s+not\s+private\.web_has_permission\s*\(\s*p_session_token\s*,\s*''teachers\.view''\s*\)')
+     OR NOT (v_partial ~* 'p_action\s+in\s*\(\s*''class_add''\s*,\s*''class_remove''\s*,\s*''subject_add''\s*,\s*''subject_remove''\s*\)\s+and\s+not\s+private\.web_has_permission\s*\(\s*p_session_token\s*,\s*''teachers\.manage''\s*\)')
+     OR NOT (v_partial ~* 'p_action\s+in\s*\(\s*''permission_set''\s*,\s*''permission_remove''\s*\)\s+and\s+not\s+private\.web_has_permission\s*\(\s*p_session_token\s*,\s*''permissions\.manage''\s*\)') THEN
+    RAISE EXCEPTION 'Partial-gate regression setup did not produce exactly one missing action gate';
   END IF;
 
-  -- This is the same branch condition used by the migration: any-but-not-all
-  -- action gates must enter the fail-closed partial-gate path.
-  IF NOT (v_catalog OR v_list OR v_assignment OR v_permission)
-     OR (v_catalog AND v_list AND v_assignment AND v_permission) THEN
-    RAISE EXCEPTION 'Partial-gate detector regression: partial state was not classified as fail-closed';
-  END IF;
+  EXECUTE v_partial;
 END
-$partial_gate_regression$;
+$prepare_partial_gate$;
 
+SAVEPOINT partial_gate_migration_attempt;
+\set ON_ERROR_STOP off
+\ir ../../supabase/migrations/20261005260000_manage_teacher_access_permission_gate.sql
+\set ON_ERROR_STOP on
+
+\if :ERROR
+  -- Expected: migration rejected the partial gate set. Undo its failed attempt,
+  -- restore the original RPC definition, and leave the disposable DB consistent.
+  ROLLBACK TO SAVEPOINT partial_gate_migration_attempt;
+  DO $restore_original_rpc$
+  DECLARE
+    v_def text;
+  BEGIN
+    SELECT definition INTO v_def
+      FROM pg_temp.manage_teacher_access_original_definition;
+    EXECUTE v_def;
+  END
+  $restore_original_rpc$;
+  COMMIT;
+  \echo 'Partial-gate migration regression passed: unsafe partial state was rejected.'
+\else
+  ROLLBACK;
+  DO $partial_gate_should_fail$
+  BEGIN
+    RAISE EXCEPTION 'Partial-gate migration regression failed: migration accepted a partial permission-gate set';
+  END
+  $partial_gate_should_fail$;
+\endif
 DO $assertions$
 DECLARE
   v jsonb;
