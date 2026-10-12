@@ -105,3 +105,24 @@ test('dashboard in-flight requests are scoped to the active tenant', async () =>
   const staleDashboard = await oldDashboard;
   assert.equal(staleDashboard.timetable.length, 0);
 });
+
+test('cache is invalidated when role or session changes within the same school', async () => {
+  const h = createHarness();
+
+  const first = await h.window.SCMSDataLoader.load('students');
+  assert.equal(first[0].school_id, 'school-A');
+  assert.equal(h.calls.length, 1);
+
+  // Same school and teacher, but a role change must not reuse cached data.
+  h.window.APP.teacher_role = 'teacher';
+  const afterRoleChange = await h.window.SCMSDataLoader.load('students');
+  assert.equal(afterRoleChange[0].school_id, 'school-A');
+  assert.equal(h.calls.length, 2);
+
+  // Same school, teacher, and role, but a new authenticated session must
+  // also get a fresh request rather than reusing the previous session cache.
+  h.window.APP.webSession = { session_token: 'session-A-renewed' };
+  const afterSessionChange = await h.window.SCMSDataLoader.load('students');
+  assert.equal(afterSessionChange[0].school_id, 'school-A');
+  assert.equal(h.calls.length, 3);
+});
