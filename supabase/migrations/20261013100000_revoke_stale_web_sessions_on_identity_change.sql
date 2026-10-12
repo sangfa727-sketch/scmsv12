@@ -10,9 +10,19 @@ CREATE OR REPLACE FUNCTION private.revoke_web_sessions_on_teacher_identity_chang
 RETURNS trigger
 LANGUAGE plpgsql
 SECURITY DEFINER
-SET search_path TO 'public', 'pg_temp'
+SET search_path TO 'pg_catalog', 'pg_temp'
 AS $function$
 BEGIN
+  IF TG_OP = 'DELETE' THEN
+    UPDATE public.app_web_sessions
+       SET expires_at = LEAST(expires_at, now()),
+           last_seen_at = now()
+     WHERE teacher_id = OLD.teacher_id
+       AND expires_at > now();
+
+    RETURN OLD;
+  END IF;
+
   IF OLD.school_id IS DISTINCT FROM NEW.school_id
      OR OLD.role IS DISTINCT FROM NEW.role
      OR OLD.status IS DISTINCT FROM NEW.status THEN
@@ -27,11 +37,20 @@ BEGIN
 END;
 $function$;
 
+REVOKE ALL ON FUNCTION private.revoke_web_sessions_on_teacher_identity_change() FROM PUBLIC;
+
 DROP TRIGGER IF EXISTS teachers_revoke_web_sessions_on_identity_change
+  ON public.teachers;
+DROP TRIGGER IF EXISTS teachers_revoke_web_sessions_on_delete
   ON public.teachers;
 
 CREATE TRIGGER teachers_revoke_web_sessions_on_identity_change
 AFTER UPDATE OF school_id, role, status ON public.teachers
+FOR EACH ROW
+EXECUTE FUNCTION private.revoke_web_sessions_on_teacher_identity_change();
+
+CREATE TRIGGER teachers_revoke_web_sessions_on_delete
+AFTER DELETE ON public.teachers
 FOR EACH ROW
 EXECUTE FUNCTION private.revoke_web_sessions_on_teacher_identity_change();
 
