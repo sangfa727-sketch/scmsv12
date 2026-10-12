@@ -17,7 +17,7 @@ const _TA_UI = {
     classRequired:'Please select a class first.', classSubjectRequired:'Please select a class and subject first.',
     saved:'Permission saved.', saveFailed:'Could not save permission.', classAddFailed:'Could not add class.',
     classRemoveFailed:'Could not remove class.', subjectAddFailed:'Could not add subject.',
-    subjectRemoveFailed:'Could not remove subject.', loadFailed:'Could not load permission information.', saveRefreshFailed:'Permission was saved, but the latest state could not be reloaded. Reopen Manage Access to verify.'
+    subjectRemoveFailed:'Could not remove subject.', loadFailed:'Could not load permission information.', saveRefreshFailed:'Permission was saved, but the latest state could not be reloaded. Reopen Manage Access to verify.', accessDenied:'You are not authorized to manage this teacher.', authRequired:'Your session has expired. Sign in again.', operationFailed:'The operation could not be completed. Please try again.'
   },
   my: {
     loading:'တင်နေသည်…', manageTitle:'လုပ်ပိုင်ခွင့် စီမံရန်', subtitle:'အတွက် အတန်း၊ ဘာသာရပ်နှင့် လုပ်ပိုင်ခွင့် သတ်မှတ်ချက်များ',
@@ -30,7 +30,7 @@ const _TA_UI = {
     classRequired:'အတန်းကို အရင်ရွေးပါ။', classSubjectRequired:'အတန်းနှင့် ဘာသာရပ်ကို အရင်ရွေးပါ။',
     saved:'လုပ်ပိုင်ခွင့် သိမ်းပြီးပါပြီ။', saveFailed:'လုပ်ပိုင်ခွင့် သိမ်း၍ မရပါ။', classAddFailed:'အတန်းထည့်၍ မရပါ။',
     classRemoveFailed:'အတန်းဖယ်၍ မရပါ။', subjectAddFailed:'ဘာသာရပ်ထည့်၍ မရပါ။',
-    subjectRemoveFailed:'ဘာသာရပ်ဖယ်၍ မရပါ။', loadFailed:'လုပ်ပိုင်ခွင့် အချက်အလက် တင်မရပါ။', saveRefreshFailed:'လုပ်ပိုင်ခွင့်ကို သိမ်းပြီးပါပြီ၊ သို့သော် နောက်ဆုံးအခြေအနေကို ပြန်မဖတ်နိုင်ပါ။ Manage Access ကို ပြန်ဖွင့်ပြီး စစ်ဆေးပါ။'
+    subjectRemoveFailed:'ဘာသာရပ်ဖယ်၍ မရပါ။', loadFailed:'လုပ်ပိုင်ခွင့် အချက်အလက် တင်မရပါ။', saveRefreshFailed:'လုပ်ပိုင်ခွင့်ကို သိမ်းပြီးပါပြီ၊ သို့သော် နောက်ဆုံးအခြေအနေကို ပြန်မဖတ်နိုင်ပါ။ Manage Access ကို ပြန်ဖွင့်ပြီး စစ်ဆေးပါ။', accessDenied:'ဤဆရာ/ဆရာမကို စီမံခန့်ခွဲရန် ခွင့်ပြုချက်မရှိပါ။', authRequired:'သင့် session သက်တမ်းကုန်သွားပါပြီ။ ပြန်လည်ဝင်ရောက်ပါ။', operationFailed:'လုပ်ဆောင်မှု မအောင်မြင်ပါ။ ထပ်မံကြိုးစားပါ။'
   },
   ms: {
     loading:'Memuat…', manageTitle:'Urus Akses', subtitle:'Tetapkan kelas, subjek dan akses kebenaran untuk',
@@ -43,7 +43,7 @@ const _TA_UI = {
     classRequired:'Sila pilih kelas dahulu.', classSubjectRequired:'Sila pilih kelas dan subjek dahulu.',
     saved:'Kebenaran disimpan.', saveFailed:'Tidak dapat menyimpan kebenaran.', classAddFailed:'Tidak dapat menambah kelas.',
     classRemoveFailed:'Tidak dapat membuang kelas.', subjectAddFailed:'Tidak dapat menambah subjek.',
-    subjectRemoveFailed:'Tidak dapat membuang subjek.', loadFailed:'Tidak dapat memuatkan maklumat kebenaran.', saveRefreshFailed:'Kebenaran telah disimpan, tetapi keadaan terkini tidak dapat dimuat semula. Buka semula Manage Access untuk mengesahkan.'
+    subjectRemoveFailed:'Tidak dapat membuang subjek.', loadFailed:'Tidak dapat memuatkan maklumat kebenaran.', saveRefreshFailed:'Kebenaran telah disimpan, tetapi keadaan terkini tidak dapat dimuat semula. Buka semula Manage Access untuk mengesahkan.', accessDenied:'Anda tidak dibenarkan mengurus guru ini.', authRequired:'Sesi anda telah tamat. Sila log masuk semula.', operationFailed:'Operasi tidak dapat diselesaikan. Sila cuba lagi.'
   },
   zh: {
     loading:'加载中…', manageTitle:'管理访问权限', subtitle:'为教师设置班级、科目和权限访问',
@@ -56,7 +56,7 @@ const _TA_UI = {
     classRequired:'请先选择班级。', classSubjectRequired:'请先选择班级和科目。',
     saved:'权限已保存。', saveFailed:'无法保存权限。', classAddFailed:'无法添加班级。',
     classRemoveFailed:'无法移除班级。', subjectAddFailed:'无法添加科目。',
-    subjectRemoveFailed:'无法移除科目。', loadFailed:'无法加载权限信息。', saveRefreshFailed:'权限已保存，但无法重新加载最新状态。请重新打开“管理访问权限”进行确认。'
+    subjectRemoveFailed:'无法移除科目。', loadFailed:'无法加载权限信息。', saveRefreshFailed:'权限已保存，但无法重新加载最新状态。请重新打开“管理访问权限”进行确认。', accessDenied:'您无权管理此教师。', authRequired:'登录会话已过期，请重新登录。', operationFailed:'操作未能完成，请重试。'
   },
   th: {
     loading:'กำลังโหลด…', manageTitle:'จัดการสิทธิ์การเข้าถึง', subtitle:'กำหนดชั้นเรียน วิชา และสิทธิ์การเข้าถึงสำหรับ',
@@ -68,7 +68,7 @@ const _TA_UI = {
     classRequired:'กรุณาเลือกชั้นเรียนก่อน', classSubjectRequired:'กรุณาเลือกชั้นเรียนและวิชาก่อน',
     saved:'บันทึกสิทธิ์แล้ว', saveFailed:'ไม่สามารถบันทึกสิทธิ์ได้', classAddFailed:'ไม่สามารถเพิ่มชั้นเรียนได้',
     classRemoveFailed:'ไม่สามารถลบชั้นเรียนได้', subjectAddFailed:'ไม่สามารถเพิ่มวิชาได้',
-    subjectRemoveFailed:'ไม่สามารถลบวิชาได้', loadFailed:'ไม่สามารถโหลดข้อมูลสิทธิ์ได้', saveRefreshFailed:'บันทึกสิทธิ์แล้ว แต่ไม่สามารถโหลดสถานะล่าสุดได้ โปรดเปิดจัดการสิทธิ์อีกครั้งเพื่อตรวจสอบ'
+    subjectRemoveFailed:'ไม่สามารถลบวิชาได้', loadFailed:'ไม่สามารถโหลดข้อมูลสิทธิ์ได้', saveRefreshFailed:'บันทึกสิทธิ์แล้ว แต่ไม่สามารถโหลดสถานะล่าสุดได้ โปรดเปิดจัดการสิทธิ์อีกครั้งเพื่อตรวจสอบ', accessDenied:'คุณไม่มีสิทธิ์จัดการครูคนนี้', authRequired:'เซสชันหมดอายุแล้ว กรุณาเข้าสู่ระบบอีกครั้ง', operationFailed:'ไม่สามารถดำเนินการได้ กรุณาลองอีกครั้ง'
   },
   jp: {
     loading:'読み込み中…', manageTitle:'アクセス管理', subtitle:'クラス・科目・権限を設定：',
@@ -79,7 +79,7 @@ const _TA_UI = {
     permissionHelp:'既定の権限は教師のロールに従います。クラス・科目ごとの権限を設定する場合は対象を選択してください。',
     classRequired:'先にクラスを選択してください。', classSubjectRequired:'先にクラスと科目を選択してください。',
     saved:'権限を保存しました。', saveFailed:'権限を保存できませんでした。', classAddFailed:'クラスを追加できませんでした。',
-    classRemoveFailed:'クラスを削除できませんでした。', subjectAddFailed:'科目を追加できませんでした。', loadFailed:'権限情報を読み込めませんでした。', saveRefreshFailed:'権限は保存されましたが、最新状態を再読み込みできませんでした。Manage Access を開き直して確認してください。'
+    classRemoveFailed:'クラスを削除できませんでした。', subjectAddFailed:'科目を追加できませんでした。', loadFailed:'権限情報を読み込めませんでした。', saveRefreshFailed:'権限は保存されましたが、最新状態を再読み込みできませんでした。Manage Access を開き直して確認してください。', accessDenied:'この教師を管理する権限がありません。', authRequired:'セッションの有効期限が切れました。再ログインしてください。', operationFailed:'操作を完了できませんでした。もう一度お試しください。'
   },
   km: {
     loading:'កំពុងផ្ទុក…', manageTitle:'គ្រប់គ្រងសិទ្ធិចូលប្រើ', subtitle:'កំណត់ថ្នាក់ មុខវិជ្ជា និងសិទ្ធិចូលប្រើសម្រាប់',
@@ -91,13 +91,27 @@ const _TA_UI = {
     classRequired:'សូមជ្រើសរើសថ្នាក់ជាមុនសិន។', classSubjectRequired:'សូមជ្រើសរើសថ្នាក់ និងមុខវិជ្ជាជាមុនសិន។',
     saved:'បានរក្សាទុកសិទ្ធិ។', saveFailed:'មិនអាចរក្សាទុកសិទ្ធិបានទេ។', classAddFailed:'មិនអាចបន្ថែមថ្នាក់បានទេ។',
     classRemoveFailed:'មិនអាចដកថ្នាក់បានទេ។', subjectAddFailed:'មិនអាចបន្ថែមមុខវិជ្ជាបានទេ။',
-    subjectRemoveFailed:'មិនអាចដកមុខវិជ្ជាបានទេ។', loadFailed:'មិនអាចផ្ទុកព័ត៌មានសិទ្ធិបានទេ។', saveRefreshFailed:'បានរក្សាទុកសិទ្ធិ ប៉ុន្តែមិនអាចផ្ទុកស្ថានភាពថ្មីបំផុតឡើងវិញបានទេ។ សូមបើក Manage Access ម្តងទៀតដើម្បីផ្ទៀងផ្ទាត់។'
+    subjectRemoveFailed:'មិនអាចដកមុខវិជ្ជាបានទេ។', loadFailed:'មិនអាចផ្ទុកព័ត៌មានសិទ្ធិបានទេ។', saveRefreshFailed:'បានរក្សាទុកសិទ្ធិ ប៉ុន្តែមិនអាចផ្ទុកស្ថានភាពថ្មីបំផុតឡើងវិញបានទេ។ សូមបើក Manage Access ម្តងទៀតដើម្បីផ្ទៀងផ្ទាត់។', accessDenied:'អ្នកមិនមានសិទ្ធិគ្រប់គ្រងគ្រូនេះទេ។', authRequired:'សម័យចូលប្រើបានផុតកំណត់។ សូមចូលម្តងទៀត។', operationFailed:'មិនអាចបញ្ចប់ប្រតិបត្តិការបានទេ។ សូមព្យាយាមម្តងទៀត។'
   }
 };
 
 function _taUi(key) {
   return (_TA_UI[_taLang()] || _TA_UI.en)[key] || _TA_UI.en[key] || key;
 }
+function _taErrorMessage(error, fallbackKey) {
+  const raw = String(error?.message || error || '').trim().toLowerCase();
+  if (/admin_required|permission_denied|not_authorized|forbidden|42501/.test(raw)) return _taUi('accessDenied');
+  if (/auth_required|session_expired|invalid_session|unauthenticated|401/.test(raw)) return _taUi('authRequired');
+  if (/^[a-z0-9_ -]{1,80}$/.test(raw) && /(_required|_denied|_failed|_error|not_found|invalid_|duplicate_|unauthorized|forbidden)/.test(raw)) {
+    return _taUi(fallbackKey || 'operationFailed');
+  }
+  // Never leak raw RPC identifiers or database error codes into the UI.
+  if (!raw || /\b(sqlstate|postgres|postgrest|rpc_|constraint|violates|duplicate key|permission denied for function)\b/.test(raw)) {
+    return _taUi(fallbackKey || 'operationFailed');
+  }
+  return String(error?.message || error || _taUi(fallbackKey || 'operationFailed'));
+}
+
 function _taText(key) {
   const dict = {
     en:{'dashboard.view':'View Dashboard','students.view':'View Students','students.edit':'Edit Student Information','leave.view':'View Leave Requests','leave.approve':'Approve / Reject Leave Requests','attendance.view':'View Attendance','attendance.edit':'Edit Attendance','homework.view':'View Homework','homework.create':'Create Homework','homework.edit':'Edit Homework','homework.delete':'Delete Homework','assessment.view':'View Assessments','assessment.create':'Create Assessments','assessment.edit':'Edit Assessments','assessment.delete':'Delete Assessments','billing.view':'View Billing (Whole School)','billing.write':'Manage Billing (Whole School)','billing.class.view':'View Billing (Assigned Classes)','billing.class.write':'Manage Billing (Assigned Classes)','billing.fees.manage':'Manage School-wide Fee Catalog','teachers.view':'View Teachers','teachers.manage':'Manage Teachers','permissions.manage':'Manage Permissions'},
@@ -110,7 +124,7 @@ function _taText(key) {
     zh:{'dashboard.view':'查看仪表板','students.view':'查看学生','students.edit':'编辑学生信息','leave.view':'查看请假申请','leave.approve':'批准 / 拒绝请假申请','attendance.view':'查看考勤','attendance.edit':'编辑考勤','homework.view':'查看作业','homework.create':'创建作业','homework.edit':'编辑作业','homework.delete':'删除作业','assessment.view':'查看评估','assessment.create':'创建评估','assessment.edit':'编辑评估','assessment.delete':'删除评估','billing.view':'查看账单（全校）','billing.write':'管理账单（全校）','billing.class.view':'查看账单（获授权班级）','billing.class.write':'管理账单（获授权班级）','teachers.view':'查看教师','teachers.manage':'管理教师','permissions.manage':'管理权限'},
     km:{'dashboard.view':'មើលផ្ទាំងគ្រប់គ្រង','students.view':'មើលសិស្ស','students.edit':'កែសម្រួលព័ត៌មានសិស្ស','leave.view':'មើលសំណើសុំច្បាប់ឈប់','leave.approve':'អនុម័ត / បដិសេធសំណើសុំច្បាប់ឈប់','attendance.view':'មើលវត្តមាន','attendance.edit':'កែសម្រួលវត្តមាន','homework.view':'មើលកិច្ចការផ្ទះ','homework.create':'បង្កើតកិច្ចការផ្ទះ','homework.edit':'កែសម្រួលកិច្ចការផ្ទះ','homework.delete':'លុបកិច្ចការផ្ទះ','assessment.view':'មើលការវាយតម្លៃ','assessment.create':'បង្កើតការវាយតម្លៃ','assessment.edit':'កែសម្រួលការវាយតម្លៃ','assessment.delete':'លុបការវាយតម្លៃ','billing.view':'មើលវិក្កយបត្រ (ទូទាំងសាលា)','billing.write':'គ្រប់គ្រងវិក្កយបត្រ (ទូទាំងសាលា)','billing.class.view':'មើលវិក្កយបត្រ (ថ្នាក់ដែលបានអនុញ្ញាត)','billing.class.write':'គ្រប់គ្រងវិក្កយបត្រ (ថ្នាក់ដែលបានអនុញ្ញាត)','teachers.view':'មើលគ្រូ','teachers.manage':'គ្រប់គ្រងគ្រូ','permissions.manage':'គ្រប់គ្រងសិទ្ធិ'},
   };
-  return (dict[_taLang()]?.[key] || dict.en[key] || key);
+  return (dict[_taLang()]?.[key] || dict.en[key] || _taPermissionFallback(key));
 }
 function _taCategory(key) {
   const dict = {
@@ -119,18 +133,55 @@ function _taCategory(key) {
     ms:{dashboard:'Papan Pemuka',students:'Pelajar',leave:'Permohonan Cuti',attendance:'Kehadiran',homework:'Kerja Rumah',assessment:'Penilaian',billing:'Bil',teachers:'Guru',permissions:'Kebenaran'},
     th:{dashboard:'แดชบอร์ด',students:'นักเรียน',leave:'คำขอลา',attendance:'การเข้าเรียน',homework:'การบ้าน',assessment:'การประเมิน',billing:'การเรียกเก็บเงิน',teachers:'ครู',permissions:'สิทธิ์'},
     jp:{dashboard:'ダッシュボード',students:'生徒',leave:'休暇申請',attendance:'出欠',homework:'宿題',assessment:'評価',billing:'請求',teachers:'教師',permissions:'権限'},
-    km:{dashboard:'ផ្ទាំងគ្រប់គ្រង',students:'សិស្ស',leave:'សំណើសុំច្បាប់ឈប់',attendance:'វត្តមាន',homework:'កិច្ចការផ្ទះ',assessment:'ការវាយតម្លៃ',billing:'វិក្កយបត្រ',teachers:'គ្រូ',permissions:'សិទ្ធិ'}
+    km:{dashboard:'ផ្ទាំងគ្រប់គ្រង',students:'សិស្ស',leave:'សំណើសុំច្បាប់ឈប់',attendance:'វត្តមាន',homework:'កិច្ចការផ្ទះ',assessment:'ការវាយតម្លៃ',billing:'វិក្កយបត្រ',teachers:'គ្រូ',permissions:'សិទ្ធិ'},
+    zh:{dashboard:'仪表板',students:'学生',leave:'请假申请',attendance:'考勤',homework:'作业',assessment:'评估',billing:'账单',teachers:'教师',permissions:'权限'}
   };
   return dict[_taLang()]?.[key] || dict.en[key] || _taPermissionFallback(key);
 }
 function _taPermissionFallback(key) {
   const raw = String(key || '').trim();
   if (!raw) return '';
+  const words = {
+    en: {dashboard:'Dashboard',view:'View',read:'Read',create:'Create',edit:'Edit',update:'Update',delete:'Delete',manage:'Manage',write:'Manage',approve:'Approve',reject:'Reject',students:'Students',student:'Student',teachers:'Teachers',teacher:'Teacher',permissions:'Permissions',permission:'Permission',attendance:'Attendance',homework:'Homework',assessment:'Assessments',billing:'Billing',class:'Class',classes:'Classes',subject:'Subject',subjects:'Subjects',leave:'Leave',requests:'Requests',report:'Reports',reports:'Reports',export:'Export',import:'Import',settings:'Settings',profile:'Profile',access:'Access',school:'School',whole:'Whole',assigned:'Assigned',fees:'Fees',catalog:'Catalog'},
+    my: {dashboard:'ပင်မစာမျက်နှာ',view:'ကြည့်ရှုရန်',read:'ဖတ်ရှုရန်',create:'ဖန်တီးရန်',edit:'ပြင်ဆင်ရန်',update:'ပြင်ဆင်ရန်',delete:'ဖျက်ရန်',manage:'စီမံရန်',write:'စီမံရန်',approve:'အတည်ပြုရန်',reject:'ပယ်ချရန်',students:'ကျောင်းသားများ',student:'ကျောင်းသား',teachers:'ဆရာ/ဆရာမများ',teacher:'ဆရာ/ဆရာမ',permissions:'လုပ်ပိုင်ခွင့်များ',permission:'လုပ်ပိုင်ခွင့်',attendance:'တက်ရောက်မှု',homework:'အိမ်စာ',assessment:'အကဲဖြတ်ချက်',billing:'ငွေစာရင်း',class:'အတန်း',classes:'အတန်းများ',subject:'ဘာသာရပ်',subjects:'ဘာသာရပ်များ',leave:'ခွင့်',requests:'တောင်းဆိုချက်များ',report:'အစီရင်ခံစာ',reports:'အစီရင်ခံစာများ',export:'ထုတ်ယူရန်',import:'ထည့်သွင်းရန်',settings:'ဆက်တင်များ',profile:'ကိုယ်ရေးအချက်အလက်',access:'ဝင်ရောက်ခွင့်',school:'ကျောင်း',whole:'တစ်ကျောင်းလုံး',assigned:'တာဝန်ပေးထားသော',fees:'ကြေးများ',catalog:'စာရင်း'},
+    th: {dashboard:'แดชบอร์ด',view:'ดู',read:'อ่าน',create:'สร้าง',edit:'แก้ไข',update:'อัปเดต',delete:'ลบ',manage:'จัดการ',write:'จัดการ',approve:'อนุมัติ',reject:'ปฏิเสธ',students:'นักเรียน',student:'นักเรียน',teachers:'ครู',teacher:'ครู',permissions:'สิทธิ์',permission:'สิทธิ์',attendance:'การเข้าเรียน',homework:'การบ้าน',assessment:'การประเมิน',billing:'การเรียกเก็บเงิน',class:'ชั้นเรียน',classes:'ชั้นเรียน',subject:'วิชา',subjects:'วิชา',leave:'การลา',requests:'คำขอ',report:'รายงาน',reports:'รายงาน',export:'ส่งออก',import:'นำเข้า',settings:'การตั้งค่า',profile:'โปรไฟล์',access:'การเข้าถึง',school:'โรงเรียน',whole:'ทั้ง',assigned:'ที่ได้รับมอบหมาย',fees:'ค่าธรรมเนียม',catalog:'รายการ'},
+    jp: {dashboard:'ダッシュボード',view:'閲覧',read:'読み取り',create:'作成',edit:'編集',update:'更新',delete:'削除',manage:'管理',write:'管理',approve:'承認',reject:'却下',students:'生徒',student:'生徒',teachers:'教師',teacher:'教師',permissions:'権限',permission:'権限',attendance:'出欠',homework:'宿題',assessment:'評価',billing:'請求',class:'クラス',classes:'クラス',subject:'科目',subjects:'科目',leave:'休暇',requests:'申請',report:'レポート',reports:'レポート',export:'エクスポート',import:'インポート',settings:'設定',profile:'プロフィール',access:'アクセス',school:'学校',whole:'全体',assigned:'割り当て済み',fees:'料金',catalog:'一覧'},
+    ms: {dashboard:'Papan Pemuka',view:'Lihat',read:'Baca',create:'Cipta',edit:'Edit',update:'Kemas Kini',delete:'Padam',manage:'Urus',write:'Urus',approve:'Luluskan',reject:'Tolak',students:'Pelajar',student:'Pelajar',teachers:'Guru',teacher:'Guru',permissions:'Kebenaran',permission:'Kebenaran',attendance:'Kehadiran',homework:'Kerja Rumah',assessment:'Penilaian',billing:'Bil',class:'Kelas',classes:'Kelas',subject:'Subjek',subjects:'Subjek',leave:'Cuti',requests:'Permohonan',report:'Laporan',reports:'Laporan',export:'Eksport',import:'Import',settings:'Tetapan',profile:'Profil',access:'Akses',school:'Sekolah',whole:'Seluruh',assigned:'Ditugaskan',fees:'Yuran',catalog:'Katalog'},
+    km: {dashboard:'ផ្ទាំងគ្រប់គ្រង',view:'មើល',read:'អាន',create:'បង្កើត',edit:'កែសម្រួល',update:'ធ្វើបច្ចុប្បន្នភាព',delete:'លុប',manage:'គ្រប់គ្រង',write:'គ្រប់គ្រង',approve:'អនុម័ត',reject:'បដិសេធ',students:'សិស្ស',student:'សិស្ស',teachers:'គ្រូ',teacher:'គ្រូ',permissions:'សិទ្ធិ',permission:'សិទ្ធិ',attendance:'វត្តមាន',homework:'កិច្ចការផ្ទះ',assessment:'ការវាយតម្លៃ',billing:'វិក្កយបត្រ',class:'ថ្នាក់',classes:'ថ្នាក់',subject:'មុខវិជ្ជា',subjects:'មុខវិជ្ជា',leave:'ច្បាប់ឈប់',requests:'សំណើ',report:'របាយការណ៍',reports:'របាយការណ៍',export:'នាំចេញ',import:'នាំចូល',settings:'ការកំណត់',profile:'ប្រវត្តិរូប',access:'ការចូលប្រើ',school:'សាលា',whole:'ទាំងមូល',assigned:'បានចាត់តាំង',fees:'ថ្លៃសេវា',catalog:'បញ្ជី'},
+    zh: {dashboard:'仪表板',view:'查看',read:'读取',create:'创建',edit:'编辑',update:'更新',delete:'删除',manage:'管理',write:'管理',approve:'批准',reject:'拒绝',students:'学生',student:'学生',teachers:'教师',teacher:'教师',permissions:'权限',permission:'权限',attendance:'考勤',homework:'作业',assessment:'评估',billing:'账单',class:'班级',classes:'班级',subject:'科目',subjects:'科目',leave:'请假',requests:'申请',report:'报告',reports:'报告',export:'导出',import:'导入',settings:'设置',profile:'资料',access:'访问',school:'学校',whole:'全校',assigned:'已分配',fees:'费用',catalog:'目录'}
+  };
+  // Domain terms used by the live permission catalog. Keep fallback labels localized
+  // even when a permission is introduced server-side before a dedicated key is added.
+  const catalogTerms = {
+    en: {communication:'Communication',daily:'Daily Reports','daily report':'Daily Report',incident:'Incidents','report card':'Report Card',timetable:'Timetable',send:'Send'},
+    my: {communication:'ဆက်သွယ်ရေး',daily:'နေ့စဉ်အစီရင်ခံစာများ','daily report':'နေ့စဉ်အစီရင်ခံစာ',incident:'ဖြစ်စဉ်များ','report card':'အစီရင်ခံစာကတ်',timetable:'အချိန်ဇယား',send:'ပို့ရန်'},
+    th: {communication:'การสื่อสาร',daily:'รายงานประจำวัน','daily report':'รายงานประจำวัน',incident:'เหตุการณ์','report card':'รายงานผลการเรียน',timetable:'ตารางเรียน',send:'ส่ง'},
+    jp: {communication:'コミュニケーション',daily:'日次レポート','daily report':'日次レポート',incident:'インシデント','report card':'成績表',timetable:'時間割',send:'送信'},
+    ms: {communication:'Komunikasi',daily:'Laporan Harian','daily report':'Laporan Harian',incident:'Insiden','report card':'Kad Laporan',timetable:'Jadual Waktu',send:'Hantar'},
+    km: {communication:'ការទំនាក់ទំនង',daily:'របាយការណ៍ប្រចាំថ្ងៃ','daily report':'របាយការណ៍ប្រចាំថ្ងៃ',incident:'ឧប្បត្តិហេតុ','report card':'ប័ណ្ណរបាយការណ៍',timetable:'តារាងពេលវេលា',send:'ផ្ញើ'},
+    zh: {communication:'通信',daily:'每日报告','daily report':'每日报告',incident:'事件','report card':'成绩单',timetable:'课程表',send:'发送'}
+  };
+  Object.assign(words.en, catalogTerms.en);
+  Object.assign(words[_taLang()] || {}, catalogTerms[_taLang()] || {});
+  const language = _taLang();
   return raw.split('.').map(function(part) {
-    return part.replace(/[_-]+/g, ' ').replace(/\\b\\w/g, function(c){ return c.toUpperCase(); });
+    const normalized = part.replace(/[_-]+/g, ' ').replace(/([a-z])([A-Z])/g, '$1 $2').trim();
+    return (words[language] && words[language][normalized.toLowerCase()]) ||
+      (words.en[normalized.toLowerCase()]) ||
+      normalized.replace(/\b\w/g, function(c){ return c.toUpperCase(); });
   }).join(' · ');
 }
-function _taDescription(key, fallback) { return _taText(key) || fallback || ''; }
+function _taDescription(key, fallback) {
+  const description = String(fallback || '').trim();
+  const permissionKey = String(key || '').trim();
+  const label = _taText(key).trim();
+  const normalize = (value) => String(value || '').replace(/\s+/g, ' ').trim().toLocaleLowerCase();
+  // A key or a description that merely repeats the translated title adds noise,
+  // leaks internal permission identifiers, and creates duplicate labels in the UI.
+  if (!description || normalize(description) === normalize(permissionKey) ||
+      normalize(description) === normalize(label)) return '';
+  return description;
+}
 function _taAssignmentTypeLabel(type) {
   const dict = {
     en:{class_teacher:'Class Teacher',assistant:'Assistant Teacher',subject_teacher:'Subject Teacher',other:'Other'},
@@ -138,7 +189,8 @@ function _taAssignmentTypeLabel(type) {
     ms:{class_teacher:'Guru Kelas',assistant:'Guru Pembantu',subject_teacher:'Guru Mata Pelajaran',other:'Lain-lain'},
     th:{class_teacher:'ครูประจำชั้น',assistant:'ครูผู้ช่วย',subject_teacher:'ครูประจำวิชา',other:'อื่นๆ'},
     jp:{class_teacher:'担任',assistant:'補助教員',subject_teacher:'教科担当',other:'その他'},
-    km:{class_teacher:'គ្រូប្រចាំថ្នាក់',assistant:'ជំនួយការគ្រូ',subject_teacher:'គ្រូប្រចាំមុខវិជ្ជា',other:'ផ្សេងទៀត'}
+    km:{class_teacher:'គ្រូប្រចាំថ្នាក់',assistant:'ជំនួយការគ្រូ',subject_teacher:'គ្រូប្រចាំមុខវិជ្ជា',other:'ផ្សេងទៀត'},
+    zh:{class_teacher:'班主任',assistant:'助理教师',subject_teacher:'科任教师',other:'其他'}
   };
   return dict[_taLang()]?.[type] || dict.en[type] || type;
 }
@@ -295,8 +347,9 @@ async function _renderTeacherAccess() {
         const initialAllowed = _taEffectiveAllowed(teacher, p, !!roleDefault, overrides, classAssignments, subjectAssignments, null, null);
         const targetHint = p.scope_type === 'global' ? _taEffectiveLabel(initialAllowed) : '—';
         html += '<div class="teacher-access-perm-row" data-permission="' + esc(p.permission_key) + '" data-scope="' + esc(p.scope_type) + '">' +
-          '<div class="teacher-access-perm-copy"><strong>' + esc(_taText(p.permission_key)) + '</strong><small>' + esc(_taDescription(p.permission_key, p.description || '')) +
-          '</small></div>' + _taScopeControls(p,catalog) +
+          '<div class="teacher-access-perm-copy"><strong>' + esc(_taText(p.permission_key)) + '</strong>' +
+          (_taDescription(p.permission_key, p.description || '') ? '<small>' + esc(_taDescription(p.permission_key, p.description || '')) + '</small>' : '') +
+          '</div>' + _taScopeControls(p,catalog) +
           '<span class="' + _taStateClass(state) + '" data-config-state>' + esc(_taStateLabel(state)) + '</span>' +
           '<span class="teacher-access-effective" data-effective-state>' + esc(targetHint) + '</span>' +
           '<select class="teacher-access-perm-state" aria-label="' + _taUi('permissions') + '"><option value="default"' + (state === 'default' ? ' selected' : '') +
@@ -343,14 +396,14 @@ async function _renderTeacherAccess() {
     });
     return true;
   } catch (e) {
-    root.innerHTML = '<div class="form-error">' + _taUi('loadFailed') + ' ' + esc(e?.message || String(e)) + '</div>';
+    root.innerHTML = '<div class="form-error">' + _taErrorMessage(e, 'loadFailed') + '</div>';
     return false;
   }
 }
 
 window.openTeacherAccess = async function(teacherId, teacherName) {
   if (!window.APP?.is_admin) {
-    showToast(t('cg.adminOnly'));
+    showToast(_taUi('accessDenied'));
     return;
   }
 
@@ -383,13 +436,13 @@ window.teacherAccessAddClass = async function() {
   const value = document.getElementById('taClass')?.value;
   if (!value) return showToast('' + _taUi('classRequired') + '');
   try { await _teacherAccessRpc('class_add', root.dataset.teacherId, {p_class_name:value,p_assignment_type:'class_teacher'}); await _renderTeacherAccess(); }
-  catch(e){ showToast(e?.message || '' + _taUi('classAddFailed') + ''); }
+  catch(e){ showToast(_taErrorMessage(e, 'classAddFailed')); }
 };
 
 window.teacherAccessRemoveClass = async function(className, assignmentType) {
   const root = document.getElementById('teacherAccessRoot');
   try { await _teacherAccessRpc('class_remove', root.dataset.teacherId, {p_class_name:className,p_assignment_type:assignmentType}); await _renderTeacherAccess(); }
-  catch(e){ showToast(e?.message || '' + _taUi('classRemoveFailed') + ''); }
+  catch(e){ showToast(_taErrorMessage(e, 'classRemoveFailed')); }
 };
 
 window.teacherAccessAddSubject = async function() {
@@ -398,13 +451,13 @@ window.teacherAccessAddSubject = async function() {
   const subject = Number(document.getElementById('taSubject')?.value);
   if (!cls || !subject) return showToast('' + _taUi('classSubjectRequired') + '');
   try { await _teacherAccessRpc('subject_add', root.dataset.teacherId, {p_class_name:cls,p_subject_id:subject}); await _renderTeacherAccess(); }
-  catch(e){ showToast(e?.message || '' + _taUi('subjectAddFailed') + ''); }
+  catch(e){ showToast(_taErrorMessage(e, 'subjectAddFailed')); }
 };
 
 window.teacherAccessRemoveSubject = async function(className, subjectId) {
   const root = document.getElementById('teacherAccessRoot');
   try { await _teacherAccessRpc('subject_remove', root.dataset.teacherId, {p_class_name:className,p_subject_id:Number(subjectId)}); await _renderTeacherAccess(); }
-  catch(e){ showToast(e?.message || '' + _taUi('subjectRemoveFailed') + ''); }
+  catch(e){ showToast(_taErrorMessage(e, 'subjectRemoveFailed')); }
 };
 
 window.teacherAccessSavePermission = async function(select) {
@@ -429,6 +482,6 @@ window.teacherAccessSavePermission = async function(select) {
     showToast(refreshed ? _taUi('saved') : _taUi('saveRefreshFailed'));
   } catch(e) {
     await _renderTeacherAccess();
-    showToast(e?.message || '' + _taUi('saveFailed') + '');
+    showToast(_taErrorMessage(e, 'saveFailed'));
   }
 };

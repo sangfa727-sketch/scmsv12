@@ -33,7 +33,21 @@ async function mountAdmin(page) {
         { permission_key: 'students.view', category: 'Students', scope_type: 'global', description: 'View students' },
         { permission_key: 'students.edit', category: 'Students', scope_type: 'class', description: 'Edit students' },
         { permission_key: 'attendance.view', category: 'Attendance', scope_type: 'subject', description: 'View attendance' },
-        { permission_key: 'grades.edit', category: 'Academics', scope_type: 'class_subject', description: 'Edit grades' }
+        { permission_key: 'grades.edit', category: 'Academics', scope_type: 'class_subject', description: 'Edit grades' },
+        { permission_key: 'custom.permission_key', category: 'custom_area', scope_type: 'global', description: 'Custom permission used to verify readable fallback labels' },
+        { permission_key: 'communication.manage', category: 'communication', scope_type: 'global', description: 'communication.manage' },
+        { permission_key: 'communication.send', category: 'communication', scope_type: 'global', description: 'communication.send' },
+        { permission_key: 'communication.view', category: 'communication', scope_type: 'global', description: 'communication.view' },
+        { permission_key: 'daily_report.delete', category: 'daily', scope_type: 'global', description: 'daily_report.delete' },
+        { permission_key: 'daily_report.edit', category: 'daily', scope_type: 'global', description: 'daily_report.edit' },
+        { permission_key: 'daily_report.view', category: 'daily', scope_type: 'global', description: 'daily_report.view' },
+        { permission_key: 'incident.create', category: 'incident', scope_type: 'global', description: 'incident.create' },
+        { permission_key: 'incident.delete', category: 'incident', scope_type: 'global', description: 'incident.delete' },
+        { permission_key: 'incident.edit', category: 'incident', scope_type: 'global', description: 'incident.edit' },
+        { permission_key: 'incident.view', category: 'incident', scope_type: 'global', description: 'incident.view' },
+        { permission_key: 'report_card.view', category: 'report_card', scope_type: 'global', description: 'report_card.view' },
+        { permission_key: 'timetable.edit', category: 'timetable', scope_type: 'global', description: 'timetable.edit' },
+        { permission_key: 'timetable.view', category: 'timetable', scope_type: 'global', description: 'timetable.view' }
       ],
       role_permissions: [{ role: 'teacher', permission_key: 'students.view', allowed: true }]
     };
@@ -92,7 +106,7 @@ test('Edit Teacher sends the selected role and updated fields to the RPC', async
 test('Manage Access renders scoped permissions and persists Allow/Default choices through RPC', async ({ page }) => {
   await mountAdmin(page);
   await page.evaluate(() => window.openTeacherAccess('teacher-2', 'Other Teacher'));
-  await expect(page.locator('.teacher-access-sheet')).toBeVisible();
+  await expect(page.locator('.teacher-access-sheet:visible')).toBeVisible();
   await expect(page.locator('.teacher-access-sheet')).toContainText('Manage Access');
   await expect(page.locator('#teacherAccessRoot')).toContainText('Other Teacher');
 
@@ -261,4 +275,60 @@ test('Reset Teacher password sends the new password to the guarded RPC without e
   expect(call.payload.p_new_password).toBe('new-secret-987');
   const toasts = await page.evaluate(() => window.__teacherTestToasts);
   expect(toasts.join(' ')).not.toContain('new-secret-987');
+});
+
+
+test('Manage Access never displays raw permission/category keys in any of the seven supported languages', async ({ page }) => {
+  await mountAdmin(page);
+  const languages = ['en', 'my', 'th', 'jp', 'ms', 'km', 'zh'];
+  for (const language of languages) {
+    await page.reload({ waitUntil: 'domcontentloaded' });
+    await mountAdmin(page);
+    await page.evaluate((lang) => { window.I18N.current = lang; }, language);
+    await page.evaluate(() => window.openTeacherAccess('teacher-2', 'Other Teacher'));
+    const sheet = page.locator('.teacher-access-sheet:visible').first();
+    await expect(sheet).toBeVisible();
+    const permissionLabel = sheet.locator('.teacher-access-perm-row[data-permission="custom.permission_key"] .teacher-access-perm-copy strong');
+    await expect(permissionLabel).toBeVisible();
+    const permissionText = await permissionLabel.textContent();
+    const categoryText = await sheet.locator('.teacher-access-perm-row[data-permission="custom.permission_key"]').evaluate(row => row.closest('.teacher-access-perm-group')?.querySelector('.teacher-access-perm-category')?.textContent || '');
+    expect(categoryText).not.toBe('');
+    expect(permissionText).not.toContain('custom.permission_key');
+    expect(permissionText).not.toContain('_');
+    expect(categoryText).not.toContain('custom_area');
+    expect(categoryText).not.toContain('_');
+    await page.evaluate(() => window.closeModal());
+  }
+});
+
+test('Manage Access localizes catalog permission keys and suppresses duplicate code descriptions in all seven languages', async ({ page }) => {
+  await mountAdmin(page);
+  const languages = ['en', 'my', 'th', 'jp', 'ms', 'km', 'zh'];
+  const keys = [
+    'communication.manage', 'communication.send', 'communication.view',
+    'daily_report.delete', 'daily_report.edit', 'daily_report.view',
+    'incident.create', 'incident.delete', 'incident.edit', 'incident.view',
+    'report_card.view', 'timetable.edit', 'timetable.view'
+  ];
+  for (const language of languages) {
+    await page.reload({ waitUntil: 'domcontentloaded' });
+    await mountAdmin(page);
+    await page.evaluate((lang) => { window.I18N.current = lang; }, language);
+    await page.evaluate(() => window.openTeacherAccess('teacher-2', 'Other Teacher'));
+    const sheet = page.locator('.teacher-access-sheet:visible').first();
+    await expect(sheet).toBeVisible();
+    for (const key of keys) {
+      const exactRow = sheet.locator('.teacher-access-perm-row[data-permission="' + key + '"]');
+      await expect(exactRow).toHaveCount(1);
+      const label = (await exactRow.locator('.teacher-access-perm-copy strong').textContent() || '').trim();
+      expect(label).not.toBe(key);
+      expect(label).not.toContain('_');
+      expect(label).not.toContain('.');
+      await expect(exactRow.locator('.teacher-access-perm-copy small')).toHaveCount(0);
+      const category = (await exactRow.evaluate(el => el.closest('.teacher-access-perm-group')?.querySelector('.teacher-access-perm-category')?.textContent || '')).trim();
+      expect(category).not.toBe('');
+      expect(category).not.toContain('_');
+    }
+    await page.evaluate(() => window.closeModal());
+  }
 });

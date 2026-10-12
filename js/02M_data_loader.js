@@ -21,27 +21,70 @@
     monthlySummary: { load: () => API.getMonthlySummary(), assign: v => { window.APP.monthlySummary = v || []; } },
   };
 
-  function _key(name) {
-    return name;
+  const tenantDataKeys = [
+    'students', 'attendance', 'dailyReports', 'homework',
+    'parentComms', 'incidents', 'timetable', 'monthlySummary',
+  ];
+
+  // Cache identity must follow the authenticated tenant and user, not only
+  // the resource name. A login can switch schools without a full page reload.
+  let cacheTenantKey = null;
+
+  function _tenantKey() {
+    const app = window.APP || {};
+    const saved = typeof window.getWebSession === 'function' ? window.getWebSession() : null;
+    const sessionToken = saved?.session_token || app.webSession?.session_token || '';
+    return [
+      app.school_id || '',
+      app.teacher_id || '',
+      app.teacher_role || '',
+      sessionToken,
+    ].map(value => String(value)).join('::');
+  }
+
+  function _syncTenant() {
+    const tenantKey = _tenantKey();
+    if (tenantKey !== cacheTenantKey) {
+      cache.clear();
+      inflight.clear();
+      // Preserve initial page bootstrap data, but wipe the previous identity's
+      // in-memory records as soon as a real session/tenant change is observed.
+      if (cacheTenantKey !== null && window.APP) {
+        tenantDataKeys.forEach(name => { window.APP[name] = []; });
+      }
+      cacheTenantKey = tenantKey;
+    }
+    return tenantKey;
+  }
+
+  function _key(name, tenantKey = _syncTenant()) {
+    return tenantKey + '::' + name;
   }
 
   async function load(name, { force = false } = {}) {
     const spec = specs[name];
     if (!spec) throw new Error('Unknown data resource: ' + name);
 
-    const key = _key(name);
+    const tenantKey = _syncTenant();
+    const key = _key(name, tenantKey);
     if (!force && cache.has(key)) return cache.get(key);
     if (!force && inflight.has(key)) return inflight.get(key);
 
-    const promise = Promise.resolve()
-      .then(spec.load)
+    let promise;
+    promise = Promise.resolve()
+      .then(() => _tenantKey() === tenantKey ? spec.load() : [])
       .then(rows => {
+        // A previous tenant's slow request must never overwrite the active
+        // tenant's in-memory APP state after an account/school switch.
+        if (_tenantKey() !== tenantKey) return [];
         const value = Array.isArray(rows) ? rows : [];
         cache.set(key, value);
         spec.assign(value);
         return value;
       })
-      .finally(() => inflight.delete(key));
+      .finally(() => {
+        if (inflight.get(key) === promise) inflight.delete(key);
+      });
 
     inflight.set(key, promise);
     return promise;
@@ -77,6 +120,7 @@
   }
 
   async function loadDashboardData() {
+    const tenantKey = _syncTenant();
     const names = ['dashboard:timetable', 'dashboard:attendance', 'dashboard:homework', 'dashboard:incidents', 'dashboard:comms', 'dashboard:leave'];
     const loaders = {
       'dashboard:timetable': () => API.getTimetable(),
@@ -87,11 +131,24 @@
       'dashboard:leave': () => API.getLeaveRequests(),
     };
     const values = await Promise.all(names.map(name => {
-      if (inflight.has(name)) return inflight.get(name);
-      const promise = Promise.resolve().then(loaders[name]).then(v => Array.isArray(v) ? v : []).finally(() => inflight.delete(name));
-      inflight.set(name, promise);
+      const key = _key(name, tenantKey);
+      if (inflight.has(key)) return inflight.get(key);
+      let promise;
+      promise = Promise.resolve()
+        .then(() => _tenantKey() === tenantKey ? loaders[name]() : [])
+        .then(value => _tenantKey() === tenantKey && Array.isArray(value) ? value : [])
+        .finally(() => {
+          if (inflight.get(key) === promise) inflight.delete(key);
+        });
+      inflight.set(key, promise);
       return promise;
     }));
+
+    // If the account changed while dashboard requests were running, discard
+    // the whole stale snapshot instead of returning data from the old school.
+    if (_tenantKey() !== tenantKey) {
+      return { timetable: [], attendance: [], homework: [], incidents: [], comms: [], leaveRequests: [] };
+    }
     return {
       timetable: values[0],
       attendance: values[1],
