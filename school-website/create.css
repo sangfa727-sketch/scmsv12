@@ -163,3 +163,16 @@ html[data-theme="dark"] .website-access-gate button{background:#78a8d0;color:#10
   .section-controls{left:7px;right:7px;gap:3px}
   .section-controls button{min-width:36px}
 }
+
+
+/* Recover hidden sections without forcing users to find an invisible control. */
+.hidden-sections-tray{max-width:900px;margin:0 auto 12px;padding:12px 14px;display:flex;align-items:center;gap:8px;flex-wrap:wrap;border:1px solid var(--ws-line);border-radius:12px;background:var(--ws-surface);color:var(--ws-ink)}
+.hidden-sections-tray[hidden]{display:none!important}.hidden-sections-tray strong{font-size:.8rem;color:var(--ws-muted);margin-right:4px}.hidden-sections-tray .button{min-height:38px;padding:8px 11px;font-size:.78rem}
+/* Preview is a public-site mockup and must keep its own readable palette in dark Studio mode. */
+#previewCanvas{color:#17202a;background:#fff}#previewCanvas .mini-hero h1{color:#17202a}#previewCanvas .mini-hero p,#previewCanvas .mini-section p{color:#52616d}#previewCanvas .mini-section h2{color:#17202a}#previewCanvas .mini-hero-cta{display:inline-flex;margin-top:12px;padding:9px 14px;border-radius:999px;background:#173d5c;color:#fff;font-size:.72rem;font-weight:800}#previewCanvas .mini-section-kicker{font-size:.62rem;font-weight:850;letter-spacing:.16em;color:#73808a;text-transform:uppercase}
+#previewCanvas[data-template="modern"] .mini-hero{background:linear-gradient(140deg,#e4f3f1 0%,#f8fbfa 55%,#dce8f5 100%)}#previewCanvas[data-template="modern"] .mini-logo{background:#176b67;border-radius:17px}#previewCanvas[data-template="modern"] .mini-hero-cta{background:#176b67}#previewCanvas[data-template="modern"] .mini-section{background:#fff}
+#previewCanvas[data-template="classic"] .mini-hero{background:#f7f0e2;border-bottom:5px double #a18a67;padding-top:64px}#previewCanvas[data-template="classic"] .mini-hero h1{font-family:Georgia,"Times New Roman",serif;font-weight:700;letter-spacing:0;color:#4b3825}#previewCanvas[data-template="classic"] .mini-hero p{color:#665541}#previewCanvas[data-template="classic"] .mini-logo{background:#5b4630;border-radius:4px}#previewCanvas[data-template="classic"] .mini-hero-cta{background:#5b4630;border-radius:4px}#previewCanvas[data-template="classic"] .mini-section{background:#fffdf8;border-color:#d9d0c2}#previewCanvas[data-template="classic"] .mini-section h2{font-family:Georgia,"Times New Roman",serif;color:#4b3825}
+#previewCanvas[data-template="premium"] .mini-hero{background:linear-gradient(145deg,#111d2a 0%,#1e3548 60%,#314f5e 100%);padding-top:82px;padding-bottom:58px}#previewCanvas[data-template="premium"] .mini-hero h1{color:#fff;font-weight:900;letter-spacing:-.055em}#previewCanvas[data-template="premium"] .mini-hero p{color:#d9e3e8}#previewCanvas[data-template="premium"] .mini-logo{background:#d6b56d;color:#17202a;border-radius:18px}#previewCanvas[data-template="premium"] .mini-hero-cta{background:#d6b56d;color:#17202a}#previewCanvas[data-template="premium"] .mini-section{background:#f7f8f9;padding-top:38px;padding-bottom:38px}#previewCanvas[data-template="premium"] .mini-section-kicker{color:#8b6b2b}
+@media(max-width:620px){.hidden-sections-tray{margin-inline:0;padding:10px}.hidden-sections-tray strong{flex-basis:100%}}
+
+.save-state[data-state="error"]{color:#b42318;font-weight:750}html[data-theme="dark"] .save-state[data-state="error"]{color:#ff9c91}

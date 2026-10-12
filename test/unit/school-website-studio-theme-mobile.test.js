@@ -39,3 +39,42 @@ test('dark theme styles editor surfaces without recoloring the public-site canva
   assert.match(css, /dialog\{background:var\(--ws-surface\);color:var\(--ws-ink\)\}/);
   assert.match(css, /central page canvas and its live preview intentionally remain a light website mockup/);
 });
+
+
+test("hidden website sections remain recoverable from a visible section tray", () => {
+  const js = read("school-website/create.js");
+  const css = read("school-website/create.css");
+  assert.match(js, /id="hiddenSectionsTray"/);
+  assert.ok(js.includes('setAttribute("data-section-action","show")'));
+  assert.match(js, /action==="show"&&!m\.locked\)m\.visible=true/);
+  assert.match(css, /\.hidden-sections-tray\[hidden\]\{display:none!important\}/);
+});
+
+test("draft save and load failures show actionable feedback instead of silent offline fallback", () => {
+  const js = read("school-website/create.js");
+  assert.match(js, /Save failed — check connection and retry/);
+  assert.match(js, /Sign in again to load and save your website/);
+  assert.match(js, /response\.status===404\?"rpc_not_found"/);
+});
+
+test("preview typography stays readable and all three templates are visually distinct", () => {
+  const css = read("school-website/create.css");
+  const js = read("school-website/create.js");
+  assert.match(css, /#previewCanvas \.mini-hero h1\{color:#17202a\}/);
+  assert.match(css, /#previewCanvas\[data-template="modern"\] \.mini-hero\{background:linear-gradient/);
+  assert.match(css, /#previewCanvas\[data-template="classic"\] \.mini-hero\{background:#f7f0e2/);
+  assert.match(css, /#previewCanvas\[data-template="premium"\] \.mini-hero\{background:linear-gradient\(145deg,#111d2a/);
+  assert.match(js, /state\.aboutTitle\|\|"About"/);
+});
+
+test("website address explains why reservation is blocked until platform domain setup", () => {
+  const js = read("school-website/create.js");
+  assert.match(js, /subdomain name, not a full custom domain/);
+  assert.match(js, /wildcard DNS, and TLS first/);
+});
+
+
+test("template selection immediately rerenders the preview instead of waiting for another edit", () => {
+  const js = read("school-website/create.js");
+  assert.match(js, /state\.template=b\.dataset\.template;templateDialog\.close\(\);render\(\)/);
+});
