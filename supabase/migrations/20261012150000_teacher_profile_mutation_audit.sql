@@ -121,7 +121,7 @@ DECLARE
   v_teacher record;
   v_changed_fields text[];
 BEGIN
-  SELECT s.school_id, t.role AS admin_role
+  SELECT s.teacher_id, s.school_id, t.role AS admin_role
     INTO v_admin
     FROM public.app_web_sessions s
     JOIN public.teachers t
@@ -207,7 +207,7 @@ BEGIN
 
   INSERT INTO public.audit_log(source, actor, action, school_id, payload)
   VALUES (
-    'web', (SELECT teacher_id FROM public.app_web_sessions WHERE session_token = p_session_token LIMIT 1),
+    'web', v_admin.teacher_id,
     'teacher.profile_update', v_admin.school_id,
     jsonb_build_object('teacher_id', p_teacher_id, 'changed_fields', to_jsonb(v_changed_fields))
   );
