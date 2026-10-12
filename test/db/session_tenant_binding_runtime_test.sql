@@ -22,7 +22,8 @@ CREATE TABLE public.app_web_sessions (
 INSERT INTO public.teachers (teacher_id, school_id, role, status) VALUES
   ('teacher-a', 'school-a', 'admin', 'active'),
   ('teacher-b', 'school-b', 'teacher', 'active'),
-  ('teacher-c', 'school-c', 'teacher', 'inactive');
+  ('teacher-c', 'school-c', 'teacher', 'inactive'),
+  ('teacher-d', 'school-d', 'teacher', 'active');
 
 INSERT INTO public.app_web_sessions
   (session_token, teacher_id, school_id, role, expires_at)
@@ -103,4 +104,23 @@ BEGIN
 END
 $test_deactivation$;
 
-SELECT 'PASS: stale school/role/inactive/orphan sessions revoked; future identity changes revoke active sessions' AS result;
+-- Teacher deletion must revoke active sessions too, rather than leaving an orphan.
+INSERT INTO public.app_web_sessions
+  (session_token, teacher_id, school_id, role, expires_at)
+VALUES
+  ('valid-d', 'teacher-d', 'school-d', 'teacher', now() + interval '1 day');
+
+DELETE FROM public.teachers WHERE teacher_id='teacher-d';
+
+DO $test_teacher_delete$
+BEGIN
+  IF EXISTS (
+    SELECT 1 FROM public.app_web_sessions
+    WHERE teacher_id='teacher-d' AND expires_at > now()
+  ) THEN
+    RAISE EXCEPTION 'teacher deletion left an active session behind';
+  END IF;
+END
+$test_teacher_delete$;
+
+SELECT 'PASS: stale identity, role/school changes, deactivation, and teacher deletion revoke sessions' AS result;
