@@ -247,7 +247,6 @@ test('Manage Access refuses RPC calls when the admin session token is missing', 
 
 test('Reset Teacher password sends the new password to the guarded RPC without echoing it in UI feedback', async ({ page }) => {
   await mountAdmin(page);
-  const messages = [];
   await page.evaluate(() => {
     window.showPasswordPrompt = (_title, _message, onSubmit) => onSubmit('new-secret-987');
     window.__teacherTestToasts = [];
