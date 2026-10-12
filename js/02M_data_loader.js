@@ -21,6 +21,11 @@
     monthlySummary: { load: () => API.getMonthlySummary(), assign: v => { window.APP.monthlySummary = v || []; } },
   };
 
+  const tenantDataKeys = [
+    'students', 'attendance', 'dailyReports', 'homework',
+    'parentComms', 'incidents', 'timetable', 'monthlySummary',
+  ];
+
   // Cache identity must follow the authenticated tenant and user, not only
   // the resource name. A login can switch schools without a full page reload.
   let cacheTenantKey = null;
@@ -42,6 +47,11 @@
     if (tenantKey !== cacheTenantKey) {
       cache.clear();
       inflight.clear();
+      // Preserve initial page bootstrap data, but wipe the previous identity's
+      // in-memory records as soon as a real session/tenant change is observed.
+      if (cacheTenantKey !== null && window.APP) {
+        tenantDataKeys.forEach(name => { window.APP[name] = []; });
+      }
       cacheTenantKey = tenantKey;
     }
     return tenantKey;
