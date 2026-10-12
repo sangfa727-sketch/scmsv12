@@ -45,7 +45,7 @@ test("hidden website sections remain recoverable from a visible section tray", (
   const js = read("school-website/create.js");
   const css = read("school-website/create.css");
   assert.match(js, /id="hiddenSectionsTray"/);
-  assert.match(js, /button\\.dataset\\.sectionAction="show"/);
+  assert.ok(js.includes('setAttribute("data-section-action","show")'));
   assert.match(js, /action==="show"&&!m\.locked\)m\.visible=true/);
   assert.match(css, /\.hidden-sections-tray\[hidden\]\{display:none!important\}/);
 });
