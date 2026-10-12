@@ -224,6 +224,7 @@
     'teacher.qrUnavailable':"ไม่สามารถแสดง QR ได้",
     'common.unknown':"ไม่ทราบ",
     'common.saveChanges':"บันทึกการเปลี่ยนแปลง"
+    'ct.teacherId': '\u0e23\u0e2b\u0e31\u0e2a\u0e04\u0e23\u0e39'
   });
   window.I18N_TH = Object.assign({}, base, overrides);
 })();
