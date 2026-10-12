@@ -255,6 +255,59 @@ BEGIN
     RAISE EXCEPTION 'Non-admin role must fail closed; got %', v;
   END IF;
 
+  -- Removal actions must obey the same tenant boundary as their add/set counterparts.
+  v := public.rpc_manage_teacher_access('admin-a-token','class_remove','teacher-b','Grade B1',NULL,'class_teacher',NULL,NULL,NULL);
+  IF v->>'error' <> 'teacher_not_found' THEN
+    RAISE EXCEPTION 'Cross-school class removal must fail closed; got %', v;
+  END IF;
+
+  v := public.rpc_manage_teacher_access('admin-a-token','subject_remove','teacher-b','Grade B1',201,NULL,NULL,NULL,NULL);
+  IF v->>'error' <> 'teacher_not_found' THEN
+    RAISE EXCEPTION 'Cross-school subject removal must fail closed; got %', v;
+  END IF;
+
+  v := public.rpc_manage_teacher_access('admin-a-token','permission_remove','teacher-b',NULL,NULL,NULL,'students.view',NULL,'global');
+  IF v->>'error' <> 'teacher_not_found' THEN
+    RAISE EXCEPTION 'Cross-school permission removal must fail closed; got %', v;
+  END IF;
+
+  -- Validate invalid actions, required fields, and scope mismatches fail closed.
+  v := public.rpc_manage_teacher_access('admin-a-token','not_a_real_action','teacher-a',NULL,NULL,NULL,NULL,NULL,NULL);
+  IF v->>'error' <> 'invalid_action' THEN
+    RAISE EXCEPTION 'Unknown action must fail closed; got %', v;
+  END IF;
+
+  v := public.rpc_manage_teacher_access('admin-a-token','class_add','teacher-a',' ',NULL,'class_teacher',NULL,NULL,NULL);
+  IF v->>'error' <> 'class_required' THEN
+    RAISE EXCEPTION 'Blank class name must be rejected; got %', v;
+  END IF;
+
+  v := public.rpc_manage_teacher_access('admin-a-token','permission_set','teacher-a',NULL,NULL,NULL,'students.view',true,'class');
+  IF v->>'error' <> 'scope_mismatch' THEN
+    RAISE EXCEPTION 'Permission scope mismatch must be rejected; got %', v;
+  END IF;
+
+  -- The remove action families must independently enforce their permission gates.
+  v := public.rpc_manage_teacher_access('no-manage','class_remove','teacher-a','Grade A1',NULL,'class_teacher',NULL,NULL,NULL);
+  IF v->>'error' <> 'permission_denied' THEN
+    RAISE EXCEPTION 'class_remove must require teachers.manage; got %', v;
+  END IF;
+
+  v := public.rpc_manage_teacher_access('no-manage','subject_add','teacher-a','Grade A1',101,NULL,NULL,NULL,NULL);
+  IF v->>'error' <> 'permission_denied' THEN
+    RAISE EXCEPTION 'subject_add must require teachers.manage; got %', v;
+  END IF;
+
+  v := public.rpc_manage_teacher_access('no-manage','subject_remove','teacher-a','Grade A1',101,NULL,NULL,NULL,NULL);
+  IF v->>'error' <> 'permission_denied' THEN
+    RAISE EXCEPTION 'subject_remove must require teachers.manage; got %', v;
+  END IF;
+
+  v := public.rpc_manage_teacher_access('no-permissions','permission_remove','teacher-a',NULL,NULL,NULL,'students.view',NULL,'global');
+  IF v->>'error' <> 'permission_denied' THEN
+    RAISE EXCEPTION 'permission_remove must require permissions.manage; got %', v;
+  END IF;
+
   -- Positive controls prove the harness is not only testing denials.
   v := public.rpc_manage_teacher_access('admin-a-token','class_add','teacher-a','Grade A1',NULL,'class_teacher',NULL,NULL,NULL);
   IF v->>'ok' <> 'true' THEN
