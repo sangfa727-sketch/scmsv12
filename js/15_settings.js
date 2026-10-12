@@ -408,7 +408,7 @@ window.openCreateTeacherModal = function() {
       </select>
 
       <label class="field-label">${t('ct.startPw')}</label>
-      <input class="form-input" id="newTPw" type="password" placeholder="temp1234" value="temp1234">
+      <input class="form-input" id="newTPw" type="password" placeholder="temp1234" autocomplete="new-password">
       <p class="form-help">${t('ct.startPwHint')}</p>
 
       <div id="newTError" class="form-error" style="display:none"></div>
