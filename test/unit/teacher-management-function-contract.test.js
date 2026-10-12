@@ -136,7 +136,7 @@ test('Manage Access loads catalog and assignments together and renders scoped pe
 test('Manage Access translates unknown permission keys and hides raw backend error identifiers', () => {
   const source = read('js/29_teacher_access.js');
   assert.match(source, /function _taPermissionFallback\(key\)/);
-  assert.match(source, /normalized\.replace\(\/\\\\b\\\\w\/g/);
+  assert.ok(source.includes("normalized.replace(/\\\\b\\\\w/g"));
   assert.match(source, /dict\[_taLang\(\)\]\?\.\[key\] \|\| dict\.en\[key\] \|\| _taPermissionFallback\(key\)/);
   assert.match(source, /function _taErrorMessage\(error, fallbackKey\)/);
   assert.match(source, /return _taUi\('accessDenied'\)/);
