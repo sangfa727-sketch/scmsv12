@@ -69,7 +69,7 @@ test('School Website Studio edits, saves, restores sections, previews templates 
 
   await page.locator('#siteAddressButton').click();
   await expect(page.locator('#siteAddressDialog')).toBeVisible();
-  await expect(page.locator('#siteAddressStatus')).toContainText('platform root domain is not configured');
+  await expect(page.locator('#siteAddressStatus')).toContainText('reservation is blocked');
   await expect(page.locator('#reserveSiteAddress')).toBeDisabled();
   expect(pageErrors, 'Studio should initialize and run without uncaught browser errors').toEqual([]);
 });
