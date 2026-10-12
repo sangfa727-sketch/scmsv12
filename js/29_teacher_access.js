@@ -133,7 +133,8 @@ function _taCategory(key) {
     ms:{dashboard:'Papan Pemuka',students:'Pelajar',leave:'Permohonan Cuti',attendance:'Kehadiran',homework:'Kerja Rumah',assessment:'Penilaian',billing:'Bil',teachers:'Guru',permissions:'Kebenaran'},
     th:{dashboard:'แดชบอร์ด',students:'นักเรียน',leave:'คำขอลา',attendance:'การเข้าเรียน',homework:'การบ้าน',assessment:'การประเมิน',billing:'การเรียกเก็บเงิน',teachers:'ครู',permissions:'สิทธิ์'},
     jp:{dashboard:'ダッシュボード',students:'生徒',leave:'休暇申請',attendance:'出欠',homework:'宿題',assessment:'評価',billing:'請求',teachers:'教師',permissions:'権限'},
-    km:{dashboard:'ផ្ទាំងគ្រប់គ្រង',students:'សិស្ស',leave:'សំណើសុំច្បាប់ឈប់',attendance:'វត្តមាន',homework:'កិច្ចការផ្ទះ',assessment:'ការវាយតម្លៃ',billing:'វិក្កយបត្រ',teachers:'គ្រូ',permissions:'សិទ្ធិ'},\n    zh:{dashboard:'仪表板',students:'学生',leave:'请假申请',attendance:'考勤',homework:'作业',assessment:'评估',billing:'账单',teachers:'教师',permissions:'权限'}
+    km:{dashboard:'ផ្ទាំងគ្រប់គ្រង',students:'សិស្ស',leave:'សំណើសុំច្បាប់ឈប់',attendance:'វត្តមាន',homework:'កិច្ចការផ្ទះ',assessment:'ការវាយតម្លៃ',billing:'វិក្កយបត្រ',teachers:'គ្រូ',permissions:'សិទ្ធិ'},
+    zh:{dashboard:'仪表板',students:'学生',leave:'请假申请',attendance:'考勤',homework:'作业',assessment:'评估',billing:'账单',teachers:'教师',permissions:'权限'}
   };
   return dict[_taLang()]?.[key] || dict.en[key] || _taPermissionFallback(key);
 }
@@ -165,7 +166,8 @@ function _taAssignmentTypeLabel(type) {
     ms:{class_teacher:'Guru Kelas',assistant:'Guru Pembantu',subject_teacher:'Guru Mata Pelajaran',other:'Lain-lain'},
     th:{class_teacher:'ครูประจำชั้น',assistant:'ครูผู้ช่วย',subject_teacher:'ครูประจำวิชา',other:'อื่นๆ'},
     jp:{class_teacher:'担任',assistant:'補助教員',subject_teacher:'教科担当',other:'その他'},
-    km:{class_teacher:'គ្រូប្រចាំថ្នាក់',assistant:'ជំនួយការគ្រូ',subject_teacher:'គ្រូប្រចាំមុខវិជ្ជា',other:'ផ្សេងទៀត'},\n    zh:{class_teacher:'班主任',assistant:'助理教师',subject_teacher:'科任教师',other:'其他'},\n    zh:{class_teacher:'班主任',assistant:'助理教师',subject_teacher:'科任教师',other:'其他'}
+    km:{class_teacher:'គ្រូប្រចាំថ្នាក់',assistant:'ជំនួយការគ្រូ',subject_teacher:'គ្រូប្រចាំមុខវិជ្ជា',other:'ផ្សេងទៀត'},
+    zh:{class_teacher:'班主任',assistant:'助理教师',subject_teacher:'科任教师',other:'其他'}
   };
   return dict[_taLang()]?.[type] || dict.en[type] || type;
 }
