@@ -40,12 +40,13 @@ function openField(field){activeField=field;activeCollection=null;const m=fieldM
 function openItem(collection){activeCollection=collection;activeField=null;const names={programs:["Add a program","Example: Primary Education"],facilities:["Add a facility","Example: Science & Innovation Lab"],news:["Add news or event","Example: Open Day 2026"]};const m=names[collection];title.textContent=m[0];label.textContent="Title";input.value="";hint.textContent=m[1];input.placeholder=m[1];input.maxLength=200;input.removeAttribute("aria-invalid");dialog.showModal();setTimeout(()=>input.focus(),30)}
 function applyTemplate(){const meta=templateMeta[state.template]||templateMeta.modern;const label=$("#changeTemplate");if(label)label.textContent=meta.label+" selected";const name=$("#templateName");if(name)name.textContent=meta.label;$$(".template-option").forEach(x=>x.classList.toggle("selected",x.dataset.template===state.template));document.body.dataset.template=state.template}
 function normalizeSections(){if(!Array.isArray(state.sections)||!state.sections.length)state.sections=DEFAULT_SECTIONS.map(x=>({...x}));const canonical=DEFAULT_SECTIONS.map(x=>x.id);const seen=new Set();state.sections=state.sections.filter(x=>x&&typeof x.id==="string"&&!seen.has(x.id)&&(seen.add(x.id),true)).map(x=>({...x,visible:x.visible!==false,locked:x.type==="hero"||x.locked===true}));for(const base of DEFAULT_SECTIONS)if(!state.sections.some(x=>x.id===base.id))state.sections.push({...base});}
-function renderSectionLayout(){normalizeSections();const canvas=$("#pageCanvas");const canonical=new Map($$("#pageCanvas > .site-block").map(n=>[n.dataset.block,n]));for(const meta of state.sections){if(!document.getElementById(meta.id)){const source=canonical.get(meta.type||meta.id);if(source&&meta.id!==source.id){const copy=source.cloneNode(true);copy.id=meta.id;copy.dataset.block=meta.id;copy.dataset.sectionLabel=meta.label||source.dataset.sectionLabel||meta.type;copy.querySelectorAll("[id]").forEach(el=>{el.id=el.id+"-"+meta.id});copy.querySelectorAll("[data-section-id]").forEach(b=>b.dataset.sectionId=meta.id);canvas.appendChild(copy);}}const node=document.getElementById(meta.id);if(!node)continue;node.hidden=!meta.visible;const hide=node.querySelector("[data-section-action=hide]");if(hide){hide.textContent=meta.visible?"Hide":"Show";hide.setAttribute("aria-label",(meta.visible?"Hide ":"Show ")+(meta.label||meta.id));hide.disabled=!!meta.locked;}const up=node.querySelector("[data-section-action=up]"),down=node.querySelector("[data-section-action=down]"),dup=node.querySelector("[data-section-action=duplicate]");if(up)up.disabled=state.sections[0]?.id===meta.id;if(down)down.disabled=state.sections[state.sections.length-1]?.id===meta.id;if(dup)dup.disabled=!!meta.locked;canvas.appendChild(node);}}
+function renderSectionLayout(){normalizeSections();const canvas=$("#pageCanvas");const canonical=new Map($("#pageCanvas > .site-block").map(n=>[n.dataset.block,n]));for(const meta of state.sections){if(!document.getElementById(meta.id)){const source=canonical.get(meta.type||meta.id);if(source&&meta.id!==source.id){const copy=source.cloneNode(true);copy.id=meta.id;copy.dataset.block=meta.id;copy.dataset.sectionLabel=meta.label||source.dataset.sectionLabel||meta.type;copy.querySelectorAll("[id]").forEach(el=>{el.id=el.id+"-"+meta.id});copy.querySelectorAll("[data-section-id]").forEach(b=>b.dataset.sectionId=meta.id);canvas.appendChild(copy);}}const node=document.getElementById(meta.id);if(!node)continue;node.hidden=!meta.visible;const hide=node.querySelector("[data-section-action=hide]");if(hide){hide.textContent="Hide";hide.setAttribute("aria-label","Hide "+(meta.label||meta.id));hide.disabled=!!meta.locked;}const up=node.querySelector("[data-section-action=up]"),down=node.querySelector("[data-section-action=down]"),dup=node.querySelector("[data-section-action=duplicate]");if(up)up.disabled=state.sections[0]?.id===meta.id;if(down)down.disabled=state.sections[state.sections.length-1]?.id===meta.id;if(dup)dup.disabled=!!meta.locked;canvas.appendChild(node);}let tray=$("#hiddenSectionsTray");if(!tray){tray=document.createElement("section");tray.id="hiddenSectionsTray";tray.className="hidden-sections-tray";tray.setAttribute("aria-label","Hidden website sections");canvas.parentElement.insertBefore(tray,canvas);}const hidden=state.sections.filter(s=>!s.visible&&!s.locked);tray.hidden=hidden.length===0;tray.replaceChildren();if(hidden.length){const heading=document.createElement("strong");heading.textContent="Hidden sections — tap Show to restore";tray.appendChild(heading);hidden.forEach(section=>{const button=document.createElement("button");button.type="button";button.className="button secondary";button.dataset.sectionAction="show";button.dataset.sectionId=section.id;button.textContent="Show "+(section.label||section.id);tray.appendChild(button);});}}
 function sectionIndex(id){return state.sections.findIndex(x=>x.id===id)}
-function sectionAction(id,action){normalizeSections();const i=sectionIndex(id),m=state.sections[i];if(i<0||!m)return;if(action==="hide"&&!m.locked)m.visible=!m.visible;else if(action==="up"&&i>0)[state.sections[i-1],state.sections[i]]=[state.sections[i],state.sections[i-1]];else if(action==="down"&&i<state.sections.length-1)[state.sections[i+1],state.sections[i]]=[state.sections[i],state.sections[i+1]];else if(action==="duplicate"&&!m.locked){const copyId=m.id+"-copy-"+Date.now().toString(36);state.sections.splice(i+1,0,{...m,id:copyId,label:(m.label||m.id)+" copy",locked:false});}render();showToast(action==="hide"?(m.visible?"Section shown":"Section hidden"):action==="up"?"Section moved up":action==="down"?"Section moved down":action==="duplicate"?"Section duplicated":"Section updated");}
+function sectionAction(id,action){normalizeSections();const i=sectionIndex(id),m=state.sections[i];if(i<0||!m)return;if(action==="hide"&&!m.locked)m.visible=false;else if(action==="show"&&!m.locked)m.visible=true;else if(action==="up"&&i>0)[state.sections[i-1],state.sections[i]]=[state.sections[i],state.sections[i-1]];else if(action==="down"&&i<state.sections.length-1)[state.sections[i+1],state.sections[i]]=[state.sections[i],state.sections[i+1]];else if(action==="duplicate"&&!m.locked){const copyId=m.id+"-copy-"+Date.now().toString(36);state.sections.splice(i+1,0,{...m,id:copyId,label:(m.label||m.id)+" copy",locked:false});}render();showToast(action==="hide"?"Section hidden":action==="show"?"Section shown":action==="up"?"Section moved up":action==="down"?"Section moved down":action==="duplicate"?"Section duplicated":"Section updated");}
 function draftStorageKey(){const schoolId=window.SCMS_WEBSITE_CONTEXT?.schoolId;if(typeof schoolId!=="string"||!schoolId.trim())throw new Error("School context is required");return "scms-website-draft:"+encodeURIComponent(schoolId)}function draftPayload(){
  return {
   template:state.template,
+  logo:state.logo,
   schoolName:state.schoolName,
   tagline:state.tagline,
   aboutTitle:state.aboutTitle,
@@ -85,8 +86,12 @@ async function saveRemoteDraft(){
    updateDraftActionButtons();
    showToast("This draft changed in another session. Reload before editing further.");
   }else{
-   $("#saveState").textContent="Offline backup only";
+   const messages={access_denied:"Session expired — sign in again",rpc_not_found:"Save service unavailable — contact SCMS admin",backend_unavailable:"Save failed — check connection and retry",invalid_content:"Some content is invalid — review the fields",permission_denied:"You do not have permission to save this website"};
+   const message=messages[reason]||"Save failed — "+(reason&&reason.length<90?reason.replace(/_/g," "):"check connection and retry");
+   $("#saveState").textContent=message;
+   $("#saveState").dataset.state="error";
    updateDraftActionButtons();
+   showToast(message);
   }
  }finally{
   draftSaveInFlight=false;
@@ -102,7 +107,7 @@ function persistDraft(){
 }
 function updateProgress(){const fields=["schoolName","tagline","aboutTitle","aboutText","contactTitle","contactText"];const done=fields.filter(f=>state[f]).length;$("#fieldProgress").textContent=done+" of "+fields.length+" completed"}
 function renderCollection(c){const target=$("#"+(c==="programs"?"programItems":c==="facilities"?"facilityItems":"newsItems"));const items=state[c];target.innerHTML=items.length?items.map((x,i)=>'<article class="added-card"><button class="remove-card" data-remove="'+c+'" data-index="'+i+'" aria-label="Remove">×</button><b>'+escapeHtml(x)+'</b><span>Ready for review</span></article>').join(""):'<button class="add-card" data-add-item="'+c+'" type="button">＋<span>'+({programs:"Add your first program",facilities:"Show families your school",news:"Add your first news item"}[c])+"</span></button>"}
-function renderPreview(){const meta=templateMeta[state.template]||templateMeta.modern;const name=escapeHtml(state.schoolName||"Your School"),tag=escapeHtml(state.tagline||meta.hero);const contentByType={about:["About",state.aboutText],programs:["Programs",state.programs.join(" · ")],facilities:["School life",state.facilities.join(" · ")],news:["News & events",state.news.join(" · ")],contact:["Contact",state.contactText]};const sections=state.sections.filter(s=>s.visible&&contentByType[s.type]).map(s=>contentByType[s.type]);const preview=$("#previewCanvas");preview.dataset.template=state.template;preview.innerHTML='<div class="mini-hero"><div class="mini-logo">'+(state.schoolName?escapeHtml(state.schoolName[0].toUpperCase()):"S")+'</div><h1>'+name+'</h1><p>'+tag+'</p></div>'+sections.map(x=>'<section class="mini-section"><h2>'+escapeHtml(x[0])+'</h2><p>'+escapeHtml(x[1]||"Content will appear here when you add it.")+"</p></section>").join("")}
+function renderPreview(){const meta=templateMeta[state.template]||templateMeta.modern;const name=escapeHtml(state.schoolName||"Your School"),tag=escapeHtml(state.tagline||meta.hero);const contentByType={about:[state.aboutTitle||"About",state.aboutText],programs:["Programs",state.programs.join(" · ")],facilities:["School life",state.facilities.join(" · ")],news:["News & events",state.news.join(" · ")],contact:[state.contactTitle||"Contact",state.contactText]};const sections=state.sections.filter(s=>s.visible&&contentByType[s.type]).map(s=>contentByType[s.type]);const preview=$("#previewCanvas");preview.dataset.template=state.template;preview.innerHTML='<div class="mini-hero"><div class="mini-logo">'+(state.schoolName?escapeHtml(state.schoolName[0].toUpperCase()):"S")+'</div><h1>'+name+'</h1><p>'+tag+'</p><span class="mini-hero-cta">Explore our school</span></div>'+sections.map((x,i)=>'<section class="mini-section"><span class="mini-section-kicker">0'+(i+1)+'</span><h2>'+escapeHtml(x[0])+'</h2><p>'+escapeHtml(x[1]||"Content will appear here when you add it.")+"</p></section>").join("")}
 function escapeHtml(v){return String(v).replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]||c))}
 function render(){normalizeSections();renderSectionLayout();$$("[data-field]").forEach(el=>{const f=el.dataset.field;const fallback={logo:"＋ Add your school logo",schoolName:"Click here to add your school name",tagline:"Click here to add a short welcome message",aboutTitle:"Click here to add your school introduction",aboutText:"Tell families what makes your school special. A short, clear introduction works best.",contactTitle:"Click here to add your contact details",contactText:"Phone · Email · Address · Location"}[f];el.textContent=state[f]||fallback;el.classList.toggle("filled",!!state[f])});renderCollection("programs");renderCollection("facilities");renderCollection("news");applyTemplate();renderPreview();updateProgress();persistDraft()}
 function addSection(){$("#sectionDialog").showModal()}function initSectionNavigation(){const links=$$(".section-nav a"),sections=links.map(a=>$(a.getAttribute("href"))).filter(Boolean);if(!("IntersectionObserver" in window))return;const observer=new IntersectionObserver(entries=>{const visible=entries.filter(e=>e.isIntersecting).sort((a,b)=>b.intersectionRatio-a.intersectionRatio)[0];if(!visible)return;links.forEach(a=>a.classList.toggle("active",a.getAttribute("href")==="#"+visible.target.id));},{rootMargin:"-22% 0px -62% 0px",threshold:[0,.25,.5]});sections.forEach(section=>observer.observe(section));links.forEach(link=>link.addEventListener("click",()=>links.forEach(a=>a.classList.toggle("active",a===link))));if(links[0])links[0].classList.add("active")}
@@ -129,8 +134,9 @@ async function websiteRpc(name,args){
   cache:"no-store",
   credentials:"omit"
  });
- if(!response.ok)throw new Error("backend_unavailable");
- const result=await response.json();
+ let result=null;
+ try{result=await response.json()}catch(_){result=null}
+ if(!response.ok)throw new Error(typeof result?.error==="string"?result.error:response.status===401||response.status===403?"access_denied":response.status===404?"rpc_not_found":"backend_unavailable");
  if(!result||result.ok!==true)throw new Error(typeof result?.error==="string"?result.error:"backend_unavailable");
  return result;
 }
@@ -172,7 +178,7 @@ async function refreshSiteAddress(){
    link.hidden=true;
    status.textContent=configured
     ?"Choose a unique subdomain. Reserving it does not make the site public."
-    :"The platform domain is not configured yet. No address has been reserved; an SCMS platform operator must configure a verified root domain first.";
+    :"You are entering a subdomain name, not a full custom domain. SCMS has no verified platform root domain configured yet, so reservation is blocked. An SCMS platform operator must configure the root domain, wildcard DNS, and TLS first.";
    status.dataset.state=configured?"info":"notice";
   }
   form.hidden=!configured||!!currentSite;
@@ -188,7 +194,7 @@ async function refreshSiteAddress(){
   link.hidden=true;
   form.hidden=false;
   if(activate)activate.hidden=true;
-  status.textContent="Site configuration could not be loaded. Please refresh and try again.";
+  status.textContent="Website address setup could not be loaded. Your text has not been saved. Check your session/connection and refresh; if the platform root domain is missing, an SCMS operator must configure it first.";
   status.dataset.state="error";
   updateSiteAddressPreview();
  }
@@ -470,9 +476,13 @@ async function bootDraftStudio(){
   if(serverFound&&result.content&&typeof result.content==="object")Object.assign(state,result.content);
   else if(localDraft&&typeof localDraft==="object")Object.assign(state,localDraft);
   remoteDraftReady=true;
- }catch(_){
+ }catch(error){
   if(localDraft&&typeof localDraft==="object")Object.assign(state,localDraft);
   remoteDraftReady=false;
+  const reason=error instanceof Error?error.message:"";
+  const messages={access_denied:"Sign in again to load and save your website",rpc_not_found:"Website draft service is unavailable",backend_unavailable:"Cannot reach SCMS to load your draft"};
+  $("#saveState").textContent=messages[reason]||"Draft not loaded — check connection and permissions";
+  $("#saveState").dataset.state="error";
  }
  normalizeSections();
  render();
