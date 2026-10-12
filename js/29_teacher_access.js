@@ -150,6 +150,19 @@ function _taPermissionFallback(key) {
     km: {dashboard:'ផ្ទាំងគ្រប់គ្រង',view:'មើល',read:'អាន',create:'បង្កើត',edit:'កែសម្រួល',update:'ធ្វើបច្ចុប្បន្នភាព',delete:'លុប',manage:'គ្រប់គ្រង',write:'គ្រប់គ្រង',approve:'អនុម័ត',reject:'បដិសេធ',students:'សិស្ស',student:'សិស្ស',teachers:'គ្រូ',teacher:'គ្រូ',permissions:'សិទ្ធិ',permission:'សិទ្ធិ',attendance:'វត្តមាន',homework:'កិច្ចការផ្ទះ',assessment:'ការវាយតម្លៃ',billing:'វិក្កយបត្រ',class:'ថ្នាក់',classes:'ថ្នាក់',subject:'មុខវិជ្ជា',subjects:'មុខវិជ្ជា',leave:'ច្បាប់ឈប់',requests:'សំណើ',report:'របាយការណ៍',reports:'របាយការណ៍',export:'នាំចេញ',import:'នាំចូល',settings:'ការកំណត់',profile:'ប្រវត្តិរូប',access:'ការចូលប្រើ',school:'សាលា',whole:'ទាំងមូល',assigned:'បានចាត់តាំង',fees:'ថ្លៃសេវា',catalog:'បញ្ជី'},
     zh: {dashboard:'仪表板',view:'查看',read:'读取',create:'创建',edit:'编辑',update:'更新',delete:'删除',manage:'管理',write:'管理',approve:'批准',reject:'拒绝',students:'学生',student:'学生',teachers:'教师',teacher:'教师',permissions:'权限',permission:'权限',attendance:'考勤',homework:'作业',assessment:'评估',billing:'账单',class:'班级',classes:'班级',subject:'科目',subjects:'科目',leave:'请假',requests:'申请',report:'报告',reports:'报告',export:'导出',import:'导入',settings:'设置',profile:'资料',access:'访问',school:'学校',whole:'全校',assigned:'已分配',fees:'费用',catalog:'目录'}
   };
+  // Domain terms used by the live permission catalog. Keep fallback labels localized
+  // even when a permission is introduced server-side before a dedicated key is added.
+  const catalogTerms = {
+    en: {communication:'Communication',daily:'Daily Reports','daily report':'Daily Report',incident:'Incidents','report card':'Report Card',timetable:'Timetable',send:'Send'},
+    my: {communication:'ဆက်သွယ်ရေး',daily:'နေ့စဉ်အစီရင်ခံစာများ','daily report':'နေ့စဉ်အစီရင်ခံစာ',incident:'ဖြစ်စဉ်များ','report card':'အစီရင်ခံစာကတ်',timetable:'အချိန်ဇယား',send:'ပို့ရန်'},
+    th: {communication:'การสื่อสาร',daily:'รายงานประจำวัน','daily report':'รายงานประจำวัน',incident:'เหตุการณ์','report card':'รายงานผลการเรียน',timetable:'ตารางเรียน',send:'ส่ง'},
+    jp: {communication:'コミュニケーション',daily:'日次レポート','daily report':'日次レポート',incident:'インシデント','report card':'成績表',timetable:'時間割',send:'送信'},
+    ms: {communication:'Komunikasi',daily:'Laporan Harian','daily report':'Laporan Harian',incident:'Insiden','report card':'Kad Laporan',timetable:'Jadual Waktu',send:'Hantar'},
+    km: {communication:'ការទំនាក់ទំនង',daily:'របាយការណ៍ប្រចាំថ្ងៃ','daily report':'របាយការណ៍ប្រចាំថ្ងៃ',incident:'ឧប្បត្តិហេតុ','report card':'ប័ណ្ណរបាយការណ៍',timetable:'តារាងពេលវេលា',send:'ផ្ញើ'},
+    zh: {communication:'通信',daily:'每日报告','daily report':'每日报告',incident:'事件','report card':'成绩单',timetable:'课程表',send:'发送'}
+  };
+  Object.assign(words.en, catalogTerms.en);
+  Object.assign(words[_taLang()] || {}, catalogTerms[_taLang()] || {});
   const language = _taLang();
   return raw.split('.').map(function(part) {
     const normalized = part.replace(/[_-]+/g, ' ').replace(/([a-z])([A-Z])/g, '$1 $2').trim();
@@ -158,7 +171,17 @@ function _taPermissionFallback(key) {
       normalized.replace(/\b\w/g, function(c){ return c.toUpperCase(); });
   }).join(' · ');
 }
-function _taDescription(key, fallback) { return _taText(key) || fallback || ''; }
+function _taDescription(key, fallback) {
+  const description = String(fallback || '').trim();
+  const permissionKey = String(key || '').trim();
+  const label = _taText(key).trim();
+  const normalize = (value) => String(value || '').replace(/\\s+/g, ' ').trim().toLocaleLowerCase();
+  // A key or a description that merely repeats the translated title adds noise,
+  // leaks internal permission identifiers, and creates duplicate labels in the UI.
+  if (!description || normalize(description) === normalize(permissionKey) ||
+      normalize(description) === normalize(label)) return '';
+  return description;
+}
 function _taAssignmentTypeLabel(type) {
   const dict = {
     en:{class_teacher:'Class Teacher',assistant:'Assistant Teacher',subject_teacher:'Subject Teacher',other:'Other'},
@@ -324,8 +347,9 @@ async function _renderTeacherAccess() {
         const initialAllowed = _taEffectiveAllowed(teacher, p, !!roleDefault, overrides, classAssignments, subjectAssignments, null, null);
         const targetHint = p.scope_type === 'global' ? _taEffectiveLabel(initialAllowed) : '—';
         html += '<div class="teacher-access-perm-row" data-permission="' + esc(p.permission_key) + '" data-scope="' + esc(p.scope_type) + '">' +
-          '<div class="teacher-access-perm-copy"><strong>' + esc(_taText(p.permission_key)) + '</strong><small>' + esc(_taDescription(p.permission_key, p.description || '')) +
-          '</small></div>' + _taScopeControls(p,catalog) +
+          '<div class="teacher-access-perm-copy"><strong>' + esc(_taText(p.permission_key)) + '</strong>' +
+          (_taDescription(p.permission_key, p.description || '') ? '<small>' + esc(_taDescription(p.permission_key, p.description || '')) + '</small>' : '') +
+          '</div>' + _taScopeControls(p,catalog) +
           '<span class="' + _taStateClass(state) + '" data-config-state>' + esc(_taStateLabel(state)) + '</span>' +
           '<span class="teacher-access-effective" data-effective-state>' + esc(targetHint) + '</span>' +
           '<select class="teacher-access-perm-state" aria-label="' + _taUi('permissions') + '"><option value="default"' + (state === 'default' ? ' selected' : '') +
