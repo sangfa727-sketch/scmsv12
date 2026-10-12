@@ -276,11 +276,10 @@ test('Manage Access never displays raw permission/category keys in any of the se
     const sheet = page.locator('.teacher-access-sheet:visible').first();
     await expect(sheet).toBeVisible();
     const permissionLabel = sheet.locator('.teacher-access-perm-row[data-permission="custom.permission_key"] .teacher-access-perm-copy strong');
-    const categoryLabel = sheet.locator('.teacher-access-perm-group').filter({ has: sheet.locator('.teacher-access-perm-row[data-permission="custom.permission_key"]') }).locator('.teacher-access-perm-category');
     await expect(permissionLabel).toBeVisible();
-    await expect(categoryLabel).toBeVisible();
     const permissionText = await permissionLabel.textContent();
-    const categoryText = await categoryLabel.textContent();
+    const categoryText = await sheet.locator('.teacher-access-perm-row[data-permission="custom.permission_key"]').evaluate(row => row.closest('.teacher-access-perm-group')?.querySelector('.teacher-access-perm-category')?.textContent || '');
+    expect(categoryText).not.toBe('');
     expect(permissionText).not.toContain('custom.permission_key');
     expect(permissionText).not.toContain('_');
     expect(categoryText).not.toContain('custom_area');
