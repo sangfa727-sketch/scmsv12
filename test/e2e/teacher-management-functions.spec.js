@@ -137,6 +137,8 @@ test('Create Teacher validates and sends the selected operational role to the se
   await page.locator('#newTName').fill('New Teacher');
   await page.locator('#newTEmail').fill('new.teacher@example.test');
   await page.locator('#newTRole').selectOption('assistant_teacher');
+  await expect(page.locator('#newTPw')).toHaveAttribute('type', 'password');
+  await expect(page.locator('#newTPw')).toHaveValue('');
   await page.locator('#newTPw').fill('valid-pin-123');
   await page.locator('#newTBtn').click();
 
@@ -241,4 +243,22 @@ test('Manage Access refuses RPC calls when the admin session token is missing', 
     } catch (_) {}
   });
   expect(await rpcCalls(page, 'rpc_manage_teacher_access')).toHaveLength(0);
+});
+
+
+test('Reset Teacher password sends the new password to the guarded RPC without echoing it in UI feedback', async ({ page }) => {
+  await mountAdmin(page);
+  await page.evaluate(() => {
+    window.showPasswordPrompt = (_title, _message, onSubmit) => onSubmit('new-secret-987');
+    window.__teacherTestToasts = [];
+    window.showToast = (message) => window.__teacherTestToasts.push(String(message));
+  });
+  await page.evaluate(() => window.resetTeacherPassword('teacher-2', 'Other Teacher'));
+  await expect.poll(async () => (await rpcCalls(page, 'rpc_admin_reset_teacher_password')).length).toBe(1);
+  const call = (await rpcCalls(page, 'rpc_admin_reset_teacher_password'))[0];
+  expect(call.payload.p_teacher_id).toBe('teacher-2');
+  expect(call.payload.p_session_token).toBe('e2e-test-session');
+  expect(call.payload.p_new_password).toBe('new-secret-987');
+  const toasts = await page.evaluate(() => window.__teacherTestToasts);
+  expect(toasts.join(' ')).not.toContain('new-secret-987');
 });
