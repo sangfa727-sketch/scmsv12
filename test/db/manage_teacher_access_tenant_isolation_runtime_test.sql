@@ -173,6 +173,7 @@ INSERT INTO public.teachers
   (teacher_id, school_id, role, status, teacher_name, email)
 VALUES
   ('admin-a', 'school-a', 'admin', 'active', 'School A Admin', 'admin-a@example.test'),
+  ('admin-peer', 'school-a', 'admin', 'active', 'School A Peer Admin', 'admin-peer@example.test'),
   ('super-a', 'school-a', 'super_admin', 'active', 'School A Super Admin', 'super-a@example.test'),
   ('teacher-a', 'school-a', 'teacher', 'active', 'School A Teacher', 'teacher-a@example.test'),
   ('admin-b', 'school-b', 'admin', 'active', 'School B Admin', 'admin-b@example.test'),
@@ -702,6 +703,49 @@ BEGIN
   END IF;
   IF v_payload::text LIKE '%teacher.a.updated@example.test%' THEN
     RAISE EXCEPTION 'Teacher profile audit must not duplicate personal field values; payload=%', v_payload;
+  END IF;
+
+  -- Omitting p_role must preserve an existing admin role while allowing non-role edits.
+  v := public.rpc_admin_update_teacher_profile(
+    'admin-a-token', 'admin-peer', 'Peer Admin Updated', 'admin.peer.updated',
+    'admin.peer.updated@example.test'
+  );
+  IF v->>'ok' <> 'true' OR v->'teacher'->>'role' <> 'admin' THEN
+    RAISE EXCEPTION 'Omitted role must preserve the target admin role; got %', v;
+  END IF;
+
+  -- An explicit NULL role must have the same safe preserve-role semantics.
+  v := public.rpc_admin_update_teacher_profile(
+    'admin-a-token', 'admin-peer', 'Peer Admin Updated Again', 'admin.peer.updated2',
+    'admin.peer.updated2@example.test', NULL
+  );
+  IF v->>'ok' <> 'true' OR v->'teacher'->>'role' <> 'admin' THEN
+    RAISE EXCEPTION 'NULL role must preserve the target admin role; got %', v;
+  END IF;
+
+  -- A regular admin cannot demote or otherwise change another admin's role.
+  v := public.rpc_admin_update_teacher_profile(
+    'admin-a-token', 'admin-peer', 'Peer Admin Updated Again', 'admin.peer.updated2',
+    'admin.peer.updated2@example.test', 'teacher'
+  );
+  IF v->>'error' <> 'insufficient_role' THEN
+    RAISE EXCEPTION 'Regular admin must not change another admin role; got %', v;
+  END IF;
+
+  IF NOT EXISTS (
+    SELECT 1 FROM public.teachers
+     WHERE teacher_id = 'admin-peer' AND school_id = 'school-a' AND role = 'admin'
+  ) THEN
+    RAISE EXCEPTION 'Denied admin role change must leave target role unchanged';
+  END IF;
+
+  -- A super-admin may change the peer admin role under the intended privilege policy.
+  v := public.rpc_admin_update_teacher_profile(
+    'super-a-token', 'admin-peer', 'Peer Admin Updated Again', 'admin.peer.updated2',
+    'admin.peer.updated2@example.test', 'assistant_teacher'
+  );
+  IF v->>'ok' <> 'true' OR v->'teacher'->>'role' <> 'assistant_teacher' THEN
+    RAISE EXCEPTION 'Super-admin role change should succeed; got %', v;
   END IF;
 
   SELECT password_hash INTO v_hash
