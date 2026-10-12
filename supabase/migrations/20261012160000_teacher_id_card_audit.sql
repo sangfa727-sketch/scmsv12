@@ -38,7 +38,8 @@ BEGIN
     FROM public.teachers
    WHERE teacher_id = p_teacher_id
      AND school_id = a.school_id
-   LIMIT 1;
+   LIMIT 1
+   FOR UPDATE;
 
   IF NOT FOUND THEN
     RETURN jsonb_build_object('ok', false, 'error', 'teacher_not_found');
