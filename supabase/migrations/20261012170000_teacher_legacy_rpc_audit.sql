@@ -141,7 +141,7 @@ BEGIN
 
   IF EXISTS (
     SELECT 1 FROM public.teachers
-     WHERE lower(login_name) = lower(v_login_name)
+     WHERE lower(trim(login_name)) = lower(v_login_name)
        AND teacher_id <> p_teacher_id
   ) THEN
     RETURN jsonb_build_object('ok', false, 'error', 'duplicate_login_name');
