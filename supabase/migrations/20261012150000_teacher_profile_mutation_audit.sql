@@ -36,11 +36,16 @@ BEGIN
     RETURN jsonb_build_object('ok', false, 'error', 'not_admin', 'message', 'Admin login လိုအပ်ပါတယ်');
   END IF;
 
-  IF p_role NOT IN ('admin', 'teacher') THEN
+  IF p_role NOT IN (
+    'teacher', 'assistant_teacher', 'senior_teacher',
+    'school_coordinator', 'administrative_assistant', 'admin', 'super_admin'
+  ) THEN
     RETURN jsonb_build_object('ok', false, 'error', 'invalid_role');
   END IF;
 
-  IF p_role = 'admin' AND v_admin.teacher_role <> 'super_admin' THEN
+  IF p_role IN ('admin', 'super_admin')
+     AND v_admin.teacher_role <> 'super_admin'
+  THEN
     RETURN jsonb_build_object('ok', false, 'error', 'insufficient_role');
   END IF;
 
