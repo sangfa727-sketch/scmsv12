@@ -615,11 +615,19 @@ DECLARE
   v_hash text;
 BEGIN
   v := public.rpc_admin_create_teacher_v2(
+    'admin-a-token', 'teacher-created-denied', 'teacher.denied', 'Denied Admin Role',
+    'initial-pin-987', 'admin', 'denied.admin@example.test'
+  );
+  IF v->>'error' <> 'insufficient_role' THEN
+    RAISE EXCEPTION 'School admin must not create another admin account; got %', v;
+  END IF;
+
+  v := public.rpc_admin_create_teacher_v2(
     'admin-a-token', 'teacher-created-a', 'teacher.created', 'Created Teacher',
-    'initial-pin-987', 'teacher', 'created.teacher@example.test'
+    'initial-pin-987', 'assistant_teacher', 'created.teacher@example.test'
   );
   IF v->>'ok' <> 'true' THEN
-    RAISE EXCEPTION 'Authorized teacher creation should succeed; got %', v;
+    RAISE EXCEPTION 'Authorized operational teacher role should be creatable; got %', v;
   END IF;
 
   SELECT actor, payload INTO v_actor, v_payload
@@ -628,7 +636,7 @@ BEGIN
      AND school_id = 'school-a'
      AND payload->>'teacher_id' = 'teacher-created-a'
    ORDER BY id DESC LIMIT 1;
-  IF v_actor <> 'admin-a' OR v_payload->>'role' <> 'teacher' THEN
+  IF v_actor <> 'admin-a' OR v_payload->>'role' <> 'assistant_teacher' THEN
     RAISE EXCEPTION 'Teacher creation audit must contain validated actor, target, and role; actor=%, payload=%', v_actor, v_payload;
   END IF;
   IF v_payload::text LIKE '%initial-pin-987%' OR v_payload ? 'password' OR v_payload ? 'password_hash' THEN
