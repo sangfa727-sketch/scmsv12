@@ -166,6 +166,8 @@ VALUES ('school-b', 'teacher-b', 'students.view', true, 'global');
 -- Apply the production function and subsequent hardening migrations, not a mock RPC.
 \ir ../../supabase/migrations/20261003070000_teacher_access_superadmin_guard.sql
 \ir ../../supabase/migrations/20261005260000_manage_teacher_access_permission_gate.sql
+-- Replaying against an already-hardened definition must be a no-op.
+\ir ../../supabase/migrations/20261005260000_manage_teacher_access_permission_gate.sql
 
 DO $assertions$
 DECLARE
