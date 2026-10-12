@@ -165,7 +165,7 @@ function _taAssignmentTypeLabel(type) {
     ms:{class_teacher:'Guru Kelas',assistant:'Guru Pembantu',subject_teacher:'Guru Mata Pelajaran',other:'Lain-lain'},
     th:{class_teacher:'ครูประจำชั้น',assistant:'ครูผู้ช่วย',subject_teacher:'ครูประจำวิชา',other:'อื่นๆ'},
     jp:{class_teacher:'担任',assistant:'補助教員',subject_teacher:'教科担当',other:'その他'},
-    km:{class_teacher:'គ្រូប្រចាំថ្នាក់',assistant:'ជំនួយការគ្រូ',subject_teacher:'គ្រូប្រចាំមុខវិជ្ជា',other:'ផ្សេងទៀត'},\n    zh:{class_teacher:'班主任',assistant:'助理教师',subject_teacher:'科任教师',other:'其他'}
+    km:{class_teacher:'គ្រូប្រចាំថ្នាក់',assistant:'ជំនួយការគ្រូ',subject_teacher:'គ្រូប្រចាំមុខវិជ្ជា',other:'ផ្សេងទៀត'},\n    zh:{class_teacher:'班主任',assistant:'助理教师',subject_teacher:'科任教师',other:'其他'},\n    zh:{class_teacher:'班主任',assistant:'助理教师',subject_teacher:'科任教师',other:'其他'}
   };
   return dict[_taLang()]?.[type] || dict.en[type] || type;
 }
@@ -370,14 +370,14 @@ async function _renderTeacherAccess() {
     });
     return true;
   } catch (e) {
-    root.innerHTML = '<div class="form-error">' + _taUi('loadFailed') + ' ' + esc(e?.message || String(e)) + '</div>';
+    root.innerHTML = '<div class="form-error">' + _taErrorMessage(e, 'loadFailed') + '</div>';
     return false;
   }
 }
 
 window.openTeacherAccess = async function(teacherId, teacherName) {
   if (!window.APP?.is_admin) {
-    showToast(t('cg.adminOnly'));
+    showToast(_taUi('accessDenied'));
     return;
   }
 
