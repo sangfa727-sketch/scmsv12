@@ -369,3 +369,38 @@ jobs:
         with:
           name: playwright-report
           path: playwright-report/
+
+  rpc-session-identity-binding-runtime:
+    name: School RPC session identity binding runtime test
+    runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: public.ecr.aws/docker/library/postgres:16
+        env:
+          POSTGRES_USER: scms_rpc_test
+          POSTGRES_PASSWORD: scms_rpc_test
+          POSTGRES_DB: scms_rpc_test
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U scms_rpc_test -d scms_rpc_test"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 10
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install PostgreSQL client
+        run: sudo apt-get update && sudo apt-get install -y postgresql-client
+      - name: Wait for PostgreSQL
+        env:
+          PGPASSWORD: scms_rpc_test
+        run: |
+          for i in {1..30}; do
+            pg_isready -h 127.0.0.1 -p 5432 -U scms_rpc_test -d scms_rpc_test && exit 0
+            sleep 1
+          done
+          exit 1
+      - name: Run school RPC session identity binding runtime harness
+        env:
+          PGPASSWORD: scms_rpc_test
+        run: psql -h 127.0.0.1 -U scms_rpc_test -d scms_rpc_test -v ON_ERROR_STOP=1 -f test/db/rpc_session_identity_binding_runtime_test.sql
