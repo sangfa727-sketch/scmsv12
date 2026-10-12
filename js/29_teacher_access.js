@@ -110,7 +110,7 @@ function _taText(key) {
     zh:{'dashboard.view':'查看仪表板','students.view':'查看学生','students.edit':'编辑学生信息','leave.view':'查看请假申请','leave.approve':'批准 / 拒绝请假申请','attendance.view':'查看考勤','attendance.edit':'编辑考勤','homework.view':'查看作业','homework.create':'创建作业','homework.edit':'编辑作业','homework.delete':'删除作业','assessment.view':'查看评估','assessment.create':'创建评估','assessment.edit':'编辑评估','assessment.delete':'删除评估','billing.view':'查看账单（全校）','billing.write':'管理账单（全校）','billing.class.view':'查看账单（获授权班级）','billing.class.write':'管理账单（获授权班级）','teachers.view':'查看教师','teachers.manage':'管理教师','permissions.manage':'管理权限'},
     km:{'dashboard.view':'មើលផ្ទាំងគ្រប់គ្រង','students.view':'មើលសិស្ស','students.edit':'កែសម្រួលព័ត៌មានសិស្ស','leave.view':'មើលសំណើសុំច្បាប់ឈប់','leave.approve':'អនុម័ត / បដិសេធសំណើសុំច្បាប់ឈប់','attendance.view':'មើលវត្តមាន','attendance.edit':'កែសម្រួលវត្តមាន','homework.view':'មើលកិច្ចការផ្ទះ','homework.create':'បង្កើតកិច្ចការផ្ទះ','homework.edit':'កែសម្រួលកិច្ចការផ្ទះ','homework.delete':'លុបកិច្ចការផ្ទះ','assessment.view':'មើលការវាយតម្លៃ','assessment.create':'បង្កើតការវាយតម្លៃ','assessment.edit':'កែសម្រួលការវាយតម្លៃ','assessment.delete':'លុបការវាយតម្លៃ','billing.view':'មើលវិក្កយបត្រ (ទូទាំងសាលា)','billing.write':'គ្រប់គ្រងវិក្កយបត្រ (ទូទាំងសាលា)','billing.class.view':'មើលវិក្កយបត្រ (ថ្នាក់ដែលបានអនុញ្ញាត)','billing.class.write':'គ្រប់គ្រងវិក្កយបត្រ (ថ្នាក់ដែលបានអនុញ្ញាត)','teachers.view':'មើលគ្រូ','teachers.manage':'គ្រប់គ្រងគ្រូ','permissions.manage':'គ្រប់គ្រងសិទ្ធិ'},
   };
-  return (dict[_taLang()]?.[key] || dict.en[key] || key);
+  return (dict[_taLang()]?.[key] || dict.en[key] || _taPermissionFallback(key));
 }
 function _taCategory(key) {
   const dict = {
@@ -119,15 +119,28 @@ function _taCategory(key) {
     ms:{dashboard:'Papan Pemuka',students:'Pelajar',leave:'Permohonan Cuti',attendance:'Kehadiran',homework:'Kerja Rumah',assessment:'Penilaian',billing:'Bil',teachers:'Guru',permissions:'Kebenaran'},
     th:{dashboard:'แดชบอร์ด',students:'นักเรียน',leave:'คำขอลา',attendance:'การเข้าเรียน',homework:'การบ้าน',assessment:'การประเมิน',billing:'การเรียกเก็บเงิน',teachers:'ครู',permissions:'สิทธิ์'},
     jp:{dashboard:'ダッシュボード',students:'生徒',leave:'休暇申請',attendance:'出欠',homework:'宿題',assessment:'評価',billing:'請求',teachers:'教師',permissions:'権限'},
-    km:{dashboard:'ផ្ទាំងគ្រប់គ្រង',students:'សិស្ស',leave:'សំណើសុំច្បាប់ឈប់',attendance:'វត្តមាន',homework:'កិច្ចការផ្ទះ',assessment:'ការវាយតម្លៃ',billing:'វិក្កយបត្រ',teachers:'គ្រូ',permissions:'សិទ្ធិ'}
+    km:{dashboard:'ផ្ទាំងគ្រប់គ្រង',students:'សិស្ស',leave:'សំណើសុំច្បាប់ឈប់',attendance:'វត្តមាន',homework:'កិច្ចការផ្ទះ',assessment:'ការវាយតម្លៃ',billing:'វិក្កយបត្រ',teachers:'គ្រូ',permissions:'សិទ្ធិ'},\n    zh:{dashboard:'仪表板',students:'学生',leave:'请假申请',attendance:'考勤',homework:'作业',assessment:'评估',billing:'账单',teachers:'教师',permissions:'权限'}
   };
   return dict[_taLang()]?.[key] || dict.en[key] || _taPermissionFallback(key);
 }
 function _taPermissionFallback(key) {
   const raw = String(key || '').trim();
   if (!raw) return '';
+  const words = {
+    en: {dashboard:'Dashboard',view:'View',read:'Read',create:'Create',edit:'Edit',update:'Update',delete:'Delete',manage:'Manage',write:'Manage',approve:'Approve',reject:'Reject',students:'Students',student:'Student',teachers:'Teachers',teacher:'Teacher',permissions:'Permissions',permission:'Permission',attendance:'Attendance',homework:'Homework',assessment:'Assessments',billing:'Billing',class:'Class',classes:'Classes',subject:'Subject',subjects:'Subjects',leave:'Leave',requests:'Requests',report:'Reports',reports:'Reports',export:'Export',import:'Import',settings:'Settings',profile:'Profile',access:'Access',school:'School',whole:'Whole',assigned:'Assigned',fees:'Fees',catalog:'Catalog'},
+    my: {dashboard:'ပင်မစာမျက်နှာ',view:'ကြည့်ရှုရန်',read:'ဖတ်ရှုရန်',create:'ဖန်တီးရန်',edit:'ပြင်ဆင်ရန်',update:'ပြင်ဆင်ရန်',delete:'ဖျက်ရန်',manage:'စီမံရန်',write:'စီမံရန်',approve:'အတည်ပြုရန်',reject:'ပယ်ချရန်',students:'ကျောင်းသားများ',student:'ကျောင်းသား',teachers:'ဆရာ/ဆရာမများ',teacher:'ဆရာ/ဆရာမ',permissions:'လုပ်ပိုင်ခွင့်များ',permission:'လုပ်ပိုင်ခွင့်',attendance:'တက်ရောက်မှု',homework:'အိမ်စာ',assessment:'အကဲဖြတ်ချက်',billing:'ငွေစာရင်း',class:'အတန်း',classes:'အတန်းများ',subject:'ဘာသာရပ်',subjects:'ဘာသာရပ်များ',leave:'ခွင့်',requests:'တောင်းဆိုချက်များ',report:'အစီရင်ခံစာ',reports:'အစီရင်ခံစာများ',export:'ထုတ်ယူရန်',import:'ထည့်သွင်းရန်',settings:'ဆက်တင်များ',profile:'ကိုယ်ရေးအချက်အလက်',access:'ဝင်ရောက်ခွင့်',school:'ကျောင်း',whole:'တစ်ကျောင်းလုံး',assigned:'တာဝန်ပေးထားသော',fees:'ကြေးများ',catalog:'စာရင်း'},
+    th: {dashboard:'แดชบอร์ด',view:'ดู',read:'อ่าน',create:'สร้าง',edit:'แก้ไข',update:'อัปเดต',delete:'ลบ',manage:'จัดการ',write:'จัดการ',approve:'อนุมัติ',reject:'ปฏิเสธ',students:'นักเรียน',student:'นักเรียน',teachers:'ครู',teacher:'ครู',permissions:'สิทธิ์',permission:'สิทธิ์',attendance:'การเข้าเรียน',homework:'การบ้าน',assessment:'การประเมิน',billing:'การเรียกเก็บเงิน',class:'ชั้นเรียน',classes:'ชั้นเรียน',subject:'วิชา',subjects:'วิชา',leave:'การลา',requests:'คำขอ',report:'รายงาน',reports:'รายงาน',export:'ส่งออก',import:'นำเข้า',settings:'การตั้งค่า',profile:'โปรไฟล์',access:'การเข้าถึง',school:'โรงเรียน',whole:'ทั้ง',assigned:'ที่ได้รับมอบหมาย',fees:'ค่าธรรมเนียม',catalog:'รายการ'},
+    jp: {dashboard:'ダッシュボード',view:'閲覧',read:'読み取り',create:'作成',edit:'編集',update:'更新',delete:'削除',manage:'管理',write:'管理',approve:'承認',reject:'却下',students:'生徒',student:'生徒',teachers:'教師',teacher:'教師',permissions:'権限',permission:'権限',attendance:'出欠',homework:'宿題',assessment:'評価',billing:'請求',class:'クラス',classes:'クラス',subject:'科目',subjects:'科目',leave:'休暇',requests:'申請',report:'レポート',reports:'レポート',export:'エクスポート',import:'インポート',settings:'設定',profile:'プロフィール',access:'アクセス',school:'学校',whole:'全体',assigned:'割り当て済み',fees:'料金',catalog:'一覧'},
+    ms: {dashboard:'Papan Pemuka',view:'Lihat',read:'Baca',create:'Cipta',edit:'Edit',update:'Kemas Kini',delete:'Padam',manage:'Urus',write:'Urus',approve:'Luluskan',reject:'Tolak',students:'Pelajar',student:'Pelajar',teachers:'Guru',teacher:'Guru',permissions:'Kebenaran',permission:'Kebenaran',attendance:'Kehadiran',homework:'Kerja Rumah',assessment:'Penilaian',billing:'Bil',class:'Kelas',classes:'Kelas',subject:'Subjek',subjects:'Subjek',leave:'Cuti',requests:'Permohonan',report:'Laporan',reports:'Laporan',export:'Eksport',import:'Import',settings:'Tetapan',profile:'Profil',access:'Akses',school:'Sekolah',whole:'Seluruh',assigned:'Ditugaskan',fees:'Yuran',catalog:'Katalog'},
+    km: {dashboard:'ផ្ទាំងគ្រប់គ្រង',view:'មើល',read:'អាន',create:'បង្កើត',edit:'កែសម្រួល',update:'ធ្វើបច្ចុប្បន្នភាព',delete:'លុប',manage:'គ្រប់គ្រង',write:'គ្រប់គ្រង',approve:'អនុម័ត',reject:'បដិសេធ',students:'សិស្ស',student:'សិស្ស',teachers:'គ្រូ',teacher:'គ្រូ',permissions:'សិទ្ធិ',permission:'សិទ្ធិ',attendance:'វត្តមាន',homework:'កិច្ចការផ្ទះ',assessment:'ការវាយតម្លៃ',billing:'វិក្កយបត្រ',class:'ថ្នាក់',classes:'ថ្នាក់',subject:'មុខវិជ្ជា',subjects:'មុខវិជ្ជា',leave:'ច្បាប់ឈប់',requests:'សំណើ',report:'របាយការណ៍',reports:'របាយការណ៍',export:'នាំចេញ',import:'នាំចូល',settings:'ការកំណត់',profile:'ប្រវត្តិរូប',access:'ការចូលប្រើ',school:'សាលា',whole:'ទាំងមូល',assigned:'បានចាត់តាំង',fees:'ថ្លៃសេវា',catalog:'បញ្ជី'},
+    zh: {dashboard:'仪表板',view:'查看',read:'读取',create:'创建',edit:'编辑',update:'更新',delete:'删除',manage:'管理',write:'管理',approve:'批准',reject:'拒绝',students:'学生',student:'学生',teachers:'教师',teacher:'教师',permissions:'权限',permission:'权限',attendance:'考勤',homework:'作业',assessment:'评估',billing:'账单',class:'班级',classes:'班级',subject:'科目',subjects:'科目',leave:'请假',requests:'申请',report:'报告',reports:'报告',export:'导出',import:'导入',settings:'设置',profile:'资料',access:'访问',school:'学校',whole:'全校',assigned:'已分配',fees:'费用',catalog:'目录'}
+  };
+  const language = _taLang();
   return raw.split('.').map(function(part) {
-    return part.replace(/[_-]+/g, ' ').replace(/\\b\\w/g, function(c){ return c.toUpperCase(); });
+    const normalized = part.replace(/[_-]+/g, ' ').replace(/([a-z])([A-Z])/g, '$1 $2').trim();
+    return (words[language] && words[language][normalized.toLowerCase()]) ||
+      (words.en[normalized.toLowerCase()]) ||
+      normalized.replace(/\b\w/g, function(c){ return c.toUpperCase(); });
   }).join(' · ');
 }
 function _taDescription(key, fallback) { return _taText(key) || fallback || ''; }
@@ -138,7 +151,7 @@ function _taAssignmentTypeLabel(type) {
     ms:{class_teacher:'Guru Kelas',assistant:'Guru Pembantu',subject_teacher:'Guru Mata Pelajaran',other:'Lain-lain'},
     th:{class_teacher:'ครูประจำชั้น',assistant:'ครูผู้ช่วย',subject_teacher:'ครูประจำวิชา',other:'อื่นๆ'},
     jp:{class_teacher:'担任',assistant:'補助教員',subject_teacher:'教科担当',other:'その他'},
-    km:{class_teacher:'គ្រូប្រចាំថ្នាក់',assistant:'ជំនួយការគ្រូ',subject_teacher:'គ្រូប្រចាំមុខវិជ្ជា',other:'ផ្សេងទៀត'}
+    km:{class_teacher:'គ្រូប្រចាំថ្នាក់',assistant:'ជំនួយការគ្រូ',subject_teacher:'គ្រូប្រចាំមុខវិជ្ជា',other:'ផ្សេងទៀត'},\n    zh:{class_teacher:'班主任',assistant:'助理教师',subject_teacher:'科任教师',other:'其他'}
   };
   return dict[_taLang()]?.[type] || dict.en[type] || type;
 }
