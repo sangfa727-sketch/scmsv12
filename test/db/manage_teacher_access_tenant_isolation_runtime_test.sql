@@ -22,7 +22,10 @@ CREATE TABLE public.teachers (
   role text NOT NULL,
   status text NOT NULL DEFAULT 'active',
   teacher_name text NOT NULL,
+  login_name text,
   email text,
+  teacher_email text,
+  updated_at timestamptz NOT NULL DEFAULT now(),
   last_web_login_at timestamptz,
   photo_url text,
   password_hash text,
@@ -192,6 +195,7 @@ VALUES ('school-b', 'teacher-b', 'students.view', true, 'global');
 \ir ../../supabase/migrations/20261006230000_fix_teacher_permission_upsert_conflict.sql
 \ir ../../supabase/migrations/20261012120000_teacher_access_audit_actor_attribution.sql
 \ir ../../supabase/migrations/20261012140000_teacher_password_reset_audit.sql
+\ir ../../supabase/migrations/20261012150000_teacher_profile_mutation_audit.sql
 -- Replaying against the fully hardened and persistence-fixed definition must be a no-op.
 \ir ../../supabase/migrations/20261005260000_manage_teacher_access_permission_gate.sql
 
@@ -577,3 +581,71 @@ BEGIN
   RAISE NOTICE 'Manage Teacher password reset audit and isolation tests passed.';
 END
 $password_reset_assertions$;
+
+
+-- Create and edit teacher RPCs must attribute successful mutations to the validated session.
+DO $teacher_profile_audit_assertions$
+DECLARE
+  v jsonb;
+  v_actor text;
+  v_payload jsonb;
+  v_hash text;
+BEGIN
+  v := public.rpc_admin_create_teacher_v2(
+    'admin-a-token', 'teacher-created-a', 'teacher.created', 'Created Teacher',
+    'initial-pin-987', 'teacher', 'created.teacher@example.test'
+  );
+  IF v->>'ok' <> 'true' THEN
+    RAISE EXCEPTION 'Authorized teacher creation should succeed; got %', v;
+  END IF;
+
+  SELECT actor, payload INTO v_actor, v_payload
+    FROM public.audit_log
+   WHERE action = 'teacher.create'
+     AND school_id = 'school-a'
+     AND payload->>'teacher_id' = 'teacher-created-a'
+   ORDER BY id DESC LIMIT 1;
+  IF v_actor <> 'admin-a' OR v_payload->>'role' <> 'teacher' THEN
+    RAISE EXCEPTION 'Teacher creation audit must contain validated actor, target, and role; actor=%, payload=%', v_actor, v_payload;
+  END IF;
+  IF v_payload::text LIKE '%initial-pin-987%' OR v_payload ? 'password' OR v_payload ? 'password_hash' THEN
+    RAISE EXCEPTION 'Teacher creation audit must never include password material; payload=%', v_payload;
+  END IF;
+
+  v := public.rpc_admin_update_teacher_profile(
+    'admin-a-token', 'teacher-a', 'School A Teacher Updated', 'teacher.a.updated',
+    'teacher.a.updated@example.test', 'assistant_teacher'
+  );
+  IF v->>'ok' <> 'true' THEN
+    RAISE EXCEPTION 'Authorized teacher profile update should succeed; got %', v;
+  END IF;
+
+  SELECT actor, payload INTO v_actor, v_payload
+    FROM public.audit_log
+   WHERE action = 'teacher.profile_update'
+     AND school_id = 'school-a'
+     AND payload->>'teacher_id' = 'teacher-a'
+   ORDER BY id DESC LIMIT 1;
+  IF v_actor <> 'admin-a' THEN
+    RAISE EXCEPTION 'Teacher profile audit must use the authenticated admin actor; got %', v_actor;
+  END IF;
+  IF NOT (v_payload->'changed_fields' ? 'teacher_name')
+     OR NOT (v_payload->'changed_fields' ? 'login_name')
+     OR NOT (v_payload->'changed_fields' ? 'email')
+     OR NOT (v_payload->'changed_fields' ? 'role') THEN
+    RAISE EXCEPTION 'Teacher profile audit must report changed field names without field values; payload=%', v_payload;
+  END IF;
+  IF v_payload::text LIKE '%teacher.a.updated@example.test%' THEN
+    RAISE EXCEPTION 'Teacher profile audit must not duplicate personal field values; payload=%', v_payload;
+  END IF;
+
+  SELECT password_hash INTO v_hash
+    FROM public.teachers
+   WHERE teacher_id = 'teacher-created-a' AND school_id = 'school-a';
+  IF v_hash <> 'test-hash:initial-pin-987' THEN
+    RAISE EXCEPTION 'Teacher creation must persist a password hash, not raw PIN';
+  END IF;
+
+  RAISE NOTICE 'Manage Teacher create/profile audit tests passed.';
+END
+$teacher_profile_audit_assertions$;
