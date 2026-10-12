@@ -1103,7 +1103,7 @@ window.I18N_MY = {
   'settings.changePassword': '🔑 ကိုယ့် password ပြောင်းရန်',
   'settings.footerNote': 'SCMS ကို သင့်ကျောင်း admin က စီမံပါတယ်။',
   'settings.googleAccount': 'Google အကောင့်',
-  'settings.webPassword': 'Web (password)',
+  'settings.webPassword': '\u101d\u1018\u103a (\u1005\u1000\u102c\u1038\u101d\u103e\u1000\u103a)',
   'tm.title': '👥 ဆရာများ စီမံရန်',
   'tm.subtitle': 'ဆရာများအတွက် login အကောင့် ဖန်တီးပါ။',
   'tm.addNew': '+ ဆရာအသစ် ထည့်ရန် (Teacher ID + password)',
