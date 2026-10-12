@@ -239,7 +239,7 @@ jobs:
       - name: Run local Playwright smoke, Staff Chat, and Manage Teacher/Access tests
         env:
           SCMS_URL: http://127.0.0.1:5173
-        run: npx playwright test test/e2e/ci-smoke.spec.js test/e2e/staff-chat-functions.spec.js test/e2e/teacher-management-functions.spec.js
+        run: npx playwright test test/e2e/ci-smoke.spec.js test/e2e/school-website-studio.spec.js test/e2e/staff-chat-functions.spec.js test/e2e/teacher-management-functions.spec.js
       - name: Write CI summary
         if: always()
         shell: bash
