@@ -269,11 +269,14 @@ test('Manage Access never displays raw permission/category keys in any of the se
   await mountAdmin(page);
   const languages = ['en', 'my', 'th', 'jp', 'ms', 'km', 'zh'];
   for (const language of languages) {
+    await page.reload({ waitUntil: 'domcontentloaded' });
+    await mountAdmin(page);
     await page.evaluate((lang) => { window.I18N.current = lang; }, language);
     await page.evaluate(() => window.openTeacherAccess('teacher-2', 'Other Teacher'));
-    await expect(page.locator('.teacher-access-sheet')).toBeVisible();
-    const permissionLabel = page.locator('.teacher-access-sheet:visible .teacher-access-perm-row[data-permission="custom.permission_key"] .teacher-access-perm-copy strong');
-    const categoryLabel = page.locator('.teacher-access-sheet:visible .teacher-access-perm-group').filter({ has: page.locator('.teacher-access-perm-row[data-permission="custom.permission_key"]') }).locator('.teacher-access-perm-category');
+    const sheet = page.locator('.teacher-access-sheet:visible').first();
+    await expect(sheet).toBeVisible();
+    const permissionLabel = sheet.locator('.teacher-access-perm-row[data-permission="custom.permission_key"] .teacher-access-perm-copy strong');
+    const categoryLabel = sheet.locator('.teacher-access-perm-group').filter({ has: sheet.locator('.teacher-access-perm-row[data-permission="custom.permission_key"]') }).locator('.teacher-access-perm-category');
     await expect(permissionLabel).toBeVisible();
     await expect(categoryLabel).toBeVisible();
     const permissionText = await permissionLabel.textContent();
