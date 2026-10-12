@@ -9,6 +9,10 @@ declare
     return jsonb_build_object('ok',false,'error','admin_required');
   end if;
 $marker$;
+  v_has_catalog_gate boolean;
+  v_has_list_gate boolean;
+  v_has_assignment_gate boolean;
+  v_has_permission_gate boolean;
   v_gate text := $gate$
   if p_action = 'catalog'
      and not private.web_has_permission(p_session_token, 'permissions.manage') then
@@ -45,17 +49,38 @@ begin
     raise exception 'rpc_manage_teacher_access signature not found';
   end if;
 
-  if position(v_marker in v_def) = 0 then
-    raise exception 'rpc_manage_teacher_access authorization marker not found; refusing unsafe rewrite';
+  -- Live deployments can contain these gates even when the migration ledger
+  -- is missing the corresponding version. Do not duplicate the gates on replay.
+  -- Match each action family to its own permission check in the same
+  -- conditional. Independent substring checks can falsely accept a partial
+  -- gate set when the same permission key appears in another action's gate.
+  v_has_catalog_gate :=
+    v_def ~* 'p_action\s*=\s*''catalog''\s+and\s+not\s+private\.web_has_permission\s*\(\s*p_session_token\s*,\s*''permissions\.manage''\s*\)';
+  v_has_list_gate :=
+    v_def ~* 'p_action\s*=\s*''list''\s+and\s+not\s+private\.web_has_permission\s*\(\s*p_session_token\s*,\s*''teachers\.view''\s*\)';
+  v_has_assignment_gate :=
+    v_def ~* 'p_action\s+in\s*\(\s*''class_add''\s*,\s*''class_remove''\s*,\s*''subject_add''\s*,\s*''subject_remove''\s*\)\s+and\s+not\s+private\.web_has_permission\s*\(\s*p_session_token\s*,\s*''teachers\.manage''\s*\)';
+  v_has_permission_gate :=
+    v_def ~* 'p_action\s+in\s*\(\s*''permission_set''\s*,\s*''permission_remove''\s*\)\s+and\s+not\s+private\.web_has_permission\s*\(\s*p_session_token\s*,\s*''permissions\.manage''\s*\)';
+
+  if v_has_catalog_gate and v_has_list_gate and v_has_assignment_gate and v_has_permission_gate then
+    -- Already fully hardened: preserve the live definition byte-for-byte.
+    null;
+  elsif v_has_catalog_gate or v_has_list_gate or v_has_assignment_gate or v_has_permission_gate then
+    raise exception 'rpc_manage_teacher_access has partial permission gates; refusing unsafe automatic rewrite';
+  else
+    if position(v_marker in v_def) = 0 then
+      raise exception 'rpc_manage_teacher_access authorization marker not found; refusing unsafe rewrite';
+    end if;
+
+    v_def := replace(
+      v_def,
+      v_marker,
+      v_marker || E'\n' || v_gate
+    );
+
+    execute v_def;
   end if;
-
-  v_def := replace(
-    v_def,
-    v_marker,
-    v_marker || E'\n' || v_gate
-  );
-
-  execute v_def;
 end
 $migration$;
 
