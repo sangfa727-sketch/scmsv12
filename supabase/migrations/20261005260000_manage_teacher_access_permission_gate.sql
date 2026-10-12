@@ -51,18 +51,17 @@ begin
 
   -- Live deployments can contain these gates even when the migration ledger
   -- is missing the corresponding version. Do not duplicate the gates on replay.
+  -- Match each action family to its own permission check in the same
+  -- conditional. Independent substring checks can falsely accept a partial
+  -- gate set when the same permission key appears in another action's gate.
   v_has_catalog_gate :=
-    position('p_action = ''catalog''' in v_def) > 0
-    and position('permissions.manage' in v_def) > 0;
+    v_def ~* 'p_action\s*=\s*''catalog''\s+and\s+not\s+private\.web_has_permission\s*\(\s*p_session_token\s*,\s*''permissions\.manage''\s*\)';
   v_has_list_gate :=
-    position('p_action = ''list''' in v_def) > 0
-    and position('teachers.view' in v_def) > 0;
+    v_def ~* 'p_action\s*=\s*''list''\s+and\s+not\s+private\.web_has_permission\s*\(\s*p_session_token\s*,\s*''teachers\.view''\s*\)';
   v_has_assignment_gate :=
-    position('p_action in (''class_add'',''class_remove'',''subject_add'',''subject_remove'')' in v_def) > 0
-    and position('teachers.manage' in v_def) > 0;
+    v_def ~* 'p_action\s+in\s*\(\s*''class_add''\s*,\s*''class_remove''\s*,\s*''subject_add''\s*,\s*''subject_remove''\s*\)\s+and\s+not\s+private\.web_has_permission\s*\(\s*p_session_token\s*,\s*''teachers\.manage''\s*\)';
   v_has_permission_gate :=
-    position('p_action in (''permission_set'',''permission_remove'')' in v_def) > 0
-    and position('permissions.manage' in v_def) > 0;
+    v_def ~* 'p_action\s+in\s*\(\s*''permission_set''\s*,\s*''permission_remove''\s*\)\s+and\s+not\s+private\.web_has_permission\s*\(\s*p_session_token\s*,\s*''permissions\.manage''\s*\)';
 
   if v_has_catalog_gate and v_has_list_gate and v_has_assignment_gate and v_has_permission_gate then
     -- Already fully hardened: preserve the live definition byte-for-byte.
