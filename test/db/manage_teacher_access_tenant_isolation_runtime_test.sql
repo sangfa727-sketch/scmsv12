@@ -219,6 +219,7 @@ VALUES ('school-b', 'teacher-b', 'students.view', true, 'global');
 \ir ../../supabase/migrations/20261012140000_teacher_password_reset_audit.sql
 \ir ../../supabase/migrations/20261012150000_teacher_profile_mutation_audit.sql
 \ir ../../supabase/migrations/20261012160000_teacher_id_card_audit.sql
+\ir ../../supabase/migrations/20261012170000_teacher_legacy_rpc_audit.sql
 -- Replaying against the fully hardened and persistence-fixed definition must be a no-op.
 \ir ../../supabase/migrations/20261005260000_manage_teacher_access_permission_gate.sql
 
@@ -736,3 +737,74 @@ BEGIN
   RAISE NOTICE 'Manage Teacher ID-card audit tests passed.';
 END
 $teacher_card_audit_assertions$;
+
+
+-- Legacy teacher RPCs remain client-executable, so they must not bypass validation or audit attribution.
+DO $legacy_teacher_rpc_assertions$
+DECLARE
+  v jsonb;
+  v_actor text;
+  v_payload jsonb;
+BEGIN
+  v := public.rpc_admin_create_teacher(
+    'admin-a-token', 'legacy-created-a', 'Legacy Created Teacher',
+    '12345', 'teacher', 'legacy.teacher@example.test'
+  );
+  IF v->>'error' <> 'pin_too_short' THEN
+    RAISE EXCEPTION 'Legacy teacher creation must enforce minimum password length; got %', v;
+  END IF;
+
+  v := public.rpc_admin_create_teacher(
+    'admin-a-token', 'legacy-created-a', 'Legacy Created Teacher',
+    'legacy-pin-987', 'teacher', 'legacy.teacher@example.test'
+  );
+  IF v->>'ok' <> 'true' THEN
+    RAISE EXCEPTION 'Authorized legacy teacher creation should retain compatibility; got %', v;
+  END IF;
+
+  SELECT actor, payload INTO v_actor, v_payload
+    FROM public.audit_log
+   WHERE action = 'teacher.create'
+     AND school_id = 'school-a'
+     AND payload->>'source_rpc' = 'legacy'
+     AND payload->>'teacher_id' = 'legacy-created-a'
+   ORDER BY id DESC LIMIT 1;
+  IF v_actor <> 'admin-a' OR v_payload::text LIKE '%legacy-pin-987%' THEN
+    RAISE EXCEPTION 'Legacy create audit must attribute actor without exposing password; actor=%, payload=%', v_actor, v_payload;
+  END IF;
+
+  v := public.rpc_admin_set_teacher_login_name(
+    'admin-a-token', 'teacher-a', 'teacher.a.legacy'
+  );
+  IF v->>'ok' <> 'true' THEN
+    RAISE EXCEPTION 'Authorized legacy login-name update should succeed; got %', v;
+  END IF;
+
+  SELECT actor, payload INTO v_actor, v_payload
+    FROM public.audit_log
+   WHERE action = 'teacher.login_name_update'
+     AND school_id = 'school-a'
+     AND payload->>'teacher_id' = 'teacher-a'
+   ORDER BY id DESC LIMIT 1;
+  IF v_actor <> 'admin-a' THEN
+    RAISE EXCEPTION 'Legacy login-name audit must use authenticated actor; got %', v_actor;
+  END IF;
+
+  v := public.rpc_admin_revoke_teacher_card('admin-a-token', 'teacher-a');
+  IF v->>'ok' <> 'true' THEN
+    RAISE EXCEPTION 'Authorized legacy card revocation should succeed; got %', v;
+  END IF;
+
+  SELECT actor, payload INTO v_actor, v_payload
+    FROM public.audit_log
+   WHERE action = 'teacher.id_card_revoke'
+     AND school_id = 'school-a'
+     AND payload->>'teacher_id' = 'teacher-a'
+   ORDER BY id DESC LIMIT 1;
+  IF v_actor <> 'admin-a' OR (v_payload->>'revoked_count')::integer < 1 THEN
+    RAISE EXCEPTION 'Legacy card-revoke audit must identify actor and affected cards; actor=%, payload=%', v_actor, v_payload;
+  END IF;
+
+  RAISE NOTICE 'Legacy Manage Teacher RPC audit and validation tests passed.';
+END
+$legacy_teacher_rpc_assertions$;
