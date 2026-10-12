@@ -39,3 +39,35 @@ test('dark theme styles editor surfaces without recoloring the public-site canva
   assert.match(css, /dialog\{background:var\(--ws-surface\);color:var\(--ws-ink\)\}/);
   assert.match(css, /central page canvas and its live preview intentionally remain a light website mockup/);
 });
+
+
+test('Website Studio restores hidden sections from a visible section manager', () => {
+  const html = read('school-website/create.html');
+  const js = read('school-website/create.js');
+  assert.match(html, /id="sectionManager"/);
+  assert.match(js, /function renderSectionManager\(\)/);
+  assert.match(js, /data-section-toggle/);
+  assert.match(js, /sectionAction\(managerToggle\.dataset\.sectionToggle,"toggle"\)/);
+  assert.match(js, /if\(\(action==="hide"\|\|action==="toggle"\)&&!m\.locked\)m\.visible=!m\.visible/);
+});
+
+test('template selection updates and persists the live preview', () => {
+  const html = read('school-website/create.html');
+  const js = read('school-website/create.js');
+  const css = read('school-website/create.css');
+  assert.match(html, /class="template-swatch swatch-modern"/);
+  assert.match(html, /class="template-swatch swatch-classic"/);
+  assert.match(html, /class="template-swatch swatch-premium"/);
+  assert.match(js, /state\.template=b\.dataset\.template;templateDialog\.close\(\);render\(\)/);
+  assert.match(css, /body\[data-template="classic"\] \.hero-block/);
+  assert.match(css, /body\[data-template="premium"\] \.hero-block/);
+  assert.match(css, /\.preview-page h1,\.preview-page h2,\.preview-page h3\{color:#17202a\}/);
+});
+
+test('draft and domain failures provide user-facing status instead of silent offline fallback', () => {
+  const js = read('school-website/create.js');
+  assert.match(js, /function studioErrorMessage\(error,context\)/);
+  assert.match(js, /Save failed — /);
+  assert.match(js, /studioErrorMessage\(error,"domain"\)/);
+  assert.match(js, /Offline backup only — SCMS sync unavailable/);
+});
