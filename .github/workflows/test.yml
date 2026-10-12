@@ -63,6 +63,41 @@ jobs:
           PGPASSWORD: scms_test
         run: psql -h 127.0.0.1 -U scms_test -d scms_test -v ON_ERROR_STOP=1 -f test/db/manage_teacher_access_permission_gate_runtime_test.sql
 
+  website-verified-host-runtime:
+    name: School Website verified-host registry runtime test
+    runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: public.ecr.aws/docker/library/postgres:16
+        env:
+          POSTGRES_USER: scms_host_test
+          POSTGRES_PASSWORD: scms_host_test
+          POSTGRES_DB: scms_host_test
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U scms_host_test -d scms_host_test"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 10
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install PostgreSQL client
+        run: sudo apt-get update && sudo apt-get install -y postgresql-client
+      - name: Wait for PostgreSQL
+        env:
+          PGPASSWORD: scms_host_test
+        run: |
+          for i in {1..30}; do
+            pg_isready -h 127.0.0.1 -p 5432 -U scms_host_test -d scms_host_test && exit 0
+            sleep 1
+          done
+          exit 1
+      - name: Run verified-host registry runtime harness
+        env:
+          PGPASSWORD: scms_host_test
+        run: psql -h 127.0.0.1 -U scms_host_test -d scms_host_test -v ON_ERROR_STOP=1 -f test/db/school_website_verified_host_runtime_test.sql
+
   school-website-delegation-runtime:
     name: School Website delegation authorization runtime test
     runs-on: ubuntu-latest
