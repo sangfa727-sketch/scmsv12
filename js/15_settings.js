@@ -408,7 +408,7 @@ window.openCreateTeacherModal = function() {
       </select>
 
       <label class="field-label">${t('ct.startPw')}</label>
-      <input class="form-input" id="newTPw" type="text" placeholder="temp1234" value="temp1234">
+      <input class="form-input" id="newTPw" type="password" placeholder="temp1234" value="temp1234">
       <p class="form-help">${t('ct.startPwHint')}</p>
 
       <div id="newTError" class="form-error" style="display:none"></div>
@@ -770,7 +770,7 @@ window.resetTeacherPassword = function(teacherId, teacherName) {
           showToast(t('rp.failed', { err: result?.error || t('common.unknown') }));
           return;
         }
-        showToast(t('rp.done', { name: teacherName, pw: newPw }));
+        showToast(t('toast.updated'));
       } catch (e) {
         showToast(t('ct.connErr'));
       }
