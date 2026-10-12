@@ -653,6 +653,22 @@ BEGIN
   END IF;
 
   v := public.rpc_admin_create_teacher_v2(
+    'admin-a-token', ' teacher-a ', 'teacher.duplicate.v2', 'Duplicate Teacher ID',
+    'initial-pin-987', 'assistant_teacher', 'duplicate.v2@example.test'
+  );
+  IF v->>'error' <> 'duplicate_id' THEN
+    RAISE EXCEPTION 'Case/whitespace variant teacher ID must return duplicate_id, not raise a database error; got %', v;
+  END IF;
+
+  v := public.rpc_admin_create_teacher(
+    'admin-a-token', ' teacher-a ', 'Duplicate Legacy Teacher ID',
+    'initial-pin-987', 'teacher', 'duplicate.legacy@example.test'
+  );
+  IF v->>'error' <> 'duplicate_id' THEN
+    RAISE EXCEPTION 'Legacy case/whitespace variant teacher ID must return duplicate_id; got %', v;
+  END IF;
+
+  v := public.rpc_admin_create_teacher_v2(
     'admin-a-token', 'teacher-created-null-role', 'teacher.nullrole', 'Null Role',
     'initial-pin-987', NULL, 'null.role@example.test'
   );
