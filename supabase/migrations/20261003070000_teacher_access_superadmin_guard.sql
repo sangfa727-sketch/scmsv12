@@ -186,7 +186,7 @@ begin
   else
     return jsonb_build_object('ok',false,'error','invalid_action');
   end if;
-end; $function$
+end; $function$;
 
 
 revoke execute on function public.rpc_manage_teacher_access(text,text,text,text,bigint,text,text,boolean,text) from public;
