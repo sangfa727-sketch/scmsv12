@@ -179,7 +179,7 @@ async function refreshSiteAddress(){
    link.hidden=true;
    status.textContent=configured
     ?"Choose a unique subdomain. Reserving it does not make the site public."
-    :"The platform domain is not configured yet. No address has been reserved; an SCMS platform operator must configure a verified root domain first.";
+    :"The platform root domain is not configured yet. No address has been reserved; an SCMS platform operator must configure a verified root domain, wildcard DNS, and TLS first.";
    status.dataset.state=configured?"info":"notice";
   }
   form.hidden=!configured||!!currentSite;
