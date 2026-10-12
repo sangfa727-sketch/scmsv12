@@ -1475,4 +1475,6 @@ window.I18N_KM = {
   "chat.gradeAccess": "សូមស្នើឱ្យអ្នកគ្រប់គ្រងពិនិត្យការកំណត់ថ្នាក់ និងការចាត់តាំងគ្រូ។",
   "chat.gradePrefix": "ថ្នាក់: ",
   "chat.individualPrefix": "បុគ្គល: "
+,
+  'ct.teacherId': '\u17a2\u178f\u17d2\u178f\u179b\u17c1\u1781\u1782\u17d2\u179a\u17bc'
 };
