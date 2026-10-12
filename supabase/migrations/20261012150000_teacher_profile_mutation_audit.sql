@@ -79,7 +79,7 @@ BEGIN
     RETURN jsonb_build_object('ok', false, 'error', 'duplicate_id');
   END IF;
 
-  IF EXISTS (SELECT 1 FROM public.teachers WHERE lower(login_name) = lower(v_login_name)) THEN
+  IF EXISTS (SELECT 1 FROM public.teachers WHERE lower(trim(login_name)) = lower(v_login_name)) THEN
     RETURN jsonb_build_object('ok', false, 'error', 'duplicate_login_name');
   END IF;
 
@@ -207,7 +207,7 @@ BEGIN
     RETURN jsonb_build_object('ok', false, 'error', 'email_required', 'message', 'Teacher email လိုအပ်ပါတယ်');
   END IF;
 
-  IF EXISTS (SELECT 1 FROM public.teachers WHERE lower(login_name) = lower(v_login) AND teacher_id <> p_teacher_id) THEN
+  IF EXISTS (SELECT 1 FROM public.teachers WHERE lower(trim(login_name)) = lower(v_login) AND teacher_id <> p_teacher_id) THEN
     RETURN jsonb_build_object('ok', false, 'error', 'duplicate_login_name');
   END IF;
 
