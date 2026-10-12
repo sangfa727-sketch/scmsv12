@@ -72,3 +72,9 @@ test("website address explains why reservation is blocked until platform domain 
   assert.match(js, /subdomain name, not a full custom domain/);
   assert.match(js, /wildcard DNS, and TLS first/);
 });
+
+
+test("template selection immediately rerenders the preview instead of waiting for another edit", () => {
+  const js = read("school-website/create.js");
+  assert.match(js, /state\.template=b\.dataset\.template;templateDialog\.close\(\);render\(\)/);
+});
