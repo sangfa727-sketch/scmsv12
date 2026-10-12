@@ -64,7 +64,7 @@ test('data cache is isolated when the signed-in school and teacher change', asyn
   const secondRequest = h.window.SCMSDataLoader.load('students');
   // Previous-school records must be removed synchronously on identity change,
   // before the new school's request has returned.
-  assert.deepEqual(h.window.APP.students, []);
+  assert.equal(h.window.APP.students.length, 0);
   const second = await secondRequest;
 
   assert.equal(second[0].school_id, 'school-B');
