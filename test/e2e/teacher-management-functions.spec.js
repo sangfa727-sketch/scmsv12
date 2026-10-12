@@ -33,7 +33,8 @@ async function mountAdmin(page) {
         { permission_key: 'students.view', category: 'Students', scope_type: 'global', description: 'View students' },
         { permission_key: 'students.edit', category: 'Students', scope_type: 'class', description: 'Edit students' },
         { permission_key: 'attendance.view', category: 'Attendance', scope_type: 'subject', description: 'View attendance' },
-        { permission_key: 'grades.edit', category: 'Academics', scope_type: 'class_subject', description: 'Edit grades' }
+        { permission_key: 'grades.edit', category: 'Academics', scope_type: 'class_subject', description: 'Edit grades' },
+        { permission_key: 'custom.permission_key', category: 'custom_area', scope_type: 'global', description: 'Custom permission used to verify readable fallback labels' }
       ],
       role_permissions: [{ role: 'teacher', permission_key: 'students.view', allowed: true }]
     };
@@ -261,4 +262,26 @@ test('Reset Teacher password sends the new password to the guarded RPC without e
   expect(call.payload.p_new_password).toBe('new-secret-987');
   const toasts = await page.evaluate(() => window.__teacherTestToasts);
   expect(toasts.join(' ')).not.toContain('new-secret-987');
+});
+
+
+test('Manage Access never displays raw permission/category keys in any of the seven supported languages', async ({ page }) => {
+  await mountAdmin(page);
+  const languages = ['en', 'my', 'th', 'jp', 'ms', 'km', 'zh'];
+  for (const language of languages) {
+    await page.evaluate((lang) => { window.I18N.current = lang; }, language);
+    await page.evaluate(() => window.openTeacherAccess('teacher-2', 'Other Teacher'));
+    await expect(page.locator('.teacher-access-sheet')).toBeVisible();
+    const permissionLabel = page.locator('.teacher-access-perm-row[data-permission="custom.permission_key"] .teacher-access-perm-copy strong');
+    const categoryLabel = page.locator('.teacher-access-perm-group').filter({ has: page.locator('.teacher-access-perm-row[data-permission="custom.permission_key"]') }).locator('.teacher-access-perm-category');
+    await expect(permissionLabel).toBeVisible();
+    await expect(categoryLabel).toBeVisible();
+    const permissionText = await permissionLabel.textContent();
+    const categoryText = await categoryLabel.textContent();
+    expect(permissionText).not.toContain('custom.permission_key');
+    expect(permissionText).not.toContain('_');
+    expect(categoryText).not.toContain('custom_area');
+    expect(categoryText).not.toContain('_');
+    await page.evaluate(() => window.closeModal());
+  }
 });
