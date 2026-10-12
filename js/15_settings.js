@@ -206,9 +206,7 @@ window.openTeacherManager = async function() {
   } catch (e) {
     const listEl = document.getElementById('teacherList');
     if (listEl && !cachedRows) {
-      const msg = e?.message || String(e);
-      listEl.innerHTML =
-        `<div class="form-error">${esc(t('tm.loadFailed'))}<br><small>${esc(msg.slice(0, 180))}</small></div>`;
+      listEl.innerHTML = `<div class="form-error">${esc(t('tm.loadFailed'))}</div>`;
     }
   }
 };
@@ -228,9 +226,7 @@ async function _refreshTeacherManagerList() {
   } catch (e) {
     const current = document.getElementById('teacherList');
     if (!current) return;
-    const msg = e?.message || String(e);
-    current.innerHTML =
-      `<div class="form-error">${esc(t('tm.loadFailed'))}<br><small>${esc(msg.slice(0, 180))}</small></div>`;
+    current.innerHTML = `<div class="form-error">${esc(t('tm.loadFailed'))}</div>`;
   }
 }
 
@@ -253,7 +249,7 @@ window.setTeacherLifecycle = async function(teacherId, action) {
     _invalidateTeacherManagerCache();
     showToast(_teacherLifecycleCopy(action === 'deactivate' ? 'deactivated' : 'reactivated'));
     await _refreshTeacherManagerList();
-  } catch (e) { showToast(e?.message || String(e)); }
+  } catch (e) { showToast(t('common.saveFailed')); }
   finally { document.querySelectorAll('[data-teacher-lifecycle]').forEach(btn => { btn.disabled = false; btn.removeAttribute('aria-busy'); }); }
 };
 
@@ -488,7 +484,7 @@ window.saveTeacherEdit = async function(teacherId) {
       _refreshTeacherManagerList();
     });
   } catch (e) {
-    err.textContent = e?.message || String(e); err.style.display = 'block';
+    err.textContent = t('common.saveFailed'); err.style.display = 'block';
   } finally {
     btn.disabled = false; btn.textContent = t('common.saveChanges');
   }
@@ -542,7 +538,7 @@ window.doCreateTeacher = async function() {
       p_email:            email,
     });
     if (!result || !result.ok) {
-      errEl.textContent = (result && result.message) || t('ct.createFailed');
+      errEl.textContent = t('ct.createFailed');
       errEl.style.display = 'block';
       btn.disabled = false;
       btn.textContent = t('ct.create');
@@ -633,7 +629,7 @@ window.openTeacherCardModal = async function(teacherId, teacherName, teacherLogi
     }
   } catch (e) {
     const root = document.getElementById('teacherCardRoot');
-    if (root) root.innerHTML = '<div class="form-error">' + esc(t('tm.cardFailed')) + '<br><small>' + esc(e?.message || String(e)) + '</small></div>';
+    if (root) root.innerHTML = '<div class="form-error">' + esc(t('tm.cardFailed')) + '</div>';
     const sheet = document.querySelector('.teacher-card-modal');
     if (sheet) {
       sheet.classList.remove('teacher-card-preparing');
@@ -767,7 +763,7 @@ window.resetTeacherPassword = function(teacherId, teacherName) {
           p_new_password:  newPw,
         });
         if (!result || !result.ok) {
-          showToast(t('rp.failed', { err: result?.error || t('common.unknown') }));
+          showToast(t('rp.failed', { err: t('common.unknown') }));
           return;
         }
         showToast(t('toast.updated'));

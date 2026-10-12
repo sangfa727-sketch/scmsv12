@@ -8,7 +8,7 @@ CREATE OR REPLACE FUNCTION public.rpc_get_monthly_summary(p_session_token text, 
 RETURNS jsonb
 LANGUAGE plpgsql
 SECURITY DEFINER
-SET search_path TO 'public', 'pg_temp'
+SET search_path TO 'pg_catalog', 'pg_temp'
 AS $function$
 DECLARE
   v_sess record;
@@ -47,7 +47,7 @@ CREATE OR REPLACE FUNCTION public.rpc_get_subjects(p_session_token text)
 RETURNS jsonb
 LANGUAGE plpgsql
 SECURITY DEFINER
-SET search_path TO 'public', 'extensions', 'pg_temp'
+SET search_path TO 'pg_catalog', 'pg_temp'
 AS $function$
 DECLARE
   v_sess record;
@@ -86,7 +86,7 @@ CREATE OR REPLACE FUNCTION public.rpc_get_terms(p_session_token text)
 RETURNS jsonb
 LANGUAGE plpgsql
 SECURITY DEFINER
-SET search_path TO 'public', 'extensions', 'pg_temp'
+SET search_path TO 'pg_catalog', 'pg_temp'
 AS $function$
 DECLARE
   v_sess record;
@@ -124,7 +124,7 @@ CREATE OR REPLACE FUNCTION public.rpc_set_school_cover(p_session_token text, p_c
 RETURNS jsonb
 LANGUAGE plpgsql
 SECURITY DEFINER
-SET search_path TO 'public', 'pg_temp'
+SET search_path TO 'pg_catalog', 'pg_temp'
 AS $function$
 DECLARE
   v_sess record;
@@ -169,7 +169,7 @@ CREATE OR REPLACE FUNCTION public.rpc_set_school_logo(p_session_token text, p_lo
 RETURNS jsonb
 LANGUAGE plpgsql
 SECURITY DEFINER
-SET search_path TO 'public', 'pg_temp'
+SET search_path TO 'pg_catalog', 'pg_temp'
 AS $function$
 DECLARE
   v_sess record;
