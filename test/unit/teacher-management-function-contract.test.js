@@ -141,7 +141,7 @@ test('Manage Access translates unknown permission keys and hides raw backend err
   assert.match(source, /function _taErrorMessage\(error, fallbackKey\)/);
   assert.match(source, /return _taUi\('accessDenied'\)/);
   assert.match(source, /return _taUi\(fallbackKey \|\| 'operationFailed'\)/);
-  assert.match(source, /root\.innerHTML = '<div class="form-error">' \+ _taErrorMessage\(e, 'loadFailed'\) \+ '<\\/div>'/);
+  assert.ok(source.includes("root.innerHTML = '<div class=\"form-error\">' + _taErrorMessage(e, 'loadFailed') + '</div>';"));
 });
 
 test('Class and subject assignment handlers validate required selections and send the correct RPC actions', () => {
