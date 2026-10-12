@@ -46,7 +46,6 @@ function sectionAction(id,action){normalizeSections();const i=sectionIndex(id),m
 function draftStorageKey(){const schoolId=window.SCMS_WEBSITE_CONTEXT?.schoolId;if(typeof schoolId!=="string"||!schoolId.trim())throw new Error("School context is required");return "scms-website-draft:"+encodeURIComponent(schoolId)}function draftPayload(){
  return {
   template:state.template,
-  logo:state.logo,
   schoolName:state.schoolName,
   tagline:state.tagline,
   aboutTitle:state.aboutTitle,
@@ -86,7 +85,7 @@ async function saveRemoteDraft(){
    updateDraftActionButtons();
    showToast("This draft changed in another session. Reload before editing further.");
   }else{
-   const messages={access_denied:"Session expired — sign in again",rpc_not_found:"Save service unavailable — contact SCMS admin",backend_unavailable:"Save failed — check connection and retry",invalid_content:"Some content is invalid — review the fields",permission_denied:"You do not have permission to save this website"};
+   const messages={access_denied:"Session expired — sign in again",rpc_not_found:"Save service unavailable — contact SCMS admin",backend_unavailable:"Save failed — check connection and retry",invalid_content:"Some content is invalid — review the fields",invalid_request:"Save request was rejected — refresh and retry",permission_denied:"You do not have permission to save this website",platform_domain_not_configured:"SCMS platform domain is not configured yet"};
    const message=messages[reason]||"Save failed — "+(reason&&reason.length<90?reason.replace(/_/g," "):"check connection and retry");
    $("#saveState").textContent=message;
    $("#saveState").dataset.state="error";
@@ -463,7 +462,7 @@ $("#submitReviewButton").addEventListener("click",submitDraftForReview);
 $("#publishButton").addEventListener("click",publishWebsiteDraft);
 const templateDialog=$("#templateDialog");
 $("#changeTemplate").addEventListener("click",()=>templateDialog.showModal());$("#closeTemplateDialog").addEventListener("click",()=>templateDialog.close());
-$$(".template-option").forEach(b=>b.addEventListener("click",()=>{state.template=b.dataset.template;$$(".template-option").forEach(x=>x.classList.toggle("selected",x===b));templateDialog.close();showToast(b.querySelector("b").textContent+" selected")}));
+$(".template-option").forEach(b=>b.addEventListener("click",()=>{state.template=b.dataset.template;templateDialog.close();render();showToast(b.querySelector("b").textContent+" selected")}));
 async function bootDraftStudio(){
  let localDraft=null;
  try{localDraft=JSON.parse(localStorage.getItem(draftStorageKey())||"null")}catch(_){}
