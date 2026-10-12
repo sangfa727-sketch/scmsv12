@@ -284,20 +284,20 @@ jobs:
         id: staging_gate
         shell: bash
         run: |
-          if [ -z "$SCMS_STAGING_URL" ] || [ -z "$SCMS_TEST_TEACHER" ] || [ -z "$SCMS_TEST_PW" ]; then
+          if [ -z "$SCMS_STAGING_URL" ] || [ -z "$SCMS_TEST_TEACHER" ] || [ -z "$SCMS_TEST_PW" ] || [ -z "$SCMS_TEST_TEACHER_2" ] || [ -z "$SCMS_TEST_PW_2" ]; then
             echo "Staging E2E BLOCKED: required staging secrets are not configured."
             {
               echo "## Staging E2E readiness: BLOCKED"
-              echo "- Required secrets: SCMS_STAGING_URL, SCMS_TEST_TEACHER, SCMS_TEST_PW."
+              echo "- Required secrets: SCMS_STAGING_URL, SCMS_TEST_TEACHER, SCMS_TEST_PW, SCMS_TEST_TEACHER_2, SCMS_TEST_PW_2."
               echo "- No staging tests ran. A skipped job is not a production-readiness pass."
-              echo "- Add isolated staging test accounts and required optional fixtures, then rerun this workflow."
+              echo "- Both isolated staging test accounts are mandatory; seed them in separate schools to validate tenant isolation. Add required optional fixtures, then rerun this workflow."
             } >> "$GITHUB_STEP_SUMMARY"
             echo "enabled=false" >> "$GITHUB_OUTPUT"
           else
             echo "enabled=true" >> "$GITHUB_OUTPUT"
             {
               echo "## Staging E2E readiness: CONFIGURED"
-              echo "- Staging URL and primary test account are configured."
+              echo "- Staging URL and both test accounts are configured. Confirm the accounts belong to separate test schools before treating tenant-isolation coverage as valid."
               echo "- Review the Playwright test report for skipped tests and backend coverage before declaring production readiness."
             } >> "$GITHUB_STEP_SUMMARY"
           fi
