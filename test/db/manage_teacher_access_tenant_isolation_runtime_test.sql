@@ -706,6 +706,8 @@ DECLARE
   v_actor text;
   v_payload jsonb;
   v_token text;
+  v_first_card_id bigint;
+  v_count integer;
 BEGIN
   v := public.rpc_admin_create_teacher_card(
     'admin-a-token', 'teacher-a', now() + interval '7 days'
@@ -715,6 +717,7 @@ BEGIN
   END IF;
 
   v_token := v->>'token';
+  v_first_card_id := (v->>'card_id')::bigint;
   IF length(v_token) < 32 THEN
     RAISE EXCEPTION 'ID-card issuance should return its one-time bearer token to the authorized caller';
   END IF;
@@ -732,6 +735,32 @@ BEGIN
      OR v_payload ? 'token'
      OR v_payload ? 'token_hash' THEN
     RAISE EXCEPTION 'ID-card audit must never contain bearer token or token hash; payload=%', v_payload;
+  END IF;
+
+  -- Re-issuing a card must revoke the previous active card before creating the next one.
+  v := public.rpc_admin_create_teacher_card(
+    'admin-a-token', 'teacher-a', now() + interval '14 days'
+  );
+  IF v->>'ok' <> 'true' THEN
+    RAISE EXCEPTION 'Second teacher ID-card issuance should succeed; got %', v;
+  END IF;
+
+  SELECT count(*) INTO v_count
+    FROM public.teacher_id_cards
+   WHERE teacher_id = 'teacher-a'
+     AND school_id = 'school-a'
+     AND revoked_at IS NULL;
+  IF v_count <> 1 THEN
+    RAISE EXCEPTION 'Re-issuing an ID card must leave exactly one active card; count=%', v_count;
+  END IF;
+
+  IF NOT EXISTS (
+    SELECT 1 FROM public.teacher_id_cards
+     WHERE card_id = v_first_card_id
+       AND school_id = 'school-a'
+       AND revoked_at IS NOT NULL
+  ) THEN
+    RAISE EXCEPTION 'The previous ID card must be revoked after re-issuance';
   END IF;
 
   RAISE NOTICE 'Manage Teacher ID-card audit tests passed.';
