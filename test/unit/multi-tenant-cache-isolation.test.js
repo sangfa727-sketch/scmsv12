@@ -82,7 +82,7 @@ test('a slow response from the previous school cannot overwrite the active schoo
   h.resolveSchoolA([{ school_id: 'school-A', student_id: 'school-A-student' }]);
   const staleRows = await oldRequest;
 
-  assert.deepEqual(staleRows, []);
+  assert.equal(staleRows.length, 0);
   assert.equal(h.window.APP.students[0].school_id, 'school-B');
   createHarness.deferSchoolA = false;
 });
@@ -103,5 +103,5 @@ test('dashboard in-flight requests are scoped to the active tenant', async () =>
 
   resolveA([{ school_id: 'school-A' }]);
   const staleDashboard = await oldDashboard;
-  assert.deepEqual(staleDashboard.timetable, []);
+  assert.equal(staleDashboard.timetable.length, 0);
 });
