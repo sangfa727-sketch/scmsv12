@@ -93,7 +93,7 @@ test('Edit Teacher sends the selected role and updated fields to the RPC', async
 test('Manage Access renders scoped permissions and persists Allow/Default choices through RPC', async ({ page }) => {
   await mountAdmin(page);
   await page.evaluate(() => window.openTeacherAccess('teacher-2', 'Other Teacher'));
-  await expect(page.locator('.teacher-access-sheet')).toBeVisible();
+  await expect(page.locator('.teacher-access-sheet:visible')).toBeVisible();
   await expect(page.locator('.teacher-access-sheet')).toContainText('Manage Access');
   await expect(page.locator('#teacherAccessRoot')).toContainText('Other Teacher');
 
@@ -272,8 +272,8 @@ test('Manage Access never displays raw permission/category keys in any of the se
     await page.evaluate((lang) => { window.I18N.current = lang; }, language);
     await page.evaluate(() => window.openTeacherAccess('teacher-2', 'Other Teacher'));
     await expect(page.locator('.teacher-access-sheet')).toBeVisible();
-    const permissionLabel = page.locator('.teacher-access-perm-row[data-permission="custom.permission_key"] .teacher-access-perm-copy strong');
-    const categoryLabel = page.locator('.teacher-access-perm-group').filter({ has: page.locator('.teacher-access-perm-row[data-permission="custom.permission_key"]') }).locator('.teacher-access-perm-category');
+    const permissionLabel = page.locator('.teacher-access-sheet:visible .teacher-access-perm-row[data-permission="custom.permission_key"] .teacher-access-perm-copy strong');
+    const categoryLabel = page.locator('.teacher-access-sheet:visible .teacher-access-perm-group').filter({ has: page.locator('.teacher-access-perm-row[data-permission="custom.permission_key"]') }).locator('.teacher-access-perm-category');
     await expect(permissionLabel).toBeVisible();
     await expect(categoryLabel).toBeVisible();
     const permissionText = await permissionLabel.textContent();
