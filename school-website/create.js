@@ -99,7 +99,7 @@ async function saveRemoteDraft(){
 function persistDraft(){
  try{localStorage.setItem(draftStorageKey(),JSON.stringify(state))}catch(_){}
  if(draftHydrating){$("#saveState").textContent="Loading draft…";updateDraftActionButtons();return;}
- if(!remoteDraftReady){$("#saveState").textContent="Offline backup only";updateDraftActionButtons();return;}
+ if(!remoteDraftReady){$("#saveState").textContent="Offline backup only — SCMS sync unavailable";updateDraftActionButtons();return;}
  if(draftConflict){$("#saveState").textContent="Draft conflict — reload";updateDraftActionButtons();return;}
  scheduleRemoteDraftSave();
 }
