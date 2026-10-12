@@ -62,6 +62,10 @@ jobs:
         env:
           PGPASSWORD: scms_test
         run: psql -h 127.0.0.1 -U scms_test -d scms_test -v ON_ERROR_STOP=1 -f test/db/manage_teacher_access_permission_gate_runtime_test.sql
+      - name: Run Manage Teacher/Access real-RPC tenant-isolation runtime harness
+        env:
+          PGPASSWORD: scms_test
+        run: psql -h 127.0.0.1 -U scms_test -d scms_test -v ON_ERROR_STOP=1 -f test/db/manage_teacher_access_tenant_isolation_runtime_test.sql
 
   school-website-delegation-runtime:
     name: School Website delegation authorization runtime test
