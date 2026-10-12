@@ -63,6 +63,7 @@ BEGIN
      OR char_length(v_login_name) > 64
      OR v_login_name !~ '^[A-Za-z0-9][A-Za-z0-9._-]*$'
   THEN
+    RETURN jsonb_build_object('ok', false, 'error', 'invalid_login_name');
   END IF;
 
   IF p_initial_pin IS NULL OR char_length(p_initial_pin) < 6 THEN
