@@ -1113,7 +1113,7 @@ window.I18N_MY = {
   'tm.none': 'ဆရာ မရှိသေးပါ။',
   'tm.lastLogin': 'နောက်ဆုံးဝင်ရောက်ချိန်: {date}',
   'tm.never': 'တစ်ခါမှ',
-  'tm.idCard': 'Teacher ID Card',
+  'tm.idCard': '\u1006\u101b\u102c/\u101e\u101b\u102c\u1019 \u101e\u1000\u103a\u101e\u1001\u1036\u1000\u1010\u103a',
   'tm.cardLoading': 'လုံခြုံသော Card ထုတ်နေသည်…',
   'tm.cardScan': 'Teacher login စရန် QR ကို scan ဖတ်ပါ',
   'tm.cardPurposeTitle': 'ဒီ Card က ဘာအတွက်လဲ',
@@ -1145,7 +1145,7 @@ window.I18N_MY = {
   'inv.failed': 'Invite ထုတ်၍မရပါ: {err}',
   'ct.title': '+ ဆရာအသစ်',
   'ct.subtitle': 'Login အကောင့် ဖန်တီးပါမယ်။ Password ကနဦးကို ပထမဆုံး login ဝင်ချိန် ပြောင်းရပါမယ်။',
-  'ct.teacherId': 'Teacher ID *',
+  'ct.teacherId': '\u1006\u101b\u102c/\u101e\u101b\u102c\u1019 ID',
   'ct.teacherIdPh': 'ဥပမာ T1001',
   'ct.teacherName': 'ဆရာအမည် *',
   'ct.email': 'အီးမေးလ် (မဖြည့်လည်းရ)',
@@ -1160,7 +1160,7 @@ window.I18N_MY = {
   'ct.creating': 'ဖန်တီးနေသည်…',
   'ct.createFailed': 'ဖန်တီး၍မရပါ',
   'ct.created': '✓ ဆရာအကောင့် ဖန်တီးပြီးပါပြီ',
-  'ct.connErr': 'Connection error',
+  'ct.connErr': '\u1001\u103b\u102d\u1010\u103a\u1006\u1000\u103a\u1019\u103e\u102f \u1021\u1019\u103e\u102c\u1038\u1016\u103c\u1005\u103a\u1015\u103d\u102c\u1038\u1001\u1032\u1037\u101e\u100a\u103a\u104b \u1021\u1011\u1015\u103a\u1019\u1036 \u1000\u103c\u102d\u102f\u1038\u1005\u102c\u1038\u1015\u102b\u104b',
   'rp.prompt': '{name} ({id}) ၏ password ပြန်သတ်မှတ်ပါ။\\n\\nPassword အသစ် (≥ ၆ လုံး):',
   'rp.sessionExpired': 'Admin session ကုန်သွားပါပြီ',
   'rp.failed': 'ပြန်သတ်မှတ်၍မရပါ: {err}',
@@ -1522,12 +1522,4 @@ window.I18N_MY = {
   'chat.gradeAccess': 'အတန်းဖွဲ့စည်းမှုနှင့် ဆရာ/ဆရာမ တာဝန်ပေးအပ်မှုများကို စီမံခန့်ခွဲသူထံ စစ်ဆေးပေးရန် မေးမြန်းပါ။',
   'chat.gradePrefix': 'အတန်း: '
   ,'chat.individualPrefix': 'တစ်ဦးချင်း: '
-,
-  'ct.teacherId': "ဆရာ/ဆရာမ ID",
-  'tm.idCard': "ဆရာ/ဆရာမ သက်သေခံကတ်",
-  'ct.connErr': "ချိတ်ဆက်မှု အမှားဖြစ်ပွားခဲ့သည်။ ကျေးဇူးပြု၍ ထပ်မံကြိုးစားပါ။"
-,
-  'ct.teacherId': '\u1006\u101b\u102c/\u101e\u101b\u102c\u1019 ID',
-  'tm.idCard': '\u1006\u101b\u102c/\u101e\u101b\u102c\u1019 \u101e\u1000\u103a\u101e\u1001\u1036\u1000\u1010\u103a',
-  'ct.connErr': '\u1001\u103b\u102d\u1010\u103a\u1006\u1000\u103a\u1019\u103e\u102f \u1021\u1019\u103e\u102c\u1038\u1016\u103c\u1005\u103a\u1015\u103d\u102c\u1038\u1001\u1032\u1037\u101e\u100a\u103a\u104b \u1021\u1011\u1015\u103a\u1019\u1036 \u1000\u103c\u102d\u102f\u1038\u1005\u102c\u1038\u1015\u102b\u104b'
 };
