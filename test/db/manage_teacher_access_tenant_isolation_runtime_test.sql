@@ -623,6 +623,22 @@ BEGIN
   END IF;
 
   v := public.rpc_admin_create_teacher_v2(
+    'admin-a-token', 'teacher-created-null-role', 'teacher.nullrole', 'Null Role',
+    'initial-pin-987', NULL, 'null.role@example.test'
+  );
+  IF v->>'error' <> 'invalid_role' THEN
+    RAISE EXCEPTION 'Missing teacher role must fail closed; got %', v;
+  END IF;
+
+  v := public.rpc_admin_create_teacher_v2(
+    'admin-a-token', 'teacher-created-null-pin', 'teacher.nullpin', 'Null PIN',
+    NULL, 'assistant_teacher', 'null.pin@example.test'
+  );
+  IF v->>'error' <> 'pin_too_short' THEN
+    RAISE EXCEPTION 'Missing initial PIN must fail closed; got %', v;
+  END IF;
+
+  v := public.rpc_admin_create_teacher_v2(
     'admin-a-token', 'teacher-created-a', 'teacher.created', 'Created Teacher',
     'initial-pin-987', 'assistant_teacher', 'created.teacher@example.test'
   );
