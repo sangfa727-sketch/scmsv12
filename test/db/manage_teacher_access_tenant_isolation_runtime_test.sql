@@ -179,7 +179,7 @@ VALUES
   ('admin-b', 'school-b', 'admin', 'active', 'School B Admin', 'admin-b@example.test'),
   ('teacher-b', 'school-b', 'teacher', 'active', 'School B Teacher', 'teacher-b@example.test');
 
-DO $teacher_id_case_insensitive_unique$
+DO $teacher_id_normalized_unique$
 BEGIN
   BEGIN
     INSERT INTO public.teachers
@@ -191,8 +191,19 @@ BEGIN
     WHEN unique_violation THEN
       NULL;
   END;
+
+  BEGIN
+    INSERT INTO public.teachers
+      (teacher_id, school_id, role, status, teacher_name)
+    VALUES
+      (' teacher-a ', 'school-a', 'teacher', 'active', 'Whitespace Variant Duplicate');
+    RAISE EXCEPTION 'Trimmed Teacher ID uniqueness regression: whitespace duplicate insert was accepted';
+  EXCEPTION
+    WHEN unique_violation THEN
+      NULL;
+  END;
 END
-$teacher_id_case_insensitive_unique$;
+$teacher_id_normalized_unique$;
 
 INSERT INTO public.app_web_sessions (session_token, teacher_id, school_id, role, expires_at)
 VALUES
