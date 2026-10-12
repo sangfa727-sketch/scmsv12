@@ -52,10 +52,12 @@ test('School Website Studio saves edits, restores hidden sections, and renders d
   await expect(page.locator('#previewCanvas .mini-hero h1')).toHaveCSS('color', 'rgb(23, 32, 42)');
 
   await page.locator('#changeTemplate').click();
+  await expect(page.locator('.swatch-modern')).toBeVisible();
+  await expect(page.locator('.swatch-classic')).toBeVisible();
+  await expect(page.locator('.swatch-premium')).toBeVisible();
   await page.locator('[data-template="classic"]').click();
   await expect(page.locator('body')).toHaveAttribute('data-template', 'classic');
   await expect(page.locator('#previewCanvas')).toHaveAttribute('data-template', 'classic');
-  await expect(page.locator('.swatch-premium')).toBeVisible();
 
   const aboutToggle = page.locator('[data-section-toggle="about"]');
   await aboutToggle.click();
