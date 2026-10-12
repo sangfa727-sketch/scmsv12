@@ -178,6 +178,7 @@ VALUES ('school-b', 'teacher-b', 'students.view', true, 'global');
 \ir ../../supabase/migrations/20261005260000_manage_teacher_access_permission_gate.sql
 -- Apply the follow-up migration that fixes expression-index upsert behavior in live RPC.
 \ir ../../supabase/migrations/20261006230000_fix_teacher_permission_upsert_conflict.sql
+\ir ../../supabase/migrations/20261012120000_teacher_access_audit_actor_attribution.sql
 -- Replaying against the fully hardened and persistence-fixed definition must be a no-op.
 \ir ../../supabase/migrations/20261005260000_manage_teacher_access_permission_gate.sql
 
@@ -423,3 +424,63 @@ BEGIN
   RAISE NOTICE 'Manage Teacher/Access real-RPC tenant-isolation runtime tests passed.';
 END
 $assertions$;
+
+
+-- Audit actor attribution must come from the authenticated server-side session.
+DO $audit_actor_assertions$
+DECLARE
+  v jsonb;
+  v_actor text;
+  v_def text;
+  v_bound_count integer;
+BEGIN
+  SELECT pg_get_functiondef(p.oid)
+    INTO v_def
+    FROM pg_proc p
+    JOIN pg_namespace n ON n.oid = p.pronamespace
+   WHERE n.nspname = 'public'
+     AND p.proname = 'rpc_manage_teacher_access'
+     AND p.proargtypes = '25 25 25 25 20 25 25 16 25'::oidvector
+   LIMIT 1;
+
+  SELECT count(*) INTO v_bound_count
+    FROM regexp_matches(
+      v_def,
+      $$values\s*\(\s*'web'\s*,\s*v_admin\.teacher_id\s*,\s*'teacher\.(class_add|class_remove|subject_add|subject_remove|permission_set|permission_remove)'$$,
+      'gi'
+    );
+  IF v_bound_count <> 6 THEN
+    RAISE EXCEPTION 'All six mutation audit events must use the session-bound actor; got %', v_bound_count;
+  END IF;
+
+  v := public.rpc_manage_teacher_access('admin-a-token','class_add','teacher-a','Audit Actor Admin',NULL,'class_teacher',NULL,NULL,NULL);
+  IF v->>'ok' <> 'true' THEN
+    RAISE EXCEPTION 'Admin audit actor positive control failed: %', v;
+  END IF;
+  SELECT actor INTO v_actor
+    FROM public.audit_log
+   WHERE action='teacher.class_add'
+     AND school_id='school-a'
+     AND payload->>'class_name'='Audit Actor Admin'
+   ORDER BY id DESC LIMIT 1;
+  IF v_actor <> 'admin-a' THEN
+    RAISE EXCEPTION 'Audit actor must be the authenticated admin teacher_id; got %', v_actor;
+  END IF;
+
+  v := public.rpc_manage_teacher_access('super-a-token','class_add','teacher-a','Audit Actor Super',NULL,'class_teacher',NULL,NULL,NULL);
+  IF v->>'ok' <> 'true' THEN
+    RAISE EXCEPTION 'Super-admin audit actor positive control failed: %', v;
+  END IF;
+  SELECT actor INTO v_actor
+    FROM public.audit_log
+   WHERE action='teacher.class_add'
+     AND school_id='school-a'
+     AND payload->>'class_name'='Audit Actor Super'
+   ORDER BY id DESC LIMIT 1;
+  IF v_actor <> 'super-a' THEN
+    RAISE EXCEPTION 'Audit actor must be the authenticated super-admin teacher_id; got %', v_actor;
+  END IF;
+
+  RAISE NOTICE 'Manage Teacher/Access audit actor attribution tests passed.';
+END
+$audit_actor_assertions$;
