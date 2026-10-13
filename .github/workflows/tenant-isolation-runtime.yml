@@ -1,0 +1,93 @@
+name: Tenant isolation runtime tests
+
+on:
+  pull_request:
+    paths:
+      - 'supabase/migrations/20261013100000_revoke_stale_web_sessions_on_identity_change.sql'
+      - 'supabase/migrations/20261013103000_harden_school_session_rpc_identity_binding.sql'
+      - 'test/db/session_tenant_binding_runtime_test.sql'
+      - 'test/db/rpc_session_identity_binding_runtime_test.sql'
+      - '.github/workflows/tenant-isolation-runtime.yml'
+  push:
+    branches: [main, audit/full-system-regression-20261003b]
+    paths:
+      - 'supabase/migrations/20261013100000_revoke_stale_web_sessions_on_identity_change.sql'
+      - 'supabase/migrations/20261013103000_harden_school_session_rpc_identity_binding.sql'
+      - 'test/db/session_tenant_binding_runtime_test.sql'
+      - 'test/db/rpc_session_identity_binding_runtime_test.sql'
+      - '.github/workflows/tenant-isolation-runtime.yml'
+  workflow_dispatch: {}
+
+permissions:
+  contents: read
+
+jobs:
+  stale-session-identity:
+    name: Stale session revocation runtime test
+    runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: public.ecr.aws/docker/library/postgres:16
+        env:
+          POSTGRES_USER: scms_test
+          POSTGRES_PASSWORD: scms_test
+          POSTGRES_DB: scms_test
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U scms_test -d scms_test"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 10
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install PostgreSQL client
+        run: sudo apt-get update && sudo apt-get install -y postgresql-client
+      - name: Wait for PostgreSQL
+        env:
+          PGPASSWORD: scms_test
+        run: |
+          for i in {1..30}; do
+            pg_isready -h 127.0.0.1 -p 5432 -U scms_test -d scms_test && exit 0
+            sleep 1
+          done
+          exit 1
+      - name: Apply migration and test identity-change revocation
+        env:
+          PGPASSWORD: scms_test
+        run: psql -h 127.0.0.1 -U scms_test -d scms_test -v ON_ERROR_STOP=1 -f test/db/session_tenant_binding_runtime_test.sql
+
+  school-rpc-identity-binding:
+    name: School-scoped RPC identity binding runtime test
+    runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: public.ecr.aws/docker/library/postgres:16
+        env:
+          POSTGRES_USER: scms_rpc_test
+          POSTGRES_PASSWORD: scms_rpc_test
+          POSTGRES_DB: scms_rpc_test
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U scms_rpc_test -d scms_rpc_test"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 10
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install PostgreSQL client
+        run: sudo apt-get update && sudo apt-get install -y postgresql-client
+      - name: Wait for PostgreSQL
+        env:
+          PGPASSWORD: scms_rpc_test
+        run: |
+          for i in {1..30}; do
+            pg_isready -h 127.0.0.1 -p 5432 -U scms_rpc_test -d scms_rpc_test && exit 0
+            sleep 1
+          done
+          exit 1
+      - name: Apply migration and test school-scoped read/write RPCs
+        env:
+          PGPASSWORD: scms_rpc_test
+        run: psql -h 127.0.0.1 -U scms_rpc_test -d scms_rpc_test -v ON_ERROR_STOP=1 -f test/db/rpc_session_identity_binding_runtime_test.sql
