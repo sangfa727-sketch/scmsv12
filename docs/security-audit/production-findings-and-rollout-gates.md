@@ -7,10 +7,11 @@ Audit mode: read-only against Supabase Production project `rszgbryucqwmrdbsgwbb`
 1. Upload status handling: compare teacher status case-insensitively so the deployed `active` value is accepted while inactive teachers remain blocked.
 2. Upload content checks: enforce the 5 MiB cap before reading file bytes; validate JPEG, PNG, and WebP signatures in addition to client MIME type.
 3. Parent login response: allowlist student fields and do not return the full student row or QR token.
-4. Parent dashboard response: allowlist student and invoice fields used by `parent.html`.
+4. Parent login/dashboard response: allowlist student and invoice fields used by `parent.html`, including the UI-required `school_name`, without exposing QR tokens, parent phone numbers, notes, or arbitrary student metadata.
 5. Parent login RPC: remove direct EXECUTE from `anon` and `authenticated`; grant EXECUTE to `service_role`, used by the deployed `parent-google-login` Edge Function after Google token verification.
 6. Internal tables: revoke direct browser-role privileges on `public.app_sessions`, `public.audit_log`, and `public.n8n_state`.
-7. Regression tests and isolated PostgreSQL runtime test harness are added for the SQL changes.
+7. Serialize invite redemption and school ID allocation; add regression tests for one-time invite use and distinct school IDs.
+8. Regression tests and an isolated PostgreSQL runtime harness cover the SQL changes; the parent-portal SQL harness passed on the latest code head.
 
 ## Verified findings that still need owner/admin review or a separately approved rollout
 
@@ -30,11 +31,11 @@ Read-only inspection found broad default grants to `anon` and `authenticated` fo
 
 `public.tap_funky` and `public.pg_all_foreign_keys` are readable by browser roles and expose catalog/function or foreign-key metadata. They are owned by `supabase_admin`, so a normal migration executed as `postgres` may not be able to revoke grants. An owner/admin runbook is provided separately; verify consumers before changing grants.
 
-### P2 — Teacher invite redemption race (fixed in this draft; runtime validation pending)
+### P2 — Teacher invite redemption race (fixed in draft; isolated runtime test passed)
 
 The Production `rpc_google_login` invite path selected an unredeemed invite without a row lock before creating the teacher and marking the invite redeemed. Concurrent requests could both observe the invite as unused and create multiple teacher records. Draft migration `20261014133000_lock_teacher_invite_redemption.sql` uses `FOR UPDATE` on the matching invite row and includes a one-time-redemption regression test. It has not been applied to Production.
 
-### P2 — Concurrent self-service school ID allocation (fixed in this draft; runtime validation pending)
+### P2 — Concurrent self-service school ID allocation (fixed in draft; isolated runtime test passed)
 
 Production `public.rpc_generate_school_id()` computes the next ID using `MAX(...)+1`. Concurrent self-service school registrations could choose the same ID before either transaction inserts the new school. Draft migration `20261014134000_serialize_school_id_generation.sql` uses a transaction-scoped advisory lock around allocation; the existing registration transaction inserts the row before releasing the lock. The migration has not been applied to Production.
 
@@ -48,7 +49,7 @@ Earlier read-only comparison found repository migration filenames/counts diverge
 
 ### Review backlog — SECURITY DEFINER and RLS
 
-The database contains many SECURITY DEFINER functions callable by browser roles, and public tables with RLS enabled but no policies. Neither pattern alone proves exploitability: review each function's identity checks, tenant scoping, search path, return payload, and side effects. RLS-enabled tables without policies normally fail closed for browser roles, but verify intended service-side access before changing policies.
+Read-only catalog queries found 180 SECURITY DEFINER functions executable by `anon` and 182 executable by `authenticated`; 164 browser-callable SECURITY DEFINER functions reference `app_web_sessions`. A simple source-text heuristic flagged 132 of those as lacking literal `school_id = s.school_id` and `role = s.role` patterns. This is a triage signal only—not a confirmed vulnerability count—because functions use different aliases, helper functions, and authorization models. Audit these in prioritized batches and add runtime tenant-isolation tests before changing grants or logic. Public tables with RLS enabled but no policies normally fail closed for browser roles; verify intended service-side access before changing policies.
 
 ## Rollout gates
 
