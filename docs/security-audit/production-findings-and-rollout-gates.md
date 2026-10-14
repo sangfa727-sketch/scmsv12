@@ -51,6 +51,8 @@ Earlier read-only comparison found repository migration filenames/counts diverge
 
 Production uses a public `student-photos` bucket, so knowing or obtaining an object URL is sufficient to read the image; Storage object-read RLS does not make an object private in a public bucket. Draft migration `20261014136000_secure_student_photo_upload.sql` removes anonymous direct-upload and object-listing policies, but intentionally preserves public object URL compatibility. This does not close photo confidentiality risk. Before changing the bucket to private, redesign all student-photo consumers to use short-lived signed URLs and test cache, portal, native app, and legacy stored-URL behavior. No bucket configuration was changed during this audit.
 
+Code review of the proposed migration also found a fail-open edge case: `IF NOT private.web_has_student_permission(...)` does not reject a SQL NULL result. The draft branch migration has now been corrected to use `IS NOT TRUE`, with a regression assertion added. This is a branch-only correction, not a deployed Production change.
+
 ### P2 — Parent contact details duplicated into audit-log payloads (fix prepared; historical rows unchanged)
 
 Production `rpc_update_student_parent(text,text,text,text,text,text)` was found to write parent name, primary/secondary phone, and email into `public.audit_log.payload`. Draft migration `20261014141000_minimize_parent_contact_audit_payload.sql` replaces this behavior with student ID and changed-field names only; see the following subsection. Historical audit rows still contain their existing payloads. Do not rewrite or delete historical audit data without an approved retention plan. The new function is not deployed to Production.
@@ -76,5 +78,5 @@ Read-only catalog queries found 180 SECURITY DEFINER functions executable by `an
 
 - Production `storage.buckets` still reports `student-photos.public = true`; `storage.objects` still has an `anon upload student photos` INSERT policy for `{anon, authenticated}` and a `public read student photos` SELECT policy. This is a confirmed confidentiality blocker, not merely a Security Advisor warning.
 - Production direct grants on `app_sessions`, `audit_log`, and `n8n_state` remain broad for `anon` and `authenticated`; the PR migration only changes the branch until formally deployed.
-- CI run for current head `1e4bb5c9146c61073e3f7fbc42f5e737e32644e0` passed frontend regression tests and the isolated parent-contact audit runtime test. The overall workflow and Playwright smoke test were still in progress at the time of this recheck; do not call the full CI green until it finishes.
+- CI run `38591458038` for commit `cfe8fea78c53e5a5022dba7d9653d76f86fedfd8` completed successfully with all 11 automatic jobs passing, including the Playwright smoke test and isolated parent-contact audit runtime test. Subsequent commits fixed the student-photo permission helper's NULL fail-open edge case and added a regression assertion; CI for those newer commits must pass before merge.
 - All checks above were read-only. No Production configuration, storage policy, table grant, schema, data, or deployed function was changed.
