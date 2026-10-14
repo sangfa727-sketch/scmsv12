@@ -12,6 +12,7 @@ Audit mode: read-only against Supabase Production project `rszgbryucqwmrdbsgwbb`
 6. Internal tables: draft migration revokes direct browser-role privileges on `public.app_sessions`, `public.audit_log`, and `public.n8n_state`. A fresh read-only Production check reconfirmed `anon` and `authenticated` still have direct `INSERT`, `UPDATE`, `DELETE`, `TRUNCATE`, `REFERENCES`, and `TRIGGER` privileges; the draft migration has not been applied.
 7. Serialize invite redemption and school ID allocation; add regression tests for one-time invite use and distinct school IDs.
 8. Regression tests and an isolated PostgreSQL runtime harness cover the SQL changes; the parent-portal SQL harness passed on the latest code head.
+9. Native student mutation audit payloads now record the student ID and submitted field names, not the submitted student name, class, grade, or parent contact values; an isolated PostgreSQL regression assertion covers this minimization.
 
 ## Verified findings that still need owner/admin review or a separately approved rollout
 
