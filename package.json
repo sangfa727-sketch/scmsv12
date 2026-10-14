@@ -20,7 +20,7 @@
     "test:contracts": "node --test test/unit/regression-contracts.test.js"
   },
   "devDependencies": {
-    "@capacitor/cli": "^6.0.0",
+    "@capacitor/cli": "^8.5.2",
     "@playwright/test": "^1.55.0"
   },
   "dependencies": {
