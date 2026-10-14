@@ -50,6 +50,20 @@ GRANT ALL PRIVILEGES ON TABLE public.app_sessions, public.audit_log, public.n8n_
 INSERT INTO public.students(student_id, name_en, name_local, class, photo_url, parent_email, school_id, status, qr_token)
 VALUES ('student-1', 'Test Student', 'စမ်းသပ်', 'Grade 1', 'https://example.invalid/photo.png',
         'parent@example.com', 'school-1', 'Active', 'qr-secret-1');
+INSERT INTO public.attendance(id, date, status, student_id) VALUES (1, current_date, 'Present', 'student-1');
+INSERT INTO public.subjects(id, subject_name) VALUES (1, 'Mathematics');
+INSERT INTO public.assessments(id, school_id, class, title, type, subject_id, date, start_time, end_time)
+VALUES (1, 'school-1', 'Grade 1', 'Unit test', 'internal-type', 1, current_date + 1, '09:00', '10:00');
+INSERT INTO public.grades(id, student_id, assessment_id, percentage, letter_grade)
+VALUES (1, 'student-1', 1, 90, 'A');
+INSERT INTO public.parent_comms(id, date, type, message_preview, status, created_at, student_id, class, school_id)
+VALUES (1, current_date, 'General', 'School message', 'Sent', now(), 'student-1', 'Grade 1', 'school-1');
+INSERT INTO public.timetable(id, school_id, class, day, period, start_time, end_time, subject, room, notes)
+VALUES (1, 'school-1', 'Grade 1', 'Monday', 1, '09:00', '09:45', 'Mathematics', 'Room 1', 'internal timetable note');
+INSERT INTO public.parent_portal_events(id, school_id, event_type, title, description, class, student_id, starts_at, ends_at, is_published)
+VALUES (1, 'school-1', 'internal-event-type', 'School event', 'Event details', 'Grade 1', 'student-1', now() + interval '1 day', now() + interval '2 days', true);
+INSERT INTO public.leave_requests(id, school_id, student_id, start_date, end_date, reason, status, created_at)
+VALUES (1, 'school-1', 'student-1', current_date + 2, current_date + 2, 'Family appointment', 'Pending', now());
 INSERT INTO public.invoices(id, school_id, student_id, invoice_number, issue_date, due_date, status, total_amount, paid_amount, notes)
 VALUES (1, 'school-1', 'student-1', 'INV-1', current_date, current_date + 7, 'Due', 100, 25, 'internal-only-note');
 INSERT INTO public.invoice_items(id, invoice_id, description, amount) VALUES (1, 1, 'Tuition', 100);
@@ -97,6 +111,19 @@ BEGIN
   END IF;
   IF NOT (invoice_json ? 'invoice_number' AND invoice_json ? 'total_amount' AND invoice_json ? 'items' AND invoice_json ? 'payments') THEN
     RAISE EXCEPTION 'parent dashboard invoice payload missing UI fields: %', invoice_json;
+  END IF;
+
+  IF (dashboard_result->'events'->0) ?| ARRAY['student_id','class','event_type','ends_at','school_id'] THEN
+    RAISE EXCEPTION 'parent dashboard leaked non-UI event fields: %', dashboard_result->'events'->0;
+  END IF;
+  IF (dashboard_result->'parent_messages'->0) ?| ARRAY['student_id','class','status','created_at','school_id'] THEN
+    RAISE EXCEPTION 'parent dashboard leaked non-UI message fields: %', dashboard_result->'parent_messages'->0;
+  END IF;
+  IF (dashboard_result->'timetable'->0) ?| ARRAY['id','class','period','notes','school_id'] THEN
+    RAISE EXCEPTION 'parent dashboard leaked non-UI timetable fields: %', dashboard_result->'timetable'->0;
+  END IF;
+  IF (dashboard_result->'upcoming_exams'->0) ? 'type' THEN
+    RAISE EXCEPTION 'parent dashboard leaked non-UI exam type: %', dashboard_result->'upcoming_exams'->0;
   END IF;
 
   IF has_table_privilege('anon', 'public.app_sessions', 'INSERT')
