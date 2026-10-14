@@ -72,8 +72,8 @@ Deno.serve(async (req: Request) => {
     let session: Record<string, unknown> | null = null;
     let sessionKind: "web" | "telegram" | null = null;
 
-    const webSessionUrl = new URL(\`\${supabaseUrl}/rest/v1/app_web_sessions\`);
-    webSessionUrl.searchParams.set("session_token", \`eq.\${sessionToken}\`);
+    const webSessionUrl = new URL(`${supabaseUrl}/rest/v1/app_web_sessions`);
+    webSessionUrl.searchParams.set("session_token", `eq.${sessionToken}`);
     webSessionUrl.searchParams.set("select", "teacher_id,school_id,role,expires_at");
     webSessionUrl.searchParams.set("limit", "1");
     const webSessionResp = await fetch(webSessionUrl, { headers });
@@ -87,8 +87,8 @@ Deno.serve(async (req: Request) => {
     } else {
       // Native/TWA Telegram sessions use a high-entropy token and have no
       // expires_at column; accept only linked rows and revalidate live identity.
-      const appSessionUrl = new URL(\`\${supabaseUrl}/rest/v1/app_sessions\`);
-      appSessionUrl.searchParams.set("token", \`eq.\${sessionToken}\`);
+      const appSessionUrl = new URL(`${supabaseUrl}/rest/v1/app_sessions`);
+      appSessionUrl.searchParams.set("token", `eq.${sessionToken}`);
       appSessionUrl.searchParams.set("status", "eq.linked");
       appSessionUrl.searchParams.set("select", "token,telegram_id,teacher_id,school_id,status");
       appSessionUrl.searchParams.set("limit", "1");
@@ -103,8 +103,8 @@ Deno.serve(async (req: Request) => {
       sessionKind = "telegram";
     }
 
-    const teacherUrl = new URL(\`\${supabaseUrl}/rest/v1/teachers\`);
-    teacherUrl.searchParams.set("teacher_id", \`eq.\${String(session.teacher_id || "")}\`);
+    const teacherUrl = new URL(`${supabaseUrl}/rest/v1/teachers`);
+    teacherUrl.searchParams.set("teacher_id", `eq.${String(session.teacher_id || "")}`);
     teacherUrl.searchParams.set("select", "teacher_id,school_id,role,status,telegram_id");
     teacherUrl.searchParams.set("limit", "1");
     const teacherResp = await fetch(teacherUrl, { headers });
