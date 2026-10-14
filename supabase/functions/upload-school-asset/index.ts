@@ -10,6 +10,23 @@ const CORS = {
 const json = (body: unknown, status = 200) =>
   new Response(JSON.stringify(body), { status, headers: CORS });
 
+function matchesImageSignature(type: string, bytes: Uint8Array): boolean {
+  if (type === "image/jpeg") {
+    return bytes.length >= 3 && bytes[0] === 0xff && bytes[1] === 0xd8 && bytes[2] === 0xff;
+  }
+  if (type === "image/png") {
+    return bytes.length >= 8 &&
+      bytes[0] === 0x89 && bytes[1] === 0x50 && bytes[2] === 0x4e && bytes[3] === 0x47 &&
+      bytes[4] === 0x0d && bytes[5] === 0x0a && bytes[6] === 0x1a && bytes[7] === 0x0a;
+  }
+  if (type === "image/webp") {
+    return bytes.length >= 12 &&
+      String.fromCharCode(...bytes.slice(0, 4)) === "RIFF" &&
+      String.fromCharCode(...bytes.slice(8, 12)) === "WEBP";
+  }
+  return false;
+}
+
 Deno.serve(async (req: Request) => {
   if (req.method === "OPTIONS") return new Response("ok", { headers: CORS });
   if (req.method !== "POST") return json({ error: "Method not allowed" }, 405);
@@ -34,6 +51,10 @@ Deno.serve(async (req: Request) => {
     }
     if (!["image/jpeg", "image/png", "image/webp"].includes(file.type)) {
       return json({ error: "Unsupported image type" }, 400);
+    }
+    const imageBytes = new Uint8Array(await file.arrayBuffer());
+    if (!matchesImageSignature(file.type, imageBytes)) {
+      return json({ error: "Image content does not match its declared type" }, 400);
     }
 
     const headers = {
@@ -61,7 +82,7 @@ Deno.serve(async (req: Request) => {
     if (!teacherResp.ok) return json({ error: "Teacher lookup failed" }, 500);
     const teachers = await teacherResp.json();
     const teacher = teachers[0];
-    if (!teacher || teacher.status !== "Active" ||
+    if (!teacher || String(teacher.status || "").toLowerCase() !== "active" ||
         teacher.school_id !== session.school_id ||
         teacher.role !== session.role) {
       return json({ error: "Session is not authorized" }, 403);
