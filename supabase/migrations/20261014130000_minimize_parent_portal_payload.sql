@@ -20,7 +20,9 @@ BEGIN
          st.parent_email, st.school_id, st.status, sc.school_name
     INTO v_student
     FROM public.students st
-    LEFT JOIN public.schools sc ON sc.school_id = st.school_id
+    JOIN public.schools sc
+      ON sc.school_id = st.school_id
+     AND sc.status = 'active'
    WHERE st.qr_token = p_qr_token
      AND st.status = 'Active';
 
@@ -87,9 +89,12 @@ BEGIN
          st.school_id, sc.school_name
     INTO v_student
     FROM public.students st
-    LEFT JOIN public.schools sc ON sc.school_id = st.school_id
+    JOIN public.schools sc
+      ON sc.school_id = st.school_id
+     AND sc.status = 'active'
    WHERE st.student_id = v_sess.student_id
-     AND st.school_id = v_sess.school_id;
+     AND st.school_id = v_sess.school_id
+     AND st.status = 'Active';
 
   IF v_student IS NULL THEN
     RETURN jsonb_build_object('ok', false, 'error', 'student_not_found');
