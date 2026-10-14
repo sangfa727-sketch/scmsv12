@@ -77,10 +77,13 @@ Deno.serve(async (req: Request) => {
     if (!contentType?.toLowerCase().startsWith("multipart/form-data;")) {
       return json({ error: "Expected multipart form data" }, 400);
     }
+    // Copy into an ArrayBuffer-backed view for Deno's BodyInit typing.
+    const requestBuffer = new ArrayBuffer(requestBytes.byteLength);
+    new Uint8Array(requestBuffer).set(requestBytes);
     const formRequest = new Request(req.url, {
       method: "POST",
       headers: { "content-type": contentType },
-      body: requestBytes,
+      body: requestBuffer,
     });
     const form = await formRequest.formData();
     const sessionToken = String(form.get("session_token") || "").trim();
