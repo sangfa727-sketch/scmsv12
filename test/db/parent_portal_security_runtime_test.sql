@@ -90,6 +90,8 @@ INSERT INTO public.parent_portal_events(id, school_id, event_type, title, descri
 VALUES (1, 'school-1', 'internal-event-type', 'School event', 'Event details', 'Grade 1', 'student-1', now() + interval '1 day', now() + interval '2 days', true);
 INSERT INTO public.leave_requests(id, school_id, student_id, start_date, end_date, reason, status, created_at)
 VALUES (1, 'school-1', 'student-1', current_date + 2, current_date + 2, 'Family appointment', 'Pending', now());
+SELECT setval(pg_get_serial_sequence('public.leave_requests', 'id'),
+              (SELECT max(id) FROM public.leave_requests), true);
 INSERT INTO public.invoices(id, school_id, student_id, invoice_number, issue_date, due_date, status, total_amount, paid_amount, notes)
 VALUES (1, 'school-1', 'student-1', 'INV-1', current_date, current_date + 7, 'Due', 100, 25, 'internal-only-note');
 INSERT INTO public.invoice_items(id, invoice_id, description, amount) VALUES (1, 1, 'Tuition', 100);
