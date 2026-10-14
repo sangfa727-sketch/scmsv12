@@ -19,3 +19,16 @@ test('school ID generation serializes MAX-plus-one allocation', () => {
   assert.match(schoolIdMigration, /pg_advisory_xact_lock[\s\S]*hashtext\('scms\.rpc_generate_school_id'\)/);
   assert.match(schoolIdMigration, /MAX\(CAST\(SUBSTRING\(school_id FROM 'SCH-/);
 });
+
+test('parent login Edge Function is version-controlled and rejects malformed expiry/body inputs', () => {
+  const edge = fs.readFileSync('supabase/functions/parent-google-login/index.ts', 'utf8');
+  assert.match(edge, /MAX_BODY_BYTES\s*=\s*16\s*\*\s*1024/);
+  assert.match(edge, /body_too_large/);
+  assert.match(edge, /claims\.exp\s*===\s*undefined/);
+  assert.match(edge, /!Number\.isFinite\(exp\)/);
+  assert.match(edge, /exp\s*<=\s*Math\.floor\(Date\.now\(\)\s*\/\s*1000\)/);
+  assert.match(edge, /claims\.aud\s*!==\s*GOOGLE_CLIENT_ID/);
+  assert.match(edge, /claims\.email_verified/);
+  assert.match(edge, /Authorization.*Bearer.*SERVICE_ROLE_KEY/);
+  assert.match(edge, /rpc_parent_google_login/);
+});
