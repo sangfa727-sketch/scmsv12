@@ -36,9 +36,9 @@ test('parent invoice responses expose only fields consumed by the portal', () =>
   assert.match(migration, /jsonb_build_object\('id', i\.id, 'invoice_number', i\.invoice_number, 'due_date', i\.due_date, 'status', i\.status, 'total_amount', i\.total_amount, 'paid_amount', i\.paid_amount,/);
   assert.doesNotMatch(migration, /to_jsonb\(i\)/);
   assert.match(migration, /'items', COALESCE/);
-  assert.match(migration, /FROM \(\s*SELECT it\.id, it\.description, it\.amount[\s\S]*?LIMIT 100\s*\) x/);
-  assert.match(migration, /FROM \(\s*SELECT p\.id, p\.payment_date, p\.method, p\.amount[\s\S]*?LIMIT 100\s*\) x/);
-  assert.match(migration, /FROM \(\s*SELECT i\.\*[\s\S]*?ORDER BY i\.id DESC\s+LIMIT 50\s*\) i/);
+  assert.match(migration, /FROM \(\s*SELECT it\.id, it\.description, it\.amount[\s\S]*?ORDER BY it\.id\s*\) x/);
+  assert.match(migration, /FROM \(\s*SELECT p\.id, p\.payment_date, p\.method, p\.amount[\s\S]*?ORDER BY p\.payment_date DESC, p\.id DESC\s*\) x/);
+  assert.match(migration, /FROM \(\s*SELECT i\.\*[\s\S]*?ORDER BY i\.id DESC\s*\) i/);
   assert.match(migration, /'payments', COALESCE/);
 });
 
@@ -51,9 +51,11 @@ test('parent portal messages, events, timetable, and exams expose only UI fields
   assert.match(migration, /jsonb_build_object\('date', x\.date, 'type', x\.type, 'message_preview', x\.message_preview\)/);
   assert.match(migration, /'title', x\.title,\s*'description', x\.description,\s*'starts_at', x\.starts_at/);
   assert.match(migration, /FROM \(\s*SELECT e\.id, e\.title, e\.description, e\.starts_at[\s\S]*?LIMIT 50\s*\) x;/);
-  assert.match(migration, /FROM \(\s*SELECT sub\.subject_name, asmt\.title, g\.percentage, g\.letter_grade, asmt\.date[\s\S]*?LIMIT 50\s*\) x;/);
+  assert.match(migration, /FROM \(\s*SELECT date, status[\s\S]*?ORDER BY date DESC\s*\) a;/);
+  assert.match(migration, /FROM \(\s*SELECT sub\.subject_name, asmt\.title, g\.percentage, g\.letter_grade, asmt\.date[\s\S]*?ORDER BY asmt\.date DESC\s*\) x;/);
   assert.match(migration, /FROM \(\s*SELECT sub\.subject_name, asmt\.title, asmt\.date, asmt\.start_time, asmt\.end_time, asmt\.id[\s\S]*?LIMIT 20\s*\) x;/);
-  assert.match(migration, /FROM \(\s*SELECT lr\.id, lr\.start_date, lr\.end_date, lr\.reason, lr\.status, lr\.created_at[\s\S]*?LIMIT 20\s*\) x;/);
+  assert.match(migration, /FROM \(\s*SELECT lr\.id, lr\.start_date, lr\.end_date, lr\.reason, lr\.status, lr\.created_at[\s\S]*?ORDER BY lr\.created_at DESC\s*\) x;/);
+  assert.match(migration, /FROM \(\s*SELECT pc\.date, pc\.type, pc\.message_preview[\s\S]*?ORDER BY pc\.date DESC, pc\.created_at DESC\s*\) pc/);
   assert.match(migration, /'day', tt\.day,\s*'start_time', tt\.start_time,\s*'end_time', tt\.end_time,\s*'subject', tt\.subject,\s*'room', tt\.room/);
   assert.match(migration, /FROM \(\s*SELECT tt\.day, tt\.start_time, tt\.end_time, tt\.subject, tt\.room, tt\.period[\s\S]*?LIMIT 100\s*\) tt;/);
   assert.doesNotMatch(migration, /'student_id', e\.student_id/);
