@@ -232,6 +232,189 @@ BEGIN
 END;
 $function$;
 
+-- Apply the same current-identity binding to attendance audit reads,
+-- self-service preferences, and Telegram disconnect mutations.
+CREATE OR REPLACE FUNCTION public.rpc_get_attendance_audit(
+  p_session_token text,
+  p_class text DEFAULT NULL,
+  p_from_date date DEFAULT NULL,
+  p_to_date date DEFAULT NULL,
+  p_limit integer DEFAULT 50
+)
+RETURNS jsonb
+LANGUAGE plpgsql
+SECURITY DEFINER
+SET search_path TO 'pg_catalog', 'pg_temp'
+AS $function$
+DECLARE
+  v_sess RECORD;
+  v_limit integer;
+  v_rows jsonb;
+BEGIN
+  SELECT s.teacher_id, s.school_id, s.role
+    INTO v_sess
+    FROM public.app_web_sessions AS s
+    JOIN public.teachers AS t
+      ON t.teacher_id = s.teacher_id
+     AND t.school_id = s.school_id
+     AND t.role = s.role
+     AND t.status = 'active'
+    JOIN public.schools AS sc
+      ON sc.school_id = t.school_id
+     AND sc.status = 'active'
+   WHERE s.session_token = p_session_token
+     AND s.expires_at > now()
+   LIMIT 1;
+
+  IF v_sess IS NULL THEN
+    RETURN jsonb_build_object('ok', false, 'error', 'invalid_session');
+  END IF;
+
+  IF v_sess.role NOT IN ('admin', 'super_admin') THEN
+    RETURN jsonb_build_object('ok', false, 'error', 'admin_only');
+  END IF;
+
+  IF p_from_date IS NOT NULL AND p_to_date IS NOT NULL AND p_from_date > p_to_date THEN
+    RETURN jsonb_build_object('ok', false, 'error', 'invalid_date_range');
+  END IF;
+
+  v_limit := LEAST(GREATEST(COALESCE(p_limit, 50), 1), 100);
+
+  SELECT COALESCE(jsonb_agg(jsonb_build_object(
+           'id', x.id,
+           'ts', x.ts,
+           'actor', x.actor,
+           'action', x.action,
+           'class', x.payload->>'class',
+           'date', x.payload->>'date',
+           'records_count', COALESCE((x.payload->>'records_count')::integer, 0)
+         ) ORDER BY x.ts DESC), '[]'::jsonb)
+    INTO v_rows
+    FROM (
+      SELECT id, ts, actor, action, payload
+        FROM public.audit_log
+       WHERE school_id = v_sess.school_id
+         AND source = 'web'
+         AND action = 'attendance.save'
+         AND (p_class IS NULL OR payload->>'class' = trim(p_class))
+         AND (p_from_date IS NULL OR (payload->>'date')::date >= p_from_date)
+         AND (p_to_date IS NULL OR (payload->>'date')::date <= p_to_date)
+       ORDER BY ts DESC
+       LIMIT v_limit
+    ) AS x;
+
+  RETURN jsonb_build_object('ok', true, 'rows', v_rows, 'count', jsonb_array_length(v_rows));
+END;
+$function$;
+
+CREATE OR REPLACE FUNCTION public.rpc_set_my_ui_prefs(p_session_token text, p_patch jsonb)
+RETURNS jsonb
+LANGUAGE plpgsql
+SECURITY DEFINER
+SET search_path TO 'pg_catalog', 'pg_temp'
+AS $function$
+DECLARE
+  v_sess RECORD;
+  v_clean jsonb := '{}'::jsonb;
+  v_allowed text[] := ARRAY['incidents','grades','billing','admissions','library','transport','parents','timetable','summary'];
+  v_mods jsonb;
+  v_prefs jsonb;
+BEGIN
+  SELECT s.teacher_id, s.school_id
+    INTO v_sess
+    FROM public.app_web_sessions AS s
+    JOIN public.teachers AS t
+      ON t.teacher_id = s.teacher_id
+     AND t.school_id = s.school_id
+     AND t.role = s.role
+     AND t.status = 'active'
+    JOIN public.schools AS sc
+      ON sc.school_id = t.school_id
+     AND sc.status = 'active'
+   WHERE s.session_token = p_session_token
+     AND s.expires_at > now()
+   LIMIT 1;
+
+  IF v_sess IS NULL THEN
+    RETURN jsonb_build_object('ok', false, 'error', 'invalid_session');
+  END IF;
+
+  IF p_patch IS NULL OR jsonb_typeof(p_patch) <> 'object' THEN
+    RETURN jsonb_build_object('ok', false, 'error', 'bad_patch');
+  END IF;
+
+  IF p_patch ? 'sidebar_modules' THEN
+    IF jsonb_typeof(p_patch->'sidebar_modules') <> 'array' THEN
+      RETURN jsonb_build_object('ok', false, 'error', 'bad_sidebar_modules');
+    END IF;
+
+    SELECT COALESCE(jsonb_agg(DISTINCT e), '[]'::jsonb)
+      INTO v_mods
+      FROM jsonb_array_elements_text(p_patch->'sidebar_modules') AS e
+     WHERE e = ANY (v_allowed);
+
+    v_clean := jsonb_build_object('sidebar_modules', v_mods);
+  END IF;
+
+  UPDATE public.teachers
+     SET ui_prefs = COALESCE(ui_prefs, '{}'::jsonb) || v_clean,
+         updated_at = now()
+   WHERE teacher_id = v_sess.teacher_id
+     AND school_id = v_sess.school_id
+  RETURNING ui_prefs INTO v_prefs;
+
+  IF NOT FOUND THEN
+    RETURN jsonb_build_object('ok', false, 'error', 'invalid_session');
+  END IF;
+
+  RETURN jsonb_build_object('ok', true, 'ui_prefs', v_prefs);
+END;
+$function$;
+
+CREATE OR REPLACE FUNCTION public.rpc_telegram_disconnect(p_session_token text)
+RETURNS jsonb
+LANGUAGE plpgsql
+SECURITY DEFINER
+SET search_path TO 'pg_catalog', 'pg_temp'
+AS $function$
+DECLARE
+  v_sess RECORD;
+BEGIN
+  SELECT s.teacher_id, s.school_id, s.role
+    INTO v_sess
+    FROM public.app_web_sessions AS s
+    JOIN public.teachers AS t
+      ON t.teacher_id = s.teacher_id
+     AND t.school_id = s.school_id
+     AND t.role = s.role
+     AND t.status = 'active'
+    JOIN public.schools AS sc
+      ON sc.school_id = t.school_id
+     AND sc.status = 'active'
+   WHERE s.session_token = p_session_token
+     AND s.expires_at > now()
+   LIMIT 1;
+
+  IF v_sess IS NULL THEN
+    RETURN jsonb_build_object('ok', false, 'error', 'invalid_session');
+  END IF;
+
+  UPDATE public.teachers
+     SET telegram_id = NULL,
+         updated_at = now()
+   WHERE teacher_id = v_sess.teacher_id
+     AND school_id = v_sess.school_id
+     AND role = v_sess.role
+     AND status = 'active';
+
+  IF NOT FOUND THEN
+    RETURN jsonb_build_object('ok', false, 'error', 'invalid_session');
+  END IF;
+
+  RETURN jsonb_build_object('ok', true);
+END;
+$function$;
+
 -- Mutation RPCs must not return the complete students row: it includes QR bearer
 -- tokens, Telegram identifiers, arbitrary metadata, notes, and other internal data.
 -- Keep the fields needed by the manual student editor while allowlisting the response.
