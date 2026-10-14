@@ -117,6 +117,12 @@ Object.assign(API, {
   },
 
   async setStudentPhoto(studentId, photoUrl) {
+    if (window.APP.platform !== 'web') {
+      return _nativeStudentRpc('rpc_app_set_student_photo', {
+        p_student_id: studentId,
+        p_photo_url: photoUrl,
+      });
+    }
     return _webRpc('rpc_set_student_photo', {
       p_session_token: _webSessionToken(),
       p_student_id: studentId,
