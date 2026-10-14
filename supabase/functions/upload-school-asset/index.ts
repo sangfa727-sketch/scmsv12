@@ -69,7 +69,15 @@ Deno.serve(async (req: Request) => {
       Authorization: `Bearer ${serviceRoleKey}`,
     };
 
-    let session: Record<string, unknown> | null = null;
+    type UploadSession = {
+      teacher_id?: string;
+      school_id?: string;
+      role?: string;
+      telegram_id?: string;
+      expires_at?: string;
+      token?: string;
+    };
+    let session: UploadSession | null = null;
     let sessionKind: "web" | "telegram" | null = null;
 
     const webSessionUrl = new URL(`${supabaseUrl}/rest/v1/app_web_sessions`);
@@ -101,6 +109,10 @@ Deno.serve(async (req: Request) => {
       }
       session = appSession;
       sessionKind = "telegram";
+    }
+
+    if (!session || !sessionKind) {
+      return json({ error: "Session expired" }, 401);
     }
 
     const teacherUrl = new URL(`${supabaseUrl}/rest/v1/teachers`);
