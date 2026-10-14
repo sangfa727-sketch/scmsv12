@@ -111,7 +111,6 @@ BEGIN
        WHERE student_id = v_sess.student_id
          AND school_id = v_student.school_id
        ORDER BY date DESC
-       LIMIT 30
     ) a;
 
   -- LIMIT must apply to source rows before aggregation; LIMIT after jsonb_agg
@@ -135,7 +134,6 @@ BEGIN
        WHERE g.student_id = v_sess.student_id
          AND g.school_id = v_student.school_id
        ORDER BY asmt.date DESC
-       LIMIT 50
     ) x;
 
   SELECT COALESCE(jsonb_agg(
@@ -182,7 +180,6 @@ BEGIN
         )
         AND COALESCE(pc.status, '') <> 'Failed'
       ORDER BY pc.date DESC, pc.created_at DESC
-      LIMIT 50
     ) x;
 
   SELECT COALESCE(jsonb_agg(
@@ -249,7 +246,6 @@ BEGIN
        WHERE lr.student_id = v_sess.student_id
          AND lr.school_id = v_student.school_id
        ORDER BY lr.created_at DESC
-       LIMIT 20
     ) x;
 
   SELECT COALESCE(jsonb_agg(
@@ -264,7 +260,6 @@ BEGIN
                    FROM public.invoice_items it
                   WHERE it.invoice_id = i.id
                   ORDER BY it.id
-                  LIMIT 100
                ) x
              ), '[]'::jsonb),
              'payments', COALESCE((
@@ -281,7 +276,6 @@ BEGIN
                    FROM public.payments p
                   WHERE p.invoice_id = i.id
                   ORDER BY p.payment_date DESC, p.id DESC
-                  LIMIT 100
                ) x
              ), '[]'::jsonb)
            )
@@ -294,7 +288,6 @@ BEGIN
        WHERE i.student_id = v_sess.student_id
          AND i.school_id = v_student.school_id
        ORDER BY i.id DESC
-       LIMIT 50
     ) i;
 
   RETURN jsonb_build_object(
