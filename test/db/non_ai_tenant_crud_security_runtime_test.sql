@@ -87,10 +87,12 @@ CREATE TABLE public.students (
   grade text,
   gender text,
   date_of_birth date,
+  dob date,
   status text NOT NULL DEFAULT 'Active',
   photo_url text,
   house text,
   home_color text,
+  house_color text,
   parent_name text,
   parent_phone text,
   parent_phone2 text,
@@ -138,6 +140,8 @@ VALUES
    'SECRET_QR_BEARER_TOKEN', 'SECRET_TELEGRAM_ID', '{"private":"metadata"}', 'private note'),
   ('student-b', 'school-b', NULL, 'Student B', NULL, 'G1', '1', 'other', NULL,
    'Active', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL);
+INSERT INTO public.students (student_id, school_id, name_en, class, grade, status)
+VALUES ('student-a2', 'school-a', 'Student A2', 'G2', '2', 'Active');
 
 CREATE OR REPLACE FUNCTION private.web_has_student_permission(
   p_session_token text, p_permission_key text, p_student_id text
@@ -258,6 +262,7 @@ $function$;
 \ir ../../supabase/migrations/20261014135000_harden_non_ai_tenant_identity_and_student_payloads.sql
 \ir ../../supabase/migrations/20261014136000_secure_student_photo_upload.sql
 \ir ../../supabase/migrations/20261014137000_harden_student_delete_authorization.sql
+\ir ../../supabase/migrations/20261014138000_secure_native_student_mutations.sql
 
 DO $assert_identity$
 DECLARE
@@ -479,6 +484,72 @@ BEGIN
   END IF;
 END
 $assert_photo_upload$;
+
+DO $assert_native_student_mutations$
+DECLARE
+  result jsonb;
+BEGIN
+  result := public.rpc_app_update_student(
+    'native-session-token-0123456789abcdef',
+    'student-test',
+    '{"name_en":"Updated Student","parent_phone":"0999999999"}'::jsonb
+  );
+  IF COALESCE((result->>'ok')::boolean, false) IS DISTINCT FROM true
+     OR result->'student'->>'name_en' IS DISTINCT FROM 'Updated Student'
+     OR result->'student'->>'parent_phone' IS DISTINCT FROM '0999999999' THEN
+    RAISE EXCEPTION 'valid Telegram admin could not edit own-school student: %', result;
+  END IF;
+  IF (result->'student') ?| ARRAY['qr_token','parent_tg_id','metadata','notes'] THEN
+    RAISE EXCEPTION 'native student edit returned internal fields: %', result->'student';
+  END IF;
+
+  result := public.rpc_app_update_student(
+    'native-session-token-0123456789abcdef',
+    'student-b',
+    '{"name_en":"Cross School Attack"}'::jsonb
+  );
+  IF COALESCE((result->>'ok')::boolean, true) THEN
+    RAISE EXCEPTION 'school A Telegram session edited school B student: %', result;
+  END IF;
+  IF (SELECT name_en FROM public.students WHERE student_id='student-b') IS DISTINCT FROM 'Student B' THEN
+    RAISE EXCEPTION 'cross-school native edit changed school B student';
+  END IF;
+
+  INSERT INTO public.app_sessions
+    (token, telegram_id, teacher_id, teacher_name, school_id, status)
+  VALUES
+    ('native-teacher-session-0123456789abcdef', 'tg-b', 'teacher-b',
+     'Teacher B', 'school-b', 'linked');
+
+  result := public.rpc_app_update_student(
+    'native-teacher-session-0123456789abcdef',
+    'student-b',
+    '{"name_en":"Unauthorized Edit"}'::jsonb
+  );
+  IF result->>'error' IS DISTINCT FROM 'permission_denied' THEN
+    RAISE EXCEPTION 'non-admin Telegram teacher edited student: %', result;
+  END IF;
+
+  result := public.rpc_app_delete_student(
+    'native-teacher-session-0123456789abcdef',
+    'student-b'
+  );
+  IF result->>'error' IS DISTINCT FROM 'forbidden' THEN
+    RAISE EXCEPTION 'non-admin Telegram teacher deleted student: %', result;
+  END IF;
+
+  result := public.rpc_app_delete_student(
+    'native-session-token-0123456789abcdef',
+    'student-a2'
+  );
+  IF COALESCE((result->>'ok')::boolean, false) IS DISTINCT FROM true THEN
+    RAISE EXCEPTION 'native school admin could not soft-delete own-school student: %', result;
+  END IF;
+  IF (SELECT status FROM public.students WHERE student_id='student-a2') IS DISTINCT FROM 'Inactive' THEN
+    RAISE EXCEPTION 'native student delete did not soft-delete record';
+  END IF;
+END
+$assert_native_student_mutations$;
 
 DO $assert_student_delete$
 DECLARE
