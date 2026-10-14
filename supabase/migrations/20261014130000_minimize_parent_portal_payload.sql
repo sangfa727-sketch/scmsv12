@@ -80,7 +80,8 @@ BEGIN
      SET last_seen_at = now()
    WHERE session_token = p_session_token;
 
-  SELECT * INTO v_student
+  SELECT student_id, name_en, name_local, class, photo_url, school_id
+    INTO v_student
     FROM public.students
    WHERE student_id = v_sess.student_id
      AND school_id = v_sess.school_id;
