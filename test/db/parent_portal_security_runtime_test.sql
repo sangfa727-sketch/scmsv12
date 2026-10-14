@@ -67,6 +67,7 @@ RETURNS text LANGUAGE sql VOLATILE AS $ SELECT 'school-new'::text $;
 \i supabase/migrations/20261014130000_minimize_parent_portal_payload.sql
 \i supabase/migrations/20261014131000_revoke_internal_table_client_mutation.sql
 \i supabase/migrations/20261014132000_restrict_parent_login_rpc.sql
+\i supabase/migrations/20261014133000_lock_teacher_invite_redemption.sql
 
 INSERT INTO public.students(student_id, name_en, name_local, class, photo_url, parent_email, school_id, status, qr_token)
 VALUES ('student-1', 'Test Student', 'စမ်းသပ်', 'Grade 1', 'https://example.invalid/photo.png',
