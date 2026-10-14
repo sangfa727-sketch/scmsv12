@@ -320,6 +320,11 @@ jobs:
             sleep 1
           done
           exit 1
+      - uses: denoland/setup-deno@v2
+        with:
+          deno-version: v2.x
+      - name: Check upload Edge Function types
+        run: deno check supabase/functions/upload-school-asset/index.ts
       - name: Run non-AI tenant and student CRUD security harness
         env:
           PGPASSWORD: scms_non_ai_test
