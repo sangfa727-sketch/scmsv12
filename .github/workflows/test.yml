@@ -290,6 +290,41 @@ jobs:
           PGPASSWORD: scms_direct_test
         run: psql -h 127.0.0.1 -U scms_direct_test -d scms_direct_test -v ON_ERROR_STOP=1 -f test/db/staff_chat_direct_tenant_runtime_test.sql
 
+  non-ai-tenant-crud-security:
+    name: Non-AI tenant identity and student CRUD response runtime test
+    runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: postgres:16
+        env:
+          POSTGRES_USER: scms_non_ai_test
+          POSTGRES_PASSWORD: scms_non_ai_test
+          POSTGRES_DB: scms_non_ai_test
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U scms_non_ai_test -d scms_non_ai_test"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 10
+    steps:
+      - uses: actions/checkout@v7
+      - name: Install PostgreSQL client
+        run: sudo apt-get update && sudo apt-get install -y postgresql-client
+      - name: Wait for PostgreSQL
+        env:
+          PGPASSWORD: scms_non_ai_test
+        run: |
+          for i in {1..30}; do
+            pg_isready -h 127.0.0.1 -p 5432 -U scms_non_ai_test -d scms_non_ai_test && exit 0
+            sleep 1
+          done
+          exit 1
+      - name: Run non-AI tenant and student CRUD security harness
+        env:
+          PGPASSWORD: scms_non_ai_test
+        run: psql -h 127.0.0.1 -U scms_non_ai_test -d scms_non_ai_test -v ON_ERROR_STOP=1 -f test/db/non_ai_tenant_crud_security_runtime_test.sql
+
   playwright-ci:
     name: Playwright local smoke test (automatic PR/push)
     if: github.event_name == 'pull_request' || github.event_name == 'push'
