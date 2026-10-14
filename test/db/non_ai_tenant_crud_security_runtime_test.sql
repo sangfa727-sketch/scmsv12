@@ -343,7 +343,7 @@ BEGIN
   UPDATE public.teachers SET status='active' WHERE teacher_id='teacher-a';
 
   UPDATE public.schools SET status='inactive' WHERE school_id='school-a';
-  result := public.rpc_app_login_bind('blocked-school-token', 'tg-new');
+  result := public.rpc_app_login_bind('blocked-school-token', 'tg-a');
   IF result->>'error' IS DISTINCT FROM 'school_not_active' THEN
     RAISE EXCEPTION 'Telegram bind ignored inactive school status: %', result;
   END IF;
