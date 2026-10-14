@@ -27,6 +27,37 @@ function matchesImageSignature(type: string, bytes: Uint8Array): boolean {
   return false;
 }
 
+async function readRequestBodyBounded(req: Request, maxBytes: number): Promise<Uint8Array | null> {
+  const reader = req.body?.getReader();
+  if (!reader) return new Uint8Array();
+
+  const chunks: Uint8Array[] = [];
+  let total = 0;
+  try {
+    while (true) {
+      const { done, value } = await reader.read();
+      if (done) break;
+      total += value.byteLength;
+      if (total > maxBytes) {
+        await reader.cancel().catch(() => {});
+        return null;
+      }
+      chunks.push(value);
+    }
+  } catch {
+    await reader.cancel().catch(() => {});
+    throw new Error("request_body_read_failed");
+  }
+
+  const bytes = new Uint8Array(total);
+  let offset = 0;
+  for (const chunk of chunks) {
+    bytes.set(chunk, offset);
+    offset += chunk.byteLength;
+  }
+  return bytes;
+}
+
 Deno.serve(async (req: Request) => {
   if (req.method === "OPTIONS") return new Response("ok", { headers: CORS });
   if (req.method !== "POST") return json({ error: "Method not allowed" }, 405);
@@ -36,7 +67,22 @@ Deno.serve(async (req: Request) => {
   if (!supabaseUrl || !serviceRoleKey) return json({ error: "Server configuration error" }, 500);
 
   try {
-    const form = await req.formData();
+    // Bound the entire multipart request before parsing it; checking file.size
+    // only after formData() would allow oversized bodies to consume memory first.
+    const maxRequestBytes = 5 * 1024 * 1024 + 128 * 1024;
+    const requestBytes = await readRequestBodyBounded(req, maxRequestBytes);
+    if (requestBytes === null) return json({ error: "Request body too large" }, 413);
+
+    const contentType = req.headers.get("content-type");
+    if (!contentType?.toLowerCase().startsWith("multipart/form-data;")) {
+      return json({ error: "Expected multipart form data" }, 400);
+    }
+    const formRequest = new Request(req.url, {
+      method: "POST",
+      headers: { "content-type": contentType },
+      body: requestBytes,
+    });
+    const form = await formRequest.formData();
     const sessionToken = String(form.get("session_token") || "").trim();
     const kind = String(form.get("kind") || "").trim();
     const studentId = String(form.get("student_id") || "").trim();
