@@ -16,11 +16,13 @@ BEGIN
     RETURN jsonb_build_object('ok', false, 'error', 'missing_params');
   END IF;
 
-  SELECT student_id, name_en, name_local, class, photo_url, parent_email, school_id, status
+  SELECT st.student_id, st.name_en, st.name_local, st.class, st.photo_url,
+         st.parent_email, st.school_id, st.status, sc.school_name
     INTO v_student
-    FROM public.students
-   WHERE qr_token = p_qr_token
-     AND status = 'Active';
+    FROM public.students st
+    LEFT JOIN public.schools sc ON sc.school_id = st.school_id
+   WHERE st.qr_token = p_qr_token
+     AND st.status = 'Active';
 
   IF v_student IS NULL THEN
     RETURN jsonb_build_object('ok', false, 'error', 'invalid_or_inactive');
@@ -80,11 +82,13 @@ BEGIN
      SET last_seen_at = now()
    WHERE session_token = p_session_token;
 
-  SELECT student_id, name_en, name_local, class, photo_url, school_id
+  SELECT st.student_id, st.name_en, st.name_local, st.class, st.photo_url,
+         st.school_id, sc.school_name
     INTO v_student
-    FROM public.students
-   WHERE student_id = v_sess.student_id
-     AND school_id = v_sess.school_id;
+    FROM public.students st
+    LEFT JOIN public.schools sc ON sc.school_id = st.school_id
+   WHERE st.student_id = v_sess.student_id
+     AND st.school_id = v_sess.school_id;
 
   IF v_student IS NULL THEN
     RETURN jsonb_build_object('ok', false, 'error', 'student_not_found');
@@ -247,7 +251,7 @@ BEGIN
 
   RETURN jsonb_build_object(
     'ok', true,
-    'student', jsonb_strip_nulls(jsonb_build_object('student_id', v_student.student_id, 'name_en', v_student.name_en, 'name_local', v_student.name_local, 'class', v_student.class, 'photo_url', v_student.photo_url)),
+    'student', jsonb_strip_nulls(jsonb_build_object('student_id', v_student.student_id, 'name_en', v_student.name_en, 'name_local', v_student.name_local, 'class', v_student.class, 'photo_url', v_student.photo_url, 'school_name', v_student.school_name)),
     'attendance', v_attendance,
     'grades', v_grades,
     'upcoming_exams', v_upcoming_exams,
