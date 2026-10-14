@@ -196,9 +196,14 @@ BEGIN
            ORDER BY tt.day, tt.period
          ), '[]'::jsonb)
     INTO v_timetable
-    FROM public.timetable tt
-   WHERE tt.school_id = v_student.school_id
-     AND tt.class = v_student.class;
+    FROM (
+      SELECT tt.day, tt.start_time, tt.end_time, tt.subject, tt.room, tt.period
+        FROM public.timetable tt
+       WHERE tt.school_id = v_student.school_id
+         AND tt.class = v_student.class
+       ORDER BY tt.day, tt.period
+       LIMIT 100
+    ) tt;
 
   SELECT COALESCE(jsonb_agg(
            jsonb_build_object(
