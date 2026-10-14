@@ -9,6 +9,8 @@ const api = fs.readFileSync('js/02C_api_students.js', 'utf8');
 test('school asset upload binds an active teacher session to the current school and role', () => {
   assert.match(source, /String\(teacher\.status \|\| ""\)\.toLowerCase\(\) !== "active"/);
   assert.match(source, /teacher\.school_id !== session\.school_id/);
+  assert.match(source, /sessionKind === "telegram"/);
+  assert.match(source, /rest\/v1\/app_sessions/);
   assert.match(source, /teacher\.role !== session\.role/);
   assert.match(source, /schools\[0\]\.status \|\| ""\)\.toLowerCase\(\) !== "active"/);
 });
@@ -45,5 +47,6 @@ test('browser student-photo flow uses the trusted Edge Function, not direct anon
   assert.match(api, /functions\/v1\/upload-school-asset/);
   assert.match(api, /form\.append\('session_token', sessionToken\)/);
   assert.match(api, /form\.append\('student_id', studentId\)/);
+  assert.match(api, /window\.getSavedSession\?\.\(\)\?\.token/);
   assert.doesNotMatch(api, /storage\/v1\/object\/student-photos/);
 });
