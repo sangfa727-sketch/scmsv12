@@ -334,6 +334,12 @@ jobs:
         env:
           PGPASSWORD: scms_non_ai_test
         run: psql -h 127.0.0.1 -U scms_non_ai_test -d scms_non_ai_test -v ON_ERROR_STOP=1 -f test/db/non_ai_tenant_crud_security_runtime_test.sql
+      - name: Run parent contact audit minimization runtime test in isolated database
+        env:
+          PGPASSWORD: scms_non_ai_test
+        run: |
+          createdb -h 127.0.0.1 -U scms_non_ai_test parent_contact_audit_test
+          psql -h 127.0.0.1 -U scms_non_ai_test -d parent_contact_audit_test -v ON_ERROR_STOP=1 -f test/db/parent_contact_audit_minimization_runtime_test.sql
 
   playwright-ci:
     name: Playwright local smoke test (automatic PR/push)
