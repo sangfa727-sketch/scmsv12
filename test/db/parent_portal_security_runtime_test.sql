@@ -60,9 +60,9 @@ CREATE TABLE public.app_web_sessions (
   role text NOT NULL, device_ua text
 );
 CREATE FUNCTION public._scms_new_teacher_id_for_invite(p_school_id text)
-RETURNS text LANGUAGE sql IMMUTABLE AS $ SELECT p_school_id || '-teacher' $;
+RETURNS text LANGUAGE sql IMMUTABLE AS 'SELECT p_school_id || ''-teacher''';
 CREATE FUNCTION public.rpc_generate_school_id()
-RETURNS text LANGUAGE sql VOLATILE AS $ SELECT 'school-new'::text $;
+RETURNS text LANGUAGE sql VOLATILE AS 'SELECT ''school-new''::text';
 
 \i supabase/migrations/20261014130000_minimize_parent_portal_payload.sql
 \i supabase/migrations/20261014131000_revoke_internal_table_client_mutation.sql
