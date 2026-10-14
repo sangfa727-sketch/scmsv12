@@ -164,6 +164,25 @@ AS $function$
   );
 $function$;
 
+CREATE TABLE public.admissions (
+  id bigint PRIMARY KEY,
+  status text NOT NULL,
+  converted_student_id text,
+  applicant_name_en text,
+  parent_phone text,
+  parent_email text,
+  applicant_photo_url text,
+  metadata jsonb,
+  notes text
+);
+INSERT INTO public.admissions
+  (id, status, converted_student_id, applicant_name_en, parent_phone, parent_email,
+   applicant_photo_url, metadata, notes)
+VALUES
+  (1, 'Enrolled', 'student-test', 'Applicant Private', '0988888888',
+   'private@example.invalid', 'https://private.invalid/photo.jpg',
+   '{"private":"admission metadata"}', 'private admission note');
+
 -- The migration replaces only the final full-row response expression in these
 -- five manual CRUD functions. Minimal stand-ins make the migration deterministic
 -- and verify the transformation without importing or mutating Production data.
@@ -217,6 +236,20 @@ DECLARE v_row record;
 BEGIN
   SELECT * INTO v_row FROM public.students WHERE student_id = 'student-test';
   RETURN jsonb_build_object('ok', true, 'student', to_jsonb(v_row));
+END;
+$function$;
+
+CREATE OR REPLACE FUNCTION public.rpc_convert_admission_to_student(
+  p_session_token text, p_id bigint, p_class text DEFAULT NULL,
+  p_home_color text DEFAULT NULL, p_status text DEFAULT 'Pending'
+) RETURNS jsonb LANGUAGE plpgsql AS $function$
+DECLARE
+  v_student record;
+  v_adm record;
+BEGIN
+  SELECT * INTO v_student FROM public.students WHERE student_id = 'student-test';
+  SELECT * INTO v_adm FROM public.admissions WHERE id = 1;
+  RETURN jsonb_build_object('ok', true, 'student', to_jsonb(v_student), 'admission', to_jsonb(v_adm));
 END;
 $function$;
 
@@ -329,7 +362,8 @@ BEGIN
     'rpc_update_student',
     'rpc_activate_student',
     'rpc_deactivate_student',
-    'rpc_reactivate_student'
+    'rpc_reactivate_student',
+    'rpc_convert_admission_to_student'
   ]
   LOOP
     CASE fn_name
@@ -345,6 +379,8 @@ BEGIN
         result := public.rpc_deactivate_student('test-session', 'student-test');
       WHEN 'rpc_reactivate_student' THEN
         result := public.rpc_reactivate_student('test-session', 'student-test');
+      WHEN 'rpc_convert_admission_to_student' THEN
+        result := public.rpc_convert_admission_to_student('test-session', 1, 'G1', 'Blue', 'Pending');
     END CASE;
 
     IF COALESCE((result->>'ok')::boolean, false) IS DISTINCT FROM true THEN
@@ -356,6 +392,16 @@ BEGIN
     IF result->'student'->>'student_id' IS DISTINCT FROM 'student-test'
        OR result->'student'->>'name_en' IS DISTINCT FROM 'Student Test' THEN
       RAISE EXCEPTION '% omitted required editor fields: %', fn_name, result->'student';
+    END IF;
+    IF fn_name = 'rpc_convert_admission_to_student' THEN
+      IF (result->'admission') ?| ARRAY['parent_phone','parent_email','metadata','notes','applicant_photo_url','applicant_name_en'] THEN
+        RAISE EXCEPTION 'admission conversion exposed internal admission fields: %', result->'admission';
+      END IF;
+      IF result->'admission'->>'id' IS DISTINCT FROM '1'
+         OR result->'admission'->>'status' IS DISTINCT FROM 'Enrolled'
+         OR result->'admission'->>'converted_student_id' IS DISTINCT FROM 'student-test' THEN
+        RAISE EXCEPTION 'admission conversion omitted required workflow fields: %', result->'admission';
+      END IF;
     END IF;
   END LOOP;
 END
