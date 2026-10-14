@@ -97,7 +97,14 @@ VALUES (1, 'school-1', 'student-1', 'INV-1', current_date, current_date + 7, 'Du
 INSERT INTO public.invoice_items(id, invoice_id, description, amount) VALUES (1, 1, 'Tuition', 100);
 INSERT INTO public.payments(id, school_id, invoice_id, amount, payment_date, method) VALUES (1, 'school-1', 1, 25, current_date, 'cash');
 
--- Stress the dashboard bounds: LIMIT must constrain input rows before JSON aggregation.
+-- Stress historical completeness separately from bounded future-facing dashboard collections.
+INSERT INTO public.attendance(id, date, status, student_id, school_id)
+SELECT gs, current_date - gs, 'Present', 'student-1', 'school-1'
+  FROM generate_series(2, 36) AS gs;
+INSERT INTO public.parent_comms(id, date, type, message_preview, status, created_at, student_id, class, school_id)
+SELECT gs, current_date - gs, 'General', 'Historical message ' || gs, 'Sent', now() - gs * interval '1 day',
+       'student-1', 'Grade 1', 'school-1'
+  FROM generate_series(2, 61) AS gs;
 INSERT INTO public.assessments(id, school_id, class, title, type, subject_id, date, start_time, end_time)
 SELECT gs, 'school-1', 'Grade 1', 'Bounded exam ' || gs, 'internal-type', 1,
        current_date + gs, '09:00', '10:00'
@@ -182,16 +189,20 @@ BEGIN
     RAISE EXCEPTION 'parent dashboard invoice payload missing UI fields: %', invoice_json;
   END IF;
 
-  IF COALESCE(jsonb_array_length(dashboard_result->'grades'), 0) <> 50
+  IF COALESCE(jsonb_array_length(dashboard_result->'attendance'), 0) <> 36
+     OR COALESCE(jsonb_array_length(dashboard_result->'grades'), 0) <> 56
+     OR COALESCE(jsonb_array_length(dashboard_result->'parent_messages'), 0) <> 61
      OR COALESCE(jsonb_array_length(dashboard_result->'upcoming_exams'), 0) <> 20
      OR COALESCE(jsonb_array_length(dashboard_result->'events'), 0) <> 50
-     OR COALESCE(jsonb_array_length(dashboard_result->'leave_requests'), 0) <> 20
-     OR COALESCE(jsonb_array_length(dashboard_result->'invoices'), 0) <> 50
-     OR COALESCE(jsonb_array_length(dashboard_result->'invoices'->0->'items'), 0) <> 100
-     OR COALESCE(jsonb_array_length(dashboard_result->'invoices'->0->'payments'), 0) <> 100
+     OR COALESCE(jsonb_array_length(dashboard_result->'leave_requests'), 0) <> 26
+     OR COALESCE(jsonb_array_length(dashboard_result->'invoices'), 0) <> 55
+     OR COALESCE(jsonb_array_length(dashboard_result->'invoices'->0->'items'), 0) <> 101
+     OR COALESCE(jsonb_array_length(dashboard_result->'invoices'->0->'payments'), 0) <> 101
      OR COALESCE(jsonb_array_length(dashboard_result->'timetable'), 0) <> 100 THEN
-    RAISE EXCEPTION 'parent dashboard aggregate limits are not enforced: grades %, exams %, events %, leave requests %, invoices %, first invoice items %, first invoice payments %, timetable %',
+    RAISE EXCEPTION 'parent dashboard history completeness/bounds mismatch: attendance %, grades %, messages %, exams %, events %, leave requests %, invoices %, first invoice items %, first invoice payments %, timetable %',
+      jsonb_array_length(dashboard_result->'attendance'),
       jsonb_array_length(dashboard_result->'grades'),
+      jsonb_array_length(dashboard_result->'parent_messages'),
       jsonb_array_length(dashboard_result->'upcoming_exams'),
       jsonb_array_length(dashboard_result->'events'),
       jsonb_array_length(dashboard_result->'leave_requests'),
