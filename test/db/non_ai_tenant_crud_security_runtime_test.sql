@@ -427,6 +427,27 @@ BEGIN
     RAISE EXCEPTION 'school A session authorized upload for school B student: %', result;
   END IF;
 
+  INSERT INTO public.app_sessions
+    (token, telegram_id, teacher_id, teacher_name, school_id, status)
+  VALUES
+    ('native-session-token-0123456789abcdef', 'tg-new', 'teacher-a',
+     'Teacher A', 'school-a', 'linked');
+
+  result := public.rpc_authorize_student_photo_upload(
+    'native-session-token-0123456789abcdef', 'student-test'
+  );
+  IF COALESCE((result->>'ok')::boolean, false) IS DISTINCT FROM true
+     OR result->>'school_id' IS DISTINCT FROM 'school-a' THEN
+    RAISE EXCEPTION 'valid Telegram teacher could not authorize own-school student photo: %', result;
+  END IF;
+
+  result := public.rpc_authorize_student_photo_upload(
+    'native-session-token-0123456789abcdef', 'student-b'
+  );
+  IF COALESCE((result->>'ok')::boolean, true) THEN
+    RAISE EXCEPTION 'Telegram session authorized upload for another school: %', result;
+  END IF;
+
   result := public.rpc_authorize_student_photo_upload('stale-role-session', 'student-test');
   IF COALESCE((result->>'ok')::boolean, true) THEN
     RAISE EXCEPTION 'stale role session authorized student photo upload: %', result;
