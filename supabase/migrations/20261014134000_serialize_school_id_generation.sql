@@ -15,10 +15,10 @@ BEGIN
     pg_catalog.hashtext('scms.rpc_generate_school_id')::bigint
   );
 
-  SELECT COALESCE(MAX(CAST(SUBSTRING(school_id FROM 'SCH-(\\d+)') AS int)), 0) + 1
+  SELECT COALESCE(MAX(CAST(SUBSTRING(school_id FROM 'SCH-(\d+)') AS int)), 0) + 1
     INTO next_num
     FROM public.schools
-   WHERE school_id ~ '^SCH-\\d+$';
+   WHERE school_id ~ '^SCH-\d+$';
 
   RETURN 'SCH-' || LPAD(next_num::text, 5, '0');
 END;
