@@ -114,7 +114,9 @@ INSERT INTO public.teachers
 VALUES
   ('teacher-a', 'Teacher A', 'school-a', 'admin', 'active', 'tg-a'),
   ('teacher-b', 'Teacher B', 'school-b', 'teacher', 'active', 'tg-b'),
-  ('teacher-inactive', 'Inactive Teacher', 'school-a', 'teacher', 'inactive', 'tg-inactive');
+  ('teacher-inactive', 'Inactive Teacher', 'school-a', 'teacher', 'inactive', 'tg-inactive'),
+  ('teacher-coordinator', 'Coordinator', 'school-a', 'school_coordinator', 'active', 'tg-coordinator'),
+  ('teacher-assistant', 'Administrative Assistant', 'school-a', 'administrative_assistant', 'active', 'tg-assistant');
 
 INSERT INTO public.app_web_sessions
   (session_token, teacher_id, school_id, role, expires_at)
@@ -457,7 +459,11 @@ BEGIN
     (token, telegram_id, teacher_id, teacher_name, school_id, status)
   VALUES
     ('native-session-token-0123456789abcdef', 'tg-new', 'teacher-a',
-     'Teacher A', 'school-a', 'linked');
+     'Teacher A', 'school-a', 'linked'),
+    ('native-coordinator-session-0123456789abcdef', 'tg-coordinator', 'teacher-coordinator',
+     'Coordinator', 'school-a', 'linked'),
+    ('native-assistant-session-0123456789abcdef', 'tg-assistant', 'teacher-assistant',
+     'Administrative Assistant', 'school-a', 'linked');
 
   result := public.rpc_authorize_student_photo_upload(
     'native-session-token-0123456789abcdef', 'student-test'
@@ -558,6 +564,60 @@ BEGIN
   );
   IF result->>'error' IS DISTINCT FROM 'invalid_photo_url' THEN
     RAISE EXCEPTION 'native photo metadata accepted a different school path: %', result;
+  END IF;
+
+  -- Positive-path matrix: coordinator and administrative assistant retain
+  -- their intended same-school edit/photo workflows, while delete remains admin-only.
+  result := public.rpc_app_update_student(
+    'native-coordinator-session-0123456789abcdef',
+    'student-test',
+    '{"name_en":"Coordinator Updated"}'::jsonb
+  );
+  IF COALESCE((result->>'ok')::boolean, false) IS DISTINCT FROM true
+     OR result->'student'->>'name_en' IS DISTINCT FROM 'Coordinator Updated' THEN
+    RAISE EXCEPTION 'school coordinator lost permitted same-school edit workflow: %', result;
+  END IF;
+
+  result := public.rpc_app_set_student_photo(
+    'native-coordinator-session-0123456789abcdef',
+    'student-test',
+    'https://rszgbryucqwmrdbsgwbb.supabase.co/storage/v1/object/public/student-photos/school-a/01234567-89ab-cdef-0123-456789abcdef.jpg'
+  );
+  IF COALESCE((result->>'ok')::boolean, false) IS DISTINCT FROM true THEN
+    RAISE EXCEPTION 'school coordinator lost permitted same-school photo workflow: %', result;
+  END IF;
+
+  result := public.rpc_app_delete_student(
+    'native-coordinator-session-0123456789abcdef', 'student-test'
+  );
+  IF result->>'error' IS DISTINCT FROM 'forbidden' THEN
+    RAISE EXCEPTION 'school coordinator unexpectedly gained student delete permission: %', result;
+  END IF;
+
+  result := public.rpc_app_update_student(
+    'native-assistant-session-0123456789abcdef',
+    'student-test',
+    '{"name_en":"Assistant Updated"}'::jsonb
+  );
+  IF COALESCE((result->>'ok')::boolean, false) IS DISTINCT FROM true
+     OR result->'student'->>'name_en' IS DISTINCT FROM 'Assistant Updated' THEN
+    RAISE EXCEPTION 'administrative assistant lost permitted same-school edit workflow: %', result;
+  END IF;
+
+  result := public.rpc_app_set_student_photo(
+    'native-assistant-session-0123456789abcdef',
+    'student-test',
+    'https://rszgbryucqwmrdbsgwbb.supabase.co/storage/v1/object/public/student-photos/school-a/01234567-89ab-cdef-0123-456789abcdef.jpg'
+  );
+  IF COALESCE((result->>'ok')::boolean, false) IS DISTINCT FROM true THEN
+    RAISE EXCEPTION 'administrative assistant lost permitted same-school photo workflow: %', result;
+  END IF;
+
+  result := public.rpc_app_delete_student(
+    'native-assistant-session-0123456789abcdef', 'student-test'
+  );
+  IF result->>'error' IS DISTINCT FROM 'forbidden' THEN
+    RAISE EXCEPTION 'administrative assistant unexpectedly gained student delete permission: %', result;
   END IF;
 
   result := public.rpc_app_update_student(
