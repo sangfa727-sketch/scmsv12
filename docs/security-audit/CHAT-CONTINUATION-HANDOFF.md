@@ -26,9 +26,9 @@ When the user starts a new chat and says **“SCMSv12 အတွက် project �
 - PR #317: https://github.com/sangfa727-sketch/scmsv12/pull/317
 - Branch: `fix/security-audit-upload-validation` → `main`
 - Purpose: harden upload validation, minimize Parent Portal payloads, restrict parent login RPC, revoke browser direct mutation rights on internal tables, harden invite/school ID concurrency, and add runtime tests.
-- Most recent known workflow run: https://github.com/sangfa727-sketch/scmsv12/actions/runs/38586377345
-- At last check, all 11 automatic jobs completed successfully, including the Non-AI tenant identity/student CRUD runtime test and automatic Playwright local smoke test. The scheduled/manual-only Playwright job was skipped by design.
-- Verify latest PR head SHA and latest CI status before any further edits or merge decisions.
+- Latest source/test changes include native student audit payload minimization (student ID + submitted field names, not submitted values) and a quantified migration-history reconciliation finding.
+- Latest known workflow run for the current audit-doc head: https://github.com/sangfa727-sketch/scmsv12/actions/runs/38594948893 (pending at last check). A preceding run was cancelled by newer commits, but its frontend regression tests and both non-AI student CRUD and parent-contact audit SQL harness steps completed successfully before cancellation. Require a fresh full green run on the current head before treating CI as passed.
+- Re-check latest PR head SHA, all automatic jobs, and latest CI conclusion before any merge decision.
 
 ## Confirmed blockers / findings to revisit
 1. **Public student photo bucket:** `student-photos` remains publicly readable by object URL. Upload authorization does not make existing photo URLs private. Needs a carefully planned private bucket + signed URL + UI integration, plus compatibility/rollback analysis.
@@ -44,7 +44,7 @@ When the user starts a new chat and says **“SCMSv12 အတွက် project �
 ## Additional Production findings
 - `rpc_parent_google_login(text,text,text)` was executable by anon/authenticated and returned the entire student row (`to_jsonb(v_student)`) at the last read-only check. PR #317 changes its ACL and payload, but these changes are not applied to Production.
 - `app_sessions`, `audit_log`, and `n8n_state` had browser-role mutation grants at the last check. PR #317 revokes them; verify that registration/login fallback continues to work through trusted server-side service-role flow.
-- Production had no matching `20261013...` / `20261014...` migration history entries at the last check.
+- Production had no matching `20261013...` / `20261014...` migration history entries at the last check. A fresh comparison found 149 migration SQL files on repo `main` versus 202 Production history rows, with 62 exact filename-stem/name matches and only 2 exact version-ID overlaps; treat this as a reconciliation signal, not proof of missing schema.
 - `student-photos` public read access is a confirmed privacy design issue; other heuristic SECURITY DEFINER candidates require validation before labeling them vulnerabilities.
 
 ## Next steps on resume
