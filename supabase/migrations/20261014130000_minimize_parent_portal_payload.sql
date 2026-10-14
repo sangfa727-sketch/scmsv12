@@ -114,41 +114,51 @@ BEGIN
        LIMIT 30
     ) a;
 
+  -- LIMIT must apply to source rows before aggregation; LIMIT after jsonb_agg
+  -- only limits the single aggregate result row and does not bound the payload.
   SELECT COALESCE(jsonb_agg(
            jsonb_build_object(
-             'subject', sub.subject_name,
-             'assessment', asmt.title,
-             'percentage', g.percentage,
-             'letter_grade', g.letter_grade,
-             'date', asmt.date
+             'subject', x.subject_name,
+             'assessment', x.title,
+             'percentage', x.percentage,
+             'letter_grade', x.letter_grade,
+             'date', x.date
            )
-           ORDER BY asmt.date DESC
+           ORDER BY x.date DESC
          ), '[]'::jsonb)
     INTO v_grades
-    FROM public.grades g
-    JOIN public.assessments asmt ON asmt.id = g.assessment_id
-    JOIN public.subjects sub ON sub.id = asmt.subject_id
-   WHERE g.student_id = v_sess.student_id
-     AND g.school_id = v_student.school_id
-   LIMIT 50;
+    FROM (
+      SELECT sub.subject_name, asmt.title, g.percentage, g.letter_grade, asmt.date
+        FROM public.grades g
+        JOIN public.assessments asmt ON asmt.id = g.assessment_id
+        JOIN public.subjects sub ON sub.id = asmt.subject_id
+       WHERE g.student_id = v_sess.student_id
+         AND g.school_id = v_student.school_id
+       ORDER BY asmt.date DESC
+       LIMIT 50
+    ) x;
 
   SELECT COALESCE(jsonb_agg(
            jsonb_build_object(
-             'subject', sub.subject_name,
-             'title', asmt.title,
-             'date', asmt.date,
-             'start_time', asmt.start_time,
-             'end_time', asmt.end_time
+             'subject', x.subject_name,
+             'title', x.title,
+             'date', x.date,
+             'start_time', x.start_time,
+             'end_time', x.end_time
            )
-           ORDER BY asmt.date ASC, asmt.start_time ASC NULLS LAST, asmt.id ASC
+           ORDER BY x.date ASC, x.start_time ASC NULLS LAST, x.id ASC
          ), '[]'::jsonb)
     INTO v_upcoming_exams
-    FROM public.assessments asmt
-    JOIN public.subjects sub ON sub.id = asmt.subject_id
-   WHERE asmt.school_id = v_student.school_id
-     AND asmt.class = v_student.class
-     AND asmt.date >= current_date
-   LIMIT 20;
+    FROM (
+      SELECT sub.subject_name, asmt.title, asmt.date, asmt.start_time, asmt.end_time, asmt.id
+        FROM public.assessments asmt
+        JOIN public.subjects sub ON sub.id = asmt.subject_id
+       WHERE asmt.school_id = v_student.school_id
+         AND asmt.class = v_student.class
+         AND asmt.date >= current_date
+       ORDER BY asmt.date ASC, asmt.start_time ASC NULLS LAST, asmt.id ASC
+       LIMIT 20
+    ) x;
 
   SELECT COALESCE(jsonb_agg(
            jsonb_build_object('date', x.date, 'type', x.type, 'message_preview', x.message_preview)
@@ -192,42 +202,50 @@ BEGIN
 
   SELECT COALESCE(jsonb_agg(
            jsonb_build_object(
-             'title', e.title,
-             'description', e.description,
-             'starts_at', e.starts_at
+             'title', x.title,
+             'description', x.description,
+             'starts_at', x.starts_at
            )
-           ORDER BY e.starts_at ASC, e.id ASC
+           ORDER BY x.starts_at ASC, x.id ASC
          ), '[]'::jsonb)
     INTO v_events
-    FROM public.parent_portal_events e
-   WHERE e.school_id = v_student.school_id
-     AND e.is_published = true
-     AND e.starts_at >= now() - interval '1 day'
-     AND (
-       e.student_id = v_student.student_id
-       OR (
-         e.student_id IS NULL
-         AND (e.class IS NULL OR e.class = v_student.class)
-       )
-     )
-   LIMIT 50;
+    FROM (
+      SELECT e.id, e.title, e.description, e.starts_at
+        FROM public.parent_portal_events e
+       WHERE e.school_id = v_student.school_id
+         AND e.is_published = true
+         AND e.starts_at >= now() - interval '1 day'
+         AND (
+           e.student_id = v_student.student_id
+           OR (
+             e.student_id IS NULL
+             AND (e.class IS NULL OR e.class = v_student.class)
+           )
+         )
+       ORDER BY e.starts_at ASC, e.id ASC
+       LIMIT 50
+    ) x;
 
   SELECT COALESCE(jsonb_agg(
            jsonb_build_object(
-             'id', lr.id,
-             'start_date', lr.start_date,
-             'end_date', lr.end_date,
-             'reason', lr.reason,
-             'status', lr.status,
-             'created_at', lr.created_at
+             'id', x.id,
+             'start_date', x.start_date,
+             'end_date', x.end_date,
+             'reason', x.reason,
+             'status', x.status,
+             'created_at', x.created_at
            )
-           ORDER BY lr.created_at DESC
+           ORDER BY x.created_at DESC
          ), '[]'::jsonb)
     INTO v_leave_requests
-    FROM public.leave_requests lr
-   WHERE lr.student_id = v_sess.student_id
-     AND lr.school_id = v_student.school_id
-   LIMIT 20;
+    FROM (
+      SELECT lr.id, lr.start_date, lr.end_date, lr.reason, lr.status, lr.created_at
+        FROM public.leave_requests lr
+       WHERE lr.student_id = v_sess.student_id
+         AND lr.school_id = v_student.school_id
+       ORDER BY lr.created_at DESC
+       LIMIT 20
+    ) x;
 
   SELECT COALESCE(jsonb_agg(
            jsonb_build_object('id', i.id, 'invoice_number', i.invoice_number, 'due_date', i.due_date, 'status', i.status, 'total_amount', i.total_amount, 'paid_amount', i.paid_amount,
