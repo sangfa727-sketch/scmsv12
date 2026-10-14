@@ -251,31 +251,46 @@ BEGIN
            jsonb_build_object('id', i.id, 'invoice_number', i.invoice_number, 'due_date', i.due_date, 'status', i.status, 'total_amount', i.total_amount, 'paid_amount', i.paid_amount,
              'items', COALESCE((
                SELECT jsonb_agg(
-                 jsonb_build_object('description', it.description, 'amount', it.amount)
-                 ORDER BY it.id
+                 jsonb_build_object('description', x.description, 'amount', x.amount)
+                 ORDER BY x.id
                )
-               FROM public.invoice_items it
-               WHERE it.invoice_id = i.id
+               FROM (
+                 SELECT it.id, it.description, it.amount
+                   FROM public.invoice_items it
+                  WHERE it.invoice_id = i.id
+                  ORDER BY it.id
+                  LIMIT 100
+               ) x
              ), '[]'::jsonb),
              'payments', COALESCE((
                SELECT jsonb_agg(
                  jsonb_build_object(
-                   'payment_date', p.payment_date,
-                   'method', p.method,
-                   'amount', p.amount
+                   'payment_date', x.payment_date,
+                   'method', x.method,
+                   'amount', x.amount
                  )
-                 ORDER BY p.payment_date DESC, p.id DESC
+                 ORDER BY x.payment_date DESC, x.id DESC
                )
-               FROM public.payments p
-               WHERE p.invoice_id = i.id
+               FROM (
+                 SELECT p.id, p.payment_date, p.method, p.amount
+                   FROM public.payments p
+                  WHERE p.invoice_id = i.id
+                  ORDER BY p.payment_date DESC, p.id DESC
+                  LIMIT 100
+               ) x
              ), '[]'::jsonb)
            )
            ORDER BY i.id DESC
          ), '[]'::jsonb)
     INTO v_invoices
-    FROM public.invoices i
-   WHERE i.student_id = v_sess.student_id
-     AND i.school_id = v_student.school_id;
+    FROM (
+      SELECT i.*
+        FROM public.invoices i
+       WHERE i.student_id = v_sess.student_id
+         AND i.school_id = v_student.school_id
+       ORDER BY i.id DESC
+       LIMIT 50
+    ) i;
 
   RETURN jsonb_build_object(
     'ok', true,
