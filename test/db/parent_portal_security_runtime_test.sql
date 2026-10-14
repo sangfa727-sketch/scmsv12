@@ -70,6 +70,9 @@ RETURNS text LANGUAGE sql VOLATILE AS 'SELECT ''school-new''::text';
 \i supabase/migrations/20261014133000_lock_teacher_invite_redemption.sql
 \i supabase/migrations/20261014134000_serialize_school_id_generation.sql
 
+INSERT INTO public.schools(school_id, school_name, status, school_email)
+VALUES ('school-1', 'Test School', 'active', 'school@example.com');
+
 INSERT INTO public.students(student_id, name_en, name_local, class, photo_url, parent_email, school_id, status, qr_token)
 VALUES ('student-1', 'Test Student', 'စမ်းသပ်', 'Grade 1', 'https://example.invalid/photo.png',
         'parent@example.com', 'school-1', 'Active', 'qr-secret-1');
