@@ -9,7 +9,7 @@ Audit mode: read-only against Supabase Production project `rszgbryucqwmrdbsgwbb`
 3. Parent login response: allowlist student fields and do not return the full student row or QR token.
 4. Parent login/dashboard response: allowlist student and invoice fields used by `parent.html`, including the UI-required `school_name`, without exposing QR tokens, parent phone numbers, notes, or arbitrary student metadata.
 5. Parent login RPC: remove direct EXECUTE from `anon` and `authenticated`; grant EXECUTE to `service_role`, used by the deployed `parent-google-login` Edge Function after Google token verification.
-6. Internal tables: revoke direct browser-role privileges on `public.app_sessions`, `public.audit_log`, and `public.n8n_state`.
+6. Internal tables: draft migration revokes direct browser-role privileges on `public.app_sessions`, `public.audit_log`, and `public.n8n_state`. A fresh read-only Production check reconfirmed `anon` and `authenticated` still have direct `INSERT`, `UPDATE`, `DELETE`, `TRUNCATE`, `REFERENCES`, and `TRIGGER` privileges; the draft migration has not been applied.
 7. Serialize invite redemption and school ID allocation; add regression tests for one-time invite use and distinct school IDs.
 8. Regression tests and an isolated PostgreSQL runtime harness cover the SQL changes; the parent-portal SQL harness passed on the latest code head.
 
@@ -29,7 +29,7 @@ Read-only inspection found broad default grants to `anon` and `authenticated` fo
 
 ### P2 — Diagnostic catalog views readable by browser roles
 
-`public.tap_funky` and `public.pg_all_foreign_keys` are readable by browser roles and expose catalog/function or foreign-key metadata. They are owned by `supabase_admin`, so a normal migration executed as `postgres` may not be able to revoke grants. An owner/admin runbook is provided separately; verify consumers before changing grants.
+A fresh read-only privilege query reconfirmed `SELECT` on `public.tap_funky` and `public.pg_all_foreign_keys` for both `anon` and `authenticated`. These views expose catalog/function or foreign-key metadata. They are owned by `supabase_admin`, so a normal migration executed as `postgres` may not be able to revoke grants. An owner/admin runbook is provided separately; verify consumers before changing grants.
 
 ### P2 — Teacher invite redemption race (fixed in draft; isolated runtime test passed)
 
@@ -51,9 +51,9 @@ Earlier read-only comparison found repository migration filenames/counts diverge
 
 Production uses a public `student-photos` bucket, so knowing or obtaining an object URL is sufficient to read the image; Storage object-read RLS does not make an object private in a public bucket. Draft migration `20261014136000_secure_student_photo_upload.sql` removes anonymous direct-upload and object-listing policies, but intentionally preserves public object URL compatibility. This does not close photo confidentiality risk. Before changing the bucket to private, redesign all student-photo consumers to use short-lived signed URLs and test cache, portal, native app, and legacy stored-URL behavior. No bucket configuration was changed during this audit.
 
-### P2 — Parent contact details are duplicated into audit-log payloads
+### P2 — Parent contact details duplicated into audit-log payloads (fix prepared; historical rows unchanged)
 
-Production `rpc_update_student_parent(text,text,text,text,text,text)` writes parent name, primary/secondary phone, and email into `public.audit_log.payload`. This duplicates sensitive contact data into a security/audit table and increases retention and access-control impact if log access is misconfigured. Review whether audit events can record changed field names or a redacted summary instead of the values; do not remove historical audit data without an approved retention plan.
+Production `rpc_update_student_parent(text,text,text,text,text,text)` was found to write parent name, primary/secondary phone, and email into `public.audit_log.payload`. Draft migration `20261014141000_minimize_parent_contact_audit_payload.sql` replaces this behavior with student ID and changed-field names only; see the following subsection. Historical audit rows still contain their existing payloads. Do not rewrite or delete historical audit data without an approved retention plan. The new function is not deployed to Production.
 
 ### P2 — Parent contact values in audit payloads (fix prepared in PR #317)
 
@@ -70,3 +70,11 @@ Read-only catalog queries found 180 SECURITY DEFINER functions executable by `an
 - Resolve owner-role privilege findings with the authorized project owner/admin.
 - Review and approve the billing session identity binding migration.
 - Merge and deployment require explicit approval; until then this PR remains a draft and Production stays unchanged.
+
+
+## Latest read-only recheck (2026-10-14)
+
+- Production `storage.buckets` still reports `student-photos.public = true`; `storage.objects` still has an `anon upload student photos` INSERT policy for `{anon, authenticated}` and a `public read student photos` SELECT policy. This is a confirmed confidentiality blocker, not merely a Security Advisor warning.
+- Production direct grants on `app_sessions`, `audit_log`, and `n8n_state` remain broad for `anon` and `authenticated`; the PR migration only changes the branch until formally deployed.
+- CI run for current head `1e4bb5c9146c61073e3f7fbc42f5e737e32644e0` passed frontend regression tests and the isolated parent-contact audit runtime test. The overall workflow and Playwright smoke test were still in progress at the time of this recheck; do not call the full CI green until it finishes.
+- All checks above were read-only. No Production configuration, storage policy, table grant, schema, data, or deployed function was changed.
