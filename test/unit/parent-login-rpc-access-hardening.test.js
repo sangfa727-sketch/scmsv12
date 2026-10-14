@@ -13,3 +13,9 @@ test('teacher invite redemption locks the invite row before creating the account
   const inviteMigration = fs.readFileSync('supabase/migrations/20261014133000_lock_teacher_invite_redemption.sql', 'utf8');
   assert.match(inviteMigration, /FROM public\.teacher_invites[\s\S]*WHERE invite_code = p_invite_code[\s\S]*redeemed_at IS NULL[\s\S]*LIMIT 1\s+FOR UPDATE/i);
 });
+
+test('school ID generation serializes MAX-plus-one allocation', () => {
+  const schoolIdMigration = fs.readFileSync('supabase/migrations/20261014134000_serialize_school_id_generation.sql', 'utf8');
+  assert.match(schoolIdMigration, /pg_advisory_xact_lock[\s\S]*hashtext\('scms\.rpc_generate_school_id'\)/);
+  assert.match(schoolIdMigration, /MAX\(CAST\(SUBSTRING\(school_id FROM 'SCH-/);
+});
