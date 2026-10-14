@@ -150,6 +150,17 @@ BEGIN
     RAISE EXCEPTION 'parent dashboard leaked non-UI exam type: %', dashboard_result->'upcoming_exams'->0;
   END IF;
 
+  -- A redeemed invite cannot be used to create a second teacher.
+  IF COALESCE((public.rpc_google_login('google-sub-1', 'invited@example.com', 'ci', 'invite-once', NULL, 'Invited Teacher')->>'ok')::boolean, false) IS NOT TRUE THEN
+    RAISE EXCEPTION 'first invite redemption should succeed';
+  END IF;
+  IF (public.rpc_google_login('google-sub-2', 'another@example.com', 'ci', 'invite-once', NULL, 'Another Teacher')->>'error') <> 'invalid_invite' THEN
+    RAISE EXCEPTION 'redeemed invite must not be reusable';
+  END IF;
+  IF (SELECT count(*) FROM public.teachers WHERE school_id = 'school-1') <> 1 THEN
+    RAISE EXCEPTION 'invite redemption created more than one teacher';
+  END IF;
+
   IF has_table_privilege('anon', 'public.app_sessions', 'INSERT')
      OR has_table_privilege('anon', 'public.app_sessions', 'UPDATE')
      OR has_table_privilege('anon', 'public.app_sessions', 'DELETE')
