@@ -43,6 +43,27 @@ CREATE TABLE public.audit_log (id bigint);
 CREATE TABLE public.n8n_state (id bigint);
 GRANT ALL PRIVILEGES ON TABLE public.app_sessions, public.audit_log, public.n8n_state TO anon, authenticated;
 
+CREATE TABLE public.teachers (
+  teacher_id text PRIMARY KEY, teacher_name text, school_id text, status text, role text,
+  email text, google_sub text, google_email text, google_linked_at timestamptz,
+  must_change_password boolean NOT NULL DEFAULT false, last_web_login_at timestamptz
+);
+CREATE TABLE public.teacher_invites (
+  invite_code text PRIMARY KEY, redeemed_at timestamptz, expires_at timestamptz NOT NULL,
+  school_id text NOT NULL, teacher_name text, role text NOT NULL, redeemed_by_teacher_id text
+);
+CREATE TABLE public.schools (
+  school_id text PRIMARY KEY, school_name text, status text, school_email text, created_at timestamptz
+);
+CREATE TABLE public.app_web_sessions (
+  session_token text PRIMARY KEY, teacher_id text NOT NULL, school_id text NOT NULL,
+  role text NOT NULL, device_ua text
+);
+CREATE FUNCTION public._scms_new_teacher_id_for_invite(p_school_id text)
+RETURNS text LANGUAGE sql IMMUTABLE AS $ SELECT p_school_id || '-teacher' $;
+CREATE FUNCTION public.rpc_generate_school_id()
+RETURNS text LANGUAGE sql VOLATILE AS $ SELECT 'school-new'::text $;
+
 \i supabase/migrations/20261014130000_minimize_parent_portal_payload.sql
 \i supabase/migrations/20261014131000_revoke_internal_table_client_mutation.sql
 \i supabase/migrations/20261014132000_restrict_parent_login_rpc.sql
