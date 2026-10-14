@@ -109,6 +109,7 @@ BEGIN
       SELECT date, status
         FROM public.attendance
        WHERE student_id = v_sess.student_id
+         AND school_id = v_student.school_id
        ORDER BY date DESC
        LIMIT 30
     ) a;
@@ -128,6 +129,7 @@ BEGIN
     JOIN public.assessments asmt ON asmt.id = g.assessment_id
     JOIN public.subjects sub ON sub.id = asmt.subject_id
    WHERE g.student_id = v_sess.student_id
+     AND g.school_id = v_student.school_id
    LIMIT 50;
 
   SELECT COALESCE(jsonb_agg(
@@ -224,6 +226,7 @@ BEGIN
     INTO v_leave_requests
     FROM public.leave_requests lr
    WHERE lr.student_id = v_sess.student_id
+     AND lr.school_id = v_student.school_id
    LIMIT 20;
 
   SELECT COALESCE(jsonb_agg(
@@ -253,7 +256,8 @@ BEGIN
          ), '[]'::jsonb)
     INTO v_invoices
     FROM public.invoices i
-   WHERE i.student_id = v_sess.student_id;
+   WHERE i.student_id = v_sess.student_id
+     AND i.school_id = v_student.school_id;
 
   RETURN jsonb_build_object(
     'ok', true,
