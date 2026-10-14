@@ -111,7 +111,13 @@ BEGIN
   INSERT INTO public.audit_log(source, actor, action, school_id, payload)
   VALUES (
     'telegram', v_sess.teacher_id, 'student.update', v_sess.school_id,
-    jsonb_build_object('student_id', v_row.student_id, 'name_en', v_row.name_en, 'class', v_row.class, 'grade', v_row.grade)
+    jsonb_build_object(
+      'student_id', v_row.student_id,
+      'submitted_fields', (
+        SELECT jsonb_agg(field_name ORDER BY field_name)
+          FROM jsonb_object_keys(p_patch) AS submitted(field_name)
+      )
+    )
   );
 
   RETURN jsonb_build_object(
