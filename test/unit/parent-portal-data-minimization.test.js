@@ -22,6 +22,16 @@ test('parent dashboard selects only needed student fields and returns an allowli
   assert.doesNotMatch(migration, /'student', to_jsonb\(v_student\)/);
 });
 
+test('parent login, dashboard, and leave requests fail closed for inactive students or schools', () => {
+  assert.match(migration, /AND st\.status = 'Active'/);
+  assert.match(migration, /AND sc\.status = 'active'/);
+  assert.match(migration, /CREATE OR REPLACE FUNCTION public\.rpc_parent_submit_leave_request/);
+  assert.match(migration, /s\.status = 'Active'/);
+  assert.match(migration, /ps\.school_id/);
+  assert.match(migration, /'invalid_session'/);
+  assert.match(migration, /'request', jsonb_build_object/);
+});
+
 test('parent invoice responses expose only fields consumed by the portal', () => {
   assert.match(migration, /jsonb_build_object\('id', i\.id, 'invoice_number', i\.invoice_number, 'due_date', i\.due_date, 'status', i\.status, 'total_amount', i\.total_amount, 'paid_amount', i\.paid_amount,/);
   assert.doesNotMatch(migration, /to_jsonb\(i\)/);
