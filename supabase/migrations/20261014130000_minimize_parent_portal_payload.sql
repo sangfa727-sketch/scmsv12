@@ -271,4 +271,69 @@ END
 $function$
 ;
 
+
+CREATE OR REPLACE FUNCTION public.rpc_parent_submit_leave_request(
+  p_session_token text,
+  p_start_date date,
+  p_end_date date,
+  p_reason text
+)
+RETURNS jsonb
+LANGUAGE plpgsql
+SECURITY DEFINER
+SET search_path TO 'pg_catalog', 'public', 'pg_temp'
+AS $function$
+DECLARE
+  v_sess RECORD;
+  v_row RECORD;
+BEGIN
+  SELECT ps.student_id, ps.school_id, s.class
+    INTO v_sess
+    FROM public.parent_sessions AS ps
+    JOIN public.students AS s
+      ON s.student_id = ps.student_id
+     AND s.school_id = ps.school_id
+     AND s.status = 'Active'
+    JOIN public.schools AS sc
+      ON sc.school_id = s.school_id
+     AND sc.status = 'active'
+   WHERE ps.session_token = p_session_token
+     AND ps.expires_at > now()
+   LIMIT 1;
+
+  IF v_sess IS NULL THEN
+    RETURN jsonb_build_object('ok', false, 'error', 'invalid_session');
+  END IF;
+  IF p_start_date IS NULL OR p_end_date IS NULL OR p_end_date < p_start_date THEN
+    RETURN jsonb_build_object('ok', false, 'error', 'invalid_date_range');
+  END IF;
+  IF p_reason IS NULL OR nullif(trim(p_reason), '') IS NULL OR length(p_reason) > 1000 THEN
+    RETURN jsonb_build_object('ok', false, 'error', 'invalid_reason');
+  END IF;
+
+  UPDATE public.parent_sessions
+     SET last_seen_at = now()
+   WHERE session_token = p_session_token;
+
+  INSERT INTO public.leave_requests
+    (school_id, student_id, class, start_date, end_date, reason)
+  VALUES
+    (v_sess.school_id, v_sess.student_id, v_sess.class, p_start_date, p_end_date, trim(p_reason))
+  RETURNING id, school_id, student_id, start_date, end_date, reason, status, created_at
+       INTO v_row;
+
+  RETURN jsonb_build_object(
+    'ok', true,
+    'request', jsonb_build_object(
+      'id', v_row.id,
+      'start_date', v_row.start_date,
+      'end_date', v_row.end_date,
+      'reason', v_row.reason,
+      'status', v_row.status,
+      'created_at', v_row.created_at
+    )
+  );
+END
+$function$;
+
 COMMIT;
