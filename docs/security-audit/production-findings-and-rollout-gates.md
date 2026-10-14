@@ -46,7 +46,7 @@ The deployed `parent-google-login` Edge Function has `verify_jwt=false` and perf
 
 ### P2 — Migration history drift
 
-Earlier read-only comparison found repository migration filenames/counts diverge from Production migration history. Reconcile renamed/missing migrations with a documented mapping before relying on automated migration history as proof that all code changes are deployed. Do not replay historical migrations or repair migration history directly in Production during this audit.
+A fresh read-only comparison counted 149 SQL migration files on repository `main` versus 202 Production `schema_migrations` rows. Exact filename-stem/name matching found 62 overlaps and only 2 exact version-ID overlaps; 141 Production history names do not match a current repository filename stem. This is a reconciliation signal, not proof that the corresponding schema objects are missing, because historical files may have been renamed, remapped, squashed, or applied under different migration identifiers. Build a reviewed mapping from each historical migration to its current equivalent and verify live schema/function/grant state before any rollout. Do not replay historical migrations or repair migration history directly in Production during this audit.
 
 ### P1/P2 — Student photo objects remain publicly readable
 
