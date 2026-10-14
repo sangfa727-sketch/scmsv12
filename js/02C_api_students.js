@@ -66,7 +66,9 @@ Object.assign(API, {
   async uploadStudentPhoto(studentId, file) {
     // Student photos must use the trusted Edge Function: direct anonymous
     // writes to the public Storage bucket are intentionally disabled.
-    const sessionToken = _webSessionToken();
+    const sessionToken = window.APP.platform === 'web'
+      ? _webSessionToken()
+      : (window.getSavedSession?.()?.token || '');
     if (!sessionToken) throw new Error('A valid school session is required to upload a student photo');
 
     // Phone photos are often HEIC or > 3 MB; normalize to a small square JPEG.
