@@ -99,7 +99,8 @@ CREATE TABLE public.students (
   qr_token text,
   parent_tg_id text,
   metadata jsonb,
-  notes text
+  notes text,
+  updated_at timestamptz NOT NULL DEFAULT now()
 );
 
 INSERT INTO public.schools (school_id, school_name, status) VALUES
