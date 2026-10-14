@@ -32,3 +32,14 @@ test('parent SECURITY DEFINER functions put pg_catalog before application schema
   assert.match(migration, /SET search_path TO 'pg_catalog', 'public', 'extensions', 'pg_temp'/);
   assert.match(migration, /SET search_path TO 'pg_catalog', 'public', 'pg_temp'/);
 });
+
+test('parent portal messages, events, timetable, and exams expose only UI fields', () => {
+  assert.match(migration, /jsonb_build_object\('date', x\.date, 'type', x\.type, 'message_preview', x\.message_preview\)/);
+  assert.match(migration, /'title', e\.title,\s*'description', e\.description,\s*'starts_at', e\.starts_at/);
+  assert.match(migration, /'day', tt\.day,\s*'start_time', tt\.start_time,\s*'end_time', tt\.end_time,\s*'subject', tt\.subject,\s*'room', tt\.room/);
+  assert.doesNotMatch(migration, /'student_id', e\.student_id/);
+  assert.doesNotMatch(migration, /'school_id', e\.school_id/);
+  assert.doesNotMatch(migration, /'student_id', pc\.student_id/);
+  assert.doesNotMatch(migration, /'notes', tt\.notes/);
+  assert.doesNotMatch(migration, /'type', asmt\.type/);
+});
