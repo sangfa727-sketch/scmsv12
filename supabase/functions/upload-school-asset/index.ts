@@ -39,15 +39,20 @@ Deno.serve(async (req: Request) => {
     const form = await req.formData();
     const sessionToken = String(form.get("session_token") || "").trim();
     const kind = String(form.get("kind") || "").trim();
+    const studentId = String(form.get("student_id") || "").trim();
     const file = form.get("file");
 
     if (!sessionToken) return json({ error: "Missing session" }, 401);
-    if (!["logo", "cover", "teacher"].includes(kind)) {
+    if (!["logo", "cover", "teacher", "student"].includes(kind)) {
       return json({ error: "Invalid asset type" }, 400);
     }
     if (!(file instanceof File)) return json({ error: "Missing image" }, 400);
-    if (file.size <= 0 || file.size > 5 * 1024 * 1024) {
-      return json({ error: "Image exceeds the 5 MB limit" }, 400);
+
+    const maxBytes = kind === "student" ? 3 * 1024 * 1024 : 5 * 1024 * 1024;
+    if (file.size <= 0 || file.size > maxBytes) {
+      return json({ error: kind === "student"
+        ? "Student photo exceeds the 3 MB limit"
+        : "Image exceeds the 5 MB limit", 400);
     }
     if (!["image/jpeg", "image/png", "image/webp"].includes(file.type)) {
       return json({ error: "Unsupported image type" }, 400);
@@ -88,14 +93,51 @@ Deno.serve(async (req: Request) => {
       return json({ error: "Session is not authorized" }, 403);
     }
 
+    const schoolUrl = new URL(`${supabaseUrl}/rest/v1/schools`);
+    schoolUrl.searchParams.set("school_id", `eq.${session.school_id}`);
+    schoolUrl.searchParams.set("select", "school_id,status");
+    schoolUrl.searchParams.set("limit", "1");
+    const schoolResp = await fetch(schoolUrl, { headers });
+    if (!schoolResp.ok) return json({ error: "School lookup failed" }, 500);
+    const schools = await schoolResp.json();
+    if (!schools[0] || String(schools[0].status || "").toLowerCase() !== "active") {
+      return json({ error: "School is not active" }, 403);
+    }
+
+    let authorizedSchoolId = session.school_id;
+    if (kind === "student") {
+      if (!studentId) return json({ error: "Missing student ID" }, 400);
+      const authResp = await fetch(`${supabaseUrl}/rest/v1/rpc/rpc_authorize_student_photo_upload`, {
+        method: "POST",
+        headers: { ...headers, "Content-Type": "application/json" },
+        body: JSON.stringify({
+          p_session_token: sessionToken,
+          p_student_id: studentId,
+        }),
+      });
+      if (!authResp.ok) {
+        console.error("[upload-school-asset] student photo authorization RPC failed", authResp.status);
+        return json({ error: "Student photo authorization failed" }, 500);
+      }
+      const authorization = await authResp.json();
+      if (!authorization?.ok || authorization.school_id !== session.school_id ||
+          authorization.student_id !== studentId) {
+        return json({ error: authorization?.error || "Student photo permission denied" }, 403);
+      }
+      authorizedSchoolId = authorization.school_id;
+    }
+
     if ((kind === "logo" || kind === "cover") &&
         !["admin", "super_admin"].includes(session.role)) {
       return json({ error: "Admin access required" }, 403);
     }
 
     const ext = file.type === "image/png" ? "png" : file.type === "image/webp" ? "webp" : "jpg";
-    const path = `${session.school_id}/${kind}/${crypto.randomUUID()}.${ext}`;
-    const uploadUrl = `${supabaseUrl}/storage/v1/object/school-assets/${path}`;
+    const bucket = kind === "student" ? "student-photos" : "school-assets";
+    const path = kind === "student"
+      ? `${authorizedSchoolId}/${crypto.randomUUID()}.${ext}`
+      : `${authorizedSchoolId}/${kind}/${crypto.randomUUID()}.${ext}`;
+    const uploadUrl = `${supabaseUrl}/storage/v1/object/${bucket}/${path}`;
     const uploadResp = await fetch(uploadUrl, {
       method: "POST",
       headers: {
@@ -113,7 +155,7 @@ Deno.serve(async (req: Request) => {
       return json({ error: "Asset upload failed" }, 502);
     }
 
-    const publicUrl = `${supabaseUrl}/storage/v1/object/public/school-assets/${path}`;
+    const publicUrl = `${supabaseUrl}/storage/v1/object/public/${bucket}/${path}`;
     return json({ ok: true, url: publicUrl, kind });
   } catch (err) {
     console.error("[upload-school-asset] unexpected error", err);
