@@ -3,7 +3,7 @@
 BEGIN;
 
 REVOKE EXECUTE ON FUNCTION public.rpc_parent_google_login(text, text, text)
-FROM anon, authenticated;
+FROM PUBLIC, anon, authenticated;
 
 GRANT EXECUTE ON FUNCTION public.rpc_parent_google_login(text, text, text)
 TO service_role;
