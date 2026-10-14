@@ -117,6 +117,7 @@ INSERT INTO public.app_web_sessions
   (session_token, teacher_id, school_id, role, expires_at)
 VALUES
   ('valid-session-a', 'teacher-a', 'school-a', 'admin', now() + interval '1 day'),
+  ('valid-session-b', 'teacher-b', 'school-b', 'teacher', now() + interval '1 day'),
   ('stale-school-session', 'teacher-b', 'school-a', 'teacher', now() + interval '1 day'),
   ('stale-role-session', 'teacher-a', 'school-a', 'super_admin', now() + interval '1 day'),
   ('inactive-teacher-session', 'teacher-inactive', 'school-a', 'teacher', now() + interval '1 day');
@@ -255,6 +256,7 @@ $function$;
 
 \ir ../../supabase/migrations/20261014135000_harden_non_ai_tenant_identity_and_student_payloads.sql
 \ir ../../supabase/migrations/20261014136000_secure_student_photo_upload.sql
+\ir ../../supabase/migrations/20261014137000_harden_student_delete_authorization.sql
 
 DO $assert_identity$
 DECLARE
@@ -453,5 +455,43 @@ BEGIN
   END IF;
 END
 $assert_photo_upload$;
+
+DO $assert_student_delete$
+DECLARE
+  result jsonb;
+BEGIN
+  result := public.rpc_delete_student('valid-session-b', 'student-b');
+  IF result->>'error' IS DISTINCT FROM 'forbidden' THEN
+    RAISE EXCEPTION 'non-admin teacher could use legacy student delete RPC: %', result;
+  END IF;
+  IF (SELECT status FROM public.students WHERE student_id='student-b') IS DISTINCT FROM 'Active' THEN
+    RAISE EXCEPTION 'non-admin student delete changed the record';
+  END IF;
+
+  result := public.rpc_delete_student('valid-session-a', 'student-b');
+  IF COALESCE((result->>'ok')::boolean, true) THEN
+    RAISE EXCEPTION 'school A admin deleted school B student: %', result;
+  END IF;
+  IF (SELECT status FROM public.students WHERE student_id='student-b') IS DISTINCT FROM 'Active' THEN
+    RAISE EXCEPTION 'cross-school student delete changed school B data';
+  END IF;
+
+  result := public.rpc_delete_student('valid-session-a', 'student-test');
+  IF COALESCE((result->>'ok')::boolean, false) IS DISTINCT FROM true THEN
+    RAISE EXCEPTION 'school A admin could not soft-delete own student: %', result;
+  END IF;
+  IF (SELECT status FROM public.students WHERE student_id='student-test') IS DISTINCT FROM 'Inactive' THEN
+    RAISE EXCEPTION 'admin student delete did not soft-delete record';
+  END IF;
+  IF NOT EXISTS (
+    SELECT 1 FROM public.audit_log
+     WHERE action='student.delete'
+       AND school_id='school-a'
+       AND payload->>'student_id'='student-test'
+  ) THEN
+    RAISE EXCEPTION 'student soft-delete was not audited';
+  END IF;
+END
+$assert_student_delete$;
 
 SELECT 'PASS: Telegram login/connect fails closed for stale identities; student CRUD responses omit internal fields' AS result;
