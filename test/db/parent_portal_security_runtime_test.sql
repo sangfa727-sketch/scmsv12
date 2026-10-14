@@ -154,7 +154,7 @@ BEGIN
   IF COALESCE((public.rpc_google_login('google-sub-1', 'invited@example.com', 'ci', 'invite-once', NULL, 'Invited Teacher')->>'ok')::boolean, false) IS NOT TRUE THEN
     RAISE EXCEPTION 'first invite redemption should succeed';
   END IF;
-  IF (public.rpc_google_login('google-sub-2', 'another@example.com', 'ci', 'invite-once', NULL, 'Another Teacher')->>'error') <> 'invalid_invite' THEN
+  IF (public.rpc_google_login('google-sub-2', 'another@example.com', 'ci', 'invite-once', NULL, 'Another Teacher')->>'error') IS DISTINCT FROM 'invalid_invite' THEN
     RAISE EXCEPTION 'redeemed invite must not be reusable';
   END IF;
   IF (SELECT count(*) FROM public.teachers WHERE school_id = 'school-1') <> 1 THEN
