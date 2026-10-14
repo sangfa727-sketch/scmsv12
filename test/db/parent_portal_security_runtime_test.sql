@@ -169,25 +169,7 @@ BEGIN
   IF COALESCE((public.rpc_google_login('school-sub-2', 'school2@example.com', 'ci', NULL, 'School Two', 'School Admin')->>'ok')::boolean, false) IS NOT TRUE THEN
     RAISE EXCEPTION 'second self-service school registration should succeed';
   END IF;
-  IF (SELECT count(DISTINCT school_id) FROM public.schools WHERE school_id ~ '^SCH-[0-9]+  IF has_table_privilege('anon', 'public.app_sessions', 'INSERT')
-     OR has_table_privilege('anon', 'public.app_sessions', 'UPDATE')
-     OR has_table_privilege('anon', 'public.app_sessions', 'DELETE')
-     OR has_table_privilege('anon', 'public.app_sessions', 'TRUNCATE')
-     OR has_table_privilege('authenticated', 'public.audit_log', 'INSERT')
-     OR has_table_privilege('authenticated', 'public.audit_log', 'UPDATE')
-     OR has_table_privilege('authenticated', 'public.audit_log', 'DELETE')
-     OR has_table_privilege('authenticated', 'public.audit_log', 'TRUNCATE')
-     OR has_table_privilege('anon', 'public.n8n_state', 'INSERT')
-     OR has_table_privilege('anon', 'public.n8n_state', 'UPDATE')
-     OR has_table_privilege('anon', 'public.n8n_state', 'DELETE')
-     OR has_table_privilege('anon', 'public.n8n_state', 'TRUNCATE') THEN
-    RAISE EXCEPTION 'browser-role mutation privileges remain on internal tables';
-  END IF;
-END
-$test$;
-
-SELECT 'parent portal security runtime tests passed' AS result;
-) <> 2 THEN
+  IF (SELECT count(DISTINCT school_id) FROM public.schools WHERE school_id ~ '^SCH-[0-9]+$') <> 2 THEN
     RAISE EXCEPTION 'school ID generator did not allocate distinct IDs';
   END IF;
 
