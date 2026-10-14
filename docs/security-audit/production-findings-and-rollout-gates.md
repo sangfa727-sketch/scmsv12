@@ -55,6 +55,10 @@ Production uses a public `student-photos` bucket, so knowing or obtaining an obj
 
 Production `rpc_update_student_parent(text,text,text,text,text,text)` writes parent name, primary/secondary phone, and email into `public.audit_log.payload`. This duplicates sensitive contact data into a security/audit table and increases retention and access-control impact if log access is misconfigured. Review whether audit events can record changed field names or a redacted summary instead of the values; do not remove historical audit data without an approved retention plan.
 
+### P2 — Parent contact values in audit payloads (fix prepared in PR #317)
+
+The read-only Production function review confirmed that `rpc_update_student_parent` previously copied parent names, phone numbers, and email addresses into `audit_log.payload`. Draft migration `20261014141000_minimize_parent_contact_audit_payload.sql` now records the student ID and changed field names only, while preserving the existing RPC response fields for UI compatibility. An isolated PostgreSQL regression test verifies the audit payload contains no submitted contact values and that an invalid session is rejected. This is not a Production fix until the migration is reviewed, approved, and applied through the normal rollout process.
+
 ### Review backlog — SECURITY DEFINER and RLS
 
 Read-only catalog queries found 180 SECURITY DEFINER functions executable by `anon` and 182 executable by `authenticated`; 164 browser-callable SECURITY DEFINER functions reference `app_web_sessions`. A simple source-text heuristic flagged 132 of those as lacking literal `school_id = s.school_id` and `role = s.role` patterns. This is a triage signal only—not a confirmed vulnerability count—because functions use different aliases, helper functions, and authorization models. Audit these in prioritized batches and add runtime tenant-isolation tests before changing grants or logic. Public tables with RLS enabled but no policies normally fail closed for browser roles; verify intended service-side access before changing policies.
