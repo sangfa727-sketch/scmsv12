@@ -6,6 +6,16 @@ const source = fs.readFileSync('supabase/functions/upload-school-asset/index.ts'
 const migration = fs.readFileSync('supabase/migrations/20261014136000_secure_student_photo_upload.sql', 'utf8');
 const api = fs.readFileSync('js/02C_api_students.js', 'utf8');
 
+test('upload rejects oversized multipart bodies before parsing FormData', () => {
+  assert.match(source, /async function readRequestBodyBounded\(req: Request, maxBytes: number\)/);
+  assert.match(source, /const maxRequestBytes = 5 \* 1024 \* 1024 \+ 128 \* 1024/);
+  assert.match(source, /return json\(\{ error: "Request body too large" \}, 413\)/);
+  const boundedRead = source.indexOf('const requestBytes = await readRequestBodyBounded');
+  const parseForm = source.indexOf('const form = await formRequest.formData()');
+  assert.ok(boundedRead >= 0 && parseForm > boundedRead,
+    'request body must be bounded before multipart parsing');
+});
+
 test('school asset upload binds an active teacher session to the current school and role', () => {
   assert.match(source, /String\(teacher\.status \|\| ""\)\.toLowerCase\(\) !== "active"/);
   assert.match(source, /teacher\.school_id !== session\.school_id/);
