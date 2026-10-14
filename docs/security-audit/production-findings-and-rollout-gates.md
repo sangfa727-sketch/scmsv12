@@ -26,6 +26,10 @@ Read-only inspection found broad default grants to `anon` and `authenticated` fo
 
 `public.tap_funky` and `public.pg_all_foreign_keys` are readable by browser roles and expose catalog/function or foreign-key metadata. They are owned by `supabase_admin`, so a normal migration executed as `postgres` may not be able to revoke grants. An owner/admin runbook is provided separately; verify consumers before changing grants.
 
+### P2 — Teacher invite redemption race (fixed in this draft; runtime validation pending)
+
+The Production `rpc_google_login` invite path selected an unredeemed invite without a row lock before creating the teacher and marking the invite redeemed. Concurrent requests could both observe the invite as unused and create multiple teacher records. Draft migration `20261014133000_lock_teacher_invite_redemption.sql` uses `FOR UPDATE` on the matching invite row and includes a one-time-redemption regression test. It has not been applied to Production.
+
 ### P2 — Public login endpoint rate limiting
 
 The deployed `parent-google-login` Edge Function has `verify_jwt=false` and performs Google ID-token verification via Google's `tokeninfo` endpoint, checking audience, issuer, verified email, and expiry before calling the parent login RPC with the service-role key. This manual verification is the intended authentication path, but the reviewed code has no application-level rate limiting. Add abuse/rate-limit controls and operational monitoring before treating endpoint-abuse risk as closed.
