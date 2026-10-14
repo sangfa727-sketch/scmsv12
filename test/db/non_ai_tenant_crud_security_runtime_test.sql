@@ -293,6 +293,27 @@ BEGIN
 
   INSERT INTO public.app_sessions (token, telegram_id, status, created_at)
   VALUES (connect_token, 'tg-new', 'linked', now());
+
+  -- Finishing must revalidate the CURRENT identity, not merely session expiry.
+  result := public.rpc_telegram_connect_finish('stale-school-session', connect_token);
+  IF COALESCE((result->>'ok')::boolean, true)
+     OR result->>'error' IS DISTINCT FROM 'invalid_session' THEN
+    RAISE EXCEPTION 'stale school-bound session finished Telegram connect: %', result;
+  END IF;
+  result := public.rpc_telegram_connect_finish('stale-role-session', connect_token);
+  IF COALESCE((result->>'ok')::boolean, true)
+     OR result->>'error' IS DISTINCT FROM 'invalid_session' THEN
+    RAISE EXCEPTION 'stale role-bound session finished Telegram connect: %', result;
+  END IF;
+  result := public.rpc_telegram_connect_finish('inactive-teacher-session', connect_token);
+  IF COALESCE((result->>'ok')::boolean, true)
+     OR result->>'error' IS DISTINCT FROM 'invalid_session' THEN
+    RAISE EXCEPTION 'inactive teacher finished Telegram connect: %', result;
+  END IF;
+  IF (SELECT telegram_id FROM public.teachers WHERE teacher_id='teacher-a') IS NOT DISTINCT FROM 'tg-new' THEN
+    RAISE EXCEPTION 'rejected stale Telegram connect changed teacher identity';
+  END IF;
+
   result := public.rpc_telegram_connect_finish('valid-session-a', connect_token);
   IF COALESCE((result->>'ok')::boolean, false) IS DISTINCT FROM true THEN
     RAISE EXCEPTION 'valid Telegram connect failed: %', result;
