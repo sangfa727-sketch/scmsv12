@@ -64,7 +64,7 @@ BEGIN
      SET parent_name = nullif(trim(coalesce(p_parent_name, '')), ''),
          parent_phone = nullif(trim(coalesce(p_parent_phone, '')), ''),
          parent_phone2 = nullif(trim(coalesce(p_parent_phone2, '')), ''),
-         parent_email = nullif(lower(trim(coalesce(p_parent_email, '')), '')),
+         parent_email = nullif(lower(trim(coalesce(p_parent_email, ''))), ''),
          updated_at = now()
    WHERE st.student_id = p_student_id
      AND st.school_id = v_sess.school_id
