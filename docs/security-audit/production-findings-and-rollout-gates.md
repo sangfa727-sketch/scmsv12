@@ -30,6 +30,10 @@ Read-only inspection found broad default grants to `anon` and `authenticated` fo
 
 The Production `rpc_google_login` invite path selected an unredeemed invite without a row lock before creating the teacher and marking the invite redeemed. Concurrent requests could both observe the invite as unused and create multiple teacher records. Draft migration `20261014133000_lock_teacher_invite_redemption.sql` uses `FOR UPDATE` on the matching invite row and includes a one-time-redemption regression test. It has not been applied to Production.
 
+### P2 — Concurrent self-service school ID allocation (fixed in this draft; runtime validation pending)
+
+Production `public.rpc_generate_school_id()` computes the next ID using `MAX(...)+1`. Concurrent self-service school registrations could choose the same ID before either transaction inserts the new school. Draft migration `20261014134000_serialize_school_id_generation.sql` uses a transaction-scoped advisory lock around allocation; the existing registration transaction inserts the row before releasing the lock. The migration has not been applied to Production.
+
 ### P2 — Public login endpoint rate limiting
 
 The deployed `parent-google-login` Edge Function has `verify_jwt=false` and performs Google ID-token verification via Google's `tokeninfo` endpoint, checking audience, issuer, verified email, and expiry before calling the parent login RPC with the service-role key. This manual verification is the intended authentication path, but the reviewed code has no application-level rate limiting. Add abuse/rate-limit controls and operational monitoring before treating endpoint-abuse risk as closed.
