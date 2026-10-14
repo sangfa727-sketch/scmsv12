@@ -206,6 +206,10 @@ BEGIN
   IF (SELECT telegram_id FROM public.teachers WHERE teacher_id='teacher-a') IS DISTINCT FROM 'tg-new' THEN
     RAISE EXCEPTION 'valid Telegram connect was not saved';
   END IF;
+  result := public.rpc_app_session_poll(poll_token);
+  IF COALESCE((result->>'linked')::boolean, true) THEN
+    RAISE EXCEPTION 'old Telegram login poll remained valid after relinking: %', result;
+  END IF;
 
   INSERT INTO public.app_sessions (token, telegram_id, status, created_at)
   VALUES ('connect-token-duplicate', 'tg-b', 'linked', now());
