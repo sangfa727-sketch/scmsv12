@@ -1,5 +1,10 @@
 name: SCMS tests
 
+# Avoid overlapping branch runs repeatedly pulling PostgreSQL images and exhausting registry quota.
+concurrency:
+  group: scmsv12-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
 on:
   push:
     branches: [main]
