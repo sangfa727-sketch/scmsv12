@@ -96,6 +96,24 @@ INSERT INTO public.invoices(id, school_id, student_id, invoice_number, issue_dat
 VALUES (1, 'school-1', 'student-1', 'INV-1', current_date, current_date + 7, 'Due', 100, 25, 'internal-only-note');
 INSERT INTO public.invoice_items(id, invoice_id, description, amount) VALUES (1, 1, 'Tuition', 100);
 INSERT INTO public.payments(id, school_id, invoice_id, amount, payment_date, method) VALUES (1, 'school-1', 1, 25, current_date, 'cash');
+
+-- Stress the dashboard bounds: LIMIT must constrain input rows before JSON aggregation.
+INSERT INTO public.assessments(id, school_id, class, title, type, subject_id, date, start_time, end_time)
+SELECT gs, 'school-1', 'Grade 1', 'Bounded exam ' || gs, 'internal-type', 1,
+       current_date + gs, '09:00', '10:00'
+  FROM generate_series(100, 154) AS gs;
+INSERT INTO public.grades(student_id, assessment_id, percentage, letter_grade, school_id)
+SELECT 'student-1', gs, 80, 'B', 'school-1'
+  FROM generate_series(100, 154) AS gs;
+INSERT INTO public.parent_portal_events(id, school_id, event_type, title, description, class, student_id, starts_at, ends_at, is_published)
+SELECT gs, 'school-1', 'internal-event-type', 'Bounded event ' || gs, 'Event details',
+       'Grade 1', NULL, now() + gs * interval '1 hour',
+       now() + (gs + 1) * interval '1 hour', true
+  FROM generate_series(100, 154) AS gs;
+INSERT INTO public.leave_requests(school_id, student_id, start_date, end_date, reason, status, created_at)
+SELECT 'school-1', 'student-1', current_date + gs, current_date + gs,
+       'Bounded request ' || gs, 'Pending', now() + gs * interval '1 minute'
+  FROM generate_series(2, 26) AS gs;
 INSERT INTO public.teacher_invites(invite_code, redeemed_at, expires_at, school_id, teacher_name, role)
 VALUES ('invite-once', NULL, now() + interval '1 day', 'school-1', 'Invited Teacher', 'teacher');
 
@@ -148,6 +166,17 @@ BEGIN
   END IF;
   IF NOT (invoice_json ? 'invoice_number' AND invoice_json ? 'total_amount' AND invoice_json ? 'items' AND invoice_json ? 'payments') THEN
     RAISE EXCEPTION 'parent dashboard invoice payload missing UI fields: %', invoice_json;
+  END IF;
+
+  IF COALESCE(jsonb_array_length(dashboard_result->'grades'), 0) <> 50
+     OR COALESCE(jsonb_array_length(dashboard_result->'upcoming_exams'), 0) <> 20
+     OR COALESCE(jsonb_array_length(dashboard_result->'events'), 0) <> 50
+     OR COALESCE(jsonb_array_length(dashboard_result->'leave_requests'), 0) <> 20 THEN
+    RAISE EXCEPTION 'parent dashboard aggregate limits are not enforced: grades %, exams %, events %, leave requests %',
+      jsonb_array_length(dashboard_result->'grades'),
+      jsonb_array_length(dashboard_result->'upcoming_exams'),
+      jsonb_array_length(dashboard_result->'events'),
+      jsonb_array_length(dashboard_result->'leave_requests');
   END IF;
 
   IF (dashboard_result->'events'->0) ?| ARRAY['student_id','class','event_type','ends_at','school_id'] THEN
