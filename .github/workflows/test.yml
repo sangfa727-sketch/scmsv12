@@ -13,7 +13,7 @@ jobs:
     name: Frontend syntax + regression tests
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
       - uses: actions/setup-node@v7
         with:
           node-version: 20
@@ -42,7 +42,7 @@ jobs:
           --health-timeout 5s
           --health-retries 10
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
       - name: Install PostgreSQL client
         run: sudo apt-get update && sudo apt-get install -y postgresql-client
       - name: Wait for PostgreSQL
@@ -62,6 +62,45 @@ jobs:
         env:
           PGPASSWORD: scms_test
         run: psql -h 127.0.0.1 -U scms_test -d scms_test -v ON_ERROR_STOP=1 -f test/db/manage_teacher_access_permission_gate_runtime_test.sql
+      - name: Run Manage Teacher/Access real-RPC tenant-isolation runtime harness
+        env:
+          PGPASSWORD: scms_test
+        run: psql -h 127.0.0.1 -U scms_test -d scms_test -v ON_ERROR_STOP=1 -f test/db/manage_teacher_access_tenant_isolation_runtime_test.sql
+
+  website-verified-host-runtime:
+    name: School Website verified-host registry runtime test
+    runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: public.ecr.aws/docker/library/postgres:16
+        env:
+          POSTGRES_USER: scms_host_test
+          POSTGRES_PASSWORD: scms_host_test
+          POSTGRES_DB: scms_host_test
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U scms_host_test -d scms_host_test"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 10
+    steps:
+      - uses: actions/checkout@v7
+      - name: Install PostgreSQL client
+        run: sudo apt-get update && sudo apt-get install -y postgresql-client
+      - name: Wait for PostgreSQL
+        env:
+          PGPASSWORD: scms_host_test
+        run: |
+          for i in {1..30}; do
+            pg_isready -h 127.0.0.1 -p 5432 -U scms_host_test -d scms_host_test && exit 0
+            sleep 1
+          done
+          exit 1
+      - name: Run verified-host registry runtime harness
+        env:
+          PGPASSWORD: scms_host_test
+        run: psql -h 127.0.0.1 -U scms_host_test -d scms_host_test -v ON_ERROR_STOP=1 -f test/db/school_website_verified_host_runtime_test.sql
 
   school-website-delegation-runtime:
     name: School Website delegation authorization runtime test
@@ -81,7 +120,7 @@ jobs:
           --health-timeout 5s
           --health-retries 10
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
       - name: Install PostgreSQL client
         run: sudo apt-get update && sudo apt-get install -y postgresql-client
       - name: Wait for PostgreSQL
@@ -99,7 +138,7 @@ jobs:
         run: psql -h 127.0.0.1 -U scms_website_test -d scms_website_test -v ON_ERROR_STOP=1 -f test/db/school_website_manager_delegation_runtime_test.sql
 
   public-website-admission-runtime:
-    name: Public School Website admission intake runtime test
+    name: School Website admission, draft, publication, and subdomain runtime tests
     runs-on: ubuntu-latest
     services:
       postgres:
@@ -116,7 +155,7 @@ jobs:
           --health-timeout 5s
           --health-retries 10
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
       - uses: actions/setup-node@v7
         with:
           node-version: 20
@@ -136,7 +175,7 @@ jobs:
             sleep 1
           done
           exit 1
-      - name: Run isolated public admission database runtime harness
+      - name: Run isolated School Website database runtime harness
         env:
           PGPASSWORD: scms_admission_test
         run: psql -h 127.0.0.1 -U scms_admission_test -d scms_admission_test -v ON_ERROR_STOP=1 -f test/db/public_website_admission_runtime_test.sql
@@ -159,7 +198,7 @@ jobs:
           --health-timeout 5s
           --health-retries 10
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
       - name: Install PostgreSQL client
         run: sudo apt-get update && sudo apt-get install -y postgresql-client
       - name: Wait for PostgreSQL
@@ -176,12 +215,47 @@ jobs:
           PGPASSWORD: scms_chat_test
         run: psql -h 127.0.0.1 -U scms_chat_test -d scms_chat_test -v ON_ERROR_STOP=1 -f test/db/staff_chat_group_runtime_test.sql
 
+  staff-chat-direct-tenant-runtime:
+    name: Staff Chat Direct Chat tenant-isolation runtime test
+    runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: public.ecr.aws/docker/library/postgres:16
+        env:
+          POSTGRES_USER: scms_direct_test
+          POSTGRES_PASSWORD: scms_direct_test
+          POSTGRES_DB: scms_direct_test
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U scms_direct_test -d scms_direct_test"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 10
+    steps:
+      - uses: actions/checkout@v7
+      - name: Install PostgreSQL client
+        run: sudo apt-get update && sudo apt-get install -y postgresql-client
+      - name: Wait for PostgreSQL
+        env:
+          PGPASSWORD: scms_direct_test
+        run: |
+          for i in {1..30}; do
+            pg_isready -h 127.0.0.1 -p 5432 -U scms_direct_test -d scms_direct_test && exit 0
+            sleep 1
+          done
+          exit 1
+      - name: Run Direct Chat tenant-isolation runtime harness
+        env:
+          PGPASSWORD: scms_direct_test
+        run: psql -h 127.0.0.1 -U scms_direct_test -d scms_direct_test -v ON_ERROR_STOP=1 -f test/db/staff_chat_direct_tenant_runtime_test.sql
+
   playwright-ci:
     name: Playwright local smoke test (automatic PR/push)
     if: github.event_name == 'pull_request' || github.event_name == 'push'
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
       - uses: actions/setup-node@v7
         with:
           node-version: 20
@@ -204,7 +278,7 @@ jobs:
       - name: Run local Playwright smoke, Staff Chat, and Manage Teacher/Access tests
         env:
           SCMS_URL: http://127.0.0.1:5173
-        run: npx playwright test test/e2e/ci-smoke.spec.js test/e2e/staff-chat-functions.spec.js test/e2e/teacher-management-functions.spec.js
+        run: npx playwright test test/e2e/ci-smoke.spec.js test/e2e/school-website-studio.spec.js test/e2e/staff-chat-functions.spec.js test/e2e/teacher-management-functions.spec.js
       - name: Write CI summary
         if: always()
         shell: bash
@@ -245,13 +319,24 @@ jobs:
         id: staging_gate
         shell: bash
         run: |
-          if [ -z "$SCMS_STAGING_URL" ] || [ -z "$SCMS_TEST_TEACHER" ] || [ -z "$SCMS_TEST_PW" ]; then
-            echo "Staging E2E skipped: required staging secrets are not configured."
+          if [ -z "$SCMS_STAGING_URL" ] || [ -z "$SCMS_TEST_TEACHER" ] || [ -z "$SCMS_TEST_PW" ] || [ -z "$SCMS_TEST_TEACHER_2" ] || [ -z "$SCMS_TEST_PW_2" ]; then
+            echo "Staging E2E BLOCKED: required staging secrets are not configured."
+            {
+              echo "## Staging E2E readiness: BLOCKED"
+              echo "- Required secrets: SCMS_STAGING_URL, SCMS_TEST_TEACHER, SCMS_TEST_PW, SCMS_TEST_TEACHER_2, SCMS_TEST_PW_2."
+              echo "- No staging tests ran. A skipped job is not a production-readiness pass."
+              echo "- Both isolated staging test accounts are mandatory; seed them in separate schools to validate tenant isolation. Add required optional fixtures, then rerun this workflow."
+            } >> "$GITHUB_STEP_SUMMARY"
             echo "enabled=false" >> "$GITHUB_OUTPUT"
           else
             echo "enabled=true" >> "$GITHUB_OUTPUT"
+            {
+              echo "## Staging E2E readiness: CONFIGURED"
+              echo "- Staging URL and both test accounts are configured. Confirm the accounts belong to separate test schools before treating tenant-isolation coverage as valid."
+              echo "- Review the Playwright test report for skipped tests and backend coverage before declaring production readiness."
+            } >> "$GITHUB_STEP_SUMMARY"
           fi
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
         if: steps.staging_gate.outputs.enabled == 'true'
       - uses: actions/setup-node@v7
         if: steps.staging_gate.outputs.enabled == 'true'
@@ -284,3 +369,73 @@ jobs:
         with:
           name: playwright-report
           path: playwright-report/
+
+  session-tenant-binding-runtime:
+    name: Session tenant/role binding runtime test
+    runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: public.ecr.aws/docker/library/postgres:16
+        env:
+          POSTGRES_USER: scms_session_test
+          POSTGRES_PASSWORD: scms_session_test
+          POSTGRES_DB: scms_session_test
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U scms_session_test -d scms_session_test"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 10
+    steps:
+      - uses: actions/checkout@v7
+      - name: Install PostgreSQL client
+        run: sudo apt-get update && sudo apt-get install -y postgresql-client
+      - name: Wait for PostgreSQL
+        env:
+          PGPASSWORD: scms_session_test
+        run: |
+          for i in {1..30}; do
+            pg_isready -h 127.0.0.1 -p 5432 -U scms_session_test -d scms_session_test && exit 0
+            sleep 1
+          done
+          exit 1
+      - name: Run session tenant/role binding runtime harness
+        env:
+          PGPASSWORD: scms_session_test
+        run: psql -h 127.0.0.1 -U scms_session_test -d scms_session_test -v ON_ERROR_STOP=1 -f test/db/session_tenant_binding_runtime_test.sql
+
+  rpc-session-identity-binding-runtime:
+    name: School RPC session identity binding runtime test
+    runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: public.ecr.aws/docker/library/postgres:16
+        env:
+          POSTGRES_USER: scms_rpc_test
+          POSTGRES_PASSWORD: scms_rpc_test
+          POSTGRES_DB: scms_rpc_test
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U scms_rpc_test -d scms_rpc_test"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 10
+    steps:
+      - uses: actions/checkout@v7
+      - name: Install PostgreSQL client
+        run: sudo apt-get update && sudo apt-get install -y postgresql-client
+      - name: Wait for PostgreSQL
+        env:
+          PGPASSWORD: scms_rpc_test
+        run: |
+          for i in {1..30}; do
+            pg_isready -h 127.0.0.1 -p 5432 -U scms_rpc_test -d scms_rpc_test && exit 0
+            sleep 1
+          done
+          exit 1
+      - name: Run school RPC session identity binding runtime harness
+        env:
+          PGPASSWORD: scms_rpc_test
+        run: psql -h 127.0.0.1 -U scms_rpc_test -d scms_rpc_test -v ON_ERROR_STOP=1 -f test/db/rpc_session_identity_binding_runtime_test.sql
