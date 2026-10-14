@@ -408,11 +408,17 @@ window.bootAfterLogin = function () {
 
 // Exposed so the More menu can offer a "Sign out" option
 window.signOut = function () {
+  // Revoke the server-side web session before clearing its local token. The
+  // webLogout path calls rpc_web_logout with this exact session token and
+  // performs the reload after the request settles. Keep legacy Telegram
+  // sign-out on its existing local-session path.
+  const webSession = typeof getWebSession === 'function' ? getWebSession() : null;
+  if (webSession?.session_token && typeof window.webLogout === 'function') {
+    void window.webLogout();
+    return;
+  }
+
   if (typeof clearSavedSession === 'function') clearSavedSession();
-  // v11.7: also clear the web session (Google / email+password / Teacher-ID
-  // logins) — this function used to only clear the legacy Telegram-native
-  // session, so web-session users could never actually sign out; the app
-  // would just log them straight back in on reload.
   if (typeof clearWebSession === 'function') clearWebSession();
   if (window.APPStore) window.APPStore.reset();
   window.location.reload();
