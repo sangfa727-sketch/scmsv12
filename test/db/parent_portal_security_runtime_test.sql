@@ -68,6 +68,7 @@ RETURNS text LANGUAGE sql VOLATILE AS 'SELECT ''school-new''::text';
 \i supabase/migrations/20261014131000_revoke_internal_table_client_mutation.sql
 \i supabase/migrations/20261014132000_restrict_parent_login_rpc.sql
 \i supabase/migrations/20261014133000_lock_teacher_invite_redemption.sql
+\i supabase/migrations/20261014134000_serialize_school_id_generation.sql
 
 INSERT INTO public.students(student_id, name_en, name_local, class, photo_url, parent_email, school_id, status, qr_token)
 VALUES ('student-1', 'Test Student', 'စမ်းသပ်', 'Grade 1', 'https://example.invalid/photo.png',
@@ -159,6 +160,35 @@ BEGIN
   END IF;
   IF (SELECT count(*) FROM public.teachers WHERE school_id = 'school-1') <> 1 THEN
     RAISE EXCEPTION 'invite redemption created more than one teacher';
+  END IF;
+
+  -- The self-service school registration path must allocate successive IDs.
+  IF COALESCE((public.rpc_google_login('school-sub-1', 'school1@example.com', 'ci', NULL, 'School One', 'School Admin')->>'ok')::boolean, false) IS NOT TRUE THEN
+    RAISE EXCEPTION 'first self-service school registration should succeed';
+  END IF;
+  IF COALESCE((public.rpc_google_login('school-sub-2', 'school2@example.com', 'ci', NULL, 'School Two', 'School Admin')->>'ok')::boolean, false) IS NOT TRUE THEN
+    RAISE EXCEPTION 'second self-service school registration should succeed';
+  END IF;
+  IF (SELECT count(DISTINCT school_id) FROM public.schools WHERE school_id ~ '^SCH-[0-9]+  IF has_table_privilege('anon', 'public.app_sessions', 'INSERT')
+     OR has_table_privilege('anon', 'public.app_sessions', 'UPDATE')
+     OR has_table_privilege('anon', 'public.app_sessions', 'DELETE')
+     OR has_table_privilege('anon', 'public.app_sessions', 'TRUNCATE')
+     OR has_table_privilege('authenticated', 'public.audit_log', 'INSERT')
+     OR has_table_privilege('authenticated', 'public.audit_log', 'UPDATE')
+     OR has_table_privilege('authenticated', 'public.audit_log', 'DELETE')
+     OR has_table_privilege('authenticated', 'public.audit_log', 'TRUNCATE')
+     OR has_table_privilege('anon', 'public.n8n_state', 'INSERT')
+     OR has_table_privilege('anon', 'public.n8n_state', 'UPDATE')
+     OR has_table_privilege('anon', 'public.n8n_state', 'DELETE')
+     OR has_table_privilege('anon', 'public.n8n_state', 'TRUNCATE') THEN
+    RAISE EXCEPTION 'browser-role mutation privileges remain on internal tables';
+  END IF;
+END
+$test$;
+
+SELECT 'parent portal security runtime tests passed' AS result;
+) <> 2 THEN
+    RAISE EXCEPTION 'school ID generator did not allocate distinct IDs';
   END IF;
 
   IF has_table_privilege('anon', 'public.app_sessions', 'INSERT')
