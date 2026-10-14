@@ -69,21 +69,43 @@ Deno.serve(async (req: Request) => {
       Authorization: `Bearer ${serviceRoleKey}`,
     };
 
-    const sessionUrl = new URL(`${supabaseUrl}/rest/v1/app_web_sessions`);
-    sessionUrl.searchParams.set("session_token", `eq.${sessionToken}`);
-    sessionUrl.searchParams.set("select", "teacher_id,school_id,role,expires_at");
-    sessionUrl.searchParams.set("limit", "1");
-    const sessionResp = await fetch(sessionUrl, { headers });
-    if (!sessionResp.ok) return json({ error: "Session lookup failed" }, 500);
-    const sessions = await sessionResp.json();
-    const session = sessions[0];
-    if (!session || !session.expires_at || new Date(session.expires_at).getTime() <= Date.now()) {
-      return json({ error: "Session expired" }, 401);
+    let session: Record<string, unknown> | null = null;
+    let sessionKind: "web" | "telegram" | null = null;
+
+    const webSessionUrl = new URL(\`\${supabaseUrl}/rest/v1/app_web_sessions\`);
+    webSessionUrl.searchParams.set("session_token", \`eq.\${sessionToken}\`);
+    webSessionUrl.searchParams.set("select", "teacher_id,school_id,role,expires_at");
+    webSessionUrl.searchParams.set("limit", "1");
+    const webSessionResp = await fetch(webSessionUrl, { headers });
+    if (!webSessionResp.ok) return json({ error: "Session lookup failed" }, 500);
+    const webSessions = await webSessionResp.json();
+    const webSession = webSessions[0];
+    if (webSession && webSession.expires_at &&
+        new Date(webSession.expires_at).getTime() > Date.now()) {
+      session = webSession;
+      sessionKind = "web";
+    } else {
+      // Native/TWA Telegram sessions use a high-entropy token and have no
+      // expires_at column; accept only linked rows and revalidate live identity.
+      const appSessionUrl = new URL(\`\${supabaseUrl}/rest/v1/app_sessions\`);
+      appSessionUrl.searchParams.set("token", \`eq.\${sessionToken}\`);
+      appSessionUrl.searchParams.set("status", "eq.linked");
+      appSessionUrl.searchParams.set("select", "token,telegram_id,teacher_id,school_id,status");
+      appSessionUrl.searchParams.set("limit", "1");
+      const appSessionResp = await fetch(appSessionUrl, { headers });
+      if (!appSessionResp.ok) return json({ error: "Session lookup failed" }, 500);
+      const appSessions = await appSessionResp.json();
+      const appSession = appSessions[0];
+      if (!appSession || typeof appSession.token !== "string" || appSession.token.length < 32) {
+        return json({ error: "Session expired" }, 401);
+      }
+      session = appSession;
+      sessionKind = "telegram";
     }
 
-    const teacherUrl = new URL(`${supabaseUrl}/rest/v1/teachers`);
-    teacherUrl.searchParams.set("teacher_id", `eq.${session.teacher_id}`);
-    teacherUrl.searchParams.set("select", "teacher_id,school_id,role,status");
+    const teacherUrl = new URL(\`\${supabaseUrl}/rest/v1/teachers\`);
+    teacherUrl.searchParams.set("teacher_id", \`eq.\${String(session.teacher_id || "")}\`);
+    teacherUrl.searchParams.set("select", "teacher_id,school_id,role,status,telegram_id");
     teacherUrl.searchParams.set("limit", "1");
     const teacherResp = await fetch(teacherUrl, { headers });
     if (!teacherResp.ok) return json({ error: "Teacher lookup failed" }, 500);
@@ -91,9 +113,11 @@ Deno.serve(async (req: Request) => {
     const teacher = teachers[0];
     if (!teacher || String(teacher.status || "").toLowerCase() !== "active" ||
         teacher.school_id !== session.school_id ||
-        teacher.role !== session.role) {
+        (sessionKind === "web" && teacher.role !== session.role) ||
+        (sessionKind === "telegram" && teacher.telegram_id !== session.telegram_id)) {
       return json({ error: "Session is not authorized" }, 403);
     }
+    if (sessionKind === "telegram") session.role = teacher.role;
 
     const schoolUrl = new URL(`${supabaseUrl}/rest/v1/schools`);
     schoolUrl.searchParams.set("school_id", `eq.${session.school_id}`);
