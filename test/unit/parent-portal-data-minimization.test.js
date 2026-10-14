@@ -36,6 +36,9 @@ test('parent invoice responses expose only fields consumed by the portal', () =>
   assert.match(migration, /jsonb_build_object\('id', i\.id, 'invoice_number', i\.invoice_number, 'due_date', i\.due_date, 'status', i\.status, 'total_amount', i\.total_amount, 'paid_amount', i\.paid_amount,/);
   assert.doesNotMatch(migration, /to_jsonb\(i\)/);
   assert.match(migration, /'items', COALESCE/);
+  assert.match(migration, /FROM \(\s*SELECT it\.id, it\.description, it\.amount[\s\S]*?LIMIT 100\s*\) x/);
+  assert.match(migration, /FROM \(\s*SELECT p\.id, p\.payment_date, p\.method, p\.amount[\s\S]*?LIMIT 100\s*\) x/);
+  assert.match(migration, /FROM \(\s*SELECT i\.\*[\s\S]*?ORDER BY i\.id DESC\s+LIMIT 50\s*\) i/);
   assert.match(migration, /'payments', COALESCE/);
 });
 
