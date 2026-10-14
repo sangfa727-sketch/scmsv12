@@ -125,7 +125,6 @@ BEGIN
            jsonb_build_object(
              'subject', sub.subject_name,
              'title', asmt.title,
-             'type', asmt.type,
              'date', asmt.date,
              'start_time', asmt.start_time,
              'end_time', asmt.end_time
@@ -141,20 +140,16 @@ BEGIN
    LIMIT 20;
 
   SELECT COALESCE(jsonb_agg(
-           to_jsonb(x)
+           jsonb_build_object('date', x.date, 'type', x.type, 'message_preview', x.message_preview)
            ORDER BY x.date DESC, x.created_at DESC
          ), '[]'::jsonb)
     INTO v_parent_messages
     FROM (
       SELECT
-        pc.id,
         pc.date,
         pc.type,
         pc.message_preview,
-        pc.status,
-        pc.created_at,
-        pc.student_id,
-        pc.class
+        pc.created_at
       FROM public.parent_comms pc
       WHERE pc.school_id = v_student.school_id
         AND (
@@ -171,15 +166,11 @@ BEGIN
 
   SELECT COALESCE(jsonb_agg(
            jsonb_build_object(
-             'id', tt.id,
-             'class', tt.class,
              'day', tt.day,
-             'period', tt.period,
              'start_time', tt.start_time,
              'end_time', tt.end_time,
              'subject', tt.subject,
-             'room', tt.room,
-             'notes', tt.notes
+             'room', tt.room
            )
            ORDER BY tt.day, tt.period
          ), '[]'::jsonb)
@@ -190,14 +181,9 @@ BEGIN
 
   SELECT COALESCE(jsonb_agg(
            jsonb_build_object(
-             'id', e.id,
-             'event_type', e.event_type,
              'title', e.title,
              'description', e.description,
-             'class', e.class,
-             'student_id', e.student_id,
-             'starts_at', e.starts_at,
-             'ends_at', e.ends_at
+             'starts_at', e.starts_at
            )
            ORDER BY e.starts_at ASC, e.id ASC
          ), '[]'::jsonb)
