@@ -320,9 +320,333 @@ jobs:
             sleep 1
           done
           exit 1
+name: SCMS tests
+
+# Avoid overlapping branch runs repeatedly pulling PostgreSQL images and exhausting registry quota.
+concurrency:
+  group: scmsv12-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch: {}
+  schedule:
+    - cron: '0 20 * * *'
+
+jobs:
+  frontend:
+    name: Frontend syntax + regression tests
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-node@v7
+        with:
+          node-version: 20
+      - run: npm install --no-audit --no-fund
+      - name: Run dependency security audit
+        run: npm audit --audit-level=high
+      - name: Run frontend syntax and regression tests
+        run: npm test
+
+  web-session-logout-runtime:
+    name: Web session logout RPC runtime test
+    runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: postgres:16
+        env:
+          POSTGRES_USER: scms_logout_test
+          POSTGRES_PASSWORD: scms_logout_test
+          POSTGRES_DB: scms_logout_test
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U scms_logout_test -d scms_logout_test"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 10
+    steps:
+      - uses: actions/checkout@v7
+      - name: Install PostgreSQL client
+        run: sudo apt-get update && sudo apt-get install -y postgresql-client
+      - name: Wait for PostgreSQL
+        env:
+          PGPASSWORD: scms_logout_test
+        run: |
+          for i in {1..30}; do
+            pg_isready -h 127.0.0.1 -p 5432 -U scms_logout_test -d scms_logout_test && exit 0
+            sleep 1
+          done
+          exit 1
+      - name: Run isolated web session logout runtime harness
+        env:
+          PGPASSWORD: scms_logout_test
+        run: psql -h 127.0.0.1 -U scms_logout_test -d scms_logout_test -v ON_ERROR_STOP=1 -f test/db/web_session_logout_runtime_test.sql
+
+  website-rls:
+    name: Public website RLS runtime test
+    runs-on: ubuntu-latest
+    services:
+      postgres:
+        # Public ECR mirror avoids Docker Hub anonymous pull throttling in CI.
+        image: postgres:16
+        env:
+          POSTGRES_USER: scms_test
+          POSTGRES_PASSWORD: scms_test
+          POSTGRES_DB: scms_test
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U scms_test -d scms_test"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 10
+    steps:
+      - uses: actions/checkout@v7
+      - name: Install PostgreSQL client
+        run: sudo apt-get update && sudo apt-get install -y postgresql-client
+      - name: Wait for PostgreSQL
+        env:
+          PGPASSWORD: scms_test
+        run: |
+          for i in {1..30}; do
+            pg_isready -h 127.0.0.1 -p 5432 -U scms_test -d scms_test && exit 0
+            sleep 1
+          done
+          exit 1
+      - name: Run public website RLS runtime harness
+        env:
+          PGPASSWORD: scms_test
+        run: psql -h 127.0.0.1 -U scms_test -d scms_test -v ON_ERROR_STOP=1 -f school-website/db/sandbox_rls_runtime_test.sql
+      - name: Run Manage Teacher/Access permission-gate runtime harness
+        env:
+          PGPASSWORD: scms_test
+        run: psql -h 127.0.0.1 -U scms_test -d scms_test -v ON_ERROR_STOP=1 -f test/db/manage_teacher_access_permission_gate_runtime_test.sql
+      - name: Run Manage Teacher/Access real-RPC tenant-isolation runtime harness
+        env:
+          PGPASSWORD: scms_test
+        run: psql -h 127.0.0.1 -U scms_test -d scms_test -v ON_ERROR_STOP=1 -f test/db/manage_teacher_access_tenant_isolation_runtime_test.sql
+
+  website-verified-host-runtime:
+    name: School Website verified-host registry runtime test
+    runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: postgres:16
+        env:
+          POSTGRES_USER: scms_host_test
+          POSTGRES_PASSWORD: scms_host_test
+          POSTGRES_DB: scms_host_test
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U scms_host_test -d scms_host_test"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 10
+    steps:
+      - uses: actions/checkout@v7
+      - name: Install PostgreSQL client
+        run: sudo apt-get update && sudo apt-get install -y postgresql-client
+      - name: Wait for PostgreSQL
+        env:
+          PGPASSWORD: scms_host_test
+        run: |
+          for i in {1..30}; do
+            pg_isready -h 127.0.0.1 -p 5432 -U scms_host_test -d scms_host_test && exit 0
+            sleep 1
+          done
+          exit 1
+      - name: Run verified-host registry runtime harness
+        env:
+          PGPASSWORD: scms_host_test
+        run: psql -h 127.0.0.1 -U scms_host_test -d scms_host_test -v ON_ERROR_STOP=1 -f test/db/school_website_verified_host_runtime_test.sql
+
+  school-website-delegation-runtime:
+    name: School Website delegation authorization runtime test
+    runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: postgres:16
+        env:
+          POSTGRES_USER: scms_website_test
+          POSTGRES_PASSWORD: scms_website_test
+          POSTGRES_DB: scms_website_test
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U scms_website_test -d scms_website_test"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 10
+    steps:
+      - uses: actions/checkout@v7
+      - name: Install PostgreSQL client
+        run: sudo apt-get update && sudo apt-get install -y postgresql-client
+      - name: Wait for PostgreSQL
+        env:
+          PGPASSWORD: scms_website_test
+        run: |
+          for i in {1..30}; do
+            pg_isready -h 127.0.0.1 -p 5432 -U scms_website_test -d scms_website_test && exit 0
+            sleep 1
+          done
+          exit 1
+      - name: Run School Website authorization and delegation runtime harness
+        env:
+          PGPASSWORD: scms_website_test
+        run: psql -h 127.0.0.1 -U scms_website_test -d scms_website_test -v ON_ERROR_STOP=1 -f test/db/school_website_manager_delegation_runtime_test.sql
+
+  public-website-admission-runtime:
+    name: School Website admission, draft, publication, and subdomain runtime tests
+    runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: postgres:16
+        env:
+          POSTGRES_USER: scms_admission_test
+          POSTGRES_PASSWORD: scms_admission_test
+          POSTGRES_DB: scms_admission_test
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U scms_admission_test -d scms_admission_test"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 10
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-node@v7
+        with:
+          node-version: 20
+      - name: Install PostgreSQL client
+        run: sudo apt-get update && sudo apt-get install -y postgresql-client
+      - uses: actions/setup-node@v7
+        with:
+          node-version: 20
+      - name: Install npm dependencies for Deno type resolution
+        run: npm install --no-audit --no-fund
       - uses: denoland/setup-deno@v2
         with:
           deno-version: v2.x
+      - name: Check Edge Function types
+        run: deno check supabase/functions/public-admission-submit/index.ts
+      - name: Wait for PostgreSQL
+        env:
+          PGPASSWORD: scms_admission_test
+        run: |
+          for i in {1..30}; do
+            pg_isready -h 127.0.0.1 -p 5432 -U scms_admission_test -d scms_admission_test && exit 0
+            sleep 1
+          done
+          exit 1
+      - name: Run isolated School Website database runtime harness
+        env:
+          PGPASSWORD: scms_admission_test
+        run: psql -h 127.0.0.1 -U scms_admission_test -d scms_admission_test -v ON_ERROR_STOP=1 -f test/db/public_website_admission_runtime_test.sql
+
+  staff-chat-group-runtime:
+    name: Staff Chat Group Chat backend runtime test
+    runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: postgres:16
+        env:
+          POSTGRES_USER: scms_chat_test
+          POSTGRES_PASSWORD: scms_chat_test
+          POSTGRES_DB: scms_chat_test
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U scms_chat_test -d scms_chat_test"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 10
+    steps:
+      - uses: actions/checkout@v7
+      - name: Install PostgreSQL client
+        run: sudo apt-get update && sudo apt-get install -y postgresql-client
+      - name: Wait for PostgreSQL
+        env:
+          PGPASSWORD: scms_chat_test
+        run: |
+          for i in {1..30}; do
+            pg_isready -h 127.0.0.1 -p 5432 -U scms_chat_test -d scms_chat_test && exit 0
+            sleep 1
+          done
+          exit 1
+      - name: Run isolated Group Chat schema, authorization, membership, and persistence tests
+        env:
+          PGPASSWORD: scms_chat_test
+        run: psql -h 127.0.0.1 -U scms_chat_test -d scms_chat_test -v ON_ERROR_STOP=1 -f test/db/staff_chat_group_runtime_test.sql
+
+  staff-chat-direct-tenant-runtime:
+    name: Staff Chat Direct Chat tenant-isolation runtime test
+    runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: postgres:16
+        env:
+          POSTGRES_USER: scms_direct_test
+          POSTGRES_PASSWORD: scms_direct_test
+          POSTGRES_DB: scms_direct_test
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U scms_direct_test -d scms_direct_test"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 10
+    steps:
+      - uses: actions/checkout@v7
+      - name: Install PostgreSQL client
+        run: sudo apt-get update && sudo apt-get install -y postgresql-client
+      - name: Wait for PostgreSQL
+        env:
+          PGPASSWORD: scms_direct_test
+        run: |
+          for i in {1..30}; do
+            pg_isready -h 127.0.0.1 -p 5432 -U scms_direct_test -d scms_direct_test && exit 0
+            sleep 1
+          done
+          exit 1
+      - name: Run Direct Chat tenant-isolation runtime harness
+        env:
+          PGPASSWORD: scms_direct_test
+        run: psql -h 127.0.0.1 -U scms_direct_test -d scms_direct_test -v ON_ERROR_STOP=1 -f test/db/staff_chat_direct_tenant_runtime_test.sql
+
+  non-ai-tenant-crud-security:
+    name: Non-AI tenant identity and student CRUD response runtime test
+    runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: postgres:16
+        env:
+          POSTGRES_USER: scms_non_ai_test
+          POSTGRES_PASSWORD: scms_non_ai_test
+          POSTGRES_DB: scms_non_ai_test
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U scms_non_ai_test -d scms_non_ai_test"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 10
+    steps:
+      - uses: actions/checkout@v7
+      - name: Install PostgreSQL client
+        run: sudo apt-get update && sudo apt-get install -y postgresql-client
+      - name: Wait for PostgreSQL
+        env:
+          PGPASSWORD: scms_non_ai_test
+        run: |
+          for i in {1..30}; do
+            pg_isready -h 127.0.0.1 -p 5432 -U scms_non_ai_test -d scms_non_ai_test && exit 0
+            sleep 1
+          done
+          exit 1
       - name: Check upload Edge Function types
         run: deno check supabase/functions/upload-school-asset/index.ts
       - name: Run non-AI tenant and student CRUD security harness
