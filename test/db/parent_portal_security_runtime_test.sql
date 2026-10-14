@@ -114,6 +114,16 @@ INSERT INTO public.leave_requests(school_id, student_id, start_date, end_date, r
 SELECT 'school-1', 'student-1', current_date + gs, current_date + gs,
        'Bounded request ' || gs, 'Pending', now() + gs * interval '1 minute'
   FROM generate_series(2, 26) AS gs;
+
+INSERT INTO public.invoices(id, school_id, student_id, invoice_number, issue_date, due_date, status, total_amount, paid_amount, notes)
+SELECT gs, 'school-1', 'student-1', 'INV-' || gs, current_date, current_date + 7, 'Due', 100, 0, 'internal-only-note'
+  FROM generate_series(2, 55) AS gs;
+INSERT INTO public.invoice_items(id, invoice_id, description, amount)
+SELECT gs, 55, 'Bounded item ' || gs, 1
+  FROM generate_series(2, 102) AS gs;
+INSERT INTO public.payments(id, school_id, invoice_id, amount, payment_date, method)
+SELECT gs, 'school-1', 55, 1, current_date - gs, 'cash'
+  FROM generate_series(2, 102) AS gs;
 INSERT INTO public.teacher_invites(invite_code, redeemed_at, expires_at, school_id, teacher_name, role)
 VALUES ('invite-once', NULL, now() + interval '1 day', 'school-1', 'Invited Teacher', 'teacher');
 
@@ -171,12 +181,18 @@ BEGIN
   IF COALESCE(jsonb_array_length(dashboard_result->'grades'), 0) <> 50
      OR COALESCE(jsonb_array_length(dashboard_result->'upcoming_exams'), 0) <> 20
      OR COALESCE(jsonb_array_length(dashboard_result->'events'), 0) <> 50
-     OR COALESCE(jsonb_array_length(dashboard_result->'leave_requests'), 0) <> 20 THEN
-    RAISE EXCEPTION 'parent dashboard aggregate limits are not enforced: grades %, exams %, events %, leave requests %',
+     OR COALESCE(jsonb_array_length(dashboard_result->'leave_requests'), 0) <> 20
+     OR COALESCE(jsonb_array_length(dashboard_result->'invoices'), 0) <> 50
+     OR COALESCE(jsonb_array_length(dashboard_result->'invoices'->0->'items'), 0) <> 100
+     OR COALESCE(jsonb_array_length(dashboard_result->'invoices'->0->'payments'), 0) <> 100 THEN
+    RAISE EXCEPTION 'parent dashboard aggregate limits are not enforced: grades %, exams %, events %, leave requests %, invoices %, first invoice items %, first invoice payments %',
       jsonb_array_length(dashboard_result->'grades'),
       jsonb_array_length(dashboard_result->'upcoming_exams'),
       jsonb_array_length(dashboard_result->'events'),
-      jsonb_array_length(dashboard_result->'leave_requests');
+      jsonb_array_length(dashboard_result->'leave_requests'),
+      jsonb_array_length(dashboard_result->'invoices'),
+      jsonb_array_length(dashboard_result->'invoices'->0->'items'),
+      jsonb_array_length(dashboard_result->'invoices'->0->'payments');
   END IF;
 
   IF (dashboard_result->'events'->0) ?| ARRAY['student_id','class','event_type','ends_at','school_id'] THEN
