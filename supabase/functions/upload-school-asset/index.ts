@@ -50,9 +50,11 @@ Deno.serve(async (req: Request) => {
 
     const maxBytes = kind === "student" ? 3 * 1024 * 1024 : 5 * 1024 * 1024;
     if (file.size <= 0 || file.size > maxBytes) {
-      return json({ error: kind === "student"
-        ? "Student photo exceeds the 3 MB limit"
-        : "Image exceeds the 5 MB limit", 400);
+      return json({
+        error: kind === "student"
+          ? "Student photo exceeds the 3 MB limit"
+          : "Image exceeds the 5 MB limit",
+      }, 400);
     }
     if (!["image/jpeg", "image/png", "image/webp"].includes(file.type)) {
       return json({ error: "Unsupported image type" }, 400);
