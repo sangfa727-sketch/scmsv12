@@ -80,7 +80,7 @@ BEGIN
   UPDATE public.students AS st
      SET name_en = CASE WHEN p_patch ? 'name_en' THEN trim(p_patch->>'name_en') ELSE st.name_en END,
          name_mm = CASE WHEN p_patch ? 'name_mm' THEN nullif(trim(p_patch->>'name_mm'), '')
-                        WHEN p_patch ? 'name_local' THEN coalesce(nullif(trim(p_patch->>'name_local'), ''), st.name_en)
+                        WHEN p_patch ? 'name_local' THEN coalesce(nullif(trim(p_patch->>'name_local'), ''), nullif(trim(p_patch->>'name_en'), ''), st.name_en)
                         ELSE st.name_mm END,
          name_local = CASE WHEN p_patch ? 'name_local' THEN nullif(trim(p_patch->>'name_local'), '') ELSE st.name_local END,
          class = CASE WHEN p_patch ? 'class' THEN trim(p_patch->>'class') ELSE st.class END,
