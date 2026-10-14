@@ -783,7 +783,7 @@ window.webLogout = async function () {
   const sess = getWebSession();
   if (sess && sess.session_token) {
     try {
-      await _fetchWithTimeout(`${SCMS_CONFIG.SUPABASE_URL}/rest/v1/rpc/rpc_web_logout`, {
+      const response = await _fetchWithTimeout(`${SCMS_CONFIG.SUPABASE_URL}/rest/v1/rpc/rpc_web_logout`, {
         method: 'POST',
         headers: {
           'apikey':        SCMS_CONFIG.SUPABASE_ANON,
@@ -792,10 +792,22 @@ window.webLogout = async function () {
         },
         body: JSON.stringify({ p_session_token: sess.session_token }),
       }, 5000);
-    } catch (e) {}
+      const result = await response.json().catch(() => null);
+      if (!response.ok || result?.ok !== true) {
+        if (typeof showToast === 'function') showToast(t('common.failed') + ' ' + t('common.networkError'));
+        return false;
+      }
+    } catch (e) {
+      console.warn('[web-session] server logout could not be confirmed', e);
+      if (typeof showToast === 'function') showToast(t('common.failed') + ' ' + t('common.networkError'));
+      return false;
+    }
   }
   clearWebSession();
+  if (typeof clearSavedSession === 'function') clearSavedSession();
+  if (window.APPStore) window.APPStore.reset();
   window.location.reload();
+  return true;
 };
 
 /* ============================================================================
