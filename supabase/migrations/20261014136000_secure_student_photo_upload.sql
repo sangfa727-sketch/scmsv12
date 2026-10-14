@@ -97,7 +97,7 @@ BEGIN
     'student_id', v_student.student_id
   );
 END;
-$function$
+$function$;
 
 REVOKE ALL ON FUNCTION public.rpc_authorize_student_photo_upload(text, text)
   FROM PUBLIC, anon, authenticated;
