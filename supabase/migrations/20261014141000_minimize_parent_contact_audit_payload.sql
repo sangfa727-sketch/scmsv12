@@ -44,9 +44,9 @@ BEGIN
     RETURN jsonb_build_object('ok', false, 'error', 'invalid_session');
   END IF;
 
-  IF NOT private.web_has_student_permission(
+  IF COALESCE(private.web_has_student_permission(
     p_session_token, 'students.edit', p_student_id
-  ) THEN
+  ), false) IS NOT TRUE THEN
     RETURN jsonb_build_object('ok', false, 'error', 'permission_denied');
   END IF;
 
