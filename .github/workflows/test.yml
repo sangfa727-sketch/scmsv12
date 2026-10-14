@@ -439,6 +439,12 @@ jobs:
         env:
           PGPASSWORD: scms_session_test
         run: psql -h 127.0.0.1 -U scms_session_test -d scms_session_test -v ON_ERROR_STOP=1 -f test/db/session_tenant_binding_runtime_test.sql
+      - name: Run parent portal SQL security runtime harness in isolated database
+        env:
+          PGPASSWORD: scms_session_test
+        run: |
+          createdb -h 127.0.0.1 -U scms_session_test parent_portal_security_test
+          psql -h 127.0.0.1 -U scms_session_test -d parent_portal_security_test -v ON_ERROR_STOP=1 -f test/db/parent_portal_security_runtime_test.sql
 
   rpc-session-identity-binding-runtime:
     name: School RPC session identity binding runtime test
