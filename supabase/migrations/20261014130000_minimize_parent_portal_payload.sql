@@ -45,7 +45,8 @@ BEGIN
       'name_en', v_student.name_en,
       'name_local', v_student.name_local,
       'class', v_student.class,
-      'photo_url', v_student.photo_url
+      'photo_url', v_student.photo_url,
+      'school_name', v_student.school_name
     ))
   );
 END
