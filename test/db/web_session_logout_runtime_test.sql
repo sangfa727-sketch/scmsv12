@@ -3,8 +3,8 @@
 
 DO $roles$
 BEGIN
-  IF NOT EXISTS (SELECT 1 FROM pg_roles WHERE rolname = 'anon') THEN CREATE ROLE anon; END IF;
-  IF NOT EXISTS (SELECT 1 FROM pg_roles WHERE rolname = 'authenticated') THEN CREATE ROLE authenticated; END IF;
+  IF NOT EXISTS (SELECT 1 FROM pg_roles WHERE rolname = 'anon') THEN EXECUTE 'CREATE ROLE anon'; END IF;
+  IF NOT EXISTS (SELECT 1 FROM pg_roles WHERE rolname = 'authenticated') THEN EXECUTE 'CREATE ROLE authenticated'; END IF;
 END
 $roles$;
 
@@ -54,7 +54,14 @@ BEGIN
      OR NOT has_function_privilege('authenticated', 'public.rpc_web_logout(text)', 'EXECUTE') THEN
     RAISE EXCEPTION 'browser roles must be able to call the token-scoped logout RPC';
   END IF;
-  IF has_function_privilege('public', 'public.rpc_web_logout(text)', 'EXECUTE') THEN
+  IF EXISTS (
+    SELECT 1
+      FROM pg_proc p
+      CROSS JOIN LATERAL aclexplode(COALESCE(p.proacl, acldefault('f', p.proowner))) a
+     WHERE p.oid = 'public.rpc_web_logout(text)'::regprocedure
+       AND a.grantee = 0
+       AND a.privilege_type = 'EXECUTE'
+  ) THEN
     RAISE EXCEPTION 'PUBLIC must not retain execute privilege';
   END IF;
 END
