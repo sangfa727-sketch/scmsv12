@@ -75,4 +75,8 @@ GRANT EXECUTE ON FUNCTION public.rpc_authorize_student_photo_upload(text, text)
 
 DROP POLICY IF EXISTS "anon upload student photos" ON storage.objects;
 
+-- Keep public object URLs working for existing UI surfaces, but do not let
+-- anonymous clients enumerate the full student-photo object inventory.
+DROP POLICY IF EXISTS "public read student photos" ON storage.objects;
+
 COMMIT;
