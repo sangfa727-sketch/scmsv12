@@ -113,8 +113,9 @@ BEGIN
        ORDER BY date DESC
     ) a;
 
-  -- LIMIT must apply to source rows before aggregation; LIMIT after jsonb_agg
-  -- only limits the single aggregate result row and does not bound the payload.
+  -- Preserve complete historical attendance/grade rows for compatibility.
+  -- Payload minimization is done by selecting only UI-required fields; caps are
+  -- reserved for future-facing/structural collections below.
   SELECT COALESCE(jsonb_agg(
            jsonb_build_object(
              'subject', x.subject_name,
