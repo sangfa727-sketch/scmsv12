@@ -777,3 +777,17 @@ test('web logout only clears local state after server revocation is confirmed', 
   assert.ok(logout.indexOf('return false;') < logout.indexOf('clearWebSession();'), 'failed revocation must preserve local session for retry');
   assert.ok(logout.includes('clearSavedSession();'), 'successful web logout must also clear any legacy saved session');
 });
+
+
+test('billing session helpers bind to current tenant and role and stay internal', () => {
+  const migration = read('supabase/migrations/20261014120000_harden_billing_session_identity_binding.sql');
+  for (const fn of ['public._billing_session(p_session_token text)','public._billing_admin_session(p_session_token text)']) {
+    assert.ok(migration.includes('CREATE OR REPLACE FUNCTION ' + fn), 'missing hardened helper: ' + fn);
+  }
+  assert.equal((migration.match(/AND t\.school_id = s\.school_id/g) || []).length, 2, 'both helpers must bind current school');
+  assert.equal((migration.match(/AND t\.role = s\.role/g) || []).length, 2, 'both helpers must bind current role');
+  assert.equal((migration.match(/AND t\.status = 'active'/g) || []).length, 2, 'both helpers must reject inactive teachers');
+  assert.ok(migration.includes("SET search_path TO 'pg_catalog', 'pg_temp'"), 'helpers must use a restricted search_path');
+  assert.ok(migration.includes("AND t.role IN ('admin', 'super_admin')"), 'admin helper must enforce current admin role');
+  assert.ok(migration.includes('FROM PUBLIC, anon, authenticated'), 'internal helpers must not be directly executable by browser roles');
+});
