@@ -130,6 +130,12 @@ BEGIN
   IF COALESCE((dashboard_result->>'ok')::boolean, false) IS NOT TRUE THEN
     RAISE EXCEPTION 'parent dashboard did not succeed: %', dashboard_result;
   END IF;
+  leave_result := public.rpc_parent_submit_leave_request(session_token, current_date, current_date, 'Family appointment');
+  IF COALESCE((leave_result->>'ok')::boolean, false) IS NOT TRUE
+     OR NOT (leave_result->'request' ? 'id')
+     OR (leave_result->'request') ?| ARRAY['school_id','student_id'] THEN
+    RAISE EXCEPTION 'valid parent leave request failed or leaked internal fields: %', leave_result;
+  END IF;
   student_json := dashboard_result->'student';
   IF student_json ? 'qr_token' OR student_json ? 'parent_email' OR student_json ? 'school_id' OR student_json ? 'status' THEN
     RAISE EXCEPTION 'parent dashboard leaked non-allowlisted student fields: %', student_json;
