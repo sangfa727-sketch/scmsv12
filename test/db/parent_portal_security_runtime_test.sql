@@ -190,6 +190,23 @@ BEGIN
      OR has_table_privilege('anon', 'public.n8n_state', 'TRUNCATE') THEN
     RAISE EXCEPTION 'browser-role mutation privileges remain on internal tables';
   END IF;
+  -- Existing parent sessions must fail closed after a school or student is deactivated.
+  UPDATE public.schools SET status = 'inactive' WHERE school_id = 'school-1';
+  login_result := public.rpc_parent_google_login('qr-secret-1', 'PARENT@example.com', 'ci-test');
+  IF login_result->>'error' IS DISTINCT FROM 'invalid_or_inactive' THEN
+    RAISE EXCEPTION 'parent login remained available for inactive school: %', login_result;
+  END IF;
+  dashboard_result := public.rpc_parent_get_dashboard(session_token);
+  IF dashboard_result->>'error' IS DISTINCT FROM 'student_not_found' THEN
+    RAISE EXCEPTION 'existing parent session remained active for inactive school: %', dashboard_result;
+  END IF;
+
+  UPDATE public.schools SET status = 'active' WHERE school_id = 'school-1';
+  UPDATE public.students SET status = 'Inactive' WHERE student_id = 'student-1';
+  dashboard_result := public.rpc_parent_get_dashboard(session_token);
+  IF dashboard_result->>'error' IS DISTINCT FROM 'student_not_found' THEN
+    RAISE EXCEPTION 'existing parent session remained active for inactive student: %', dashboard_result;
+  END IF;
 END
 $test$;
 
