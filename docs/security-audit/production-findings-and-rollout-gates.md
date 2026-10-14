@@ -47,6 +47,14 @@ The deployed `parent-google-login` Edge Function has `verify_jwt=false` and perf
 
 Earlier read-only comparison found repository migration filenames/counts diverge from Production migration history. Reconcile renamed/missing migrations with a documented mapping before relying on automated migration history as proof that all code changes are deployed. Do not replay historical migrations or repair migration history directly in Production during this audit.
 
+### P1/P2 — Student photo objects remain publicly readable
+
+Production uses a public `student-photos` bucket, so knowing or obtaining an object URL is sufficient to read the image; Storage object-read RLS does not make an object private in a public bucket. Draft migration `20261014136000_secure_student_photo_upload.sql` removes anonymous direct-upload and object-listing policies, but intentionally preserves public object URL compatibility. This does not close photo confidentiality risk. Before changing the bucket to private, redesign all student-photo consumers to use short-lived signed URLs and test cache, portal, native app, and legacy stored-URL behavior. No bucket configuration was changed during this audit.
+
+### P2 — Parent contact details are duplicated into audit-log payloads
+
+Production `rpc_update_student_parent(text,text,text,text,text,text)` writes parent name, primary/secondary phone, and email into `public.audit_log.payload`. This duplicates sensitive contact data into a security/audit table and increases retention and access-control impact if log access is misconfigured. Review whether audit events can record changed field names or a redacted summary instead of the values; do not remove historical audit data without an approved retention plan.
+
 ### Review backlog — SECURITY DEFINER and RLS
 
 Read-only catalog queries found 180 SECURITY DEFINER functions executable by `anon` and 182 executable by `authenticated`; 164 browser-callable SECURITY DEFINER functions reference `app_web_sessions`. A simple source-text heuristic flagged 132 of those as lacking literal `school_id = s.school_id` and `role = s.role` patterns. This is a triage signal only—not a confirmed vulnerability count—because functions use different aliases, helper functions, and authorization models. Audit these in prioritized batches and add runtime tenant-isolation tests before changing grants or logic. Public tables with RLS enabled but no policies normally fail closed for browser roles; verify intended service-side access before changing policies.
