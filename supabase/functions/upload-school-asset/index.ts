@@ -166,7 +166,8 @@ Deno.serve(async (req: Request) => {
     }
 
     if ((kind === "logo" || kind === "cover") &&
-        !["admin", "super_admin"].includes(session.role)) {
+        (typeof session.role !== "string" ||
+         !["admin", "super_admin"].includes(session.role))) {
       return json({ error: "Admin access required" }, 403);
     }
 
