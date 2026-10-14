@@ -107,7 +107,6 @@ BEGIN
            jsonb_build_object(
              'subject', sub.subject_name,
              'assessment', asmt.title,
-             'type', asmt.type,
              'percentage', g.percentage,
              'letter_grade', g.letter_grade,
              'date', asmt.date
