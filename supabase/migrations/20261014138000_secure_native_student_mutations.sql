@@ -203,16 +203,12 @@ BEGIN
   END IF;
 
   IF p_photo_url IS NOT NULL THEN
-    v_url_pattern := '^https://[^/]+/storage/v1/object/public/student-photos/'
-      || regexp_replace(v_sess.school_id, '([.^$*+?()|{}\[\]\\-])', '\\\1', 'g')
-      || '/[0-9a-fA-F-]+\.(jpg|png|webp)REVOKE ALL ON FUNCTION public.rpc_app_delete_student(text, text) FROM PUBLIC;
-REVOKE ALL ON FUNCTION public.rpc_app_set_student_photo(text, text, text) FROM PUBLIC;
-GRANT EXECUTE ON FUNCTION public.rpc_app_update_student(text, text, jsonb) TO anon, authenticated, service_role;
-GRANT EXECUTE ON FUNCTION public.rpc_app_delete_student(text, text) TO anon, authenticated, service_role;
-GRANT EXECUTE ON FUNCTION public.rpc_app_set_student_photo(text, text, text) TO anon, authenticated, service_role;
-
-COMMIT;
-;
+    IF v_sess.school_id !~ '^[A-Za-z0-9_-]+$' THEN
+      RETURN jsonb_build_object('ok', false, 'error', 'invalid_school_id');
+    END IF;
+    v_url_pattern := '^https://[A-Za-z0-9.-]+[.]supabase[.]co/storage/v1/object/public/student-photos/'
+      || v_sess.school_id
+      || '/[0-9a-fA-F-]{36}[.](jpg|png|webp)$';
     IF p_photo_url !~ v_url_pattern THEN
       RETURN jsonb_build_object('ok', false, 'error', 'invalid_photo_url');
     END IF;
@@ -239,7 +235,9 @@ $function$;
 
 REVOKE ALL ON FUNCTION public.rpc_app_update_student(text, text, jsonb) FROM PUBLIC;
 REVOKE ALL ON FUNCTION public.rpc_app_delete_student(text, text) FROM PUBLIC;
+REVOKE ALL ON FUNCTION public.rpc_app_set_student_photo(text, text, text) FROM PUBLIC;
 GRANT EXECUTE ON FUNCTION public.rpc_app_update_student(text, text, jsonb) TO anon, authenticated, service_role;
 GRANT EXECUTE ON FUNCTION public.rpc_app_delete_student(text, text) TO anon, authenticated, service_role;
+GRANT EXECUTE ON FUNCTION public.rpc_app_set_student_photo(text, text, text) TO anon, authenticated, service_role;
 
 COMMIT;
