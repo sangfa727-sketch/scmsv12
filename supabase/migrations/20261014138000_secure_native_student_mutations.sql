@@ -174,6 +174,69 @@ BEGIN
 END;
 $function$;
 
+CREATE OR REPLACE FUNCTION public.rpc_app_set_student_photo(
+  p_token text,
+  p_student_id text,
+  p_photo_url text
+)
+RETURNS jsonb
+LANGUAGE plpgsql
+SECURITY DEFINER
+SET search_path TO 'pg_catalog', 'pg_temp'
+AS $function$
+DECLARE
+  v_sess RECORD;
+  v_student_id text;
+  v_url_pattern text;
+BEGIN
+  SELECT * INTO v_sess FROM private.app_session_identity(p_token) LIMIT 1;
+  IF v_sess IS NULL THEN
+    RETURN jsonb_build_object('ok', false, 'error', 'invalid_session');
+  END IF;
+  IF v_sess.role NOT IN (
+    'admin', 'super_admin', 'school_coordinator', 'administrative_assistant'
+  ) THEN
+    RETURN jsonb_build_object('ok', false, 'error', 'permission_denied');
+  END IF;
+  IF p_student_id IS NULL OR nullif(trim(p_student_id), '') IS NULL THEN
+    RETURN jsonb_build_object('ok', false, 'error', 'student_id_required');
+  END IF;
+
+  IF p_photo_url IS NOT NULL THEN
+    v_url_pattern := '^https://[^/]+/storage/v1/object/public/student-photos/'
+      || regexp_replace(v_sess.school_id, '([.^$*+?()|{}\[\]\\-])', '\\\1', 'g')
+      || '/[0-9a-fA-F-]+\.(jpg|png|webp)REVOKE ALL ON FUNCTION public.rpc_app_delete_student(text, text) FROM PUBLIC;
+REVOKE ALL ON FUNCTION public.rpc_app_set_student_photo(text, text, text) FROM PUBLIC;
+GRANT EXECUTE ON FUNCTION public.rpc_app_update_student(text, text, jsonb) TO anon, authenticated, service_role;
+GRANT EXECUTE ON FUNCTION public.rpc_app_delete_student(text, text) TO anon, authenticated, service_role;
+GRANT EXECUTE ON FUNCTION public.rpc_app_set_student_photo(text, text, text) TO anon, authenticated, service_role;
+
+COMMIT;
+;
+    IF p_photo_url !~ v_url_pattern THEN
+      RETURN jsonb_build_object('ok', false, 'error', 'invalid_photo_url');
+    END IF;
+  END IF;
+
+  UPDATE public.students
+     SET photo_url = p_photo_url,
+         updated_at = now()
+   WHERE student_id = p_student_id
+     AND school_id = v_sess.school_id
+  RETURNING student_id INTO v_student_id;
+
+  IF v_student_id IS NULL THEN
+    RETURN jsonb_build_object('ok', false, 'error', 'not_found');
+  END IF;
+
+  INSERT INTO public.audit_log(source, actor, action, school_id, payload)
+  VALUES ('telegram', v_sess.teacher_id, 'student.photo.update', v_sess.school_id,
+          jsonb_build_object('student_id', v_student_id, 'photo_removed', p_photo_url IS NULL));
+
+  RETURN jsonb_build_object('ok', true, 'student_id', v_student_id, 'photo_url', p_photo_url);
+END;
+$function$;
+
 REVOKE ALL ON FUNCTION public.rpc_app_update_student(text, text, jsonb) FROM PUBLIC;
 REVOKE ALL ON FUNCTION public.rpc_app_delete_student(text, text) FROM PUBLIC;
 GRANT EXECUTE ON FUNCTION public.rpc_app_update_student(text, text, jsonb) TO anon, authenticated, service_role;
