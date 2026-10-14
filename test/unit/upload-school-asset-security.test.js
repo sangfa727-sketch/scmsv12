@@ -21,6 +21,7 @@ test('school asset upload verifies image signatures, not only client MIME', () =
 
 test('school asset upload retains size and role restrictions', () => {
   assert.match(source, /file\.size > 5 \* 1024 \* 1024/);
-  assert.match(source, /kind === "logo" \|\| kind === "cover"/);\n  assert.match(source, /!\["admin", "super_admin"\]\.includes\(session\.role\)/);
+  assert.match(source, /kind === "logo" \|\| kind === "cover"/);
+  assert.match(source, /!["admin", "super_admin"]\.includes\(session\.role\)/);
   assert.match(source, /session\.expires_at/);
 });
