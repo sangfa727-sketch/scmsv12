@@ -18,6 +18,10 @@ Audit mode: read-only against Supabase Production project `rszgbryucqwmrdbsgwbb`
 
 The Production helpers `public._billing_session(text)` and `public._billing_admin_session(text)` validate token existence/expiry and teacher status/role, but do not bind the teacher's current school and role to the stored session's school and role. The code fix is present in the repository on main via migration `20261014120000_harden_billing_session_identity_binding.sql`, but Production migration history did not include it during this audit. Keep it as a deployment blocker until the change is reviewed, approved, and applied through the normal migration process.
 
+### P1 — Teacher web-session identity binding migration is also absent in Production
+
+Read-only inspection found no `teachers_revoke_web_sessions_on_identity_change` trigger on Production's `public.teachers` table, and the Production migration-history query returned no `20261013...` entries. The repository already contains `supabase/migrations/20261013100000_revoke_stale_web_sessions_on_identity_change.sql`, which expires existing sessions with mismatched school/role/status and installs triggers to revoke sessions when those identity attributes change. Because many SECURITY DEFINER RPCs rely on a valid session token and not all independently re-bind every identity field, deploying this existing migration is a high-priority rollout gate. It was not executed as part of this audit.
+
 ### P1/P2 — Broad default privileges for owner role `supabase_admin`
 
 Read-only inspection found broad default grants to `anon` and `authenticated` for future public-schema tables, functions, and sequences created by `supabase_admin`. The repository's existing default-privilege migration only addresses role `postgres`. Production `postgres` is not a member of `supabase_admin`; do not force this change through by granting role membership. Review with the authorized Supabase owner/admin, identify expected API grants, then remediate defaults under the correct owner role.
