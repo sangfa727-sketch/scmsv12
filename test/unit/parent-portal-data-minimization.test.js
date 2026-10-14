@@ -16,7 +16,7 @@ test('parent login returns an allowlisted student profile, never the full row or
 });
 
 test('parent dashboard selects only needed student fields and returns an allowlist', () => {
-  assert.match(migration, /SELECT student_id, name_en, name_local, class, photo_url, school_id\s+INTO v_student\s+FROM public\.students/);
+  assert.match(migration, /SELECT st.student_id, st.name_en, st.name_local, st.class, st.photo_url,\s+st.school_id, sc.school_name\s+INTO v_student\s+FROM public\.students st\s+LEFT JOIN public\.schools sc ON sc.school_id = st.school_id/);
   assert.match(migration, /'student', jsonb_strip_nulls\(jsonb_build_object\('student_id'/);
   assert.doesNotMatch(migration, /'student', to_jsonb\(v_student\)/);
 });
