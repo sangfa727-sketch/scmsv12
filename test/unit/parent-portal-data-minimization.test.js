@@ -55,7 +55,7 @@ test('parent portal messages, events, timetable, and exams expose only UI fields
   assert.match(migration, /FROM \(\s*SELECT sub\.subject_name, asmt\.title, g\.percentage, g\.letter_grade, asmt\.date[\s\S]*?ORDER BY asmt\.date DESC\s*\) x;/);
   assert.match(migration, /FROM \(\s*SELECT sub\.subject_name, asmt\.title, asmt\.date, asmt\.start_time, asmt\.end_time, asmt\.id[\s\S]*?LIMIT 20\s*\) x;/);
   assert.match(migration, /FROM \(\s*SELECT lr\.id, lr\.start_date, lr\.end_date, lr\.reason, lr\.status, lr\.created_at[\s\S]*?ORDER BY lr\.created_at DESC\s*\) x;/);
-  assert.match(migration, /FROM \(\s*SELECT pc\.date, pc\.type, pc\.message_preview[\s\S]*?ORDER BY pc\.date DESC, pc\.created_at DESC\s*\) pc/);
+  assert.match(migration, /FROM \(\s*SELECT\s+pc\.date,\s+pc\.type,\s+pc\.message_preview[\s\S]*?ORDER BY pc\.date DESC, pc\.created_at DESC\s*\) x;/);
   assert.match(migration, /'day', tt\.day,\s*'start_time', tt\.start_time,\s*'end_time', tt\.end_time,\s*'subject', tt\.subject,\s*'room', tt\.room/);
   assert.match(migration, /FROM \(\s*SELECT tt\.day, tt\.start_time, tt\.end_time, tt\.subject, tt\.room, tt\.period[\s\S]*?LIMIT 100\s*\) tt;/);
   assert.doesNotMatch(migration, /'student_id', e\.student_id/);
