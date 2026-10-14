@@ -503,6 +503,24 @@ BEGIN
     RAISE EXCEPTION 'native student edit returned internal fields: %', result->'student';
   END IF;
 
+  result := public.rpc_app_set_student_photo(
+    'native-session-token-0123456789abcdef',
+    'student-test',
+    'https://rszgbryucqwmrdbsgwbb.supabase.co/storage/v1/object/public/student-photos/school-a/01234567-89ab-cdef-0123-456789abcdef.jpg'
+  );
+  IF COALESCE((result->>'ok')::boolean, false) IS DISTINCT FROM true THEN
+    RAISE EXCEPTION 'native photo metadata update rejected a valid same-school URL: %', result;
+  END IF;
+
+  result := public.rpc_app_set_student_photo(
+    'native-session-token-0123456789abcdef',
+    'student-test',
+    'https://rszgbryucqwmrdbsgwbb.supabase.co/storage/v1/object/public/student-photos/school-b/01234567-89ab-cdef-0123-456789abcdef.jpg'
+  );
+  IF result->>'error' IS DISTINCT FROM 'invalid_photo_url' THEN
+    RAISE EXCEPTION 'native photo metadata accepted a different school path: %', result;
+  END IF;
+
   result := public.rpc_app_update_student(
     'native-session-token-0123456789abcdef',
     'student-b',
