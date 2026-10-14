@@ -64,27 +64,35 @@ Object.assign(API, {
    *  Path: <school_id>/<student_id>-<uid>.<ext> — unique per upload, never overwrites. */
 
   async uploadStudentPhoto(studentId, file) {
-    // Phone photos are often HEIC or > 3 MB, which the bucket rejects — always
-    // resize to a small square JPEG first.
+    // Student photos must use the trusted Edge Function: direct anonymous
+    // writes to the public Storage bucket are intentionally disabled.
+    const sessionToken = _webSessionToken();
+    if (!sessionToken) throw new Error('A valid school session is required to upload a student photo');
+
+    // Phone photos are often HEIC or > 3 MB; normalize to a small square JPEG.
     const blob = await _prepStudentPhoto(file);
-    const path = `${window.APP.school_id}/${studentId}-${Date.now().toString(36)}.jpg`;
+    const form = new FormData();
+    form.append('session_token', sessionToken);
+    form.append('kind', 'student');
+    form.append('student_id', studentId);
+    form.append('file', blob, 'student.jpg');
+
     const resp = await fetch(
-      `${SCMS_CONFIG.SUPABASE_URL}/storage/v1/object/student-photos/${path}`,
+      `${SCMS_CONFIG.SUPABASE_URL}/functions/v1/upload-school-asset`,
       {
-        method:  'POST',
+        method: 'POST',
         headers: {
-          'apikey':        SCMS_CONFIG.SUPABASE_ANON,
+          'apikey': SCMS_CONFIG.SUPABASE_ANON,
           'Authorization': `Bearer ${SCMS_CONFIG.SUPABASE_ANON}`,
-          'Content-Type':  'image/jpeg',
         },
-        body: blob,
+        body: form,
       }
     );
-    if (!resp.ok) {
-      const t = await resp.text().catch(() => '');
-      throw new Error(`Photo upload failed (${resp.status}): ${t.slice(0, 200)}`);
+    const result = await resp.json().catch(() => ({}));
+    if (!resp.ok || !result?.ok || !result?.url) {
+      throw new Error(result?.error || `Photo upload failed (${resp.status})`);
     }
-    return `${SCMS_CONFIG.SUPABASE_URL}/storage/v1/object/public/student-photos/${path}?t=${Date.now()}`;
+    return result.url;
   },
 
   async setStudentPhoto(studentId, photoUrl) {
