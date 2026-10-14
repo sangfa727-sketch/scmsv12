@@ -78,11 +78,12 @@ BEGIN
   END IF;
 
   IF v_session_type = 'web' THEN
-    IF NOT private.web_has_student_permission(
+    -- NULL from the permission helper must fail closed, just like FALSE.
+    IF private.web_has_student_permission(
       p_session_token,
       'students.edit',
       p_student_id
-    ) THEN
+    ) IS NOT TRUE THEN
       RETURN jsonb_build_object('ok', false, 'error', 'permission_denied');
     END IF;
   ELSIF v_sess.role NOT IN (
