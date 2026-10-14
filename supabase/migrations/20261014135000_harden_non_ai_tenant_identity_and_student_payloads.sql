@@ -80,6 +80,7 @@ BEGIN
     JOIN public.teachers AS t
       ON t.teacher_id = a.teacher_id
      AND t.school_id = a.school_id
+     AND t.telegram_id = a.telegram_id
     JOIN public.schools AS sc
       ON sc.school_id = t.school_id
      AND sc.status = 'active'
