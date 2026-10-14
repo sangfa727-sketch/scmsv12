@@ -44,7 +44,7 @@ AS $function$
   );
 $function$;
 
-\i ../../supabase/migrations/20261014141000_minimize_parent_contact_audit_payload.sql
+\ir ../../supabase/migrations/20261014141000_minimize_parent_contact_audit_payload.sql
 
 DO $assert$
 DECLARE
