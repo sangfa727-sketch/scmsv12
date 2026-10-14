@@ -124,3 +124,7 @@ END
 $test_teacher_delete$;
 
 SELECT 'PASS: stale identity, role/school changes, deactivation, and teacher deletion revoke sessions' AS result;
+
+
+-- Also exercise the billing-specific shared helpers in the same disposable DB job.
+\ir billing_session_identity_runtime_test.sql
