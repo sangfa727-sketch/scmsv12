@@ -758,3 +758,10 @@ test('official message recipient modes keep independent verified previews', () =
   assert.match(html, /style\.css\?v=20261009e/);
   assert.match(html, /js\/16_chat\.js\?v=20261012a/);
 });
+
+test('web-session sign out delegates to server-side session revocation', () => {
+  const app = read('js/14_app.js');
+  assert.ok(app.includes("const webSession = typeof getWebSession === 'function' ? getWebSession() : null;"), 'sign out must identify an active web session');
+  assert.ok(app.includes("if (webSession?.session_token && typeof window.webLogout === 'function')"), 'web-session sign out must invoke the server logout path');
+  assert.ok(app.includes('void window.webLogout();'), 'web-session sign out must call webLogout before local-only cleanup');
+});
