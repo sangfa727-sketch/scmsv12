@@ -524,6 +524,24 @@ BEGIN
     RAISE EXCEPTION 'native student edit returned internal fields: %', result->'student';
   END IF;
 
+  IF EXISTS (
+    SELECT 1 FROM public.audit_log
+     WHERE action='student.update' AND school_id='school-a'
+       AND payload->>'student_id'='student-test'
+       AND (payload ? 'name_en' OR payload ? 'parent_phone' OR payload ? 'class' OR payload ? 'grade')
+  ) THEN
+    RAISE EXCEPTION 'native student audit payload persisted submitted student/contact values';
+  END IF;
+  IF NOT EXISTS (
+    SELECT 1 FROM public.audit_log
+     WHERE action='student.update' AND school_id='school-a'
+       AND payload->>'student_id'='student-test'
+       AND payload->'submitted_fields' ? 'name_en'
+       AND payload->'submitted_fields' ? 'parent_phone'
+  ) THEN
+    RAISE EXCEPTION 'native student audit payload omitted submitted field names';
+  END IF;
+
   result := public.rpc_app_set_student_photo(
     'native-session-token-0123456789abcdef',
     'student-test',
