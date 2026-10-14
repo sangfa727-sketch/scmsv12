@@ -90,6 +90,8 @@ INSERT INTO public.invoices(id, school_id, student_id, invoice_number, issue_dat
 VALUES (1, 'school-1', 'student-1', 'INV-1', current_date, current_date + 7, 'Due', 100, 25, 'internal-only-note');
 INSERT INTO public.invoice_items(id, invoice_id, description, amount) VALUES (1, 1, 'Tuition', 100);
 INSERT INTO public.payments(id, school_id, invoice_id, amount, payment_date, method) VALUES (1, 'school-1', 1, 25, current_date, 'cash');
+INSERT INTO public.teacher_invites(invite_code, redeemed_at, expires_at, school_id, teacher_name, role)
+VALUES ('invite-once', NULL, now() + interval '1 day', 'school-1', 'Invited Teacher', 'teacher');
 
 DO $test$
 DECLARE
