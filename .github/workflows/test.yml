@@ -340,6 +340,12 @@ jobs:
         run: |
           createdb -h 127.0.0.1 -U scms_non_ai_test parent_contact_audit_test
           psql -h 127.0.0.1 -U scms_non_ai_test -d parent_contact_audit_test -v ON_ERROR_STOP=1 -f test/db/parent_contact_audit_minimization_runtime_test.sql
+      - name: Run web session invalidation runtime test in isolated database
+        env:
+          PGPASSWORD: scms_non_ai_test
+        run: |
+          createdb -h 127.0.0.1 -U scms_non_ai_test web_session_invalidation_test
+          psql -h 127.0.0.1 -U scms_non_ai_test -d web_session_invalidation_test -v ON_ERROR_STOP=1 -f test/db/web_session_invalidation_runtime_test.sql
 
   playwright-ci:
     name: Playwright local smoke test (automatic PR/push)
