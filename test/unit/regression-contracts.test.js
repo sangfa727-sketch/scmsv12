@@ -765,3 +765,15 @@ test('web-session sign out delegates to server-side session revocation', () => {
   assert.ok(app.includes("if (webSession?.session_token && typeof window.webLogout === 'function')"), 'web-session sign out must invoke the server logout path');
   assert.ok(app.includes('void window.webLogout();'), 'web-session sign out must call webLogout before local-only cleanup');
 });
+
+test('web logout only clears local state after server revocation is confirmed', () => {
+  const landing = read('js/00_landing.js');
+  const start = landing.indexOf('window.webLogout = async function () {');
+  const end = landing.indexOf('\n};', start);
+  assert.ok(start >= 0 && end > start, 'webLogout implementation missing');
+  const logout = landing.slice(start, end);
+  assert.ok(logout.includes('if (!response.ok || result?.ok !== true)'), 'HTTP and RPC failures must be detected');
+  assert.ok(logout.includes('return false;'), 'failed server revocation must stop local cleanup');
+  assert.ok(logout.indexOf('return false;') < logout.indexOf('clearWebSession();'), 'failed revocation must preserve local session for retry');
+  assert.ok(logout.includes('clearSavedSession();'), 'successful web logout must also clear any legacy saved session');
+});
