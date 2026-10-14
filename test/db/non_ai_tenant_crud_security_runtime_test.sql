@@ -351,6 +351,8 @@ BEGIN
   IF COALESCE((result->>'linked')::boolean, true) THEN
     RAISE EXCEPTION 'poll still exposed an inactive school session: %', result;
   END IF;
+  -- Restore the disposable fixture for the subsequent student CRUD/photo tests.
+  UPDATE public.schools SET status='active' WHERE school_id='school-a';
 END
 $assert_identity$;
 
