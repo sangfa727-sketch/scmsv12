@@ -10,6 +10,7 @@ test('native student mutations use a linked Telegram session and RPC, never anon
   assert.match(api, /rest\/v1\/rpc\/\$\{name\}/);
   assert.match(api, /rpc_app_update_student/);
   assert.match(api, /rpc_app_delete_student/);
+  assert.match(api, /rpc_app_set_student_photo/);
   assert.doesNotMatch(api, /rest\/v1\/students[\s\S]{0,350}method:\s*'PATCH'/);
 });
 
@@ -22,6 +23,8 @@ test('native mutation RPCs validate current identity, active school, and tenant 
   assert.match(migration, /'admin', 'super_admin', 'school_coordinator', 'administrative_assistant'/);
   assert.match(migration, /'student\.update'/);
   assert.match(migration, /'student\.deactivate'/);
+  assert.match(migration, /rpc_app_set_student_photo/);
+  assert.match(migration, /invalid_photo_url/);
 });
 
 test('native update RPC rejects internal fields and minimizes student response', () => {
