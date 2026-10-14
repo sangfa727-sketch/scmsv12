@@ -37,6 +37,7 @@ test('student photo upload is authorized for the same school and student before 
   assert.match(source, /const bucket = kind === "student" \? "student-photos" : "school-assets"/);
   assert.match(migration, /private\.web_has_student_permission/);
   assert.match(migration, /DROP POLICY IF EXISTS "anon upload student photos" ON storage\.objects/);
+  assert.match(migration, /DROP POLICY IF EXISTS "public read student photos" ON storage\.objects/);
   assert.match(migration, /GRANT EXECUTE ON FUNCTION public\.rpc_authorize_student_photo_upload\(text, text\)\s+TO service_role/);
 });
 
