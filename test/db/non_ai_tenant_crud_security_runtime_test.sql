@@ -24,6 +24,9 @@ ALTER TABLE storage.objects ENABLE ROW LEVEL SECURITY;
 CREATE POLICY "anon upload student photos" ON storage.objects
   FOR INSERT TO anon, authenticated
   WITH CHECK (bucket_id = 'student-photos');
+CREATE POLICY "public read student photos" ON storage.objects
+  FOR SELECT TO public
+  USING (bucket_id = 'student-photos');
 
 CREATE TABLE public.schools (
   school_id text PRIMARY KEY,
@@ -385,6 +388,14 @@ BEGIN
        AND policyname='anon upload student photos'
   ) THEN
     RAISE EXCEPTION 'anonymous direct upload policy for student photos still exists';
+  END IF;
+  IF EXISTS (
+    SELECT 1 FROM pg_policies
+     WHERE schemaname='storage'
+       AND tablename='objects'
+       AND policyname='public read student photos'
+  ) THEN
+    RAISE EXCEPTION 'anonymous listing policy for student photo objects still exists';
   END IF;
 
   IF has_function_privilege('anon', 'public.rpc_authorize_student_photo_upload(text,text)', 'EXECUTE')
