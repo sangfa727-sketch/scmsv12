@@ -5,12 +5,13 @@ const fs = require('node:fs');
 const migration = fs.readFileSync('supabase/migrations/20261014130000_minimize_parent_portal_payload.sql', 'utf8');
 
 test('parent login returns an allowlisted student profile, never the full row or QR token', () => {
-  assert.match(migration, /SELECT student_id, name_en, name_local, class, photo_url, parent_email, school_id, status\s+INTO v_student\s+FROM public\.students/);
+  assert.match(migration, /SELECT st.student_id, st.name_en, st.name_local, st.class, st.photo_url,\s+st.parent_email, st.school_id, st.status, sc.school_name\s+INTO v_student\s+FROM public\.students st\s+LEFT JOIN public\.schools sc ON sc.school_id = st.school_id/);
   assert.match(migration, /'student_id', v_student\.student_id/);
   assert.match(migration, /'name_en', v_student\.name_en/);
   assert.match(migration, /'name_local', v_student\.name_local/);
   assert.match(migration, /'class', v_student\.class/);
   assert.match(migration, /'photo_url', v_student\.photo_url/);
+  assert.match(migration, /'school_name', v_student\.school_name/);
   assert.doesNotMatch(migration, /'student', to_jsonb\(v_student\)/);
   assert.doesNotMatch(migration, /'qr_token', v_student\.qr_token/);
 });
