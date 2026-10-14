@@ -495,6 +495,12 @@ jobs:
         env:
           PGPASSWORD: scms_session_test
         run: psql -h 127.0.0.1 -U scms_session_test -d scms_session_test -v ON_ERROR_STOP=1 -f test/db/session_tenant_binding_runtime_test.sql
+      - name: Run stale web session invalidation runtime test in isolated database
+        env:
+          PGPASSWORD: scms_session_test
+        run: |
+          createdb -h 127.0.0.1 -U scms_session_test stale_web_session_test
+          psql -h 127.0.0.1 -U scms_session_test -d stale_web_session_test -v ON_ERROR_STOP=1 -f test/db/stale_web_session_invalidation_runtime_test.sql
       - name: Run parent portal SQL security runtime harness in isolated database
         env:
           PGPASSWORD: scms_session_test
