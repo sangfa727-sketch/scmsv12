@@ -21,8 +21,15 @@ function json(body: unknown, status = 200, extraHeaders: Record<string, string> 
   });
 }
 
-async function sha256Hex(value: string): Promise<string> {
-  const digest = await crypto.subtle.digest("SHA-256", new TextEncoder().encode(value));
+async function hmacSha256Hex(value: string): Promise<string> {
+  const key = await crypto.subtle.importKey(
+    "raw",
+    new TextEncoder().encode(SERVICE_ROLE_KEY),
+    { name: "HMAC", hash: "SHA-256" },
+    false,
+    ["sign"],
+  );
+  const digest = await crypto.subtle.sign("HMAC", key, new TextEncoder().encode(value));
   return Array.from(new Uint8Array(digest), (byte) => byte.toString(16).padStart(2, "0")).join("");
 }
 
@@ -30,7 +37,7 @@ type RateLimitResult = { allowed: boolean; retryAfterSeconds: number };
 
 async function checkRateLimit(key: string, maxAttempts: number): Promise<RateLimitResult | null> {
   try {
-    const keyHash = await sha256Hex(key);
+    const keyHash = await hmacSha256Hex(key);
     const resp = await fetch(`${SUPABASE_URL}/rest/v1/rpc/rpc_parent_login_rate_limit`, {
       method: "POST",
       headers: {
@@ -128,7 +135,7 @@ Deno.serve(async (req) => {
 
   // Supabase's gateway populates X-Forwarded-For with the client address.
   // Skip only this IP dimension when the platform omits it; the verified-email
-  // limit below still applies. Never store the raw IP, only its SHA-256 digest.
+  // limit below still applies. Never store the raw IP, only its keyed HMAC digest.
   const forwardedIp = req.headers.get("x-forwarded-for")?.split(",")[0]?.trim();
   if (forwardedIp && forwardedIp.length <= 64 && /^[0-9a-fA-F:.]+$/.test(forwardedIp)) {
     const ipLimit = await checkRateLimit(`ip:${forwardedIp}`, MAX_IP_ATTEMPTS);
