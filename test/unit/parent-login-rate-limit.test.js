@@ -15,8 +15,8 @@ test('parent login uses persistent per-IP and per-email rate limits before the l
   assert.match(edge, /rate_limited/);
   assert.match(edge, /checkRateLimit[\s\S]{0,100}ip:/);
   assert.match(edge, /checkRateLimit[\s\S]{0,100}email:/);
-  assert.ok(edge.indexOf('checkRateLimit') < edge.indexOf('oauth2.googleapis.com/tokeninfo'));
-  assert.ok(edge.lastIndexOf('checkRateLimit') < edge.indexOf('rpc_parent_google_login'));
+  assert.ok(edge.indexOf('const ipLimit = await checkRateLimit') < edge.indexOf('oauth2.googleapis.com/tokeninfo'));
+  assert.ok(edge.indexOf('const emailLimit = await checkRateLimit') < edge.indexOf('rpc_parent_google_login'));
 });
 
 test('rate-limit RPC is atomic, bounded, and unavailable to browser roles', () => {
