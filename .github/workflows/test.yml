@@ -1,6 +1,6 @@
 name: SCMS tests
 
-# Avoid overlapping branch runs repeatedly pulling PostgreSQL images and exhausting registry quota.
+# Avoid overlapping branch runs so repeated PostgreSQL pulls do not amplify registry throttling.
 concurrency:
   group: scmsv12-${{ github.workflow }}-${{ github.ref }}
   cancel-in-progress: true
@@ -33,7 +33,7 @@ jobs:
     runs-on: ubuntu-latest
     services:
       postgres:
-        image: public.ecr.aws/docker/library/postgres:16
+        image: postgres:16
         env:
           POSTGRES_USER: scms_logout_test
           POSTGRES_PASSWORD: scms_logout_test
@@ -68,8 +68,8 @@ jobs:
     runs-on: ubuntu-latest
     services:
       postgres:
-        # Public ECR mirror avoids Docker Hub anonymous pull throttling in CI.
-        image: public.ecr.aws/docker/library/postgres:16
+        # Use the official PostgreSQL image; concurrency above limits overlapping pulls.
+        image: postgres:16
         env:
           POSTGRES_USER: scms_test
           POSTGRES_PASSWORD: scms_test
@@ -112,7 +112,7 @@ jobs:
     runs-on: ubuntu-latest
     services:
       postgres:
-        image: public.ecr.aws/docker/library/postgres:16
+        image: postgres:16
         env:
           POSTGRES_USER: scms_host_test
           POSTGRES_PASSWORD: scms_host_test
@@ -147,7 +147,7 @@ jobs:
     runs-on: ubuntu-latest
     services:
       postgres:
-        image: public.ecr.aws/docker/library/postgres:16
+        image: postgres:16
         env:
           POSTGRES_USER: scms_website_test
           POSTGRES_PASSWORD: scms_website_test
@@ -182,7 +182,7 @@ jobs:
     runs-on: ubuntu-latest
     services:
       postgres:
-        image: public.ecr.aws/docker/library/postgres:16
+        image: postgres:16
         env:
           POSTGRES_USER: scms_admission_test
           POSTGRES_PASSWORD: scms_admission_test
@@ -225,7 +225,7 @@ jobs:
     runs-on: ubuntu-latest
     services:
       postgres:
-        image: public.ecr.aws/docker/library/postgres:16
+        image: postgres:16
         env:
           POSTGRES_USER: scms_chat_test
           POSTGRES_PASSWORD: scms_chat_test
@@ -260,7 +260,7 @@ jobs:
     runs-on: ubuntu-latest
     services:
       postgres:
-        image: public.ecr.aws/docker/library/postgres:16
+        image: postgres:16
         env:
           POSTGRES_USER: scms_direct_test
           POSTGRES_PASSWORD: scms_direct_test
@@ -295,7 +295,7 @@ jobs:
     runs-on: ubuntu-latest
     services:
       postgres:
-        image: public.ecr.aws/docker/library/postgres:16
+        image: postgres:16
         env:
           POSTGRES_USER: scms_non_ai_test
           POSTGRES_PASSWORD: scms_non_ai_test
@@ -466,7 +466,7 @@ jobs:
     runs-on: ubuntu-latest
     services:
       postgres:
-        image: public.ecr.aws/docker/library/postgres:16
+        image: postgres:16
         env:
           POSTGRES_USER: scms_session_test
           POSTGRES_PASSWORD: scms_session_test
@@ -513,7 +513,7 @@ jobs:
     runs-on: ubuntu-latest
     services:
       postgres:
-        image: public.ecr.aws/docker/library/postgres:16
+        image: postgres:16
         env:
           POSTGRES_USER: scms_rpc_test
           POSTGRES_PASSWORD: scms_rpc_test
