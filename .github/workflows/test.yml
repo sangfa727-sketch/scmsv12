@@ -328,8 +328,8 @@ jobs:
       - uses: denoland/setup-deno@v2
         with:
           deno-version: v2.x
-      - name: Check upload Edge Function types
-        run: deno check --node-modules-dir=auto supabase/functions/upload-school-asset/index.ts
+      - name: Check upload and Parent Portal Edge Function types
+        run: deno check --node-modules-dir=auto supabase/functions/upload-school-asset/index.ts supabase/functions/parent-google-login/index.ts
       - name: Run non-AI tenant and student CRUD security harness
         env:
           PGPASSWORD: scms_non_ai_test
@@ -542,3 +542,38 @@ jobs:
         env:
           PGPASSWORD: scms_rpc_test
         run: psql -h 127.0.0.1 -U scms_rpc_test -d scms_rpc_test -v ON_ERROR_STOP=1 -f test/db/rpc_session_identity_binding_runtime_test.sql
+
+  parent-login-rate-limit-runtime:
+    name: Parent login rate-limit runtime test
+    runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: postgres:16
+        env:
+          POSTGRES_USER: scms_parent_login_test
+          POSTGRES_PASSWORD: scms_parent_login_test
+          POSTGRES_DB: scms_parent_login_test
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U scms_parent_login_test -d scms_parent_login_test"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 10
+    steps:
+      - uses: actions/checkout@v7
+      - name: Install PostgreSQL client
+        run: sudo apt-get update && sudo apt-get install -y postgresql-client
+      - name: Wait for PostgreSQL
+        env:
+          PGPASSWORD: scms_parent_login_test
+        run: |
+          for i in {1..30}; do
+            pg_isready -h 127.0.0.1 -p 5432 -U scms_parent_login_test -d scms_parent_login_test && exit 0
+            sleep 1
+          done
+          exit 1
+      - name: Run parent login rate-limit runtime harness
+        env:
+          PGPASSWORD: scms_parent_login_test
+        run: psql -h 127.0.0.1 -U scms_parent_login_test -d scms_parent_login_test -v ON_ERROR_STOP=1 -f test/db/parent_login_rate_limit_runtime_test.sql
