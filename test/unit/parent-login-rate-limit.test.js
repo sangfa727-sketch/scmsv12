@@ -9,8 +9,8 @@ test('parent login uses persistent per-IP and per-email rate limits before the l
   assert.match(edge, /cf-connecting-ip/i);
   assert.match(edge, /hmacSha256Hex/);
   assert.match(edge, /rpc_parent_login_rate_limit/);
-  assert.match(edge, /MAX_IP_ATTEMPTS\s*=\s*10/);
-  assert.match(edge, /MAX_EMAIL_ATTEMPTS\s*=\s*5/);
+  assert.match(edge, /MAX_IP_ATTEMPTS\\s*=\\s*30/);
+  assert.match(edge, /MAX_EMAIL_ATTEMPTS\\s*=\\s*10/);
   assert.match(edge, /RATE_LIMIT_WINDOW_SECONDS\s*=\s*900/);
   assert.match(edge, /rate_limited/);
   assert.match(edge, /checkRateLimit[\s\S]{0,100}ip:/);
