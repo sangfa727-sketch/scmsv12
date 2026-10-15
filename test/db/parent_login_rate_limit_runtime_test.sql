@@ -9,7 +9,8 @@ END $$;
 
 \i supabase/migrations/20261016100000_parent_login_rate_limit.sql
 
-DO $$
+BEGIN;
+DO $
 DECLARE
   v jsonb;
   v_hash text := repeat('a', 64);
