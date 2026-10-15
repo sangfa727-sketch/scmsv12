@@ -122,6 +122,7 @@ INSERT INTO public.app_web_sessions
   (session_token, teacher_id, school_id, role, expires_at)
 VALUES
   ('valid-session-a', 'teacher-a', 'school-a', 'admin', now() + interval '1 day'),
+  ('permission-null-session', 'teacher-a', 'school-a', 'admin', now() + interval '1 day'),
   ('valid-session-b', 'teacher-b', 'school-b', 'teacher', now() + interval '1 day'),
   ('stale-school-session', 'teacher-b', 'school-a', 'teacher', now() + interval '1 day'),
   ('stale-role-session', 'teacher-a', 'school-a', 'super_admin', now() + interval '1 day'),
@@ -152,7 +153,9 @@ LANGUAGE sql
 SECURITY DEFINER
 SET search_path TO 'pg_catalog', 'pg_temp'
 AS $function$
-  SELECT EXISTS (
+  SELECT CASE
+    WHEN p_session_token = 'permission-null-session' THEN NULL
+    ELSE EXISTS (
     SELECT 1
       FROM public.app_web_sessions AS s
       JOIN public.teachers AS t
@@ -169,7 +172,8 @@ AS $function$
      WHERE s.session_token = p_session_token
        AND s.expires_at > now()
        AND p_permission_key = 'students.edit'
-  );
+    )
+  END;
 $function$;
 
 CREATE TABLE public.admissions (
@@ -686,6 +690,14 @@ BEGIN
   END IF;
   IF (SELECT status FROM public.students WHERE student_id='student-b') IS DISTINCT FROM 'Active' THEN
     RAISE EXCEPTION 'cross-school student delete changed school B data';
+  END IF;
+
+  result := public.rpc_delete_student('permission-null-session', 'student-test');
+  IF result->>'error' IS DISTINCT FROM 'permission_denied' THEN
+    RAISE EXCEPTION 'legacy student delete did not fail closed when permission helper returned NULL: %', result;
+  END IF;
+  IF (SELECT status FROM public.students WHERE student_id='student-test') IS DISTINCT FROM 'Active' THEN
+    RAISE EXCEPTION 'NULL permission result changed the student record';
   END IF;
 
   result := public.rpc_delete_student('valid-session-a', 'student-test');
