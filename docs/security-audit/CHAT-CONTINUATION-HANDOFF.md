@@ -32,8 +32,8 @@ When the user starts a new chat and says **“SCMSv12 အတွက် project �
 
 ## Confirmed blockers / findings to revisit
 1. **Public student photo bucket:** `student-photos` remains publicly readable by object URL. Upload authorization does not make existing photo URLs private. Needs a carefully planned private bucket + signed URL + UI integration, plus compatibility/rollback analysis.
-2. **Telegram/n8n login fallback:** deployed n8n workflow and fallback behavior are not confirmed from accessible repository evidence. Verify actual deployed workflow with authorized access before claiming end-to-end login works.
-3. **Telegram connect identity checks:** Production `rpc_telegram_connect_start` / `rpc_telegram_connect_finish` require deeper review of current teacher status, school and role binding. A test was added on the security branch for stale school/role/inactive sessions; verify whether it is in the latest head and that it passes.
+2. **Deferred — Telegram/n8n login fallback:** deployed n8n workflow and fallback behavior are not confirmed from accessible repository evidence. Keep out of PR #317; verify in a separately scoped follow-up only if the user reopens Telegram scope.
+3. **Deferred — Telegram connect identity checks:** Production `rpc_telegram_connect_start` / `rpc_telegram_connect_finish` require deeper review of current teacher status, school and role binding. Do not patch as part of PR #317 while Telegram work is explicitly out of scope.
 4. **Production migration drift:** recent repo migrations are not present in Production migration history; there are many migration filename/name mismatches. Do not apply migrations until reconciliation is done.
 5. **Teacher web session invalidation:** repo has a migration for invalidating stale sessions after teacher school/role/status changes, but Production did not have the corresponding triggers at last check.
 6. **Billing identity binding:** hardening migration is in repo/PR history but not recorded as applied in Production. PR #316 is not to be merged.
@@ -50,7 +50,7 @@ When the user starts a new chat and says **“SCMSv12 အတွက် project �
 ## Next steps on resume
 1. Read this handoff and inspect current PR #317 head, status, changed files, reviews, and CI jobs.
 2. Confirm current run completion; inspect logs for failures, especially session identity, parent portal payload, non-AI tenant/CRUD, and Playwright.
-3. Review Telegram connect RPC definitions and branch test coverage; patch only the security branch if safe and run tests again.
+3. Keep Telegram/n8n and AI Universe work deferred as requested; create a separate future scope only if the user explicitly reopens it.
 4. Continue read-only Production audit of Student/Teacher/Parent CRUD RPC definitions, grants, permission helper behavior, tenant scoping, payload minimization, audit logging, and stale sessions.
 5. Prepare a staged rollout plan that explicitly resolves migration drift, photo privacy, n8n/login verification, and rollback/monitoring.
 6. Do not merge or deploy while blockers remain. If a later merge becomes appropriate, state exact evidence and risk first; require explicit approval for Production rollout separately.
