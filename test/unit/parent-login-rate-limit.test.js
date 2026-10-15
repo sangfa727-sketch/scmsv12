@@ -6,7 +6,7 @@ const edge = fs.readFileSync('supabase/functions/parent-google-login/index.ts', 
 const migration = fs.readFileSync('supabase/migrations/20261016100000_parent_login_rate_limit.sql', 'utf8');
 
 test('parent login uses persistent per-IP and per-email rate limits before the login RPC', () => {
-  assert.match(edge, /x-forwarded-for/i);
+  assert.match(edge, /cf-connecting-ip/i);
   assert.match(edge, /hmacSha256Hex/);
   assert.match(edge, /rpc_parent_login_rate_limit/);
   assert.match(edge, /MAX_IP_ATTEMPTS\s*=\s*10/);
