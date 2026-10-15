@@ -5,8 +5,8 @@ const SERVICE_ROLE_KEY = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
 const GOOGLE_CLIENT_ID = Deno.env.get("GOOGLE_CLIENT_ID") ?? "";
 const MAX_BODY_BYTES = 16 * 1024;
 const RATE_LIMIT_WINDOW_SECONDS = 900;
-const MAX_IP_ATTEMPTS = 10;
-const MAX_EMAIL_ATTEMPTS = 5;
+const MAX_IP_ATTEMPTS = 30;
+const MAX_EMAIL_ATTEMPTS = 10;
 
 const CORS_HEADERS = {
   "Access-Control-Allow-Origin": "*",
