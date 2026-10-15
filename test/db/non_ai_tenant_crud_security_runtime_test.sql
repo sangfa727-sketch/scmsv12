@@ -459,6 +459,11 @@ BEGIN
     RAISE EXCEPTION 'school A session authorized upload for school B student: %', result;
   END IF;
 
+  result := public.rpc_authorize_student_photo_upload('permission-null-session', 'student-test');
+  IF result->>'error' IS DISTINCT FROM 'permission_denied' THEN
+    RAISE EXCEPTION 'NULL student permission helper result did not fail closed for photo upload: %', result;
+  END IF;
+
   INSERT INTO public.app_sessions
     (token, telegram_id, teacher_id, teacher_name, school_id, status)
   VALUES
