@@ -43,11 +43,11 @@ BEGIN
     RETURN jsonb_build_object('ok', false, 'error', 'student_id_required');
   END IF;
 
-  IF NOT private.web_has_student_permission(
+  IF private.web_has_student_permission(
     p_session_token,
     'students.edit',
     p_student_id
-  ) THEN
+  ) IS NOT TRUE THEN
     RETURN jsonb_build_object('ok', false, 'error', 'permission_denied');
   END IF;
 
