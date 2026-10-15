@@ -7,7 +7,7 @@ const migration = fs.readFileSync('supabase/migrations/20261016100000_parent_log
 
 test('parent login uses persistent per-IP and per-email rate limits before the login RPC', () => {
   assert.match(edge, /x-forwarded-for/i);
-  assert.match(edge, /sha256Hex/);
+  assert.match(edge, /hmacSha256Hex/);
   assert.match(edge, /rpc_parent_login_rate_limit/);
   assert.match(edge, /MAX_IP_ATTEMPTS\s*=\s*10/);
   assert.match(edge, /MAX_EMAIL_ATTEMPTS\s*=\s*5/);
