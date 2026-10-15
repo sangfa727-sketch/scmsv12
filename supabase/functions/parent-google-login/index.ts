@@ -133,12 +133,13 @@ Deno.serve(async (req) => {
   if (typeof qrToken !== "string" || !qrToken.trim()) return json({ ok: false, error: "missing_qr_token" }, 400);
   if (!GOOGLE_CLIENT_ID) return json({ ok: false, error: "server_misconfigured", message: "GOOGLE_CLIENT_ID not set" }, 500);
 
-  // Supabase's gateway populates X-Forwarded-For with the client address.
-  // Skip only this IP dimension when the platform omits it; the verified-email
-  // limit below still applies. Never store the raw IP, only its keyed HMAC digest.
-  const forwardedIp = req.headers.get("x-forwarded-for")?.split(",")[0]?.trim();
-  if (forwardedIp && forwardedIp.length <= 64 && /^[0-9a-fA-F:.]+$/.test(forwardedIp)) {
-    const ipLimit = await checkRateLimit(`ip:${forwardedIp}`, MAX_IP_ATTEMPTS);
+  // Use the edge platform's client-IP header rather than X-Forwarded-For,
+  // whose leftmost value may be supplied by the caller. If the trusted header
+  // is absent/invalid, retain the verified-email limit and skip only IP limiting.
+  // Never store the raw IP, only its keyed HMAC digest.
+  const clientIp = req.headers.get("cf-connecting-ip")?.trim();
+  if (clientIp && clientIp.length <= 64 && /^[0-9a-fA-F:.]+$/.test(clientIp)) {
+    const ipLimit = await checkRateLimit(`ip:${clientIp}`, MAX_IP_ATTEMPTS);
     if (!ipLimit) return json({ ok: false, error: "rate_limit_unavailable" }, 503, { "Cache-Control": "no-store" });
     if (!ipLimit.allowed) return rateLimitedResponse(ipLimit);
   }
