@@ -1,5 +1,10 @@
 name: SCMS tests
 
+# Avoid overlapping branch runs so repeated PostgreSQL pulls do not amplify registry throttling.
+concurrency:
+  group: scmsv12-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
 on:
   push:
     branches: [main]
@@ -28,7 +33,7 @@ jobs:
     runs-on: ubuntu-latest
     services:
       postgres:
-        image: public.ecr.aws/docker/library/postgres:16
+        image: postgres:16
         env:
           POSTGRES_USER: scms_logout_test
           POSTGRES_PASSWORD: scms_logout_test
@@ -63,8 +68,8 @@ jobs:
     runs-on: ubuntu-latest
     services:
       postgres:
-        # Public ECR mirror avoids Docker Hub anonymous pull throttling in CI.
-        image: public.ecr.aws/docker/library/postgres:16
+        # Use the official PostgreSQL image; concurrency above limits overlapping pulls.
+        image: postgres:16
         env:
           POSTGRES_USER: scms_test
           POSTGRES_PASSWORD: scms_test
@@ -107,7 +112,7 @@ jobs:
     runs-on: ubuntu-latest
     services:
       postgres:
-        image: public.ecr.aws/docker/library/postgres:16
+        image: postgres:16
         env:
           POSTGRES_USER: scms_host_test
           POSTGRES_PASSWORD: scms_host_test
@@ -142,7 +147,7 @@ jobs:
     runs-on: ubuntu-latest
     services:
       postgres:
-        image: public.ecr.aws/docker/library/postgres:16
+        image: postgres:16
         env:
           POSTGRES_USER: scms_website_test
           POSTGRES_PASSWORD: scms_website_test
@@ -177,7 +182,7 @@ jobs:
     runs-on: ubuntu-latest
     services:
       postgres:
-        image: public.ecr.aws/docker/library/postgres:16
+        image: postgres:16
         env:
           POSTGRES_USER: scms_admission_test
           POSTGRES_PASSWORD: scms_admission_test
@@ -220,7 +225,7 @@ jobs:
     runs-on: ubuntu-latest
     services:
       postgres:
-        image: public.ecr.aws/docker/library/postgres:16
+        image: postgres:16
         env:
           POSTGRES_USER: scms_chat_test
           POSTGRES_PASSWORD: scms_chat_test
@@ -255,7 +260,7 @@ jobs:
     runs-on: ubuntu-latest
     services:
       postgres:
-        image: public.ecr.aws/docker/library/postgres:16
+        image: postgres:16
         env:
           POSTGRES_USER: scms_direct_test
           POSTGRES_PASSWORD: scms_direct_test
@@ -284,6 +289,57 @@ jobs:
         env:
           PGPASSWORD: scms_direct_test
         run: psql -h 127.0.0.1 -U scms_direct_test -d scms_direct_test -v ON_ERROR_STOP=1 -f test/db/staff_chat_direct_tenant_runtime_test.sql
+
+  non-ai-tenant-crud-security:
+    name: Non-AI tenant identity and student CRUD response runtime test
+    runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: postgres:16
+        env:
+          POSTGRES_USER: scms_non_ai_test
+          POSTGRES_PASSWORD: scms_non_ai_test
+          POSTGRES_DB: scms_non_ai_test
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U scms_non_ai_test -d scms_non_ai_test"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 10
+    steps:
+      - uses: actions/checkout@v7
+      - name: Install PostgreSQL client
+        run: sudo apt-get update && sudo apt-get install -y postgresql-client
+      - name: Wait for PostgreSQL
+        env:
+          PGPASSWORD: scms_non_ai_test
+        run: |
+          for i in {1..30}; do
+            pg_isready -h 127.0.0.1 -p 5432 -U scms_non_ai_test -d scms_non_ai_test && exit 0
+            sleep 1
+          done
+          exit 1
+      - uses: actions/setup-node@v7
+        with:
+          node-version: 20
+      - name: Install npm dependencies for Deno type resolution
+        run: npm install --no-audit --no-fund
+      - uses: denoland/setup-deno@v2
+        with:
+          deno-version: v2.x
+      - name: Check upload Edge Function types
+        run: deno check --node-modules-dir=auto supabase/functions/upload-school-asset/index.ts
+      - name: Run non-AI tenant and student CRUD security harness
+        env:
+          PGPASSWORD: scms_non_ai_test
+        run: psql -h 127.0.0.1 -U scms_non_ai_test -d scms_non_ai_test -v ON_ERROR_STOP=1 -f test/db/non_ai_tenant_crud_security_runtime_test.sql
+      - name: Run parent contact audit minimization runtime test in isolated database
+        env:
+          PGPASSWORD: scms_non_ai_test
+        run: |
+          createdb -h 127.0.0.1 -U scms_non_ai_test parent_contact_audit_test
+          psql -h 127.0.0.1 -U scms_non_ai_test -d parent_contact_audit_test -v ON_ERROR_STOP=1 -f test/db/parent_contact_audit_minimization_runtime_test.sql
 
   playwright-ci:
     name: Playwright local smoke test (automatic PR/push)
@@ -410,7 +466,7 @@ jobs:
     runs-on: ubuntu-latest
     services:
       postgres:
-        image: public.ecr.aws/docker/library/postgres:16
+        image: postgres:16
         env:
           POSTGRES_USER: scms_session_test
           POSTGRES_PASSWORD: scms_session_test
@@ -439,13 +495,25 @@ jobs:
         env:
           PGPASSWORD: scms_session_test
         run: psql -h 127.0.0.1 -U scms_session_test -d scms_session_test -v ON_ERROR_STOP=1 -f test/db/session_tenant_binding_runtime_test.sql
+      - name: Run stale web session invalidation runtime test in isolated database
+        env:
+          PGPASSWORD: scms_session_test
+        run: |
+          createdb -h 127.0.0.1 -U scms_session_test stale_web_session_test
+          psql -h 127.0.0.1 -U scms_session_test -d stale_web_session_test -v ON_ERROR_STOP=1 -f test/db/stale_web_session_invalidation_runtime_test.sql
+      - name: Run parent portal SQL security runtime harness in isolated database
+        env:
+          PGPASSWORD: scms_session_test
+        run: |
+          createdb -h 127.0.0.1 -U scms_session_test parent_portal_security_test
+          psql -h 127.0.0.1 -U scms_session_test -d parent_portal_security_test -v ON_ERROR_STOP=1 -f test/db/parent_portal_security_runtime_test.sql
 
   rpc-session-identity-binding-runtime:
     name: School RPC session identity binding runtime test
     runs-on: ubuntu-latest
     services:
       postgres:
-        image: public.ecr.aws/docker/library/postgres:16
+        image: postgres:16
         env:
           POSTGRES_USER: scms_rpc_test
           POSTGRES_PASSWORD: scms_rpc_test

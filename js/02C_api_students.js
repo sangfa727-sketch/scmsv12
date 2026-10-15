@@ -10,6 +10,25 @@
 
 var API = window.API || {};
 
+async function _nativeStudentRpc(name, payload) {
+  const session = window.getSavedSession?.();
+  if (!session?.token) throw new Error('A valid Telegram school session is required');
+  const resp = await fetch(`${SCMS_CONFIG.SUPABASE_URL}/rest/v1/rpc/${name}`, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      'apikey': SCMS_CONFIG.SUPABASE_ANON,
+      'Authorization': `Bearer ${SCMS_CONFIG.SUPABASE_ANON}`,
+    },
+    body: JSON.stringify({ ...payload, p_token: session.token }),
+  });
+  const result = await resp.json().catch(() => ({}));
+  if (!resp.ok || !result?.ok) {
+    throw new Error(result?.message || result?.error || `Student operation failed (${resp.status})`);
+  }
+  return result;
+}
+
 Object.assign(API, {
 
   async getStudents() {
@@ -64,30 +83,46 @@ Object.assign(API, {
    *  Path: <school_id>/<student_id>-<uid>.<ext> — unique per upload, never overwrites. */
 
   async uploadStudentPhoto(studentId, file) {
-    // Phone photos are often HEIC or > 3 MB, which the bucket rejects — always
-    // resize to a small square JPEG first.
+    // Student photos must use the trusted Edge Function: direct anonymous
+    // writes to the public Storage bucket are intentionally disabled.
+    const sessionToken = window.APP.platform === 'web'
+      ? _webSessionToken()
+      : (window.getSavedSession?.()?.token || '');
+    if (!sessionToken) throw new Error('A valid school session is required to upload a student photo');
+
+    // Phone photos are often HEIC or > 3 MB; normalize to a small square JPEG.
     const blob = await _prepStudentPhoto(file);
-    const path = `${window.APP.school_id}/${studentId}-${Date.now().toString(36)}.jpg`;
+    const form = new FormData();
+    form.append('session_token', sessionToken);
+    form.append('kind', 'student');
+    form.append('student_id', studentId);
+    form.append('file', blob, 'student.jpg');
+
     const resp = await fetch(
-      `${SCMS_CONFIG.SUPABASE_URL}/storage/v1/object/student-photos/${path}`,
+      `${SCMS_CONFIG.SUPABASE_URL}/functions/v1/upload-school-asset`,
       {
-        method:  'POST',
+        method: 'POST',
         headers: {
-          'apikey':        SCMS_CONFIG.SUPABASE_ANON,
+          'apikey': SCMS_CONFIG.SUPABASE_ANON,
           'Authorization': `Bearer ${SCMS_CONFIG.SUPABASE_ANON}`,
-          'Content-Type':  'image/jpeg',
         },
-        body: blob,
+        body: form,
       }
     );
-    if (!resp.ok) {
-      const t = await resp.text().catch(() => '');
-      throw new Error(`Photo upload failed (${resp.status}): ${t.slice(0, 200)}`);
+    const result = await resp.json().catch(() => ({}));
+    if (!resp.ok || !result?.ok || !result?.url) {
+      throw new Error(result?.error || `Photo upload failed (${resp.status})`);
     }
-    return `${SCMS_CONFIG.SUPABASE_URL}/storage/v1/object/public/student-photos/${path}?t=${Date.now()}`;
+    return result.url;
   },
 
   async setStudentPhoto(studentId, photoUrl) {
+    if (window.APP.platform !== 'web') {
+      return _nativeStudentRpc('rpc_app_set_student_photo', {
+        p_student_id: studentId,
+        p_photo_url: photoUrl,
+      });
+    }
     return _webRpc('rpc_set_student_photo', {
       p_session_token: _webSessionToken(),
       p_student_id: studentId,
@@ -115,33 +150,17 @@ Object.assign(API, {
       p_parent_email: patch.parent_email || null,
     });
 
-    // Whitelist fields that exist in the DB schema (matches Apply Student Edit)
+    // Native/TWA clients cannot write directly to public.students with the anon key.
+    // Route mutations through the tenant-scoped RPC and the linked Telegram session.
     const allowed = ['name_en', 'name_mm', 'name_local', 'class', 'grade',
                      'gender', 'date_of_birth', 'parent_name', 'parent_phone',
-                     'parent_tg_id', 'status', 'parent_email', 'home_color'];
+                     'parent_phone2', 'parent_email', 'home_color'];
     const clean = {};
     for (const k of allowed) if (k in patch) clean[k] = patch[k];
-    clean.updated_at = new Date().toISOString();
-
-    const url = `${SCMS_CONFIG.SUPABASE_URL}/rest/v1/students`
-              + `?student_id=eq.${encodeURIComponent(studentId)}`
-              + `&school_id=eq.${encodeURIComponent(window.APP.school_id)}`;
-    const resp = await fetch(url, {
-      method:  'PATCH',
-      headers: {
-        'Content-Type':  'application/json',
-        'apikey':        SCMS_CONFIG.SUPABASE_ANON,
-        'Authorization': `Bearer ${SCMS_CONFIG.SUPABASE_ANON}`,
-        'Prefer':        'return=representation',
-      },
-      body: JSON.stringify(clean),
+    return _nativeStudentRpc('rpc_app_update_student', {
+      p_student_id: studentId,
+      p_patch: clean,
     });
-    if (!resp.ok) {
-      const t = await resp.text();
-      throw new Error(`update_student failed (${resp.status}): ${t}`);
-    }
-    const rows = await resp.json();
-    return { ok: true, success: true, student: rows[0] || null };
   },
 
   /** Soft-delete (status=Inactive) — admin only. */
@@ -156,26 +175,9 @@ Object.assign(API, {
       p_student_id: studentId,
     });
 
-    const url = `${SCMS_CONFIG.SUPABASE_URL}/rest/v1/students`
-              + `?student_id=eq.${encodeURIComponent(studentId)}`
-              + `&school_id=eq.${encodeURIComponent(window.APP.school_id)}`;
-    const resp = await fetch(url, {
-      method:  'PATCH',
-      headers: {
-        'Content-Type':  'application/json',
-        'apikey':        SCMS_CONFIG.SUPABASE_ANON,
-        'Authorization': `Bearer ${SCMS_CONFIG.SUPABASE_ANON}`,
-      },
-      body: JSON.stringify({
-        status: 'Inactive',
-        updated_at: new Date().toISOString(),
-      }),
+    return _nativeStudentRpc('rpc_app_delete_student', {
+      p_student_id: studentId,
     });
-    if (!resp.ok) {
-      const t = await resp.text();
-      throw new Error(`delete_student failed (${resp.status}): ${t}`);
-    }
-    return { ok: true, success: true };
   },
 
   /** Poll Supabase to see if the bot has captured the parent's Telegram ID
@@ -247,6 +249,17 @@ Object.assign(API, {
    *  kind: 'logo' | 'cover' | 'teacher'. Every upload gets a unique path — never overwrites. */
 
   async updateStudentParent(studentId, data) {
+    if (window.APP.platform !== 'web') {
+      return _nativeStudentRpc('rpc_app_update_student', {
+        p_student_id: studentId,
+        p_patch: {
+          parent_name: data.parent_name || null,
+          parent_phone: data.parent_phone || null,
+          parent_phone2: data.parent_phone2 || null,
+          parent_email: data.parent_email || null,
+        },
+      });
+    }
     return _webRpc('rpc_update_student_parent', {
       p_session_token: _webSessionToken(),
       p_student_id: studentId,
