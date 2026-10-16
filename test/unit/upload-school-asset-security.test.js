@@ -3,7 +3,8 @@ const assert = require('node:assert/strict');
 const fs = require('node:fs');
 
 const source = fs.readFileSync('supabase/functions/upload-school-asset/index.ts', 'utf8');
-const migration = fs.readFileSync('supabase/migrations/20261014136000_secure_student_photo_upload.sql', 'utf8');
+const authorizationMigration = fs.readFileSync('supabase/migrations/20261014136000_secure_student_photo_upload.sql', 'utf8');
+const rolloutScript = fs.readFileSync('scripts/rollouts/enforce_student_photo_upload_endpoint.sql', 'utf8');
 const api = fs.readFileSync('js/02C_api_students.js', 'utf8');
 
 test('upload rejects oversized multipart bodies before parsing FormData', () => {
@@ -47,11 +48,11 @@ test('student photo upload is authorized for the same school and student before 
   assert.match(source, /authorization\.school_id !== session\.school_id/);
   assert.match(source, /authorization\.student_id !== studentId/);
   assert.match(source, /const bucket = kind === "student" \? "student-photos" : "school-assets"/);
-  assert.match(migration, /private\.web_has_student_permission/);
-  assert.match(migration, /web_has_student_permission\([\s\S]*?\) IS NOT TRUE/);
-  assert.match(migration, /DROP POLICY IF EXISTS "anon upload student photos" ON storage\.objects/);
-  assert.match(migration, /DROP POLICY IF EXISTS "public read student photos" ON storage\.objects/);
-  assert.match(migration, /GRANT EXECUTE ON FUNCTION public\.rpc_authorize_student_photo_upload\(text, text\)\s+TO service_role/);
+  assert.match(authorizationMigration, /private\.web_has_student_permission/);
+  assert.match(authorizationMigration, /web_has_student_permission\([\s\S]*?\) IS NOT TRUE/);
+  assert.match(rolloutScript, /DROP POLICY IF EXISTS "anon upload student photos" ON storage\.objects/);
+  assert.match(rolloutScript, /DROP POLICY IF EXISTS "public read student photos" ON storage\.objects/);
+  assert.match(authorizationMigration, /GRANT EXECUTE ON FUNCTION public\.rpc_authorize_student_photo_upload\(text, text\)\s+TO service_role/);
 });
 
 test('browser student-photo flow uses the trusted Edge Function, not direct anonymous Storage writes', () => {

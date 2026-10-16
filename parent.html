@@ -245,11 +245,19 @@ async function showDashboard(sessionToken) {
   appEl.innerHTML = `<div class="card center"><div class="skeleton" style="width:60%;margin:0 auto"></div><div class="skeleton" style="width:80%"></div><div class="skeleton" style="width:80%"></div></div>`;
 
   const res = await rpc('rpc_parent_get_dashboard', { p_session_token: sessionToken });
-  const { student, attendance, grades, invoices, upcoming_exams, parent_messages, timetable, events, leave_requests } = res;
+  const { student, attendance, attendance_summary, grades, invoices, upcoming_exams, parent_messages, timetable, events, leave_requests } = res;
 
-  const presentCount = attendance.filter(a => a.status === 'Present').length;
-  const absentCount  = attendance.filter(a => a.status === 'Absent').length;
-  const lateCount    = attendance.filter(a => a.status === 'Late').length;
+  // New backend returns full-history totals separately from the bounded recent-history list.
+  // Fall back to counting returned rows for compatibility with older backend deployments.
+  const presentCount = Number.isFinite(Number(attendance_summary?.present))
+    ? Number(attendance_summary.present)
+    : attendance.filter(a => a.status === 'Present').length;
+  const absentCount = Number.isFinite(Number(attendance_summary?.absent))
+    ? Number(attendance_summary.absent)
+    : attendance.filter(a => a.status === 'Absent').length;
+  const lateCount = Number.isFinite(Number(attendance_summary?.late))
+    ? Number(attendance_summary.late)
+    : attendance.filter(a => a.status === 'Late').length;
 
   appEl.innerHTML = `
     <div class="card center">
