@@ -587,3 +587,9 @@ jobs:
         run: |
           createdb -h 127.0.0.1 -U scms_parent_login_test public_internal_grants_test
           psql -h 127.0.0.1 -U scms_parent_login_test -d public_internal_grants_test -v ON_ERROR_STOP=1 -f test/db/public_internal_table_grants_runtime_test.sql
+      - name: Run diagnostic-view grant regression test
+        env:
+          PGPASSWORD: scms_parent_login_test
+        run: |
+          createdb -h 127.0.0.1 -U scms_parent_login_test diagnostic_view_grants_test
+          psql -h 127.0.0.1 -U scms_parent_login_test -d diagnostic_view_grants_test -v ON_ERROR_STOP=1 -f test/db/public_diagnostic_view_grants_runtime_test.sql
