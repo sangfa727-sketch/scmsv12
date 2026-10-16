@@ -8,6 +8,7 @@ BEGIN
 END $$;
 
 \i supabase/migrations/20261016100000_parent_login_rate_limit.sql
+\i supabase/migrations/20261016110000_bound_parent_login_rate_limit_cleanup.sql
 
 BEGIN;
 DO $$
@@ -58,6 +59,20 @@ BEGIN
   EXCEPTION WHEN invalid_parameter_value THEN
     NULL;
   END;
+
+  -- Cleanup must be bounded so a large expired-key backlog cannot make one
+  -- login request perform an unbounded delete.
+  INSERT INTO private.parent_login_rate_limits (key_hash, window_started_at, attempts, updated_at)
+  SELECT lpad(to_hex(g), 64, '0'), now() - interval '25 hours', 1, now() - interval '25 hours'
+    FROM generate_series(1, 1005) AS g
+  ON CONFLICT (key_hash) DO NOTHING;
+
+  PERFORM public.rpc_parent_login_rate_limit(repeat('b', 64), 900, 10);
+
+  IF (SELECT count(*) FROM private.parent_login_rate_limits
+       WHERE updated_at < now() - interval '24 hours') <> 5 THEN
+    RAISE EXCEPTION 'cleanup should remove at most 1000 stale rows per request';
+  END IF;
 END $$;
 
 ROLLBACK;
