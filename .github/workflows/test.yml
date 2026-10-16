@@ -577,3 +577,7 @@ jobs:
         env:
           PGPASSWORD: scms_parent_login_test
         run: psql -h 127.0.0.1 -U scms_parent_login_test -d scms_parent_login_test -v ON_ERROR_STOP=1 -f test/db/parent_login_rate_limit_runtime_test.sql
+      - name: Run Production security drift repair runtime harness
+        env:
+          PGPASSWORD: scms_parent_login_test
+        run: psql -h 127.0.0.1 -U scms_parent_login_test -d scms_parent_login_test -v ON_ERROR_STOP=1 -f test/db/production_security_drift_repair_runtime_test.sql
