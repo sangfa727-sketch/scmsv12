@@ -644,11 +644,15 @@ BEGIN
       r.proname = 'rpc_convert_admission_to_student'
       AND position('to_jsonb(v_student)' in lower(d)) = 0
       AND position('to_jsonb(v_adm)' in lower(d)) = 0
+      AND position('jsonb_build_object(''student_id'', v_student.student_id' in lower(d)) > 0
     ) OR (
       r.proname <> 'rpc_convert_admission_to_student'
       AND position('to_jsonb(v_row)' in lower(d)) = 0
+      AND position('jsonb_build_object(''student_id'', v_row.student_id' in lower(d)) > 0
     ) THEN
-      -- Treat an already-minimized definition as covered on safe re-runs.
+      -- Treat an already-minimized definition as covered only when its explicit
+      -- student-field allowlist is present. A different full-row serialization
+      -- must fail closed rather than being mistaken for a safe re-run.
       v_covered := v_covered + 1;
     END IF;
   END LOOP;
