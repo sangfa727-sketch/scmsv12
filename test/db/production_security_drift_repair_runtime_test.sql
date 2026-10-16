@@ -204,6 +204,16 @@ INSERT INTO public.app_web_sessions(session_token, teacher_id, school_id, role, 
 
 INSERT INTO public.attendance(date, status, student_id, school_id) VALUES
   (current_date, 'Present', 'student-a', 'school-a');
+
+-- More than 30 rows ensure summary totals remain complete while history is bounded.
+INSERT INTO public.attendance(date, status, student_id, school_id)
+SELECT current_date - g,
+       CASE WHEN g % 3 = 0 THEN 'Present'
+            WHEN g % 3 = 1 THEN 'Absent'
+            ELSE 'Late' END,
+       'student-a',
+       'school-a'
+  FROM generate_series(1, 34) AS g;
 INSERT INTO public.subjects(id, subject_name) VALUES (1, 'Mathematics');
 INSERT INTO public.assessments(id, school_id, class, title, type, subject_id, date, start_time, end_time)
 VALUES (1, 'school-a', 'G1', 'Unit test', 'internal-type', 1, current_date + 1, '09:00', '10:00');
@@ -458,6 +468,15 @@ BEGIN
   dashboard_result := public.rpc_parent_get_dashboard(session_token);
   IF COALESCE((dashboard_result->>'ok')::boolean, false) IS DISTINCT FROM true THEN
     RAISE EXCEPTION 'Parent dashboard failed after login: %', dashboard_result;
+  END IF;
+  IF jsonb_array_length(dashboard_result->'attendance') IS DISTINCT FROM 30 THEN
+    RAISE EXCEPTION 'Parent dashboard should return only the latest 30 attendance rows';
+  END IF;
+  IF dashboard_result->'attendance_summary'->>'present' IS DISTINCT FROM '12'
+     OR dashboard_result->'attendance_summary'->>'absent' IS DISTINCT FROM '12'
+     OR dashboard_result->'attendance_summary'->>'late' IS DISTINCT FROM '11' THEN
+    RAISE EXCEPTION 'Parent dashboard attendance summary must count complete history: %',
+      dashboard_result->'attendance_summary';
   END IF;
   IF (dashboard_result->'student') ?| ARRAY['qr_token','parent_email','school_id','status'] THEN
     RAISE EXCEPTION 'Parent dashboard returned internal student fields: %', dashboard_result->'student';
