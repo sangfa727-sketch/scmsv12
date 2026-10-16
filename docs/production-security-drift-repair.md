@@ -40,6 +40,7 @@ Before rollout, reconcile the outstanding migration history against actual live 
 ## Compatibility and residual risks
 
 - Parent Login keeps the current UI fields (`student_id`, names, class, photo URL, school name) and session-token contract; it no longer returns the full database row.
+- Parent Dashboard attendance is limited to the latest 30 rows; exams, parent messages, timetable, events, and leave requests are bounded. Grade history and invoice history (including invoice items and payments) remain complete and therefore unbounded to avoid silently hiding historical records. This is a residual payload/performance risk for unusually large accounts; add UI pagination before introducing safe caps.
 - Upload continues to use the current public photo URL format for compatibility. The migration does **not** make `student-photos` private. Direct access to known public object URLs remains a privacy risk while the bucket is public.
 - Switching the photo bucket to private requires a separate migration of every photo URL consumer to signed/authenticated delivery and a compatibility test before changing `storage.buckets.public`.
 - Revoking direct table grants should not break the trusted Edge Function because it uses the service-role key; the runtime harness checks that browser roles lose direct access while service-role RPC access remains.
