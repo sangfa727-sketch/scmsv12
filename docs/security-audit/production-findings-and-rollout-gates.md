@@ -46,7 +46,22 @@ The deployed `parent-google-login` Edge Function has `verify_jwt=false` and perf
 
 ### P2 — Migration history drift
 
-A fresh read-only comparison counted 149 SQL migration files on repository `main` versus 202 Production `schema_migrations` rows. Exact filename-stem/name matching found 62 overlaps and only 2 exact version-ID overlaps; 141 Production history names do not match a current repository filename stem. This is a reconciliation signal, not proof that the corresponding schema objects are missing, because historical files may have been renamed, remapped, squashed, or applied under different migration identifiers. Build a reviewed mapping from each historical migration to its current equivalent and verify live schema/function/grant state before any rollout. Do not replay historical migrations or repair migration history directly in Production during this audit.
+The latest read-only comparison after PR #321 merged (2026-10-16) found 164 SQL migration files on repository `main` versus 202 Production `schema_migrations` rows. Exact filename-stem/name matching found 63 overlaps; only 2 files have a version prefix that exactly matches a Production ledger version. There are 28 repository migration files whose 14-digit prefixes sort after the live ledger's maximum version `20261011221557`, and 8 duplicated 14-digit prefixes across the repository migration directory. These mismatches are a reconciliation signal, not proof that every corresponding schema change is absent: historical files may have been renamed, remapped, rewritten, squashed, or applied under different migration identifiers.
+
+**Do not run `supabase db push`, replay the historical backlog wholesale, rename historical migrations based on filename alone, or hand-edit `supabase_migrations.schema_migrations`.** Build a reviewed mapping from each migration file to its live effect and ledger entry; compare SQL definitions, grants, policies, indexes, triggers, and constraints before deciding whether a change is pending, already present, superseded, or intentionally release-only.
+
+#### Post-PR #321 read-only Production snapshot
+
+- Live ledger: 202 rows; maximum version `20261011221557`.
+- Missing live objects confirmed by catalog queries: `private.parent_login_rate_limits`, `public.rpc_parent_login_rate_limit(text, integer, integer)`, and `public.rpc_authorize_student_photo_upload(text, text)`.
+- `public.rpc_parent_google_login(text, text, text)` still grants EXECUTE to `anon` and `authenticated`, and its live definition still returns `to_jsonb(v_student)`; the PR's allowlisted replacement is not deployed.
+- No `teachers_revoke_web_sessions_on_identity_change` / `teachers_revoke_web_sessions_on_delete` trigger was found. Live `rpc_google_login` does not yet show the invite-row lock, and live `rpc_generate_school_id()` does not yet show the transaction advisory lock.
+- The `student-photos` and `school-assets` buckets are both public. The live `student-photos` policies still allow browser-role uploads and public reads. Keep policy removal gated behind the reviewed upload Edge Function and successful smoke tests; public object URLs remain a separate privacy risk.
+- The repository migration `20261012100000_school_website_verified_host_registry.sql` explicitly labels itself a release artifact requiring separate approval and shares its timestamp prefix with `20261012100000_staff_direct_conversation_tenant_filters.sql`. Neither should be blindly applied through a bulk push.
+- A catalog preflight found zero duplicate normalized teacher IDs and zero duplicate normalized login names at audit time. This makes the corresponding uniqueness-index preflight clear at that snapshot only; it is not a substitute for rerunning the preflight immediately before deployment.
+- The Security Advisor currently reports broad categories of SECURITY DEFINER functions executable by browser roles. Do not revoke grants globally: inspect each RPC's caller contract, session-token validation, role checks, and frontend use to avoid breaking legitimate manual CRUD and login paths.
+
+No Production database, configuration, Edge Function, Storage policy, or migration-ledger changes were performed during this verification. PR #321 merge-commit CI passed: [SCMS tests](https://github.com/sangfa727-sketch/scmsv12/actions/runs/38909979569), [Pages build](https://github.com/sangfa727-sketch/scmsv12/actions/runs/38909978292).
 
 ### P1/P2 — Student photo objects remain publicly readable
 
