@@ -2,7 +2,7 @@
 
 ## Scope
 
-The forward-only repair set (`20261016120000_production_security_drift_repair.sql` plus `20261016140000_revoke_public_internal_table_grants.sql`) addresses the confirmed live mismatches:
+The forward-only repair set (`20261016120000_production_security_drift_repair.sql`, `20261016140000_revoke_public_internal_table_grants.sql`, and `20261016150000_revoke_public_diagnostic_view_grants.sql`) addresses the confirmed live mismatches:
 
 1. Revoke direct browser-role privileges on `public.app_sessions`, `public.audit_log`, and `public.n8n_state`, including privileges inherited from `PUBLIC`.
 2. Replace the Parent Login RPC's full-row student response with an explicit UI allowlist and restrict direct RPC execution to `service_role`.
@@ -10,6 +10,7 @@ The forward-only repair set (`20261016120000_production_security_drift_repair.sq
 4. Minimize all six legacy manual student CRUD response payloads, remove parent-contact values from student-update audit events, and harden legacy web student deletion to current-school admin-only soft delete.
 5. Minimize parent-contact audit payloads to changed field names.
 6. Add the trusted student-photo authorization RPC. Direct upload / object-listing policy removal is a separate manual rollout script outside the automatic migration directory.
+7. Revoke browser-role and `PUBLIC` access to `public.pg_all_foreign_keys` and `public.tap_funky`, which the live Production Security Advisor confirmed were exposed through both direct role grants and `PUBLIC`.
 
 The migration does not modify business rows, student status, student records, stored photo URLs, or bucket visibility. It is idempotent for the intended schema state and is covered by a disposable PostgreSQL runtime harness.
 
@@ -40,7 +41,7 @@ The historical migration `20261014136000_secure_student_photo_upload.sql` create
    - Student-update and parent-contact audit records omit phone/email values and retain only field names.
    - Legacy student deletion rejects cross-school and NULL-permission cases while preserving same-school admin soft delete.
    - Photo authorization allows an active same-school authorized session and rejects cross-school / invalid sessions.
-   - After step 5, verify the legacy direct-upload and listing policies are still present (they must remain during the Edge Function deployment gap). Confirm they are absent only after step 10 applies the manual policy-removal rollout script.
+   - After step 5, verify the legacy direct-upload and listing policies are still present (they must remain during the Edge Function deployment gap). Confirm they are absent only after step 11 applies the manual policy-removal rollout script.
 9. **Student-photo staged rollout:** Repository code already wires `API.uploadStudentPhoto()` to `upload-school-asset` with `kind=student`; the Edge Function validates the school session and calls `rpc_authorize_student_photo_upload` before writing to `student-photos`. Production currently runs an older deployed version, so first deploy the reviewed version-controlled `upload-school-asset` only after step 5 has created the RPC. Until the new function is deployed, the old direct-upload policy remains in place, avoiding an upload outage.
 10. Smoke-test student photo upload and verify the returned URL and stored object path. Also smoke-test school logo/cover and teacher asset uploads. If any test fails, stop and fix forward; do not remove the legacy photo policy.
 11. Only after successful upload verification, run `scripts/rollouts/enforce_student_photo_upload_endpoint.sql` manually to remove the direct browser upload and object-listing policies. Then re-run student photo upload and verify it still succeeds through the Edge Function. The bucket remains public for existing URL compatibility; this is not a private-photo migration.
