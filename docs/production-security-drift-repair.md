@@ -34,8 +34,9 @@ Before rollout, reconcile the outstanding migration history against actual live 
    - Legacy student deletion rejects cross-school and NULL-permission cases while preserving same-school admin soft delete.
    - Photo authorization allows an active same-school authorized session and rejects cross-school / invalid sessions.
    - Legacy direct upload and listing policies are absent.
-6. Only after the migration verifies, deploy the version-controlled `parent-google-login` and `upload-school-asset` Edge Functions. Do not deploy the Parent Login function before its rate-limit RPC exists; it intentionally fails closed with HTTP 503 if the limiter is unavailable.
-7. Run smoke checks for Parent Login, student photo upload, school logo/cover upload, and existing student CRUD. If any check fails, stop and fix forward; do not restore the old vulnerable function as a routine rollback.
+6. **Student-photo rollout blocker:** Production currently has no dedicated student-photo upload Edge Function. The deployed `upload-school-asset` endpoint only handles school logo, cover, and teacher assets; it does not upload to `student-photos` or call `rpc_authorize_student_photo_upload`. Before applying the migration that removes direct browser upload, implement and test a dedicated trusted student-photo upload endpoint, wire every existing UI upload caller to it, and deploy it. Until then, do not apply the photo-policy-removal portion of this migration because it would break student photo uploads.
+7. After the upload endpoint exists and the reviewed migration verifies, deploy the version-controlled `parent-google-login` and relevant asset Edge Functions. Do not deploy Parent Login before its rate-limit RPC exists; it intentionally fails closed with HTTP 503 if the limiter is unavailable.
+8. Run smoke checks for Parent Login, student photo upload, school logo/cover upload, and existing student CRUD. If any check fails, stop and fix forward; do not restore the old vulnerable function as a routine rollback.
 
 ## Compatibility and residual risks
 
