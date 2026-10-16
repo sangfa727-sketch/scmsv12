@@ -141,9 +141,9 @@ BEGIN
        LIMIT 30
     ) a;
 
-  -- Preserve complete historical attendance/grade rows for compatibility.
-  -- Payload minimization is done by selecting only UI-required fields; caps are
-  -- reserved for future-facing/structural collections below.
+  -- Attendance is intentionally capped to the latest 30 rows. Grades retain
+  -- complete history for compatibility; their response size remains unbounded
+  -- until the Parent Portal supports paginated historical grades.
   SELECT COALESCE(jsonb_agg(
            jsonb_build_object(
              'subject', x.subject_name,
