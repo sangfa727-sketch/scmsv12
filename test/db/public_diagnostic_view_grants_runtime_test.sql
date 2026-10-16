@@ -38,9 +38,9 @@ BEGIN
     RAISE EXCEPTION 'diagnostic views remain accessible to browser roles';
   END IF;
 
-  IF has_table_privilege('service_role', 'public.pg_all_foreign_keys', 'SELECT')
-     OR has_table_privilege('service_role', 'public.tap_funky', 'SELECT') THEN
-    RAISE EXCEPTION 'explicit trusted service_role access was unexpectedly removed';
+  IF NOT has_table_privilege('service_role', 'public.pg_all_foreign_keys', 'SELECT')
+     OR NOT has_table_privilege('service_role', 'public.tap_funky', 'SELECT') THEN
+    RAISE EXCEPTION 'trusted service_role SELECT access was not preserved';
   END IF;
 END
 $assert_revoked$;
