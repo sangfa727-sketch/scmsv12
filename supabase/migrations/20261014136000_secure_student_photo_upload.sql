@@ -1,8 +1,8 @@
 -- Create the trusted student-photo upload authorization RPC.
 -- IMPORTANT: Do not remove the legacy Storage policies in this historical migration.
 -- The trusted upload-school-asset Edge Function must be deployed and smoke-tested
--- before the separately gated policy-removal migration is applied. Keeping policy
--- removal out of this migration preserves the staged rollout on fresh installations.
+-- before the separately gated policy-removal rollout script is run. Keeping policy
+-- removal outside the migrations directory preserves staged rollout on fresh installs.
 -- Public object URL visibility remains unchanged for compatibility.
 
 BEGIN;
