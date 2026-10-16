@@ -445,4 +445,7 @@ BEGIN
 END
 $assert$;
 
-SELECT 'PASS: forward repair enforces internal grants, Parent Login minimization/rate limits, and trusted photo authorization' AS result;
+-- A second application must be a safe no-op for the already-repaired schema.
+\ir ../../supabase/migrations/20261016120000_production_security_drift_repair.sql
+
+SELECT 'PASS: forward repair is repeatable and enforces internal grants, Parent Login minimization/rate limits, student CRUD payload/audit protections, and trusted photo authorization' AS result;
