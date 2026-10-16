@@ -96,6 +96,7 @@ DECLARE
   v_sess             record;
   v_student          record;
   v_attendance       jsonb;
+  v_attendance_summary jsonb;
   v_grades           jsonb;
   v_invoices         jsonb;
   v_upcoming_exams   jsonb;
@@ -146,9 +147,20 @@ BEGIN
        LIMIT 30
     ) a;
 
-  -- Attendance is intentionally capped to the latest 30 rows. Grades retain
-  -- complete history for compatibility; their response size remains unbounded
-  -- until the Parent Portal supports paginated historical grades.
+  -- Return only the latest 30 attendance rows for history display, while
+  -- computing summary counts across the student's complete school-scoped history.
+  SELECT jsonb_build_object(
+           'present', count(*) FILTER (WHERE a.status = 'Present'),
+           'absent', count(*) FILTER (WHERE a.status = 'Absent'),
+           'late', count(*) FILTER (WHERE a.status = 'Late')
+         )
+    INTO v_attendance_summary
+    FROM public.attendance a
+   WHERE a.student_id = v_sess.student_id
+     AND a.school_id = v_student.school_id;
+
+  -- Grades retain complete history for compatibility; their response size
+  -- remains unbounded until the Parent Portal supports paginated history.
   SELECT COALESCE(jsonb_agg(
            jsonb_build_object(
              'subject', x.subject_name,
@@ -329,6 +341,7 @@ BEGIN
     'ok', true,
     'student', jsonb_strip_nulls(jsonb_build_object('student_id', v_student.student_id, 'name_en', v_student.name_en, 'name_local', v_student.name_local, 'class', v_student.class, 'photo_url', v_student.photo_url, 'school_name', v_student.school_name)),
     'attendance', v_attendance,
+    'attendance_summary', v_attendance_summary,
     'grades', v_grades,
     'upcoming_exams', v_upcoming_exams,
     'parent_messages', v_parent_messages,
