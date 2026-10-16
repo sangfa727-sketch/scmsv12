@@ -2,11 +2,11 @@
 -- This migration intentionally touches only the currently verified broken surfaces:
 -- (1) browser grants on internal tables, (2) Parent Login RPC payload/grants,
 -- (3) bounded Parent Login rate limiting, and (4) student-photo upload authorization.
--- IMPORTANT: Production currently has no dedicated student-photo upload Edge Function.
--- upload-school-asset handles school branding/teacher assets, not student-photos.
--- Do not apply this migration until a dedicated trusted student-photo upload endpoint
--- is implemented, wired to the UI, deployed, and smoke-tested; otherwise photo upload
--- will stop working after the direct browser INSERT policy is removed.
+-- Student photo upload is already wired in the repository to upload-school-asset
+-- with kind='student'. Production rollout must be staged: apply this migration to
+-- create the authorization RPC, deploy the reviewed Edge Function, verify uploads,
+-- then apply the separate policy-removal migration. Do not remove direct-upload
+-- policy before the trusted endpoint is deployed and smoke-tested.
 -- It does NOT make student-photos private because existing UI consumes public URLs;
 -- that needs a separate URL-consumer migration and compatibility rollout.
 -- Do not run the full historical backlog with db push until migration history is reconciled.
@@ -869,7 +869,8 @@ REVOKE ALL ON FUNCTION public.rpc_authorize_student_photo_upload(text, text)
 GRANT EXECUTE ON FUNCTION public.rpc_authorize_student_photo_upload(text, text)
   TO service_role;
 
-DROP POLICY IF EXISTS "anon upload student photos" ON storage.objects;
-DROP POLICY IF EXISTS "public read student photos" ON storage.objects;
+-- Storage policy removal is deliberately separated into a follow-up migration.
+-- This allows the authorization RPC to exist before the Edge Function is deployed,
+-- and keeps the legacy upload path available until the trusted endpoint is verified.
 
 COMMIT;
