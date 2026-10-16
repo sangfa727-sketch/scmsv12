@@ -146,7 +146,32 @@ DECLARE
   student_json jsonb;
   invoice_json jsonb;
   leave_result jsonb;
+  internal_table text;
+  browser_role text;
+  privilege_name text;
 BEGIN
+  -- Regression guard: browser roles must not regain direct privileges on
+  -- internal session, audit, or automation state tables. Test every table /
+  -- role / privilege combination rather than only checking one representative.
+  FOREACH internal_table IN ARRAY ARRAY['app_sessions', 'audit_log', 'n8n_state']
+  LOOP
+    FOREACH browser_role IN ARRAY ARRAY['anon', 'authenticated']
+    LOOP
+      FOREACH privilege_name IN ARRAY ARRAY[
+        'SELECT', 'INSERT', 'UPDATE', 'DELETE', 'TRUNCATE', 'REFERENCES', 'TRIGGER'
+      ]
+      LOOP
+        IF has_table_privilege(
+          browser_role,
+          format('public.%I', internal_table),
+          privilege_name
+        ) THEN
+          RAISE EXCEPTION 'browser role % unexpectedly has % on public.%', 
+            browser_role, privilege_name, internal_table;
+        END IF;
+      END LOOP;
+    END LOOP;
+  END LOOP;
   IF has_function_privilege('anon', 'public.rpc_parent_google_login(text,text,text)', 'EXECUTE') THEN
     RAISE EXCEPTION 'anon must not execute rpc_parent_google_login';
   END IF;
