@@ -138,6 +138,7 @@ BEGIN
        WHERE student_id = v_sess.student_id
          AND school_id = v_student.school_id
        ORDER BY date DESC
+       LIMIT 30
     ) a;
 
   -- Preserve complete historical attendance/grade rows for compatibility.
@@ -208,6 +209,7 @@ BEGIN
         )
         AND COALESCE(pc.status, '') <> 'Failed'
       ORDER BY pc.date DESC, pc.created_at DESC
+      LIMIT 50
     ) x;
 
   SELECT COALESCE(jsonb_agg(
@@ -274,6 +276,7 @@ BEGIN
        WHERE lr.student_id = v_sess.student_id
          AND lr.school_id = v_student.school_id
        ORDER BY lr.created_at DESC
+       LIMIT 20
     ) x;
 
   SELECT COALESCE(jsonb_agg(
@@ -370,7 +373,7 @@ BEGIN
   IF p_start_date IS NULL OR p_end_date IS NULL OR p_end_date < p_start_date THEN
     RETURN jsonb_build_object('ok', false, 'error', 'invalid_date_range');
   END IF;
-  IF p_reason IS NULL OR nullif(trim(p_reason), '') IS NULL OR length(p_reason) > 1000 THEN
+  IF length(coalesce(p_reason, '')) > 1000 THEN
     RETURN jsonb_build_object('ok', false, 'error', 'invalid_reason');
   END IF;
 
@@ -381,7 +384,7 @@ BEGIN
   INSERT INTO public.leave_requests
     (school_id, student_id, class, start_date, end_date, reason)
   VALUES
-    (v_sess.school_id, v_sess.student_id, v_sess.class, p_start_date, p_end_date, trim(p_reason))
+    (v_sess.school_id, v_sess.student_id, v_sess.class, p_start_date, p_end_date, nullif(trim(p_reason), ''))
   RETURNING id, school_id, student_id, start_date, end_date, reason, status, created_at
        INTO v_row;
 
