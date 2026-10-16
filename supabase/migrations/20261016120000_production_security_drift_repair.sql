@@ -1,7 +1,12 @@
 -- Forward-only repair for confirmed Production security drift.
 -- This migration intentionally touches only the currently verified broken surfaces:
 -- (1) browser grants on internal tables, (2) Parent Login RPC payload/grants,
--- (3) bounded Parent Login rate limiting, and (4) trusted student-photo upload authorization.
+-- (3) bounded Parent Login rate limiting, and (4) student-photo upload authorization.
+-- IMPORTANT: Production currently has no dedicated student-photo upload Edge Function.
+-- upload-school-asset handles school branding/teacher assets, not student-photos.
+-- Do not apply this migration until a dedicated trusted student-photo upload endpoint
+-- is implemented, wired to the UI, deployed, and smoke-tested; otherwise photo upload
+-- will stop working after the direct browser INSERT policy is removed.
 -- It does NOT make student-photos private because existing UI consumes public URLs;
 -- that needs a separate URL-consumer migration and compatibility rollout.
 -- Do not run the full historical backlog with db push until migration history is reconciled.
