@@ -104,7 +104,7 @@ CREATE TABLE public.payments (
 CREATE TABLE public.teachers (
   teacher_id text PRIMARY KEY,
   school_id text NOT NULL,
-  role text NOT NULL,
+  role text,
   status text NOT NULL,
   telegram_id text
 );
@@ -194,12 +194,13 @@ INSERT INTO public.students(student_id, name_en, name_local, class, photo_url, p
   ('student-b', 'Student B', 'Student B local', 'G1', NULL, 'other@example.invalid', 'school-b', 'Active', 'qr-secret-b');
 INSERT INTO public.teachers(teacher_id, school_id, role, status, telegram_id) VALUES
   ('teacher-a', 'school-a', 'admin', 'active', 'tg-a'),
-  ('teacher-b', 'school-b', 'admin', 'active', 'tg-b');
+  ('teacher-b', 'school-b', 'admin', 'active', 'tg-b'),
+  ('teacher-null-role', 'school-a', NULL, 'active', 'tg-null-role');
 INSERT INTO public.app_web_sessions(session_token, teacher_id, school_id, role, expires_at) VALUES
   ('valid-session-a', 'teacher-a', 'school-a', 'admin', now() + interval '1 day'),
-  ('permission-null-session', 'teacher-a', 'school-a', 'admin', now() + interval '1 day');
-INSERT INTO public.app_sessions(token, telegram_id, teacher_id, school_id, status) VALUES
-  ('native-session-token-0123456789abcdef', 'tg-a', 'teacher-a', 'school-a', 'linked');
+  ('permission-null-session', 'teacher-a', 'school-a', 'admin', now() + interval '1 day');INSERT INTO public.app_sessions(token, telegram_id, teacher_id, school_id, status) VALUES
+  ('native-session-token-0123456789abcdef', 'tg-a', 'teacher-a', 'school-a', 'linked'),
+  ('null-role-session-token-0123456789abcdef', 'tg-null-role', 'teacher-null-role', 'school-a', 'linked');
 
 INSERT INTO public.attendance(date, status, student_id, school_id) VALUES
   (current_date, 'Present', 'student-a', 'school-a');
@@ -397,7 +398,6 @@ BEGIN
   END IF;
 END
 $assert_student_payloads$;
-
 DO $assert$
 DECLARE
   result jsonb;
@@ -518,6 +518,14 @@ BEGIN
     RAISE EXCEPTION 'cross-school photo authorization succeeded: %', result;
   END IF;
   result := public.rpc_authorize_student_photo_upload('permission-null-session', 'student-a');
+  IF COALESCE((result->>'ok')::boolean, true) THEN
+    RAISE EXCEPTION 'photo authorization allowed a NULL permission result: %', result;
+  END IF;
+  result := public.rpc_authorize_student_photo_upload('null-role-session-token-0123456789abcdef', 'student-a');
+  IF COALESCE((result->>'ok')::boolean, true)
+     OR result->>'error' IS DISTINCT FROM 'permission_denied' THEN
+    RAISE EXCEPTION 'photo authorization must deny a Telegram session with NULL role: %', result;
+  END IF;
   IF result->>'error' IS DISTINCT FROM 'permission_denied' THEN
     RAISE EXCEPTION 'NULL permission result did not fail closed: %', result;
   END IF;
