@@ -237,8 +237,7 @@ BEGIN
        LIMIT 100
     ) tt;
 
-  SELECT COALESCE(jsonb_agg(
-           jsonb_build_object(
+  SELECT COALESCE(jsonb_agg(           jsonb_build_object(
              'title', x.title,
              'description', x.description,
              'starts_at', x.starts_at
@@ -478,7 +477,6 @@ BEGIN
    WHERE st.student_id = p_student_id
      AND st.school_id = v_sess.school_id
   RETURNING st.* INTO v_row;
-
   IF v_row.parent_name IS DISTINCT FROM v_before.parent_name THEN
     v_changed_fields := array_append(v_changed_fields, 'parent_name');
   END IF;
@@ -717,8 +715,7 @@ DECLARE
   v_retry_after integer;
 BEGIN
   IF p_key_hash IS NULL OR p_key_hash !~ '^[0-9a-f]{64}$'
-     OR p_window_seconds IS NULL OR p_window_seconds < 1 OR p_window_seconds > 86400
-     OR p_max_attempts IS NULL OR p_max_attempts < 1 OR p_max_attempts > 1000 THEN
+     OR p_window_seconds IS NULL OR p_window_seconds < 1 OR p_window_seconds > 86400     OR p_max_attempts IS NULL OR p_max_attempts < 1 OR p_max_attempts > 1000 THEN
     RAISE EXCEPTION 'invalid rate-limit parameters' USING ERRCODE = '22023';
   END IF;
 
@@ -850,7 +847,7 @@ BEGIN
     ) IS NOT TRUE THEN
       RETURN jsonb_build_object('ok', false, 'error', 'permission_denied');
     END IF;
-  ELSIF v_sess.role NOT IN (
+  ELSIF v_sess.role IS NULL OR v_sess.role NOT IN (
     'admin', 'super_admin', 'school_coordinator', 'administrative_assistant'
   ) THEN
     RETURN jsonb_build_object('ok', false, 'error', 'permission_denied');
