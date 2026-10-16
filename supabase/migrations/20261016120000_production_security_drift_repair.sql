@@ -255,6 +255,97 @@ BEGIN
 END;
 $function$;
 
+
+
+-- 2d) Minimize the six legacy manual student CRUD response payloads.
+-- Fail closed if the expected function response patterns have drifted; do not
+-- silently report success after changing fewer functions than intended.
+DO $harden_student_responses$
+DECLARE
+  r RECORD;
+  d TEXT;
+  newd TEXT;
+  v_changed INTEGER := 0;
+  v_expected CONSTANT INTEGER := 6;
+BEGIN
+  FOR r IN
+    SELECT p.oid, p.proname, pg_get_functiondef(p.oid) AS definition
+      FROM pg_proc AS p
+      JOIN pg_namespace AS n ON n.oid = p.pronamespace
+     WHERE n.nspname = 'public'
+       AND p.proname IN (
+         'rpc_register_student',
+         'rpc_update_student',
+         'rpc_activate_student',
+         'rpc_deactivate_student',
+         'rpc_reactivate_student',
+         'rpc_convert_admission_to_student'
+       )
+  LOOP
+    d := r.definition;
+    IF r.proname = 'rpc_convert_admission_to_student' THEN
+      newd := regexp_replace(
+        d,
+        'RETURN jsonb_build_object\(\s*''ok''\s*,\s*true\s*,\s*''student''\s*,\s*to_jsonb\(v_student\)\s*,\s*''admission''\s*,\s*to_jsonb\(v_adm\)\s*\);',
+        'RETURN jsonb_build_object(''ok'', true, ''student'', jsonb_build_object(''student_id'', v_student.student_id, ''name_mm'', v_student.name_mm, ''name_en'', v_student.name_en, ''name_local'', v_student.name_local, ''class'', v_student.class, ''grade'', v_student.grade, ''gender'', v_student.gender, ''date_of_birth'', v_student.date_of_birth, ''status'', v_student.status, ''photo_url'', v_student.photo_url, ''house'', v_student.house, ''home_color'', v_student.home_color, ''parent_name'', v_student.parent_name, ''parent_phone'', v_student.parent_phone, ''parent_phone2'', v_student.parent_phone2, ''parent_email'', v_student.parent_email, ''enrollment_date'', v_student.enrollment_date), ''admission'', jsonb_build_object(''id'', v_adm.id, ''status'', v_adm.status, ''converted_student_id'', v_adm.converted_student_id));',
+        'gi'
+      );
+    ELSE
+      newd := regexp_replace(
+        d,
+        'RETURN jsonb_build_object\(\s*''ok''\s*,\s*true\s*,\s*''student''\s*,\s*to_jsonb\(v_row\)\s*\);',
+        'RETURN jsonb_build_object(''ok'', true, ''student'', jsonb_build_object(''student_id'', v_row.student_id, ''name_mm'', v_row.name_mm, ''name_en'', v_row.name_en, ''name_local'', v_row.name_local, ''class'', v_row.class, ''grade'', v_row.grade, ''gender'', v_row.gender, ''date_of_birth'', v_row.date_of_birth, ''status'', v_row.status, ''photo_url'', v_row.photo_url, ''house'', v_row.house, ''home_color'', v_row.home_color, ''parent_name'', v_row.parent_name, ''parent_phone'', v_row.parent_phone, ''parent_phone2'', v_row.parent_phone2, ''parent_email'', v_row.parent_email, ''enrollment_date'', v_row.enrollment_date));',
+        'gi'
+      );
+    END IF;
+
+    IF newd <> d THEN
+      EXECUTE newd;
+      v_changed := v_changed + 1;
+    END IF;
+  END LOOP;
+
+  IF v_changed <> v_expected THEN
+    RAISE EXCEPTION
+      'student mutation response hardening coverage mismatch: changed %, expected %',
+      v_changed, v_expected;
+  END IF;
+END;
+$harden_student_responses$;
+
+-- 2e) Remove parent contact values from the general student-update audit event.
+-- Keep student_id and field names for auditability, never the submitted PII values.
+DO $minimize_student_update_audit$
+DECLARE
+  d TEXT;
+  newd TEXT;
+BEGIN
+  SELECT pg_get_functiondef(p.oid) INTO d
+    FROM pg_proc p
+    JOIN pg_namespace n ON n.oid = p.pronamespace
+   WHERE n.nspname = 'public'
+     AND p.proname = 'rpc_update_student'
+   LIMIT 1;
+
+  IF d IS NULL THEN
+    RAISE EXCEPTION 'rpc_update_student is missing; refusing partial student response repair';
+  END IF;
+
+  newd := regexp_replace(
+    d,
+    'jsonb_build_object\(\s*''student_id''\s*,\s*v_row\.student_id\s*,\s*''name_en''\s*,\s*v_row\.name_en\s*,\s*''class''\s*,\s*v_row\.class\s*,\s*''grade''\s*,\s*v_row\.grade\s*,\s*''parent_name''\s*,\s*v_row\.parent_name\s*,\s*''parent_phone''\s*,\s*v_row\.parent_phone\s*,\s*''parent_email''\s*,\s*v_row\.parent_email\s*\)',
+    'jsonb_build_object(''student_id'', v_row.student_id, ''submitted_fields'', jsonb_build_array(''name_en'', ''class'', ''grade'', ''parent_name'', ''parent_phone'', ''parent_email''))',
+    'gi'
+  );
+
+  IF newd = d THEN
+    RAISE EXCEPTION 'rpc_update_student audit payload pattern did not match; refusing partial audit repair';
+  END IF;
+
+  EXECUTE newd;
+END;
+$minimize_student_update_audit$;
+
 -- 3) Atomic, hashed-key rate limiter required by the hardened Parent Login Edge Function.
 CREATE SCHEMA IF NOT EXISTS private;
 
