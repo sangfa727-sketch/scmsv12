@@ -19,6 +19,10 @@ Production's migration history and repository filenames are drifted. **Do not ru
 
 Before rollout, reconcile the outstanding migration history against actual live schema, function definitions, grants, policies, and constraints. Apply only the reviewed forward-only repair migration; then record its exact version using the supported migration-repair workflow once its version is known. Do not hand-edit `supabase_migrations.schema_migrations`.
 
+## Student-photo migration ownership
+
+The historical migration `20261014136000_secure_student_photo_upload.sql` creates the authorization RPC only; it deliberately does not drop either legacy Storage policy. Policy removal has one owner: `20261016130000_enforce_student_photo_upload_endpoint.sql`, which must be applied only after the reviewed Edge Function is deployed and the upload smoke test passes. The disposable runtime harness replays the historical migration, checks that both policies remain, applies the forward repair and checks again, then applies the gated migration and verifies policy removal. This prevents fresh-install migration replay from silently bypassing the staged rollout.
+
 ## Required rollout order
 
 1. Confirm a current recoverable database backup / restore point is available.
