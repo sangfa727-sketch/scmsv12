@@ -22,9 +22,14 @@ CREATE TABLE public.schools (
 );
 CREATE TABLE public.students (
   student_id text PRIMARY KEY,
+  name_mm text,
   name_en text,
   name_local text,
   class text,
+  grade text,
+  gender text,
+  date_of_birth date,
+  dob date,
   photo_url text,
   parent_email text,
   parent_name text,
@@ -34,6 +39,12 @@ CREATE TABLE public.students (
   school_id text NOT NULL,
   status text NOT NULL DEFAULT 'Active',
   qr_token text,
+  house text,
+  home_color text,
+  house_color text,
+  enrollment_date date,
+  metadata jsonb,
+  notes text,
   updated_at timestamptz NOT NULL DEFAULT now()
 );
 CREATE TABLE public.parent_sessions (
