@@ -265,7 +265,7 @@ DECLARE
   r RECORD;
   d TEXT;
   newd TEXT;
-  v_changed INTEGER := 0;
+  v_covered INTEGER := 0;
   v_expected CONSTANT INTEGER := 6;
 BEGIN
   FOR r IN
@@ -301,14 +301,24 @@ BEGIN
 
     IF newd <> d THEN
       EXECUTE newd;
-      v_changed := v_changed + 1;
+      v_covered := v_covered + 1;
+    ELSIF (
+      r.proname = 'rpc_convert_admission_to_student'
+      AND position('to_jsonb(v_student)' in lower(d)) = 0
+      AND position('to_jsonb(v_adm)' in lower(d)) = 0
+    ) OR (
+      r.proname <> 'rpc_convert_admission_to_student'
+      AND position('to_jsonb(v_row)' in lower(d)) = 0
+    ) THEN
+      -- Treat an already-minimized definition as covered on safe re-runs.
+      v_covered := v_covered + 1;
     END IF;
   END LOOP;
 
-  IF v_changed <> v_expected THEN
+  IF v_covered <> v_expected THEN
     RAISE EXCEPTION
-      'student mutation response hardening coverage mismatch: changed %, expected %',
-      v_changed, v_expected;
+      'student mutation response hardening coverage mismatch: covered %, expected %',
+      v_covered, v_expected;
   END IF;
 END;
 $harden_student_responses$;
@@ -339,10 +349,12 @@ BEGIN
   );
 
   IF newd = d THEN
-    RAISE EXCEPTION 'rpc_update_student audit payload pattern did not match; refusing partial audit repair';
+    IF position('submitted_fields' in d) = 0 THEN
+      RAISE EXCEPTION 'rpc_update_student audit payload pattern did not match; refusing partial audit repair';
+    END IF;
+  ELSE
+    EXECUTE newd;
   END IF;
-
-  EXECUTE newd;
 END;
 $minimize_student_update_audit$;
 
