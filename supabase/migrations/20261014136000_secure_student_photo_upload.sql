@@ -1,7 +1,9 @@
--- Student photos must be uploaded through the trusted Edge Function, not directly
--- by any anonymous browser using the public anon key. Public read is preserved
--- for compatibility; changing student-photo visibility requires a separate UI
--- and consent decision because stored URLs are currently public.
+-- Create the trusted student-photo upload authorization RPC.
+-- IMPORTANT: Do not remove the legacy Storage policies in this historical migration.
+-- The trusted upload-school-asset Edge Function must be deployed and smoke-tested
+-- before the separately gated policy-removal migration is applied. Keeping policy
+-- removal out of this migration preserves the staged rollout on fresh installations.
+-- Public object URL visibility remains unchanged for compatibility.
 
 BEGIN;
 
@@ -104,11 +106,5 @@ REVOKE ALL ON FUNCTION public.rpc_authorize_student_photo_upload(text, text)
   FROM PUBLIC, anon, authenticated;
 GRANT EXECUTE ON FUNCTION public.rpc_authorize_student_photo_upload(text, text)
   TO service_role;
-
-DROP POLICY IF EXISTS "anon upload student photos" ON storage.objects;
-
--- Keep public object URLs working for existing UI surfaces, but do not let
--- anonymous clients enumerate the full student-photo object inventory.
-DROP POLICY IF EXISTS "public read student photos" ON storage.objects;
 
 COMMIT;
