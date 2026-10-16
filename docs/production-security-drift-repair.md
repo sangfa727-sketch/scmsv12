@@ -9,7 +9,7 @@ The forward-only migration `20261016120000_production_security_drift_repair.sql`
 3. Create the private hashed-key Parent Login rate-limit store and bounded atomic rate-limit RPC.
 4. Minimize all six legacy manual student CRUD response payloads, remove parent-contact values from student-update audit events, and harden legacy web student deletion to current-school admin-only soft delete.
 5. Minimize parent-contact audit payloads to changed field names.
-6. Add the trusted student-photo authorization RPC and remove the direct anonymous upload / object-listing policies.
+6. Add the trusted student-photo authorization RPC. Direct upload / object-listing policy removal is a separate gated migration.
 
 The migration does not modify business rows, student status, student records, stored photo URLs, or bucket visibility. It is idempotent for the intended schema state and is covered by a disposable PostgreSQL runtime harness.
 
@@ -24,7 +24,7 @@ Before rollout, reconcile the outstanding migration history against actual live 
 1. Confirm a current recoverable database backup / restore point is available.
 2. Verify the PR's PostgreSQL runtime harness and CI are green.
 3. Review the live preflight query results for the exact expected objects and function signatures.
-4. Apply the reviewed repair migration as a single transaction, without applying the older missing migration backlog.
+4. Apply `20261016120000_production_security_drift_repair.sql` as a single transaction, without applying the older missing migration backlog. This creates the photo authorization RPC but deliberately leaves the legacy photo policies in place.
 5. Immediately verify:
    - `anon` and `authenticated` have none of the seven direct table privileges on the three internal tables.
    - Parent Login RPC is executable by `service_role` only and no longer returns `qr_token`, `parent_email`, `school_id`, or internal student columns.
@@ -34,9 +34,10 @@ Before rollout, reconcile the outstanding migration history against actual live 
    - Legacy student deletion rejects cross-school and NULL-permission cases while preserving same-school admin soft delete.
    - Photo authorization allows an active same-school authorized session and rejects cross-school / invalid sessions.
    - Legacy direct upload and listing policies are absent.
-6. **Student-photo rollout blocker:** Production currently has no dedicated student-photo upload Edge Function. The deployed `upload-school-asset` endpoint only handles school logo, cover, and teacher assets; it does not upload to `student-photos` or call `rpc_authorize_student_photo_upload`. Before applying the migration that removes direct browser upload, implement and test a dedicated trusted student-photo upload endpoint, wire every existing UI upload caller to it, and deploy it. Until then, do not apply the photo-policy-removal portion of this migration because it would break student photo uploads.
-7. After the upload endpoint exists and the reviewed migration verifies, deploy the version-controlled `parent-google-login` and relevant asset Edge Functions. Do not deploy Parent Login before its rate-limit RPC exists; it intentionally fails closed with HTTP 503 if the limiter is unavailable.
-8. Run smoke checks for Parent Login, student photo upload, school logo/cover upload, and existing student CRUD. If any check fails, stop and fix forward; do not restore the old vulnerable function as a routine rollback.
+6. **Student-photo staged rollout:** Repository code already wires `API.uploadStudentPhoto()` to `upload-school-asset` with `kind=student`; the Edge Function validates the school session and calls `rpc_authorize_student_photo_upload` before writing to `student-photos`. Production currently runs an older deployed version, so first deploy the reviewed version-controlled `upload-school-asset` only after step 4 has created the RPC. Until the new function is deployed, the old direct-upload policy remains in place, avoiding an upload outage.
+7. Smoke-test student photo upload and verify the returned URL and stored object path. Also smoke-test school logo/cover and teacher asset uploads. If any test fails, stop and fix forward; do not remove the legacy photo policy.
+8. Only after successful upload verification, apply `20261016130000_enforce_student_photo_upload_endpoint.sql` to remove the direct browser upload and object-listing policies. Then re-run student photo upload and verify it still succeeds through the Edge Function. The bucket remains public for existing URL compatibility; this is not a private-photo migration.
+9. Deploy the version-controlled `parent-google-login` only after the rate-limit RPC exists. Run smoke checks for Parent Login and existing manual student CRUD. If any check fails, stop and fix forward; do not restore the old vulnerable function as a routine rollback.
 
 ## Compatibility and residual risks
 
