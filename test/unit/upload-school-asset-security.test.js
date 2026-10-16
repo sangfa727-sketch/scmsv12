@@ -3,7 +3,7 @@ const assert = require('node:assert/strict');
 const fs = require('node:fs');
 
 const source = fs.readFileSync('supabase/functions/upload-school-asset/index.ts', 'utf8');
-const migration = fs.readFileSync('supabase/migrations/20261014136000_secure_student_photo_upload.sql', 'utf8');
+const migration = fs.readFileSync('supabase/migrations/20261014136000_secure_student_photo_upload.sql', 'utf8') + fs.readFileSync('supabase/migrations/20261016130000_enforce_student_photo_upload_endpoint.sql', 'utf8');
 const api = fs.readFileSync('js/02C_api_students.js', 'utf8');
 
 test('upload rejects oversized multipart bodies before parsing FormData', () => {
