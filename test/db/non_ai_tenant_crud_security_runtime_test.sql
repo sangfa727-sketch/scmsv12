@@ -521,7 +521,7 @@ END
 $assert_photo_upload$;
 
 -- Simulate the explicitly gated post-deployment rollout step in the disposable DB.
-\ir ../../supabase/migrations/20261016130000_enforce_student_photo_upload_endpoint.sql
+\ir ../../scripts/rollouts/enforce_student_photo_upload_endpoint.sql
 
 DO $assert_photo_policy_rollout_complete$
 BEGIN
