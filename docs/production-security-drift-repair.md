@@ -2,7 +2,7 @@
 
 ## Scope
 
-The forward-only migration `20261016120000_production_security_drift_repair.sql` repairs only the confirmed live mismatches:
+The forward-only repair set (`20261016120000_production_security_drift_repair.sql` plus `20261016140000_revoke_public_internal_table_grants.sql`) addresses the confirmed live mismatches:
 
 1. Revoke direct browser-role privileges on `public.app_sessions`, `public.audit_log`, and `public.n8n_state`, including privileges inherited from `PUBLIC`.
 2. Replace the Parent Login RPC's full-row student response with an explicit UI allowlist and restrict direct RPC execution to `service_role`.
