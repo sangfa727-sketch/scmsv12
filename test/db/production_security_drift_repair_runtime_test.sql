@@ -308,6 +308,19 @@ END;
 $function$;
 
 \ir ../../supabase/migrations/20261016120000_production_security_drift_repair.sql
+
+-- The first migration must preserve the legacy upload path during the deployment gap.
+DO $assert_photo_rollout_gap$
+BEGIN
+  IF NOT EXISTS (SELECT 1 FROM pg_policies WHERE schemaname='storage' AND tablename='objects'
+                 AND policyname='anon upload student photos')
+     OR NOT EXISTS (SELECT 1 FROM pg_policies WHERE schemaname='storage' AND tablename='objects'
+                    AND policyname='public read student photos') THEN
+    RAISE EXCEPTION 'first migration removed student-photo policies before the trusted endpoint rollout';
+  END IF;
+END
+$assert_photo_rollout_gap$;
+
 \ir ../../supabase/migrations/20261016130000_enforce_student_photo_upload_endpoint.sql
 
 DO $assert_student_payloads$
