@@ -2,10 +2,10 @@
 -- This runs only in the disposable PostgreSQL 16 CI database, never Production.
 \set ON_ERROR_STOP on
 
-CREATE SCHEMA extensions;
-CREATE SCHEMA private;
-CREATE SCHEMA storage;
-CREATE EXTENSION pgcrypto WITH SCHEMA extensions;
+CREATE SCHEMA IF NOT EXISTS extensions;
+CREATE SCHEMA IF NOT EXISTS private;
+CREATE SCHEMA IF NOT EXISTS storage;
+CREATE EXTENSION IF NOT EXISTS pgcrypto WITH SCHEMA extensions;
 
 DO $roles$
 BEGIN
