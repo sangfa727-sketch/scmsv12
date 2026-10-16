@@ -7,8 +7,9 @@ The forward-only migration `20261016120000_production_security_drift_repair.sql`
 1. Revoke direct browser-role privileges on `public.app_sessions`, `public.audit_log`, and `public.n8n_state`.
 2. Replace the Parent Login RPC's full-row student response with an explicit UI allowlist and restrict direct RPC execution to `service_role`.
 3. Create the private hashed-key Parent Login rate-limit store and bounded atomic rate-limit RPC.
-4. Minimize parent-contact audit payloads to changed field names and harden legacy web student deletion to current-school admin-only soft delete.
-5. Add the trusted student-photo authorization RPC and remove the direct anonymous upload / object-listing policies.
+4. Minimize all six legacy manual student CRUD response payloads, remove parent-contact values from student-update audit events, and harden legacy web student deletion to current-school admin-only soft delete.
+5. Minimize parent-contact audit payloads to changed field names.
+6. Add the trusted student-photo authorization RPC and remove the direct anonymous upload / object-listing policies.
 
 The migration does not modify business rows, student status, student records, stored photo URLs, or bucket visibility. It is idempotent for the intended schema state and is covered by a disposable PostgreSQL runtime harness.
 
@@ -28,7 +29,8 @@ Before rollout, reconcile the outstanding migration history against actual live 
    - `anon` and `authenticated` have none of the seven direct table privileges on the three internal tables.
    - Parent Login RPC is executable by `service_role` only and no longer returns `qr_token`, `parent_email`, `school_id`, or internal student columns.
    - Rate-limit RPC works for allowed and over-limit attempts; its table is not directly accessible to browser roles.
-   - Parent-contact audit records changed field names only, without phone/email values.
+   - All six manual student CRUD RPCs return only allowlisted student/admission fields.
+   - Student-update and parent-contact audit records omit phone/email values and retain only field names.
    - Legacy student deletion rejects cross-school and NULL-permission cases while preserving same-school admin soft delete.
    - Photo authorization allows an active same-school authorized session and rejects cross-school / invalid sessions.
    - Legacy direct upload and listing policies are absent.
