@@ -448,6 +448,16 @@ BEGIN
      OR (leave_result->'request') ?| ARRAY['school_id','student_id'] THEN
     RAISE EXCEPTION 'Parent leave request failed or returned internal fields: %', leave_result;
   END IF;
+  -- The current Parent Portal UI allows an empty reason and sends NULL.
+  -- Preserve that behavior while still bounding user-controlled text.
+  leave_result := public.rpc_parent_submit_leave_request(
+    session_token, current_date + 4, current_date + 4, NULL
+  );
+  IF COALESCE((leave_result->>'ok')::boolean, false) IS DISTINCT FROM true
+     OR leave_result->'request'->'reason' IS DISTINCT FROM 'null'::jsonb THEN
+    RAISE EXCEPTION 'Parent leave request broke the existing optional-reason UI contract: %', leave_result;
+  END IF;
+
   leave_result := public.rpc_parent_submit_leave_request(
     session_token, current_date + 3, current_date + 3, repeat('x', 1001)
   );
