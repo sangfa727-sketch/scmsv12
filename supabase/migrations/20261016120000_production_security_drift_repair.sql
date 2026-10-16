@@ -80,6 +80,181 @@ REVOKE EXECUTE ON FUNCTION public.rpc_parent_google_login(text, text, text)
 GRANT EXECUTE ON FUNCTION public.rpc_parent_google_login(text, text, text)
   TO service_role;
 
+
+
+-- 2b) Keep parent contact values out of the append-only audit log while preserving
+-- the existing RPC response contract consumed by the student editor.
+CREATE OR REPLACE FUNCTION public.rpc_update_student_parent(
+  p_session_token text,
+  p_student_id text,
+  p_parent_name text DEFAULT NULL,
+  p_parent_phone text DEFAULT NULL,
+  p_parent_phone2 text DEFAULT NULL,
+  p_parent_email text DEFAULT NULL
+)
+RETURNS jsonb
+LANGUAGE plpgsql
+SECURITY DEFINER
+SET search_path TO 'pg_catalog', 'pg_temp'
+AS $function$
+DECLARE
+  v_sess record;
+  v_before public.students%ROWTYPE;
+  v_row public.students%ROWTYPE;
+  v_changed_fields text[] := ARRAY[]::text[];
+BEGIN
+  IF p_student_id IS NULL OR nullif(trim(p_student_id), '') IS NULL THEN
+    RETURN jsonb_build_object('ok', false, 'error', 'student_id_required');
+  END IF;
+
+  SELECT s.teacher_id, s.school_id, s.role
+    INTO v_sess
+    FROM public.app_web_sessions AS s
+    JOIN public.teachers AS t
+      ON t.teacher_id = s.teacher_id
+     AND t.school_id = s.school_id
+     AND t.role = s.role
+     AND lower(t.status) = 'active'
+    JOIN public.schools AS sc
+      ON sc.school_id = t.school_id
+     AND lower(sc.status) = 'active'
+   WHERE s.session_token = p_session_token
+     AND s.expires_at > now()
+   LIMIT 1;
+
+  IF v_sess IS NULL THEN
+    RETURN jsonb_build_object('ok', false, 'error', 'invalid_session');
+  END IF;
+
+  IF private.web_has_student_permission(
+    p_session_token, 'students.edit', p_student_id
+  ) IS NOT TRUE THEN
+    RETURN jsonb_build_object('ok', false, 'error', 'permission_denied');
+  END IF;
+
+  SELECT st.* INTO v_before
+    FROM public.students AS st
+   WHERE st.student_id = p_student_id
+     AND st.school_id = v_sess.school_id
+   FOR UPDATE;
+
+  IF v_before IS NULL THEN
+    RETURN jsonb_build_object('ok', false, 'error', 'not_found');
+  END IF;
+
+  UPDATE public.students AS st
+     SET parent_name = nullif(trim(coalesce(p_parent_name, '')), ''),
+         parent_phone = nullif(trim(coalesce(p_parent_phone, '')), ''),
+         parent_phone2 = nullif(trim(coalesce(p_parent_phone2, '')), ''),
+         parent_email = nullif(lower(trim(coalesce(p_parent_email, ''))), ''),
+         updated_at = now()
+   WHERE st.student_id = p_student_id
+     AND st.school_id = v_sess.school_id
+  RETURNING st.* INTO v_row;
+
+  IF v_row.parent_name IS DISTINCT FROM v_before.parent_name THEN
+    v_changed_fields := array_append(v_changed_fields, 'parent_name');
+  END IF;
+  IF v_row.parent_phone IS DISTINCT FROM v_before.parent_phone THEN
+    v_changed_fields := array_append(v_changed_fields, 'parent_phone');
+  END IF;
+  IF v_row.parent_phone2 IS DISTINCT FROM v_before.parent_phone2 THEN
+    v_changed_fields := array_append(v_changed_fields, 'parent_phone2');
+  END IF;
+  IF v_row.parent_email IS DISTINCT FROM v_before.parent_email THEN
+    v_changed_fields := array_append(v_changed_fields, 'parent_email');
+  END IF;
+
+  INSERT INTO public.audit_log(source, actor, action, school_id, payload)
+  VALUES (
+    'web', v_sess.teacher_id, 'student.parent.update', v_sess.school_id,
+    jsonb_build_object(
+      'student_id', v_row.student_id,
+      'changed_fields', to_jsonb(v_changed_fields)
+    )
+  );
+
+  RETURN jsonb_build_object(
+    'ok', true,
+    'student_id', v_row.student_id,
+    'parent_name', v_row.parent_name,
+    'parent_phone', v_row.parent_phone,
+    'parent_phone2', v_row.parent_phone2,
+    'parent_email', v_row.parent_email,
+    'parent_tg_id', v_row.parent_tg_id
+  );
+END;
+$function$;
+
+-- 2c) Legacy web student delete is a soft delete, but only an authorized
+-- current-school admin may perform it. NULL permission results fail closed.
+CREATE OR REPLACE FUNCTION public.rpc_delete_student(
+  p_session_token text,
+  p_student_id text
+)
+RETURNS jsonb
+LANGUAGE plpgsql
+SECURITY DEFINER
+SET search_path TO 'pg_catalog', 'pg_temp'
+AS $function$
+DECLARE
+  v_sess RECORD;
+  v_deleted_student_id text;
+BEGIN
+  SELECT s.teacher_id, s.school_id, s.role
+    INTO v_sess
+    FROM public.app_web_sessions AS s
+    JOIN public.teachers AS t
+      ON t.teacher_id = s.teacher_id
+     AND t.school_id = s.school_id
+     AND t.role = s.role
+     AND lower(t.status) = 'active'
+    JOIN public.schools AS sc
+      ON sc.school_id = t.school_id
+     AND lower(sc.status) = 'active'
+   WHERE s.session_token = p_session_token
+     AND s.expires_at > now()
+   LIMIT 1;
+
+  IF v_sess IS NULL THEN
+    RETURN jsonb_build_object('ok', false, 'error', 'invalid_session');
+  END IF;
+
+  IF v_sess.role NOT IN ('admin', 'super_admin') THEN
+    RETURN jsonb_build_object('ok', false, 'error', 'forbidden');
+  END IF;
+
+  IF p_student_id IS NULL OR nullif(trim(p_student_id), '') IS NULL THEN
+    RETURN jsonb_build_object('ok', false, 'error', 'student_id_required');
+  END IF;
+
+  IF private.web_has_student_permission(
+    p_session_token, 'students.edit', p_student_id
+  ) IS NOT TRUE THEN
+    RETURN jsonb_build_object('ok', false, 'error', 'permission_denied');
+  END IF;
+
+  UPDATE public.students
+     SET status = 'Inactive',
+         updated_at = now()
+   WHERE student_id = p_student_id
+     AND school_id = v_sess.school_id
+  RETURNING student_id INTO v_deleted_student_id;
+
+  IF v_deleted_student_id IS NULL THEN
+    RETURN jsonb_build_object('ok', false, 'error', 'not_found');
+  END IF;
+
+  INSERT INTO public.audit_log(source, actor, action, school_id, payload)
+  VALUES (
+    'web', v_sess.teacher_id, 'student.delete', v_sess.school_id,
+    jsonb_build_object('student_id', v_deleted_student_id)
+  );
+
+  RETURN jsonb_build_object('ok', true);
+END;
+$function$;
+
 -- 3) Atomic, hashed-key rate limiter required by the hardened Parent Login Edge Function.
 CREATE SCHEMA IF NOT EXISTS private;
 
