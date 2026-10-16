@@ -232,6 +232,77 @@ $function$;
 
 \ir ../../supabase/migrations/20261016120000_production_security_drift_repair.sql
 
+DO $assert_student_payloads$
+DECLARE
+  result jsonb;
+  fn_name text;
+  audit_payload jsonb;
+BEGIN
+  FOREACH fn_name IN ARRAY ARRAY[
+    'rpc_register_student',
+    'rpc_update_student',
+    'rpc_activate_student',
+    'rpc_deactivate_student',
+    'rpc_reactivate_student',
+    'rpc_convert_admission_to_student'
+  ]
+  LOOP
+    CASE fn_name
+      WHEN 'rpc_register_student' THEN
+        result := public.rpc_register_student('test-session');
+      WHEN 'rpc_update_student' THEN
+        result := public.rpc_update_student('test-session', 'student-a', 'Local Name',
+          'Student A', 'G1', '1', 'other', DATE '2015-01-01', 'Blue',
+          'Parent A', '0900000000', 'parent-changed@example.invalid');
+      WHEN 'rpc_activate_student' THEN
+        result := public.rpc_activate_student('test-session', 'student-a');
+      WHEN 'rpc_deactivate_student' THEN
+        result := public.rpc_deactivate_student('test-session', 'student-a');
+      WHEN 'rpc_reactivate_student' THEN
+        result := public.rpc_reactivate_student('test-session', 'student-a');
+      WHEN 'rpc_convert_admission_to_student' THEN
+        result := public.rpc_convert_admission_to_student('test-session', 1, 'G1', 'Blue', 'Pending');
+    END CASE;
+
+    IF COALESCE((result->>'ok')::boolean, false) IS DISTINCT FROM true THEN
+      RAISE EXCEPTION '% test function did not return a student payload: %', fn_name, result;
+    END IF;
+    IF (result->'student') ?| ARRAY['qr_token','parent_tg_id','metadata','notes'] THEN
+      RAISE EXCEPTION '% exposed internal student fields: %', fn_name, result->'student';
+    END IF;
+    IF result->'student'->>'student_id' IS DISTINCT FROM 'student-a'
+       OR result->'student'->>'name_en' IS DISTINCT FROM 'Student A' THEN
+      RAISE EXCEPTION '% omitted required editor fields: %', fn_name, result->'student';
+    END IF;
+    IF fn_name = 'rpc_convert_admission_to_student' THEN
+      IF (result->'admission') ?| ARRAY['parent_phone','parent_email','metadata','notes','applicant_photo_url','applicant_name_en'] THEN
+        RAISE EXCEPTION 'admission conversion exposed internal admission fields: %', result->'admission';
+      END IF;
+      IF result->'admission'->>'id' IS DISTINCT FROM '1'
+         OR result->'admission'->>'status' IS DISTINCT FROM 'Enrolled'
+         OR result->'admission'->>'converted_student_id' IS DISTINCT FROM 'student-a' THEN
+        RAISE EXCEPTION 'admission conversion omitted required workflow fields: %', result->'admission';
+      END IF;
+    END IF;
+  END LOOP;
+
+  SELECT payload INTO audit_payload
+    FROM public.audit_log
+   WHERE action='student.update' AND school_id='school-a'
+   ORDER BY id DESC LIMIT 1;
+  IF audit_payload IS NULL
+     OR audit_payload ?| ARRAY['parent_name','parent_phone','parent_email']
+     OR audit_payload->'submitted_fields' IS NULL
+     OR NOT ((audit_payload->'submitted_fields') @> '["parent_phone","parent_email"]'::jsonb) THEN
+    RAISE EXCEPTION 'student update audit payload retained contact values or omitted submitted field names: %', audit_payload;
+  END IF;
+  IF audit_payload::text LIKE '%0900000000%'
+     OR audit_payload::text LIKE '%parent-changed@example.invalid%' THEN
+    RAISE EXCEPTION 'student update audit payload contains private contact values: %', audit_payload;
+  END IF;
+END
+$assert_student_payloads$;
+
 DO $assert$
 DECLARE
   result jsonb;
