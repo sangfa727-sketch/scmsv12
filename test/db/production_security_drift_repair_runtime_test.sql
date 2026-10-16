@@ -308,6 +308,7 @@ END;
 $function$;
 
 \ir ../../supabase/migrations/20261016120000_production_security_drift_repair.sql
+\ir ../../supabase/migrations/20261016130000_enforce_student_photo_upload_endpoint.sql
 
 DO $assert_student_payloads$
 DECLARE
@@ -572,5 +573,6 @@ $assert$;
 
 -- A second application must be a safe no-op for the already-repaired schema.
 \ir ../../supabase/migrations/20261016120000_production_security_drift_repair.sql
+\ir ../../supabase/migrations/20261016130000_enforce_student_photo_upload_endpoint.sql
 
 SELECT 'PASS: forward repair is repeatable and enforces internal grants, Parent Login minimization/rate limits, student CRUD payload/audit protections, and trusted photo authorization' AS result;
