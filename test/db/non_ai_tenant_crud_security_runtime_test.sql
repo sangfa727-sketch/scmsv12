@@ -494,21 +494,20 @@ BEGIN
     RAISE EXCEPTION 'stale role session authorized student photo upload: %', result;
   END IF;
 
-  IF EXISTS (
+  -- The historical authorization migration must preserve the legacy policies
+  -- until the trusted Edge Function is deployed and smoke-tested.
+  IF NOT EXISTS (
     SELECT 1 FROM pg_policies
      WHERE schemaname='storage'
        AND tablename='objects'
        AND policyname='anon upload student photos'
-  ) THEN
-    RAISE EXCEPTION 'anonymous direct upload policy for student photos still exists';
-  END IF;
-  IF EXISTS (
+  ) OR NOT EXISTS (
     SELECT 1 FROM pg_policies
      WHERE schemaname='storage'
        AND tablename='objects'
        AND policyname='public read student photos'
   ) THEN
-    RAISE EXCEPTION 'anonymous listing policy for student photo objects still exists';
+    RAISE EXCEPTION 'student-photo policies were removed before the gated rollout migration';
   END IF;
 
   IF has_function_privilege('anon', 'public.rpc_authorize_student_photo_upload(text,text)', 'EXECUTE')
@@ -520,6 +519,21 @@ BEGIN
   END IF;
 END
 $assert_photo_upload$;
+
+-- Simulate the explicitly gated post-deployment rollout step in the disposable DB.
+\ir ../../supabase/migrations/20261016130000_enforce_student_photo_upload_endpoint.sql
+
+DO $assert_photo_policy_rollout_complete$
+BEGIN
+  IF EXISTS (
+    SELECT 1 FROM pg_policies
+     WHERE schemaname='storage' AND tablename='objects'
+       AND policyname IN ('anon upload student photos', 'public read student photos')
+  ) THEN
+    RAISE EXCEPTION 'gated student-photo policy removal migration did not remove legacy policies';
+  END IF;
+END
+$assert_photo_policy_rollout_complete$;
 
 DO $assert_native_student_mutations$
 DECLARE
