@@ -392,6 +392,10 @@ DECLARE
   privilege_name text;
   stale_count integer;
   audit_payload jsonb;
+  session_token text;
+  dashboard_result jsonb;
+  invoice_json jsonb;
+  leave_result jsonb;
 BEGIN
   FOREACH internal_table IN ARRAY ARRAY['app_sessions', 'audit_log', 'n8n_state'] LOOP
     FOREACH browser_role IN ARRAY ARRAY['anon', 'authenticated'] LOOP
