@@ -5,8 +5,8 @@
 -- Student photo upload is already wired in the repository to upload-school-asset
 -- with kind='student'. Production rollout must be staged: apply this migration to
 -- create the authorization RPC, deploy the reviewed Edge Function, verify uploads,
--- then apply the separate policy-removal migration. Do not remove direct-upload
--- policy before the trusted endpoint is deployed and smoke-tested.
+-- then run the separate manual policy-removal rollout script in scripts/rollouts/.
+-- Do not remove direct-upload policy before the trusted endpoint is deployed and smoke-tested.
 -- It does NOT make student-photos private because existing UI consumes public URLs;
 -- that needs a separate URL-consumer migration and compatibility rollout.
 -- Do not run the full historical backlog with db push until migration history is reconciled.
