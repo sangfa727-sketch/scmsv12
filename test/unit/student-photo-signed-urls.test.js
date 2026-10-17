@@ -33,6 +33,10 @@ test('authorization RPC supports parent-owned student only and validates staff t
   assert.match(migration, /s\.school_id = v_web\.school_id/);
   assert.match(migration, /private\.web_has_student_permission\(p_session_token, 'students\.view', p_student_id\) IS NOT TRUE/);
   assert.match(migration, /a\.status = 'linked'/);
+  assert.match(migration, /v_native\.role NOT IN \('teacher', 'senior_teacher', 'assistant_teacher'\)/);
+  assert.match(migration, /a\.teacher_id = v_native\.teacher_id/);
+  assert.match(migration, /a\.class_name = trim\(v_student\.class\)/);
+  assert.match(migration, /a\.is_active = true/);
   assert.match(migration, /GRANT EXECUTE ON FUNCTION public\.rpc_authorize_student_photo_read\(text, text\)\s+TO service_role/);
   assert.match(migration, /REVOKE ALL ON FUNCTION public\.rpc_authorize_student_photo_read\(text, text\)\s+FROM PUBLIC, anon, authenticated/);
   assert.match(migration, /storage\/v1\/object\/public\/student-photos/);
