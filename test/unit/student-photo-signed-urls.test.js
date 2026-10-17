@@ -13,7 +13,7 @@ test('signed photo endpoint is POST-only, bounded, and limits batch size', () =>
   assert.match(endpoint, /req\.method !== "POST"/);
   assert.match(endpoint, /32 \* 1024/);
   assert.match(endpoint, /studentIds\.length > 100/);
-  assert.match(endpoint, /student_ids: studentIds/);
+  assert.match(endpoint, /body\.student_ids/);
 });
 
 test('signed photo endpoint calls the service-only authorization RPC for every requested ID', () => {
