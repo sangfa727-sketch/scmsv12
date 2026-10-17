@@ -6,6 +6,8 @@ const source = fs.readFileSync('supabase/functions/upload-school-asset/index.ts'
 const authorizationMigration = fs.readFileSync('supabase/migrations/20261014136000_secure_student_photo_upload.sql', 'utf8');
 const rolloutScript = fs.readFileSync('scripts/rollouts/enforce_student_photo_upload_endpoint.sql', 'utf8');
 const api = fs.readFileSync('js/02C_api_students.js', 'utf8');
+const admissionsApi = fs.readFileSync('js/02G_api_admissions.js', 'utf8');
+const admissionAuthorizationMigration = fs.readFileSync('supabase/migrations/20261018110000_harden_admission_photo_upload.sql', 'utf8');
 const runtimeTest = fs.readFileSync('test/db/non_ai_tenant_crud_security_runtime_test.sql', 'utf8');
 
 test('upload rejects oversized multipart bodies before parsing FormData', () => {
@@ -39,7 +41,7 @@ test('school asset upload verifies image signatures, not only client MIME', () =
 });
 
 test('upload endpoint applies bucket-specific size caps and retains role restrictions', () => {
-  assert.match(source, /const maxBytes = kind === "student" \? 3 \* 1024 \* 1024 : 5 \* 1024 \* 1024/);
+  assert.match(source, /const maxBytes = \(kind === "student" \|\| kind === "admission"\) \? 3 \* 1024 \* 1024 : 5 \* 1024 \* 1024/);
   assert.match(source, /file\.size > maxBytes/);
   assert.match(source, /kind === "logo" \|\| kind === "cover"/);
   assert.match(source, /!\["admin", "super_admin"\]\.includes\(session\.role\)/);
@@ -50,7 +52,7 @@ test('student photo upload is authorized for the same school and student before 
   assert.match(source, /rpc_authorize_student_photo_upload/);
   assert.match(source, /authorization\.school_id !== session\.school_id/);
   assert.match(source, /authorization\.student_id !== studentId/);
-  assert.match(source, /const bucket = kind === "student" \? "student-photos" : "school-assets"/);
+  assert.match(source, /const bucket = \(kind === "student" \|\| kind === "admission"\) \? "student-photos" : "school-assets"/);
   assert.match(authorizationMigration, /private\.web_has_student_permission/);
   assert.match(authorizationMigration, /web_has_student_permission\([\s\S]*?\) IS NOT TRUE/);
   assert.match(rolloutScript, /DROP POLICY IF EXISTS "anon upload student photos" ON storage\.objects/);
@@ -70,4 +72,23 @@ test('browser student-photo flow uses the trusted Edge Function, not direct anon
   assert.match(api, /form\.append\('student_id', studentId\)/);
   assert.match(api, /window\.getSavedSession\?\.\(\)\?\.token/);
   assert.doesNotMatch(api, /storage\/v1\/object\/student-photos/);
+});
+
+test('admission photo upload uses server-side permission and tenant authorization', () => {
+  assert.match(source, /rpc_authorize_admission_photo_upload/);
+  assert.match(source, /authorization\.school_id !== session\.school_id/);
+  assert.match(source, /String\(authorization\.admission_id\) !== admissionId/);
+  assert.match(source, /admissions\/\$\{admissionId\}/);
+  assert.match(admissionAuthorizationMigration, /private\.web_has_permission\(p_session_token, 'admissions\.manage', NULL, NULL\) IS NOT TRUE/);
+  assert.match(admissionAuthorizationMigration, /a\.id = p_admission_id AND a\.school_id = v_school_id/);
+  assert.match(admissionAuthorizationMigration, /ws\.expires_at > now\(\)/);
+  assert.match(admissionAuthorizationMigration, /t\.school_id = ws\.school_id/);
+  assert.match(admissionAuthorizationMigration, /t\.role = ws\.role/);
+  assert.match(admissionAuthorizationMigration, /lower\(t\.status\) = 'active'/);
+  assert.match(admissionAuthorizationMigration, /lower\(sc\.status\) = 'active'/);
+  assert.match(admissionAuthorizationMigration, /REVOKE ALL ON FUNCTION public\.rpc_authorize_admission_photo_upload\(text, bigint\) FROM PUBLIC, anon, authenticated/);
+  assert.match(admissionAuthorizationMigration, /GRANT EXECUTE ON FUNCTION public\.rpc_authorize_admission_photo_upload\(text, bigint\) TO service_role/);
+  assert.match(admissionsApi, /functions\/v1\/upload-school-asset/);
+  assert.match(admissionsApi, /form\.append\('admission_id', String\(admissionId\)\)/);
+  assert.doesNotMatch(admissionsApi, /storage\/v1\/object\/student-photos/);
 });

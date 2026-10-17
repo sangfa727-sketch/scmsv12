@@ -60,24 +60,20 @@ Object.assign(API, {
   
   async uploadAdmissionPhoto(admissionId, file) {
       const blob = await _prepStudentPhoto(file);
-      const path = `${window.APP.school_id}/admissions/${admissionId}-${Date.now().toString(36)}.jpg`;
+      const form = new FormData();
+      form.append('session_token', _webSessionToken());
+      form.append('kind', 'admission');
+      form.append('admission_id', String(admissionId));
+      form.append('file', blob, 'applicant-photo.jpg');
       const resp = await fetch(
-        `${SCMS_CONFIG.SUPABASE_URL}/storage/v1/object/student-photos/${path}`,
-        {
-          method:  'POST',
-          headers: {
-            'apikey':        SCMS_CONFIG.SUPABASE_ANON,
-            'Authorization': `Bearer ${SCMS_CONFIG.SUPABASE_ANON}`,
-            'Content-Type':  'image/jpeg',
-          },
-          body: blob,
-        }
+        `${SCMS_CONFIG.SUPABASE_URL}/functions/v1/upload-school-asset`,
+        { method: 'POST', body: form }
       );
-      if (!resp.ok) {
-        const t = await resp.text().catch(() => '');
-        throw new Error(`Photo upload failed (${resp.status}): ${t.slice(0, 200)}`);
+      const result = await resp.json().catch(() => ({}));
+      if (!resp.ok || !result.ok || typeof result.url !== 'string') {
+        throw new Error(result.error || `Photo upload failed (${resp.status})`);
       }
-      return `${SCMS_CONFIG.SUPABASE_URL}/storage/v1/object/public/student-photos/${path}?t=${Date.now()}`;
+      return result.url;
     },
   
   async setAdmissionPhoto(id, photoUrl) {

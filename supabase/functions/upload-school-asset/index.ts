@@ -89,19 +89,20 @@ Deno.serve(async (req: Request) => {
     const sessionToken = String(form.get("session_token") || "").trim();
     const kind = String(form.get("kind") || "").trim();
     const studentId = String(form.get("student_id") || "").trim();
+    const admissionId = String(form.get("admission_id") || "").trim();
     const file = form.get("file");
 
     if (!sessionToken) return json({ error: "Missing session" }, 401);
-    if (!["logo", "cover", "teacher", "student"].includes(kind)) {
+    if (!["logo", "cover", "teacher", "student", "admission"].includes(kind)) {
       return json({ error: "Invalid asset type" }, 400);
     }
     if (!(file instanceof File)) return json({ error: "Missing image" }, 400);
 
-    const maxBytes = kind === "student" ? 3 * 1024 * 1024 : 5 * 1024 * 1024;
+    const maxBytes = (kind === "student" || kind === "admission") ? 3 * 1024 * 1024 : 5 * 1024 * 1024;
     if (file.size <= 0 || file.size > maxBytes) {
       return json({
-        error: kind === "student"
-          ? "Student photo exceeds the 3 MB limit"
+        error: (kind === "student" || kind === "admission")
+          ? "Photo exceeds the 3 MB limit"
           : "Image exceeds the 5 MB limit",
       }, 400);
     }
@@ -188,6 +189,24 @@ Deno.serve(async (req: Request) => {
       authorizedSchoolId = authorization.school_id;
     }
 
+    if (kind === "admission") {
+      if (!/^\d{1,18}$/.test(admissionId)) return json({ error: "Invalid admission ID" }, 400);
+      const authResp = await fetch(`${supabaseUrl}/rest/v1/rpc/rpc_authorize_admission_photo_upload`, {
+        method: "POST",
+        headers: { ...headers, "Content-Type": "application/json" },
+        body: JSON.stringify({ p_session_token: sessionToken, p_admission_id: admissionId }),
+      });
+      if (!authResp.ok) {
+        console.error("[upload-school-asset] admission photo authorization RPC failed", authResp.status);
+        return json({ error: "Admission photo authorization failed" }, 500);
+      }
+      const authorization = await authResp.json();
+      if (!authorization?.ok || authorization.school_id !== session.school_id || String(authorization.admission_id) !== admissionId) {
+        return json({ error: authorization?.error || "Admission photo permission denied" }, 403);
+      }
+      authorizedSchoolId = authorization.school_id;
+    }
+
     if ((kind === "logo" || kind === "cover") &&
         (typeof session.role !== "string" ||
          !["admin", "super_admin"].includes(session.role))) {
@@ -195,10 +214,12 @@ Deno.serve(async (req: Request) => {
     }
 
     const ext = file.type === "image/png" ? "png" : file.type === "image/webp" ? "webp" : "jpg";
-    const bucket = kind === "student" ? "student-photos" : "school-assets";
+    const bucket = (kind === "student" || kind === "admission") ? "student-photos" : "school-assets";
     const path = kind === "student"
       ? `${authorizedSchoolId}/${studentId}/${crypto.randomUUID()}.${ext}`
-      : `${authorizedSchoolId}/${kind}/${crypto.randomUUID()}.${ext}`;
+      : kind === "admission"
+        ? `${authorizedSchoolId}/admissions/${admissionId}/${crypto.randomUUID()}.${ext}`
+        : `${authorizedSchoolId}/${kind}/${crypto.randomUUID()}.${ext}`;
     const uploadUrl = `${supabaseUrl}/storage/v1/object/${bucket}/${path}`;
     const uploadResp = await fetch(uploadUrl, {
       method: "POST",
