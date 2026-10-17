@@ -32,15 +32,60 @@ async function _nativeStudentRpc(name, payload) {
 Object.assign(API, {
 
   async getStudents() {
+    let rows;
     if (window.APP.platform === 'web') {
       const res = await _webRpc('rpc_get_students', { p_session_token: _webSessionToken() });
-      return res.rows;
+      rows = res.rows;
+    } else {
+      rows = await twaPost('get_students', {
+        school_id: window.APP.school_id,
+        status: 'Active',
+        order: 'class,name_en',
+      });
     }
-    return twaPost('get_students', {
-      school_id: window.APP.school_id,
-      status: 'Active',
-      order: 'class,name_en',
-    });
+    return API.signStudentPhotoUrls(rows || []);
+  },
+
+  // Resolve photo URLs only through the session-checked Edge Function.
+  // If signing fails, fail closed for images while preserving student records.
+  async signStudentPhotoUrls(students) {
+    if (!Array.isArray(students) || !students.length) return students || [];
+    const sessionToken = window.APP.platform === 'web'
+      ? _webSessionToken()
+      : (window.getSavedSession?.()?.token || '');
+    if (!sessionToken) return students.map(s => s?.photo_url ? { ...s, photo_url: null } : s);
+
+    const output = students.map(s => ({ ...s }));
+    const withPhotos = output.filter(s => s?.photo_url && s?.student_id);
+    for (let offset = 0; offset < withPhotos.length; offset += 100) {
+      const batch = withPhotos.slice(offset, offset + 100);
+      try {
+        const resp = await fetch(
+          `${SCMS_CONFIG.SUPABASE_URL}/functions/v1/student-photo-signed-urls`,
+          {
+            method: 'POST',
+            headers: {
+              'apikey': SCMS_CONFIG.SUPABASE_ANON,
+              'Authorization': `Bearer ${SCMS_CONFIG.SUPABASE_ANON}`,
+              'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+              session_token: sessionToken,
+              student_ids: batch.map(s => s.student_id),
+            }),
+          }
+        );
+        const result = await resp.json().catch(() => ({}));
+        if (!resp.ok || !result?.ok || !result.photos || typeof result.photos !== 'object') {
+          batch.forEach(s => { s.photo_url = null; });
+          continue;
+        }
+        batch.forEach(s => { s.photo_url = result.photos[s.student_id] || null; });
+      } catch (_) {
+        batch.forEach(s => { s.photo_url = null; });
+      }
+    }
+    return output;
   },
 
     /** Register new student.
