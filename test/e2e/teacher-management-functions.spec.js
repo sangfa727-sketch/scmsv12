@@ -1,6 +1,51 @@
 const { test, expect } = require('@playwright/test');
 
+async function installMockWebSession(page) {
+  // Seed a non-production test session before app scripts run. The matching RPC
+  // routes are local Playwright fixtures only; no production auth code is bypassed.
+  await page.addInitScript(() => {
+    localStorage.setItem('scms_web_session', JSON.stringify({
+      type: 'web',
+      session_token: 'e2e-test-session-token-1234567890',
+      teacher_id: 'teacher-1',
+      teacher_name: 'Test Teacher',
+      school_id: 'school-1',
+      role: 'teacher'
+    }));
+  });
+  await page.route('**/rest/v1/rpc/rpc_web_session_verify', route => route.fulfill({
+    status: 200,
+    contentType: 'application/json',
+    body: JSON.stringify({
+      ok: true,
+      teacher_name: 'Test Teacher',
+      role: 'teacher',
+      school_id: 'school-1',
+      must_change_password: false
+    })
+  }));
+  await page.route('**/rest/v1/rpc/rpc_web_bootstrap', route => route.fulfill({
+    status: 200,
+    contentType: 'application/json',
+    body: JSON.stringify({
+      ok: true,
+      school_id: 'school-1',
+      school_name: 'Test School',
+      teacher_id: 'teacher-1',
+      teacher_name: 'Test Teacher',
+      teacher_role: 'teacher',
+      is_admin: false,
+      school_config: {},
+      classes: [],
+      assigned_classes: [],
+      assigned_subjects: [],
+      permissions: []
+    })
+  }));
+}
+
 async function mountAdmin(page) {
+  await installMockWebSession(page);
   await page.goto('/', { waitUntil: 'domcontentloaded' });
   await page.waitForFunction(() =>
     typeof window.openTeacherManager === 'function' &&
