@@ -29,7 +29,11 @@ Deno.serve(async (req: Request) => {
     if (new TextEncoder().encode(raw).byteLength > 32 * 1024) {
       return json({ error: "Request body too large" }, 413);
     }
-    body = JSON.parse(raw);
+    const parsed: unknown = JSON.parse(raw);
+    if (!parsed || typeof parsed !== "object" || Array.isArray(parsed)) {
+      return json({ error: "Invalid JSON body" }, 400);
+    }
+    body = parsed as { session_token?: unknown; student_ids?: unknown };
   } catch {
     return json({ error: "Invalid JSON body" }, 400);
   }
