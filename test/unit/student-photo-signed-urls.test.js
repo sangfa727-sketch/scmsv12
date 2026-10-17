@@ -4,6 +4,7 @@ const fs = require('node:fs');
 
 const endpoint = fs.readFileSync('supabase/functions/student-photo-signed-urls/index.ts', 'utf8');
 const migration = fs.readFileSync('supabase/migrations/20261017110000_authorize_student_photo_reads.sql', 'utf8');
+const disableNativeMigration = fs.readFileSync('supabase/migrations/20261017182335_disable_native_twa_and_telegram_entrypoints.sql', 'utf8');
 const api = fs.readFileSync('js/02C_api_students.js', 'utf8');
 const boot = fs.readFileSync('js/14_app.js', 'utf8');
 const parent = fs.readFileSync('parent.html', 'utf8');
@@ -51,6 +52,21 @@ test('authorization RPC supports parent-owned student only and validates staff t
   assert.match(migration, /REVOKE ALL ON FUNCTION public\.rpc_authorize_student_photo_read\(text, text\)\s+FROM PUBLIC, anon, authenticated/);
   assert.match(migration, /storage\/v1\/object\/public\/student-photos/);
   assert.match(migration, /position\('\.\.' in v_path\)/);
+});
+
+
+test('native/TWA and Telegram browser entry points are disabled while web and parent photo paths remain', () => {
+  assert.match(disableNativeMigration, /p\.proname LIKE 'rpc_app_%'/);
+  assert.match(disableNativeMigration, /rpc_telegram_connect_start/);
+  assert.match(disableNativeMigration, /rpc_telegram_connect_finish/);
+  assert.match(disableNativeMigration, /rpc_telegram_disconnect/);
+  assert.match(disableNativeMigration, /REVOKE ALL ON FUNCTION %s FROM PUBLIC, anon, authenticated/);
+  assert.match(disableNativeMigration, /app_web_sessions ws/);
+  assert.match(disableNativeMigration, /parent_sessions ps/);
+  assert.match(disableNativeMigration, /private\.web_has_student_permission\(p_session_token, 'students\.view', p_student_id\) IS NOT TRUE/);
+  assert.match(disableNativeMigration, /private\.web_has_student_permission\(\s*p_session_token, 'students\.edit', p_student_id\s*\) IS NOT TRUE/);
+  assert.doesNotMatch(disableNativeMigration, /FROM public\.app_sessions a/);
+  assert.doesNotMatch(disableNativeMigration, /v_native/);
 });
 
 test('staff and native bootstrap photo data are resolved through the signed URL endpoint', () => {

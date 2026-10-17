@@ -39,12 +39,24 @@ CREATE TABLE public.audit_log (
   source text, actor text, action text, school_id text, payload jsonb
 );
 
+CREATE OR REPLACE FUNCTION public.rpc_app_session_poll(p_token text)
+RETURNS jsonb LANGUAGE sql AS $function$ SELECT '{}'::jsonb $function$;
+CREATE OR REPLACE FUNCTION public.rpc_telegram_connect_start(p_session_token text)
+RETURNS jsonb LANGUAGE sql AS $function$ SELECT '{}'::jsonb $function$;
+CREATE OR REPLACE FUNCTION public.rpc_telegram_connect_finish(p_session_token text, p_connect_token text)
+RETURNS jsonb LANGUAGE sql AS $function$ SELECT '{}'::jsonb $function$;
+CREATE OR REPLACE FUNCTION public.rpc_telegram_disconnect(p_session_token text)
+RETURNS jsonb LANGUAGE sql AS $function$ SELECT '{}'::jsonb $function$;
+
 CREATE OR REPLACE FUNCTION private.app_session_identity(p_token text)
 RETURNS TABLE(teacher_id text, school_id text, role text)
 LANGUAGE sql STABLE AS $function$
   SELECT 'admin-a'::text, 'school-a'::text, 'admin'::text
   WHERE p_token = 'native-admin-session-token-123456789012';
 $function$;
+
+CREATE OR REPLACE FUNCTION public.rpc_authorize_student_photo_upload(p_session_token text, p_student_id text)
+RETURNS jsonb LANGUAGE sql AS $function$ SELECT '{}'::jsonb $function$;
 
 CREATE TABLE public.teacher_class_assignments (
   school_id text NOT NULL, teacher_id text NOT NULL, class_name text NOT NULL, is_active boolean NOT NULL
@@ -81,6 +93,8 @@ VALUES ('school-a', 'teacher-a', 'K1', true);
 
 \ir ../../supabase/migrations/20261017110000_authorize_student_photo_reads.sql
 \ir ../../supabase/migrations/20261017120000_bind_student_photo_paths.sql
+\ir ../../supabase/migrations/20261017182335_disable_native_twa_and_telegram_entrypoints.sql
+\ir ../../supabase/migrations/20261017192345_restore_legacy_parent_photo_path_access.sql
 
 DO $assertions$
 DECLARE result jsonb;
@@ -108,6 +122,29 @@ BEGIN
   IF result->>'ok' <> 'true' THEN
     RAISE EXCEPTION 'legacy school-scoped photo paths must remain readable: %', result;
   END IF;
+
+  UPDATE public.students
+     SET photo_url = 'https://example.supabase.co/storage/v1/object/public/student-photos/school-a/legacy1234/old.jpg'
+   WHERE student_id = 'student-a';
+  result := public.rpc_authorize_student_photo_read('parent-session-valid', 'student-a');
+  IF result->>'ok' <> 'true' THEN
+    RAISE EXCEPTION 'unique legacy nested Parent Portal photo paths must remain readable: %', result;
+  END IF;
+
+  UPDATE public.students
+     SET photo_url = 'https://example.supabase.co/storage/v1/object/public/student-photos/school-a/legacy1234/old.jpg'
+   WHERE student_id = 'student-b';
+  result := public.rpc_authorize_student_photo_read('parent-session-valid', 'student-a');
+  IF result->>'ok' <> 'false' THEN
+    RAISE EXCEPTION 'shared object paths must be denied to avoid cross-student photo leakage: %', result;
+  END IF;
+  UPDATE public.students
+     SET photo_url = 'https://example.supabase.co/storage/v1/object/public/student-photos/school-a/b.jpg'
+   WHERE student_id = 'student-b';
+
+  UPDATE public.students
+     SET photo_url = 'https://example.supabase.co/storage/v1/object/public/student-photos/school-a/a.jpg'
+   WHERE student_id = 'student-a';
   result := public.rpc_authorize_student_photo_read('parent-session-valid', 'student-b');
   IF result->>'ok' <> 'false' THEN RAISE EXCEPTION 'parent must not read another student photo: %', result; END IF;
   result := public.rpc_authorize_student_photo_read('web-session-valid', 'student-a');
@@ -115,15 +152,34 @@ BEGIN
   result := public.rpc_authorize_student_photo_read('web-session-valid', 'student-b');
   IF result->>'ok' <> 'false' THEN RAISE EXCEPTION 'web teacher without students.view must be denied: %', result; END IF;
   result := public.rpc_authorize_student_photo_read('native-teacher-session-token-123456789012', 'student-a');
-  IF result->>'ok' <> 'true' THEN RAISE EXCEPTION 'native teacher should read active assigned class photo: %', result; END IF;
+  IF result->>'ok' <> 'false' THEN RAISE EXCEPTION 'native/TWA photo reads must be disabled: %', result; END IF;
   result := public.rpc_authorize_student_photo_read('native-teacher-session-token-123456789012', 'student-b');
-  IF result->>'ok' <> 'false' THEN RAISE EXCEPTION 'native teacher must not read unassigned class photo: %', result; END IF;
+  IF result->>'ok' <> 'false' THEN RAISE EXCEPTION 'native/TWA photo reads must remain disabled for all students: %', result; END IF;
   result := public.rpc_authorize_student_photo_read('native-teacher-session-token-123456789012', 'student-other-school');
-  IF result->>'ok' <> 'false' THEN RAISE EXCEPTION 'native teacher must not read cross-school photo: %', result; END IF;
+  IF result->>'ok' <> 'false' THEN RAISE EXCEPTION 'native/TWA cross-school reads must be denied: %', result; END IF;
   result := public.rpc_authorize_student_photo_read('native-null-role-session-token-123456789', 'student-a');
   IF result->>'ok' <> 'false' THEN RAISE EXCEPTION 'native session with NULL role must fail closed: %', result; END IF;
   result := public.rpc_authorize_student_photo_read('native-admin-session-token-123456789012', 'student-b');
-  IF result->>'ok' <> 'true' THEN RAISE EXCEPTION 'school admin should retain school-wide photo view: %', result; END IF;
+  IF result->>'ok' <> 'false' THEN RAISE EXCEPTION 'native/TWA admin photo reads must also be disabled: %', result; END IF;
+  result := public.rpc_authorize_student_photo_upload('native-admin-session-token-123456789012', 'student-a');
+  IF result->>'error' <> 'invalid_session' THEN RAISE EXCEPTION 'native/TWA photo uploads must be disabled: %', result; END IF;
+
+  IF has_function_privilege('anon', 'public.rpc_app_session_poll(text)', 'EXECUTE')
+     OR has_function_privilege('authenticated', 'public.rpc_app_session_poll(text)', 'EXECUTE') THEN
+    RAISE EXCEPTION 'native session polling must not be callable by browser roles';
+  END IF;
+  IF has_function_privilege('anon', 'public.rpc_app_set_student_photo(text,text,text)', 'EXECUTE')
+     OR has_function_privilege('authenticated', 'public.rpc_app_set_student_photo(text,text,text)', 'EXECUTE') THEN
+    RAISE EXCEPTION 'native student photo setter must not be callable by browser roles';
+  END IF;
+  IF has_function_privilege('anon', 'public.rpc_telegram_connect_start(text)', 'EXECUTE')
+     OR has_function_privilege('authenticated', 'public.rpc_telegram_connect_start(text)', 'EXECUTE')
+     OR has_function_privilege('anon', 'public.rpc_telegram_connect_finish(text,text)', 'EXECUTE')
+     OR has_function_privilege('authenticated', 'public.rpc_telegram_connect_finish(text,text)', 'EXECUTE')
+     OR has_function_privilege('anon', 'public.rpc_telegram_disconnect(text)', 'EXECUTE')
+     OR has_function_privilege('authenticated', 'public.rpc_telegram_disconnect(text)', 'EXECUTE') THEN
+    RAISE EXCEPTION 'Telegram connect/disconnect entry points must be disabled for browser roles';
+  END IF;
   IF has_function_privilege('anon', 'public.rpc_authorize_student_photo_read(text,text)', 'EXECUTE') THEN
     RAISE EXCEPTION 'anon must not execute the authorization RPC directly';
   END IF;
@@ -157,21 +213,6 @@ BEGIN
     RAISE EXCEPTION 'student photo setter must reject a cross-school object path: %', result;
   END IF;
 
-
-  result := public.rpc_app_set_student_photo(
-    'native-admin-session-token-123456789012', 'student-a',
-    'https://example.supabase.co/storage/v1/object/public/student-photos/school-a/student-a/123e4567-e89b-12d3-a456-426614174000.jpg'
-  );
-  IF result->>'ok' <> 'true' THEN
-    RAISE EXCEPTION 'native setter must accept the new school/student/object path: %', result;
-  END IF;
-  result := public.rpc_app_set_student_photo(
-    'native-admin-session-token-123456789012', 'student-a',
-    'https://example.supabase.co/storage/v1/object/public/student-photos/school-a/student-b/123e4567-e89b-12d3-a456-426614174000.jpg'
-  );
-  IF result->>'error' <> 'invalid_photo_url' THEN
-    RAISE EXCEPTION 'native setter must reject another student object path: %', result;
-  END IF;
 
   RAISE NOTICE 'student-photo authorization runtime assertions passed';
 END;
