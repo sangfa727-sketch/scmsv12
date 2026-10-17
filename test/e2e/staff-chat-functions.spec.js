@@ -52,9 +52,8 @@ async function installMockWebSession(page) {
 }
 
 async function mountSmartChat(page, render = true) {
-  // Keep the configured Playwright storage state intact. Clearing browser storage
-  // here removes the session fixture and causes initApp to show an expired-session
-  // overlay above the mocked chat UI, blocking interaction tests.
+  // Keep the mocked web-session fixture installed before navigation. Clearing
+  // browser storage here would make session-dependent UI calls fail closed.
   await installMockWebSession(page);
   await page.goto('/', { waitUntil: 'domcontentloaded' });
   await page.waitForFunction(() =>
