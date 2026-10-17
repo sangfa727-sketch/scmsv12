@@ -81,6 +81,7 @@ VALUES ('school-a', 'teacher-a', 'K1', true);
 
 \ir ../../supabase/migrations/20261017110000_authorize_student_photo_reads.sql
 \ir ../../supabase/migrations/20261017120000_bind_student_photo_paths.sql
+\ir ../../supabase/migrations/20261017182335_disable_native_twa_and_telegram_entrypoints.sql
 
 DO $assertions$
 DECLARE result jsonb;
