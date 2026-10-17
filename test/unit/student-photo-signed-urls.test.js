@@ -58,6 +58,8 @@ test('Parent Portal resolves only its linked student photo and fails closed on s
   assert.match(parent, /functions\/v1\/student-photo-signed-urls/);
   assert.match(parent, /student_ids: \[student\.student_id\]/);
   assert.match(parent, /student\.photo_url = null/);
+  assert.match(parent, /avatar\(\{ \.\.\.student, photo_url: null \}\)/,
+    'pre-authentication QR login must not load the long-lived public photo URL');
 });
 
 test('avatar renderer consumes the resolved URL on the student object without adding a public URL fallback', () => {
