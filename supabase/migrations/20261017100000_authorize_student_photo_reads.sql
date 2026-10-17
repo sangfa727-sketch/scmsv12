@@ -89,19 +89,38 @@ BEGIN
          AND length(a.token) >= 32
        LIMIT 1;
 
-      IF v_native IS NULL OR v_native.role NOT IN (
-        'admin', 'super_admin', 'school_coordinator', 'administrative_assistant'
-      ) THEN
+      IF v_native IS NULL THEN
         RETURN jsonb_build_object('ok', false, 'error', 'invalid_session_or_permission_denied');
       END IF;
 
-      SELECT s.student_id, s.school_id, s.photo_url
+      SELECT s.student_id, s.school_id, s.photo_url, s.class
         INTO v_student
         FROM public.students s
        WHERE s.student_id = p_student_id
          AND s.school_id = v_native.school_id
          AND s.status = 'Active'
        LIMIT 1;
+
+      -- Match native/TWA roster visibility: administrators may view the whole
+      -- school, while teacher-like roles may view only actively assigned classes.
+      -- Photo reads must not be stricter than legitimate roster reads, nor wider.
+      IF v_student IS NOT NULL
+         AND v_native.role NOT IN (
+           'admin', 'super_admin', 'school_coordinator', 'administrative_assistant'
+         )
+         AND (
+           v_native.role NOT IN ('teacher', 'senior_teacher', 'assistant_teacher')
+           OR NOT EXISTS (
+             SELECT 1
+               FROM public.teacher_class_assignments a
+              WHERE a.school_id = v_native.school_id
+                AND a.teacher_id = v_native.teacher_id
+                AND a.class_name = trim(v_student.class)
+                AND a.is_active = true
+           )
+         ) THEN
+        RETURN jsonb_build_object('ok', false, 'error', 'permission_denied');
+      END IF;
     END IF;
   END IF;
 
