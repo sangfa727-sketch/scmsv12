@@ -193,7 +193,10 @@ Deno.serve(async (req: Request) => {
 
     let authorizedSchoolId = session.school_id;
     if (kind === "student") {
-      if (!studentId) return json({ error: "Missing student ID" }, 400);
+      if (!studentId || studentId.length > 128 || /[\\/\\\\]/.test(studentId) ||
+          studentId.includes("..") || /%(2e|2f|5c)/i.test(studentId)) {
+        return json({ error: "Invalid student ID" }, 400);
+      }
       const authResp = await fetch(`${supabaseUrl}/rest/v1/rpc/rpc_authorize_student_photo_upload`, {
         method: "POST",
         headers: { ...headers, "Content-Type": "application/json" },
@@ -223,7 +226,7 @@ Deno.serve(async (req: Request) => {
     const ext = file.type === "image/png" ? "png" : file.type === "image/webp" ? "webp" : "jpg";
     const bucket = kind === "student" ? "student-photos" : "school-assets";
     const path = kind === "student"
-      ? `${authorizedSchoolId}/${crypto.randomUUID()}.${ext}`
+      ? `${authorizedSchoolId}/${studentId}/${crypto.randomUUID()}.${ext}`
       : `${authorizedSchoolId}/${kind}/${crypto.randomUUID()}.${ext}`;
     const uploadUrl = `${supabaseUrl}/storage/v1/object/${bucket}/${path}`;
     const uploadResp = await fetch(uploadUrl, {

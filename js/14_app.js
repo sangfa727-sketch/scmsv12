@@ -258,6 +258,9 @@ async function initApp() {
     }
 
     window.APP.students       = bootstrapData.students       || [];
+    if (window.APP.students.length && typeof API?.signStudentPhotoUrls === 'function') {
+      window.APP.students = await API.signStudentPhotoUrls(window.APP.students);
+    }
     window.APP.attendance     = bootstrapData.attendance     || [];
     window.APP.dailyReports   = bootstrapData.dailyReports   || [];
     window.APP.homework       = bootstrapData.homework       || [];

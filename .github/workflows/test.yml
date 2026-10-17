@@ -329,7 +329,7 @@ jobs:
         with:
           deno-version: v2.x
       - name: Check upload and Parent Portal Edge Function types
-        run: deno check --node-modules-dir=auto supabase/functions/upload-school-asset/index.ts supabase/functions/parent-google-login/index.ts
+        run: deno check --node-modules-dir=auto supabase/functions/upload-school-asset/index.ts supabase/functions/parent-google-login/index.ts supabase/functions/student-photo-signed-urls/index.ts
       - name: Run non-AI tenant and student CRUD security harness
         env:
           PGPASSWORD: scms_non_ai_test
@@ -340,11 +340,18 @@ jobs:
         run: |
           createdb -h 127.0.0.1 -U scms_non_ai_test parent_contact_audit_test
           psql -h 127.0.0.1 -U scms_non_ai_test -d parent_contact_audit_test -v ON_ERROR_STOP=1 -f test/db/parent_contact_audit_minimization_runtime_test.sql
+      - name: Run student-photo authorization migration runtime test in isolated database
+        env:
+          PGPASSWORD: scms_non_ai_test
+        run: |
+          createdb -h 127.0.0.1 -U scms_non_ai_test student_photo_authorization_test
+          psql -h 127.0.0.1 -U scms_non_ai_test -d student_photo_authorization_test -v ON_ERROR_STOP=1 -f test/db/student_photo_authorization_runtime_test.sql
 
   playwright-ci:
     name: Playwright local smoke test (automatic PR/push)
     if: github.event_name == 'pull_request' || github.event_name == 'push'
     runs-on: ubuntu-latest
+    timeout-minutes: 20
     steps:
       - uses: actions/checkout@v7
       - uses: actions/setup-node@v7

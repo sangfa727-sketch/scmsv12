@@ -1,6 +1,60 @@
 const { test, expect } = require('@playwright/test');
 
+async function installMockWebSession(page) {
+  // Seed a non-production test session before app scripts run. The matching RPC
+  // routes are local Playwright fixtures only; no production auth code is bypassed.
+  await page.addInitScript(() => {
+    localStorage.setItem('scms_web_session', JSON.stringify({
+      type: 'web',
+      session_token: 'e2e-test-session-token-1234567890',
+      teacher_id: 'teacher-1',
+      teacher_name: 'Test Teacher',
+      school_id: 'school-1',
+      role: 'teacher'
+    }));
+  });
+  // Keep the UI suite isolated from live Supabase and avoid waiting on network
+  // timeouts for unrelated bootstrap refresh calls.
+  await page.route('**/rest/v1/rpc/**', route => route.fulfill({
+    status: 200,
+    contentType: 'application/json',
+    body: JSON.stringify({ ok: true, data: [], students: [], rows: [] })
+  }));
+  await page.route('**/rest/v1/rpc/rpc_web_session_verify', route => route.fulfill({
+    status: 200,
+    contentType: 'application/json',
+    body: JSON.stringify({
+      ok: true,
+      teacher_name: 'Test Teacher',
+      role: 'teacher',
+      school_id: 'school-1',
+      must_change_password: false
+    })
+  }));
+  await page.route('**/rest/v1/rpc/rpc_web_bootstrap', route => route.fulfill({
+    status: 200,
+    contentType: 'application/json',
+    body: JSON.stringify({
+      ok: true,
+      school_id: 'school-1',
+      school_name: 'Test School',
+      teacher_id: 'teacher-1',
+      teacher_name: 'Test Teacher',
+      teacher_role: 'teacher',
+      is_admin: false,
+      school_config: {},
+      classes: [],
+      assigned_classes: [],
+      assigned_subjects: [],
+      permissions: []
+    })
+  }));
+}
+
 async function mountSmartChat(page, render = true) {
+  // Keep the mocked web-session fixture installed before navigation. Clearing
+  // browser storage here would make session-dependent UI calls fail closed.
+  await installMockWebSession(page);
   await page.goto('/', { waitUntil: 'domcontentloaded' });
   await page.waitForFunction(() =>
     typeof window.renderChat === 'function' &&
@@ -24,7 +78,11 @@ async function mountSmartChat(page, render = true) {
       window.__chatTestCalls.push({ name, args });
     };
     const now = '2026-10-10T08:00:00.000Z';
-    window.API = {
+    // Keep the original API object identity: chat modules may retain references
+    // to it. Replacing window.API leaves those references calling real session APIs.
+    const testApi = window.API;
+    Object.keys(testApi).forEach(key => delete testApi[key]);
+    Object.assign(testApi, {
       getChatMessages: async (...args) => {
         record('getChatMessages', ...args);
         return [{ id: 'msg-1', teacher_id: 'teacher-2', teacher_name: 'Other Teacher', text: 'Staff hello', created_at: now }];
@@ -157,7 +215,8 @@ async function mountSmartChat(page, render = true) {
         record('createStaffAnnouncement', ...args);
         return { ok: true, recipient_count: 1 };
       }
-    };
+    });
+    window.API = testApi;
 
     if (shouldRender) window.renderChat();
   }, render);
