@@ -24,6 +24,7 @@ END
 $student_photo_rollout_preflight$;
 
 DROP POLICY IF EXISTS "anon upload student photos" ON storage.objects;
-DROP POLICY IF EXISTS "public read student photos" ON storage.objects;
+-- Keep public read temporarily for compatibility with existing photo_url consumers.
+-- A separate signed-URL migration must update all UI consumers before this policy is removed.
 
 COMMIT;
