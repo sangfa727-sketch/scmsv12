@@ -1,14 +1,10 @@
 const { test, expect } = require('@playwright/test');
 
 async function mountSmartChat(page, render = true) {
-  // Clear persisted state only after the page has a real origin. Then reload
-  // so initApp cannot race the cleanup and render a stale-session error overlay.
+  // Keep the configured Playwright storage state intact. Clearing browser storage
+  // here removes the session fixture and causes initApp to show an expired-session
+  // overlay above the mocked chat UI, blocking interaction tests.
   await page.goto('/', { waitUntil: 'domcontentloaded' });
-  await page.evaluate(() => {
-    localStorage.clear();
-    sessionStorage.clear();
-  });
-  await page.reload({ waitUntil: 'domcontentloaded' });
   await page.waitForFunction(() =>
     typeof window.renderChat === 'function' &&
     typeof window.switchChatChannel === 'function' &&
