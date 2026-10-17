@@ -1,6 +1,15 @@
 const { test, expect } = require('@playwright/test');
 
 async function mountSmartChat(page, render = true) {
+  // Start from a deterministic unauthenticated browser state. The app boot
+  // checks persisted web sessions before this helper can install its mocks;
+  // stale storage can otherwise cover the chat UI with the real expiry screen.
+  await page.addInitScript(() => {
+    if (sessionStorage.getItem('__scms_chat_test_storage_reset') === '1') return;
+    localStorage.clear();
+    sessionStorage.clear();
+    sessionStorage.setItem('__scms_chat_test_storage_reset', '1');
+  });
   await page.goto('/', { waitUntil: 'domcontentloaded' });
   await page.waitForFunction(() =>
     typeof window.renderChat === 'function' &&
