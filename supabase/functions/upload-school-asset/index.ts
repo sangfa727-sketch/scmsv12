@@ -190,7 +190,7 @@ Deno.serve(async (req: Request) => {
     }
 
     if (kind === "admission") {
-      if (!/^\\d{1,18}$/.test(admissionId)) return json({ error: "Invalid admission ID" }, 400);
+      if (!/^\d{1,18}$/.test(admissionId)) return json({ error: "Invalid admission ID" }, 400);
       const authResp = await fetch(`${supabaseUrl}/rest/v1/rpc/rpc_authorize_admission_photo_upload`, {
         method: "POST",
         headers: { ...headers, "Content-Type": "application/json" },
