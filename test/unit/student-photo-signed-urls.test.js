@@ -62,3 +62,10 @@ test('newly uploaded student photos are replaced with short-lived signed URLs be
   assert.match(studentUi, /API\.signStudentPhotoUrls/);
   assert.match(studentUi, /signedStudent\?\.photo_url \|\| null/);
 });
+
+test('cached student roster refreshes expiring signed photo URLs without refetching the full list', () => {
+  const loader = fs.readFileSync('js/02M_data_loader.js', 'utf8');
+  assert.match(loader, /Signed URLs expire/);
+  assert.match(loader, /API\.signStudentPhotoUrls\(cached\)/);
+  assert.match(loader, /cache\.set\(key, refreshed\)/);
+});
