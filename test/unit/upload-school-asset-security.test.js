@@ -79,8 +79,14 @@ test('admission photo upload uses server-side permission and tenant authorizatio
   assert.match(source, /authorization\.school_id !== session\.school_id/);
   assert.match(source, /String\(authorization\.admission_id\) !== admissionId/);
   assert.match(source, /admissions\/\$\{admissionId\}/);
-  assert.match(admissionAuthorizationMigration, /private\.web_has_permission\(p_session_token, 'admissions\.manage'/);
+  assert.match(admissionAuthorizationMigration, /private\.web_has_permission\(p_session_token, 'admissions\.manage', NULL, NULL\) IS NOT TRUE/);
   assert.match(admissionAuthorizationMigration, /a\.id = p_admission_id AND a\.school_id = v_school_id/);
+  assert.match(admissionAuthorizationMigration, /ws\.expires_at > now\(\)/);
+  assert.match(admissionAuthorizationMigration, /t\.school_id = ws\.school_id/);
+  assert.match(admissionAuthorizationMigration, /t\.role = ws\.role/);
+  assert.match(admissionAuthorizationMigration, /lower\(t\.status\) = 'active'/);
+  assert.match(admissionAuthorizationMigration, /lower\(sc\.status\) = 'active'/);
+  assert.match(admissionAuthorizationMigration, /REVOKE ALL ON FUNCTION public\.rpc_authorize_admission_photo_upload\(text, bigint\) FROM PUBLIC, anon, authenticated/);
   assert.match(admissionAuthorizationMigration, /GRANT EXECUTE ON FUNCTION public\.rpc_authorize_admission_photo_upload\(text, bigint\) TO service_role/);
   assert.match(admissionsApi, /functions\/v1\/upload-school-asset/);
   assert.match(admissionsApi, /form\.append\('admission_id', String\(admissionId\)\)/);
