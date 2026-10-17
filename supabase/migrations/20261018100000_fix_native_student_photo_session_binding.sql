@@ -18,7 +18,7 @@ DECLARE
   v_path text;
   v_expected_prefix text;
 BEGIN
-  SELECT t.teacher_id, t.school_id::text AS school_id, t.role
+  SELECT t.teacher_id, t.school_id, t.role
     INTO v_sess
     FROM public.app_sessions a
     JOIN public.teachers t
@@ -57,7 +57,7 @@ BEGIN
       p_photo_url
       FROM '^https://[A-Za-z0-9.-]+[.]supabase[.]co/storage/v1/object/public/student-photos/([^?#]+)\Z'
     );
-    v_expected_prefix := v_sess.school_id || '/' || p_student_id || '/';
+    v_expected_prefix := v_sess.school_id::text || '/' || p_student_id || '/';
     IF v_sess.school_id !~ '^[A-Za-z0-9_-]+\Z'
        OR v_path IS NULL
        OR left(v_path, length(v_expected_prefix)) <> v_expected_prefix
@@ -73,7 +73,7 @@ BEGIN
      SET photo_url = p_photo_url,
          updated_at = now()
    WHERE student_id = p_student_id
-     AND school_id::text = v_sess.school_id
+     AND school_id = v_sess.school_id
   RETURNING student_id INTO v_student_id;
 
   IF v_student_id IS NULL THEN
