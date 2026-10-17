@@ -39,6 +39,15 @@ CREATE TABLE public.audit_log (
   source text, actor text, action text, school_id text, payload jsonb
 );
 
+CREATE OR REPLACE FUNCTION public.rpc_app_session_poll(p_token text)
+RETURNS jsonb LANGUAGE sql AS $function$ SELECT '{}'::jsonb $function$;
+CREATE OR REPLACE FUNCTION public.rpc_telegram_connect_start(p_session_token text)
+RETURNS jsonb LANGUAGE sql AS $function$ SELECT '{}'::jsonb $function$;
+CREATE OR REPLACE FUNCTION public.rpc_telegram_connect_finish(p_session_token text, p_connect_token text)
+RETURNS jsonb LANGUAGE sql AS $function$ SELECT '{}'::jsonb $function$;
+CREATE OR REPLACE FUNCTION public.rpc_telegram_disconnect(p_session_token text)
+RETURNS jsonb LANGUAGE sql AS $function$ SELECT '{}'::jsonb $function$;
+
 CREATE OR REPLACE FUNCTION private.app_session_identity(p_token text)
 RETURNS TABLE(teacher_id text, school_id text, role text)
 LANGUAGE sql STABLE AS $function$
