@@ -51,7 +51,8 @@ test('student photo upload is authorized for the same school and student before 
   assert.match(authorizationMigration, /private\.web_has_student_permission/);
   assert.match(authorizationMigration, /web_has_student_permission\([\s\S]*?\) IS NOT TRUE/);
   assert.match(rolloutScript, /DROP POLICY IF EXISTS "anon upload student photos" ON storage\.objects/);
-  assert.match(rolloutScript, /DROP POLICY IF EXISTS "public read student photos" ON storage\.objects/);
+  assert.doesNotMatch(rolloutScript, /DROP POLICY IF EXISTS "public read student photos" ON storage\.objects/);
+  assert.match(rolloutScript, /Keep public read temporarily for compatibility/);
   assert.match(authorizationMigration, /GRANT EXECUTE ON FUNCTION public\.rpc_authorize_student_photo_upload\(text, text\)\s+TO service_role/);
 });
 
