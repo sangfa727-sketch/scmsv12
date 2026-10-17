@@ -134,7 +134,15 @@ BEGIN
   IF v_path IS NULL
      OR left(v_path, length(v_student.school_id::text) + 1) <> v_student.school_id::text || '/'
      OR position('..' in v_path) > 0
-     OR position(chr(92) in v_path) > 0 THEN
+     OR position(chr(92) in v_path) > 0
+     OR v_path ~* '%(2e|2f|5c)'
+     -- Legacy objects use school_id/filename and remain readable.
+     -- Newly uploaded objects use school_id/student_id/filename; when a
+     -- nested student-scoped path is present, bind it to this exact student.
+     OR (
+       strpos(substr(v_path, length(v_student.school_id::text) + 2), '/') > 0
+       AND split_part(v_path, '/', 2) <> v_student.student_id::text
+     ) THEN
     RETURN jsonb_build_object('ok', false, 'error', 'photo_not_available');
   END IF;
 
