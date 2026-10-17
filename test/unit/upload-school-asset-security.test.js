@@ -6,6 +6,7 @@ const source = fs.readFileSync('supabase/functions/upload-school-asset/index.ts'
 const authorizationMigration = fs.readFileSync('supabase/migrations/20261014136000_secure_student_photo_upload.sql', 'utf8');
 const rolloutScript = fs.readFileSync('scripts/rollouts/enforce_student_photo_upload_endpoint.sql', 'utf8');
 const api = fs.readFileSync('js/02C_api_students.js', 'utf8');
+const runtimeTest = fs.readFileSync('test/db/non_ai_tenant_crud_security_runtime_test.sql', 'utf8');
 
 test('upload rejects oversized multipart bodies before parsing FormData', () => {
   assert.match(source, /async function readRequestBodyBounded\(req: Request, maxBytes: number\)/);
@@ -54,6 +55,11 @@ test('student photo upload is authorized for the same school and student before 
   assert.doesNotMatch(rolloutScript, /DROP POLICY IF EXISTS "public read student photos" ON storage\.objects/);
   assert.match(rolloutScript, /Keep public read temporarily for compatibility/);
   assert.match(authorizationMigration, /GRANT EXECUTE ON FUNCTION public\.rpc_authorize_student_photo_upload\(text, text\)\s+TO service_role/);
+});
+
+test('gated rollout runtime assertion removes anonymous upload only and preserves public read', () => {
+  assert.match(runtimeTest, /policyname = 'anon upload student photos'[\s\S]*?legacy anonymous upload policy remains/);
+  assert.match(runtimeTest, /policyname = 'public read student photos'[\s\S]*?public-read compatibility policy was removed prematurely/);
 });
 
 test('browser student-photo flow uses the trusted Edge Function, not direct anonymous Storage writes', () => {
