@@ -337,7 +337,7 @@ BEGIN
 END
 $assert_historical_photo_rollout_gap$;
 
-\ir ../../supabase/migrations/20261016120000_production_security_drift_repair.sql
+\ir ../../supabase/migrations/20261017035505_production_security_drift_repair.sql
 
 -- The forward-only repair must also preserve the legacy upload path during the deployment gap.
 DO $assert_photo_rollout_gap$
@@ -649,7 +649,7 @@ END
 $assert$;
 
 -- A second application must be a safe no-op for the already-repaired schema.
-\ir ../../supabase/migrations/20261016120000_production_security_drift_repair.sql
+\ir ../../supabase/migrations/20261017035505_production_security_drift_repair.sql
 \ir ../../scripts/rollouts/enforce_student_photo_upload_endpoint.sql
 
 SELECT 'PASS: forward repair is repeatable and enforces internal grants, Parent Login minimization/rate limits, student CRUD payload/audit protections, and trusted photo authorization' AS result;
