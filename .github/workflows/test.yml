@@ -340,6 +340,12 @@ jobs:
         run: |
           createdb -h 127.0.0.1 -U scms_non_ai_test parent_contact_audit_test
           psql -h 127.0.0.1 -U scms_non_ai_test -d parent_contact_audit_test -v ON_ERROR_STOP=1 -f test/db/parent_contact_audit_minimization_runtime_test.sql
+      - name: Run student-photo authorization migration runtime test in isolated database
+        env:
+          PGPASSWORD: scms_non_ai_test
+        run: |
+          createdb -h 127.0.0.1 -U scms_non_ai_test student_photo_authorization_test
+          psql -h 127.0.0.1 -U scms_non_ai_test -d student_photo_authorization_test -v ON_ERROR_STOP=1 -f test/db/student_photo_authorization_runtime_test.sql
 
   playwright-ci:
     name: Playwright local smoke test (automatic PR/push)
