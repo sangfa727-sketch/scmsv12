@@ -58,7 +58,7 @@ BEGIN
       FROM '^https://[A-Za-z0-9.-]+[.]supabase[.]co/storage/v1/object/public/student-photos/([^?#]+)\Z'
     );
     v_expected_prefix := v_sess.school_id::text || '/' || p_student_id || '/';
-    IF v_sess.school_id !~ '^[A-Za-z0-9_-]+\Z'
+    IF v_sess.school_id::text !~ '^[A-Za-z0-9_-]+\Z'
        OR v_path IS NULL
        OR left(v_path, length(v_expected_prefix)) <> v_expected_prefix
        OR substring(v_path FROM length(v_expected_prefix) + 1) !~ '^[0-9a-fA-F-]{36}[.](jpg|png|webp)\Z'
