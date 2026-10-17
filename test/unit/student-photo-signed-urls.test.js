@@ -3,7 +3,7 @@ const assert = require('node:assert/strict');
 const fs = require('node:fs');
 
 const endpoint = fs.readFileSync('supabase/functions/student-photo-signed-urls/index.ts', 'utf8');
-const migration = fs.readFileSync('supabase/migrations/20261017100000_authorize_student_photo_reads.sql', 'utf8');
+const migration = fs.readFileSync('supabase/migrations/20261017110000_authorize_student_photo_reads.sql', 'utf8');
 const api = fs.readFileSync('js/02C_api_students.js', 'utf8');
 const boot = fs.readFileSync('js/14_app.js', 'utf8');
 const parent = fs.readFileSync('parent.html', 'utf8');
