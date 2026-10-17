@@ -53,10 +53,15 @@ Object.assign(API, {
     const sessionToken = window.APP.platform === 'web'
       ? _webSessionToken()
       : (window.getSavedSession?.()?.token || '');
-    if (!sessionToken) return students.map(s => s?.photo_url ? { ...s, photo_url: null } : s);
+    if (!sessionToken) return students.map(s => s?.photo_url
+      ? { ...s, photo_url: null, photo_source_available: true }
+      : s);
 
-    const output = students.map(s => ({ ...s }));
-    const withPhotos = output.filter(s => s?.photo_url && s?.student_id);
+    const output = students.map(s => ({
+      ...s,
+      photo_source_available: !!(s?.photo_source_available || s?.photo_url),
+    }));
+    const withPhotos = output.filter(s => s?.photo_source_available && s?.student_id);
     for (let offset = 0; offset < withPhotos.length; offset += 100) {
       const batch = withPhotos.slice(offset, offset + 100);
       try {
