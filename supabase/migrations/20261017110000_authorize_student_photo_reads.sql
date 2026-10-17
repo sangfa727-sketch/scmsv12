@@ -104,11 +104,11 @@ BEGIN
       -- school, while teacher-like roles may view only actively assigned classes.
       -- Photo reads must not be stricter than legitimate roster reads, nor wider.
       IF v_student IS NOT NULL
-         AND lower(v_native.role) NOT IN (
+         AND coalesce(lower(v_native.role), '') NOT IN (
            'admin', 'super_admin', 'school_coordinator', 'administrative_assistant', 'principal', 'ht'
          )
          AND (
-           lower(v_native.role) NOT IN ('teacher', 'senior_teacher', 'assistant_teacher')
+           coalesce(lower(v_native.role), '') NOT IN ('teacher', 'senior_teacher', 'assistant_teacher')
            OR NOT EXISTS (
              SELECT 1
                FROM public.teacher_class_assignments a
