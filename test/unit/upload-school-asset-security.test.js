@@ -41,7 +41,7 @@ test('school asset upload verifies image signatures, not only client MIME', () =
 });
 
 test('upload endpoint applies bucket-specific size caps and retains role restrictions', () => {
-  assert.match(source, /const maxBytes = kind === "student" \? 3 \* 1024 \* 1024 : 5 \* 1024 \* 1024/);
+  assert.match(source, /const maxBytes = \(kind === "student" \|\| kind === "admission"\) \? 3 \* 1024 \* 1024 : 5 \* 1024 \* 1024/);
   assert.match(source, /file\.size > maxBytes/);
   assert.match(source, /kind === "logo" \|\| kind === "cover"/);
   assert.match(source, /!\["admin", "super_admin"\]\.includes\(session\.role\)/);
@@ -52,7 +52,7 @@ test('student photo upload is authorized for the same school and student before 
   assert.match(source, /rpc_authorize_student_photo_upload/);
   assert.match(source, /authorization\.school_id !== session\.school_id/);
   assert.match(source, /authorization\.student_id !== studentId/);
-  assert.match(source, /const bucket = kind === "student" \? "student-photos" : "school-assets"/);
+  assert.match(source, /const bucket = \(kind === "student" \|\| kind === "admission"\) \? "student-photos" : "school-assets"/);
   assert.match(authorizationMigration, /private\.web_has_student_permission/);
   assert.match(authorizationMigration, /web_has_student_permission\([\s\S]*?\) IS NOT TRUE/);
   assert.match(rolloutScript, /DROP POLICY IF EXISTS "anon upload student photos" ON storage\.objects/);
