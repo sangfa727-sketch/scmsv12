@@ -121,6 +121,29 @@ BEGIN
   IF result->>'ok' <> 'true' THEN
     RAISE EXCEPTION 'legacy school-scoped photo paths must remain readable: %', result;
   END IF;
+
+  UPDATE public.students
+     SET photo_url = 'https://example.supabase.co/storage/v1/object/public/student-photos/school-a/legacy1234/old.jpg'
+   WHERE student_id = 'student-a';
+  result := public.rpc_authorize_student_photo_read('parent-session-valid', 'student-a');
+  IF result->>'ok' <> 'true' THEN
+    RAISE EXCEPTION 'unique legacy nested Parent Portal photo paths must remain readable: %', result;
+  END IF;
+
+  UPDATE public.students
+     SET photo_url = 'https://example.supabase.co/storage/v1/object/public/student-photos/school-a/legacy1234/old.jpg'
+   WHERE student_id = 'student-b';
+  result := public.rpc_authorize_student_photo_read('parent-session-valid', 'student-a');
+  IF result->>'ok' <> 'false' THEN
+    RAISE EXCEPTION 'shared object paths must be denied to avoid cross-student photo leakage: %', result;
+  END IF;
+  UPDATE public.students
+     SET photo_url = 'https://example.supabase.co/storage/v1/object/public/student-photos/school-a/b.jpg'
+   WHERE student_id = 'student-b';
+
+  UPDATE public.students
+     SET photo_url = 'https://example.supabase.co/storage/v1/object/public/student-photos/school-a/a.jpg'
+   WHERE student_id = 'student-a';
   result := public.rpc_authorize_student_photo_read('parent-session-valid', 'student-b');
   IF result->>'ok' <> 'false' THEN RAISE EXCEPTION 'parent must not read another student photo: %', result; END IF;
   result := public.rpc_authorize_student_photo_read('web-session-valid', 'student-a');
