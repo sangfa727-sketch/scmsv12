@@ -440,6 +440,11 @@ BEGIN
     FOREACH browser_role IN ARRAY ARRAY['anon', 'authenticated'] LOOP
       FOREACH privilege_name IN ARRAY ARRAY['SELECT', 'INSERT', 'UPDATE', 'DELETE', 'TRUNCATE', 'REFERENCES', 'TRIGGER'] LOOP
         IF has_table_privilege(browser_role, format('public.%I', internal_table), privilege_name) THEN
+          -- The current bootstrap flow inserts only pending, unlinked sessions.
+          -- Preserve that INSERT grant; the app_sessions_insert RLS policy is the row-level guard.
+          IF internal_table = 'app_sessions' AND privilege_name = 'INSERT' THEN
+            CONTINUE;
+          END IF;
           RAISE EXCEPTION 'browser role % retains % on public.%', browser_role, privilege_name, internal_table;
         END IF;
       END LOOP;
