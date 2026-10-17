@@ -20,7 +20,8 @@ CREATE TABLE public.teachers (
 );
 CREATE TABLE public.students (
   student_id text PRIMARY KEY, school_id text NOT NULL REFERENCES public.schools(school_id),
-  status text NOT NULL, photo_url text, class text
+  status text NOT NULL, photo_url text, class text,
+  name_en text, name_local text, updated_at timestamptz
 );
 CREATE TABLE public.parent_sessions (
   session_token text PRIMARY KEY, student_id text NOT NULL, school_id text NOT NULL,
@@ -42,7 +43,7 @@ CREATE OR REPLACE FUNCTION private.web_has_student_permission(
   p_session_token text, p_permission text, p_student_id text
 ) RETURNS boolean LANGUAGE sql STABLE AS $function$
   SELECT p_session_token = 'web-session-valid'
-     AND p_permission = 'students.view'
+     AND p_permission IN ('students.view', 'students.edit')
      AND p_student_id = 'student-a';
 $function$;
 
@@ -68,6 +69,7 @@ INSERT INTO public.teacher_class_assignments (school_id, teacher_id, class_name,
 VALUES ('school-a', 'teacher-a', 'K1', true);
 
 \ir ../../supabase/migrations/20261017110000_authorize_student_photo_reads.sql
+\ir ../../supabase/migrations/20261017120000_bind_student_photo_paths.sql
 
 DO $assertions$
 DECLARE result jsonb;
@@ -99,6 +101,30 @@ BEGIN
   IF NOT has_function_privilege('service_role', 'public.rpc_authorize_student_photo_read(text,text)', 'EXECUTE') THEN
     RAISE EXCEPTION 'service_role must be able to execute the authorization RPC';
   END IF;
+  result := public.rpc_set_student_photo(
+    'web-session-valid', 'student-a',
+    'https://example.supabase.co/storage/v1/object/public/student-photos/school-a/student-b/other.jpg'
+  );
+  IF result->>'error' <> 'invalid_photo_url' THEN
+    RAISE EXCEPTION 'student photo setter must reject another student object path: %', result;
+  END IF;
+
+  result := public.rpc_set_student_photo(
+    'web-session-valid', 'student-a',
+    'https://example.supabase.co/storage/v1/object/public/student-photos/school-a/student-a/new.jpg'
+  );
+  IF result->>'ok' <> 'true' THEN
+    RAISE EXCEPTION 'student photo setter should accept a path scoped to the same student: %', result;
+  END IF;
+
+  result := public.rpc_set_student_photo(
+    'web-session-valid', 'student-a',
+    'https://example.supabase.co/storage/v1/object/public/student-photos/school-b/student-a/foreign.jpg'
+  );
+  IF result->>'error' <> 'invalid_photo_url' THEN
+    RAISE EXCEPTION 'student photo setter must reject a cross-school object path: %', result;
+  END IF;
+
   RAISE NOTICE 'student-photo authorization runtime assertions passed';
 END;
 $assertions$;
