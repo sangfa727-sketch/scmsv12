@@ -223,7 +223,7 @@ Deno.serve(async (req: Request) => {
     const ext = file.type === "image/png" ? "png" : file.type === "image/webp" ? "webp" : "jpg";
     const bucket = kind === "student" ? "student-photos" : "school-assets";
     const path = kind === "student"
-      ? `${authorizedSchoolId}/${crypto.randomUUID()}.${ext}`
+      ? `${authorizedSchoolId}/${studentId}/${crypto.randomUUID()}.${ext}`
       : `${authorizedSchoolId}/${kind}/${crypto.randomUUID()}.${ext}`;
     const uploadUrl = `${supabaseUrl}/storage/v1/object/${bucket}/${path}`;
     const uploadResp = await fetch(uploadUrl, {
