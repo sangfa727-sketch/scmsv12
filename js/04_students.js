@@ -984,7 +984,8 @@ window.saveStudentForm = async function(mode, studentId) {
         try {
           const url = await API.uploadStudentPhoto(studentId, _pendingPhotoFile);
           await API.setStudentPhoto(studentId, url);
-          if (idx >= 0) window.APP.students[idx].photo_url = url;
+          const [signedStudent] = await API.signStudentPhotoUrls([{ student_id: studentId, photo_url: url }]);
+          if (idx >= 0) window.APP.students[idx].photo_url = signedStudent?.photo_url || null;
         } catch (photoErr) {
           showToast(t('students.toast.photoUploadFailedEdit', { err: photoErr.message || t('common.error') }));
         }
@@ -1020,7 +1021,8 @@ window.saveStudentForm = async function(mode, studentId) {
         try {
           const url = await API.uploadStudentPhoto(newStudent.student_id, _pendingPhotoFile);
           await API.setStudentPhoto(newStudent.student_id, url);
-          newStudent.photo_url = url;
+          const [signedStudent] = await API.signStudentPhotoUrls([{ student_id: newStudent.student_id, photo_url: url }]);
+          newStudent.photo_url = signedStudent?.photo_url || null;
         } catch (photoErr) {
           showToast(t('students.toast.photoUploadFailedAdd', { err: photoErr.message || t('common.error') }));
         }
