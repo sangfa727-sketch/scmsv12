@@ -67,7 +67,20 @@
 
     const tenantKey = _syncTenant();
     const key = _key(name, tenantKey);
-    if (!force && cache.has(key)) return cache.get(key);
+    if (!force && cache.has(key)) {
+      const cached = cache.get(key);
+      // Signed URLs expire. Refresh student-photo URLs on each roster load
+      // without refetching the full student list or reusing an old tenant's data.
+      if (name === 'students' && Array.isArray(cached) &&
+          typeof API.signStudentPhotoUrls === 'function') {
+        const refreshed = await API.signStudentPhotoUrls(cached);
+        if (_tenantKey() !== tenantKey) return [];
+        cache.set(key, refreshed);
+        spec.assign(refreshed);
+        return refreshed;
+      }
+      return cached;
+    }
     if (!force && inflight.has(key)) return inflight.get(key);
 
     let promise;
