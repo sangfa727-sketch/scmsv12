@@ -24,6 +24,8 @@ test('signed photo endpoint calls the service-only authorization RPC for every r
   assert.match(endpoint, /expiresIn: 300/);
   assert.match(endpoint, /path\.startsWith\(schoolPrefix\)/);
   assert.match(endpoint, /path\.includes\("\.\."/);
+  assert.match(endpoint, /path\.includes\(String\.fromCharCode\(92\)\)/,
+    'single backslashes must be rejected in authorized object paths');
 });
 
 test('authorization RPC supports parent-owned student only and validates staff tenant/permissions', () => {
