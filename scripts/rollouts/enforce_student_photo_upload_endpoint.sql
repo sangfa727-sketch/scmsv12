@@ -1,8 +1,8 @@
 -- MANUAL ROLLOUT ONLY: do not place this script in supabase/migrations.
 -- Run only after the reviewed upload-school-asset Edge Function is deployed
 -- and end-to-end student photo upload has passed.
--- This removes direct browser upload and object-listing policies only. The bucket
--- remains public for compatibility; known object URLs remain publicly accessible.
+-- This removes only the direct browser upload policy. The public-read policy
+-- remains temporarily for compatibility; known object URLs remain publicly accessible.
 BEGIN;
 
 DO $student_photo_rollout_preflight$
@@ -24,6 +24,7 @@ END
 $student_photo_rollout_preflight$;
 
 DROP POLICY IF EXISTS "anon upload student photos" ON storage.objects;
-DROP POLICY IF EXISTS "public read student photos" ON storage.objects;
+-- Keep public read temporarily for compatibility with existing photo_url consumers.
+-- A separate signed-URL migration must update all UI consumers before this policy is removed.
 
 COMMIT;

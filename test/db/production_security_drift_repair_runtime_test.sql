@@ -591,8 +591,10 @@ BEGIN
   END IF;
 
   IF EXISTS (SELECT 1 FROM pg_policies WHERE schemaname='storage' AND tablename='objects'
-             AND policyname IN ('anon upload student photos', 'public read student photos')) THEN
-    RAISE EXCEPTION 'legacy student-photo storage policies remain';
+             AND policyname='anon upload student photos')
+     OR NOT EXISTS (SELECT 1 FROM pg_policies WHERE schemaname='storage' AND tablename='objects'
+                    AND policyname='public read student photos') THEN
+    RAISE EXCEPTION 'legacy anonymous upload policy remains or public-read compatibility policy was removed prematurely';
   END IF;
 
   -- Parent contact values remain in the UI response, but must not be copied to audit_log.

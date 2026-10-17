@@ -528,9 +528,16 @@ BEGIN
   IF EXISTS (
     SELECT 1 FROM pg_policies
      WHERE schemaname='storage' AND tablename='objects'
-       AND policyname IN ('anon upload student photos', 'public read student photos')
+       AND policyname = 'anon upload student photos'
   ) THEN
-    RAISE EXCEPTION 'gated student-photo policy removal migration did not remove legacy policies';
+    RAISE EXCEPTION 'gated student-photo rollout left legacy anonymous upload enabled';
+  END IF;
+  IF NOT EXISTS (
+    SELECT 1 FROM pg_policies
+     WHERE schemaname='storage' AND tablename='objects'
+       AND policyname = 'public read student photos'
+  ) THEN
+    RAISE EXCEPTION 'gated student-photo rollout removed public-read compatibility prematurely';
   END IF;
 END
 $assert_photo_policy_rollout_complete$;
