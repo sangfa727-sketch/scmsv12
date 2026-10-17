@@ -46,6 +46,9 @@ LANGUAGE sql STABLE AS $function$
   WHERE p_token = 'native-admin-session-token-123456789012';
 $function$;
 
+CREATE OR REPLACE FUNCTION public.rpc_authorize_student_photo_upload(p_session_token text, p_student_id text)
+RETURNS jsonb LANGUAGE sql AS $function$ SELECT '{}'::jsonb $function$;
+
 CREATE TABLE public.teacher_class_assignments (
   school_id text NOT NULL, teacher_id text NOT NULL, class_name text NOT NULL, is_active boolean NOT NULL
 );
