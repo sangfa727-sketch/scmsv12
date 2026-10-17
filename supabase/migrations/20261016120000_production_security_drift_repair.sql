@@ -18,7 +18,11 @@ REVOKE ALL PRIVILEGES ON TABLE
   public.app_sessions,
   public.audit_log,
   public.n8n_state
-FROM anon, authenticated;
+FROM PUBLIC, anon, authenticated;
+
+-- Preserve the RLS-checked pending-session bootstrap insert used by existing flows.
+-- No browser SELECT, UPDATE, or DELETE is restored on this internal table.
+GRANT INSERT ON TABLE public.app_sessions TO anon, authenticated;
 
 -- 2) Return an explicit allowlist from Parent Login, never the full students row.
 CREATE OR REPLACE FUNCTION public.rpc_parent_google_login(
