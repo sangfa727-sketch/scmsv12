@@ -72,8 +72,7 @@ BEGIN
         RETURN jsonb_build_object('ok', false, 'error', 'permission_denied');
       END IF;
     ELSE
-      -- Native/TWA session. Keep the same restricted role boundary as the
-      -- existing trusted student-photo upload path.
+      -- Native/TWA session: bind the current teacher identity and active school.
       SELECT t.teacher_id, t.school_id, t.role
         INTO v_native
         FROM public.app_sessions a
