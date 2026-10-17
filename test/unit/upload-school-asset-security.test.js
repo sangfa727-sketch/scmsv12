@@ -20,7 +20,7 @@ test('upload rejects oversized multipart bodies before parsing FormData', () => 
 
 test('school asset upload accepts only active web sessions bound to the current school and role', () => {
   assert.match(source, /rest\/v1\/app_web_sessions/);
-  assert.match(source, /webSession\.expires_at/);
+  assert.match(source, /session\.expires_at/);
   assert.match(source, /String\(teacher\.status \|\| ""\)\.toLowerCase\(\) !== "active"/);
   assert.match(source, /teacher\.school_id !== session\.school_id/);
   assert.match(source, /teacher\.role !== session\.role/);
