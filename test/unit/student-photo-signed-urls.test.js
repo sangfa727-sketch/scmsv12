@@ -8,6 +8,7 @@ const api = fs.readFileSync('js/02C_api_students.js', 'utf8');
 const boot = fs.readFileSync('js/14_app.js', 'utf8');
 const parent = fs.readFileSync('parent.html', 'utf8');
 const avatars = fs.readFileSync('js/03_utils.js', 'utf8');
+const studentUi = fs.readFileSync('js/04_students.js', 'utf8');
 
 test('signed photo endpoint is POST-only, bounded, and limits batch size', () => {
   assert.match(endpoint, /req\.method !== "POST"/);
