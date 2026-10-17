@@ -57,7 +57,11 @@ BEGIN
     );
     v_expected_prefix := v_sess.school_id::text || '/' || p_student_id || '/';
 
-    IF v_path IS NULL
+    IF position('/' IN p_student_id) > 0
+       OR position(chr(92) IN p_student_id) > 0
+       OR position('..' IN p_student_id) > 0
+       OR p_student_id ~* '%(2e|2f|5c)'
+       OR v_path IS NULL
        OR left(v_path, length(v_expected_prefix)) <> v_expected_prefix
        OR position('..' IN v_path) > 0
        OR position(chr(92) IN v_path) > 0
