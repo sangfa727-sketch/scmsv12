@@ -345,6 +345,7 @@ jobs:
     name: Playwright local smoke test (automatic PR/push)
     if: github.event_name == 'pull_request' || github.event_name == 'push'
     runs-on: ubuntu-latest
+    timeout-minutes: 20
     steps:
       - uses: actions/checkout@v7
       - uses: actions/setup-node@v7
