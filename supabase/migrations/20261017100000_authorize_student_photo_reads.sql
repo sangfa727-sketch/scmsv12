@@ -116,7 +116,7 @@ BEGIN
   IF v_path IS NULL
      OR left(v_path, length(v_student.school_id::text) + 1) <> v_student.school_id::text || '/'
      OR position('..' in v_path) > 0
-     OR position(E'\\\\' in v_path) > 0 THEN
+     OR position(chr(92) in v_path) > 0 THEN
     RETURN jsonb_build_object('ok', false, 'error', 'photo_not_available');
   END IF;
 
