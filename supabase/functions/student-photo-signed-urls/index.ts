@@ -83,7 +83,7 @@ Deno.serve(async (req: Request) => {
       const path = authorization.object_path;
       const schoolPrefix = `${authorization.school_id}/`;
       if (!path.startsWith(schoolPrefix) || path.includes("..") ||
-          path.startsWith("/") || path.includes("\\\\")) {
+          path.startsWith("/") || path.includes(String.fromCharCode(92))) {
         console.error("[student-photo-signed-urls] rejected invalid authorized object path");
         unavailable.push(studentId);
         continue;
