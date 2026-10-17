@@ -104,24 +104,9 @@ BEGIN
      OR position('..' in v_path) > 0
      OR position(chr(92) in v_path) > 0
      OR v_path ~* '%(2e|2f|5c)'
-     -- Canonical new paths bind the second segment to the student ID.
-     -- Legacy nested paths may use a non-student folder segment; allow those
-     -- only when the segment is not another student's ID and the object path
-     -- is referenced by exactly this one student row.
      OR (
        strpos(substr(v_path, length(v_student.school_id::text) + 2), '/') > 0
        AND split_part(v_path, '/', 2) <> v_student.student_id::text
-       AND EXISTS (
-         SELECT 1 FROM public.students other_student
-          WHERE other_student.student_id = split_part(v_path, '/', 2)
-            AND other_student.student_id <> v_student.student_id
-       )
-     )
-     OR EXISTS (
-       SELECT 1 FROM public.students other_student
-        WHERE other_student.student_id <> v_student.student_id
-          AND substring(other_student.photo_url
-            from '/storage/v1/object/public/student-photos/([^?]+)') = v_path
      ) THEN
     RETURN jsonb_build_object('ok', false, 'error', 'photo_not_available');
   END IF;
