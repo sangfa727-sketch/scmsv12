@@ -43,7 +43,7 @@ test('upload endpoint applies bucket-specific size caps and retains role restric
   assert.match(source, /file\.size > maxBytes/);
   assert.match(source, /kind === "logo" \|\| kind === "cover"/);
   assert.match(source, /!\["admin", "super_admin"\]\.includes\(session\.role\)/);
-  assert.match(source, /webSession\.expires_at/);
+  assert.match(source, /session\.expires_at/);
 });
 
 test('student photo upload is authorized for the same school and student before storage write', () => {
