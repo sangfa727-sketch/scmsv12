@@ -13,6 +13,13 @@ async function installMockWebSession(page) {
       role: 'teacher'
     }));
   });
+  // Keep the UI suite isolated from live Supabase and avoid waiting on network
+  // timeouts for unrelated bootstrap refresh calls.
+  await page.route('**/rest/v1/rpc/**', route => route.fulfill({
+    status: 200,
+    contentType: 'application/json',
+    body: JSON.stringify({ ok: true, data: [], students: [], rows: [] })
+  }));
   await page.route('**/rest/v1/rpc/rpc_web_session_verify', route => route.fulfill({
     status: 200,
     contentType: 'application/json',
