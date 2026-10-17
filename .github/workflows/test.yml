@@ -329,7 +329,7 @@ jobs:
         with:
           deno-version: v2.x
       - name: Check upload and Parent Portal Edge Function types
-        run: deno check --node-modules-dir=auto supabase/functions/upload-school-asset/index.ts supabase/functions/parent-google-login/index.ts
+        run: deno check --node-modules-dir=auto supabase/functions/upload-school-asset/index.ts supabase/functions/parent-google-login/index.ts supabase/functions/student-photo-signed-urls/index.ts
       - name: Run non-AI tenant and student CRUD security harness
         env:
           PGPASSWORD: scms_non_ai_test
