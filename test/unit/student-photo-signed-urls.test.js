@@ -57,3 +57,8 @@ test('avatar renderer consumes the resolved URL on the student object without ad
   assert.match(avatars, /src="\$\{esc\(s\.photo_url\)\}"/);
   assert.doesNotMatch(avatars, /storage\/v1\/object\/public\/student-photos/);
 });
+
+test('newly uploaded student photos are replaced with short-lived signed URLs before rendering', () => {
+  assert.match(studentUi, /API\.signStudentPhotoUrls/);
+  assert.match(studentUi, /signedStudent\?\.photo_url \|\| null/);
+});
