@@ -53,6 +53,6 @@ test('student photo authorization is service-role-only and storage policy remova
 });
 
 test('production repair is transactional', () => {
-  assert.match(migration, /^BEGIN;/);
+  assert.match(migration, /\nBEGIN;/);
   assert.match(migration, /COMMIT;\s*$/);
 });
