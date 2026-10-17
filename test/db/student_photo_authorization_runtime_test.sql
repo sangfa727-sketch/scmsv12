@@ -35,6 +35,17 @@ CREATE TABLE public.app_sessions (
   token text PRIMARY KEY, status text NOT NULL, teacher_id text NOT NULL,
   school_id text NOT NULL, telegram_id text
 );
+CREATE TABLE public.audit_log (
+  source text, actor text, action text, school_id text, payload jsonb
+);
+
+CREATE OR REPLACE FUNCTION private.app_session_identity(p_token text)
+RETURNS TABLE(teacher_id text, school_id text, role text)
+LANGUAGE sql STABLE AS $function$
+  SELECT 'admin-a'::text, 'school-a'::text, 'admin'::text
+  WHERE p_token = 'native-admin-session-token-123456789012';
+$function$;
+
 CREATE TABLE public.teacher_class_assignments (
   school_id text NOT NULL, teacher_id text NOT NULL, class_name text NOT NULL, is_active boolean NOT NULL
 );
@@ -144,6 +155,22 @@ BEGIN
   );
   IF result->>'error' <> 'invalid_photo_url' THEN
     RAISE EXCEPTION 'student photo setter must reject a cross-school object path: %', result;
+  END IF;
+
+
+  result := public.rpc_app_set_student_photo(
+    'native-admin-session-token-123456789012', 'student-a',
+    'https://example.supabase.co/storage/v1/object/public/student-photos/school-a/student-a/123e4567-e89b-12d3-a456-426614174000.jpg'
+  );
+  IF result->>'ok' <> 'true' THEN
+    RAISE EXCEPTION 'native setter must accept the new school/student/object path: %', result;
+  END IF;
+  result := public.rpc_app_set_student_photo(
+    'native-admin-session-token-123456789012', 'student-a',
+    'https://example.supabase.co/storage/v1/object/public/student-photos/school-a/student-b/123e4567-e89b-12d3-a456-426614174000.jpg'
+  );
+  IF result->>'error' <> 'invalid_photo_url' THEN
+    RAISE EXCEPTION 'native setter must reject another student object path: %', result;
   END IF;
 
   RAISE NOTICE 'student-photo authorization runtime assertions passed';
