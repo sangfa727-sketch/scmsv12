@@ -130,7 +130,7 @@ Object.assign(API, {
   },
 
     /** Upload a student's photo to Supabase Storage and return its public URL.
-   *  Path: <school_id>/<student_id>-<uid>.<ext> — unique per upload, never overwrites. */
+   *  Path: <school_id>/<student_id>/<uid>.<ext> — binds each object to one student. */
 
   async uploadStudentPhoto(studentId, file) {
     // Student photos must use the trusted Edge Function: direct anonymous
