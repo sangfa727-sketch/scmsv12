@@ -246,6 +246,30 @@ async function showDashboard(sessionToken) {
 
   const res = await rpc('rpc_parent_get_dashboard', { p_session_token: sessionToken });
   const { student, attendance, attendance_summary, grades, invoices, upcoming_exams, parent_messages, timetable, events, leave_requests } = res;
+  // Parent sessions may resolve only their own student's image; never fall back
+  // to the long-lived public object URL when signed URL resolution fails.
+  if (student && student.photo_url && student.student_id) {
+    try {
+      const photoResp = await fetch(SUPABASE_URL + '/functions/v1/student-photo-signed-urls', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'apikey': SUPABASE_ANON,
+          'Authorization': 'Bearer ' + SUPABASE_ANON,
+        },
+        body: JSON.stringify({
+          session_token: sessionToken,
+          student_ids: [student.student_id],
+        }),
+      });
+      const photoData = await photoResp.json().catch(() => ({}));
+      student.photo_url = photoResp.ok && photoData?.ok
+        ? (photoData.photos?.[student.student_id] || null)
+        : null;
+    } catch (_) {
+      student.photo_url = null;
+    }
+  }
 
   // New backend returns full-history totals separately from the bounded recent-history list.
   // Fall back to counting returned rows for compatibility with older backend deployments.
