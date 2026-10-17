@@ -3,7 +3,7 @@ const assert = require('node:assert/strict');
 const fs = require('node:fs');
 
 const migration = fs.readFileSync(
-  'supabase/migrations/20261016120000_production_security_drift_repair.sql',
+  'supabase/migrations/20261017035505_production_security_drift_repair.sql',
   'utf8',
 );
 
