@@ -18,12 +18,14 @@ test('upload rejects oversized multipart bodies before parsing FormData', () => 
     'request body must be bounded before multipart parsing');
 });
 
-test('school asset upload binds an active teacher session to the current school and role', () => {
+test('school asset upload accepts only active web sessions bound to the current school and role', () => {
+  assert.match(source, /rest\/v1\/app_web_sessions/);
+  assert.match(source, /webSession\.expires_at/);
   assert.match(source, /String\(teacher\.status \|\| ""\)\.toLowerCase\(\) !== "active"/);
   assert.match(source, /teacher\.school_id !== session\.school_id/);
-  assert.match(source, /sessionKind === "telegram"/);
-  assert.match(source, /rest\/v1\/app_sessions/);
   assert.match(source, /teacher\.role !== session\.role/);
+  assert.doesNotMatch(source, /rest\/v1\/app_sessions/);
+  assert.doesNotMatch(source, /sessionKind|telegram_id/);
   assert.match(source, /schools\[0\]\.status \|\| ""\)\.toLowerCase\(\) !== "active"/);
 });
 
