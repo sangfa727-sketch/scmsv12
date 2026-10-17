@@ -58,8 +58,8 @@ test('student photo upload is authorized for the same school and student before 
 });
 
 test('gated rollout runtime assertion removes anonymous upload only and preserves public read', () => {
-  assert.match(runtimeTest, /policyname = 'anon upload student photos'[\s\S]*?legacy anonymous upload policy remains/);
-  assert.match(runtimeTest, /policyname = 'public read student photos'[\s\S]*?public-read compatibility policy was removed prematurely/);
+  assert.match(runtimeTest, /policyname\s*=\s*'anon upload student photos'[\s\S]*?gated student-photo rollout left legacy anonymous upload enabled/);
+  assert.match(runtimeTest, /policyname\s*=\s*'public read student photos'[\s\S]*?gated student-photo rollout removed public-read compatibility prematurely/);
 });
 
 test('browser student-photo flow uses the trusted Edge Function, not direct anonymous Storage writes', () => {
