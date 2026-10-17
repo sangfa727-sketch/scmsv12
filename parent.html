@@ -200,7 +200,8 @@ async function showLogin() {
 
   appEl.innerHTML = `
     <div class="card center">
-      <div class="avatar">${avatar(student)}</div>
+      <!-- Do not load the public photo URL before a parent session exists. -->
+      <div class="avatar">${avatar({ ...student, photo_url: null })}</div>
       <div class="student-name">${esc(student.name_en)}</div>
       <div class="student-sub">${esc(student.class || '')} · ${esc(student.school_name || '')}</div>
       <p class="muted">${esc(pte('view',{name:student.name_en}))}</p>
